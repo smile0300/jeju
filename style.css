@@ -1,0 +1,446 @@
+/* ==================== Reset & Base ==================== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+    --primary-gradient: linear-gradient(135deg, #4338ca 0%, #1e40af 100%);
+    --secondary-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    --accent-gradient: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    --success-gradient: linear-gradient(135deg, #059669 0%, #10b981 100%);
+    --warning-gradient: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+    --danger-gradient: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+
+    --bg-page: #f8fafc;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f1f5f9;
+    --text-primary: #0f172a;
+    --text-secondary: #334155;
+    --text-muted: #64748b;
+    --border-light: rgba(226, 232, 240, 0.8);
+
+    --accent-blue: #2563eb;
+    --accent-indigo: #4f46e5;
+    --accent-green: #10b981;
+    --accent-orange: #f59e0b;
+    --accent-red: #ef4444;
+    --accent-purple: #8b5cf6;
+
+    --spacing-xs: 0.5rem; --spacing-sm: 1rem; --spacing-md: 1.5rem;
+    --spacing-lg: 2rem; --spacing-xl: 3rem; --spacing-xxl: 4rem;
+
+    --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px; --radius-xl: 24px;
+
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.04);
+    --shadow-md: 0 10px 15px -3px rgba(0,0,0,0.07), 0 4px 6px -2px rgba(0,0,0,0.04);
+    --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.08), 0 10px 10px -5px rgba(0,0,0,0.04);
+
+    --transition-fast: 0.2s ease; --transition-normal: 0.3s ease; --transition-slow: 0.5s ease;
+}
+
+body {
+    font-family: 'Noto Sans SC', 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-page);
+    color: var(--text-primary);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+.container { max-width: 1200px; margin: 0 auto; padding: 0 var(--spacing-lg); }
+
+/* ==================== Header ==================== */
+.header {
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(12px) saturate(180%);
+    border-bottom: 1px solid var(--border-light);
+    position: sticky; top: 0; z-index: 1000;
+    box-shadow: var(--shadow-sm);
+}
+.header-content { display: flex; justify-content: space-between; align-items: center; padding: var(--spacing-sm) 0; }
+.logo { display: flex; align-items: center; gap: var(--spacing-sm); }
+.logo-icon { font-size: 2rem; animation: float 3s ease-in-out infinite; }
+.logo h1 {
+    font-size: 1.5rem; font-weight: 700;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+.nav { display: flex; gap: var(--spacing-md); }
+.nav-link {
+    color: var(--text-secondary); text-decoration: none; font-weight: 500;
+    padding: var(--spacing-xs) var(--spacing-sm); border-radius: var(--radius-sm);
+    transition: all var(--transition-fast); position: relative; white-space: nowrap;
+}
+.nav-link::after {
+    content: ''; position: absolute; bottom: 0; left: 50%;
+    width: 0; height: 2px; background: var(--primary-gradient);
+    transition: all var(--transition-normal); transform: translateX(-50%);
+}
+.nav-link:hover { color: var(--text-primary); transform: translateY(-2px); }
+.nav-link:hover::after { width: 80%; }
+
+/* ==================== Hero ==================== */
+.hero {
+    position: relative; min-height: 420px; display: flex;
+    align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #4338ca 0%, #1e40af 50%, #1d4ed8 100%);
+    overflow: hidden;
+}
+.hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 600'%3E%3Cpath d='M0,300 Q300,200 600,300 T1200,300 L1200,600 L0,600 Z' fill='rgba(15,15,35,0.25)'/%3E%3C/svg%3E") no-repeat bottom;
+    background-size: cover; animation: wave 10s ease-in-out infinite;
+}
+@keyframes wave { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+.hero-content { position: relative; text-align: center; color: white; padding: var(--spacing-xl) var(--spacing-lg); animation: fadeInUp 0.9s ease; }
+@keyframes fadeInUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
+.hero-title { font-size: 3rem; font-weight: 700; margin-bottom: var(--spacing-sm); text-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+.hero-subtitle { font-size: 1.25rem; color: rgba(255,255,255,0.85); margin-bottom: var(--spacing-lg); }
+.hero-stats { display: flex; gap: var(--spacing-lg); justify-content: center; flex-wrap: wrap; }
+.stat-card {
+    background: rgba(255,255,255,0.15); backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2); border-radius: var(--radius-lg);
+    padding: var(--spacing-sm) var(--spacing-md);
+    display: flex; align-items: center; gap: var(--spacing-md);
+    transition: all var(--transition-normal); color: white;
+}
+.stat-card:hover { transform: translateY(-5px); background: rgba(255,255,255,0.22); }
+.stat-icon { font-size: 2.2rem; }
+.stat-number { font-size: 2rem; font-weight: 700; }
+.stat-label { font-size: 0.875rem; color: rgba(255,255,255,0.8); }
+
+/* ==================== Sections ==================== */
+.section { padding: var(--spacing-xxl) 0; }
+.section-alt { background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%); border-top: 1px solid rgba(0,0,0,0.03); border-bottom: 1px solid rgba(0,0,0,0.03); }
+.section-header { text-align: center; margin-bottom: var(--spacing-xl); }
+.section-title {
+    font-size: 2.25rem; font-weight: 700; margin-bottom: var(--spacing-sm);
+    background: var(--primary-gradient);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.section-subtitle { font-size: 1.1rem; color: var(--text-secondary); }
+
+/* ==================== CCTV ==================== */
+.cctv-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--spacing-lg); }
+.cctv-card {
+    background: var(--bg-card); border-radius: var(--radius-lg);
+    overflow: hidden; transition: all var(--transition-normal);
+    border: 1px solid var(--border-light); box-shadow: var(--shadow-md);
+}
+.cctv-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); border-color: var(--accent-blue); }
+.cctv-video-wrapper { position: relative; aspect-ratio: 16/10; background: #000; overflow:hidden; }
+.cctv-video-el { width: 100%; height: 100%; object-fit: cover; display: block; }
+.yt-embed-container { width: 100%; height: 100%; }
+.yt-embed-container iframe { width: 100%; height: 100%; border: none; }
+.live-badge {
+    position: absolute; top: 12px; left: 12px;
+    background: rgba(220,38,38,0.9); color: white;
+    padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;
+    animation: pulse-badge 2s infinite;
+}
+@keyframes pulse-badge { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+.cctv-info { padding: var(--spacing-md); }
+.cctv-info h3 { font-size: 1.2rem; margin-bottom: 4px; text-align: center; }
+.cctv-info p { color: var(--text-muted); font-size: 0.9rem; text-align: center; }
+
+/* ==================== Weather ==================== */
+.location-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 30px; }
+.location-tab {
+    background: var(--bg-card); border: 2px solid var(--border-light);
+    padding: 14px 4px; border-radius: var(--radius-md); cursor: pointer;
+    transition: all var(--transition-normal);
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    box-shadow: var(--shadow-sm);
+}
+.location-tab:hover { background: var(--bg-card-hover); border-color: var(--accent-purple); transform: translateY(-3px); }
+.location-tab.active { background: var(--primary-gradient); border-color: transparent; box-shadow: var(--shadow-lg); }
+.tab-icon { font-size: 1.5rem; }
+.tab-name { font-size: 1rem; font-weight: 600; color: var(--text-primary); }
+.tab-sub { font-size: 0.8rem; color: var(--text-muted); }
+.location-tab.active .tab-name, .location-tab.active .tab-sub { color: white; }
+.location-tab.active .tab-sub { color: rgba(255,255,255,0.8); }
+
+.location-weather { display: none; animation: fadeIn 0.4s ease; }
+.location-weather.active { display: block; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+.current-weather {
+    background: var(--bg-card); border-radius: var(--radius-xl);
+    padding: var(--spacing-lg); margin-bottom: var(--spacing-lg);
+    border: 1px solid var(--border-light);
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;
+    gap: var(--spacing-lg); box-shadow: var(--shadow-md);
+}
+.weather-main { display: flex; align-items: center; gap: var(--spacing-lg); }
+.weather-icon { font-size: 3.5rem; animation: float 3s ease-in-out infinite; }
+.weather-temp { display: flex; align-items: baseline; gap: 4px; }
+.temp-value {
+    font-size: 3.5rem; font-weight: 700;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.temp-unit { font-size: 1.5rem; color: var(--text-secondary); }
+.weather-desc { font-size: 1.3rem; color: var(--text-secondary); margin-top: var(--spacing-xs); }
+.weather-details { display: grid; gap: var(--spacing-sm); }
+.weather-detail-item {
+    display: flex; align-items: center; gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md); background: var(--bg-card-hover);
+    border-radius: var(--radius-md); transition: all var(--transition-fast);
+}
+.weather-detail-item:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+.detail-icon { font-size: 1.25rem; }
+.detail-label { font-size: 0.85rem; color: var(--text-muted); min-width: 60px; }
+.detail-value { font-size: 1rem; font-weight: 600; }
+
+.subsection-title { font-size: 1.4rem; margin-bottom: var(--spacing-md); text-align: center; }
+.hourly-weather { margin-bottom: var(--spacing-xl); }
+.hourly-scroll { display: flex; gap: var(--spacing-md); overflow-x: auto; padding: var(--spacing-sm) 0; }
+.hourly-scroll::-webkit-scrollbar { height: 4px; }
+.hourly-scroll::-webkit-scrollbar-track { background: var(--bg-card-hover); border-radius: 2px; }
+.hourly-scroll::-webkit-scrollbar-thumb { background: var(--accent-blue); border-radius: 2px; }
+.hourly-item {
+    background: var(--bg-card); border-radius: var(--radius-md);
+    padding: 12px 10px; min-width: 85px; text-align: center;
+    border: 1px solid var(--border-light); transition: all var(--transition-fast); flex-shrink: 0;
+}
+.hourly-item:hover { transform: translateY(-4px); border-color: var(--accent-blue); box-shadow: var(--shadow-md); }
+.hourly-time { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; }
+.hourly-icon { font-size: 1.5rem; margin: 6px 0; }
+.hourly-temp { font-size: 1rem; font-weight: 600; }
+.hourly-wind { font-size: 0.75rem; color: #0288d1; font-weight: 600; margin-top: 2px; }
+.hourly-precip { font-size: 0.75rem; color: #546e7a; margin-top: 1px; }
+.hourly-precip.precip-blue { color: #1e88e5; font-weight: bold; }
+
+.weekly-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--spacing-md); }
+.weekly-item {
+    background: var(--bg-card); border-radius: var(--radius-md); padding: 12px;
+    text-align: center; border: 1px solid var(--border-light); transition: all var(--transition-fast);
+}
+.weekly-item:hover { transform: translateY(-4px); border-color: var(--accent-green); box-shadow: var(--shadow-md); }
+.weekly-day { font-size: 0.95rem; color: var(--text-secondary); margin-bottom: var(--spacing-xs); }
+.weekly-icon { font-size: 2rem; margin: 8px 0; }
+.weekly-temps { display: flex; justify-content: center; gap: var(--spacing-sm); margin-top: var(--spacing-xs); }
+.temp-high { font-size: 1.05rem; font-weight: 700; color: var(--accent-red); }
+.temp-low { font-size: 1.05rem; color: var(--text-muted); }
+.weekly-precip { font-size: 0.75rem; color: #546e7a; margin-top: 4px; }
+.weekly-precip.precip-blue { color: #1e88e5; font-weight: bold; }
+
+/* ==================== Hallasan ==================== */
+.status-card {
+    background: var(--bg-card); border-radius: var(--radius-lg);
+    padding: var(--spacing-lg); margin-bottom: var(--spacing-lg);
+    display: flex; align-items: center; gap: var(--spacing-lg);
+    border: 2px solid var(--border-light); transition: all var(--transition-normal); box-shadow: var(--shadow-md);
+}
+.status-card.status-open { border-color: var(--accent-green); background: linear-gradient(135deg, rgba(6,78,59,0.05) 0%, rgba(16,185,129,0.03) 100%); }
+.status-card.status-closed { border-color: var(--accent-red); background: linear-gradient(135deg, rgba(127,29,29,0.05) 0%, rgba(239,68,68,0.03) 100%); }
+.status-card.status-loading { border-color: var(--border-light); }
+.status-icon { font-size: 3rem; flex-shrink: 0; }
+.status-content h3 { font-size: 1.6rem; margin-bottom: 4px; }
+.status-time { font-size: 0.9rem; color: var(--text-muted); }
+
+.trails-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--spacing-md); margin-top: var(--spacing-lg); }
+.trail-card {
+    background: var(--bg-card); border-radius: var(--radius-md);
+    padding: var(--spacing-md); border: 1px solid var(--border-light);
+    transition: all var(--transition-normal); box-shadow: var(--shadow-sm);
+}
+.trail-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); border-color: var(--accent-purple); }
+.trail-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-sm); padding-bottom: var(--spacing-sm); border-bottom: 1px solid var(--border-light); }
+.trail-header h4 { font-size: 1rem; font-weight: 600; }
+.trail-status-badge { padding: 4px 12px; border-radius: var(--radius-sm); font-size: 0.8rem; font-weight: 600; }
+.trail-status-badge.open { background: var(--success-gradient); color: white; }
+.trail-status-badge.partial { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; }
+.trail-status-badge.closed { background: var(--danger-gradient); color: white; }
+.trail-detail { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.9rem; }
+.trail-label { color: var(--text-muted); }
+.trail-value { font-weight: 600; }
+
+/* ==================== Flights ==================== */
+.flight-tabs { display: flex; gap: var(--spacing-sm); margin-bottom: var(--spacing-lg); justify-content: center; }
+.flight-tab {
+    background: var(--bg-card); color: var(--text-secondary);
+    border: 1px solid var(--border-light);
+    padding: var(--spacing-sm) var(--spacing-lg); border-radius: var(--radius-md);
+    font-size: 1rem; font-weight: 600; cursor: pointer;
+    transition: all var(--transition-fast); box-shadow: var(--shadow-sm);
+}
+.flight-tab:hover { background: var(--bg-card-hover); }
+.flight-tab.active { background: var(--primary-gradient); color: white; border-color: transparent; box-shadow: var(--shadow-md); }
+.flight-content { display: none; }
+.flight-content.active { display: block; }
+.flight-table { background: var(--bg-card); border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border-light); box-shadow: var(--shadow-md); }
+.flight-row { display: grid; grid-template-columns: 1.2fr 1.3fr 1.5fr 1.3fr 1.1fr; gap: var(--spacing-sm); padding: var(--spacing-sm) var(--spacing-md); border-bottom: 1px solid var(--border-light); transition: background var(--transition-fast); }
+.flight-row:last-child { border-bottom: none; }
+.flight-row:hover:not(.flight-header) { background: var(--bg-card-hover); }
+.flight-row.flight-header { background: #f1f5f9; font-weight: 700; }
+.flight-col { display: flex; align-items: center; font-size: 0.9rem; }
+.status-badge { padding: 5px 10px; border-radius: var(--radius-sm); font-size: 0.8rem; font-weight: 600; white-space: nowrap; }
+.status-badge.status-ontime { background: var(--success-gradient); color: white; }
+.status-badge.status-delayed { background: var(--warning-gradient); color: white; }
+.status-badge.status-cancelled { background: var(--danger-gradient); color: white; }
+.status-badge.status-landed, .status-badge.status-departed { background: var(--accent-gradient); color: white; }
+.status-badge.status-boarding { background: var(--primary-gradient); color: white; }
+
+/* ==================== Footer ==================== */
+.footer { background: #f1f5f9; border-top: 1px solid var(--border-light); padding: var(--spacing-xl) 0 var(--spacing-md); margin-top: var(--spacing-xxl); }
+.footer-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--spacing-xl); margin-bottom: var(--spacing-lg); }
+.footer-section h3 { font-size: 1.3rem; margin-bottom: var(--spacing-sm); background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.footer-links { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.footer-links li { color: var(--text-secondary); font-size: 0.9rem; }
+.footer-links a { color: var(--text-secondary); text-decoration: none; transition: color var(--transition-fast); }
+.footer-links a:hover { color: var(--accent-blue); }
+.footer-bottom { text-align: center; padding-top: var(--spacing-md); border-top: 1px solid var(--border-light); color: var(--text-muted); font-size: 0.875rem; }
+
+/* XHS Footer Card */
+.xhs-footer-card { background: linear-gradient(135deg, #ff2442 0%, #ff5c7c 100%); border-radius: 20px; padding: 20px; max-width: 350px; margin: 0 auto; box-shadow: 0 10px 25px rgba(255,36,66,0.25); }
+.xhs-qr-row { display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+.xhs-info-section h4 { font-size: 1.2rem; font-weight: 700; color: #fff; margin-bottom: 4px; }
+.xhs-info-section p { font-size: 0.875rem; color: rgba(255,255,255,0.85); margin-bottom: 4px; }
+
+/* ==================== Modal ==================== */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+.modal-content { background: #000; border-radius: var(--radius-lg); width: 90%; max-width: 900px; position: relative; padding: 20px; }
+.modal-close { position: absolute; top: 10px; right: 14px; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; z-index: 1; }
+#modal-body video, #modal-body iframe { width: 100%; aspect-ratio: 16/9; border-radius: var(--radius-md); }
+
+/* ==================== Responsive ==================== */
+@media (max-width: 1024px) { .container { padding: var(--spacing-md); } }
+
+/* ==================== 태블릿 (769px ~ 1024px) ==================== */
+@media screen and (max-width: 1024px) and (min-width: 769px) {
+    .weekly-grid { grid-template-columns: repeat(3, 1fr); }
+    .cctv-grid { gap: 12px; }
+}
+
+/* ==================== 모바일 핵심 (768px 이하) ==================== */
+@media screen and (max-width: 768px) {
+
+    /* 기본 */
+    body { font-size: 14px; background: #f0f4f8; }
+    .container { padding: 0 8px; max-width: 100%; }
+
+    /* 헤더 컴팩트 */
+    .header { padding: 0; }
+    .header-content { flex-direction: row; justify-content: space-between; align-items: center; padding: 6px 8px; flex-wrap: nowrap; gap: 6px; }
+    .logo { gap: 4px; flex-shrink: 0; }
+    .logo-icon { font-size: 1.2rem; animation: none; }
+    .logo h1 { font-size: 0.9rem; white-space: nowrap; }
+    .nav { gap: 4px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; flex-shrink: 1; flex-wrap: nowrap; min-width: 0; }
+    .nav::-webkit-scrollbar { display: none; }
+    .nav-link { font-size: 0.7rem; padding: 4px 7px; background: rgba(0,0,0,0.04); border-radius: 14px; flex: 0 0 auto; white-space: nowrap; }
+    .nav-link::after { display: none; }
+
+    /* ★ Hero 숨김 - 모바일 한 화면에 담기 핵심 ★ */
+    .hero { display: none; }
+
+    /* 섹션 → 카드 스타일 */
+    .section, .section-alt {
+        background: #ffffff !important;
+        border-radius: 16px !important;
+        padding: 12px !important;
+        margin: 0 0 10px 0 !important;
+        border: 1px solid rgba(226,232,240,0.8) !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important;
+    }
+    .section-header { margin-bottom: 8px; }
+    .section-title { font-size: 1.15rem !important; margin-bottom: 2px; }
+    .section-subtitle { display: none; }
+
+    /* CCTV: 2x2 그리드 유지, 크기 축소 */
+    .cctv-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .cctv-video-wrapper { aspect-ratio: 16/10; }
+    .cctv-info { padding: 6px 8px; }
+    .cctv-info h3 { font-size: 0.85rem; margin-bottom: 1px; }
+    .cctv-info p { font-size: 0.72rem; }
+    .live-badge { font-size: 0.6rem; padding: 2px 6px; top: 6px; left: 6px; }
+
+    /* 날씨 탭 - 가로 스크롤 1줄 */
+    .location-tabs {
+        flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start;
+        gap: 8px; margin-bottom: 10px; padding-bottom: 2px;
+        -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    }
+    .location-tabs::-webkit-scrollbar { display: none; }
+    .location-tab { flex: 0 0 auto; min-width: 72px; padding: 8px 10px; border-radius: 10px; gap: 2px; }
+    .tab-icon { font-size: 1.1rem; }
+    .tab-name { font-size: 0.78rem; }
+    .tab-sub { font-size: 0.65rem; }
+
+    /* 현재 날씨 - 가로 row (GitHub 레포 방식) */
+    .current-weather {
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 10px; padding: 10px !important;
+        margin-bottom: 10px;
+        background: #f8fafc !important;
+        border-radius: 10px !important;
+    }
+    .weather-main { flex-direction: row !important; align-items: center !important; gap: 8px; flex-shrink: 0; }
+    .weather-icon { font-size: 2.2rem !important; animation: none; }
+    .temp-value { font-size: 1.8rem !important; }
+    .temp-unit { font-size: 1rem; }
+    .weather-desc { font-size: 0.85rem; margin-top: 2px; }
+    .weather-details { gap: 6px; flex: 1; min-width: 0; }
+    .weather-detail-item { padding: 5px 8px; gap: 6px; border-radius: 8px; }
+    .detail-icon { font-size: 1rem; }
+    .detail-label { font-size: 0.72rem; min-width: 40px; }
+    .detail-value { font-size: 0.82rem; }
+
+    /* 시간별 예보 */
+    .subsection-title { font-size: 0.95rem; margin-bottom: 8px; }
+    .hourly-weather { margin-bottom: 10px; }
+    .hourly-scroll { gap: 6px; }
+    .hourly-item { min-width: 60px; padding: 8px 6px; border-radius: 8px; }
+    .hourly-time { font-size: 0.72rem; }
+    .hourly-icon { font-size: 1.1rem; margin: 3px 0; }
+    .hourly-temp { font-size: 0.82rem; }
+    .hourly-wind { font-size: 0.62rem; }
+
+    /* 주간 예보 */
+    .weekly-grid { grid-template-columns: repeat(5, 1fr); gap: 4px; }
+    .weekly-item { padding: 6px 4px; border-radius: 8px; }
+    .weekly-day { font-size: 0.7rem; margin-bottom: 1px; }
+    .weekly-icon { font-size: 1.3rem; margin: 2px 0; }
+    .temp-high { font-size: 0.8rem; }
+    .temp-low { font-size: 0.8rem; }
+    .weekly-precip { font-size: 0.62rem; }
+
+    /* 한라산 */
+    .status-card { padding: 10px 12px; gap: 10px; margin-bottom: 10px; }
+    .status-icon { font-size: 2rem; }
+    .status-content h3 { font-size: 1.1rem; }
+    .status-time { font-size: 0.75rem; }
+    .trails-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; margin-top: 8px; }
+    .trail-card { padding: 8px 10px; }
+    .trail-header { margin-bottom: 6px; padding-bottom: 6px; }
+    .trail-header h4 { font-size: 0.82rem; }
+    .trail-status-badge { padding: 2px 8px; font-size: 0.7rem; }
+    .trail-detail { font-size: 0.75rem; margin-bottom: 3px; }
+
+    /* 항공 */
+    .flight-tabs { gap: 8px; margin-bottom: 10px; }
+    .flight-tab { padding: 8px 16px; font-size: 0.85rem; border-radius: 8px; }
+    .flight-row { grid-template-columns: 0.9fr 1.1fr 0.8fr 1fr; gap: 4px; padding: 8px 8px; }
+    .flight-col { font-size: 0.78rem; }
+    .status-badge { padding: 3px 6px; font-size: 0.68rem; }
+
+    /* 푸터 */
+    .footer { padding: 16px 0 10px; margin-top: 0; }
+    .footer-content { grid-template-columns: 1fr; gap: 12px; }
+    .footer-section h3 { font-size: 1rem; }
+    .footer-links li { font-size: 0.8rem; }
+    .footer-bottom { font-size: 0.78rem; }
+    .xhs-footer-card { padding: 14px; }
+}
+
+/* ==================== 소형 스마트폰 (480px 이하) ==================== */
+@media screen and (max-width: 480px) {
+    .header-content { padding: 5px 6px; }
+    .logo h1 { font-size: 0.95rem; }
+    .cctv-grid { gap: 6px; }
+    .cctv-info h3 { font-size: 0.8rem; }
+    .weekly-grid { grid-template-columns: repeat(5, 1fr); gap: 3px; }
+    .flight-row { grid-template-columns: 0.9fr 1fr 0.8fr 0.9fr; gap: 2px; font-size: 0.72rem; }
+    .trails-grid { grid-template-columns: 1fr 1fr; }
+}
+
