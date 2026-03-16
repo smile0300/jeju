@@ -489,57 +489,37 @@ async function fetchHallasanStatus() {
 }
 
 // ============================================================
-// 항공: 한국공항공사 API (중청·대만·홍콩·마카오 국적만 필터)
+// 항공: 한국공항공사 API (모든 국제선 표시)
 // ============================================================
 
-// 중화권 (CN·TW·HK·MO) 항공사 코드 리스트
-const CHINESE_AIRLINES = new Set([
-    // 중국 본토 항공사
-    'CA', // 중국국제항공 Air China
-    'MU', // 중국동방항공 China Eastern
-    'CZ', // 중국남방항공 China Southern
-    'MF', // 틦멘항공 Xiamen Airlines
-    'ZH', // 선전항공 Shenzhen Airlines
-    'HO', // 준에여항공 Juneyao Airlines
-    '3U', // 쓰챘항공 Sichuan Airlines
-    'SC', // 산둥항공 Shandong Airlines
-    'GS', // 트데항공 Tianjin Airlines
-    'MH', // 하이난항공 Hainan Airlines (HA 코드)
-    'HU', // 하이난항공 Hainan Airlines
-    '9C', // 종여항공 Spring Airlines
-    '8L', // 럭키항공 Lucky Air
-    'PN', // 서부항공 West Air
-    'BK', // 허별항공 Okay Airways
-    'TV', // 시장항공 Tibetan Airlines
-    'UQ', // 우루무치항공 Urumqi Air
-    'JD', // 북경항공 Capital Airlines
-    'GJ', // 진에어항공 Zhejiang Loong Airlines
-    'DR', // 루이항공 Ruili Airlines
-    // 대만 항공사
-    'CI', // 중화항공 China Airlines
-    'BR', // 에바항공 EVA Air
-    'IT', // 타이거어타이완 Tigerair Taiwan
-    'AE', // 맞다린항공 Mandarin Airlines
-    'B7', // 상위항공 Uni Air
-    // 홍콩 항공사
-    'CX', // 캐세이퍼시픽항공 Cathay Pacific
-    'UO', // 홍콩익스프레스 HK Express
-    'HB', // 그레이터베이항공 Greater Bay Airlines
-    'LD', // 홍콩항공 HK Airlines
-    'KA', // 쪐세이드래곤 Cathay Dragon
-    // 마카오 항공사
-    'NX', // 에어마카오 Air Macau
-]);
+// 주요 항공사 코드 → 중국어 이름 매핑 (국제선 운항 위주)
+const AIRLINE_NAMES = {
+    // 한국 국적사
+    'KE': '大韩航空', 'OZ': '韩亚航空', '7C': '济州航空',
+    'LJ': '真航空', 'TW': '德威航空', 'ZE': '易斯达航空',
+    'BX': '釜山航空', 'RS': '首尔航空', 'RF': '江原航空',
+    // 중국 본토
+    'CA': '中国国际航空', 'MU': '中国东方航空', 'CZ': '中国南方航空',
+    'MF': '厦门航空', 'ZH': '深圳航空', 'HO': '吉祥航空',
+    '9C': '春秋航空', 'HU': '海南航空', 'SC': '山东航空',
+    'GJ': '长龙航空', 'QW': '青岛航空', 'JD': '首都航空',
+    // 대만/홍콩/기타
+    'CI': '中华航空', 'BR': '长荣航空', 'IT': '台湾虎航',
+    'CX': '国泰航空', 'UO': '香港快运', 'HB': '大湾区航空',
+    'NX': '澳门航空', 'TR': '酷航'
+};
 
 const STATUS_MAP = {
     '출발': { cls: 'status-departed', cn: '已出发' },
-    '탕승': { cls: 'status-boarding', cn: '登机中' },
-    '도착': { cls: 'status-landed', cn: '已到단' },
+    '탑승중': { cls: 'status-boarding', cn: '正在登机' },
+    '탑승': { cls: 'status-boarding', cn: '正在登机' },
+    '도착': { cls: 'status-landed', cn: '已到达' },
     '결항': { cls: 'status-cancelled', cn: '已取消 ✕' },
+    '사전결항': { cls: 'status-cancelled', cn: '提前取消 ✕' },
     '지연': { cls: 'status-delayed', cn: '延误' },
     '정시': { cls: 'status-ontime', cn: '准时' },
     '운항': { cls: 'status-ontime', cn: '准时' },
-    '입항': { cls: 'status-landed', cn: '已到다' },
+    '입항': { cls: 'status-landed', cn: '已到达' },
     '입항지연': { cls: 'status-delayed', cn: '到达延误' },
     '출발지연': { cls: 'status-delayed', cn: '出发延误' }
 };
@@ -550,44 +530,33 @@ function getStatusBadge(rawStatus) {
     return `<span class="status-badge ${info.cls}">${info.cn}</span>`;
 }
 
-// 항공사 코드 → 중국어 이름 매핑
-const AIRLINE_NAMES = {
-    'CA': '中国国际航空', 'MU': '中国东方航空', 'CZ': '中国南方航空',
-    'MF': '厦门航空', 'ZH': '深圳航空', 'HO': '吉祥航空',
-    '3U': '四川航空', 'SC': '山东航空', 'GS': '天津航空',
-    'HU': '海南航空', '9C': '春秋航空', '8L': '幸福航空',
-    'PN': '西部航空', 'JD': '首都航空', 'GJ': '浙江龙翔航空',
-    'CI': '中华航空', 'BR': '长荣航空', 'IT': '台湾虎航',
-    'AE': '华信航空', 'B7': '立荣航空',
-    'CX': '国泰航空', 'UO': '香港快运', 'HB': '大湾区航空', 'LD': '香港航空',
-    'NX': '澳门航空'
-};
-
-function getAirlineName(flightId) {
+function getAirlineName(flightId, rawAirline) {
     const code = (flightId || '').slice(0, 2).toUpperCase();
-    return AIRLINE_NAMES[code] || code;
+    return AIRLINE_NAMES[code] || rawAirline || code;
 }
+
+// 제주/김포/김해 등 주요 국내 공항 코드 (국제선 필터링용)
+const DOMESTIC_AIRPORTS = new Set(['CJU', 'GMP', 'PUS', 'CJJ', 'TAE', 'KWJ', 'USN', 'KUV', 'WJU', 'HIN', 'RSU', 'KPO', 'MWX', 'YNY']);
+
+// 중화권 (중국 본토, 대만, 홍콩, 마카오) 주요 공항 코드
+const REGION_AIRPORTS = new Set([
+    // 중국 본토
+    'PVG', 'SHA', 'PEK', 'PKX', 'HGH', 'CAN', 'SZX', 'NKG', 'TAO', 'XIY', 'CTU', 'CKG', 
+    'KMG', 'TSN', 'DLC', 'SHE', 'HRB', 'WUX', 'NGB', 'FOC', 'XMN', 'SYX', 'HAK', 'TNA', 
+    'CGQ', 'CGO', 'WNZ', 'SWA', 'KWL', 'NNG', 'HFE', 'TYN', 'KHN', 'LHW', 'XNN', 'HET', 
+    'URC', 'CSX', 'DYG', 'YNT', 'WEI', 'YIW', 'LYA', 'JNZ', 'LYI', 'ENH', 'INC', 'HIA',
+    // 대만
+    'TPE', 'TSA', 'KHH', 'RMQ', 'TNN',
+    // 홍콩/마카오
+    'HKG', 'MFM'
+]);
 
 async function fetchFlights(type) {
     const container = document.getElementById(`${type}-data`);
     if (!container) return;
 
-    // API 키 없으면 오류 UI 표시
     if (!CONFIG.PUBLIC_DATA_KEY) {
-        container.innerHTML = `
-            <div style="text-align:center;padding:32px 16px;">
-                <div style="font-size:2rem;margin-bottom:12px;">⚠️</div>
-                <div style="font-weight:700;font-size:1rem;color:var(--text-primary);margin-bottom:6px;">API密钥未设置</div>
-                <div style="color:var(--text-muted);font-size:0.85rem;margin-bottom:16px;">
-                    请在 script.js 的 CONFIG.PUBLIC_DATA_KEY 中输入<br>韩国公共数据门户 API 密钥
-                </div>
-                <button onclick="fetchFlights('${type}')"
-                    style="background:var(--primary-gradient);color:white;border:none;
-                           padding:8px 20px;border-radius:8px;font-size:0.9rem;
-                           cursor:pointer;font-weight:600;">
-                    🔄 重新加载
-                </button>
-            </div>`;
+        container.innerHTML = `<div style="text-align:center;padding:32px 16px;"><div style="font-size:2rem;margin-bottom:12px;">⚠️</div><div style="font-weight:700;font-size:1rem;color:var(--text-primary);margin-bottom:6px;">API密钥未设置</div><div style="color:var(--text-muted);font-size:0.85rem;margin-bottom:16px;">请在 script.js 的 CONFIG.PUBLIC_DATA_KEY 中输入<br>韩国公共数据门户 API 密钥</div><button onclick="fetchFlights('${type}')" style="background:var(--primary-gradient);color:white;border:none;padding:8px 20px;border-radius:8px;font-size:0.9rem;cursor:pointer;font-weight:600;">🔄 重新加载</button></div>`;
         return;
     }
 
@@ -596,13 +565,11 @@ async function fetchFlights(type) {
         
         const today = new Date();
         const ymd = today.getFullYear() + String(today.getMonth() + 1).padStart(2, '0') + String(today.getDate()).padStart(2, '0');
-        
         const endpoint = type === 'arrive' ? 'getArrFlightStatusList' : 'getDepFlightStatusList';
         const airportParam = type === 'arrive' ? 'arr_airport_code=CJU' : 'airport_code=CJU';
         
-        // 브라우저에서 HTTP 직접 호출 시 차단 위험 있으므로 Proxy에 위임
-        // 공항공사 API가 종종 강제로 XML을 반환하는 경우가 있어 XML 처리 로직으로 구성
-        const targetUrl = `http://openapi.airport.co.kr/service/rest/StatusOfFlights/${endpoint}?serviceKey=${CONFIG.PUBLIC_DATA_KEY}&pageNo=1&numOfRows=100&searchday=${ymd}&${airportParam}`;
+        // 데이터 수신량을 1000개로 조정하여 모든 국제선이 포함되도록 함 (HTTP 프로토콜 및 캐시 무효화 적용)
+        const targetUrl = `http://openapi.airport.co.kr/service/rest/StatusOfFlights/${endpoint}?serviceKey=${CONFIG.PUBLIC_DATA_KEY}&pageNo=1&numOfRows=1000&searchday=${ymd}&${airportParam}&_=${Date.now()}`;
         const url = CONFIG.PROXY_URL + '?url=' + encodeURIComponent(targetUrl);
 
         const res = await fetch(url);
@@ -613,39 +580,39 @@ async function fetchFlights(type) {
         const xmlDoc = parser.parseFromString(xmlText, "text/xml");
         
         const errorNode = xmlDoc.querySelector('resultMsg');
-        if (errorNode && errorNode.textContent.includes('ERROR')) {
-            throw new Error(errorNode.textContent);
-        }
+        if (errorNode && errorNode.textContent.includes('ERROR')) throw new Error(errorNode.textContent);
 
-        const itemsElement = xmlDoc.querySelectorAll('item');
+        const itemsElement = xmlDoc.getElementsByTagName('item');
         const itemsArray = Array.from(itemsElement).map(node => {
-            const getTag = (tag) => node.querySelector(tag)?.textContent || '';
+            const getTag = (tag) => (node.getElementsByTagName(tag)[0]?.textContent || '').trim();
             const schedText = getTag('scheduledatetime');
             const estText = getTag('estimateddatetime');
             
             return {
-                flight_id: getTag('flightid') || getTag('fid'),
+                flight_id: (getTag('flightid') || getTag('fid') || getTag('flightId')).toUpperCase(),
                 plan_time: schedText.length >= 12 ? schedText.slice(8, 12) : schedText,
                 est_time: estText.length >= 12 ? estText.slice(8, 12) : estText,
-                airport: getTag('depAirport'),       // 도착 탭용 (어디서 왔는지)
-                arr_airport: getTag('arrAirport'),   // 출발 탭용 (어디로 가는지)
+                dep_airport: getTag('depAirport'),
+                dep_code: getTag('depAirportCode').toUpperCase(),
+                arr_airport: getTag('arrAirport'),
+                arr_code: getTag('arrAirportCode').toUpperCase(),
                 airline: getTag('airline'),
-                status: getTag('rmkKor')             // 한글 운항 상태 ('출발', '지연' 등)
+                status: getTag('rmkKor'),
+                is_intl: getTag('io') === 'I' || getTag('line') === '국제'
             };
         });
 
-        if (!itemsArray.length) {
-            container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">暂无相关航班信息</div>';
-            return;
-        }
-
-        // 중화권 항공사 필터 (f_id 앞 2자리 활용)
-        const filtered = itemsArray.filter(f => {
-            const f_id = f.flight_id || '';
-            return CHINESE_AIRLINES.has(String(f_id).slice(0, 2).toUpperCase());
+        // "국제선" 중 특정 지역(중화권)만 필터링: 공항 코드로 비교 및 제주공항(CJU) 여부 재확인
+        const filteredFlights = itemsArray.filter(f => {
+            const oppositeCode = type === 'arrive' ? f.dep_code : f.arr_code;
+            const localCode = type === 'arrive' ? f.arr_code : f.dep_code;
+            
+            // 1. 해당 공항이 제주(CJU)여야 함
+            // 2. 국제선이면서(is_intl) 지정된 공항 코드 리스트에 포함되는지 확인
+            return localCode === 'CJU' && oppositeCode && (f.is_intl || !DOMESTIC_AIRPORTS.has(oppositeCode)) && REGION_AIRPORTS.has(oppositeCode);
         });
 
-        renderFlightList(container, filtered.length ? filtered : itemsArray.slice(0, 20), type);
+        renderFlightList(container, filteredFlights, type);
     } catch (e) {
         console.error('항공 API 오류:', e);
         // API 오류 시 오류 UI + 새로고침
@@ -670,18 +637,13 @@ function renderFlightList(container, items, type) {
         return;
     }
     container.innerHTML = items.map(f => {
-        // StatusOfFlights API 응답 필드명 적용
-        const flightNo = f.flight_id || f.f_id || '-';
-        
-        // 예: 0930 -> 09:30
+        const flightNo = f.flight_id || '-';
         const schedTimeRaw = (f.plan_time || '').toString();
         const estTimeRaw = (f.est_time || '').toString();
-        
         const schedStr = schedTimeRaw.length >= 4 ? `${schedTimeRaw.slice(0, 2)}:${schedTimeRaw.slice(2, 4)}` : '-';
         const estStr = estTimeRaw.length >= 4 && estTimeRaw !== schedTimeRaw
             ? `<br><small style="color:#f59e0b">→ ${estTimeRaw.slice(0, 2)}:${estTimeRaw.slice(2, 4)}</small>` : '';
-            
-        const city = type === 'arrive' ? (f.airport || '-') : (f.arr_airport || '-');
+        const city = type === 'arrive' ? (f.dep_airport || '-') : (f.arr_airport || '-');
         const airline = f.airline || getAirlineName(flightNo);
         const statusSpan = getStatusBadge(f.status || '지연');
 
@@ -695,8 +657,6 @@ function renderFlightList(container, items, type) {
     }).join('');
 }
 
-
-
 function switchFlightTab(type) {
     document.querySelectorAll('.flight-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.flight-content').forEach(c => c.classList.remove('active'));
@@ -709,23 +669,157 @@ function switchFlightTab(type) {
 function openCctvModal(cam) {
     const modal = document.getElementById('cctv-modal');
     const body = document.getElementById('modal-body');
+    if (!modal || !body) return;
+    
     if (cam.type === 'youtube') {
         body.innerHTML = `<iframe src="https://www.youtube.com/embed/${cam.ytId}?autoplay=1&mute=0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
     } else {
         body.innerHTML = `<video id="modal-video" controls autoplay muted style="width:100%;aspect-ratio:16/9;border-radius:12px;"></video>`;
         setTimeout(() => {
             const v = document.getElementById('modal-video');
-            const hls = new Hls();
-            hls.loadSource(cam.url);
-            hls.attachMedia(v);
+            if (v && typeof Hls !== 'undefined' && Hls.isSupported()) {
+                const hls = new Hls();
+                hls.loadSource(cam.url);
+                hls.attachMedia(v);
+            }
         }, 100);
     }
     modal.style.display = 'flex';
 }
 function closeCctvModal() {
     const modal = document.getElementById('cctv-modal');
-    modal.style.display = 'none';
-    document.getElementById('modal-body').innerHTML = '';
+    if (modal) modal.style.display = 'none';
+    const body = document.getElementById('modal-body');
+    if (body) body.innerHTML = '';
+}
+
+// ==================== Lost & Found (경찰청 API) ====================
+let currentLostType = 'lost'; // 'lost' or 'found'
+
+async function fetchLostGoods() {
+    const grid = document.getElementById('lost-goods-grid');
+    if (!grid) return;
+
+    if (!CONFIG.PUBLIC_DATA_KEY) {
+        grid.innerHTML = '<div class="loading-lost">未设置 API Key</div>';
+        return;
+    }
+
+    try {
+        const startDateInput = document.getElementById('start-date');
+        const endDateInput = document.getElementById('end-date');
+        
+        // 날짜 기본값 설정 (최근 7일)
+        if (startDateInput && !startDateInput.value) {
+            const today = new Date();
+            const lastWeek = new Date();
+            lastWeek.setDate(today.getDate() - 7);
+            const formatDateInput = (d) => d.toISOString().split('T')[0];
+            startDateInput.value = formatDateInput(lastWeek);
+            endDateInput.value = formatDateInput(today);
+        }
+
+        const startDate = (startDateInput?.value || '').replace(/-/g, '');
+        const endDate = (endDateInput?.value || '').replace(/-/g, '');
+        
+        grid.innerHTML = '<div class="loading-lost"><p>正在加载实时数据...</p></div>';
+
+        const isLost = currentLostType === 'lost';
+        const apiMethod = isLost ? 'getLostGoodsInfoAccToClAreaPd' : 'getFoundGoodsInfoAccToClAreaPd';
+        
+        // 지역 필터링 파라미터 : 제주(LCR000)
+        let baseUrl = `https://apis.data.go.kr/1320000/LostGoodsInfoInqireService/${apiMethod}`;
+        let queryParams = [
+            `serviceKey=${CONFIG.PUBLIC_DATA_KEY}`,
+            `numOfRows=12`,
+            `pageNo=1`,
+            `START_YMD=${startDate}`,
+            `END_YMD=${endDate}`
+        ];
+
+        if (isLost) {
+            queryParams.push(`LST_LCT_CD=LCR000`); // 분실지역: 제주 (LCR000)
+        } else {
+            // 습득물(found) 보관장소 지역코드 파라미터명: PRDCT_ASST_LCT_CD
+            queryParams.push(`PRDCT_ASST_LCT_CD=LCR000`); // 보관지역: 제주 (LCR000)
+        }
+        
+        const targetUrl = baseUrl + '?' + queryParams.join('&');
+        const url = CONFIG.PROXY_URL + '?url=' + encodeURIComponent(targetUrl);
+
+        console.log(`[Lost&Found] Requesting: ${targetUrl}`);
+
+        const res = await fetch(url);
+        if (res.status === 403) {
+            grid.innerHTML = `<div class="loading-lost">无法加载数据 (403 Forbidden)<br><span style="font-size:0.7rem;">请检查 API Key 是否已开通 "${isLost ? '警察厅_遗失物' : '警察厅_拾得物'}" 权限</span></div>`;
+            return;
+        }
+        if (!res.ok) {
+            console.error(`[Lost&Found] API Error: ${res.status}`);
+            throw new Error(`API request failed with status ${res.status}`);
+        }
+
+        const xmlText = await res.text();
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+
+        const items = Array.from(xmlDoc.querySelectorAll('item')).map(node => {
+            const getTag = (tag) => node.querySelector(tag)?.textContent || '';
+            const rawCategory = getTag('prdtClNm') || '';
+            return {
+                id: getTag('atcId'),
+                name: getTag('lstPrdtNm') || getTag('fdPrdtNm'),
+                place: getTag('lstPlace') || getTag('depPlace'),
+                date: getTag('lstYmd') || getTag('fdYmd'),
+                category: rawCategory.split(' > ')[0] || '其他'
+            };
+        }).filter(item => {
+            // 제주 지역 키워드 필터링 (전국 데이터가 섞여 올 경우를 대비)
+            const p = item.place || '';
+            return p.includes('제주') || p.includes('서귀포') || p.includes('Jeju') || p.includes('Seogwipo');
+        });
+
+        renderLostGoods(grid, items);
+    } catch (e) {
+        console.error('유실물 API 오류:', e);
+        grid.innerHTML = '<div class="loading-lost">无法加载实时数据，请稍后再试</div>';
+    }
+}
+
+function renderLostGoods(grid, items) {
+    if (!items || items.length === 0) {
+        grid.innerHTML = '<div class="loading-lost">该期间内暂无相关记录</div>';
+        return;
+    }
+
+    grid.innerHTML = items.map(item => `
+        <div class="lost-card">
+            <div class="lost-info">
+                <div class="lost-category">${item.category}</div>
+                <h3 class="lost-title" title="${item.name}">${item.name}</h3>
+                <div class="lost-meta">
+                    <div class="lost-meta-item">
+                        <span class="lost-date">📅 ${item.date}</span>
+                    </div>
+                    <div class="lost-meta-item">
+                        <span class="lost-place" title="${item.place}">📍 ${item.place}</span>
+                    </div>
+                </div>
+            </div>
+            <a href="https://www.lost112.go.kr/find/findDetail.do?ATC_ID=${item.id}" target="_blank" class="lost-link">查看详情</a>
+        </div>
+    `).join('');
+}
+
+function setLostType(type) {
+    currentLostType = type;
+    document.getElementById('btn-lost-lost')?.classList.toggle('active', type === 'lost');
+    document.getElementById('btn-lost-found')?.classList.toggle('active', type === 'found');
+    fetchLostGoods();
+}
+
+function fetchLostGoodsManual() {
+    fetchLostGoods();
 }
 
 // ============================================================
@@ -733,18 +827,30 @@ function closeCctvModal() {
 // ============================================================
 window.addEventListener('load', () => {
     // CCTV
-    initCCTV();
+    if (typeof initCCTV === 'function') initCCTV();
 
     // 날씨 (4개 지역 병렬 로드)
-    Object.keys(CONFIG.WEATHER_LOCATIONS).forEach(loc => fetchWeatherData(loc));
+    if (typeof fetchWeatherData === 'function') {
+        Object.keys(CONFIG.WEATHER_LOCATIONS).forEach(loc => fetchWeatherData(loc));
+    }
 
     // 한라산
-    fetchHallasanStatus();
+    if (typeof fetchHallasanStatus === 'function') fetchHallasanStatus();
 
     // 항공 (기본: 도착편)
-    fetchFlights('arrive');
+    if (typeof fetchFlights === 'function') fetchFlights('arrive');
+
+    // 분실물 초기 로드
+    fetchLostGoods();
 
     // 주기적 갱신
-    setInterval(() => fetchFlights('arrive'), 3 * 60 * 1000);  // 3분마다
-    setInterval(() => Object.keys(CONFIG.WEATHER_LOCATIONS).forEach(loc => fetchWeatherData(loc)), 30 * 60 * 1000); // 30분마다
+    setInterval(() => {
+        if (typeof fetchFlights === 'function') fetchFlights('arrive');
+    }, 3 * 60 * 1000); 
+    setInterval(() => {
+        if (typeof fetchWeatherData === 'function') {
+            Object.keys(CONFIG.WEATHER_LOCATIONS).forEach(loc => fetchWeatherData(loc));
+        }
+    }, 30 * 60 * 1000);
+    setInterval(fetchLostGoods, 30 * 60 * 1000);
 });
