@@ -16,6 +16,8 @@ const CONFIG = {
     // 공공데이터포털(data.go.kr) 인증키 (필수)
     PUBLIC_DATA_KEY: '05988a053767a7a6cc5553d077ce7ea541c60806a0160d5ac2e9119ebe5a61ce',
 
+    // 제주 관광 API
+    VISIT_JEJU_KEY: '0972fcb659994423bcaa3c910d2d13c1',
     // Cloudflare Worker 프록시 URL (CORS 우회용)
     PROXY_URL: 'https://jejuweb.k97460300.workers.dev/',
 
@@ -289,16 +291,13 @@ function parseAndRenderWeather(locKey, items) {
             }
             
             const s = getSkyInfo(pty, sky);
-            const dayLabel = dayNames[targetD.getDay() % 7];
-            const dateLabel = `${String(targetD.getMonth() + 1).padStart(2, '0')}/${String(targetD.getDate()).padStart(2, '0')}`;
-            // 강수 확률은 0%라도 무조건 표시
-            const precipHtml = `<div class="weekly-precip ${precip >= 50 ? 'precip-blue' : ''}">💧${precip}%</div>`;
+            const dateLabel = i === 0 ? '今天' : dayNames[targetD.getDay()];
+            const precipHtml = precip > 0 ? `<div class="weekly-precip ${precip >= 50 ? 'precip-blue' : ''}">💧${precip}%</div>` : '';
             return `<div class="weekly-item">
-                <div class="weekly-day">${dayLabel} <small>${dateLabel}</small></div>
+                <div class="weekly-day"><small>${dateLabel}</small></div>
                 <div class="weekly-icon">${s.icon}</div>
                 <div class="weekly-temps">
-                    <span class="temp-high">${max}</span>
-                    <span class="temp-low">${min}</span>
+                    <span class="temp-high">${max}</span> / <span class="temp-low">${min}</span>
                 </div>
                 ${precipHtml}
             </div>`;
@@ -346,13 +345,15 @@ function renderWeatherMock(locKey) {
         const weekIcons = ['☀️', '⛅', '🌧️', '☀️', '⛅', '☁️', '☀️', '⛅', '🌧️', '☀️'];
         weeklyEl.innerHTML = Array.from({ length: 10 }, (_, i) => {
             const d = new Date(today); d.setDate(today.getDate() + i);
+            const popMock = Math.floor(Math.random() * 40); // 0~40% 임의 강수확률
+            const precipHtml = `<div class="weekly-precip ${popMock >= 50 ? 'precip-blue' : ''}">💧${popMock}%</div>`;
             return `<div class="weekly-item">
-                <div class="weekly-day">${dayNames[d.getDay()]} <small>${d.getMonth() + 1}/${d.getDate()}</small></div>
+                <div class="weekly-day"><small>${d.getMonth() + 1}/${d.getDate()}</small></div>
                 <div class="weekly-icon">${weekIcons[i]}</div>
                 <div class="weekly-temps">
-                    <span class="temp-high">${m.temp + Math.floor(Math.random() * 4)}°</span>
-                    <span class="temp-low">${m.temp - Math.floor(Math.random() * 6)}°</span>
+                    <span class="temp-high">${m.temp + Math.floor(Math.random() * 4)}°</span> / <span class="temp-low">${m.temp - Math.floor(Math.random() * 6)}°</span>
                 </div>
+                ${precipHtml}
             </div>`;
         }).join('');
     }
@@ -379,7 +380,7 @@ const HALLASAN_TRAILS = [
     { nameKo: '영실탐방로', nameCn: '灵室路线', distanceCn: '5.8km（单程）', timeCn: '约2.5小时' },
     { nameKo: '어승생악탐방로', nameCn: '洘承生岳路线', distanceCn: '1.3km（单程）', timeCn: '约30分钟' },
     { nameKo: '돈내코탐방로', nameCn: '敦乃科路线', distanceCn: '9.1km（单程）', timeCn: '约4.5小时' },
-    { nameKo: '석굴암탐방로', nameCn: '石窟庄路线', distanceCn: '1.5km（单程）', timeCn: '约50分钟' },
+    { nameKo: '석굴암탐방로', nameCn: '石굴암路线', distanceCn: '1.5km（单程）', timeCn: '约50分钟' },
     { nameKo: '관음사탐방로', nameCn: '观音寺路线', distanceCn: '8.7km（单程）', timeCn: '约5小时' },
     { nameKo: '성판악탐방로', nameCn: '城板岳路线', distanceCn: '9.6km（单程）', timeCn: '约4.5小时' }
 ];
@@ -390,7 +391,7 @@ const TRAIL_STATUS_MAP = {
     '부분통제': { cn: '部分管制', cls: 'partial' },
     '전면통제': { cn: '全面管制', cls: 'closed' },
     '통제': { cn: '全面管制', cls: 'closed' },
-    '일부통제': { cn: '部分管制', cls: 'partial' },
+    '일부통제': { cn: '부분통제', cls: 'partial' },
     '입산제한': { cn: '全面管制', cls: 'closed' }
 };
 
@@ -457,9 +458,10 @@ async function fetchHallasanStatus() {
                     <h4>${t.nameCn}</h4>
                     <span class="trail-status-badge ${t.statusCls}">${t.statusCn}</span>
                 </div>
-                <div class="trail-detail"><span class="trail-label">路线距离</span><span class="trail-value">${t.distanceCn}</span></div>
-                <div class="trail-detail"><span class="trail-label">所需时间</span><span class="trail-value">${t.timeCn}</span></div>
-                <div class="trail-detail"><span class="trail-label">管制状态</span><span class="trail-value">${t.statusCn}</span></div>
+                <div class="trail-info-compact">
+                    <span>📏 ${t.distanceCn}</span>
+                    <span>⏱️ ${t.timeCn}</span>
+                </div>
             </div>`).join('');
 
     } catch (e) {
@@ -479,11 +481,12 @@ async function fetchHallasanStatus() {
             <div class="trail-card">
                 <div class="trail-header">
                     <h4>${t.nameCn}</h4>
-                    <span class="trail-status-badge open">正常运营</span>
+                    <span class="trail-status-badge open">正常开放</span>
                 </div>
-                <div class="trail-detail"><span class="trail-label">路线距离</span><span class="trail-value">${t.distanceCn}</span></div>
-                <div class="trail-detail"><span class="trail-label">所需时间</span><span class="trail-value">${t.timeCn}</span></div>
-                <div class="trail-detail"><span class="trail-label">管制状态</span><span class="trail-value">正常运营</span></div>
+                <div class="trail-info-compact">
+                    <span>📏 ${t.distanceCn}</span>
+                    <span>⏱️ ${t.timeCn}</span>
+                </div>
             </div>`).join('');
     }
 }
@@ -530,6 +533,19 @@ function getStatusBadge(rawStatus) {
     return `<span class="status-badge ${info.cls}">${info.cn}</span>`;
 }
 
+const AIRLINE_MARKS = {
+    'KE': '🇰orean', 'OZ': '🇦siana', 'LJ': '🇯inAir', '7C': '🇯ejuAir', 'TW': '🇹way', 'ZE': '🇪ast', 'BX': '🇦irBusan', 'RS': '🇦irSeoul'
+};
+
+function getAirlineMark(flightId, rawAirline) {
+    const code = (flightId || '').slice(0, 2).toUpperCase();
+    const markMap = {
+        'KE': '✈️', 'OZ': '✈️', 'LJ': '🦋', '7C': '🍊', 'TW': '✈️', 'ZE': '✈️', 'BX': '✈️', 'RS': '✈️',
+        'CA': '🇨🇳', 'MU': '✈️', 'CZ': '✈️', '9C': '🍏'
+    };
+    return markMap[code] || '✈️';
+}
+
 function getAirlineName(flightId, rawAirline) {
     const code = (flightId || '').slice(0, 2).toUpperCase();
     return AIRLINE_NAMES[code] || rawAirline || code;
@@ -556,7 +572,7 @@ async function fetchFlights(type) {
     if (!container) return;
 
     if (!CONFIG.PUBLIC_DATA_KEY) {
-        container.innerHTML = `<div style="text-align:center;padding:32px 16px;"><div style="font-size:2rem;margin-bottom:12px;">⚠️</div><div style="font-weight:700;font-size:1rem;color:var(--text-primary);margin-bottom:6px;">API密钥未设置</div><div style="color:var(--text-muted);font-size:0.85rem;margin-bottom:16px;">请在 script.js 的 CONFIG.PUBLIC_DATA_KEY 中输入<br>韩国公共数据门户 API 密钥</div><button onclick="fetchFlights('${type}')" style="background:var(--primary-gradient);color:white;border:none;padding:8px 20px;border-radius:8px;font-size:0.9rem;cursor:pointer;font-weight:600;">🔄 重新加载</button></div>`;
+        container.innerHTML = `<div style="text-align:center;padding:32px 16px;"><div style="font-size:2rem;margin-bottom:12px;">⚠️</div><div style="font-weight:700;font-size:1rem;color:var(--text-primary);margin-bottom:6px;">API密钥未设置</div><div style="color:var(--text-muted);font-size:0.85rem;margin-bottom:16px;">请在 script.js 의 CONFIG.PUBLIC_DATA_KEY 中 입력하세요.<br>韩国公共数据门户 API 密钥</div><button onclick="fetchFlights('${type}')" style="background:var(--primary-gradient);color:white;border:none;padding:8px 20px;border-radius:8px;font-size:0.9rem;cursor:pointer;font-weight:600;">🔄 重新加载</button></div>`;
         return;
     }
 
@@ -568,7 +584,6 @@ async function fetchFlights(type) {
         const endpoint = type === 'arrive' ? 'getArrFlightStatusList' : 'getDepFlightStatusList';
         const airportParam = type === 'arrive' ? 'arr_airport_code=CJU' : 'airport_code=CJU';
         
-        // 데이터 수신량을 1000개로 조정하여 모든 국제선이 포함되도록 함 (HTTP 프로토콜 및 캐시 무효화 적용)
         const targetUrl = `http://openapi.airport.co.kr/service/rest/StatusOfFlights/${endpoint}?serviceKey=${CONFIG.PUBLIC_DATA_KEY}&pageNo=1&numOfRows=1000&searchday=${ymd}&${airportParam}&_=${Date.now()}`;
         const url = CONFIG.PROXY_URL + '?url=' + encodeURIComponent(targetUrl);
 
@@ -602,20 +617,15 @@ async function fetchFlights(type) {
             };
         });
 
-        // "국제선" 중 특정 지역(중화권)만 필터링: 공항 코드로 비교 및 제주공항(CJU) 여부 재확인
         const filteredFlights = itemsArray.filter(f => {
             const oppositeCode = type === 'arrive' ? f.dep_code : f.arr_code;
             const localCode = type === 'arrive' ? f.arr_code : f.dep_code;
-            
-            // 1. 해당 공항이 제주(CJU)여야 함
-            // 2. 국제선이면서(is_intl) 지정된 공항 코드 리스트에 포함되는지 확인
             return localCode === 'CJU' && oppositeCode && (f.is_intl || !DOMESTIC_AIRPORTS.has(oppositeCode)) && REGION_AIRPORTS.has(oppositeCode);
         });
 
         renderFlightList(container, filteredFlights, type);
     } catch (e) {
         console.error('항공 API 오류:', e);
-        // API 오류 시 오류 UI + 새로고침
         container.innerHTML = `
             <div style="text-align:center;padding:32px 16px;">
                 <div style="font-size:2rem;margin-bottom:12px;">❌</div>
@@ -636,25 +646,44 @@ function renderFlightList(container, items, type) {
         container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">暂无相关航班信息</div>';
         return;
     }
-    container.innerHTML = items.map(f => {
+    
+    // 동적 헤더 생성 (데이터가 있을 때만)
+    const destHeader = type === 'arrive' ? '出发地' : '目的地';
+    let htmlMsg = `<div class="flight-row flight-header">
+        <div class="flight-col">航班号</div>
+        <div class="flight-col">航空公司</div>
+        <div class="flight-col">${destHeader}</div>
+        <div class="flight-col">预定/实际</div>
+        <div class="flight-col">状态</div>
+    </div>`;
+
+    htmlMsg += items.map(f => {
         const flightNo = f.flight_id || '-';
         const schedTimeRaw = (f.plan_time || '').toString();
         const estTimeRaw = (f.est_time || '').toString();
         const schedStr = schedTimeRaw.length >= 4 ? `${schedTimeRaw.slice(0, 2)}:${schedTimeRaw.slice(2, 4)}` : '-';
         const estStr = estTimeRaw.length >= 4 && estTimeRaw !== schedTimeRaw
             ? `<br><small style="color:#f59e0b">→ ${estTimeRaw.slice(0, 2)}:${estTimeRaw.slice(2, 4)}</small>` : '';
-        const city = type === 'arrive' ? (f.dep_airport || '-') : (f.arr_airport || '-');
-        const airline = f.airline || getAirlineName(flightNo);
+        
+        // 목적지/출발지 '/' 줄바꿈 처리
+        let city = type === 'arrive' ? (f.dep_airport || '-') : (f.arr_airport || '-');
+        if (city.includes('/')) {
+            city = city.replace(/\//g, '/<br>');
+        }
+        
+        const airlineName = f.airline || '-';
         const statusSpan = getStatusBadge(f.status || '지연');
 
         return `<div class="flight-row">
-            <div class="flight-col" style="font-weight:700">${flightNo}</div>
-            <div class="flight-col" style="font-size:0.82rem">${airline}</div>
-            <div class="flight-col">${city}</div>
+            <div class="flight-col">${flightNo}</div>
+            <div class="flight-col">${airlineName}</div>
+            <div class="flight-col" style="text-align:center;">${city}</div>
             <div class="flight-col">${schedStr}${estStr}</div>
             <div class="flight-col">${statusSpan}</div>
         </div>`;
     }).join('');
+    
+    container.innerHTML = htmlMsg;
 }
 
 function switchFlightTab(type) {
@@ -693,10 +722,8 @@ function closeCctvModal() {
     if (body) body.innerHTML = '';
 }
 
-// ==================== Lost & Found (경찰청 API) ====================
-let currentLostType = 'lost'; // 'lost' or 'found'
-
-async function fetchLostGoods() {
+// ==================== Found Goods (경찰청 습득물 API) ====================
+async function fetchFoundGoods() {
     const grid = document.getElementById('lost-goods-grid');
     if (!grid) return;
 
@@ -708,56 +735,45 @@ async function fetchLostGoods() {
     try {
         const startDateInput = document.getElementById('start-date');
         const endDateInput = document.getElementById('end-date');
+        const categoryInput = document.getElementById('pkupCmdtyLclsfCd');
         
-        // 날짜 기본값 설정 (최근 7일)
+        // 날짜 기본값 설정 (최근 15일)
         if (startDateInput && !startDateInput.value) {
             const today = new Date();
-            const lastWeek = new Date();
-            lastWeek.setDate(today.getDate() - 7);
+            const lastPeriod = new Date();
+            lastPeriod.setDate(today.getDate() - 15);
             const formatDateInput = (d) => d.toISOString().split('T')[0];
-            startDateInput.value = formatDateInput(lastWeek);
+            startDateInput.value = formatDateInput(lastPeriod);
             endDateInput.value = formatDateInput(today);
         }
 
         const startDate = (startDateInput?.value || '').replace(/-/g, '');
         const endDate = (endDateInput?.value || '').replace(/-/g, '');
+        const category = categoryInput?.value || '';
         
-        grid.innerHTML = '<div class="loading-lost"><p>正在加载实时数据...</p></div>';
+        grid.innerHTML = '<div class="loading-lost"><p>正在搜索济州实时数据...</p></div>';
 
-        const isLost = currentLostType === 'lost';
-        const apiMethod = isLost ? 'getLostGoodsInfoAccToClAreaPd' : 'getFoundGoodsInfoAccToClAreaPd';
+        const serviceName = 'LosfundInfoInqireService';
+        const apiMethod = 'getLosfundInfoAccToClAreaPd';
         
-        // 지역 필터링 파라미터 : 제주(LCR000)
-        let baseUrl = `https://apis.data.go.kr/1320000/LostGoodsInfoInqireService/${apiMethod}`;
+        let baseUrl = `http://apis.data.go.kr/1320000/${serviceName}/${apiMethod}`;
         let queryParams = [
             `serviceKey=${CONFIG.PUBLIC_DATA_KEY}`,
-            `numOfRows=12`,
+            `numOfRows=30`, 
             `pageNo=1`,
             `START_YMD=${startDate}`,
-            `END_YMD=${endDate}`
+            `END_YMD=${endDate}`,
+            `LCT_CD=LCR000`, // 제주 지역 코드 (LCT_CD로 수정 테스트)
+            `PRDCT_CL_CD_01=${category}`
         ];
-
-        if (isLost) {
-            queryParams.push(`LST_LCT_CD=LCR000`); // 분실지역: 제주 (LCR000)
-        } else {
-            // 습득물(found) 보관장소 지역코드 파라미터명: PRDCT_ASST_LCT_CD
-            queryParams.push(`PRDCT_ASST_LCT_CD=LCR000`); // 보관지역: 제주 (LCR000)
-        }
         
         const targetUrl = baseUrl + '?' + queryParams.join('&');
         const url = CONFIG.PROXY_URL + '?url=' + encodeURIComponent(targetUrl);
 
-        console.log(`[Lost&Found] Requesting: ${targetUrl}`);
+        console.log(`[FoundGoods] Requesting: ${targetUrl}`);
 
         const res = await fetch(url);
-        if (res.status === 403) {
-            grid.innerHTML = `<div class="loading-lost">无法加载数据 (403 Forbidden)<br><span style="font-size:0.7rem;">请检查 API Key 是否已开通 "${isLost ? '警察厅_遗失物' : '警察厅_拾得物'}" 权限</span></div>`;
-            return;
-        }
-        if (!res.ok) {
-            console.error(`[Lost&Found] API Error: ${res.status}`);
-            throw new Error(`API request failed with status ${res.status}`);
-        }
+        if (!res.ok) throw new Error(`API request failed with status ${res.status}`);
 
         const xmlText = await res.text();
         const parser = new DOMParser();
@@ -768,21 +784,18 @@ async function fetchLostGoods() {
             const rawCategory = getTag('prdtClNm') || '';
             return {
                 id: getTag('atcId'),
-                name: getTag('lstPrdtNm') || getTag('fdPrdtNm'),
-                place: getTag('lstPlace') || getTag('depPlace'),
-                date: getTag('lstYmd') || getTag('fdYmd'),
-                category: rawCategory.split(' > ')[0] || '其他'
+                name: getTag('fdPrdtNm'),
+                place: getTag('depPlace'),
+                date: getTag('fdYmd'),
+                category: rawCategory.split(' > ')[0] || '其他',
+                img: getTag('fdFilePathImg') // 이미지 경로 추가
             };
-        }).filter(item => {
-            // 제주 지역 키워드 필터링 (전국 데이터가 섞여 올 경우를 대비)
-            const p = item.place || '';
-            return p.includes('제주') || p.includes('서귀포') || p.includes('Jeju') || p.includes('Seogwipo');
         });
 
         renderLostGoods(grid, items);
     } catch (e) {
-        console.error('유실물 API 오류:', e);
-        grid.innerHTML = '<div class="loading-lost">无法加载实时数据，请稍后再试</div>';
+        console.error('습득물 API 오류:', e);
+        grid.innerHTML = '<div class="loading-lost">无法加载实时 데이터，请稍后再试</div>';
     }
 }
 
@@ -794,8 +807,9 @@ function renderLostGoods(grid, items) {
 
     grid.innerHTML = items.map(item => `
         <div class="lost-card">
+            ${item.img ? `<div class="lost-img-box"><img src="${item.img}" alt="${item.name}" onerror="this.style.display='none'"></div>` : ''}
             <div class="lost-info">
-                <div class="lost-category">${item.category}</div>
+                <div class="lost-category-badge">${item.category}</div>
                 <h3 class="lost-title" title="${item.name}">${item.name}</h3>
                 <div class="lost-meta">
                     <div class="lost-meta-item">
@@ -805,21 +819,122 @@ function renderLostGoods(grid, items) {
                         <span class="lost-place" title="${item.place}">📍 ${item.place}</span>
                     </div>
                 </div>
+                <a href="https://www.lost112.go.kr/find/findDetail.do?ATC_ID=${item.id}" target="_blank" class="lost-link-btn">查看详情</a>
             </div>
-            <a href="https://www.lost112.go.kr/find/findDetail.do?ATC_ID=${item.id}" target="_blank" class="lost-link">查看详情</a>
         </div>
     `).join('');
 }
 
-function setLostType(type) {
-    currentLostType = type;
-    document.getElementById('btn-lost-lost')?.classList.toggle('active', type === 'lost');
-    document.getElementById('btn-lost-found')?.classList.toggle('active', type === 'found');
-    fetchLostGoods();
+function fetchFoundGoodsManual() {
+    fetchFoundGoods();
 }
 
-function fetchLostGoodsManual() {
-    fetchLostGoods();
+// ==================== Weather Alerts (기상특보) ====================
+// (Mock data for now, as real API is complex)
+function fetchWeatherAlerts() {
+    const alertsContainer = document.getElementById('weather-alerts-container');
+    if (!alertsContainer) return;
+
+    const mockAlerts = [
+        // { type: '大风', message: '济州岛全境大风预警', icon: '🌬️' },
+        // { type: '寒潮', message: '汉拿山地区寒潮预警', icon: '🥶' }
+    ];
+
+    if (mockAlerts.length > 0) {
+        alertsContainer.style.display = 'flex';
+        alertsContainer.innerHTML = mockAlerts.map(alert => `
+            <div class="weather-alert-card">
+                <span>${alert.icon}</span>
+                <span style="font-weight: 700;">[${alert.type}]</span> 
+                <span>${alert.message}</span>
+            </div>
+        `).join('');
+    } else {
+        alertsContainer.style.display = 'none';
+    }
+}
+
+/**
+ * Visit Jeju API를 이용한 축제/행사 정보 조회
+ */
+async function fetchFestivals() {
+    const listContainer = document.getElementById('festival-list');
+    if (!listContainer) return;
+    
+    try {
+        listContainer.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">正在获取并加载济주活动...</div>';
+        
+        // Visit Jeju API 전용 타겟 URL (행사/축제 카테고리 c4)
+        const targetUrl = `https://api.visitjeju.net/vsjApi/contents/searchList?apiKey=${CONFIG.VISIT_JEJU_KEY}&locale=zh&category=c4`;
+        const url = CONFIG.PROXY_URL + '?url=' + encodeURIComponent(targetUrl);
+        
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('API request failed');
+        
+        const data = await res.json();
+        if (!data || !data.items || data.items.length === 0) {
+            listContainer.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">暂无近期节日活动信息</div>';
+            return;
+        }
+
+        listContainer.innerHTML = data.items.slice(0, 15).map(item => {
+            const title = item.title || '无题活动';
+            const imgUrl = item.repPhoto?.photoid?.thumbnailpath || 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=400';
+            const dateStr = item.tag || '近期举行';
+            const place = item.address || '济州岛全域';
+
+            return `
+                <div class="festival-card" onclick="window.open('https://www.visitjeju.net/u/12A', '_blank')">
+                    <img src="${imgUrl}" class="festival-img" alt="${title}" onerror="this.src='https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=400'">
+                    <div class="festival-info">
+                        <div class="festival-date">📅 ${dateStr}</div>
+                        <h3 class="festival-title">${title}</h3>
+                        <div class="festival-place">📍 ${place}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+    } catch (e) {
+        console.error('Festival API Error:', e);
+        listContainer.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">活动加载失败，请重试</div>';
+    }
+}
+
+// ============================================================
+// Navigation - Section Switching
+// ============================================================
+function showSection(sectionId) {
+    // 모든 섹션 숨기기
+    document.querySelectorAll('.app-section').forEach(section => {
+        section.classList.remove('active');
+    });
+
+    // 대상 섹션 보이기
+    const targetSection = document.getElementById(sectionId);
+    if (targetSection) {
+        targetSection.classList.add('active');
+        // 페이지 상단으로 이동
+        window.scrollTo(0, 0);
+    }
+
+    // 상단 바(Header) 가시성 조정 - 홈 바와 일반 바 구분
+    const mainAppBar = document.getElementById('main-app-bar');
+    if (sectionId === 'home') {
+        if (mainAppBar) mainAppBar.style.display = 'flex';
+    } else {
+        // 기능 섹션 내에는 자체 app-bar가 있으므로 메인 홈 바는 숨김
+        if (mainAppBar) mainAppBar.style.display = 'none';
+        
+        // 특정 섹션에 진입했을 때 데이터가 로드되지 않았다면 새로고침 등 추가 로직 가능
+        // (현재는 로드 시 전체 로드하므로 추가 조치 불필요)
+        if (sectionId === 'cctv') initCCTV();
+        if (sectionId === 'weather') Object.keys(CONFIG.WEATHER_LOCATIONS).forEach(loc => fetchWeatherData(loc));
+        if (sectionId === 'hallasan') fetchHallasanStatus();
+        if (sectionId === 'airport') fetchFlights('arrive');
+        if (sectionId === 'lost-found') fetchFoundGoods();
+        if (sectionId === 'festival') fetchFestivals();
+    }
 }
 
 // ============================================================
@@ -840,17 +955,23 @@ window.addEventListener('load', () => {
     // 항공 (기본: 도착편)
     if (typeof fetchFlights === 'function') fetchFlights('arrive');
 
-    // 분실물 초기 로드
-    fetchLostGoods();
+    // 습득물 초기 로드
+    fetchFoundGoods();
+
+    // 축제 정보 초기 로드
+    fetchFestivals();
+
+    // 초기 화면 설정 (홈)
+    showSection('home');
 
     // 주기적 갱신
     setInterval(() => {
         if (typeof fetchFlights === 'function') fetchFlights('arrive');
-    }, 3 * 60 * 1000); 
+    }, 60000);
     setInterval(() => {
         if (typeof fetchWeatherData === 'function') {
             Object.keys(CONFIG.WEATHER_LOCATIONS).forEach(loc => fetchWeatherData(loc));
         }
     }, 30 * 60 * 1000);
-    setInterval(fetchLostGoods, 30 * 60 * 1000);
+    setInterval(fetchFoundGoods, 30 * 60 * 1000);
 });
