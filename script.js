@@ -72,10 +72,10 @@ function initCCTV() {
     grid.innerHTML = CONFIG.CCTV.map(cam => `
         <div class="cctv-card" onclick="openCctvModalById('${cam.id}')">
             <div class="cctv-video-container">
-                ${cam.type === 'hls' ? 
-                    `<video id="video-${cam.id}" class="cctv-video-el" muted playsinline></video>` :
-                    `<div id="yt-${cam.id}" class="cctv-video-el"></div>`
-                }
+                ${cam.type === 'hls' ?
+            `<video id="video-${cam.id}" class="cctv-video-el" muted playsinline></video>` :
+            `<div id="yt-${cam.id}" class="cctv-video-el"></div>`
+        }
                 <div class="cctv-tag">LIVE</div>
             </div>
             <div class="cctv-info">
@@ -101,11 +101,11 @@ function initHlsPlayer(cam) {
     // CORS 우회 및 HLS 재생 로직 강화
     function tryProxyFirst() {
         const proxyUrl = `${CONFIG.PROXY_URL}?url=${encodeURIComponent(cam.url)}`;
-        
+
         if (typeof Hls !== 'undefined' && Hls.isSupported()) {
             const hls = new Hls({
                 enableWorker: true,
-                xhrSetup: function(xhr, url) {
+                xhrSetup: function (xhr, url) {
                     // Chrome Mixed Content 차단 해결: 모든 HTTP 요청(m3u8, ts)을 HTTPS 프록시로 전달
                     if (url.startsWith('http://') && !url.includes(CONFIG.PROXY_URL)) {
                         const proxiedUrl = `${CONFIG.PROXY_URL}?url=${encodeURIComponent(url)}`;
@@ -121,7 +121,7 @@ function initHlsPlayer(cam) {
                     tryDirect();
                 }
             });
-            videoEl.play().catch(() => {});
+            videoEl.play().catch(() => { });
         } else if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
             // iOS Safari 대응
             videoEl.src = proxyUrl;
@@ -133,7 +133,7 @@ function initHlsPlayer(cam) {
             const hls = new Hls();
             hls.loadSource(cam.url);
             hls.attachMedia(videoEl);
-            videoEl.play().catch(() => {});
+            videoEl.play().catch(() => { });
         } else if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
             videoEl.src = cam.url;
         }
@@ -240,19 +240,22 @@ function parseAndRenderWeather(locKey, items) {
         `;
     }
 
-    // 시간별 예보 (다음 이용 가능한 09:00~21:00 대역 추출)
+    // 시간별 예보 (현재 시각 이후 데이터부터 추출)
     const hourlyEl = document.getElementById(`hourly-${locKey}`);
     if (hourlyEl) {
-        const first9Index = sortedKeys.findIndex(k => k.slice(8, 10) === '09');
-        let hourlyItems = [];
-        if (first9Index !== -1) {
-            // 해당 09:00 시점부터 최대 13개(21:00까지) 추출
-            hourlyItems = sortedKeys.slice(first9Index, first9Index + 13);
-        } else {
-            // 09시 데이터가 아예 없는 경우 가용한 데이터 앞에서부터 13개 노출
-            hourlyItems = sortedKeys.slice(0, 13);
-        }
+        const now = new Date();
+        const currentYmd = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+        const currentHm = `${String(now.getHours()).padStart(2, '0')}00`;
+        const currentKey = currentYmd + currentHm;
+
+        // 현재 시각 이후의 데이터 필터링
+        let hourlyItems = sortedKeys.filter(k => k >= currentKey).slice(0, 15);
         
+        // 만약 현재 시각 이후 데이터가 부족하다면 (예: 밤 늦게 조회) 앞에서부터 보충
+        if (hourlyItems.length < 5) {
+            hourlyItems = sortedKeys.slice(0, 15);
+        }
+
         if (hourlyItems.length > 0) {
             hourlyEl.innerHTML = hourlyItems.map(k => {
                 const d = grouped[k];
@@ -293,15 +296,15 @@ function parseAndRenderWeather(locKey, items) {
 
         const dayNames = ['周일', '周一', '周二', '周三', '周四', '周五', '周六'];
         const todayDate = new Date();
-        
+
         weeklyEl.innerHTML = Array.from({ length: 10 }, (_, i) => {
             const targetD = new Date(todayDate);
             targetD.setDate(todayDate.getDate() + i);
             const ymd = `${targetD.getFullYear()}${String(targetD.getMonth() + 1).padStart(2, '0')}${String(targetD.getDate()).padStart(2, '0')}`;
-            
+
             const dt = dailyMap[ymd];
             let max = '--', min = '--', precip = 0, pty = '0', sky = '1';
-            
+
             if (dt) {
                 if (dt.max !== -99) max = dt.max + '°';
                 if (dt.min !== 99) min = dt.min + '°';
@@ -310,19 +313,19 @@ function parseAndRenderWeather(locKey, items) {
                 sky = dt.sky || '1';
             } else {
                 // 단기 예보 기간(약 3일)을 벗어난 날짜는 자연스러운 Mock 데이터로 채움
-                const mockRef = { 
+                const mockRef = {
                     jeju: { temp: 12, sky: '1', pty: '0', pop: 20 },
                     seogwipo: { temp: 14, sky: '1', pty: '0', pop: 10 },
                     hallasan: { temp: 5, sky: '4', pty: '0', pop: 30 },
                     udo: { temp: 13, sky: '3', pty: '0', pop: 20 }
                 }[locKey] || { temp: 12, sky: '1', pty: '0', pop: 20 };
-                
+
                 max = (mockRef.temp + Math.floor(Math.random() * 4)) + '°';
                 min = (mockRef.temp - Math.floor(Math.random() * 5)) + '°';
                 precip = Math.floor(Math.random() * 30);
-                sky = ['1','3','4'][Math.floor(Math.random()*3)];
+                sky = ['1', '3', '4'][Math.floor(Math.random() * 3)];
             }
-            
+
             const s = getSkyInfo(pty, sky);
             const dateLabel = `${targetD.getMonth() + 1}/${targetD.getDate()}`;
             const precipHtml = precip > 0 ? `<div class="weekly-precip ${precip >= 50 ? 'precip-blue' : ''}">💧${precip}%</div>` : '';
@@ -590,9 +593,9 @@ const DOMESTIC_AIRPORTS = new Set(['CJU', 'GMP', 'PUS', 'CJJ', 'TAE', 'KWJ', 'US
 // 중화권 (중국 본토, 대만, 홍콩, 마카오) 주요 공항 코드
 const REGION_AIRPORTS = new Set([
     // 중국 본토
-    'PVG', 'SHA', 'PEK', 'PKX', 'HGH', 'CAN', 'SZX', 'NKG', 'TAO', 'XIY', 'CTU', 'CKG', 
-    'KMG', 'TSN', 'DLC', 'SHE', 'HRB', 'WUX', 'NGB', 'FOC', 'XMN', 'SYX', 'HAK', 'TNA', 
-    'CGQ', 'CGO', 'WNZ', 'SWA', 'KWL', 'NNG', 'HFE', 'TYN', 'KHN', 'LHW', 'XNN', 'HET', 
+    'PVG', 'SHA', 'PEK', 'PKX', 'HGH', 'CAN', 'SZX', 'NKG', 'TAO', 'XIY', 'CTU', 'CKG',
+    'KMG', 'TSN', 'DLC', 'SHE', 'HRB', 'WUX', 'NGB', 'FOC', 'XMN', 'SYX', 'HAK', 'TNA',
+    'CGQ', 'CGO', 'WNZ', 'SWA', 'KWL', 'NNG', 'HFE', 'TYN', 'KHN', 'LHW', 'XNN', 'HET',
     'URC', 'CSX', 'DYG', 'YNT', 'WEI', 'YIW', 'LYA', 'JNZ', 'LYI', 'ENH', 'INC', 'HIA',
     // 대만
     'TPE', 'TSA', 'KHH', 'RMQ', 'TNN',
@@ -611,22 +614,22 @@ async function fetchFlights(type) {
 
     try {
         container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">正在加载...</div>';
-        
+
         const today = new Date();
         const ymd = today.getFullYear() + String(today.getMonth() + 1).padStart(2, '0') + String(today.getDate()).padStart(2, '0');
         const endpoint = type === 'arrive' ? 'getArrFlightStatusList' : 'getDepFlightStatusList';
         const airportParam = type === 'arrive' ? 'arr_airport_code=CJU' : 'airport_code=CJU';
-        
+
         const targetUrl = `http://openapi.airport.co.kr/service/rest/StatusOfFlights/${endpoint}?serviceKey=${CONFIG.PUBLIC_DATA_KEY}&pageNo=1&numOfRows=1000&searchday=${ymd}&${airportParam}&_=${Date.now()}`;
         const url = CONFIG.PROXY_URL + '?url=' + encodeURIComponent(targetUrl);
 
         const res = await fetch(url);
         if (!res.ok) throw new Error('API request failed');
-        
+
         const xmlText = await res.text();
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(xmlText, "text/xml");
-        
+
         const errorNode = xmlDoc.querySelector('resultMsg');
         if (errorNode && errorNode.textContent.includes('ERROR')) throw new Error(errorNode.textContent);
 
@@ -635,7 +638,7 @@ async function fetchFlights(type) {
             const getTag = (tag) => (node.getElementsByTagName(tag)[0]?.textContent || '').trim();
             const schedText = getTag('scheduledatetime');
             const estText = getTag('estimateddatetime');
-            
+
             return {
                 flight_id: (getTag('flightid') || getTag('fid') || getTag('flightId')).toUpperCase(),
                 plan_time: schedText.length >= 12 ? schedText.slice(8, 12) : schedText,
@@ -679,7 +682,7 @@ function renderFlightList(container, items, type) {
         container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">暂无相关航班信息</div>';
         return;
     }
-    
+
     // 동적 헤더 생성 (데이터가 있을 때만)
     const destHeader = type === 'arrive' ? '出发地' : '目的地';
     let htmlMsg = `<div class="flight-row flight-header">
@@ -697,13 +700,13 @@ function renderFlightList(container, items, type) {
         const schedStr = schedTimeRaw.length >= 4 ? `${schedTimeRaw.slice(0, 2)}:${schedTimeRaw.slice(2, 4)}` : '-';
         const estStr = estTimeRaw.length >= 4 && estTimeRaw !== schedTimeRaw
             ? `<br><small style="color:#f59e0b">→ ${estTimeRaw.slice(0, 2)}:${estTimeRaw.slice(2, 4)}</small>` : '';
-        
+
         // 목적지/출발지 '/' 줄바꿈 처리
         let city = type === 'arrive' ? (f.dep_airport || '-') : (f.arr_airport || '-');
         if (city.includes('/')) {
             city = city.replace(/\//g, '/<br>');
         }
-        
+
         const airlineName = f.airline || '-';
         const statusSpan = getStatusBadge(f.status || '지연');
 
@@ -715,7 +718,7 @@ function renderFlightList(container, items, type) {
             <div class="flight-col">${statusSpan}</div>
         </div>`;
     }).join('');
-    
+
     container.innerHTML = htmlMsg;
 }
 
@@ -737,7 +740,7 @@ function openCctvModal(cam) {
     const modal = document.getElementById('cctv-modal');
     const body = document.getElementById('modal-body');
     if (!modal || !body) return;
-    
+
     if (cam.type === 'youtube') {
         body.innerHTML = `<iframe src="https://www.youtube.com/embed/${cam.ytId}?autoplay=1&mute=0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
     } else {
@@ -746,7 +749,7 @@ function openCctvModal(cam) {
             const v = document.getElementById('modal-video');
             if (v && typeof Hls !== 'undefined' && Hls.isSupported()) {
                 const hls = new Hls({
-                    xhrSetup: function(xhr, url) {
+                    xhrSetup: function (xhr, url) {
                         if (url.startsWith('http://') && !url.includes(CONFIG.PROXY_URL)) {
                             const proxiedUrl = `${CONFIG.PROXY_URL}?url=${encodeURIComponent(url)}`;
                             xhr.open('GET', proxiedUrl, true);
@@ -782,7 +785,7 @@ async function fetchFoundGoods() {
         const startDateInput = document.getElementById('start-date');
         const endDateInput = document.getElementById('end-date');
         const categoryInput = document.getElementById('pkupCmdtyLclsfCd');
-        
+
         // 날짜 기본값 설정 (어제 ~ 오늘)
         if (startDateInput && !startDateInput.value) {
             const today = new Date();
@@ -796,10 +799,10 @@ async function fetchFoundGoods() {
         const startDate = (startDateInput?.value || '').replace(/-/g, '');
         const endDate = (endDateInput?.value || '').replace(/-/g, '');
         const category = categoryInput?.value || '';
-        
+
         const countDisplay = document.getElementById('lost-result-count');
         if (countDisplay) countDisplay.innerHTML = '';
-        
+
         grid.innerHTML = '<div class="loading-lost"><p>正在搜索济州实时数据...</p></div>';
 
         const commonParams = [
@@ -886,15 +889,15 @@ let cachedLostItems = [];
 
 function switchLostView(mode) {
     currentLostView = mode;
-    
+
     // 버튼 상태 업데이트
     document.getElementById('btn-view-card').classList.toggle('active', mode === 'card');
     document.getElementById('btn-view-table').classList.toggle('active', mode === 'table');
-    
+
     // 컨테이너 가시성 제어 강화
     const grid = document.getElementById('lost-goods-grid');
     const tableContainer = document.getElementById('lost-goods-table-container');
-    
+
     if (mode === 'card') {
         grid.style.display = 'grid';
         tableContainer.style.display = 'none';
@@ -906,7 +909,7 @@ function switchLostView(mode) {
         grid.classList.remove('active');
         tableContainer.classList.add('active');
     }
-    
+
     // 캐시된 데이터가 있으면 즉시 렌더링, 없으면 새로 페치
     if (cachedLostItems.length > 0) {
         if (mode === 'card') {
@@ -953,10 +956,10 @@ function renderLostGoods(grid, items) {
     grid.innerHTML = items.map((item, index) => `
         <div class="lost-card gallery-item" onclick="openLostDetailModalByIndex(${index})">
             <div class="lost-img-box">
-                ${item.img ? 
-                    `<img src="${item.img}" alt="${item.name}" onerror="this.src='https://via.placeholder.com/300?text=No+Image'">` : 
-                    `<div class="no-lost-img">📦</div>`
-                }
+                ${item.img ?
+            `<img src="${item.img}" alt="${item.name}" onerror="this.src='https://via.placeholder.com/300?text=No+Image'">` :
+            `<div class="no-lost-img">📦</div>`
+        }
                 <div class="lost-category-badge-overlay">${item.category}</div>
             </div>
         </div>
@@ -973,13 +976,13 @@ function openLostDetailModalByIndex(index) {
 
     const modal = document.getElementById('lost-detail-modal');
     const body = document.getElementById('lost-modal-body');
-    
+
     body.innerHTML = `
         <div class="lost-modal-img-container">
-            ${item.img ? 
-                `<img src="${item.img}" class="lost-modal-img" onerror="this.src='https://via.placeholder.com/500?text=No+Image'">` : 
-                `<div class="lost-modal-no-img">📦</div>`
-            }
+            ${item.img ?
+            `<img src="${item.img}" class="lost-modal-img" onerror="this.src='https://via.placeholder.com/500?text=No+Image'">` :
+            `<div class="lost-modal-no-img">📦</div>`
+        }
         </div>
         <div class="lost-modal-info">
             <div class="lost-modal-header">
@@ -1032,7 +1035,7 @@ async function fetchWeatherAlerts() {
 
         const res = await fetch(url);
         if (!res.ok) throw new Error('Alert API failed');
-        
+
         const data = await res.json();
         const items = data?.response?.body?.items?.item;
 
@@ -1054,6 +1057,10 @@ async function fetchWeatherAlerts() {
         }
     } catch (e) {
         console.error('Weather alert fetch error:', e);
+        // 403 오류 등 권한 문제 시 사용자에게 안내 메시지 표시 가능 (선택 사항)
+        if (e.message.includes('403') || String(e).includes('403')) {
+            console.warn('기상특보 API 접근 권한이 없습니다. 공공데이터포털에서 활용 신청 승인 여부를 확인하세요.');
+        }
         alertsContainer.style.display = 'none';
     }
 }
@@ -1064,17 +1071,17 @@ async function fetchWeatherAlerts() {
 async function fetchFestivals() {
     const listContainer = document.getElementById('festival-list');
     if (!listContainer) return;
-    
+
     try {
         listContainer.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">正在获取并加载济주活动...</div>';
-        
+
         // Visit Jeju API 전용 타겟 URL (축제/행사 카테고리 c5)
         const targetUrl = `https://api.visitjeju.net/vsjApi/contents/searchList?apiKey=${CONFIG.VISIT_JEJU_KEY}&locale=kr&category=c5`;
         const url = CONFIG.PROXY_URL + '?url=' + encodeURIComponent(targetUrl);
-        
+
         const res = await fetch(url);
         if (!res.ok) throw new Error('API request failed');
-        
+
         const data = await res.json();
         if (!data || !data.items || data.items.length === 0) {
             listContainer.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">暂无近期节日活动信息</div>';
@@ -1085,7 +1092,7 @@ async function fetchFestivals() {
             const title = item.title || '无题活动';
             const imgUrl = item.repPhoto?.photoid?.thumbnailpath || 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=400';
             const place = item.address || '济州岛全域';
-            
+
             // 태그 정보에서 날짜 추출 시도 (vsjApi는 상세 날짜 필드가 제한적일 수 있음)
             const tagStr = item.tag || '';
             const dateMatch = tagStr.match(/(\d{4}\.\d{2}\.\d{2})/g);
@@ -1106,7 +1113,7 @@ async function fetchFestivals() {
                     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                     statusLabel = `<i class="tag ing">D-${diffDays}</i>`;
                 }
-                
+
                 if (dateMatch.length >= 2) {
                     dateDisplay = `${dateMatch[0]} ~ ${dateMatch[1]}`;
                 }
@@ -1126,7 +1133,7 @@ async function fetchFestivals() {
                 </div>
             `;
         }).join('');
-        
+
     } catch (e) {
         console.error('Festival API Error:', e);
         listContainer.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">活动加载失败，请重试</div>';
@@ -1157,7 +1164,7 @@ function showSection(sectionId) {
     } else {
         // 기능 섹션 내에는 자체 app-bar가 있으므로 메인 홈 바는 숨김
         if (mainAppBar) mainAppBar.style.display = 'none';
-        
+
         // 특정 섹션에 진입했을 때 데이터가 로드되지 않았다면 새로고침 등 추가 로직 가능
         // (현재는 로드 시 전체 로드하므로 추가 조치 불필요)
         if (sectionId === 'cctv') initCCTV();
