@@ -111,6 +111,7 @@ body {
     background: var(--primary-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    background-clip: text;
     pointer-events: none; /* 뒤에 있는 요소 클릭 허용 */
 }
 
@@ -145,6 +146,19 @@ body {
     gap: 16px;
     max-width: 500px;
     margin: 0 auto;
+}
+
+.lost-result-count {
+    margin: -10px 0 15px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    text-align: right;
+    font-weight: 500;
+}
+
+.lost-result-count strong {
+    color: var(--accent-blue);
+    font-weight: 800;
 }
 
 .home-item {
@@ -578,8 +592,8 @@ body {
     padding: 0;
     overflow: hidden;
     aspect-ratio: 1 / 1;
-    border-radius: 8px;
-    background: #f1f5f9;
+    border-radius: 12px;
+    background: white;
 }
 
 .lost-card.image-only .lost-img-box {
@@ -593,6 +607,19 @@ body {
     object-fit: cover;
 }
 
+.lost-category-badge-overlay {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--primary-gradient);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
 .no-lost-img {
     width: 100%;
     height: 100%;
@@ -600,7 +627,8 @@ body {
     align-items: center;
     justify-content: center;
     font-size: 2rem;
-    background: #e2e8f0;
+    background: #f1f5f9;
+    color: #cbd5e1;
 }
 
 .lost-category-badge {
@@ -654,27 +682,29 @@ body {
 
 .view-toggle-container {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     background: #f1f5f9;
-    padding: 5px;
-    border-radius: 12px;
-    width: fit-content;
-    align-self: flex-end;
+    padding: 6px;
+    border-radius: 14px;
+    width: 100%; /* 너비 100%로 설정 */
+    margin-top: 10px;
 }
 
 .view-toggle-btn {
+    flex: 1; /* 5:5 비율을 위해 동일한 비중 할당 */
     border: none;
     background: transparent;
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-size: 0.85rem;
-    font-weight: 600;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 700;
     color: var(--text-secondary);
     cursor: pointer;
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
-    gap: 6px;
+    justify-content: center;
+    gap: 8px;
 }
 
 .view-toggle-btn.active {
@@ -682,23 +712,159 @@ body {
     color: var(--accent-blue);
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
+/* ==================== CCTV ==================== */
+.cctv-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-top: 10px;
+}
+
+.cctv-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease;
+    cursor: pointer;
+    border: 1px solid var(--border-light);
+}
+
+.cctv-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+}
+
+.cctv-video-container {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: #000;
+}
+
+.cctv-video-el {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cctv-tag {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: #ff2442;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.cctv-tag::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: white;
+    border-radius: 50%;
+    animation: flash 1s infinite;
+}
+
+@keyframes flash {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+.cctv-info {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.cctv-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.cctv-name-cn {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
 
 .lost-goods-grid {
     display: none;
-    grid-template-columns: repeat(3, 1fr); /* 기본 3열 설정 */
-    gap: 8px;
+    grid-template-columns: repeat(3, 1fr); /* 3열 고정 */
+    gap: 10px;
+    margin-top: 20px;
 }
 
-.lost-goods-grid.active, .lost-table-container.active {
-    display: grid;
+.lost-card.gallery-item {
+    aspect-ratio: 1 / 1;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #f1f5f9;
+    position: relative;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.lost-card.gallery-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+
+.lost-card.gallery-item .lost-img-box {
+    width: 100%;
+    height: 100%;
+}
+
+.lost-card.gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.no-lost-img {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    background: #e2e8f0;
+    color: #94a3b8;
+}
+
+.lost-category-badge-overlay {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    pointer-events: none;
+}
+
+.lost-goods-grid.active {
+    display: grid !important;
 }
 
 .lost-table-container.active {
-    display: block;
+    display: block !important;
 }
 
 /* Excel Style Table */
 .lost-table-container {
+    display: none; /* 기본 숨김 */
     width: 100%;
     overflow-x: auto;
     background: white;
@@ -904,10 +1070,68 @@ body {
 .xhs-qr-box img { width: 100%; height: 100%; object-fit: contain; }
 
 /* ==================== Modal ==================== */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; align-items: center; justify-content: center; }
-.modal-content { background: #000; border-radius: var(--radius-lg); width: 90%; max-width: 900px; position: relative; padding: 20px; }
-.modal-close { position: absolute; top: 10px; right: 14px; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; z-index: 1; }
-#modal-body video, #modal-body iframe { width: 100%; aspect-ratio: 16/9; border-radius: var(--radius-md); }
+.modal-overlay { 
+    position: fixed; 
+    inset: 0; 
+    background: rgba(0,0,0,0.6); 
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 9999; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-content { 
+    background: #000; 
+    border-radius: var(--radius-xl); 
+    width: 95%; 
+    max-width: 1000px; 
+    position: relative; 
+    padding: 2px; /* 비디오가 꽉 차게 */
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    animation: modalScaleUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+@keyframes modalScaleUp {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.modal-close { 
+    position: absolute; 
+    top: 15px; 
+    right: 15px; 
+    background: rgba(255,255,255,0.2); 
+    backdrop-filter: blur(4px);
+    border: none; 
+    color: white; 
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 1.2rem; 
+    cursor: pointer; 
+    z-index: 10; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.modal-close:hover {
+    background: rgba(255,255,255,0.3);
+    transform: rotate(90deg);
+}
+
+#modal-body video, #modal-body iframe { 
+    width: 100%; 
+    aspect-ratio: 16/9; 
+    border-radius: var(--radius-lg); 
+    display: block;
+}
 
 /* ==================== Responsive ==================== */
 @media (max-width: 1024px) { .container { padding: var(--spacing-md); } }
@@ -945,3 +1169,225 @@ body {
     .trails-grid { grid-template-columns: 1fr 1fr; }
 }
 
+/* ==================== Lost Detail Modal Styles ==================== */
+.lost-detail-content {
+    max-width: 500px;
+    padding: 0;
+    overflow: hidden;
+    background: #fff;
+    border-radius: 24px;
+}
+
+.lost-modal-body {
+    display: flex;
+    flex-direction: column;
+}
+
+.lost-modal-img-container {
+    width: 100%;
+    aspect-ratio: 1/1;
+    background: #f1f5f9;
+    position: relative;
+    overflow: hidden;
+}
+
+.lost-modal-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.lost-modal-no-img {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 5rem;
+    color: #cbd5e1;
+}
+
+.lost-modal-info {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.lost-modal-header {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.lost-modal-category {
+    font-size: 0.8rem;
+    color: var(--accent-blue);
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.lost-modal-title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1.3;
+}
+
+.lost-modal-details {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: #f8fafc;
+    padding: 16px;
+    border-radius: 16px;
+}
+
+.lost-modal-field {
+    display: flex;
+    gap: 12px;
+    font-size: 0.95rem;
+}
+
+.lost-modal-label {
+    color: var(--text-muted);
+    font-weight: 600;
+    min-width: 70px;
+}
+
+.lost-modal-value {
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+.lost-modal-footer {
+    padding: 20px 24px 24px;
+    display: flex;
+    gap: 12px;
+}
+
+.lost-modal-btn {
+    flex: 1;
+    padding: 14px;
+    border-radius: 14px;
+    font-weight: 800;
+    text-align: center;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.lost-modal-btn.primary {
+    background: var(--primary-gradient);
+    color: white;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+.lost-modal-btn.secondary {
+    background: #f1f5f9;
+    color: var(--text-secondary);
+}
+
+.lost-modal-btn:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+}
+
+
+/* ==================== Festival & Events (축제) ==================== */
+.festival-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+    margin-top: 20px;
+}
+
+.festival-card {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 1px solid var(--border-light);
+    display: flex;
+    flex-direction: column;
+}
+
+.festival-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+}
+
+.festival-card .image {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4/3;
+    overflow: hidden;
+    margin: 0;
+}
+
+.festival-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.festival-card:hover .festival-img {
+    transform: scale(1.1);
+}
+
+.tag.ing {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    background: #ff2442;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    font-style: normal;
+    box-shadow: 0 4px 10px rgba(255, 36, 66, 0.3);
+    z-index: 5;
+}
+
+.festival-info {
+    padding: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.festival-date {
+    font-size: 0.85rem;
+    color: var(--accent-blue);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.festival-title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    height: 3.2rem;
+}
+
+.festival-place {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

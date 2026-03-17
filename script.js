@@ -66,6 +66,25 @@ const CONFIG = {
 // CCTV 초기화
 // ============================================================
 function initCCTV() {
+    const grid = document.getElementById('cctv-grid');
+    if (!grid) return;
+
+    grid.innerHTML = CONFIG.CCTV.map(cam => `
+        <div class="cctv-card" onclick="openCctvModalById('${cam.id}')">
+            <div class="cctv-video-container">
+                ${cam.type === 'hls' ? 
+                    `<video id="video-${cam.id}" class="cctv-video-el" muted playsinline></video>` :
+                    `<div id="yt-${cam.id}" class="cctv-video-el"></div>`
+                }
+                <div class="cctv-tag">LIVE</div>
+            </div>
+            <div class="cctv-info">
+                <span class="cctv-name">${cam.nameKo}</span>
+                <span class="cctv-name-cn">${cam.nameCn}</span>
+            </div>
+        </div>
+    `).join('');
+
     CONFIG.CCTV.forEach(cam => {
         if (cam.type === 'hls') {
             initHlsPlayer(cam);
@@ -87,8 +106,11 @@ function initHlsPlayer(cam) {
             const hls = new Hls({
                 enableWorker: true,
                 xhrSetup: function(xhr, url) {
-                    // 세그먼트(.ts) 요청도 프록시를 타도록 설정할 수 있으나, 
-                    // 현재는 m3u8만 프록시를 거치도록 설계됨
+                    // Chrome Mixed Content 차단 해결: 모든 HTTP 요청(m3u8, ts)을 HTTPS 프록시로 전달
+                    if (url.startsWith('http://') && !url.includes(CONFIG.PROXY_URL)) {
+                        const proxiedUrl = `${CONFIG.PROXY_URL}?url=${encodeURIComponent(url)}`;
+                        xhr.open('GET', proxiedUrl, true);
+                    }
                 }
             });
             hls.loadSource(proxyUrl);
@@ -302,7 +324,7 @@ function parseAndRenderWeather(locKey, items) {
             }
             
             const s = getSkyInfo(pty, sky);
-            const dateLabel = i === 0 ? '今天' : dayNames[targetD.getDay()];
+            const dateLabel = `${targetD.getMonth() + 1}/${targetD.getDate()}`;
             const precipHtml = precip > 0 ? `<div class="weekly-precip ${precip >= 50 ? 'precip-blue' : ''}">💧${precip}%</div>` : '';
             return `<div class="weekly-item">
                 <div class="weekly-day"><small>${dateLabel}</small></div>
@@ -697,6 +719,11 @@ function renderFlightList(container, items, type) {
     container.innerHTML = htmlMsg;
 }
 
+function openCctvModalById(id) {
+    const cam = CONFIG.CCTV.find(c => c.id === id);
+    if (cam) openCctvModal(cam);
+}
+
 function switchFlightTab(type) {
     document.querySelectorAll('.flight-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.flight-content').forEach(c => c.classList.remove('active'));
@@ -718,8 +745,16 @@ function openCctvModal(cam) {
         setTimeout(() => {
             const v = document.getElementById('modal-video');
             if (v && typeof Hls !== 'undefined' && Hls.isSupported()) {
-                const hls = new Hls();
-                hls.loadSource(cam.url);
+                const hls = new Hls({
+                    xhrSetup: function(xhr, url) {
+                        if (url.startsWith('http://') && !url.includes(CONFIG.PROXY_URL)) {
+                            const proxiedUrl = `${CONFIG.PROXY_URL}?url=${encodeURIComponent(url)}`;
+                            xhr.open('GET', proxiedUrl, true);
+                        }
+                    }
+                });
+                const proxyUrl = `${CONFIG.PROXY_URL}?url=${encodeURIComponent(cam.url)}`;
+                hls.loadSource(proxyUrl);
                 hls.attachMedia(v);
             }
         }, 100);
@@ -748,13 +783,13 @@ async function fetchFoundGoods() {
         const endDateInput = document.getElementById('end-date');
         const categoryInput = document.getElementById('pkupCmdtyLclsfCd');
         
-        // 날짜 기본값 설정 (최근 15일)
+        // 날짜 기본값 설정 (어제 ~ 오늘)
         if (startDateInput && !startDateInput.value) {
             const today = new Date();
-            const lastPeriod = new Date();
-            lastPeriod.setDate(today.getDate() - 15);
+            const yesterday = new Date();
+            yesterday.setDate(today.getDate() - 1);
             const formatDateInput = (d) => d.toISOString().split('T')[0];
-            startDateInput.value = formatDateInput(lastPeriod);
+            startDateInput.value = formatDateInput(yesterday);
             endDateInput.value = formatDateInput(today);
         }
 
@@ -762,52 +797,71 @@ async function fetchFoundGoods() {
         const endDate = (endDateInput?.value || '').replace(/-/g, '');
         const category = categoryInput?.value || '';
         
+        const countDisplay = document.getElementById('lost-result-count');
+        if (countDisplay) countDisplay.innerHTML = '';
+        
         grid.innerHTML = '<div class="loading-lost"><p>正在搜索济州实时数据...</p></div>';
 
-        const serviceName = 'LosfundInfoInqireService';
-        const apiMethod = 'getLosfundInfoAccToClAreaPd';
-        
-        let baseUrl = `http://apis.data.go.kr/1320000/${serviceName}/${apiMethod}`;
-        let queryParams = [
+        const commonParams = [
             `serviceKey=${CONFIG.PUBLIC_DATA_KEY}`,
-            `numOfRows=50`, 
+            `numOfRows=200`,
             `pageNo=1`,
-            `START_YMD=${startDate}`,
-            `END_YMD=${endDate}`,
-            `PRDCT_ASST_LCT_CD=LCR000`, // ★ 제주 지역 코드 (PRDCT_ASST_LCT_CD 사용)
-            `PRDCT_CL_CD_01=${category}`
+            `N_FD_LCT_CD=LCP000`,
+            `START_YMD=${startDate || ''}`,
+            `END_YMD=${endDate || ''}`
         ];
-        
-        const targetUrl = baseUrl + '?' + queryParams.join('&');
-        const url = CONFIG.PROXY_URL + '?url=' + encodeURIComponent(targetUrl);
 
-        console.log(`[FoundGoods] Requesting: ${targetUrl} (Jeju Strictly)`);
+        // 분류(카테고리) 코드가 있으면 추가 (메인 대분류 필터: PRDT_CL_CD_01)
+        if (category) {
+            commonParams.push(`PRDT_CL_CD_01=${category}`);
+        }
 
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`API request failed with status ${res.status}`);
+        // 1. 경찰청 습득물 API (경찰관서 습득물)
+        const polUrl = `http://apis.data.go.kr/1320000/LosfundInfoInqireService/getLosfundInfoAccToClAreaPd?${commonParams.join('&')}`;
+        // 2. 포털기관(공항, 택시, 지하철 등) 습득물 API - 사용자가 제공한 신규 API 적용
+        const portalUrl = `http://apis.data.go.kr/1320000/LosPtfundInfoInqireService/getPtLosfundInfoAccToClAreaPd?${commonParams.join('&')}`;
 
-        const xmlText = await res.text();
-        const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+        console.log(`[FoundGoods] Fetching from Police and Portal...`);
 
-        const items = Array.from(xmlDoc.querySelectorAll('item')).map(node => {
-            const getTag = (tag) => node.querySelector(tag)?.textContent || '';
-            const rawCategory = getTag('prdtClNm') || '';
-            const lctNm = getTag('lctNm') || '';
-            
-            // 데이터 무결성 체크: 다시 한번 제주인지 확인 (lctNm에 제주가 포함된 경우만)
-            if (lctNm && !lctNm.includes('제주')) return null;
+        const fetchResults = async (apiUrl) => {
+            const res = await fetch(CONFIG.PROXY_URL + '?url=' + encodeURIComponent(apiUrl));
+            if (!res.ok) return [];
+            const xmlText = await res.text();
+            const xmlDoc = new DOMParser().parseFromString(xmlText, "text/xml");
+            return Array.from(xmlDoc.querySelectorAll('item')).map(node => {
+                const getTag = (tag) => node.querySelector(tag)?.textContent || '';
+                const rawCategory = getTag('prdtClNm') || '';
+                const fndPlace = getTag('fdFndPlace'); // 상세 습득 장소 (경찰 API)
+                const lctNm = getTag('lctNm');         // 습득 기관명 (경찰 API)
+                const storagePlace = getTag('depPlace'); // 보관 장소 (공히 사용)
 
-            return {
-                id: getTag('atcId'),
-                name: getTag('fdPrdtNm'),
-                place: getTag('depPlace'),
-                date: getTag('fdYmd'),
-                category: rawCategory.split(' > ')[0] || '其他',
-                img: getTag('fdFilePathImg'),
-                lct: lctNm
-            };
-        }).filter(item => item !== null);
+                return {
+                    id: getTag('atcId'),
+                    name: getTag('fdPrdtNm'),
+                    place: storagePlace,
+                    date: getTag('fdYmd'),
+                    category: rawCategory.split(' > ')[0] || '其他',
+                    img: getTag('fdFilePathImg'),
+                    // 습득장소가 비어있으면 보관장소를 대신 표시 (포털기관 데이터 대응)
+                    lct: fndPlace || lctNm || storagePlace || '정보 없음'
+                };
+            });
+        };
+
+        const [polItems, portalItems] = await Promise.all([
+            fetchResults(polUrl),
+            fetchResults(portalUrl)
+        ]);
+
+        const items = [...polItems, ...portalItems].sort((a, b) => b.date.localeCompare(a.date));
+
+        // 데이터 캐싱
+        cachedLostItems = items;
+
+        // 건수 표시
+        if (countDisplay) {
+            countDisplay.innerHTML = `총 <strong>${items.length}</strong>건의 습득물이 조회되었습니다.`;
+        }
 
         // 현재 뷰 모드에 따라 렌더링
         if (currentLostView === 'card') {
@@ -821,8 +875,14 @@ async function fetchFoundGoods() {
     }
 }
 
-// 뷰 모드 상태 변수
+// 수동 검색 함수 (돋보기 버튼 클릭 시)
+function fetchFoundGoodsManual() {
+    fetchFoundGoods();
+}
+
+// 뷰 모드 및 데이터 상태 변수
 let currentLostView = 'card';
+let cachedLostItems = [];
 
 function switchLostView(mode) {
     currentLostView = mode;
@@ -831,12 +891,32 @@ function switchLostView(mode) {
     document.getElementById('btn-view-card').classList.toggle('active', mode === 'card');
     document.getElementById('btn-view-table').classList.toggle('active', mode === 'table');
     
-    // 컨테이너 표시 전환
-    document.getElementById('lost-goods-grid').classList.toggle('active', mode === 'card');
-    document.getElementById('lost-goods-table-container').classList.toggle('active', mode === 'table');
+    // 컨테이너 가시성 제어 강화
+    const grid = document.getElementById('lost-goods-grid');
+    const tableContainer = document.getElementById('lost-goods-table-container');
     
-    // 데이터 다시 페치하여 렌더링 (캐시된 데이터가 없으므로 다시 호출)
-    fetchFoundGoods();
+    if (mode === 'card') {
+        grid.style.display = 'grid';
+        tableContainer.style.display = 'none';
+        grid.classList.add('active');
+        tableContainer.classList.remove('active');
+    } else {
+        grid.style.display = 'none';
+        tableContainer.style.display = 'block';
+        grid.classList.remove('active');
+        tableContainer.classList.add('active');
+    }
+    
+    // 캐시된 데이터가 있으면 즉시 렌더링, 없으면 새로 페치
+    if (cachedLostItems.length > 0) {
+        if (mode === 'card') {
+            renderLostGoods(grid, cachedLostItems);
+        } else {
+            renderLostGoodsTable(cachedLostItems);
+        }
+    } else {
+        fetchFoundGoods();
+    }
 }
 
 function renderLostGoodsTable(items) {
@@ -858,7 +938,7 @@ function renderLostGoodsTable(items) {
             <td><span class="lost-date" style="font-size:0.8rem;">${item.date}</span></td>
             <td style="color:var(--text-secondary);font-size:0.8rem;">${item.place}</td>
             <td>
-                <a href="https://www.lost112.go.kr/find/findDetail.do?ATC_ID=${item.id}" target="_blank" class="lost-table-btn">详细</a>
+                <button onclick="openLostDetailModalByIndex(${items.indexOf(item)})" class="lost-table-btn">详细</button>
             </td>
         </tr>
     `).join('');
@@ -870,13 +950,14 @@ function renderLostGoods(grid, items) {
         return;
     }
 
-    grid.innerHTML = items.map(item => `
-        <div class="lost-card image-only" onclick="window.open('https://www.lost112.go.kr/find/findDetail.do?ATC_ID=${item.id}', '_blank')">
+    grid.innerHTML = items.map((item, index) => `
+        <div class="lost-card gallery-item" onclick="openLostDetailModalByIndex(${index})">
             <div class="lost-img-box">
                 ${item.img ? 
-                    `<img src="${item.img}" alt="${item.name}" onerror="this.src='https://via.placeholder.com/150?text=No+Image'">` : 
+                    `<img src="${item.img}" alt="${item.name}" onerror="this.src='https://via.placeholder.com/300?text=No+Image'">` : 
                     `<div class="no-lost-img">📦</div>`
                 }
+                <div class="lost-category-badge-overlay">${item.category}</div>
             </div>
         </div>
     `).join('');
@@ -884,6 +965,56 @@ function renderLostGoods(grid, items) {
 
 function fetchFoundGoodsManual() {
     fetchFoundGoods();
+}
+
+function openLostDetailModalByIndex(index) {
+    const item = cachedLostItems[index];
+    if (!item) return;
+
+    const modal = document.getElementById('lost-detail-modal');
+    const body = document.getElementById('lost-modal-body');
+    
+    body.innerHTML = `
+        <div class="lost-modal-img-container">
+            ${item.img ? 
+                `<img src="${item.img}" class="lost-modal-img" onerror="this.src='https://via.placeholder.com/500?text=No+Image'">` : 
+                `<div class="lost-modal-no-img">📦</div>`
+            }
+        </div>
+        <div class="lost-modal-info">
+            <div class="lost-modal-header">
+                <span class="lost-modal-category">${item.category}</span>
+                <h2 class="lost-modal-title">${item.name}</h2>
+            </div>
+            <div class="lost-modal-details">
+                <div class="lost-modal-field">
+                    <span class="lost-modal-label">습득일자</span>
+                    <span class="lost-modal-value">${item.date}</span>
+                </div>
+                <div class="lost-modal-field">
+                    <span class="lost-modal-label">습득장소</span>
+                    <span class="lost-modal-value">${item.lct}</span>
+                </div>
+                <div class="lost-modal-field">
+                    <span class="lost-modal-label">보관장소</span>
+                    <span class="lost-modal-value">${item.place}</span>
+                </div>
+            </div>
+            <div class="lost-modal-footer">
+                <button class="lost-modal-btn secondary" onclick="closeLostDetailModal()">닫기</button>
+                <a href="https://www.lost112.go.kr/find/findDetail.do?ATC_ID=${item.id}" target="_blank" class="lost-modal-btn primary">원본 보기</a>
+            </div>
+        </div>
+    `;
+
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeLostDetailModal() {
+    const modal = document.getElementById('lost-detail-modal');
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
 }
 
 // ==================== Weather Alerts (기상특보) ====================
@@ -937,8 +1068,8 @@ async function fetchFestivals() {
     try {
         listContainer.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">正在获取并加载济주活动...</div>';
         
-        // Visit Jeju API 전용 타겟 URL (행사/축제 카테고리 c4)
-        const targetUrl = `https://api.visitjeju.net/vsjApi/contents/searchList?apiKey=${CONFIG.VISIT_JEJU_KEY}&locale=zh&category=c4`;
+        // Visit Jeju API 전용 타겟 URL (축제/행사 카테고리 c5)
+        const targetUrl = `https://api.visitjeju.net/vsjApi/contents/searchList?apiKey=${CONFIG.VISIT_JEJU_KEY}&locale=kr&category=c5`;
         const url = CONFIG.PROXY_URL + '?url=' + encodeURIComponent(targetUrl);
         
         const res = await fetch(url);
@@ -953,14 +1084,42 @@ async function fetchFestivals() {
         listContainer.innerHTML = data.items.slice(0, 15).map(item => {
             const title = item.title || '无题活动';
             const imgUrl = item.repPhoto?.photoid?.thumbnailpath || 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=400';
-            const dateStr = item.tag || '近期举行';
             const place = item.address || '济州岛全域';
+            
+            // 태그 정보에서 날짜 추출 시도 (vsjApi는 상세 날짜 필드가 제한적일 수 있음)
+            const tagStr = item.tag || '';
+            const dateMatch = tagStr.match(/(\d{4}\.\d{2}\.\d{2})/g);
+            let dateDisplay = tagStr || '近期举行';
+            let statusLabel = '';
+
+            // D-Day 및 진행중 계산 (날짜 정보가 태그에 포함된 경우)
+            if (dateMatch && dateMatch.length >= 1) {
+                const startDate = new Date(dateMatch[0].replace(/\./g, '-'));
+                const endDate = dateMatch.length >= 2 ? new Date(dateMatch[1].replace(/\./g, '-')) : startDate;
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                if (today >= startDate && today <= endDate) {
+                    statusLabel = '<i class="tag ing">진행중</i>';
+                } else if (today < startDate) {
+                    const diffTime = startDate - today;
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    statusLabel = `<i class="tag ing">D-${diffDays}</i>`;
+                }
+                
+                if (dateMatch.length >= 2) {
+                    dateDisplay = `${dateMatch[0]} ~ ${dateMatch[1]}`;
+                }
+            }
 
             return `
-                <div class="festival-card" onclick="window.open('https://www.visitjeju.net/u/12A', '_blank')">
-                    <img src="${imgUrl}" class="festival-img" alt="${title}" onerror="this.src='https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=400'">
+                <div class="festival-card" onclick="window.open('https://www.visitjeju.net/kr/detail/view?contentsid=${item.contentsid}', '_blank')">
+                    <p class="image">
+                        <img src="${imgUrl}" class="festival-img" alt="${title}" onerror="this.src='https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=400'">
+                        ${statusLabel}
+                    </p>
                     <div class="festival-info">
-                        <div class="festival-date">📅 ${dateStr}</div>
+                        <div class="festival-date">📅 ${dateDisplay}</div>
                         <h3 class="festival-title">${title}</h3>
                         <div class="festival-place">📍 ${place}</div>
                     </div>
@@ -1030,6 +1189,14 @@ window.addEventListener('load', () => {
 
     // 습득물 초기 로드
     fetchFoundGoods();
+
+    // 카테고리 필터 변경 시 자동 검색 연동
+    const categorySelect = document.getElementById('pkupCmdtyLclsfCd');
+    if (categorySelect) {
+        categorySelect.addEventListener('change', () => {
+            fetchFoundGoods();
+        });
+    }
 
     // 축제 정보 초기 로드
     fetchFestivals();
