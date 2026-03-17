@@ -1005,7 +1005,11 @@ function openLostDetailModalByIndex(index) {
             </div>
             <div class="lost-modal-footer">
                 <button class="lost-modal-btn secondary" onclick="closeLostDetailModal()">닫기</button>
-                <a href="https://www.lost112.go.kr/find/findDetail.do?ATC_ID=${item.id}" target="_blank" class="lost-modal-btn primary">원본 보기</a>
+                <button class="lost-modal-btn primary" onclick="showWechatQR()">문의하기</button>
+            </div>
+            <div id="wechat-qr-container" style="display:none; text-align:center; padding: 15px; border-top: 1px solid #eee;">
+                <p style="font-size: 14px; color: #666; margin-bottom: 10px;">스캔하여 위챗으로 문의해주세요</p>
+                <img src="assets/wechat_qr.png" style="width: 200px; height: 200px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
             </div>
         </div>
     `;
@@ -1018,6 +1022,17 @@ function closeLostDetailModal() {
     const modal = document.getElementById('lost-detail-modal');
     modal.style.display = 'none';
     document.body.style.overflow = 'auto';
+    // QR 컨테이너 초기화
+    const qrContainer = document.getElementById('wechat-qr-container');
+    if (qrContainer) qrContainer.style.display = 'none';
+}
+
+function showWechatQR() {
+    const qrContainer = document.getElementById('wechat-qr-container');
+    if (qrContainer) {
+        qrContainer.style.display = 'block';
+        qrContainer.scrollIntoView({ behavior: 'smooth' });
+    }
 }
 
 // ==================== Weather Alerts (기상특보) ====================
@@ -1075,8 +1090,8 @@ async function fetchFestivals() {
     try {
         listContainer.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">正在获取并加载济주活动...</div>';
 
-        // Visit Jeju API 전용 타겟 URL (축제/행사 카테고리 c5)
-        const targetUrl = `https://api.visitjeju.net/vsjApi/contents/searchList?apiKey=${CONFIG.VISIT_JEJU_KEY}&locale=kr&category=c5`;
+        // Visit Jeju API 전용 타겟 URL (축제/행사 카테고리 c5, 최신 등록순 정렬)
+        const targetUrl = `https://api.visitjeju.net/vsjApi/contents/searchList?apiKey=${CONFIG.VISIT_JEJU_KEY}&locale=kr&category=c5&sorting=regdate+desc`;
         const url = CONFIG.PROXY_URL + '?url=' + encodeURIComponent(targetUrl);
 
         const res = await fetch(url);
