@@ -786,14 +786,14 @@ async function fetchFoundGoods() {
         const endDateInput = document.getElementById('end-date');
         const categoryInput = document.getElementById('pkupCmdtyLclsfCd');
 
-        // 날짜 기본값 설정 (어제 ~ 오늘)
+        // 날짜 기본값 설정 (어제 ~ 어제)
         if (startDateInput && !startDateInput.value) {
-            const today = new Date();
             const yesterday = new Date();
-            yesterday.setDate(today.getDate() - 1);
+            yesterday.setDate(yesterday.getDate() - 1);
             const formatDateInput = (d) => d.toISOString().split('T')[0];
-            startDateInput.value = formatDateInput(yesterday);
-            endDateInput.value = formatDateInput(today);
+            const yymmdd = formatDateInput(yesterday);
+            startDateInput.value = yymmdd;
+            endDateInput.value = yymmdd;
         }
 
         const startDate = (startDateInput?.value || '').replace(/-/g, '');
@@ -993,10 +993,6 @@ function openLostDetailModalByIndex(index) {
                 <div class="lost-modal-field">
                     <span class="lost-modal-label">습득일자</span>
                     <span class="lost-modal-value">${item.date}</span>
-                </div>
-                <div class="lost-modal-field">
-                    <span class="lost-modal-label">습득장소</span>
-                    <span class="lost-modal-value">${item.lct}</span>
                 </div>
                 <div class="lost-modal-field">
                     <span class="lost-modal-label">보관장소</span>

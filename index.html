@@ -214,13 +214,22 @@
                         <div class="filter-row" style="display:flex;gap:10px;">
                             <input type="date" id="start-date" class="date-input" style="flex:1;">
                             <input type="date" id="end-date" class="date-input" style="flex:1;">
+                            <script>
+                                (function() {
+                                    const yesterday = new Date();
+                                    yesterday.setDate(yesterday.getDate() - 1);
+                                    const yyyymmdd = yesterday.toISOString().split('T')[0];
+                                    document.getElementById('start-date').setAttribute('max', yyyymmdd);
+                                    document.getElementById('end-date').setAttribute('max', yyyymmdd);
+                                })();
+                            </script>
                             <button class="search-btn" onclick="fetchFoundGoodsManual()">🔍</button>
                         </div>
                     </div>
                     <div id="lost-result-count" class="lost-result-count"></div>
                     <div class="view-toggle-container">
-                        <button id="btn-view-card" class="view-toggle-btn active" onclick="switchLostView('card')">🎴 卡片模式</button>
-                        <button id="btn-view-table" class="view-toggle-btn" onclick="switchLostView('table')">📊 表格模式</button>
+                        <button id="btn-view-card" class="view-toggle-btn active" onclick="switchLostView('card')">卡片模式</button>
+                        <button id="btn-view-table" class="view-toggle-btn" onclick="switchLostView('table')">表格模式</button>
                     </div>
                 </div>
                 

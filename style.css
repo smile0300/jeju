@@ -1391,3 +1391,24 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+/* ===== Lost & Found Table Optimization ===== */
+.lost-table th, .lost-table td {
+    padding: 12px 10px;
+    white-space: nowrap; /* 줄바꿈 방지 */
+}
+
+.lost-table td {
+    overflow: hidden;
+    text-overflow: ellipsis; 
+    max-width: 200px; /* 적절한 너비 유지 */
+}
+
+#wechat-qr-container {
+    animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
