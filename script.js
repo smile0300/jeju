@@ -759,18 +759,18 @@ async function fetchFoundGoods() {
         let baseUrl = `http://apis.data.go.kr/1320000/${serviceName}/${apiMethod}`;
         let queryParams = [
             `serviceKey=${CONFIG.PUBLIC_DATA_KEY}`,
-            `numOfRows=30`, 
+            `numOfRows=50`, 
             `pageNo=1`,
             `START_YMD=${startDate}`,
             `END_YMD=${endDate}`,
-            `LCT_CD=LCR000`, // 제주 지역 코드 (LCT_CD로 수정 테스트)
+            `PRDCT_ASST_LCT_CD=LCR000`, // ★ 제주 지역 코드 (PRDCT_ASST_LCT_CD 사용)
             `PRDCT_CL_CD_01=${category}`
         ];
         
         const targetUrl = baseUrl + '?' + queryParams.join('&');
         const url = CONFIG.PROXY_URL + '?url=' + encodeURIComponent(targetUrl);
 
-        console.log(`[FoundGoods] Requesting: ${targetUrl}`);
+        console.log(`[FoundGoods] Requesting: ${targetUrl} (Jeju Strictly)`);
 
         const res = await fetch(url);
         if (!res.ok) throw new Error(`API request failed with status ${res.status}`);
@@ -782,21 +782,75 @@ async function fetchFoundGoods() {
         const items = Array.from(xmlDoc.querySelectorAll('item')).map(node => {
             const getTag = (tag) => node.querySelector(tag)?.textContent || '';
             const rawCategory = getTag('prdtClNm') || '';
+            const lctNm = getTag('lctNm') || '';
+            
+            // 데이터 무결성 체크: 다시 한번 제주인지 확인 (lctNm에 제주가 포함된 경우만)
+            if (lctNm && !lctNm.includes('제주')) return null;
+
             return {
                 id: getTag('atcId'),
                 name: getTag('fdPrdtNm'),
                 place: getTag('depPlace'),
                 date: getTag('fdYmd'),
                 category: rawCategory.split(' > ')[0] || '其他',
-                img: getTag('fdFilePathImg') // 이미지 경로 추가
+                img: getTag('fdFilePathImg'),
+                lct: lctNm
             };
-        });
+        }).filter(item => item !== null);
 
-        renderLostGoods(grid, items);
+        // 현재 뷰 모드에 따라 렌더링
+        if (currentLostView === 'card') {
+            renderLostGoods(grid, items);
+        } else {
+            renderLostGoodsTable(items);
+        }
     } catch (e) {
         console.error('습득물 API 오류:', e);
         grid.innerHTML = '<div class="loading-lost">无法加载实时 데이터，请稍后再试</div>';
     }
+}
+
+// 뷰 모드 상태 변수
+let currentLostView = 'card';
+
+function switchLostView(mode) {
+    currentLostView = mode;
+    
+    // 버튼 상태 업데이트
+    document.getElementById('btn-view-card').classList.toggle('active', mode === 'card');
+    document.getElementById('btn-view-table').classList.toggle('active', mode === 'table');
+    
+    // 컨테이너 표시 전환
+    document.getElementById('lost-goods-grid').classList.toggle('active', mode === 'card');
+    document.getElementById('lost-goods-table-container').classList.toggle('active', mode === 'table');
+    
+    // 데이터 다시 페치하여 렌더링 (캐시된 데이터가 없으므로 다시 호출)
+    fetchFoundGoods();
+}
+
+function renderLostGoodsTable(items) {
+    const tableBody = document.getElementById('lost-table-body');
+    if (!tableBody) return;
+
+    if (!items || items.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;">该期间内暂无相关记录</td></tr>';
+        return;
+    }
+
+    tableBody.innerHTML = items.map(item => `
+        <tr>
+            <td>
+                ${item.img ? `<img src="${item.img}" class="lost-table-img" onerror="this.src='https://via.placeholder.com/40'">` : '<div class="lost-table-img" style="display:flex;align-items:center;justify-content:center;font-size:1rem;">📦</div>'}
+            </td>
+            <td><span class="lost-category-badge" style="font-size:0.7rem;padding:2px 8px;">${item.category}</span></td>
+            <td style="font-weight:600;">${item.name}</td>
+            <td><span class="lost-date" style="font-size:0.8rem;">${item.date}</span></td>
+            <td style="color:var(--text-secondary);font-size:0.8rem;">${item.place}</td>
+            <td>
+                <a href="https://www.lost112.go.kr/find/findDetail.do?ATC_ID=${item.id}" target="_blank" class="lost-table-btn">详细</a>
+            </td>
+        </tr>
+    `).join('');
 }
 
 function renderLostGoods(grid, items) {

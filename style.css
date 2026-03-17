@@ -591,6 +591,115 @@ body {
     color: var(--text-secondary);
 }
 
+.lost-header-row {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.view-toggle-container {
+    display: flex;
+    gap: 10px;
+    background: #f1f5f9;
+    padding: 5px;
+    border-radius: 12px;
+    width: fit-content;
+    align-self: flex-end;
+}
+
+.view-toggle-btn {
+    border: none;
+    background: transparent;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.view-toggle-btn.active {
+    background: white;
+    color: var(--accent-blue);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.lost-goods-grid, .lost-table-container {
+    display: none;
+}
+
+.lost-goods-grid.active, .lost-table-container.active {
+    display: block;
+}
+
+/* Excel Style Table */
+.lost-table-container {
+    width: 100%;
+    overflow-x: auto;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border: 1px solid var(--border-light);
+}
+
+.lost-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+}
+
+.lost-table th {
+    background: #f8fafc;
+    color: var(--text-secondary);
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 2px solid #e2e8f0;
+    white-space: nowrap;
+}
+
+.lost-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    vertical-align: middle;
+}
+
+.lost-table tr:hover {
+    background: #fcfdfe;
+}
+
+.lost-table-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    object-fit: cover;
+    background: #f1f5f9;
+}
+
+.lost-table-btn {
+    padding: 6px 12px;
+    background: #f1f5f9;
+    color: var(--accent-blue);
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.lost-table-btn:hover {
+    background: var(--accent-blue);
+    color: white;
+}
+
 .lost-date {
     background: rgba(37, 99, 235, 0.1);
     color: var(--accent-blue);
