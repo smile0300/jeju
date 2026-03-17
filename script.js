@@ -79,35 +79,46 @@ function initHlsPlayer(cam) {
     const videoEl = document.getElementById(`video-${cam.id}`);
     if (!videoEl) return;
 
-    function tryDirect() {
-        if (typeof Hls === 'undefined') return tryProxy();
-        if (!Hls.isSupported()) {
-            if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
-                videoEl.src = cam.url;
-            } else {
-                tryProxy();
-            }
-            return;
-        }
-        const hls = new Hls({ enableWorker: true, lowLatencyMode: true });
-        hls.on(Hls.Events.ERROR, (e, data) => {
-            if (data.fatal) tryProxy();
-        });
-        hls.loadSource(cam.url);
-        hls.attachMedia(videoEl);
-        videoEl.play().catch(() => { });
-    }
-
-    function tryProxy() {
-        if (!CONFIG.PROXY_URL) return;
+    // CORS 우회 및 HLS 재생 로직 강화
+    function tryProxyFirst() {
         const proxyUrl = `${CONFIG.PROXY_URL}?url=${encodeURIComponent(cam.url)}`;
-        const hls2 = new Hls();
-        hls2.loadSource(proxyUrl);
-        hls2.attachMedia(videoEl);
-        videoEl.play().catch(() => { });
+        
+        if (typeof Hls !== 'undefined' && Hls.isSupported()) {
+            const hls = new Hls({
+                enableWorker: true,
+                xhrSetup: function(xhr, url) {
+                    // 세그먼트(.ts) 요청도 프록시를 타도록 설정할 수 있으나, 
+                    // 현재는 m3u8만 프록시를 거치도록 설계됨
+                }
+            });
+            hls.loadSource(proxyUrl);
+            hls.attachMedia(videoEl);
+            hls.on(Hls.Events.ERROR, (event, data) => {
+                if (data.fatal) {
+                    console.warn(`[CCTV] Proxy failed for ${cam.id}, trying direct...`);
+                    tryDirect();
+                }
+            });
+            videoEl.play().catch(() => {});
+        } else if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
+            // iOS Safari 대응
+            videoEl.src = proxyUrl;
+        }
     }
 
-    tryDirect();
+    function tryDirect() {
+        if (typeof Hls !== 'undefined' && Hls.isSupported()) {
+            const hls = new Hls();
+            hls.loadSource(cam.url);
+            hls.attachMedia(videoEl);
+            videoEl.play().catch(() => {});
+        } else if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
+            videoEl.src = cam.url;
+        }
+    }
+
+    // 기본적으로 프록시를 먼저 시도 (CORS 방지)
+    tryProxyFirst();
 }
 
 function initYoutubeEmbed(cam) {
@@ -860,20 +871,12 @@ function renderLostGoods(grid, items) {
     }
 
     grid.innerHTML = items.map(item => `
-        <div class="lost-card">
-            ${item.img ? `<div class="lost-img-box"><img src="${item.img}" alt="${item.name}" onerror="this.style.display='none'"></div>` : ''}
-            <div class="lost-info">
-                <div class="lost-category-badge">${item.category}</div>
-                <h3 class="lost-title" title="${item.name}">${item.name}</h3>
-                <div class="lost-meta">
-                    <div class="lost-meta-item">
-                        <span class="lost-date">📅 ${item.date}</span>
-                    </div>
-                    <div class="lost-meta-item">
-                        <span class="lost-place" title="${item.place}">📍 ${item.place}</span>
-                    </div>
-                </div>
-                <a href="https://www.lost112.go.kr/find/findDetail.do?ATC_ID=${item.id}" target="_blank" class="lost-link-btn">查看详情</a>
+        <div class="lost-card image-only" onclick="window.open('https://www.lost112.go.kr/find/findDetail.do?ATC_ID=${item.id}', '_blank')">
+            <div class="lost-img-box">
+                ${item.img ? 
+                    `<img src="${item.img}" alt="${item.name}" onerror="this.src='https://via.placeholder.com/150?text=No+Image'">` : 
+                    `<div class="no-lost-img">📦</div>`
+                }
             </div>
         </div>
     `).join('');
@@ -885,25 +888,41 @@ function fetchFoundGoodsManual() {
 
 // ==================== Weather Alerts (기상특보) ====================
 // (Mock data for now, as real API is complex)
-function fetchWeatherAlerts() {
+async function fetchWeatherAlerts() {
     const alertsContainer = document.getElementById('weather-alerts-container');
     if (!alertsContainer) return;
 
-    const mockAlerts = [
-        // { type: '大风', message: '济州岛全境大风预警', icon: '🌬️' },
-        // { type: '寒潮', message: '汉拿山地区寒潮预警', icon: '🥶' }
-    ];
+    if (!CONFIG.PUBLIC_DATA_KEY) return;
 
-    if (mockAlerts.length > 0) {
-        alertsContainer.style.display = 'flex';
-        alertsContainer.innerHTML = mockAlerts.map(alert => `
-            <div class="weather-alert-card">
-                <span>${alert.icon}</span>
-                <span style="font-weight: 700;">[${alert.type}]</span> 
-                <span>${alert.message}</span>
-            </div>
-        `).join('');
-    } else {
+    try {
+        // 기상청 기상특보 조회 서비스 (stnId=184 는 제주)
+        const targetUrl = `https://apis.data.go.kr/1360000/WthrWrnInfoService/getWthrWrnMsg?serviceKey=${encodeURIComponent(CONFIG.PUBLIC_DATA_KEY)}&numOfRows=10&pageNo=1&dataType=JSON&stnId=184`;
+        const url = CONFIG.PROXY_URL + '?url=' + encodeURIComponent(targetUrl);
+
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('Alert API failed');
+        
+        const data = await res.json();
+        const items = data?.response?.body?.items?.item;
+
+        if (items && items.length > 0) {
+            alertsContainer.style.display = 'flex';
+            // "제주" 가 포함된 특보만 필터링하거나 전체 노출
+            alertsContainer.innerHTML = items.map(item => {
+                // t6: 특보 내용, t1: 발효 시각 등 (API 버전에 따라 다를 수 있음)
+                const title = item.title || '기상 특보';
+                return `
+                    <div class="weather-alert-card">
+                        <div class="alert-type-badge">제주특보</div>
+                        <div class="alert-msg">🚨 ${title}</div>
+                    </div>
+                `;
+            }).join('');
+        } else {
+            alertsContainer.style.display = 'none';
+        }
+    } catch (e) {
+        console.error('Weather alert fetch error:', e);
         alertsContainer.style.display = 'none';
     }
 }
@@ -1014,6 +1033,9 @@ window.addEventListener('load', () => {
 
     // 축제 정보 초기 로드
     fetchFestivals();
+
+    // 기상 특보 초기 로드
+    fetchWeatherAlerts();
 
     // 초기 화면 설정 (홈)
     showSection('home');
