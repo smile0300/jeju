@@ -824,8 +824,13 @@ async function fetchFoundGoods() {
 
         grid.innerHTML = '<div class="loading-lost"><p>正在搜索济州实时数据...</p></div>';
 
-        const polEndpoint = `http://apis.data.go.kr/1320000/LosfundInfoInqireService/getLosfundInfoAccToClAreaPd`;
-        const portalEndpoint = `http://apis.data.go.kr/1320000/LosPtfundInfoInqireService/getPtLosfundInfoAccToClAreaPd`;
+        const commonParams = [
+            `numOfRows=200`,
+            `pageNo=1`,
+            `N_FD_LCT_CD=LCP000`,
+            `fdYmd=${selectedDate}`
+        ];
+        if (category) commonParams.push(`PRDT_CL_CD_01=${category}`);
 
         const polUrl = `${CONFIG.PROXY_URL}/api/public-data?endpoint=${encodeURIComponent(polEndpoint)}&${commonParams.join('&')}`;
         const portalUrl = `${CONFIG.PROXY_URL}/api/public-data?endpoint=${encodeURIComponent(portalEndpoint)}&${commonParams.join('&')}`;
@@ -1044,8 +1049,8 @@ async function fetchWeatherAlerts() {
 
     try {
         // 기상청 기상특보 조회 서비스 (stnId=184 는 제주)
-        const targetUrl = `https://apis.data.go.kr/1360000/WthrWrnInfoService/getWthrWrnMsg?serviceKey=${encodeURIComponent(CONFIG.PUBLIC_DATA_KEY)}&numOfRows=10&pageNo=1&dataType=JSON&stnId=184`;
-        const url = CONFIG.PROXY_URL + '?url=' + encodeURIComponent(targetUrl);
+        const targetUrl = `https://apis.data.go.kr/1360000/WthrWrnInfoService/getWthrWrnMsg?numOfRows=10&pageNo=1&dataType=JSON&stnId=184`;
+        const url = `${CONFIG.PROXY_URL}/api/public-data?endpoint=${encodeURIComponent(targetUrl)}`;
 
         const res = await fetch(url);
         if (!res.ok) throw new Error('Alert API failed');
@@ -1107,11 +1112,13 @@ async function fetchFestivals() {
     try {
         listContainer.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">正在获取并加载济州活动...</div>';
 
-        // 1. 기본 최신 등록순 목록 (워커를 통해 키 숨김)
-        const baseUrl = `${CONFIG.PROXY_URL}/api/visitjeju?locale=kr&category=c5&sorting=regdate+desc&pageSize=50`;
+        // 1. 기본 최신 등록순 목록
+        const baseEndpoint = `https://api.visitjeju.net/vsjApi/contents/searchList?locale=kr&category=c5&sorting=regdate+desc&pageSize=50`;
+        const baseUrl = `${CONFIG.PROXY_URL}/api/public-data?endpoint=${encodeURIComponent(baseEndpoint)}`;
 
-        // 2. 2026 키워드 검색 목록 (워커를 통해 키 숨김)
-        const searchUrl = `${CONFIG.PROXY_URL}/api/visitjeju?locale=kr&category=c5&title=2026&pageSize=50`;
+        // 2. 2026 키워드 검색 목록
+        const searchEndpoint = `https://api.visitjeju.net/vsjApi/contents/searchList?locale=kr&category=c5&title=2026&pageSize=50`;
+        const searchUrl = `${CONFIG.PROXY_URL}/api/public-data?endpoint=${encodeURIComponent(searchEndpoint)}`;
 
         const [resBase, resSearch] = await Promise.all([
             fetch(baseUrl),
