@@ -179,6 +179,10 @@ function formatBaseTime(date) {
 }
 
 async function fetchWeatherData(locKey) {
+    const loc = CONFIG.WEATHER_LOCATIONS[locKey];
+    if (!loc) return;
+
+    const { baseDate, baseTime } = formatBaseTime(new Date());
     const endpoint = 'https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst';
     const workerUrl = `${CONFIG.PROXY_URL}/api/public-data?endpoint=${encodeURIComponent(endpoint)}&pageNo=1&numOfRows=1000&dataType=JSON&base_date=${baseDate}&base_time=${baseTime}&nx=${loc.nx}&ny=${loc.ny}`;
 
