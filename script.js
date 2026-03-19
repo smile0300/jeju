@@ -798,11 +798,6 @@ async function fetchFoundGoods() {
     const grid = document.getElementById('lost-goods-grid');
     if (!grid) return;
 
-    if (!CONFIG.PUBLIC_DATA_KEY) {
-        grid.innerHTML = '<div class="loading-lost">未设置 API Key</div>';
-        return;
-    }
-
     try {
         const startDateInput = document.getElementById('start-date');
         const endDateInput = document.getElementById('end-date');
@@ -1044,8 +1039,6 @@ function showWechatQR() {
 async function fetchWeatherAlerts() {
     const alertsContainer = document.getElementById('weather-alerts-container');
     if (!alertsContainer) return;
-
-    if (!CONFIG.PUBLIC_DATA_KEY) return;
 
     try {
         // 기상청 기상특보 조회 서비스 (stnId=184 는 제주)
