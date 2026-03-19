@@ -718,8 +718,8 @@ function renderFlightList(container, items, type) {
         return;
     }
 
-    // 동적 헤더 생성 (타입에 따른 '출발지' vs '목적지' 확실히 구분)
-    const destHeader = type === '\u0061\u0072\u0072\u0069\u0076\u0065' ? '\u51fa\u53d1\u5730' : '\u76ee\u7684\u5730';
+    // 동적 헤더 생성 (타입 구분 강화: 'arrive' vs 'depart')
+    const destHeader = type.toLowerCase().trim().includes('depart') ? '\u76ee\u7684\u5730' : '\u51fa\u53d1\u5730';
     let htmlMsg = `<div class="flight-row flight-header">
         <div class="flight-col">航班号</div>
         <div class="flight-col">航空公司</div>
@@ -879,9 +879,9 @@ async function fetchFoundGoods() {
             fetchResults(portalUrl)
         ]);
 
-        // 1. 합치고 2. 날짜별 내림차순 3. 사용자 선택 날짜와 정확히 일치하는것만 최종 필터링
+        // 1. 합치고 2. 날짜별 내림차순 3. 사용자 선택 날짜와 정확히 일치하는것만 최종 필터링 (하이픈 제거 후 비교)
         const items = [...polItems, ...portalItems]
-            .filter(item => item.date === selectedDate)
+            .filter(item => (item.date || '').replace(/-/g, '') === selectedDate)
             .sort((a, b) => b.date.localeCompare(a.date));
 
         // 데이터 캐싱
@@ -1385,8 +1385,8 @@ async function submitFeatureRequest() {
             headers: { 'Content-Type': 'text/plain' },
             body: JSON.stringify({
                 content: content,
-                // KST (Asia/Seoul) 시간으로 전송
-                timestamp: new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }),
+                // KST 시간 (YYYY-MM-DD HH:mm:ss 형식)
+                timestamp: new Date(new Date().getTime() + 9 * 60 * 60 * 1000).toISOString().replace('T', ' ').slice(0, 19),
                 userAgent: navigator.userAgent
             })
         });
