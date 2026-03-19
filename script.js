@@ -1267,7 +1267,13 @@ function showSection(sectionId) {
         if (sectionId === 'cctv') initCCTV();
         if (sectionId === 'weather') Object.keys(CONFIG.WEATHER_LOCATIONS).forEach(loc => fetchWeatherData(loc));
         if (sectionId === 'hallasan') fetchHallasanStatus();
-        if (sectionId === 'airport') fetchFlights('arrive');
+        if (sectionId === 'airport') {
+            const arriveData = document.getElementById('arrive-data');
+            // 데이터가 비어있을 때만 초기 로드
+            if (arriveData && !arriveData.innerHTML.includes('flight-row')) {
+                fetchFlights('arrive');
+            }
+        }
         if (sectionId === 'lost-found') fetchFoundGoods();
         if (sectionId === 'festival') fetchFestivals();
     }
