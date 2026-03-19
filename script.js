@@ -716,15 +716,15 @@ function renderFlightList(container, items, type) {
         updateEl.textContent = `🕐 更新时间: ${now.getFullYear()}.${pad(now.getMonth() + 1)}.${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
     }
 
-    // 동적 헤더 생성 (v3.0: 가장 단순하고 확실한 체크)
-    const isDepart = (type === 'depart');
-    const destHeader = isDepart ? '\u76ee\u7684\u5730' : '\u51fa\u53d1\u5730';
-    console.log(`[Flight v3.0] type: ${type}, isDepart: ${isDepart}, destHeader: ${destHeader}`);
+    // 동적 헤더 생성 (v3.2: 더욱 직관적인 판별)
+    const isArrivalTab = (type === 'arrive');
+    const headerText = isArrivalTab ? '出发地' : '目的地';
+    console.log(`[Flight v3.2] type: ${type}, isArrival: ${isArrivalTab}, header: ${headerText}`);
 
     let htmlMsg = `<div class="flight-row flight-header">
         <div class="flight-col">航班号</div>
         <div class="flight-col">航空公司</div>
-        <div class="flight-col">${destHeader}</div>
+        <div class="flight-col">${headerText}</div>
         <div class="flight-col">预定/实际</div>
         <div class="flight-col">状态</div>
     </div>`;
@@ -1391,10 +1391,10 @@ async function submitFeatureRequest() {
         statusEl.textContent = '正在连接...';
 
         // Cloudflare Worker를 통해 안전하게 전송
-        await fetch(WORKER_URL, {
+        const response = await fetch(WORKER_URL, {
             method: 'POST',
-            mode: 'no-cors', // Worker에서 CORS를 핸들링하므로 안전함
-            headers: { 'Content-Type': 'text/plain' },
+            // mode: 'no-cors' 제거 (Worker에서 CORS를 처리하므로 응답 확인 가능하게 변경)
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 content: content,
                 // KST 시간 (YYYY-MM-DD HH:mm:ss 형식)
@@ -1403,9 +1403,12 @@ async function submitFeatureRequest() {
             })
         });
 
-        // no-cors 모드에서는 응답을 읽을 수 없으므로 전송 시도 후 성공으로 간주합니다.
-        statusEl.style.color = '#059669';
-        statusEl.textContent = '✅ 提交成功！谢谢您的建议。';
+        if (response.ok) {
+            statusEl.style.color = '#059669';
+            statusEl.textContent = '✅ 提交成功！谢谢您的建议。';
+        } else {
+            throw new Error(`Server returned ${response.status}`);
+        }
         contentEl.value = '';
 
         setTimeout(() => {
