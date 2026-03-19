@@ -562,12 +562,12 @@ const STATUS_MAP = {
     '회항': { cls: 'status-ontime', cn: '返航/备降' }
 };
 function getStatusBadge(status) {
-    if (!status) return `<span class="badge badge-info">-</span>`;
+    if (!status || status.trim() === '-') return '-'; 
     const s = status.trim();
-    if (s.includes('\uCD9C\uBC1C')) return `<span class="badge badge-success">已出发</span>`;
-    if (s.includes('\uB3C4\uCC29')) return `<span class="badge badge-success">已到达</span>`;
-    if (s.includes('\uC9C0\uC5F0')) return `<span class="badge badge-warning">延误</span>`;
-    if (s.includes('\uACB0\uD56D')) return `<span class="badge badge-danger">取消</span>`;
+    if (s.includes('\uCD9C\uBC1C')) return `<span class="badge badge-success">已出发</span>`; 
+    if (s.includes('\uB3C4\uCC29')) return `<span class="badge badge-success">已到达</span>`; 
+    if (s.includes('\uC9C0\uC5F0')) return `<span class="badge badge-warning">延误</span>`; 
+    if (s.includes('\uACB0\uD56D')) return `<span class="badge badge-danger">取消</span>`; 
     return `<span class="badge badge-info">${s}</span>`;
 }
 
@@ -684,7 +684,9 @@ async function fetchFlights(type) {
         const filteredFlights = itemsArray.filter(f => {
             const oppositeCode = type === 'arrive' ? f.dep_code : f.arr_code;
             const localCode = type === 'arrive' ? f.arr_code : f.dep_code;
-            return localCode === 'CJU' && oppositeCode && (f.is_intl || !DOMESTIC_AIRPORTS.has(oppositeCode)) && REGION_AIRPORTS.has(oppositeCode);
+            // 엄격한 방향성 필터: 도착편은 목적지가 CJU, 출발편은 출발지가 CJU여야 함
+            const directionMatch = (type === 'arrive' ? f.arr_code === 'CJU' : f.dep_code === 'CJU');
+            return directionMatch && oppositeCode && (f.is_intl || !DOMESTIC_AIRPORTS.has(oppositeCode)) && REGION_AIRPORTS.has(oppositeCode);
         });
 
         renderFlightList(container, filteredFlights, type);
@@ -1323,9 +1325,11 @@ window.addEventListener('load', () => {
     // 초기 화면 설정 (홈)
     showSection('home');
 
-    // 주기적인 갱신
+    // 주기적인 갱신 (현재 활성화된 탭 기준)
     setInterval(() => {
-        if (typeof fetchFlights === 'function') fetchFlights('arrive');
+        const activeTab = document.querySelector('.flight-tab.active');
+        const activeType = activeTab?.id === 'tab-depart' ? 'depart' : 'arrive';
+        if (typeof fetchFlights === 'function') fetchFlights(activeType);
     }, 60000);
     setInterval(() => {
         if (typeof fetchWeatherData === 'function') {
