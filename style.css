@@ -124,27 +124,69 @@ body {
 
 .home-welcome {
     text-align: center;
-    margin-bottom: 30px;
-    margin-top: 20px;
+    margin-bottom: 35px;
+    margin-top: 30px;
+    padding: 0 20px;
+    animation: fadeInDown 0.8s ease-out;
 }
 
 .home-welcome h1 {
-    font-size: 1.8rem;
-    font-weight: 800;
-    color: var(--text-primary);
-    margin-bottom: 8px;
+    font-size: 2.1rem;
+    font-weight: 900;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 15px;
+    letter-spacing: -1px;
 }
 
 .home-welcome p {
     color: var(--text-secondary);
-    font-size: 1rem;
+    font-size: 1.05rem;
+    line-height: 1.6;
+    max-width: 300px;
+    margin: 0 auto;
+    font-weight: 500;
+    opacity: 0.9;
+    margin-bottom: 20px;
+}
+
+.feature-request-btn {
+    background: white;
+    color: var(--accent-blue);
+    border: 1.5px solid var(--accent-blue);
+    padding: 10px 24px;
+    border-radius: 25px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+}
+
+.feature-request-btn:hover {
+    background: var(--primary-gradient);
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+    border-color: transparent;
+}
+
+#feature-content:focus {
+    border-color: var(--accent-blue) !important;
+}
+
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .home-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-    max-width: 500px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    max-width: 600px;
     margin: 0 auto;
 }
 
@@ -173,6 +215,7 @@ body {
     border: 1px solid rgba(255,255,255,0.8);
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    min-height: 110px; /* 모든 항목 크기 균일화 */
 }
 
 .home-item:active {
@@ -197,6 +240,14 @@ body {
 .item-hallasan .item-icon { color: #059669; }
 .item-airport .item-icon { color: #3b82f6; }
 .item-lost .item-icon { color: #8b5cf6; }
+
+.home-item.item-empty {
+    background: rgba(255, 255, 255, 0.3);
+    border: 1px dashed rgba(0,0,0,0.1);
+    box-shadow: none;
+    cursor: default;
+    pointer-events: none;
+}
 
 /* ==================== Sections ==================== */
 .section { padding: var(--spacing-xxl) 0; }
@@ -300,39 +351,46 @@ body {
 
 .current-weather {
     background: var(--bg-card); border-radius: var(--radius-xl);
-    padding: 10px; margin-bottom: var(--spacing-lg);
+    padding: 16px; margin-bottom: var(--spacing-md);
     border: 1px solid var(--border-light);
-    display: flex; justify-content: space-between; align-items: center;
-    gap: 4px; box-shadow: var(--shadow-md);
-    flex-wrap: nowrap;
-    overflow: hidden;
+    display: flex; flex-direction: column; align-items: stretch;
+    gap: 12px; box-shadow: var(--shadow-md);
 }
-.weather-main { display: flex; align-items: center; gap: 4px; flex-shrink: 1; min-width: 0; }
-.weather-icon { font-size: 2rem; animation: float 3s ease-in-out infinite; flex-shrink: 0; }
+.weather-main {
+    display: flex; align-items: center; gap: 16px;
+    flex-shrink: 0;
+    justify-content: space-between;
+}
+.weather-temp-wrap {
+    flex: 1;
+}
+.weather-icon { font-size: 3rem; animation: float 3s ease-in-out infinite; flex-shrink: 0; }
 .weather-temp { display: flex; align-items: baseline; gap: 4px; }
 .temp-value {
-    font-size: 2.2rem; font-weight: 700;
+    font-size: 2.8rem; font-weight: 700;
     background: var(--accent-gradient);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    line-height: 1;
 }
 .temp-unit { font-size: 1rem; color: var(--text-secondary); }
-.weather-desc { font-size: 1rem; color: var(--text-secondary); margin-top: 2px; }
-.weather-details { 
-    display: grid; 
-    grid-template-columns: 1fr; /* 세로로 나열 */
-    gap: 6px; 
-    flex-shrink: 0;
+.weather-desc { font-size: 1rem; color: var(--text-secondary); margin-top: 4px; }
+.weather-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    border-left: 1px solid var(--border-light);
+    padding-left: 12px;
 }
 .weather-detail-item {
-    display: flex; align-items: center; gap: 4px;
-    padding: 6px 10px; background: var(--bg-card-hover);
-    border-radius: var(--radius-md); transition: all var(--transition-fast);
-    white-space: nowrap; /* 줄바꿈 방지 */
+    display: flex; align-items: center; gap: 6px;
+    padding: 2px 0; background: transparent;
+    border-radius: 0; transition: none;
+    white-space: nowrap;
 }
-.weather-detail-item:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
-.detail-icon { font-size: 0.8rem; }
-.detail-label { font-size: 0.65rem; color: var(--text-muted); margin-right: 2px; }
-.detail-value { font-size: 0.7rem; font-weight: 700; }
+.weather-detail-item:hover { transform: none; box-shadow: none; }
+.detail-icon { font-size: 0.9rem; }
+.detail-label { font-size: 0.75rem; color: var(--text-muted); margin-right: 4px; }
+.detail-value { font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); }
 
 .subsection-title { font-size: 1.1rem; margin-bottom: var(--spacing-sm); text-align: center; font-weight: 700; }
 .hourly-weather { margin-bottom: var(--spacing-xl); }
@@ -449,7 +507,7 @@ body {
 .flight-col:nth-child(5) { flex: 1.1; } /* 상태 */
 
 .flight-row:hover:not(.flight-header) { background: var(--bg-card-hover); }
-.status-badge { padding: 5px 10px; border-radius: var(--radius-sm); font-size: 0.8rem; font-weight: 600; white-space: nowrap; }
+.status-badge { padding: 4px 8px; border-radius: var(--radius-sm); font-size: 0.72rem; font-weight: 600; white-space: nowrap; }
 .status-badge.status-ontime { background: var(--success-gradient); color: white; }
 .status-badge.status-delayed { background: var(--warning-gradient); color: white; }
 .status-badge.status-cancelled { background: var(--danger-gradient); color: white; }
@@ -1037,10 +1095,10 @@ body {
 
 /* ==================== Footer ==================== */
 .app-footer { 
-    padding: 40px 0; 
+    padding: 20px 0; 
     background: #f8fafc; 
     border-top: 1px solid var(--border-light); 
-    margin-top: 40px;
+    margin-top: 20px;
 }
 .footer-grid { 
     display: flex; 
@@ -1406,6 +1464,58 @@ body {
 
 #wechat-qr-container {
     animation: fadeIn 0.4s ease-out;
+}
+
+/* ===== Footer QR Section ===== */
+.footer-qr-container {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin: 20px auto;
+    padding: 10px;
+}
+.qr-item {
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+.qr-item a {
+    display: block;
+    text-decoration: none;
+    cursor: pointer;
+}
+.qr-item:hover {
+    transform: translateY(-5px);
+}
+.qr-img {
+    width: 140px;
+    height: 140px;
+    border-radius: 16px;
+    background: white;
+    padding: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    display: block;
+    margin-bottom: 12px;
+    border: 1px solid rgba(0,0,0,0.03);
+}
+.qr-label {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: block;
+}
+
+@media (max-width: 480px) {
+    .footer-qr-container {
+        gap: 20px;
+    }
+    .qr-img {
+        width: 120px;
+        height: 120px;
+    }
 }
 
 @keyframes fadeIn {

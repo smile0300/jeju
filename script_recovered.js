@@ -1,70 +1,69 @@
 /**
- * 济州岛旅游助手 - script.js
+ * 役롥퇍略쎿뾽歷멨뒰??- script.js
  * GitHub: github.com/k97460300-coder/jejuweb
  * 
- * 기능:
- *  - CCTV: HLS.js 직결 + Cloudflare Worker 프록시 백업 + YouTube Live
- *  - 날씨: 기상청 단기예보/중기예보 API (4개 지역)
- *  - 한라산: 제주도청 웹사이트 스크래핑 (CORS 우회)
- *  - 항공: 한국공항공사 실시간 운항정보 API
+ * 湲곕뒫:
+ *  - CCTV: HLS.js 吏곴껐 + Cloudflare Worker ?꾨줉??諛깆뾽 + YouTube Live
+ *  - ?좎뵪: 湲곗긽泥??④린?덈낫/以묎린?덈낫 API (4媛?吏??
+ *  - ?쒕씪?? ?쒖＜?꾩껌 ?뱀궗?댄듃 ?ㅽ겕?섑븨 (CORS ?고쉶)
+ *  - ??났: ?쒓뎅怨듯빆怨듭궗 ?ㅼ떆媛??댄빆?뺣낫 API
  */
 
 // ============================================================
-// CONFIG - 사용자 제공 API 키를 여기에 입력하세요.
+// CONFIG - ?ъ슜???쒓났 API ?ㅻ? ?ш린???낅젰?섏꽭??
 // ============================================================
 const CONFIG = {
-    // 공공데이터포털(data.go.kr) 인증키 (필수)
+    // 怨듦났?곗씠?고룷??data.go.kr) ?몄쬆??(?꾩닔)
     PUBLIC_DATA_KEY: '05988a053767a7a6cc5553d077ce7ea541c60806a0160d5ac2e9119ebe5a61ce',
 
-    // 제주 관광 API
+    // ?쒖＜ 愿愿?API
     VISIT_JEJU_KEY: '0972fcb659994423bcaa3c910d2d13c1',
-    // Cloudflare Worker 프록시 URL (CORS 우회용)
+    // Cloudflare Worker ?꾨줉??URL (CORS ?고쉶??
     PROXY_URL: 'https://jejuweb.k97460300.workers.dev/',
 
-    // CCTV HLS 스트림 소스
+    // CCTV HLS ?ㅽ듃由??뚯뒪
     CCTV: [
         {
             id: 'samyang',
-            nameKo: '삼양해수욕장',
-            nameCn: '三阳海水浴场',
+            nameKo: '?쇱뼇?댁닔?뺤옣',
+            nameCn: '訝됮삾役룡객役닷쑛',
             type: 'hls',
             url: 'http://123.140.197.51/stream/27/play.m3u8'
         },
         {
             id: 'hamdeok',
-            nameKo: '함덕해수욕장',
-            nameCn: '咸德海水浴场',
+            nameKo: '?⑤뜒?댁닔?뺤옣',
+            nameCn: '?멨쓿役룡객役닷쑛',
             type: 'hls',
             url: 'http://123.140.197.51/stream/33/play.m3u8'
         },
         {
             id: 'seongsan',
-            nameKo: '성산일출봉',
-            nameCn: '城山日出峰',
+            nameKo: '?깆궛?쇱텧遊?,
+            nameCn: '?롥굇?ε눣約?,
             type: 'youtube',
-            ytId: 'GKFO9t7a9xs' // 성산일출봉 YouTube Live ID
+            ytId: 'GKFO9t7a9xs' // ?깆궛?쇱텧遊?YouTube Live ID
         },
         {
             id: 'hyeopjae',
-            nameKo: '협재해수욕장',
-            nameCn: '挟才海水浴场',
+            nameKo: '?묒옱?댁닔?뺤옣',
+            nameCn: '?잍뎺役룡객役닷쑛',
             type: 'hls',
             url: 'http://123.140.197.51/stream/31/play.m3u8'
         }
     ],
 
-    // 4개 지역 날씨 좌표 (기상청 격자 nx,ny)
+    // 4媛?吏???좎뵪 醫뚰몴 (湲곗긽泥?寃⑹옄 nx,ny)
     WEATHER_LOCATIONS: {
-        jeju: { nx: 53, ny: 38, nameKo: '제주시', nameCn: '济州市', midCode: '11G00000' },
-        seogwipo: { nx: 52, ny: 33, nameKo: '서귀포시', nameCn: '西归浦', midCode: '11G00000' },
-        hallasan: { nx: 52, ny: 35, nameKo: '한라산1100고지', nameCn: '汉拿山', midCode: '11G00000' },
-        udo: { nx: 56, ny: 38, nameKo: '우도', nameCn: '牛岛', midCode: '11G00000' }
+        jeju: { nx: 53, ny: 38, nameKo: '?쒖＜??, nameCn: '役롥퇍躍?, midCode: '11G00000' },
+        seogwipo: { nx: 52, ny: 33, nameKo: '?쒓??ъ떆', nameCn: '蜈욕퐩役?, midCode: '11G00000' },
+        hallasan: { nx: 52, ny: 35, nameKo: '?쒕씪??100怨좎?', nameCn: '黎됪떯掠?, midCode: '11G00000' },
+        udo: { nx: 56, ny: 38, nameKo: '?곕룄', nameCn: '?쎾쿆', midCode: '11G00000' }
     }
 };
 
 // ============================================================
-// CCTV 초기화
-// ============================================================
+// CCTV 珥덇린??// ============================================================
 function initCCTV() {
     const grid = document.getElementById('cctv-grid');
     if (!grid) return;
@@ -98,7 +97,7 @@ function initHlsPlayer(cam) {
     const videoEl = document.getElementById(`video-${cam.id}`);
     if (!videoEl) return;
 
-    // CORS 우회 및 HLS 재생 로직 강화
+    // CORS ?고쉶 諛?HLS ?ъ깮 濡쒖쭅 媛뺥솕
     function tryProxyFirst() {
         const proxyUrl = `${CONFIG.PROXY_URL}?url=${encodeURIComponent(cam.url)}`;
 
@@ -106,7 +105,7 @@ function initHlsPlayer(cam) {
             const hls = new Hls({
                 enableWorker: true,
                 xhrSetup: function (xhr, url) {
-                    // Chrome Mixed Content 차단 해결: 모든 HTTP 요청(m3u8, ts)을 HTTPS 프록시로 전달
+                    // Chrome Mixed Content 李⑤떒 ?닿껐: 紐⑤뱺 HTTP ?붿껌(m3u8, ts)??HTTPS ?꾨줉?쒕줈 ?꾨떖
                     if (url.startsWith('http://') && !url.includes(CONFIG.PROXY_URL)) {
                         const proxiedUrl = `${CONFIG.PROXY_URL}?url=${encodeURIComponent(url)}`;
                         xhr.open('GET', proxiedUrl, true);
@@ -123,8 +122,7 @@ function initHlsPlayer(cam) {
             });
             videoEl.play().catch(() => { });
         } else if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
-            // iOS Safari 대응
-            videoEl.src = proxyUrl;
+            // iOS Safari ???            videoEl.src = proxyUrl;
         }
     }
 
@@ -139,7 +137,7 @@ function initHlsPlayer(cam) {
         }
     }
 
-    // 기본적으로 프록시를 먼저 시도 (CORS 방지)
+    // 湲곕낯?곸쑝濡??꾨줉?쒕? 癒쇱? ?쒕룄 (CORS 諛⑹?)
     tryProxyFirst();
 }
 
@@ -152,25 +150,25 @@ function initYoutubeEmbed(cam) {
 }
 
 // ============================================================
-// 날씨: 기상청 API
+// ?좎뵪: 湲곗긽泥?API
 // ============================================================
-// 날씨 코드 → 이모지 & 중국어 설명
+// ?좎뵪 肄붾뱶 ???대え吏 & 以묎뎅???ㅻ챸
 function getSkyInfo(pty, sky) {
-    if (pty === '1') return { icon: '🌧️', desc: '雨' };
-    if (pty === '2') return { icon: '🌨️', desc: '雨夹雪' };
-    if (pty === '3') return { icon: '🌨️', desc: '雪' };
-    if (sky === '1') return { icon: '☀️', desc: '晴' };
-    if (sky === '3') return { icon: '⛅', desc: '多云' };
-    if (sky === '4') return { icon: '☁️', desc: '阴' };
-    return { icon: '🌤️', desc: '晴' };
+    if (pty === '1') return { icon: '?뙢截?, desc: '?? };
+    if (pty === '2') return { icon: '?뙣截?, desc: '?ⓨㅉ?? };
+    if (pty === '3') return { icon: '?뙣截?, desc: '?? };
+    if (sky === '1') return { icon: '?截?, desc: '?? };
+    if (sky === '3') return { icon: '??, desc: '鸚싦틧' };
+    if (sky === '4') return { icon: '?곻툘', desc: '?? };
+    return { icon: '?뙟截?, desc: '?? };
 }
 
 function getWindDesc(ws) {
     const v = parseFloat(ws);
-    if (v < 4) return '微风';
-    if (v < 9) return '和风';
-    if (v < 14) return '疾风';
-    return '强风';
+    if (v < 4) return '孃?즼';
+    if (v < 9) return '?뚪즼';
+    if (v < 14) return '?얗즼';
+    return '凉븅즼';
 }
 
 function formatBaseTime(date) {
@@ -202,7 +200,7 @@ async function fetchWeatherData(locKey) {
         if (!items) throw new Error('No data');
         parseAndRenderWeather(locKey, items);
     } catch (e) {
-        console.error(`날씨 API 오류(${locKey}):`, e);
+        console.error(`?좎뵪 API ?ㅻ쪟(${locKey}):`, e);
         renderWeatherMock(locKey);
     }
 }
@@ -223,7 +221,7 @@ function parseAndRenderWeather(locKey, items) {
     const current = grouped[sortedKeys[0]];
     const sky = getSkyInfo(current.PTY, current.SKY);
 
-    // 현재 날씨 업데이트
+    // ?꾩옱 ?좎뵪 ?낅뜲?댄듃
     const iconEl = document.getElementById(`icon-${locKey}`);
     const tempEl = document.getElementById(`temp-${locKey}`);
     const descEl = document.getElementById(`desc-${locKey}`);
@@ -233,14 +231,14 @@ function parseAndRenderWeather(locKey, items) {
     if (descEl) descEl.textContent = sky.desc;
     if (detailsEl) {
         detailsEl.innerHTML = `
-            <div class="weather-detail-item"><span class="detail-icon">💧</span><span class="detail-label">湿度</span><span class="detail-value">${current.REH ?? '-'}%</span></div>
-            <div class="weather-detail-item"><span class="detail-icon">💨</span><span class="detail-label">风速</span><span class="detail-value">${current.WSD ?? '-'}m/s · ${getWindDesc(current.WSD)}</span></div>
-            <div class="weather-detail-item"><span class="detail-icon">🌂</span><span class="detail-label">降水</span><span class="detail-value">${current.PCP === '강수없음' ? '无降水' : (current.PCP ?? '-')}</span></div>
-            <div class="weather-detail-item"><span class="detail-icon">📊</span><span class="detail-label">降水概率</span><span class="detail-value">${current.POP ?? '-'}%</span></div>
+            <div class="weather-detail-item"><span class="detail-icon">?뮛</span><span class="detail-label">疫욕벧</span><span class="detail-value">${current.REH ?? '-'}%</span></div>
+            <div class="weather-detail-item"><span class="detail-icon">?뮜</span><span class="detail-label">繇롩?/span><span class="detail-value">${current.WSD ?? '-'}m/s 쨌 ${getWindDesc(current.WSD)}</span></div>
+            <div class="weather-detail-item"><span class="detail-icon">?똼</span><span class="detail-label">?띷객</span><span class="detail-value">${current.PCP === '媛뺤닔?놁쓬' ? '?좈솉麗? : (current.PCP ?? '-')}</span></div>
+            <div class="weather-detail-item"><span class="detail-icon">?뱤</span><span class="detail-label">?띷객礖귞럤</span><span class="detail-value">${current.POP ?? '-'}%</span></div>
         `;
     }
 
-    // 시간별 예보 (현재 시각 이후 데이터부터 추출)
+    // ?쒓컙蹂??덈낫 (?꾩옱 ?쒓컖 ?댄썑 ?곗씠?곕???異붿텧)
     const hourlyEl = document.getElementById(`hourly-${locKey}`);
     if (hourlyEl) {
         const now = new Date();
@@ -248,10 +246,9 @@ function parseAndRenderWeather(locKey, items) {
         const currentHm = `${String(now.getHours()).padStart(2, '0')}00`;
         const currentKey = currentYmd + currentHm;
 
-        // 현재 시각 이후의 데이터 필터링
-        let hourlyItems = sortedKeys.filter(k => k >= currentKey).slice(0, 15);
+        // ?꾩옱 ?쒓컖 ?댄썑???곗씠???꾪꽣留?        let hourlyItems = sortedKeys.filter(k => k >= currentKey).slice(0, 15);
         
-        // 만약 현재 시각 이후 데이터가 부족하다면 (예: 밤 늦게 조회) 앞에서부터 보충
+        // 留뚯빟 ?꾩옱 ?쒓컖 ?댄썑 ?곗씠?곌? 遺議깊븯?ㅻ㈃ (?? 諛???쾶 議고쉶) ?욎뿉?쒕???蹂댁땐
         if (hourlyItems.length < 5) {
             hourlyItems = sortedKeys.slice(0, 15);
         }
@@ -262,21 +259,21 @@ function parseAndRenderWeather(locKey, items) {
                 const s = getSkyInfo(d.PTY, d.SKY);
                 const t = k.slice(8).padStart(4, '0');
                 const h = `${t.slice(0, 2)}:${t.slice(2)}`;
-                // 강수 확률이 있으면 0%라도 표시
-                const precipVal = d.POP !== undefined ? d.POP : (d.PCP && d.PCP !== '강수없음' ? d.PCP : null);
-                const precipHtml = precipVal !== null ? `<div class="hourly-precip precip-blue">💧${precipVal}%</div>` : '';
+                // 媛뺤닔 ?뺣쪧???덉쑝硫?0%?쇰룄 ?쒖떆
+                const precipVal = d.POP !== undefined ? d.POP : (d.PCP && d.PCP !== '媛뺤닔?놁쓬' ? d.PCP : null);
+                const precipHtml = precipVal !== null ? `<div class="hourly-precip precip-blue">?뮛${precipVal}%</div>` : '';
                 return `<div class="hourly-item">
                     <div class="hourly-time">${h}</div>
                     <div class="hourly-icon">${s.icon}</div>
-                    <div class="hourly-temp">${d.TMP ?? '--'}°</div>
-                    <div class="hourly-wind">🌬️${d.WSD ?? '-'}m/s</div>
+                    <div class="hourly-temp">${d.TMP ?? '--'}째</div>
+                    <div class="hourly-wind">?뙩截?{d.WSD ?? '-'}m/s</div>
                     ${precipHtml}
                 </div>`;
             }).join('');
         }
     }
 
-    // 주간 예보 (날짜별 최고/최저, 데이터 부족 시 Mock 보완하여 10일치 보장)
+    // 二쇨컙 ?덈낫 (?좎쭨蹂?理쒓퀬/理쒖?, ?곗씠??遺議???Mock 蹂댁셿?섏뿬 10?쇱튂 蹂댁옣)
     const weeklyEl = document.getElementById(`weekly-${locKey}`);
     if (weeklyEl) {
         const dailyMap = {};
@@ -294,7 +291,7 @@ function parseAndRenderWeather(locKey, items) {
             if (d.POP) dailyMap[date].precip = Math.max(dailyMap[date].precip, parseInt(d.POP));
         });
 
-        const dayNames = ['周일', '周一', '周二', '周三', '周四', '周五', '周六'];
+        const dayNames = ['?⑥씪', '?ⓧ?', '?ⓧ틠', '?ⓧ툒', '?ⓨ썪', '?ⓧ틪', '?ⓨ뀷'];
         const todayDate = new Date();
 
         weeklyEl.innerHTML = Array.from({ length: 10 }, (_, i) => {
@@ -306,13 +303,13 @@ function parseAndRenderWeather(locKey, items) {
             let max = '--', min = '--', precip = 0, pty = '0', sky = '1';
 
             if (dt) {
-                if (dt.max !== -99) max = dt.max + '°';
-                if (dt.min !== 99) min = dt.min + '°';
+                if (dt.max !== -99) max = dt.max + '째';
+                if (dt.min !== 99) min = dt.min + '째';
                 precip = dt.precip || 0;
                 pty = dt.pty || '0';
                 sky = dt.sky || '1';
             } else {
-                // 단기 예보 기간(약 3일)을 벗어난 날짜는 자연스러운 Mock 데이터로 채움
+                // ?④린 ?덈낫 湲곌컙(??3????踰쀬뼱???좎쭨???먯뿰?ㅻ윭??Mock ?곗씠?곕줈 梨꾩?
                 const mockRef = {
                     jeju: { temp: 12, sky: '1', pty: '0', pop: 20 },
                     seogwipo: { temp: 14, sky: '1', pty: '0', pop: 10 },
@@ -320,15 +317,15 @@ function parseAndRenderWeather(locKey, items) {
                     udo: { temp: 13, sky: '3', pty: '0', pop: 20 }
                 }[locKey] || { temp: 12, sky: '1', pty: '0', pop: 20 };
 
-                max = (mockRef.temp + Math.floor(Math.random() * 4)) + '°';
-                min = (mockRef.temp - Math.floor(Math.random() * 5)) + '°';
+                max = (mockRef.temp + Math.floor(Math.random() * 4)) + '째';
+                min = (mockRef.temp - Math.floor(Math.random() * 5)) + '째';
                 precip = Math.floor(Math.random() * 30);
                 sky = ['1', '3', '4'][Math.floor(Math.random() * 3)];
             }
 
             const s = getSkyInfo(pty, sky);
             const dateLabel = `${targetD.getMonth() + 1}/${targetD.getDate()}`;
-            const precipHtml = precip > 0 ? `<div class="weekly-precip ${precip >= 50 ? 'precip-blue' : ''}">💧${precip}%</div>` : '';
+            const precipHtml = precip > 0 ? `<div class="weekly-precip ${precip >= 50 ? 'precip-blue' : ''}">?뮛${precip}%</div>` : '';
             return `<div class="weekly-item">
                 <div class="weekly-day"><small>${dateLabel}</small></div>
                 <div class="weekly-icon">${s.icon}</div>
@@ -343,10 +340,10 @@ function parseAndRenderWeather(locKey, items) {
 
 function renderWeatherMock(locKey) {
     const mocks = {
-        jeju: { temp: 15, icon: '🌤️', desc: '多云转晴', hum: 62, wind: '4.2', pop: 10 },
-        seogwipo: { temp: 17, icon: '☀️', desc: '晴', hum: 55, wind: '3.1', pop: 0 },
-        hallasan: { temp: 8, icon: '❄️', desc: '有雪', hum: 80, wind: '7.5', pop: 60 },
-        udo: { temp: 16, icon: '⛅', desc: '多云', hum: 70, wind: '5.0', pop: 20 }
+        jeju: { temp: 15, icon: '?뙟截?, desc: '鸚싦틧饔ф쇀', hum: 62, wind: '4.2', pop: 10 },
+        seogwipo: { temp: 17, icon: '?截?, desc: '??, hum: 55, wind: '3.1', pop: 0 },
+        hallasan: { temp: 8, icon: '?꾬툘', desc: '?됮쎀', hum: 80, wind: '7.5', pop: 60 },
+        udo: { temp: 16, icon: '??, desc: '鸚싦틧', hum: 70, wind: '5.0', pop: 20 }
     };
     const m = mocks[locKey] || mocks.jeju;
     const iconEl = document.getElementById(`icon-${locKey}`);
@@ -355,12 +352,12 @@ function renderWeatherMock(locKey) {
     const detailsEl = document.getElementById(`details-${locKey}`);
     if (iconEl) iconEl.textContent = m.icon;
     if (tempEl) tempEl.textContent = m.temp;
-    if (descEl) descEl.textContent = `${m.desc} (示例数据)`;
+    if (descEl) descEl.textContent = `${m.desc} (鹽뷰풃?경뜮)`;
     if (detailsEl) {
         detailsEl.innerHTML = `
-            <div class="weather-detail-item"><span class="detail-icon">💧</span><span class="detail-label">湿度</span><span class="detail-value">${m.hum}%</span></div>
-            <div class="weather-detail-item"><span class="detail-icon">💨</span><span class="detail-label">风速</span><span class="detail-value">${m.wind}m/s</span></div>
-            <div class="weather-detail-item"><span class="detail-icon">📊</span><span class="detail-label">降水概率</span><span class="detail-value">${m.pop}%</span></div>
+            <div class="weather-detail-item"><span class="detail-icon">?뮛</span><span class="detail-label">疫욕벧</span><span class="detail-value">${m.hum}%</span></div>
+            <div class="weather-detail-item"><span class="detail-icon">?뮜</span><span class="detail-label">繇롩?/span><span class="detail-value">${m.wind}m/s</span></div>
+            <div class="weather-detail-item"><span class="detail-icon">?뱤</span><span class="detail-label">?띷객礖귞럤</span><span class="detail-value">${m.pop}%</span></div>
         `;
     }
     const hourlyEl = document.getElementById(`hourly-${locKey}`);
@@ -370,24 +367,24 @@ function renderWeatherMock(locKey) {
             <div class="hourly-item">
                 <div class="hourly-time">${h}:00</div>
                 <div class="hourly-icon">${m.icon}</div>
-                <div class="hourly-temp">${m.temp + (h > 14 ? -2 : 2)}°</div>
-                <div class="hourly-wind">🌬️${m.wind}m/s</div>
+                <div class="hourly-temp">${m.temp + (h > 14 ? -2 : 2)}째</div>
+                <div class="hourly-wind">?뙩截?{m.wind}m/s</div>
             </div>`).join('');
     }
     const weeklyEl = document.getElementById(`weekly-${locKey}`);
     if (weeklyEl) {
-        const dayNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+        const dayNames = ['?ⓩ뿥', '?ⓧ?', '?ⓧ틠', '?ⓧ툒', '?ⓨ썪', '?ⓧ틪', '?ⓨ뀷'];
         const today = new Date();
-        const weekIcons = ['☀️', '⛅', '🌧️', '☀️', '⛅', '☁️', '☀️', '⛅', '🌧️', '☀️'];
+        const weekIcons = ['?截?, '??, '?뙢截?, '?截?, '??, '?곻툘', '?截?, '??, '?뙢截?, '?截?];
         weeklyEl.innerHTML = Array.from({ length: 10 }, (_, i) => {
             const d = new Date(today); d.setDate(today.getDate() + i);
-            const popMock = Math.floor(Math.random() * 40); // 0~40% 임의 강수확률
-            const precipHtml = `<div class="weekly-precip ${popMock >= 50 ? 'precip-blue' : ''}">💧${popMock}%</div>`;
+            const popMock = Math.floor(Math.random() * 40); // 0~40% ?꾩쓽 媛뺤닔?뺣쪧
+            const precipHtml = `<div class="weekly-precip ${popMock >= 50 ? 'precip-blue' : ''}">?뮛${popMock}%</div>`;
             return `<div class="weekly-item">
                 <div class="weekly-day"><small>${d.getMonth() + 1}/${d.getDate()}</small></div>
                 <div class="weekly-icon">${weekIcons[i]}</div>
                 <div class="weekly-temps">
-                    <span class="temp-high">${m.temp + Math.floor(Math.random() * 4)}°</span> / <span class="temp-low">${m.temp - Math.floor(Math.random() * 6)}°</span>
+                    <span class="temp-high">${m.temp + Math.floor(Math.random() * 4)}째</span> / <span class="temp-low">${m.temp - Math.floor(Math.random() * 6)}째</span>
                 </div>
                 ${precipHtml}
             </div>`;
@@ -395,7 +392,7 @@ function renderWeatherMock(locKey) {
     }
 }
 
-// 날씨 탭 전환
+// ?좎뵪 ???꾪솚
 function switchWeatherLocation(loc) {
     document.querySelectorAll('.location-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.location-weather').forEach(c => c.classList.remove('active'));
@@ -406,29 +403,29 @@ function switchWeatherLocation(loc) {
 }
 
 // ============================================================
-// 한라산 탐방로 상태 - jeju.go.kr 메인페이지 실시간 스크래핑
-// index.htm의 #roadStats > dd.situation 파싱
+// ?쒕씪???먮갑濡??곹깭 - jeju.go.kr 硫붿씤?섏씠吏 ?ㅼ떆媛??ㅽ겕?섑븨
+// index.htm??#roadStats > dd.situation ?뚯떛
 // ============================================================
 
-// 탐방로 데이터 (HTML 순서, nameKo로 실시간 상태 매핑)
+// ?먮갑濡??곗씠??(HTML ?쒖꽌, nameKo濡??ㅼ떆媛??곹깭 留ㅽ븨)
 const HALLASAN_TRAILS = [
-    { nameKo: '어리목탐방로', nameCn: '御里牧路线', distanceCn: '6.8km（单程）', timeCn: '约3小时' },
-    { nameKo: '영실탐방로', nameCn: '灵室路线', distanceCn: '5.8km（单程）', timeCn: '约2.5小时' },
-    { nameKo: '어승생악탐방로', nameCn: '洘承生岳路线', distanceCn: '1.3km（单程）', timeCn: '约30分钟' },
-    { nameKo: '돈내코탐방로', nameCn: '敦乃科路线', distanceCn: '9.1km（单程）', timeCn: '约4.5小时' },
-    { nameKo: '석굴암탐방로', nameCn: '石굴암路线', distanceCn: '1.5km（单程）', timeCn: '约50分钟' },
-    { nameKo: '관음사탐방로', nameCn: '观音寺路线', distanceCn: '8.7km（单程）', timeCn: '约5小时' },
-    { nameKo: '성판악탐방로', nameCn: '城板岳路线', distanceCn: '9.6km（单程）', timeCn: '约4.5小时' }
+    { nameKo: '?대━紐⑺깘諛⑸줈', nameCn: '孃↓뇤?㎬러瀛?, distanceCn: '6.8km竊덂뜒葉뗰펹', timeCn: '瀛?弱뤸뿶' },
+    { nameKo: '?곸떎?먮갑濡?, nameCn: '?드?瓮?봇', distanceCn: '5.8km竊덂뜒葉뗰펹', timeCn: '瀛?.5弱뤸뿶' },
+    { nameKo: '?댁듅?앹븙?먮갑濡?, nameCn: '域섉돽?잌껙瓮?봇', distanceCn: '1.3km竊덂뜒葉뗰펹', timeCn: '瀛?0?녽뮓' },
+    { nameKo: '?덈궡肄뷀깘諛⑸줈', nameCn: '?╊퉫燁묋러瀛?, distanceCn: '9.1km竊덂뜒葉뗰펹', timeCn: '瀛?.5弱뤸뿶' },
+    { nameKo: '?앷뎬?뷀깘諛⑸줈', nameCn: '?녠뎬?붻러瀛?, distanceCn: '1.5km竊덂뜒葉뗰펹', timeCn: '瀛?0?녽뮓' },
+    { nameKo: '愿?뚯궗?먮갑濡?, nameCn: '鰲귡윹野븃러瀛?, distanceCn: '8.7km竊덂뜒葉뗰펹', timeCn: '瀛?弱뤸뿶' },
+    { nameKo: '?깊뙋?낇깘諛⑸줈', nameCn: '?롦씮略녘러瀛?, distanceCn: '9.6km竊덂뜒葉뗰펹', timeCn: '瀛?.5弱뤸뿶' }
 ];
 
-// 한국어 상태 → 중국어/CSS클래스 매핑 (정상운영 / 부분통제 / 전면통제)
+// ?쒓뎅???곹깭 ??以묎뎅??CSS?대옒??留ㅽ븨 (?뺤긽?댁쁺 / 遺遺꾪넻??/ ?꾨㈃?듭젣)
 const TRAIL_STATUS_MAP = {
-    '정상운영': { cn: '正常运营', cls: 'open' },
-    '부분통제': { cn: '部分管制', cls: 'partial' },
-    '전면통제': { cn: '全面管制', cls: 'closed' },
-    '통제': { cn: '全面管制', cls: 'closed' },
-    '일부통제': { cn: '부분통제', cls: 'partial' },
-    '입산제한': { cn: '全面管制', cls: 'closed' }
+    '?뺤긽?댁쁺': { cn: '閭ｅ만瓦먫맓', cls: 'open' },
+    '遺遺꾪넻??: { cn: '?ⓨ늽嶸▼댍', cls: 'partial' },
+    '?꾨㈃?듭젣': { cn: '?③씊嶸▼댍', cls: 'closed' },
+    '?듭젣': { cn: '?③씊嶸▼댍', cls: 'closed' },
+    '?쇰??듭젣': { cn: '遺遺꾪넻??, cls: 'partial' },
+    '?낆궛?쒗븳': { cn: '?③씊嶸▼댍', cls: 'closed' }
 };
 
 async function fetchHallasanStatus() {
@@ -436,29 +433,29 @@ async function fetchHallasanStatus() {
     const trailsEl = document.getElementById('trails-grid');
     const now = new Date().toLocaleString('zh-CN');
 
-    // 로딩 표시
+    // 濡쒕뵫 ?쒖떆
     container.innerHTML = `
         <div class="status-card status-loading">
-            <div class="status-icon">⏳</div>
+            <div class="status-icon">??/div>
             <div class="status-content">
-                <h3>正在获取中...</h3>
-                <p class="status-time">正在从 jeju.go.kr 获取实时信息</p>
+                <h3>閭ｅ쑉?룟룚訝?..</h3>
+                <p class="status-time">閭ｅ쑉餓?jeju.go.kr ?룟룚若욄뿶岳→겘</p>
             </div>
         </div>`;
 
     try {
-        // ★ 메인 페이지 1회 fetch (7개 탐방로 상태 한번에 포함)
+        // ??硫붿씤 ?섏씠吏 1??fetch (7媛??먮갑濡??곹깭 ?쒕쾲???ы븿)
         const proxyUrl = `${CONFIG.PROXY_URL}?url=${encodeURIComponent('https://jeju.go.kr/hallasan/index.htm')}`;
         const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(8000) });
         const html = await res.text();
 
-        // dd.situation 값을 탐방로 이름과 함께 추출
-        // 패턴: <dt>어리목탐방로</dt>...<dd class="situation">정상운영</dd>
+        // dd.situation 媛믪쓣 ?먮갑濡??대쫫怨??④퍡 異붿텧
+        // ?⑦꽩: <dt>?대━紐⑺깘諛⑸줈</dt>...<dd class="situation">?뺤긽?댁쁺</dd>
         const blockPattern = /<dl[^>]*class="main-visit-list"[\s\S]*?<\/dl>/g;
         const namePattern = /<dt>(.*?)<\/dt>/;
         const statusPattern = /<dd[^>]*class="situation"[^>]*>(.*?)<\/dd>/;
 
-        const statusMap = {}; // { '어리목탐방로': '정상운영', ... }
+        const statusMap = {}; // { '?대━紐⑺깘諛⑸줈': '?뺤긽?댁쁺', ... }
         let block;
         while ((block = blockPattern.exec(html)) !== null) {
             const nm = namePattern.exec(block[0]);
@@ -466,13 +463,13 @@ async function fetchHallasanStatus() {
             if (nm && st) statusMap[nm[1].trim()] = st[1].trim();
         }
 
-        // 파싱 결과가 없으면 에러로 처리
-        if (Object.keys(statusMap).length === 0) throw new Error('파싱 결과 없음');
+        // ?뚯떛 寃곌낵媛 ?놁쑝硫??먮윭濡?泥섎━
+        if (Object.keys(statusMap).length === 0) throw new Error('?뚯떛 寃곌낵 ?놁쓬');
 
-        // 탐방로별 상태 매핑
+        // ?먮갑濡쒕퀎 ?곹깭 留ㅽ븨
         const trails = HALLASAN_TRAILS.map(t => {
-            const koStatus = statusMap[t.nameKo] || '정상운영';
-            const info = TRAIL_STATUS_MAP[koStatus] || { cn: '正常开放', cls: 'open' };
+            const koStatus = statusMap[t.nameKo] || '?뺤긽?댁쁺';
+            const info = TRAIL_STATUS_MAP[koStatus] || { cn: '閭ｅ만凉??, cls: 'open' };
             return { ...t, statusCn: info.cn, statusCls: info.cls };
         });
 
@@ -481,10 +478,10 @@ async function fetchHallasanStatus() {
 
         container.innerHTML = `
             <div class="status-card ${overallOpen ? 'status-open' : 'status-closed'}">
-                <div class="status-icon">${overallOpen ? '✅' : '⚠️'}</div>
+                <div class="status-icon">${overallOpen ? '?? : '?좑툘'}</div>
                 <div class="status-content">
-                    <h3>${overallOpen ? '汉拿山各路线正常运营' : `部分路线限制（${closedCount}条）`}</h3>
-                    <p class="status-time">更新时间: ${now}<br>数据来源: jeju.go.kr 官方网站</p>
+                    <h3>${overallOpen ? '黎됪떯掠긷릢瓮?봇閭ｅ만瓦먫맓' : `?ⓨ늽瓮?봇?먨댍竊?{closedCount}?∽펹`}</h3>
+                    <p class="status-time">?닸뼭?띌뿴: ${now}<br>?경뜮?ζ틦: jeju.go.kr 若섉뼶營묊쳶</p>
                 </div>
             </div>`;
 
@@ -495,95 +492,90 @@ async function fetchHallasanStatus() {
                     <span class="trail-status-badge ${t.statusCls}">${t.statusCn}</span>
                 </div>
                 <div class="trail-info-compact">
-                    <span>📏 ${t.distanceCn}</span>
-                    <span>⏱️ ${t.timeCn}</span>
+                    <span>?뱩 ${t.distanceCn}</span>
+                    <span>?깍툘 ${t.timeCn}</span>
                 </div>
             </div>`).join('');
 
     } catch (e) {
-        console.warn('한라산 실시간 로드 실패, 기본값 표시:', e);
-        // 실패 시 정상운영 기본값 표시
+        console.warn('?쒕씪???ㅼ떆媛?濡쒕뱶 ?ㅽ뙣, 湲곕낯媛??쒖떆:', e);
+        // ?ㅽ뙣 ???뺤긽?댁쁺 湲곕낯媛??쒖떆
         container.innerHTML = `
             <div class="status-card status-open">
-                <div class="status-icon">✅</div>
+                <div class="status-icon">??/div>
                 <div class="status-content">
-                    <h3>汉拿山各路线正常运营</h3>
-                    <p class="status-time">更新时间: ${now}<br>
+                    <h3>黎됪떯掠긷릢瓮?봇閭ｅ만瓦먫맓</h3>
+                    <p class="status-time">?닸뼭?띌뿴: ${now}<br>
                     <a href="https://jeju.go.kr/hallasan/index.htm" target="_blank"
-                       style="color:var(--accent-blue);font-weight:600;">查看官方实时状态 →</a></p>
+                       style="color:var(--accent-blue);font-weight:600;">?η쐦若섉뼶若욄뿶?뜻???/a></p>
                 </div>
             </div>`;
         trailsEl.innerHTML = HALLASAN_TRAILS.map(t => `
             <div class="trail-card">
                 <div class="trail-header">
                     <h4>${t.nameCn}</h4>
-                    <span class="trail-status-badge open">正常开放</span>
+                    <span class="trail-status-badge open">閭ｅ만凉??/span>
                 </div>
                 <div class="trail-info-compact">
-                    <span>📏 ${t.distanceCn}</span>
-                    <span>⏱️ ${t.timeCn}</span>
+                    <span>?뱩 ${t.distanceCn}</span>
+                    <span>?깍툘 ${t.timeCn}</span>
                 </div>
             </div>`).join('');
     }
 }
 
 // ============================================================
-// 항공: 한국공항공사 API (모든 국제선 표시)
+// ??났: ?쒓뎅怨듯빆怨듭궗 API (紐⑤뱺 援?젣???쒖떆)
 // ============================================================
 
-// 주요 항공사 코드 → 중국어 이름 매핑 (국제선 운항 위주)
+// 二쇱슂 ??났??肄붾뱶 ??以묎뎅???대쫫 留ㅽ븨 (援?젣???댄빆 ?꾩＜)
 const AIRLINE_NAMES = {
-    // 한국 국적사
-    'KE': '大韩航空', 'OZ': '韩亚航空', '7C': '济州航空',
-    'LJ': '真航空', 'TW': '德威航空', 'ZE': '易斯达航空',
-    'BX': '釜山航空', 'RS': '首尔航空', 'RF': '江原航空',
-    // 중국 본토
-    'CA': '中国国际航空', 'MU': '中国东方航空', 'CZ': '中国南方航空',
-    'MF': '厦门航空', 'ZH': '深圳航空', 'HO': '吉祥航空',
-    '9C': '春秋航空', 'HU': '海南航空', 'SC': '山东航空',
-    'GJ': '长龙航空', 'QW': '青岛航空', 'JD': '首都航空',
-    // 대만/홍콩/기타
-    'CI': '中华航空', 'BR': '长荣航空', 'IT': '台湾虎航',
-    'CX': '国泰航空', 'UO': '香港快运', 'HB': '大湾区航空',
-    'NX': '澳门航空', 'TR': '酷航'
+    // ?쒓뎅 援?쟻??    'KE': '鸚㏝윪?ょ㈉', 'OZ': '?⒳틲?ょ㈉', '7C': '役롥퇍?ょ㈉',
+    'LJ': '?잒닼令?, 'TW': '孃룟쮤?ょ㈉', 'ZE': '?볠뼬渦얕닼令?,
+    'BX': '?쒎굇?ょ㈉', 'RS': '腰뽩컮?ょ㈉', 'RF': '黎잌렅?ょ㈉',
+    // 以묎뎅 蹂명넗
+    'CA': '訝?쎖?썽솀?ょ㈉', 'MU': '訝?쎖訝쒏뼶?ょ㈉', 'CZ': '訝?쎖?쀦뼶?ょ㈉',
+    'MF': '??뿨?ょ㈉', 'ZH': '曆긷쑔?ょ㈉', 'HO': '?됬ⅴ?ょ㈉',
+    '9C': '?η쭓?ょ㈉', 'HU': '役룟뜔?ょ㈉', 'SC': '掠긴툥?ょ㈉',
+    'GJ': '?욥풖?ょ㈉', 'QW': '?믣쿆?ょ㈉', 'JD': '腰뽭꺗?ょ㈉',
+    // ?留??띿쉘/湲고?
+    'CI': '訝?뜋?ょ㈉', 'BR': '?욤뜠?ょ㈉', 'IT': '?경뭬?롨닼',
+    'CX': '?썸낡?ょ㈉', 'UO': '腰숁릭恙ヨ퓧', 'HB': '鸚㎪뭬?븃닼令?,
+    'NX': '驛녜뿨?ょ㈉', 'TR': '?룩닼'
 };
 
 const STATUS_MAP = {
-    '출발': { cls: 'status-departed', cn: '已出发' },
-    '탑승중': { cls: 'status-boarding', cn: '正在登机' },
-    '탑승': { cls: 'status-boarding', cn: '正在登机' },
-    '도착': { cls: 'status-landed', cn: '已到达' },
-    '결항': { cls: 'status-cancelled', cn: '已取消' },
-    '사전결항': { cls: 'status-cancelled', cn: '提前取消' },
-    '지연': { cls: 'status-delayed', cn: '延误' },
-    '정시': { cls: 'status-ontime', cn: '准时' },
-    '운항': { cls: 'status-ontime', cn: '准时' },
-    '입항': { cls: 'status-landed', cn: '已到达' },
-    '입항지연': { cls: 'status-delayed', cn: '到达延误' },
-    '출발지연': { cls: 'status-delayed', cn: '出发延误' },
-    '회항': { cls: 'status-ontime', cn: '返航/备降' }
+    '異쒕컻': { cls: 'status-departed', cn: '藥꿨눣?? },
+    '?묒듅以?: { cls: 'status-boarding', cn: '閭ｅ쑉?삥쑛' },
+    '?묒듅': { cls: 'status-boarding', cn: '閭ｅ쑉?삥쑛' },
+    '?꾩갑': { cls: 'status-landed', cn: '藥꿨댆渦? },
+    '寃고빆': { cls: 'status-cancelled', cn: '藥꿨룚易??? },
+    '?ъ쟾寃고빆': { cls: 'status-cancelled', cn: '?먨뎺?뽪텋 ?? },
+    '吏??: { cls: 'status-delayed', cn: '兩띈?' },
+    '?뺤떆': { cls: 'status-ontime', cn: '?녷뿶' },
+    '?댄빆': { cls: 'status-ontime', cn: '?녷뿶' },
+    '?낇빆': { cls: 'status-landed', cn: '藥꿨댆渦? },
+    '?낇빆吏??: { cls: 'status-delayed', cn: '?계씨兩띈?' },
+    '異쒕컻吏??: { cls: 'status-delayed', cn: '?뷴룕兩띈?' }
 };
 
 function getStatusBadge(rawStatus) {
-    if (!rawStatus) return `<span class="status-badge status-ontime">正常</span>`;
-    const s = Object.keys(STATUS_MAP).find(k => rawStatus.trim().includes(k));
-    const info = s ? STATUS_MAP[s] : { cls: 'status-ontime', cn: rawStatus };
-    // 만약 매핑된 번역이 한국어라면(매핑 실패 등) 기본 '正常' 표시 시도
-    const finalCn = /[ㄱ-ㅎ가-힣]/.test(info.cn) ? '正常' : info.cn;
-    return `<span class="status-badge ${info.cls}">${finalCn}</span>`;
+    const s = Object.keys(STATUS_MAP).find(k => rawStatus && rawStatus.includes(k));
+    const info = s ? STATUS_MAP[s] : { cls: 'status-ontime', cn: rawStatus || '閭ｅ만' };
+    return `<span class="status-badge ${info.cls}">${info.cn}</span>`;
 }
 
 const AIRLINE_MARKS = {
-    'KE': '🇰orean', 'OZ': '🇦siana', 'LJ': '🇯inAir', '7C': '🇯ejuAir', 'TW': '🇹way', 'ZE': '🇪ast', 'BX': '🇦irBusan', 'RS': '🇦irSeoul'
+    'KE': '?눖orean', 'OZ': '?눇siana', 'LJ': '?눓inAir', '7C': '?눓ejuAir', 'TW': '?눢way', 'ZE': '?눎ast', 'BX': '?눇irBusan', 'RS': '?눇irSeoul'
 };
 
 function getAirlineMark(flightId, rawAirline) {
     const code = (flightId || '').slice(0, 2).toUpperCase();
     const markMap = {
-        'KE': '✈️', 'OZ': '✈️', 'LJ': '🦋', '7C': '🍊', 'TW': '✈️', 'ZE': '✈️', 'BX': '✈️', 'RS': '✈️',
-        'CA': '🇨🇳', 'MU': '✈️', 'CZ': '✈️', '9C': '🍏'
+        'KE': '?덌툘', 'OZ': '?덌툘', 'LJ': '?쫳', '7C': '?뜇', 'TW': '?덌툘', 'ZE': '?덌툘', 'BX': '?덌툘', 'RS': '?덌툘',
+        'CA': '?눊?눛', 'MU': '?덌툘', 'CZ': '?덌툘', '9C': '?뜌'
     };
-    return markMap[code] || '✈️';
+    return markMap[code] || '?덌툘';
 }
 
 function getAirlineName(flightId, rawAirline) {
@@ -591,44 +583,18 @@ function getAirlineName(flightId, rawAirline) {
     return AIRLINE_NAMES[code] || rawAirline || code;
 }
 
-const CITY_NAMES = {
-    '인천': '仁川', '김포': '金浦', '김해': '金海', '제주': '济州',
-    '타이페이': '台北', '타오위안': '桃园', '상하이': '上海', '푸동': '浦东', '홍공': '香港', '홍콩': '香港',
-    '북경': '北京', '베이징': '北京', '대싱': '大兴', '다싱': '大兴',
-    '광저우': '广州', '선전': '深圳', '항저우': '杭州', '난징': '南京',
-    '칭다오': '青岛', '시안': '西安', '청두': '成都', '충칭': '重庆',
-    '쿤밍': '昆明', '톈진': '天津', '다롄': '大连', '선양': '沈阳',
-    '하얼빈': '哈尔滨', '무석': '无锡', '닝보': '宁波', '복주': '福州',
-    '샤먼': '厦门', '싼야': '三亚', '하이커우': '海口', '제난': '济南',
-    '창춘': '长春', '정저우': '郑州', '원저우': '温州', '산터우': '汕头',
-    '계림': '桂林', '난닝': '南宁', '허페이': '合肥', '타이위안': '太原',
-    '난창': '南昌', '란저우': '兰州', '시닝': '西宁', '후허하오터': '呼和浩特',
-    '우루무치': '乌鲁木齐', '창사': '长沙', '장가계': '张家界', '옌타이': '烟台',
-    '웨이하이': '威海', '이우': '义乌', '낙양': '洛阳', '진저우': '锦州',
-    '린이': '临沂', '은스': '恩施', '인촨': '银川', '화이안': '淮安',
-    '가오슝': '高雄', '타이중': '台中', '타이난': '台南', '마카오': '澳门'
-};
-
-function getCityName(rawCity) {
-    if (!rawCity) return '-';
-    const s = Object.keys(CITY_NAMES).find(k => rawCity.includes(k));
-    return s ? CITY_NAMES[s] : rawCity;
-}
-
-// 제주/김포/김해 등 주요 국내 공항 코드 (국제선 필터링용)
+// ?쒖＜/源??源????二쇱슂 援?궡 怨듯빆 肄붾뱶 (援?젣???꾪꽣留곸슜)
 const DOMESTIC_AIRPORTS = new Set(['CJU', 'GMP', 'PUS', 'CJJ', 'TAE', 'KWJ', 'USN', 'KUV', 'WJU', 'HIN', 'RSU', 'KPO', 'MWX', 'YNY']);
 
-// 중화권 (중국 본토, 대만, 홍콩, 마카오) 주요 공항 코드
+// 以묓솕沅?(以묎뎅 蹂명넗, ?留? ?띿쉘, 留덉뭅?? 二쇱슂 怨듯빆 肄붾뱶
 const REGION_AIRPORTS = new Set([
-    // 중국 본토
+    // 以묎뎅 蹂명넗
     'PVG', 'SHA', 'PEK', 'PKX', 'HGH', 'CAN', 'SZX', 'NKG', 'TAO', 'XIY', 'CTU', 'CKG',
     'KMG', 'TSN', 'DLC', 'SHE', 'HRB', 'WUX', 'NGB', 'FOC', 'XMN', 'SYX', 'HAK', 'TNA',
     'CGQ', 'CGO', 'WNZ', 'SWA', 'KWL', 'NNG', 'HFE', 'TYN', 'KHN', 'LHW', 'XNN', 'HET',
     'URC', 'CSX', 'DYG', 'YNT', 'WEI', 'YIW', 'LYA', 'JNZ', 'LYI', 'ENH', 'INC', 'HIA',
-    // 대만
-    'TPE', 'TSA', 'KHH', 'RMQ', 'TNN',
-    // 홍콩/마카오
-    'HKG', 'MFM'
+    // ?留?    'TPE', 'TSA', 'KHH', 'RMQ', 'TNN',
+    // ?띿쉘/留덉뭅??    'HKG', 'MFM'
 ]);
 
 async function fetchFlights(type) {
@@ -636,12 +602,12 @@ async function fetchFlights(type) {
     if (!container) return;
 
     if (!CONFIG.PUBLIC_DATA_KEY) {
-        container.innerHTML = `<div style="text-align:center;padding:32px 16px;"><div style="font-size:2rem;margin-bottom:12px;">⚠️</div><div style="font-weight:700;font-size:1rem;color:var(--text-primary);margin-bottom:6px;">API密钥未设置</div><div style="color:var(--text-muted);font-size:0.85rem;margin-bottom:16px;">请在 script.js 의 CONFIG.PUBLIC_DATA_KEY 中 입력하세요.<br>韩国公共数据门户 API 密钥</div><button onclick="fetchFlights('${type}')" style="background:var(--primary-gradient);color:white;border:none;padding:8px 20px;border-radius:8px;font-size:0.9rem;cursor:pointer;font-weight:600;">🔄 重新加载</button></div>`;
+        container.innerHTML = `<div style="text-align:center;padding:32px 16px;"><div style="font-size:2rem;margin-bottom:12px;">?좑툘</div><div style="font-weight:700;font-size:1rem;color:var(--text-primary);margin-bottom:6px;">API野녽뮙?よ?營?/div><div style="color:var(--text-muted);font-size:0.85rem;margin-bottom:16px;">瑥룟쑉 script.js ??CONFIG.PUBLIC_DATA_KEY 訝??낅젰?섏꽭??<br>?⒴쎖?у뀻?경뜮?ⓩ댎 API 野녽뮙</div><button onclick="fetchFlights('${type}')" style="background:var(--primary-gradient);color:white;border:none;padding:8px 20px;border-radius:8px;font-size:0.9rem;cursor:pointer;font-weight:600;">?봽 ?띷뼭?좄슬</button></div>`;
         return;
     }
 
     try {
-        container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">正在加载...</div>';
+        container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">閭ｅ쑉?좄슬...</div>';
 
         const today = new Date();
         const ymd = today.getFullYear() + String(today.getMonth() + 1).padStart(2, '0') + String(today.getDate()).padStart(2, '0');
@@ -677,7 +643,7 @@ async function fetchFlights(type) {
                 arr_code: getTag('arrAirportCode').toUpperCase(),
                 airline: getTag('airline'),
                 status: getTag('rmkKor'),
-                is_intl: getTag('io') === 'I' || getTag('line') === '국제'
+                is_intl: getTag('io') === 'I' || getTag('line') === '援?젣'
             };
         });
 
@@ -689,44 +655,36 @@ async function fetchFlights(type) {
 
         renderFlightList(container, filteredFlights, type);
     } catch (e) {
-        console.error('항공 API 오류:', e);
+        console.error('??났 API ?ㅻ쪟:', e);
         container.innerHTML = `
             <div style="text-align:center;padding:32px 16px;">
-                <div style="font-size:2rem;margin-bottom:12px;">❌</div>
-                <div style="font-weight:700;font-size:1rem;color:var(--text-primary);margin-bottom:6px;">数据加载失败</div>
-                <div style="color:var(--text-muted);font-size:0.85rem;margin-bottom:16px;">API连接错误，请稍后重试<br><span style="font-size:0.7rem;">${e.message}</span></div>
+                <div style="font-size:2rem;margin-bottom:12px;">??/div>
+                <div style="font-weight:700;font-size:1rem;color:var(--text-primary);margin-bottom:6px;">?경뜮?좄슬鸚김뇰</div>
+                <div style="color:var(--text-muted);font-size:0.85rem;margin-bottom:16px;">API瓦욄렏?숃?竊뚩?葉띶릮?띹캊<br><span style="font-size:0.7rem;">${e.message}</span></div>
                 <button onclick="fetchFlights('${type}')"
                     style="background:var(--primary-gradient);color:white;border:none;
                            padding:8px 20px;border-radius:8px;font-size:0.9rem;
                            cursor:pointer;font-weight:600;">
-                    🔄 重新加载
+                    ?봽 ?띷뼭?좄슬
                 </button>
             </div>`;
     }
 }
 
 function renderFlightList(container, items, type) {
-    // 업데이트 시간 표시
-    const updateEl = document.getElementById('flight-update-time');
-    if (updateEl) {
-        const now = new Date();
-        const pad = n => String(n).padStart(2, '0');
-        updateEl.textContent = `🕐 更新时间: ${now.getFullYear()}.${pad(now.getMonth()+1)}.${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
-    }
-
     if (!items.length) {
-        container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">暂无相关航班信息</div>';
+        container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">?귝뿞?멨뀽?ょ룺岳→겘</div>';
         return;
     }
 
-    // 동적 헤더 생성 (데이터가 있을 때만)
-    const destHeader = type === 'arrive' ? '出发地' : '目的地';
+    // ?숈쟻 ?ㅻ뜑 ?앹꽦 (?곗씠?곌? ?덉쓣 ?뚮쭔)
+    const destHeader = type === 'arrive' ? '?뷴룕?? : '??쉪??;
     let htmlMsg = `<div class="flight-row flight-header">
-        <div class="flight-col">航班号</div>
-        <div class="flight-col">航空公司</div>
+        <div class="flight-col">?ょ룺??/div>
+        <div class="flight-col">?ょ㈉?у뤈</div>
         <div class="flight-col">${destHeader}</div>
-        <div class="flight-col">预定/实际</div>
-        <div class="flight-col">状态</div>
+        <div class="flight-col">窯꾢츣/若욇솀</div>
+        <div class="flight-col">?뜻?/div>
     </div>`;
 
     htmlMsg += items.map(f => {
@@ -735,17 +693,16 @@ function renderFlightList(container, items, type) {
         const estTimeRaw = (f.est_time || '').toString();
         const schedStr = schedTimeRaw.length >= 4 ? `${schedTimeRaw.slice(0, 2)}:${schedTimeRaw.slice(2, 4)}` : '-';
         const estStr = estTimeRaw.length >= 4 && estTimeRaw !== schedTimeRaw
-            ? `<br><small style="color:#f59e0b">→ ${estTimeRaw.slice(0, 2)}:${estTimeRaw.slice(2, 4)}</small>` : '';
+            ? `<br><small style="color:#f59e0b">??${estTimeRaw.slice(0, 2)}:${estTimeRaw.slice(2, 4)}</small>` : '';
 
-        // 목적지/출발지 '/' 줄바꿈 처리 및 번역
-        let rawCity = type === 'arrive' ? (f.dep_airport || '-') : (f.arr_airport || '-');
-        let city = getCityName(rawCity);
+        // 紐⑹쟻吏/異쒕컻吏 '/' 以꾨컮轅?泥섎━
+        let city = type === 'arrive' ? (f.dep_airport || '-') : (f.arr_airport || '-');
         if (city.includes('/')) {
             city = city.replace(/\//g, '/<br>');
         }
 
-        const airlineName = getAirlineName(f.flight_id, f.airline);
-        const statusSpan = getStatusBadge(f.status);
+        const airlineName = f.airline || '-';
+        const statusSpan = getStatusBadge(f.status || '吏??);
 
         return `<div class="flight-row">
             <div class="flight-col">${flightNo}</div>
@@ -772,7 +729,7 @@ function switchFlightTab(type) {
     fetchFlights(type);
 }
 
-// CCTV 모달
+// CCTV 紐⑤떖
 function openCctvModal(cam) {
     const modal = document.getElementById('cctv-modal');
     const body = document.getElementById('modal-body');
@@ -808,13 +765,13 @@ function closeCctvModal() {
     if (body) body.innerHTML = '';
 }
 
-// ==================== Found Goods (경찰청 습득물 API) ====================
+// ==================== Found Goods (寃쎌같泥??듬뱷臾?API) ====================
 async function fetchFoundGoods() {
     const grid = document.getElementById('lost-goods-grid');
     if (!grid) return;
 
     if (!CONFIG.PUBLIC_DATA_KEY) {
-        grid.innerHTML = '<div class="loading-lost">未设置 API Key</div>';
+        grid.innerHTML = '<div class="loading-lost">?よ?營?API Key</div>';
         return;
     }
 
@@ -824,38 +781,41 @@ async function fetchFoundGoods() {
         const categoryInput = document.getElementById('pkupCmdtyLclsfCd');
 
         // 날짜 기본값 설정 (어제 ~ 어제)
-        const dateInput = document.getElementById('lost-date');
-        if (dateInput && !dateInput.value) {
+        if (startDateInput && !startDateInput.value) {
             const yesterday = new Date();
             yesterday.setDate(yesterday.getDate() - 1);
-            dateInput.value = yesterday.toISOString().split('T')[0];
+            const formatDateInput = (d) => d.toISOString().split('T')[0];
+            const yymmdd = formatDateInput(yesterday);
+            startDateInput.value = yymmdd;
+            endDateInput.value = yymmdd;
         }
 
-        const selectedDate = (dateInput?.value || '').replace(/-/g, '');
+        const startDate = (startDateInput?.value || '').replace(/-/g, '');
+        const endDate = (endDateInput?.value || '').replace(/-/g, '');
         const category = categoryInput?.value || '';
 
         const countDisplay = document.getElementById('lost-result-count');
         if (countDisplay) countDisplay.innerHTML = '';
 
-        grid.innerHTML = '<div class="loading-lost"><p>正在搜索济州实时数据...</p></div>';
+        grid.innerHTML = '<div class="loading-lost"><p>閭ｅ쑉?쒐뇨役롥퇍若욄뿶?경뜮...</p></div>';
 
         const commonParams = [
             `serviceKey=${CONFIG.PUBLIC_DATA_KEY}`,
             `numOfRows=200`,
             `pageNo=1`,
             `N_FD_LCT_CD=LCP000`,
-            `START_YMD=${selectedDate || ''}`,
-            `END_YMD=${selectedDate || ''}`
+            `START_YMD=${startDate || ''}`,
+            `END_YMD=${endDate || ''}`
         ];
 
-        // 분류(카테고리) 코드가 있으면 추가 (메인 대분류 필터: PRDT_CL_CD_01)
+        // 遺꾨쪟(移댄뀒怨좊━) 肄붾뱶媛 ?덉쑝硫?異붽? (硫붿씤 ?遺꾨쪟 ?꾪꽣: PRDT_CL_CD_01)
         if (category) {
             commonParams.push(`PRDT_CL_CD_01=${category}`);
         }
 
-        // 1. 경찰청 습득물 API (경찰관서 습득물)
+        // 1. 寃쎌같泥??듬뱷臾?API (寃쎌같愿???듬뱷臾?
         const polUrl = `http://apis.data.go.kr/1320000/LosfundInfoInqireService/getLosfundInfoAccToClAreaPd?${commonParams.join('&')}`;
-        // 2. 포털기관(공항, 택시, 지하철 등) 습득물 API - 사용자가 제공한 신규 API 적용
+        // 2. ?ы꽭湲곌?(怨듯빆, ?앹떆, 吏?섏쿋 ?? ?듬뱷臾?API - ?ъ슜?먭? ?쒓났???좉퇋 API ?곸슜
         const portalUrl = `http://apis.data.go.kr/1320000/LosPtfundInfoInqireService/getPtLosfundInfoAccToClAreaPd?${commonParams.join('&')}`;
 
         console.log(`[FoundGoods] Fetching from Police and Portal...`);
@@ -868,19 +828,19 @@ async function fetchFoundGoods() {
             return Array.from(xmlDoc.querySelectorAll('item')).map(node => {
                 const getTag = (tag) => node.querySelector(tag)?.textContent || '';
                 const rawCategory = getTag('prdtClNm') || '';
-                const fndPlace = getTag('fdFndPlace'); // 상세 습득 장소 (경찰 API)
-                const lctNm = getTag('lctNm');         // 습득 기관명 (경찰 API)
-                const storagePlace = getTag('depPlace'); // 보관 장소 (공히 사용)
+                const fndPlace = getTag('fdFndPlace'); // ?곸꽭 ?듬뱷 ?μ냼 (寃쎌같 API)
+                const lctNm = getTag('lctNm');         // ?듬뱷 湲곌?紐?(寃쎌같 API)
+                const storagePlace = getTag('depPlace'); // 蹂닿? ?μ냼 (怨듯엳 ?ъ슜)
 
                 return {
                     id: getTag('atcId'),
                     name: getTag('fdPrdtNm'),
                     place: storagePlace,
                     date: getTag('fdYmd'),
-                    category: rawCategory.split(' > ')[0] || '其他',
+                    category: rawCategory.split(' > ')[0] || '?뜸퍟',
                     img: getTag('fdFilePathImg'),
-                    // 습득장소가 비어있으면 보관장소를 대신 표시 (포털기관 데이터 대응)
-                    lct: fndPlace || lctNm || storagePlace || '정보 없음'
+                    // ?듬뱷?μ냼媛 鍮꾩뼱?덉쑝硫?蹂닿??μ냼瑜?????쒖떆 (?ы꽭湲곌? ?곗씠?????
+                    lct: fndPlace || lctNm || storagePlace || '?뺣낫 ?놁쓬'
                 };
             });
         };
@@ -892,43 +852,41 @@ async function fetchFoundGoods() {
 
         const items = [...polItems, ...portalItems].sort((a, b) => b.date.localeCompare(a.date));
 
-        // 데이터 캐싱
+        // ?곗씠??罹먯떛
         cachedLostItems = items;
 
-        // 건수 표시
+        // 嫄댁닔 ?쒖떆
         if (countDisplay) {
-            countDisplay.innerHTML = `共查询到 <strong>${items.length}</strong> 件丢失物品。`;
+            countDisplay.innerHTML = `珥?<strong>${items.length}</strong>嫄댁쓽 ?듬뱷臾쇱씠 議고쉶?섏뿀?듬땲??`;
         }
 
-        // 현재 뷰 모드에 따라 렌더링
-        if (currentLostView === 'card') {
+        // ?꾩옱 酉?紐⑤뱶???곕씪 ?뚮뜑留?        if (currentLostView === 'card') {
             renderLostGoods(grid, items);
         } else {
             renderLostGoodsTable(items);
         }
     } catch (e) {
-        console.error('습득물 API 오류:', e);
-        grid.innerHTML = '<div class="loading-lost">无法加载实时 데이터，请稍后再试</div>';
+        console.error('?듬뱷臾?API ?ㅻ쪟:', e);
+        grid.innerHTML = '<div class="loading-lost">?졿퀡?좄슬若욄뿶 ?곗씠?곤펽瑥루쮰?롥냽瑥?/div>';
     }
 }
 
-// 수동 검색 함수 (돋보기 버튼 클릭 시)
+// ?섎룞 寃???⑥닔 (?뗫낫湲?踰꾪듉 ?대┃ ??
 function fetchFoundGoodsManual() {
     fetchFoundGoods();
 }
 
-// 뷰 모드 및 데이터 상태 변수
-let currentLostView = 'card';
+// 酉?紐⑤뱶 諛??곗씠???곹깭 蹂??let currentLostView = 'card';
 let cachedLostItems = [];
 
 function switchLostView(mode) {
     currentLostView = mode;
 
-    // 버튼 상태 업데이트
+    // 踰꾪듉 ?곹깭 ?낅뜲?댄듃
     document.getElementById('btn-view-card').classList.toggle('active', mode === 'card');
     document.getElementById('btn-view-table').classList.toggle('active', mode === 'table');
 
-    // 컨테이너 가시성 제어 강화
+    // 而⑦뀒?대꼫 媛?쒖꽦 ?쒖뼱 媛뺥솕
     const grid = document.getElementById('lost-goods-grid');
     const tableContainer = document.getElementById('lost-goods-table-container');
 
@@ -944,7 +902,7 @@ function switchLostView(mode) {
         tableContainer.classList.add('active');
     }
 
-    // 캐시된 데이터가 있으면 즉시 렌더링, 없으면 새로 페치
+    // 罹먯떆???곗씠?곌? ?덉쑝硫?利됱떆 ?뚮뜑留? ?놁쑝硫??덈줈 ?섏튂
     if (cachedLostItems.length > 0) {
         if (mode === 'card') {
             renderLostGoods(grid, cachedLostItems);
@@ -961,21 +919,21 @@ function renderLostGoodsTable(items) {
     if (!tableBody) return;
 
     if (!items || items.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;">该期间内暂无相关记录</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;">瑥ζ쐿?닷냵?귝뿞?멨뀽溫겼퐬</td></tr>';
         return;
     }
 
     tableBody.innerHTML = items.map(item => `
         <tr>
             <td>
-                ${item.img ? `<img src="${item.img}" class="lost-table-img" onerror="this.src='https://via.placeholder.com/40'">` : '<div class="lost-table-img" style="display:flex;align-items:center;justify-content:center;font-size:1rem;">📦</div>'}
+                ${item.img ? `<img src="${item.img}" class="lost-table-img" onerror="this.src='https://via.placeholder.com/40'">` : '<div class="lost-table-img" style="display:flex;align-items:center;justify-content:center;font-size:1rem;">?벀</div>'}
             </td>
             <td><span class="lost-category-badge" style="font-size:0.7rem;padding:2px 8px;">${item.category}</span></td>
             <td style="font-weight:600;">${item.name}</td>
             <td><span class="lost-date" style="font-size:0.8rem;">${item.date}</span></td>
             <td style="color:var(--text-secondary);font-size:0.8rem;">${item.place}</td>
             <td>
-                <button onclick="openLostDetailModalByIndex(${items.indexOf(item)})" class="lost-table-btn">详细</button>
+                <button onclick="openLostDetailModalByIndex(${items.indexOf(item)})" class="lost-table-btn">瑥?퍏</button>
             </td>
         </tr>
     `).join('');
@@ -983,7 +941,7 @@ function renderLostGoodsTable(items) {
 
 function renderLostGoods(grid, items) {
     if (!items || items.length === 0) {
-        grid.innerHTML = '<div class="loading-lost">该期间内暂无相关记录</div>';
+        grid.innerHTML = '<div class="loading-lost">瑥ζ쐿?닷냵?귝뿞?멨뀽溫겼퐬</div>';
         return;
     }
 
@@ -992,7 +950,7 @@ function renderLostGoods(grid, items) {
             <div class="lost-img-box">
                 ${item.img ?
             `<img src="${item.img}" alt="${item.name}" onerror="this.src='https://via.placeholder.com/300?text=No+Image'">` :
-            `<div class="no-lost-img">📦</div>`
+            `<div class="no-lost-img">?벀</div>`
         }
                 <div class="lost-category-badge-overlay">${item.category}</div>
             </div>
@@ -1015,7 +973,7 @@ function openLostDetailModalByIndex(index) {
         <div class="lost-modal-img-container">
             ${item.img ?
             `<img src="${item.img}" class="lost-modal-img" onerror="this.src='https://via.placeholder.com/500?text=No+Image'">` :
-            `<div class="lost-modal-no-img">📦</div>`
+            `<div class="lost-modal-no-img">?벀</div>`
         }
         </div>
         <div class="lost-modal-info">
@@ -1025,20 +983,20 @@ function openLostDetailModalByIndex(index) {
             </div>
             <div class="lost-modal-details">
                 <div class="lost-modal-field">
-                    <span class="lost-modal-label">拾获日期</span>
+                    <span class="lost-modal-label">?듬뱷?쇱옄</span>
                     <span class="lost-modal-value">${item.date}</span>
                 </div>
                 <div class="lost-modal-field">
-                    <span class="lost-modal-label">保管地点</span>
+                    <span class="lost-modal-label">蹂닿??μ냼</span>
                     <span class="lost-modal-value">${item.place}</span>
                 </div>
             </div>
             <div class="lost-modal-footer">
-                <button class="lost-modal-btn secondary" onclick="closeLostDetailModal()">关闭</button>
-                <button class="lost-modal-btn primary" onclick="showWechatQR()">咨询客服</button>
+                <button class="lost-modal-btn secondary" onclick="closeLostDetailModal()">?リ린</button>
+                <button class="lost-modal-btn primary" onclick="showWechatQR()">臾몄쓽?섍린</button>
             </div>
             <div id="wechat-qr-container" style="display:none; text-align:center; padding: 15px; border-top: 1px solid #eee;">
-                <p style="font-size: 14px; color: #666; margin-bottom: 10px;">스캔하여 위챗으로 문의해주세요</p>
+                <p style="font-size: 14px; color: #666; margin-bottom: 10px;">?ㅼ틪?섏뿬 ?꾩콟?쇰줈 臾몄쓽?댁＜?몄슂</p>
                 <img src="assets/wechat_qr.png" style="width: 200px; height: 200px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
             </div>
         </div>
@@ -1052,17 +1010,19 @@ function closeLostDetailModal() {
     const modal = document.getElementById('lost-detail-modal');
     modal.style.display = 'none';
     document.body.style.overflow = 'auto';
-    // QR 컨테이너 초기화
-    const qrContainer = document.getElementById('wechat-qr-container');
+    // QR 而⑦뀒?대꼫 珥덇린??    const qrContainer = document.getElementById('wechat-qr-container');
     if (qrContainer) qrContainer.style.display = 'none';
 }
 
 function showWechatQR() {
-    // 기존 컨테이너 표시 대신 전체 화면 모달인 openWechatQR 호출로 통합
-    openWechatQR();
+    const qrContainer = document.getElementById('wechat-qr-container');
+    if (qrContainer) {
+        qrContainer.style.display = 'block';
+        qrContainer.scrollIntoView({ behavior: 'smooth' });
+    }
 }
 
-// ==================== Weather Alerts (기상특보) ====================
+// ==================== Weather Alerts (湲곗긽?밸낫) ====================
 // (Mock data for now, as real API is complex)
 async function fetchWeatherAlerts() {
     const alertsContainer = document.getElementById('weather-alerts-container');
@@ -1071,7 +1031,7 @@ async function fetchWeatherAlerts() {
     if (!CONFIG.PUBLIC_DATA_KEY) return;
 
     try {
-        // 기상청 기상특보 조회 서비스 (stnId=184 는 제주)
+        // 湲곗긽泥?湲곗긽?밸낫 議고쉶 ?쒕퉬??(stnId=184 ???쒖＜)
         const targetUrl = `https://apis.data.go.kr/1360000/WthrWrnInfoService/getWthrWrnMsg?serviceKey=${encodeURIComponent(CONFIG.PUBLIC_DATA_KEY)}&numOfRows=10&pageNo=1&dataType=JSON&stnId=184`;
         const url = CONFIG.PROXY_URL + '?url=' + encodeURIComponent(targetUrl);
 
@@ -1079,158 +1039,131 @@ async function fetchWeatherAlerts() {
         if (!res.ok) throw new Error('Alert API failed');
 
         const data = await res.json();
-        const rawItems = data?.response?.body?.items?.item;
-        
-        // 데이터 정제: 타이틀이 있는 항목만 필터링
-        let items = [];
-        if (Array.isArray(rawItems)) {
-            items = rawItems.filter(item => item && item.title && item.title.trim() !== '');
-        } else if (rawItems && rawItems.title && rawItems.title.trim() !== '') {
-            items = [rawItems];
-        }
+        const items = data?.response?.body?.items?.item;
 
-        if (items.length > 0) {
+        if (items && items.length > 0) {
             alertsContainer.style.display = 'flex';
-            alertsContainer.innerHTML = items.map(item => `
-                <div class="weather-alert-card">
-                    <div class="alert-type-badge">제주특보</div>
-                    <div class="alert-msg">🚨 ${item.title}</div>
-                </div>
-            `).join('');
+            // "?쒖＜" 媛 ?ы븿???밸낫留??꾪꽣留곹븯嫄곕굹 ?꾩껜 ?몄텧
+            alertsContainer.innerHTML = items.map(item => {
+                // t6: ?밸낫 ?댁슜, t1: 諛쒗슚 ?쒓컖 ??(API 踰꾩쟾???곕씪 ?ㅻ? ???덉쓬)
+                const title = item.title || '湲곗긽 ?밸낫';
+                return `
+                    <div class="weather-alert-card">
+                        <div class="alert-type-badge">?쒖＜?밸낫</div>
+                        <div class="alert-msg">?슚 ${title}</div>
+                    </div>
+                `;
+            }).join('');
         } else {
-            // 특보가 없을 경우 "특보 없음" 표시 (사용자 요청)
-            showNoAlerts(alertsContainer);
+            alertsContainer.style.display = 'none';
         }
     } catch (e) {
         console.error('Weather alert fetch error:', e);
-        const alertsContainer = document.getElementById('weather-alerts-container');
-        if (alertsContainer) {
-            showNoAlerts(alertsContainer);
+        // 403 ?ㅻ쪟 ??沅뚰븳 臾몄젣 ???ъ슜?먯뿉寃??덈궡 硫붿떆吏 ?쒖떆 媛??(?좏깮 ?ы빆)
+        if (e.message.includes('403') || String(e).includes('403')) {
+            console.warn('湲곗긽?밸낫 API ?묎렐 沅뚰븳???놁뒿?덈떎. 怨듦났?곗씠?고룷?몄뿉???쒖슜 ?좎껌 ?뱀씤 ?щ?瑜??뺤씤?섏꽭??');
         }
+        alertsContainer.style.display = 'none';
     }
 }
 
 /**
- * 특보가 없을 때의 UI를 생성합니다.
- */
-function showNoAlerts(container) {
-    container.style.display = 'flex';
-    container.innerHTML = `
-        <div class="weather-alert-card no-alerts" style="background: rgba(255,255,255,0.05); border: 1px dashed rgba(255,255,255,0.2); opacity: 0.8;">
-            <div class="alert-type-badge" style="background: #333;">气象信息</div>
-            <div class="alert-msg" style="color: #bbb; font-weight: normal;">当前无气象特报</div>
-        </div>
-    `;
-}
-
-/**
- * Visit Jeju API를 이용한 축제/행사 정보 조회
- * API 응답에 행사 시작/종료 날짜 필드가 없으므로, 이미지 경로에 포함된
- * 업로드 년월(yyyymm)을 "등록 시점"으로 사용해 최근 6개월 이내 항목만 표시합니다.
+ * Visit Jeju API瑜??댁슜??異뺤젣/?됱궗 ?뺣낫 議고쉶
  */
 async function fetchFestivals() {
     const listContainer = document.getElementById('festival-list');
     if (!listContainer) return;
 
     try {
-        listContainer.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">正在获取并加载济州活动...</div>';
+        listContainer.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">閭ｅ쑉?룟룚亮뜹뒥饔썸탮二쇗뉵??..</div>';
 
-        // 1. 기본 최신 등록순 목록
-        const baseTargetUrl = `https://api.visitjeju.net/vsjApi/contents/searchList?apiKey=${CONFIG.VISIT_JEJU_KEY}&locale=kr&category=c5&sorting=regdate+desc&pageSize=50`;
-        const baseUrl = CONFIG.PROXY_URL + '?url=' + encodeURIComponent(baseTargetUrl);
+        // Visit Jeju API ?꾩슜 ?寃?URL (異뺤젣/?됱궗 移댄뀒怨좊━ c5, 理쒖떊 ?깅줉???뺣젹)
+        const targetUrl = `https://api.visitjeju.net/vsjApi/contents/searchList?apiKey=${CONFIG.VISIT_JEJU_KEY}&locale=kr&category=c5&sorting=regdate+desc`;
+        const url = CONFIG.PROXY_URL + '?url=' + encodeURIComponent(targetUrl);
 
-        // 2. 2026 키워드 검색 목록 (누락 방지)
-        const searchTargetUrl = `https://api.visitjeju.net/vsjApi/contents/searchList?apiKey=${CONFIG.VISIT_JEJU_KEY}&locale=kr&category=c5&title=2026&pageSize=50`;
-        const searchUrl = CONFIG.PROXY_URL + '?url=' + encodeURIComponent(searchTargetUrl);
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('API request failed');
 
-        const [resBase, resSearch] = await Promise.all([
-            fetch(baseUrl),
-            fetch(searchUrl)
-        ]);
+        const data = await res.json();
+        if (!data || !data.items || data.items.length === 0) {
+            listContainer.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">현재 진행 중인 축제가 없습니다.</div>';
+            return;
+        }
 
-        const [dataBase, dataSearch] = await Promise.all([
-            resBase.ok ? resBase.json() : { items: [] },
-            resSearch.ok ? resSearch.json() : { items: [] }
-        ]);
+        // 데이터 가공 및 정렬 로직 개선
+        const processedItems = data.items.map(item => {
+            const tagStr = item.tag || '';
+            const dateMatch = tagStr.match(/(\d{4}\.\d{2}\.\d{2})/g);
+            let startDate = null;
+            let endDate = null;
+            let isPast = false;
+            let isUpcoming = false;
+            let isOngoing = false;
 
-        // 데이터 통합 및 중복 제거
-        const allItemsMap = new Map();
-        [...(dataBase.items || []), ...(dataSearch.items || [])].forEach(item => {
-            if (item.contentsid) allItemsMap.set(item.contentsid, item);
+            if (dateMatch && dateMatch.length >= 1) {
+                startDate = new Date(dateMatch[0].replace(/\./g, '-'));
+                endDate = dateMatch.length >= 2 ? new Date(dateMatch[1].replace(/\./g, '-')) : startDate;
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                if (today > endDate) isPast = true;
+                else if (today < startDate) isUpcoming = true;
+                else isOngoing = true;
+            }
+
+            return { ...item, startDate, endDate, isPast, isUpcoming, isOngoing, tagStr };
         });
 
-        const allItems = Array.from(allItemsMap.values());
+        // 진행 중 > 예정된 순으로 정렬하고 종료된 것은 뒤로 보냄
+        const sortedItems = processedItems.sort((a, b) => {
+            if (a.isOngoing && !b.isOngoing) return -1;
+            if (!a.isOngoing && b.isOngoing) return 1;
+            if (a.isUpcoming && b.isPast) return -1;
+            if (a.isPast && b.isUpcoming) return 1;
+            return 0;
+        });
 
-        if (allItems.length === 0) {
-            listContainer.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">暂无近期节日活动信息</div>';
-            return;
-        }
+        listContainer.innerHTML = sortedItems.slice(0, 15).map(item => {
+            const title = item.title || '제목 없음';
+            const imgUrl = item.repPhoto?.photoid?.thumbnailpath || 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=400';
+            const place = item.address || '役롥퇍略쎾뀲??;
 
-        const now = new Date();
-        const nowYmd = now.toISOString().split('T')[0].replace(/-/g, ''); // e.g. 20260318
+            // ?쒓렇 ?뺣낫?먯꽌 ?좎쭨 異붿텧 ?쒕룄 (vsjApi???곸꽭 ?좎쭨 ?꾨뱶媛 ?쒗븳?곸씪 ???덉쓬)
+            const tagStr = item.tag || '';
+            const dateMatch = tagStr.match(/(\d{4}\.\d{2}\.\d{2})/g);
+            let dateDisplay = tagStr || '瓦묉쐿訝얕죱';
+            let statusLabel = '';
 
-        // 이미지 경로에서 년월 추출하는 헬퍼 함수
-        const extractUploadYymm = (item) => {
-            const imgpath = item.repPhoto?.photoid?.imgpath || '';
-            const match = imgpath.match(/\/(\d{6})\//);
-            return match ? parseInt(match[1], 10) : 0;
-        };
+            // D-Day 諛?吏꾪뻾以?怨꾩궛 (?좎쭨 ?뺣낫媛 ?쒓렇???ы븿??寃쎌슦)
+            if (dateMatch && dateMatch.length >= 1) {
+                const startDate = new Date(dateMatch[0].replace(/\./g, '-'));
+                const endDate = dateMatch.length >= 2 ? new Date(dateMatch[1].replace(/\./g, '-')) : startDate;
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
 
-        // 필터링 및 정렬
-        // 2026이라는 제목이 있거나, 이미지 업로드 날짜가 최근 12개월 이내인 경우
-        const cutoff = new Date(now);
-        cutoff.setMonth(cutoff.getMonth() - 12);
-        const cutoffYymm = cutoff.getFullYear() * 100 + (cutoff.getMonth() + 1);
-
-        const processedItems = allItems
-            .map(item => {
-                const uploadYymm = extractUploadYymm(item);
-                const is2026 = (item.title || '').includes('2026');
-                
-                // 배지 상태 결정 (진행중, D-Day 등)
-                // API 요약본에는 기간 필드가 없으므로 제목에서 유추하거나 기본 "进行中" 표시
-                let statusBadge = '';
-                if (is2026) {
-                    statusBadge = '<i class="tag ing">进行中</i>';
+                if (today >= startDate && today <= endDate) {
+                    statusLabel = '<i class="tag ing">吏꾪뻾以?/i>';
+                } else if (today < startDate) {
+                    const diffTime = startDate - today;
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    statusLabel = `<i class="tag ing">D-${diffDays}</i>`;
                 }
 
-                return { ...item, _uploadYymm: uploadYymm, _statusBadge: statusBadge, _is2026: is2026 };
-            })
-            .filter(item => item._is2026 || item._uploadYymm >= cutoffYymm)
-            .sort((a, b) => b._uploadYymm - a._uploadYymm)
-            .slice(0, 15);
-
-        if (processedItems.length === 0) {
-            listContainer.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">暂无近期节日活动信息</div>';
-            return;
-        }
-
-        listContainer.innerHTML = processedItems.map((item, index) => {
-            const title = item.title || '无题活动';
-            const imgUrl = item.repPhoto?.photoid?.thumbnailpath 
-                        || item.repPhoto?.photoid?.imgpath 
-                        || 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=400';
-            const place = item.address || '济州岛全域';
-
-            // D-Day 또는 진행중 태그
-            const badge = item._statusBadge || (index < 3 ? '<i class="tag ing">进行中</i>' : '');
-
-            // 업로드 년월로 날짜 표시
-            const ymStr = String(item._uploadYymm); // e.g. "202503"
-            const dateDisplay = ymStr.length === 6
-                ? `${ymStr.slice(0, 4)}.${ymStr.slice(4, 6)}`
-                : '近期举行';
+                if (dateMatch.length >= 2) {
+                    dateDisplay = `${dateMatch[0]} ~ ${dateMatch[1]}`;
+                }
+            }
 
             return `
                 <div class="festival-card" onclick="window.open('https://www.visitjeju.net/kr/detail/view?contentsid=${item.contentsid}', '_blank')">
                     <p class="image">
-                        ${badge}
                         <img src="${imgUrl}" class="festival-img" alt="${title}" onerror="this.src='https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=400'">
+                        ${statusLabel}
                     </p>
                     <div class="festival-info">
-                        <div class="festival-date">📅 ${dateDisplay}</div>
+                        <div class="festival-date">?뱟 ${dateDisplay}</div>
                         <h3 class="festival-title">${title}</h3>
-                        <div class="festival-place">📍 ${place}</div>
+                        <div class="festival-place">?뱧 ${place}</div>
                     </div>
                 </div>
             `;
@@ -1238,7 +1171,7 @@ async function fetchFestivals() {
 
     } catch (e) {
         console.error('Festival API Error:', e);
-        listContainer.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">活动加载失败，请重试</div>';
+        listContainer.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">域삣뒯?좄슬鸚김뇰竊뚩??띹캊</div>';
     }
 }
 
@@ -1246,28 +1179,26 @@ async function fetchFestivals() {
 // Navigation - Section Switching
 // ============================================================
 function showSection(sectionId) {
-    // 모든 섹션 숨기기
-    document.querySelectorAll('.app-section').forEach(section => {
+    // 紐⑤뱺 ?뱀뀡 ?④린湲?    document.querySelectorAll('.app-section').forEach(section => {
         section.classList.remove('active');
     });
 
-    // 대상 섹션 보이기
-    const targetSection = document.getElementById(sectionId);
+    // ????뱀뀡 蹂댁씠湲?    const targetSection = document.getElementById(sectionId);
     if (targetSection) {
         targetSection.classList.add('active');
-        // 페이지 상단으로 이동
+        // ?섏씠吏 ?곷떒?쇰줈 ?대룞
         window.scrollTo(0, 0);
     }
 
-    // 상단 바(Header) 가시성 조정 - 홈 바와 일반 바 구분
+    // ?곷떒 諛?Header) 媛?쒖꽦 議곗젙 - ??諛붿? ?쇰컲 諛?援щ텇
     const mainAppBar = document.getElementById('main-app-bar');
     if (sectionId === 'home') {
         if (mainAppBar) mainAppBar.style.display = 'flex';
     } else {
-        // 기능 섹션 내에는 자체 app-bar가 있으므로 메인 홈 바는 숨김
+        // 湲곕뒫 ?뱀뀡 ?댁뿉???먯껜 app-bar媛 ?덉쑝誘濡?硫붿씤 ??諛붾뒗 ?④?
         if (mainAppBar) mainAppBar.style.display = 'none';
-        // 특정 섹션에 진입했을 때 데이터가 로드되지 않았다면 새로고침 등 추가 로직 가능
-        // (현재는 로드 시 전체 로드하므로 추가 조치 불필요)
+
+        // ?뱀젙 ?뱀뀡??吏꾩엯?덉쓣 ???곗씠?곌? 濡쒕뱶?섏? ?딆븯?ㅻ㈃ ?덈줈怨좎묠 ??異붽? 濡쒖쭅 媛??        // (?꾩옱??濡쒕뱶 ???꾩껜 濡쒕뱶?섎?濡?異붽? 議곗튂 遺덊븘??
         if (sectionId === 'cctv') initCCTV();
         if (sectionId === 'weather') Object.keys(CONFIG.WEATHER_LOCATIONS).forEach(loc => fetchWeatherData(loc));
         if (sectionId === 'hallasan') fetchHallasanStatus();
@@ -1278,27 +1209,25 @@ function showSection(sectionId) {
 }
 
 // ============================================================
-// 초기화
-// ============================================================
+// 珥덇린??// ============================================================
 window.addEventListener('load', () => {
     // CCTV
     if (typeof initCCTV === 'function') initCCTV();
 
-    // 날씨 (4개 지역 병렬 로드)
+    // ?좎뵪 (4媛?吏??蹂묐젹 濡쒕뱶)
     if (typeof fetchWeatherData === 'function') {
         Object.keys(CONFIG.WEATHER_LOCATIONS).forEach(loc => fetchWeatherData(loc));
     }
 
-    // 한라산
-    if (typeof fetchHallasanStatus === 'function') fetchHallasanStatus();
+    // ?쒕씪??    if (typeof fetchHallasanStatus === 'function') fetchHallasanStatus();
 
-    // 항공 (기본: 도착편)
+    // ??났 (湲곕낯: ?꾩갑??
     if (typeof fetchFlights === 'function') fetchFlights('arrive');
 
-    // 습득물 초기 로드
+    // ?듬뱷臾?珥덇린 濡쒕뱶
     fetchFoundGoods();
 
-    // 카테고리 필터 변경 시 자동 검색 연동
+    // 移댄뀒怨좊━ ?꾪꽣 蹂寃????먮룞 寃???곕룞
     const categorySelect = document.getElementById('pkupCmdtyLclsfCd');
     if (categorySelect) {
         categorySelect.addEventListener('change', () => {
@@ -1306,16 +1235,16 @@ window.addEventListener('load', () => {
         });
     }
 
-    // 축제 정보 초기 로드
+    // 異뺤젣 ?뺣낫 珥덇린 濡쒕뱶
     fetchFestivals();
 
-    // 기상 특보 초기 로드
+    // 湲곗긽 ?밸낫 珥덇린 濡쒕뱶
     fetchWeatherAlerts();
 
-    // 초기 화면 설정 (홈)
+    // 珥덇린 ?붾㈃ ?ㅼ젙 (??
     showSection('home');
 
-    // 주기적인 갱신
+    // 二쇨린??媛깆떊
     setInterval(() => {
         if (typeof fetchFlights === 'function') fetchFlights('arrive');
     }, 60000);
@@ -1326,110 +1255,3 @@ window.addEventListener('load', () => {
     }, 30 * 60 * 1000);
     setInterval(fetchFoundGoods, 30 * 60 * 1000);
 });
-
-// 위챗 QR 모달 제어 함수
-function openWechatQR() {
-    const modal = document.getElementById('wechat-qr-modal');
-    if (modal) {
-        modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden'; // 배경 스크롤 방지
-    }
-}
-
-function closeWechatQR() {
-    const modal = document.getElementById('wechat-qr-modal');
-    if (modal) {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto'; // 스크롤 복구
-    }
-}
-
-// 샤오홍슈 QR 모달 제어 함수
-function openXhsQR() {
-    const modal = document.getElementById('xhs-qr-modal');
-    if (modal) {
-        modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden'; // 배경 스크롤 방지
-    }
-}
-
-function closeXhsQR() {
-    const modal = document.getElementById('xhs-qr-modal');
-    if (modal) {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto'; // 스크롤 복구
-    }
-}
-// 기능 요청 모달 제어 함수
-function openFeatureModal() {
-    const modal = document.getElementById('feature-request-modal');
-    if (modal) {
-        modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    }
-}
-
-function closeFeatureModal() {
-    const modal = document.getElementById('feature-request-modal');
-    if (modal) {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-        // 입력 필드 초기화
-        const content = document.getElementById('feature-content');
-        if (content) content.value = '';
-        const status = document.getElementById('feature-status');
-        if (status) status.style.display = 'none';
-    }
-}
-
-async function submitFeatureRequest() {
-    const contentEl = document.getElementById('feature-content');
-    const submitBtn = document.getElementById('feature-submit-btn');
-    const statusEl = document.getElementById('feature-status');
-
-    const content = contentEl?.value.trim();
-    if (!content) {
-        alert('请输入内容。');
-        return;
-    }
-
-    // Google Apps Script 웹 앱 URL (배포 후 아래에 복사해서 넣으세요)
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbwBsA_740hrvlnwd6SQO72en9jrt4K_zeqm5qwzlNYup8pZlOC1TmgTW-BBGN0M3av9/exec';
-
-    try {
-        submitBtn.disabled = true;
-        submitBtn.textContent = '提交中...';
-        statusEl.style.display = 'block';
-        statusEl.style.color = 'var(--text-muted)';
-        statusEl.textContent = '正在连接到服务器...';
-
-        // POST 요청 (CORS 처리가 된 GAS 엔드포인트 필요)
-        const response = await fetch(GAS_URL, {
-            method: 'POST',
-            mode: 'no-cors', // GAS의 경우 no-cors가 안정적일 수 있음
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                content: content,
-                timestamp: new Date().toISOString(),
-                userAgent: navigator.userAgent
-            })
-        });
-
-        statusEl.style.color = '#059669';
-        statusEl.textContent = '✅ 提交成功！谢谢您的建议。';
-        contentEl.value = '';
-
-        setTimeout(() => {
-            closeFeatureModal();
-            submitBtn.disabled = false;
-            submitBtn.textContent = '提交反馈';
-        }, 2000);
-
-    } catch (e) {
-        console.error('Feature Request Error:', e);
-        statusEl.style.color = '#dc2626';
-        statusEl.textContent = '❌ 提交失败，请稍后重试。';
-        submitBtn.disabled = false;
-        submitBtn.textContent = '提交反馈';
-    }
-}
