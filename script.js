@@ -1,6 +1,6 @@
 /**
  * 济州岛旅游助手 - script.js
- * GitHub: github.com/k97460300-coder/jejuweb
+ * GitHub: github.com/smile0300/jeju
  * 
  * 기능:
  *  - CCTV: HLS.js 직결 + Cloudflare Worker 프록시 백업 + YouTube Live
@@ -13,13 +13,8 @@
 // CONFIG - 사용자 제공 API 키를 여기에 입력하세요.
 // ============================================================
 const CONFIG = {
-    // 공공데이터포털(data.go.kr) 인증키 (필수)
-    PUBLIC_DATA_KEY: '05988a053767a7a6cc5553d077ce7ea541c60806a0160d5ac2e9119ebe5a61ce',
-
-    // 제주 관광 API
-    VISIT_JEJU_KEY: '0972fcb659994423bcaa3c910d2d13c1',
-    // Cloudflare Worker 프록시 URL (CORS 우회용)
-    PROXY_URL: 'https://jejuweb.k97460300.workers.dev/',
+    // Cloudflare Worker 보안 프록시 URL
+    PROXY_URL: 'https://jejuweb.smile0300.workers.dev',
 
     // CCTV HLS 스트림 소스
     CCTV: [
@@ -184,19 +179,11 @@ function formatBaseTime(date) {
 }
 
 async function fetchWeatherData(locKey) {
-    if (!CONFIG.PUBLIC_DATA_KEY) {
-        renderWeatherMock(locKey);
-        return;
-    }
-
-    const loc = CONFIG.WEATHER_LOCATIONS[locKey];
-    const now = new Date();
-    const { baseDate, baseTime } = formatBaseTime(new Date(now));
-
-    const url = `https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst?serviceKey=${encodeURIComponent(CONFIG.PUBLIC_DATA_KEY)}&pageNo=1&numOfRows=1000&dataType=JSON&base_date=${baseDate}&base_time=${baseTime}&nx=${loc.nx}&ny=${loc.ny}`;
+    const endpoint = 'https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst';
+    const workerUrl = `${CONFIG.PROXY_URL}/api/public-data?endpoint=${encodeURIComponent(endpoint)}&pageNo=1&numOfRows=1000&dataType=JSON&base_date=${baseDate}&base_time=${baseTime}&nx=${loc.nx}&ny=${loc.ny}`;
 
     try {
-        const res = await fetch(url);
+        const res = await fetch(workerUrl);
         const json = await res.json();
         const items = json?.response?.body?.items?.item;
         if (!items) throw new Error('No data');
@@ -250,7 +237,7 @@ function parseAndRenderWeather(locKey, items) {
 
         // 현재 시각 이후의 데이터 필터링
         let hourlyItems = sortedKeys.filter(k => k >= currentKey).slice(0, 15);
-        
+
         // 만약 현재 시각 이후 데이터가 부족하다면 (예: 밤 늦게 조회) 앞에서부터 보충
         if (hourlyItems.length < 5) {
             hourlyItems = sortedKeys.slice(0, 15);
@@ -447,9 +434,10 @@ async function fetchHallasanStatus() {
         </div>`;
 
     try {
-        // ★ 메인 페이지 1회 fetch (7개 탐방로 상태 한번에 포함)
-        const proxyUrl = `${CONFIG.PROXY_URL}?url=${encodeURIComponent('https://jeju.go.kr/hallasan/index.htm')}`;
-        const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(8000) });
+        // ★ 메인 페이지 1회 fetch (워커를 통해 CORS 우회 및 보안 강화)
+        const targetUrl = 'https://jeju.go.kr/hallasan/index.htm';
+        const workerUrl = `${CONFIG.PROXY_URL}/api/public-data?endpoint=${encodeURIComponent(targetUrl)}`;
+        const res = await fetch(workerUrl, { signal: AbortSignal.timeout(8000) });
         const html = await res.text();
 
         // dd.situation 값을 탐방로 이름과 함께 추출
@@ -635,23 +623,16 @@ async function fetchFlights(type) {
     const container = document.getElementById(`${type}-data`);
     if (!container) return;
 
-    if (!CONFIG.PUBLIC_DATA_KEY) {
-        container.innerHTML = `<div style="text-align:center;padding:32px 16px;"><div style="font-size:2rem;margin-bottom:12px;">⚠️</div><div style="font-weight:700;font-size:1rem;color:var(--text-primary);margin-bottom:6px;">API密钥未设置</div><div style="color:var(--text-muted);font-size:0.85rem;margin-bottom:16px;">请在 script.js 의 CONFIG.PUBLIC_DATA_KEY 中 입력하세요.<br>韩国公共数据门户 API 密钥</div><button onclick="fetchFlights('${type}')" style="background:var(--primary-gradient);color:white;border:none;padding:8px 20px;border-radius:8px;font-size:0.9rem;cursor:pointer;font-weight:600;">🔄 重新加载</button></div>`;
-        return;
-    }
-
     try {
-        container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">正在加载...</div>';
-
         const today = new Date();
         const ymd = today.getFullYear() + String(today.getMonth() + 1).padStart(2, '0') + String(today.getDate()).padStart(2, '0');
-        const endpoint = type === 'arrive' ? 'getArrFlightStatusList' : 'getDepFlightStatusList';
+        const endpointType = type === 'arrive' ? 'getArrFlightStatusList' : 'getDepFlightStatusList';
         const airportParam = type === 'arrive' ? 'arr_airport_code=CJU' : 'airport_code=CJU';
 
-        const targetUrl = `http://openapi.airport.co.kr/service/rest/StatusOfFlights/${endpoint}?serviceKey=${CONFIG.PUBLIC_DATA_KEY}&pageNo=1&numOfRows=1000&searchday=${ymd}&${airportParam}&_=${Date.now()}`;
-        const url = CONFIG.PROXY_URL + '?url=' + encodeURIComponent(targetUrl);
+        const apiEndpoint = `http://openapi.airport.co.kr/service/rest/StatusOfFlights/${endpointType}`;
+        const workerUrl = `${CONFIG.PROXY_URL}/api/public-data?endpoint=${encodeURIComponent(apiEndpoint)}&pageNo=1&numOfRows=1000&searchday=${ymd}&${airportParam}&_=${Date.now()}`;
 
-        const res = await fetch(url);
+        const res = await fetch(workerUrl);
         if (!res.ok) throw new Error('API request failed');
 
         const xmlText = await res.text();
@@ -711,7 +692,7 @@ function renderFlightList(container, items, type) {
     if (updateEl) {
         const now = new Date();
         const pad = n => String(n).padStart(2, '0');
-        updateEl.textContent = `🕐 更新时间: ${now.getFullYear()}.${pad(now.getMonth()+1)}.${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+        updateEl.textContent = `🕐 更新时间: ${now.getFullYear()}.${pad(now.getMonth() + 1)}.${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
     }
 
     if (!items.length) {
@@ -839,29 +820,16 @@ async function fetchFoundGoods() {
 
         grid.innerHTML = '<div class="loading-lost"><p>正在搜索济州实时数据...</p></div>';
 
-        const commonParams = [
-            `serviceKey=${CONFIG.PUBLIC_DATA_KEY}`,
-            `numOfRows=200`,
-            `pageNo=1`,
-            `N_FD_LCT_CD=LCP000`,
-            `START_YMD=${selectedDate || ''}`,
-            `END_YMD=${selectedDate || ''}`
-        ];
+        const polEndpoint = `http://apis.data.go.kr/1320000/LosfundInfoInqireService/getLosfundInfoAccToClAreaPd`;
+        const portalEndpoint = `http://apis.data.go.kr/1320000/LosPtfundInfoInqireService/getPtLosfundInfoAccToClAreaPd`;
 
-        // 분류(카테고리) 코드가 있으면 추가 (메인 대분류 필터: PRDT_CL_CD_01)
-        if (category) {
-            commonParams.push(`PRDT_CL_CD_01=${category}`);
-        }
+        const polUrl = `${CONFIG.PROXY_URL}/api/public-data?endpoint=${encodeURIComponent(polEndpoint)}&${commonParams.join('&')}`;
+        const portalUrl = `${CONFIG.PROXY_URL}/api/public-data?endpoint=${encodeURIComponent(portalEndpoint)}&${commonParams.join('&')}`;
 
-        // 1. 경찰청 습득물 API (경찰관서 습득물)
-        const polUrl = `http://apis.data.go.kr/1320000/LosfundInfoInqireService/getLosfundInfoAccToClAreaPd?${commonParams.join('&')}`;
-        // 2. 포털기관(공항, 택시, 지하철 등) 습득물 API - 사용자가 제공한 신규 API 적용
-        const portalUrl = `http://apis.data.go.kr/1320000/LosPtfundInfoInqireService/getPtLosfundInfoAccToClAreaPd?${commonParams.join('&')}`;
-
-        console.log(`[FoundGoods] Fetching from Police and Portal...`);
+        console.log(`[FoundGoods] Fetching via Cloudflare Worker...`);
 
         const fetchResults = async (apiUrl) => {
-            const res = await fetch(CONFIG.PROXY_URL + '?url=' + encodeURIComponent(apiUrl));
+            const res = await fetch(apiUrl);
             if (!res.ok) return [];
             const xmlText = await res.text();
             const xmlDoc = new DOMParser().parseFromString(xmlText, "text/xml");
@@ -1080,7 +1048,7 @@ async function fetchWeatherAlerts() {
 
         const data = await res.json();
         const rawItems = data?.response?.body?.items?.item;
-        
+
         // 데이터 정제: 타이틀이 있는 항목만 필터링
         let items = [];
         if (Array.isArray(rawItems)) {
@@ -1135,13 +1103,11 @@ async function fetchFestivals() {
     try {
         listContainer.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">正在获取并加载济州活动...</div>';
 
-        // 1. 기본 최신 등록순 목록
-        const baseTargetUrl = `https://api.visitjeju.net/vsjApi/contents/searchList?apiKey=${CONFIG.VISIT_JEJU_KEY}&locale=kr&category=c5&sorting=regdate+desc&pageSize=50`;
-        const baseUrl = CONFIG.PROXY_URL + '?url=' + encodeURIComponent(baseTargetUrl);
+        // 1. 기본 최신 등록순 목록 (워커를 통해 키 숨김)
+        const baseUrl = `${CONFIG.PROXY_URL}/api/visitjeju?locale=kr&category=c5&sorting=regdate+desc&pageSize=50`;
 
-        // 2. 2026 키워드 검색 목록 (누락 방지)
-        const searchTargetUrl = `https://api.visitjeju.net/vsjApi/contents/searchList?apiKey=${CONFIG.VISIT_JEJU_KEY}&locale=kr&category=c5&title=2026&pageSize=50`;
-        const searchUrl = CONFIG.PROXY_URL + '?url=' + encodeURIComponent(searchTargetUrl);
+        // 2. 2026 키워드 검색 목록 (워커를 통해 키 숨김)
+        const searchUrl = `${CONFIG.PROXY_URL}/api/visitjeju?locale=kr&category=c5&title=2026&pageSize=50`;
 
         const [resBase, resSearch] = await Promise.all([
             fetch(baseUrl),
@@ -1186,7 +1152,7 @@ async function fetchFestivals() {
             .map(item => {
                 const uploadYymm = extractUploadYymm(item);
                 const is2026 = (item.title || '').includes('2026');
-                
+
                 // 배지 상태 결정 (진행중, D-Day 등)
                 // API 요약본에는 기간 필드가 없으므로 제목에서 유추하거나 기본 "进行中" 표시
                 let statusBadge = '';
@@ -1207,9 +1173,9 @@ async function fetchFestivals() {
 
         listContainer.innerHTML = processedItems.map((item, index) => {
             const title = item.title || '无题活动';
-            const imgUrl = item.repPhoto?.photoid?.thumbnailpath 
-                        || item.repPhoto?.photoid?.imgpath 
-                        || 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=400';
+            const imgUrl = item.repPhoto?.photoid?.thumbnailpath
+                || item.repPhoto?.photoid?.imgpath
+                || 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=400';
             const place = item.address || '济州岛全域';
 
             // D-Day 또는 진행중 태그
@@ -1344,22 +1310,7 @@ function closeWechatQR() {
     }
 }
 
-// 샤오홍슈 QR 모달 제어 함수
-function openXhsQR() {
-    const modal = document.getElementById('xhs-qr-modal');
-    if (modal) {
-        modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden'; // 배경 스크롤 방지
-    }
-}
 
-function closeXhsQR() {
-    const modal = document.getElementById('xhs-qr-modal');
-    if (modal) {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto'; // 스크롤 복구
-    }
-}
 // 기능 요청 모달 제어 함수
 function openFeatureModal() {
     const modal = document.getElementById('feature-request-modal');
@@ -1393,21 +1344,21 @@ async function submitFeatureRequest() {
         return;
     }
 
-    // Google Apps Script 웹 앱 URL (배포 후 아래에 복사해서 넣으세요)
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbwBsA_740hrvlnwd6SQO72en9jrt4K_zeqm5qwzlNYup8pZlOC1TmgTW-BBGN0M3av9/exec';
+    // Cloudflare Worker 보안 엔드포인트 (GAS URL 대행)
+    const WORKER_URL = `${CONFIG.PROXY_URL}/api/feature-request`;
 
     try {
         submitBtn.disabled = true;
         submitBtn.textContent = '提交中...';
         statusEl.style.display = 'block';
         statusEl.style.color = 'var(--text-muted)';
-        statusEl.textContent = '正在连接到服务器...';
+        statusEl.textContent = '正在连接...';
 
-        // POST 요청 (CORS 처리가 된 GAS 엔드포인트 필요)
-        const response = await fetch(GAS_URL, {
+        // Cloudflare Worker를 통해 안전하게 전송
+        await fetch(WORKER_URL, {
             method: 'POST',
-            mode: 'no-cors', // GAS의 경우 no-cors가 안정적일 수 있음
-            headers: { 'Content-Type': 'application/json' },
+            mode: 'no-cors', // Worker에서 CORS를 핸들링하므로 안전함
+            headers: { 'Content-Type': 'text/plain' },
             body: JSON.stringify({
                 content: content,
                 timestamp: new Date().toISOString(),
@@ -1415,6 +1366,7 @@ async function submitFeatureRequest() {
             })
         });
 
+        // no-cors 모드에서는 응답을 읽을 수 없으므로 전송 시도 후 성공으로 간주합니다.
         statusEl.style.color = '#059669';
         statusEl.textContent = '✅ 提交成功！谢谢您的建议。';
         contentEl.value = '';
@@ -1428,8 +1380,9 @@ async function submitFeatureRequest() {
     } catch (e) {
         console.error('Feature Request Error:', e);
         statusEl.style.color = '#dc2626';
-        statusEl.textContent = '❌ 提交失败，请稍后重试。';
+        statusEl.textContent = '❌ 提交失败，请稍후重试。';
         submitBtn.disabled = false;
         submitBtn.textContent = '提交反馈';
     }
 }
+
