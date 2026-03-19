@@ -283,9 +283,17 @@
                             <input type="date" id="lost-date" class="date-input" style="flex:1;">
                             <script>
                                 (function () {
-                                    const yesterday = new Date();
+                                    // 현재 한국 시간(KST) 기준 어제 날짜 계산
+                                    const now = new Date();
+                                    const kstTime = new Date(now.getTime() + (9 * 60 * 60 * 1000));
+                                    const yesterday = new Date(kstTime);
                                     yesterday.setDate(yesterday.getDate() - 1);
-                                    const yyyymmdd = yesterday.toISOString().split('T')[0];
+                                    
+                                    const yyyy = yesterday.getUTCFullYear();
+                                    const mm = String(yesterday.getUTCMonth() + 1).padStart(2, '0');
+                                    const dd = String(yesterday.getUTCDate()).padStart(2, '0');
+                                    const yyyymmdd = `${yyyy}-${mm}-${dd}`;
+                                    
                                     const dateInput = document.getElementById('lost-date');
                                     dateInput.setAttribute('max', yyyymmdd);
                                     dateInput.value = yyyymmdd;
@@ -378,8 +386,8 @@
         <div class="modal-content" style="max-width: 320px; text-align: center; padding: 30px;"
             onclick="event.stopPropagation()">
             <button class="modal-close" onclick="closeWechatQR()">✕</button>
-            <h3 style="margin-bottom: 15px; font-size: 1.1rem;">联系我们 (WeChat)</h3>
-            <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">扫描二维码或复制ID添加微信</p>
+            <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: #3b82f6;">联系我们 (WeChat)</h3>
+            <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">通过扫描下方二维码或复制ID添加我的微信</p>
             <img src="assets/wechat_qr.png"
                 style="width: 100%; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px;">
             <div class="wechat-copy-box" style="display:flex; gap:8px;">
@@ -435,7 +443,7 @@
 
 
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    <script src="script.js?v=3.9" charset="UTF-8"></script>
+    <script src="script.js?v=4.3" charset="UTF-8"></script>
 </body>
 
 </html>
