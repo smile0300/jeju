@@ -1403,12 +1403,11 @@ async function submitFeatureRequest() {
         // Cloudflare Worker를 통해 안전하게 전송
         const response = await fetch(WORKER_URL, {
             method: 'POST',
-            // mode: 'no-cors' 제거 (Worker에서 CORS를 처리하므로 응답 확인 가능하게 변경)
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 content: content,
                 // KST 시간 (YYYY-MM-DD HH:mm:ss 형식)
-                timestamp: new Date(new Date().getTime() + 9 * 60 * 60 * 1000).toISOString().replace('T', ' ').slice(0, 19),
+                timestamp: new Date().toLocaleString('ko-KR', { hour12: false, timeZone: 'Asia/Seoul' }).replace(/\./g, '-').replace(/\s+/g, ' ').replace(/- /g, '-').slice(0, 19),
                 userAgent: navigator.userAgent
             })
         });
@@ -1430,7 +1429,7 @@ async function submitFeatureRequest() {
     } catch (e) {
         console.error('Feature Request Error:', e);
         statusEl.style.color = '#dc2626';
-        statusEl.textContent = '❌ 提交失败，请稍후重试。';
+        statusEl.textContent = '❌ 提交失败，请稍后再试。';
         submitBtn.disabled = false;
         submitBtn.textContent = '提交反馈';
     }
