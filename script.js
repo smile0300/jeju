@@ -583,6 +583,16 @@ function getAirlineName(flightId, rawAirline) {
     return AIRLINE_NAMES[code] || rawAirline || code;
 }
 
+function getStatusBadge(status) {
+    if (!status) return '-';
+    // "출발" (\uCD9C\uBC1C), "도착" (\uB304\uCC29), "지연" (\uC9C0\uC5F0), "결항" (\uACB0\uD56D)
+    if (status.includes('\uCD9C\uBC1C')) return `<span class="badge badge-success">已出发</span>`;
+    if (status.includes('\uB3C4\uCC29')) return `<span class="badge badge-success">已到达</span>`;
+    if (status.includes('\uC9C0\uC5F0')) return `<span class="badge badge-warning">延误</span>`;
+    if (status.includes('\uACB0\uD56D')) return `<span class="badge badge-danger">取消</span>`;
+    return `<span class="badge badge-info">${status}</span>`;
+}
+
 const CITY_NAMES = {
     '인천': '仁川', '김포': '金浦', '김해': '金海', '제주': '济州',
     '타이페이': '台北', '타오위안': '桃园', '상하이': '上海', '푸동': '浦东', '홍공': '香港', '홍콩': '香港',
@@ -651,6 +661,9 @@ async function fetchFlights(type) {
             const getTag = (tag) => (node.getElementsByTagName(tag)[0]?.textContent || '').trim();
             const schedText = getTag('scheduledatetime');
             const estText = getTag('estimateddatetime');
+            const rmkKor = getTag('rmkKor');
+            const io = getTag('io');
+            const line = getTag('line');
 
             return {
                 flight_id: (getTag('flightid') || getTag('fid') || getTag('flightId')).toUpperCase(),
@@ -661,8 +674,9 @@ async function fetchFlights(type) {
                 arr_airport: getTag('arrAirport'),
                 arr_code: getTag('arrAirportCode').toUpperCase(),
                 airline: getTag('airline'),
-                status: getTag('rmkKor'),
-                is_intl: getTag('io') === 'I' || getTag('line') === '국제'
+                status: rmkKor,
+                // "국제" (\uAD6D\uC81C)
+                is_intl: io === 'I' || line?.includes('\uAD6D\uC81C')
             };
         });
 
@@ -704,8 +718,8 @@ function renderFlightList(container, items, type) {
         return;
     }
 
-    // 동적 헤더 생성 (데이터가 있을 때만)
-    const destHeader = type === 'arrive' ? '出发地' : '目的地';
+    // 동적 헤더 생성 (타입에 따른 '출발지' vs '목적지' 확실히 구분)
+    const destHeader = type === '\u0061\u0072\u0072\u0069\u0076\u0065' ? '\u51fa\u53d1\u5730' : '\u76ee\u7684\u5730';
     let htmlMsg = `<div class="flight-row flight-header">
         <div class="flight-col">航班号</div>
         <div class="flight-col">航空公司</div>
@@ -865,7 +879,10 @@ async function fetchFoundGoods() {
             fetchResults(portalUrl)
         ]);
 
-        const items = [...polItems, ...portalItems].sort((a, b) => b.date.localeCompare(a.date));
+        // 1. 합치고 2. 날짜별 내림차순 3. 사용자 선택 날짜와 정확히 일치하는것만 최종 필터링
+        const items = [...polItems, ...portalItems]
+            .filter(item => item.date === selectedDate)
+            .sort((a, b) => b.date.localeCompare(a.date));
 
         // 데이터 캐싱
         cachedLostItems = items;
@@ -1368,7 +1385,8 @@ async function submitFeatureRequest() {
             headers: { 'Content-Type': 'text/plain' },
             body: JSON.stringify({
                 content: content,
-                timestamp: new Date().toISOString(),
+                // KST (Asia/Seoul) 시간으로 전송
+                timestamp: new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }),
                 userAgent: navigator.userAgent
             })
         });
