@@ -716,9 +716,10 @@ function renderFlightList(container, items, type) {
         updateEl.textContent = `🕐 更新时间: ${now.getFullYear()}.${pad(now.getMonth() + 1)}.${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
     }
 
-    // 동적 헤더 생성 (타입 구분 강화: 'arrive' vs 'depart')
-    const isDepart = type.toLowerCase().trim().includes('depart');
+    // 동적 헤더 생성 (v3.0: 가장 단순하고 확실한 체크)
+    const isDepart = (type === 'depart');
     const destHeader = isDepart ? '\u76ee\u7684\u5730' : '\u51fa\u53d1\u5730';
+    console.log(`[Flight v3.0] type: ${type}, isDepart: ${isDepart}, destHeader: ${destHeader}`);
 
     let htmlMsg = `<div class="flight-row flight-header">
         <div class="flight-col">航班号</div>
