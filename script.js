@@ -141,9 +141,15 @@ function initHlsPlayer(cam) {
 function initYoutubeEmbed(cam) {
     const container = document.getElementById(`yt-${cam.id}`);
     if (!container) return;
+    
+    // 유튜브는 중국 내에서 차단되므로 안내 문구와 함께 로드
     container.innerHTML = `
-        <iframe src="https://www.youtube.com/embed/${cam.ytId}?autoplay=1&mute=1&rel=0&loop=1&playlist=${cam.ytId}"
-                allow="autoplay; encrypted-media" allowfullscreen style="width:100%;height:100%;border:none;"></iframe>`;
+        <div class="yt-placeholder" style="width:100%; height:100%; background:#222; display:flex; flex-direction:column; align-items:center; justify-content:center; color:white; padding:20px; text-align:center;">
+            <p style="font-size:0.8rem; margin-bottom:10px; opacity:0.8;">YouTube Live</p>
+            <p style="font-size:0.9rem; margin-bottom:15px;">部分地区可能无法直接播放视频<br>(如在大陆请连接VPN)</p>
+            <iframe src="https://www.youtube.com/embed/${cam.ytId}?autoplay=1&mute=1&rel=0&loop=1&playlist=${cam.ytId}"
+                allow="autoplay; encrypted-media" allowfullscreen style="width:100%;height:100%;border:none;position:absolute;top:0;left:0;"></iframe>
+        </div>`;
 }
 
 // ============================================================
@@ -555,15 +561,16 @@ const STATUS_MAP = {
     '출발지연': { cls: 'status-delayed', cn: '出发延误' },
     '회항': { cls: 'status-ontime', cn: '返航/备降' }
 };
-
-function getStatusBadge(rawStatus) {
-    if (!rawStatus) return `<span class="status-badge status-ontime">正常</span>`;
-    const s = Object.keys(STATUS_MAP).find(k => rawStatus.trim().includes(k));
-    const info = s ? STATUS_MAP[s] : { cls: 'status-ontime', cn: rawStatus };
-    // 만약 매핑된 번역이 한국어라면(매핑 실패 등) 기본 '正常' 표시 시도
-    const finalCn = /[ㄱ-ㅎ가-힣]/.test(info.cn) ? '正常' : info.cn;
-    return `<span class="status-badge ${info.cls}">${finalCn}</span>`;
+function getStatusBadge(status) {
+    if (!status) return `<span class="badge badge-info">-</span>`;
+    const s = status.trim();
+    if (s.includes('\uCD9C\uBC1C')) return `<span class="badge badge-success">已出发</span>`;
+    if (s.includes('\uB3C4\uCC29')) return `<span class="badge badge-success">已到达</span>`;
+    if (s.includes('\uC9C0\uC5F0')) return `<span class="badge badge-warning">延误</span>`;
+    if (s.includes('\uACB0\uD56D')) return `<span class="badge badge-danger">取消</span>`;
+    return `<span class="badge badge-info">${s}</span>`;
 }
+
 
 const AIRLINE_MARKS = {
     'KE': '🇰orean', 'OZ': '🇦siana', 'LJ': '🇯inAir', '7C': '🇯ejuAir', 'TW': '🇹way', 'ZE': '🇪ast', 'BX': '🇦irBusan', 'RS': '🇦irSeoul'
@@ -583,15 +590,6 @@ function getAirlineName(flightId, rawAirline) {
     return AIRLINE_NAMES[code] || rawAirline || code;
 }
 
-function getStatusBadge(status) {
-    if (!status) return '-';
-    // "출발" (\uCD9C\uBC1C), "도착" (\uB304\uCC29), "지연" (\uC9C0\uC5F0), "결항" (\uACB0\uD56D)
-    if (status.includes('\uCD9C\uBC1C')) return `<span class="badge badge-success">已出发</span>`;
-    if (status.includes('\uB3C4\uCC29')) return `<span class="badge badge-success">已到达</span>`;
-    if (status.includes('\uC9C0\uC5F0')) return `<span class="badge badge-warning">延误</span>`;
-    if (status.includes('\uACB0\uD56D')) return `<span class="badge badge-danger">取消</span>`;
-    return `<span class="badge badge-info">${status}</span>`;
-}
 
 const CITY_NAMES = {
     '인천': '仁川', '김포': '金浦', '김해': '金海', '제주': '济州',
@@ -716,15 +714,15 @@ function renderFlightList(container, items, type) {
         updateEl.textContent = `🕐 更新时间: ${now.getFullYear()}.${pad(now.getMonth() + 1)}.${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
     }
 
-    // 동적 헤더 생성 (v3.2: 더욱 직관적인 판별)
-    const isArrivalTab = (type === 'arrive');
-    const headerText = isArrivalTab ? '出发地' : '目的地';
-    console.log(`[Flight v3.2] type: ${type}, isArrival: ${isArrivalTab}, header: ${headerText}`);
+    // 동적 헤더 생성 (v3.3: 탭 데이터 일치성 보장)
+    const isArrive = (type === 'arrive');
+    const headerTitle = isArrive ? '出发地' : '目的地';
+    console.log(`[Flight v3.3] type: ${type}, isArrive: ${isArrive}, header: ${headerTitle}`);
 
     let htmlMsg = `<div class="flight-row flight-header">
         <div class="flight-col">航班号</div>
         <div class="flight-col">航空公司</div>
-        <div class="flight-col">${headerText}</div>
+        <div class="flight-col">${headerTitle}</div>
         <div class="flight-col">预定/实际</div>
         <div class="flight-col">状态</div>
     </div>`;
@@ -1297,7 +1295,15 @@ window.addEventListener('load', () => {
     // 항공 (기본: 도착편)
     if (typeof fetchFlights === 'function') fetchFlights('arrive');
 
-    // 습득물 초기 로드
+    // 습득물 초기 날짜 설정 및 로드 (하루 전날 기준)
+    const dateInput = document.getElementById('lost-date');
+    if (dateInput) {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yyyymmdd = yesterday.toISOString().split('T')[0];
+        dateInput.value = yyyymmdd;
+        dateInput.setAttribute('max', yyyymmdd);
+    }
     fetchFoundGoods();
 
     // 카테고리 필터 변경 시 자동 검색 연동
@@ -1426,3 +1432,22 @@ async function submitFeatureRequest() {
     }
 }
 
+
+// 위챗 아이디 복사 함수
+function copyWechatId() {
+    const input = document.getElementById('wechat-id-input');
+    if (!input) return;
+
+    input.select();
+    input.setSelectionRange(0, 99999); // 모바일 대응
+
+    try {
+        navigator.clipboard.writeText(input.value).then(() => {
+            alert('ID已复制到剪贴板: ' + input.value);
+        });
+    } catch (err) {
+        // 구형 브라우저 대응
+        document.execCommand('copy');
+        alert('ID已复制: ' + input.value);
+    }
+}
