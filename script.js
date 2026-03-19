@@ -646,6 +646,9 @@ async function fetchFlights(type) {
         const apiEndpoint = `http://openapi.airport.co.kr/service/rest/StatusOfFlights/${endpointType}`;
         const workerUrl = `${CONFIG.PROXY_URL}/api/public-data?endpoint=${encodeURIComponent(apiEndpoint)}&pageNo=1&numOfRows=1000&searchday=${ymd}&${airportParam}&_=${Date.now()}`;
 
+        // 로딩 표시 및 기존 데이터 제거
+        container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">正在加载...</div>';
+
         const res = await fetch(workerUrl);
         if (!res.ok) throw new Error('API request failed');
 
@@ -713,13 +716,10 @@ function renderFlightList(container, items, type) {
         updateEl.textContent = `🕐 更新时间: ${now.getFullYear()}.${pad(now.getMonth() + 1)}.${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
     }
 
-    if (!items.length) {
-        container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">暂无相关航班信息</div>';
-        return;
-    }
-
     // 동적 헤더 생성 (타입 구분 강화: 'arrive' vs 'depart')
-    const destHeader = type.toLowerCase().trim().includes('depart') ? '\u76ee\u7684\u5730' : '\u51fa\u53d1\u5730';
+    const isDepart = type.toLowerCase().trim().includes('depart');
+    const destHeader = isDepart ? '\u76ee\u7684\u5730' : '\u51fa\u53d1\u5730';
+
     let htmlMsg = `<div class="flight-row flight-header">
         <div class="flight-col">航班号</div>
         <div class="flight-col">航空公司</div>
@@ -727,6 +727,11 @@ function renderFlightList(container, items, type) {
         <div class="flight-col">预定/实际</div>
         <div class="flight-col">状态</div>
     </div>`;
+
+    if (!items.length) {
+        container.innerHTML = htmlMsg + '<div style="text-align:center;padding:20px;color:var(--text-muted)">暂无相关航班信息</div>';
+        return;
+    }
 
     htmlMsg += items.map(f => {
         const flightNo = f.flight_id || '-';
