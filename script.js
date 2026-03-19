@@ -1407,7 +1407,7 @@ async function submitFeatureRequest() {
             body: JSON.stringify({
                 content: content,
                 // KST 시간 (YYYY-MM-DD HH:mm:ss 형식)
-                timestamp: new Date().toLocaleString('ko-KR', { hour12: false, timeZone: 'Asia/Seoul' }).replace(/\./g, '-').replace(/\s+/g, ' ').replace(/- /g, '-').slice(0, 19),
+                timestamp: new Date(new Date().getTime() + 9 * 60 * 60 * 1000).toISOString().replace('T', ' ').slice(0, 19),
                 userAgent: navigator.userAgent
             })
         });

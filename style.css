@@ -1591,7 +1591,22 @@ body {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.badge-success { background-color: #059669; } /* 정상, 출발, 도착 */
-.badge-warning { background-color: #f59e0b; } /* 지연 */
-.badge-danger  { background-color: #dc2626; } /* 결항, 취소 */
-.badge-info    { background-color: #2563eb; } /* 기타 */
+.badge-success { background-color: #059669; } /* 正常/已出发/已到达 */
+.badge-warning { background-color: #f59e0b; } /* 延误 */
+.badge-danger  { background-color: #dc2626; } /* 取消/결항 */
+.badge-info    { background-color: #2563eb; } /* 其他 */
+
+/* ==================== Flight Tabs Visibility ==================== */
+.flight-content {
+    display: none;
+}
+
+.flight-content.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
