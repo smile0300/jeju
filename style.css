@@ -353,7 +353,7 @@ body {
     padding: 16px; margin-bottom: var(--spacing-md);
     border: 1px solid var(--border-light);
     display: flex; flex-direction: column; align-items: stretch;
-    gap: 12px; box-shadow: var(--shadow-md);
+    gap: 8px; box-shadow: var(--shadow-md);
 }
 .weather-main {
     display: flex; align-items: center; gap: 16px;
@@ -376,7 +376,7 @@ body {
 .weather-details {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
     border-left: 1px solid var(--border-light);
     padding-left: 12px;
 }
@@ -384,7 +384,7 @@ body {
     display: flex; align-items: center; gap: 6px;
     padding: 2px 0; background: transparent;
     border-radius: 0; transition: none;
-    white-space: nowrap;
+    flex-wrap: wrap;
 }
 .weather-detail-item:hover { transform: none; box-shadow: none; }
 .detail-icon { font-size: 0.9rem; }

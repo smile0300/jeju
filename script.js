@@ -529,6 +529,8 @@ function getStatusBadge(status) {
     if (s.includes('\uC9C0\uC5F0')) return `<span class="badge badge-warning">延误</span>`; 
     if (s.includes('\uACB0\uD56D')) return `<span class="badge badge-danger">取消</span>`; 
     if (s.includes('\uD0D1\uC2B9')) return `<span class="badge badge-info">正在登机</span>`; 
+    if (s.includes('\uC218\uC10D\uC911')) return `<span class="badge badge-info">正在办理</span>`; 
+    if (s.includes('\uB9C8\uAC10')) return `<span class="badge badge-danger">登记截止</span>`; 
     return `<span class="badge badge-info">${s}</span>`;
 }
 
