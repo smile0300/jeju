@@ -353,7 +353,7 @@ body {
     padding: 16px; margin-bottom: var(--spacing-md);
     border: 1px solid var(--border-light);
     display: flex; flex-direction: column; align-items: stretch;
-    gap: 8px; box-shadow: var(--shadow-md);
+    gap: 6px; box-shadow: var(--shadow-md);
 }
 .weather-main {
     display: flex; align-items: center; gap: 16px;
@@ -376,13 +376,13 @@ body {
 .weather-details {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 1px;
     border-left: 1px solid var(--border-light);
     padding-left: 12px;
 }
 .weather-detail-item {
     display: flex; align-items: center; gap: 6px;
-    padding: 2px 0; background: transparent;
+    padding: 1px 0; background: transparent;
     border-radius: 0; transition: none;
     flex-wrap: wrap;
 }
