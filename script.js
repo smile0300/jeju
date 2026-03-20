@@ -602,7 +602,7 @@ async function fetchFlights(type) {
         const endpointType = type === 'arrive' ? 'getArrFlightStatusList' : 'getDepFlightStatusList';
         const airportParam = type === 'arrive' ? 'arr_airport_code=CJU' : 'airport_code=CJU';
 
-        const apiEndpoint = `http://openapi.airport.co.kr/service/rest/StatusOfFlights/${endpointType}`;
+        const apiEndpoint = `https://openapi.airport.co.kr/service/rest/StatusOfFlights/${endpointType}`;
         const workerUrl = `${CONFIG.PROXY_URL}/api/public-data?endpoint=${encodeURIComponent(apiEndpoint)}&pageNo=1&numOfRows=1000&searchday=${ymd}&${airportParam}&_=${Date.now()}`;
 
         // 로딩 표시 및 기존 데이터 제거

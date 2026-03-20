@@ -56,14 +56,31 @@ export default {
           }
         }
 
+        // 4. 불필요한 헤더 제거 및 보안 강화
+        const cleanHeaders = new Headers();
+        
+        // 브라우저가 보낸 헤더 중 안전한 것만 선택적으로 전달하거나 차단
+        // 특히 'Expect' 헤더가 417 오류의 주원인이 될 수 있으므로 제외합니다.
+        const headersToSkip = ['expect', 'host', 'cf-connecting-ip', 'cf-visitor', 'cf-ray', 'cf-ipcountry', 'x-forwarded-for', 'x-real-ip'];
+        
+        for (const [key, value] of request.headers) {
+          if (!headersToSkip.includes(key.toLowerCase())) {
+            cleanHeaders.set(key, value);
+          }
+        }
+        
+        // 대상 서버(공항공사 등)와의 호환성을 위해 기본 헤더 설정
+        cleanHeaders.set('User-Agent', 'Cloudflare-Worker-Jeju-Proxy');
+        if (!cleanHeaders.has('Accept')) {
+          cleanHeaders.set('Accept', '*/*');
+        }
+
         const finalUrl = targetUrl.toString();
 
         // 원본 요청 실행
         const response = await fetch(finalUrl, {
           method: request.method,
-          headers: {
-            'User-Agent': 'Cloudflare-Worker-Jeju-Proxy',
-          }
+          headers: cleanHeaders
         });
 
         // 결과 반환 (CORS 헤더 추가)
