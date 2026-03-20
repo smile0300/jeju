@@ -8,7 +8,8 @@ const ALLOWED_DOMAINS = [
   'apis.data.go.kr',      // 기상청 날씨 API
   'jeju.go.kr',           // 한라산 탐방로 정보 (스크래핑용)
   'openapi.airport.co.kr', // 공항공사 항공 정보 API
-  '123.140.197.51'        // CCTV 스트리밍 서버 IP
+  '123.140.197.51',       // CCTV 스트리밍 서버 IP
+  'hallacctv.kr'          // 한라산 CCTV 스트리밍 서버
 ];
 
 // 2. 허용된 오리진 (CORS)
