@@ -56,31 +56,18 @@ export default {
           }
         }
 
-        // 4. 불필요한 헤더 제거 및 보안 강화
-        const cleanHeaders = new Headers();
-        
-        // 브라우저가 보낸 헤더 중 안전한 것만 선택적으로 전달하거나 차단
-        // 특히 'Expect' 헤더가 417 오류의 주원인이 될 수 있으므로 제외합니다.
-        const headersToSkip = ['expect', 'host', 'cf-connecting-ip', 'cf-visitor', 'cf-ray', 'cf-ipcountry', 'x-forwarded-for', 'x-real-ip'];
-        
-        for (const [key, value] of request.headers) {
-          if (!headersToSkip.includes(key.toLowerCase())) {
-            cleanHeaders.set(key, value);
-          }
-        }
-        
-        // 대상 서버(공항공사 등)와의 호환성을 위해 기본 헤더 설정
-        cleanHeaders.set('User-Agent', 'Cloudflare-Worker-Jeju-Proxy');
-        if (!cleanHeaders.has('Accept')) {
-          cleanHeaders.set('Accept', '*/*');
-        }
+        // 4. 항공 API 417 오류 해결을 위한 헤더 완전 초기화
+        // 브라우저에서 넘어온 헤더를 무시하고 서버가 거부감을 느끼지 않는 최소 헤더만 생성합니다.
+        const minimalHeaders = new Headers();
+        minimalHeaders.set('Accept', 'application/xml, text/xml, */*');
+        minimalHeaders.set('User-Agent', 'Mozilla/5.0'); 
 
         const finalUrl = targetUrl.toString();
 
-        // 원본 요청 실행
+        // 원본 요청 실행 (모든 요청을 GET으로 고정 - 날씨/항공 모두 GET 방식임)
         const response = await fetch(finalUrl, {
-          method: request.method,
-          headers: cleanHeaders
+          method: 'GET',
+          headers: minimalHeaders
         });
 
         // 결과 반환 (CORS 헤더 추가)
