@@ -19,32 +19,39 @@ const CONFIG = {
     // CCTV HLS 스트림 소스
     CCTV: [
         {
-            id: 'samyang',
-            nameKo: '삼양해수욕장',
-            nameCn: '三阳海水浴场',
+            id: 'baenglokdam',
+            nameKo: '백록담',
+            nameCn: '白鹿潭',
             type: 'hls',
-            url: 'http://123.140.197.51/stream/27/play.m3u8'
+            url: 'https://hallacctv.kr/live/cctv01.stream_360p/playlist.m3u8'
         },
         {
-            id: 'hamdeok',
-            nameKo: '함덕해수욕장',
-            nameCn: '咸德海水浴场',
+            id: 'wang-gwanreung',
+            nameKo: '왕관릉',
+            nameCn: '王冠陵',
             type: 'hls',
-            url: 'http://123.140.197.51/stream/33/play.m3u8'
+            url: 'https://hallacctv.kr/live/cctv02.stream_360p/playlist.m3u8'
         },
         {
-            id: 'seongsan',
-            nameKo: '성산일출봉',
-            nameCn: '城山日出峰',
-            type: 'youtube',
-            ytId: 'GKFO9t7a9xs' // 성산일출봉 YouTube Live ID
+            id: 'witseoreum',
+            nameKo: '윗세오름',
+            nameCn: '威世岳',
+            type: 'hls',
+            url: 'https://hallacctv.kr/live/cctv03.stream_360p/playlist.m3u8'
         },
         {
-            id: 'hyeopjae',
-            nameKo: '협재해수욕장',
-            nameCn: '挟才海水浴场',
+            id: 'eoseungsaengak',
+            nameKo: '어승생악',
+            nameCn: '御乘生岳',
             type: 'hls',
-            url: 'http://123.140.197.51/stream/31/play.m3u8'
+            url: 'https://hallacctv.kr/live/cctv04.stream_360p/playlist.m3u8'
+        },
+        {
+            id: '1100road',
+            nameKo: '1100도로',
+            nameCn: '1100道路',
+            type: 'hls',
+            url: 'https://hallacctv.kr/live/cctv05.stream_360p/playlist.m3u8'
         }
     ],
 
