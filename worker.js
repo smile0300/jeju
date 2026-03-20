@@ -38,16 +38,25 @@ export default {
           return new Response('Forbidden: Target domain not in whitelist', { status: 403 });
         }
 
-        // 3. API Key 자동 주입 (기상청 및 공항공사)
-        let finalUrl = targetUrlString;
-        if (targetUrl.hostname.includes('apis.data.go.kr') || targetUrl.hostname.includes('openapi.airport.co.kr')) {
-          const separator = finalUrl.includes('?') ? '&' : '?';
-          // 신규 Secret 이름(SECRET_PUBLIC_DATA_KEY) 또는 기존 이름(PUBLIC_DATA_KEY) 사용
-          const serviceKey = env.SECRET_PUBLIC_DATA_KEY || env.PUBLIC_DATA_KEY;
-          if (serviceKey) {
-            finalUrl += `${separator}serviceKey=${serviceKey}`;
+        // 3. API Key 자동 주입 및 쿼리 파라미터 전달 개선
+        // (상단 line 30에서 이미 선언된 targetUrl을 사용합니다)
+        
+        // 원본 요청의 모든 쿼리 파라미터를 대상 URL에 복사 (endpoint/url 제외)
+        for (const [key, value] of url.searchParams) {
+          if (key !== 'endpoint' && key !== 'url') {
+            targetUrl.searchParams.set(key, value);
           }
         }
+
+        // 특정 도메인에 대해 API Key 자동 주입
+        if (targetUrl.hostname.includes('apis.data.go.kr') || targetUrl.hostname.includes('openapi.airport.co.kr')) {
+          const serviceKey = env.SECRET_PUBLIC_DATA_KEY || env.PUBLIC_DATA_KEY;
+          if (serviceKey && !targetUrl.searchParams.has('serviceKey')) {
+            targetUrl.searchParams.set('serviceKey', serviceKey);
+          }
+        }
+
+        const finalUrl = targetUrl.toString();
 
         // 원본 요청 실행
         const response = await fetch(finalUrl, {

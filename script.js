@@ -200,7 +200,7 @@ async function fetchWeatherData(locKey) {
         parseAndRenderWeather(locKey, items);
     } catch (e) {
         console.error(`날씨 API 오류(${locKey}):`, e);
-        renderWeatherMock(locKey);
+        renderWeatherError(locKey);
     }
 }
 
@@ -291,7 +291,6 @@ function parseAndRenderWeather(locKey, items) {
             if (d.POP) dailyMap[date].precip = Math.max(dailyMap[date].precip, parseInt(d.POP));
         });
 
-        const dayNames = ['周일', '周一', '周二', '周三', '周四', '周五', '周六'];
         const todayDate = new Date();
 
         weeklyEl.innerHTML = Array.from({ length: 10 }, (_, i) => {
@@ -338,60 +337,21 @@ function parseAndRenderWeather(locKey, items) {
     }
 }
 
-function renderWeatherMock(locKey) {
-    const mocks = {
-        jeju: { temp: 15, icon: '🌤️', desc: '多云转晴', hum: 62, wind: '4.2', pop: 10 },
-        seogwipo: { temp: 17, icon: '☀️', desc: '晴', hum: 55, wind: '3.1', pop: 0 },
-        hallasan: { temp: 8, icon: '❄️', desc: '有雪', hum: 80, wind: '7.5', pop: 60 },
-        udo: { temp: 16, icon: '⛅', desc: '多云', hum: 70, wind: '5.0', pop: 20 }
-    };
-    const m = mocks[locKey] || mocks.jeju;
+function renderWeatherError(locKey) {
     const iconEl = document.getElementById(`icon-${locKey}`);
     const tempEl = document.getElementById(`temp-${locKey}`);
     const descEl = document.getElementById(`desc-${locKey}`);
     const detailsEl = document.getElementById(`details-${locKey}`);
-    if (iconEl) iconEl.textContent = m.icon;
-    if (tempEl) tempEl.textContent = m.temp;
-    if (descEl) descEl.textContent = `${m.desc} (示例数据)`;
-    if (detailsEl) {
-        detailsEl.innerHTML = `
-            <div class="weather-detail-item"><span class="detail-icon">💧</span><span class="detail-label">湿度</span><span class="detail-value">${m.hum}%</span></div>
-            <div class="weather-detail-item"><span class="detail-icon">💨</span><span class="detail-label">风速</span><span class="detail-value">${m.wind}m/s</span></div>
-            <div class="weather-detail-item"><span class="detail-icon">📊</span><span class="detail-label">降水概率</span><span class="detail-value">${m.pop}%</span></div>
-        `;
-    }
     const hourlyEl = document.getElementById(`hourly-${locKey}`);
-    if (hourlyEl) {
-        const hours = [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
-        hourlyEl.innerHTML = hours.map(h => `
-            <div class="hourly-item">
-                <div class="hourly-time">${h}:00</div>
-                <div class="hourly-icon">${m.icon}</div>
-                <div class="hourly-temp">${m.temp + (h > 14 ? -2 : 2)}°</div>
-                <div class="hourly-wind">🌬️${m.wind}m/s</div>
-            </div>`).join('');
-    }
     const weeklyEl = document.getElementById(`weekly-${locKey}`);
-    if (weeklyEl) {
-        const dayNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-        const today = new Date();
-        const weekIcons = ['☀️', '⛅', '🌧️', '☀️', '⛅', '☁️', '☀️', '⛅', '🌧️', '☀️'];
-        weeklyEl.innerHTML = Array.from({ length: 10 }, (_, i) => {
-            const d = new Date(today); d.setDate(today.getDate() + i);
-            const popMock = Math.floor(Math.random() * 40); // 0~40% 임의 강수확률
-            const precipHtml = `<div class="weekly-precip ${popMock >= 50 ? 'precip-blue' : ''}">💧${popMock}%</div>`;
-            return `<div class="weekly-item">
-                <div class="weekly-day"><small>${d.getMonth() + 1}/${d.getDate()}</small></div>
-                <div class="weekly-icon">${weekIcons[i]}</div>
-                <div class="weekly-temps">
-                    <span class="temp-high">${m.temp + Math.floor(Math.random() * 4)}°</span> / <span class="temp-low">${m.temp - Math.floor(Math.random() * 6)}°</span>
-                </div>
-                ${precipHtml}
-            </div>`;
-        }).join('');
-    }
-}
 
+    if (iconEl) iconEl.textContent = '⚠️';
+    if (tempEl) tempEl.textContent = '--';
+    if (descEl) descEl.textContent = '天气数据加载失败';
+    if (detailsEl) detailsEl.innerHTML = '<p style="font-size:0.8rem; color:var(--text-muted); padding:10px;">暂时无法获取实时天气信息，请稍后再试。</p>';
+    if (hourlyEl) hourlyEl.innerHTML = '';
+    if (weeklyEl) weeklyEl.innerHTML = '';
+}
 // 날씨 탭 전환
 function switchWeatherLocation(loc) {
     document.querySelectorAll('.location-tab').forEach(t => t.classList.remove('active'));
