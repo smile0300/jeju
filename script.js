@@ -1400,7 +1400,20 @@ async function submitFeatureRequest() {
     const submitBtn = document.getElementById('feature-submit-btn');
     const statusEl = document.getElementById('feature-status');
 
-    const content = contentEl?.value.trim();
+    // XSS 방지를 위한 HTML 이스케이프 함수
+    const escapeHTML = (str) => {
+        if (!str) return '';
+        return str.replace(/[&<>"']/g, (m) => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        }[m]));
+    };
+
+    const rawContent = contentEl?.value.trim();
+    const content = escapeHTML(rawContent);
     if (!content) {
         alert('请输入内容。');
         return;

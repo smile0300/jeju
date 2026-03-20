@@ -1,0 +1,15 @@
+# 제주 여행 도우미 - .gitignore
+
+# 1. 백업 및 복구 파일 (민감 정보 포함 가능성)
+*_recovered.js
+*~
+*.bak
+*.tmp
+
+# 2. 로컬 개발 환경 제어
+.DS_Store
+Thumbs.db
+
+# 3. 환경 변수 (배포 시 Worker Secret 권장)
+.env
+secret.json

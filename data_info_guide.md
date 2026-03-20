@@ -55,10 +55,34 @@
 - **편의 기능**: `copyWechatId()` 함수를 통해 아이디 원터치 복사 지원 (`#wechat-id-input`).
 - **그리드 유지**: 홈 화면의 미사용 그리드 칸은 `item-empty` 클래스를 사용하여 레이아웃 균형 유지.
 
-## 7. 기능 요청 및 건의사항 저장 (Google Sheets)
+## 7. 기능 요청 및 건의사항 저장 (Google Sheets & Security)
 - **방법**: **Google Apps Script (GAS)** 백엔드.
 - **흐름**: `#feature-content` 입력값 + 시간(KST) + UserAgent를 JSON으로 전달하여 구글 시트 행 추가.
-- **관리**: 상세 설정은 `google_sheets_guide.md` 참조.
+- **보안 강화 (2026-03-20)**:
+    - **XSS 방지**: `submitFeatureRequest` 함수에서 `escapeHTML` 필터를 적용하여 악성 HTML 태그가 서버로 전송되는 것을 차단.
+
+## 8. 시스템 보안 및 인프라 (Security & Infrastructure)
+웹사이트의 안정성과 데이터 보호를 위해 다음과 같은 보안 계층이 적용되어 있습니다.
+
+### 8.1. 보안 프록시 (Cloudflare Worker)
+- **주소**: `jejuweb.smile0300.workers.dev`
+- **역할**: 클라이언트와 외부 API(기상청, 공항공사 등) 사이의 중계.
+- **주요 기능**:
+    - **SSRF 방지**: 화이트리스트에 등록된 도메인(`*.data.go.kr`, `*.jeju.go.kr` 등)만 호출 가능하도록 제한.
+    - **API Key 은닉**: `SECRET_PUBLIC_DATA_KEY`를 Worker 환경 변수로 관리하여 클라이언트 코드에서 키 유출 원천 차단.
+    - **CORS 설정**: 지정된 도메인(`jeju-9kn.pages.dev`)의 요청만 수락.
+
+### 8.2. 보안 헤더 (Cloudflare Pages)
+- **설정 파일**: `_headers`
+- **적용 항목**:
+    - `Content-Security-Policy (CSP)`: 신뢰할 수 없는 스크립트 실행 제한.
+    - `Strict-Transport-Security (HSTS)`: 1년(31536000초) 동안 보안 연결 고정.
+    - `X-Frame-Options: DENY`: 외부 사이트에서의 iframe 임베딩(클릭재킹) 방지.
+    - `X-Content-Type-Options: nosniff`: 잘못된 MIME 타입 해석 방지.
+
+### 8.3. 안전한 소스 관리
+- **.gitignore**: API 키 파편이나 임시 데이터 파일(`xml_temp.txt` 등)이 GitHub 저장소에 노출되지 않도록 엄격히 관리.
+- **환경 변수**: 로컬 개발 시 `.env` 파일을 활용하여 인증 정보 관리.
 
 ---
-**유지보수 핵심**: `script.js`의 `CONFIG` 객체에서 모든 API 엔드포인트와 프록시 설정을 관리하며, 배지 및 폰트 스타일은 `style.css` 하단의 `Flight Badges` 섹션에 정의되어 있습니다.
+**유지보수 핵심**: `script.js`의 `CONFIG` 객체에서 모든 API 엔드포인트와 프록시 설정을 관리하며, 보안 관련 설정은 Cloudflare Worker 및 Pages의 대시보드와 `_headers` 파일을 통해 동기화됩니다.

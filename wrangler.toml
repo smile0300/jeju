@@ -1,0 +1,10 @@
+name = "jejuweb"
+main = "worker.js"
+compatibility_date = "2024-03-20"
+account_id = "2952a38a59e8d419aefa3c409c5cdf3a"
+
+[vars]
+# 공개 가능한 변수들
+ALLOWED_ORIGIN = "https://jeju-9kn.pages.dev"
+
+# [secrets] 섹션은 wrangler secret put으로 관리해야 함
