@@ -9,7 +9,8 @@ const ALLOWED_DOMAINS = [
   'jeju.go.kr',           // 한라산 탐방로 정보 (스크래핑용)
   'openapi.airport.co.kr', // 공항공사 항공 정보 API
   '123.140.197.51',       // CCTV 스트리밍 서버 IP
-  'hallacctv.kr'          // 한라산 CCTV 스트리밍 서버
+  'hallacctv.kr',         // 한라산 CCTV 스트리밍 서버 (Root)
+  'www.hallacctv.kr'      // 한라산 CCTV 스트리밍 서버 (Sub)
 ];
 
 // 2. 허용된 오리진 (CORS)
