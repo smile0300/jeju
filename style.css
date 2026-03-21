@@ -1610,3 +1610,168 @@ body {
     from { opacity: 0; }
     to { opacity: 1; }
 }
+
+
+/* ==================== Lost Report Feature ==================== */
+.lost-report-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    background: var(--primary-gradient);
+    color: white;
+    border: none;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 15px rgba(67, 56, 202, 0.2);
+}
+
+.lost-report-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(67, 56, 202, 0.4);
+}
+
+.lost-report-form-content {
+    max-width: 500px;
+    width: 90%;
+    padding: 0;
+    overflow: hidden;
+}
+
+.lost-report-header {
+    background: var(--bg-card-hover);
+    padding: 20px 25px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.lost-report-header h3 {
+    margin-bottom: 5px;
+    color: var(--text-primary);
+}
+
+.lost-report-header p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.lost-report-body {
+    padding: 25px;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--text-secondary);
+}
+
+.form-group input, 
+.form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-light);
+    font-family: inherit;
+    font-size: 0.95rem;
+    transition: border-color 0.2s;
+}
+
+.form-group input:focus, 
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.form-group textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.form-row {
+    display: flex;
+    gap: 15px;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+.photo-preview {
+    margin-top: 10px;
+    max-width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    display: none;
+}
+
+.photo-preview img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.form-submit-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    background: var(--primary-gradient);
+    color: white;
+    border: none;
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: all 0.2s;
+}
+
+.form-submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(67, 56, 202, 0.3);
+}
+
+.form-submit-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.form-status {
+    margin-top: 15px;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+    text-align: center;
+    border-radius: 8px;
+    padding: 10px;
+    display: none;
+}
+.form-status.success {
+    background: #ecfdf5;
+    color: #065f46;
+    display: block;
+}
+.form-status.error {
+    background: #fef2f2;
+    color: #991b1b;
+    display: block;
+}
+
+@media (max-width: 480px) {
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+}

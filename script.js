@@ -1527,3 +1527,137 @@ function copyWechatId() {
         alert('ID已复制: ' + input.value);
     }
 }
+
+
+/* ==================== Lost Report Feature ==================== */
+let lostReportImageBase64 = null;
+
+function openLostReportModal() {
+    document.getElementById('lost-report-modal').style.display = 'flex';
+    document.getElementById('lost-report-location').value = '';
+    
+    const now = new Date();
+    const kstTime = new Date(now.getTime() + (9 * 60 * 60 * 1000));
+    const yyyy = kstTime.getUTCFullYear();
+    const mm = String(kstTime.getUTCMonth() + 1).padStart(2, '0');
+    const dd = String(kstTime.getUTCDate()).padStart(2, '0');
+    
+    document.getElementById('lost-report-date').value = `${yyyy}-${mm}-${dd}`;
+    document.getElementById('lost-report-time').value = '';
+    document.getElementById('lost-report-item').value = '';
+    document.getElementById('lost-report-specifics').value = '';
+    document.getElementById('lost-report-photo').value = '';
+    document.getElementById('lost-report-wechat').value = '';
+    
+    const preview = document.getElementById('lost-report-photo-preview');
+    preview.style.display = 'none';
+    preview.innerHTML = '';
+    lostReportImageBase64 = null;
+    
+    const statusDiv = document.getElementById('lost-report-status');
+    statusDiv.style.display = 'none';
+    statusDiv.className = 'form-status';
+    
+    document.getElementById('lost-report-submit-btn').disabled = false;
+    document.getElementById('lost-report-submit-btn').innerText = '提交报失登记';
+    
+    document.body.style.overflow = 'hidden';
+}
+
+function closeLostReportModal() {
+    document.getElementById('lost-report-modal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+function handleLostImageChange(event) {
+    const file = event.target.files[0];
+    if (!file) {
+        lostReportImageBase64 = null;
+        document.getElementById('lost-report-photo-preview').style.display = 'none';
+        return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+        alert('照片大小不能超过2MB。请选择较小的文件。');
+        event.target.value = '';
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        lostReportImageBase64 = e.target.result;
+        const preview = document.getElementById('lost-report-photo-preview');
+        preview.innerHTML = `<img src="${lostReportImageBase64}" alt="Preview">`;
+        preview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+}
+
+async function submitLostReport() {
+    const location = document.getElementById('lost-report-location').value.trim();
+    const date = document.getElementById('lost-report-date').value;
+    const time = document.getElementById('lost-report-time').value;
+    const itemName = document.getElementById('lost-report-item').value.trim();
+    const specifics = document.getElementById('lost-report-specifics').value.trim();
+    const wechatId = document.getElementById('lost-report-wechat').value.trim();
+    
+    const statusDiv = document.getElementById('lost-report-status');
+    const submitBtn = document.getElementById('lost-report-submit-btn');
+
+    if (!location || !date || !itemName || !wechatId) {
+        statusDiv.className = 'form-status error';
+        statusDiv.innerText = '⚠️ 请填写所有必填项 (地点, 日期, 物品名称, 微信ID)';
+        statusDiv.style.display = 'block';
+        return;
+    }
+
+    const reportData = {
+        type: 'lost_report',
+        location: location,
+        date: date,
+        time: time,
+        itemName: itemName,
+        specifics: specifics,
+        photo: lostReportImageBase64 || '',
+        wechatId: wechatId,
+        userAgent: navigator.userAgent
+    };
+
+    try {
+        submitBtn.disabled = true;
+        submitBtn.innerText = '正在提交... ⏳';
+        statusDiv.style.display = 'none';
+
+        const response = await fetch('/api/lost-report', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(reportData)
+        });
+
+        if (!response.ok) {
+            throw new Error('Server returned ' + response.status);
+        }
+
+        const result = await response.json();
+
+        if (result.result === 'success' || result.status === 'success') {
+            statusDiv.className = 'form-status success';
+            statusDiv.innerText = '✅ 提交成功！如果您找到物品，我们将通过微信联系您。';
+            statusDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                closeLostReportModal();
+            }, 3000);
+        } else {
+            throw new Error(result.error || 'Unknown error');
+        }
+
+    } catch (error) {
+        console.error('Lost Report Submit Error:', error);
+        statusDiv.className = 'form-status error';
+        statusDiv.innerText = '❌ 提交失败，请稍后再试或直接联系我们。';
+        statusDiv.style.display = 'block';
+        submitBtn.disabled = false;
+        submitBtn.innerText = '重新提交登记';
+    }
+}

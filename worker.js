@@ -102,8 +102,8 @@ export default {
       }
     }
 
-    // /api/feature-request 엔드포인트 처리 (Google Sheets 연동)
-    if (url.pathname === '/api/feature-request' && request.method === 'POST') {
+    // /api/feature-request 및 /api/lost-report 엔드포인트 처리 (Google Sheets 연동)
+    if ((url.pathname === '/api/feature-request' || url.pathname === '/api/lost-report') && request.method === 'POST') {
       try {
         const gasUrl = env.GAS_URL || env.SECRET_GAS_URL;
         if (!gasUrl) {
