@@ -1628,7 +1628,7 @@ async function submitLostReport() {
         submitBtn.innerText = '正在提交... ⏳';
         statusDiv.style.display = 'none';
 
-        const response = await fetch('/api/lost-report', {
+        const response = await fetch(CONFIG.PROXY_URL + '/api/lost-report', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(reportData)
