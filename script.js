@@ -57,10 +57,10 @@ const CONFIG = {
 
     // 4개 지역 날씨 좌표 (기상청 격자 nx,ny)
     WEATHER_LOCATIONS: {
-        jeju: { nx: 53, ny: 38, nameKo: '제주시', nameCn: '济州市', midCode: '11G00000' },
-        seogwipo: { nx: 52, ny: 33, nameKo: '서귀포시', nameCn: '西归浦', midCode: '11G00000' },
-        hallasan: { nx: 52, ny: 35, nameKo: '한라산1100고지', nameCn: '汉拿山', midCode: '11G00000' },
-        udo: { nx: 56, ny: 38, nameKo: '우도', nameCn: '牛岛', midCode: '11G00000' }
+        jeju: { nx: 53, ny: 38, nameKo: '제주시', nameCn: '济州市', midLandCode: '11G00000', midTaCode: '11G0201' },
+        seogwipo: { nx: 52, ny: 33, nameKo: '서귀포시', nameCn: '西归浦', midLandCode: '11G00000', midTaCode: '11G0202' },
+        hallasan: { nx: 52, ny: 35, nameKo: '한라산1100고지', nameCn: '汉拿山', midLandCode: '11G00000', midTaCode: '11G0201' },
+        udo: { nx: 56, ny: 38, nameKo: '우도', nameCn: '牛岛', midLandCode: '11G00000', midTaCode: '11G0202' }
     }
 };
 
@@ -185,10 +185,55 @@ function formatBaseTime(date) {
     const kstHour = date.getHours();
     const times = [2, 5, 8, 11, 14, 17, 20, 23];
     let base = times.filter(t => t <= kstHour).pop() || 23;
-    if (base === 23 && kstHour < 2) { date.setDate(date.getDate() - 1); base = 23; }
-    const baseDate = `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}`;
+    const targetDateForShort = new Date(date);
+    if (kstHour < 2) { targetDateForShort.setDate(date.getDate() - 1); base = 23; }
+    const baseDate = `${targetDateForShort.getFullYear()}${String(targetDateForShort.getMonth() + 1).padStart(2, '0')}${String(targetDateForShort.getDate()).padStart(2, '0')}`;
     const baseTime = `${String(base).padStart(2, '0')}00`;
-    return { baseDate, baseTime };
+
+    // 중기 예보 기준 시간 (오늘 0600 또는 1800)
+    let midBase = kstHour < 6 ? 18 : (kstHour < 18 ? 6 : 18);
+    const targetDateForMid = new Date(date);
+    if (kstHour < 6) { targetDateForMid.setDate(date.getDate() - 1); }
+    const tmFc = `${targetDateForMid.getFullYear()}${String(targetDateForMid.getMonth() + 1).padStart(2, '0')}${String(targetDateForMid.getDate()).padStart(2, '0')}${String(midBase).padStart(2, '0')}00`;
+
+    return { baseDate, baseTime, tmFc };
+}
+
+// 중기예보 날씨 상태(wf) → 이모지/중국어 변환
+function translateMidWf(wf) {
+    if (wf.includes('맑음')) return { icon: '☀️', desc: '晴' };
+    if (wf.includes('구름많고 비') || wf.includes('흐리고 비')) return { icon: '🌧️', desc: '雨' };
+    if (wf.includes('구름많고 눈') || wf.includes('흐리고 눈')) return { icon: '🌨️', desc: '雪' };
+    if (wf.includes('구름많고 비/눈') || wf.includes('흐리고 비/눈')) return { icon: '🌨️', desc: '雨夹雪' };
+    if (wf.includes('구름많음')) return { icon: '⛅', desc: '多云' };
+    if (wf.includes('흐림')) return { icon: '☁️', desc: '阴' };
+    if (wf.includes('소나기')) return { icon: '🚿', desc: '阵雨' };
+    return { icon: '🌤️', desc: '晴' };
+}
+
+async function fetchMidTermWeather(loc) {
+    const { tmFc } = formatBaseTime(new Date());
+    const endpoints = {
+        land: 'https://apis.data.go.kr/1360000/MidFcstInfoService/getMidLandFcst',
+        temp: 'https://apis.data.go.kr/1360000/MidFcstInfoService/getMidTa'
+    };
+
+    const landUrl = `${CONFIG.PROXY_URL}/api/public-data?endpoint=${encodeURIComponent(endpoints.land)}&pageNo=1&numOfRows=10&dataType=JSON&regId=${loc.midLandCode}&tmFc=${tmFc}`;
+    const tempUrl = `${CONFIG.PROXY_URL}/api/public-data?endpoint=${encodeURIComponent(endpoints.temp)}&pageNo=1&numOfRows=10&dataType=JSON&regId=${loc.midTaCode}&tmFc=${tmFc}`;
+
+    try {
+        const [landRes, tempRes] = await Promise.all([fetch(landUrl), fetch(tempUrl)]);
+        const landJson = await landRes.json();
+        const tempJson = await tempRes.json();
+        
+        const landItem = landJson?.response?.body?.items?.item?.[0];
+        const tempItem = tempJson?.response?.body?.items?.item?.[0];
+        
+        return { landItem, tempItem };
+    } catch (e) {
+        console.warn('중기예보 로드 실패:', e);
+        return null;
+    }
 }
 
 async function fetchWeatherData(locKey) {
@@ -200,18 +245,24 @@ async function fetchWeatherData(locKey) {
     const workerUrl = `${CONFIG.PROXY_URL}/api/public-data?endpoint=${encodeURIComponent(endpoint)}&pageNo=1&numOfRows=1000&dataType=JSON&base_date=${baseDate}&base_time=${baseTime}&nx=${loc.nx}&ny=${loc.ny}`;
 
     try {
-        const res = await fetch(workerUrl);
-        const json = await res.json();
-        const items = json?.response?.body?.items?.item;
-        if (!items) throw new Error('No data');
-        parseAndRenderWeather(locKey, items);
+        // 단기예보와 중기예보 병렬로 가져오기
+        const [shortRes, midData] = await Promise.all([
+            fetch(workerUrl),
+            fetchMidTermWeather(loc)
+        ]);
+        
+        const shortJson = await shortRes.json();
+        const items = shortJson?.response?.body?.items?.item;
+        if (!items) throw new Error('Short-term forecast data missing');
+        
+        parseAndRenderWeather(locKey, items, midData);
     } catch (e) {
         console.error(`날씨 API 오류(${locKey}):`, e);
         renderWeatherError(locKey);
     }
 }
 
-function parseAndRenderWeather(locKey, items) {
+function parseAndRenderWeather(locKey, items, midData) {
     const grouped = {};
     items.forEach(it => {
         const key = `${it.fcstDate}${it.fcstTime}`;
@@ -244,21 +295,15 @@ function parseAndRenderWeather(locKey, items) {
         `;
     }
 
-    // 시간별 예보 (현재 시각 이후 데이터부터 추출)
+    // 시간별 예보
     const hourlyEl = document.getElementById(`hourly-${locKey}`);
     if (hourlyEl) {
         const now = new Date();
         const currentYmd = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
         const currentHm = `${String(now.getHours()).padStart(2, '0')}00`;
         const currentKey = currentYmd + currentHm;
-
-        // 현재 시각 이후의 데이터 필터링
         let hourlyItems = sortedKeys.filter(k => k >= currentKey).slice(0, 15);
-
-        // 만약 현재 시각 이후 데이터가 부족하다면 (예: 밤 늦게 조회) 앞에서부터 보충
-        if (hourlyItems.length < 5) {
-            hourlyItems = sortedKeys.slice(0, 15);
-        }
+        if (hourlyItems.length < 5) hourlyItems = sortedKeys.slice(0, 15);
 
         if (hourlyItems.length > 0) {
             hourlyEl.innerHTML = hourlyItems.map(k => {
@@ -266,7 +311,6 @@ function parseAndRenderWeather(locKey, items) {
                 const s = getSkyInfo(d.PTY, d.SKY);
                 const t = k.slice(8).padStart(4, '0');
                 const h = `${t.slice(0, 2)}:${t.slice(2)}`;
-                // 강수 확률이 있으면 0%라도 표시
                 const precipVal = d.POP !== undefined ? d.POP : (d.PCP && d.PCP !== '강수없음' ? d.PCP : null);
                 const precipHtml = precipVal !== null ? `<div class="hourly-precip precip-blue">💧${precipVal}%</div>` : '';
                 return `<div class="hourly-item">
@@ -280,7 +324,7 @@ function parseAndRenderWeather(locKey, items) {
         }
     }
 
-    // 주간 예보 (날짜별 최고/최저, 데이터 부족 시 Mock 보완하여 10일치 보장)
+    // 주간 예보 (단기 1~3일 + 중기 4~10일 통합)
     const weeklyEl = document.getElementById(`weekly-${locKey}`);
     if (weeklyEl) {
         const dailyMap = {};
@@ -299,42 +343,52 @@ function parseAndRenderWeather(locKey, items) {
         });
 
         const todayDate = new Date();
+        const { landItem, tempItem } = midData || {};
 
         weeklyEl.innerHTML = Array.from({ length: 10 }, (_, i) => {
             const targetD = new Date(todayDate);
             targetD.setDate(todayDate.getDate() + i);
             const ymd = `${targetD.getFullYear()}${String(targetD.getMonth() + 1).padStart(2, '0')}${String(targetD.getDate()).padStart(2, '0')}`;
+            const dateLabel = `${targetD.getMonth() + 1}/${targetD.getDate()}`;
+
+            let max = '--', min = '--', icon = '🌤️', precip = 0;
 
             const dt = dailyMap[ymd];
-            let max = '--', min = '--', precip = 0, pty = '0', sky = '1';
-
-            if (dt) {
-                if (dt.max !== -99) max = dt.max + '°';
-                if (dt.min !== 99) min = dt.min + '°';
+            if (dt && dt.max !== -99) {
+                // 1~3일차: 단기예보 데이터 사용
+                max = dt.max + '°';
+                min = dt.min + '°';
                 precip = dt.precip || 0;
-                pty = dt.pty || '0';
-                sky = dt.sky || '1';
+                const s = getSkyInfo(dt.pty, dt.sky);
+                icon = s.icon;
+            } else if (landItem && tempItem && i >= 3) {
+                // 4~10일차: 중기예보 데이터 사용
+                const dayIdx = i + 1;
+                max = (tempItem[`taMax${dayIdx}`] ?? '--') + '°';
+                min = (tempItem[`taMin${dayIdx}`] ?? '--') + '°';
+                
+                if (i <= 6) {
+                    const amPm = new Date().getHours() < 12 ? 'Am' : 'Pm';
+                    precip = landItem[`rnSt${dayIdx}${amPm}`] ?? landItem[`rnSt${dayIdx}`] ?? 0;
+                    const s2 = translateMidWf(landItem[`wf${dayIdx}${amPm}`] || landItem[`wf${dayIdx}`] || '');
+                    icon = s2.icon;
+                } else {
+                    precip = landItem[`rnSt${dayIdx}`] ?? 0;
+                    const s2 = translateMidWf(landItem[`wf${dayIdx}`] || '');
+                    icon = s2.icon;
+                }
             } else {
-                // 단기 예보 기간(약 3일)을 벗어난 날짜는 자연스러운 Mock 데이터로 채움
-                const mockRef = {
-                    jeju: { temp: 12, sky: '1', pty: '0', pop: 20 },
-                    seogwipo: { temp: 14, sky: '1', pty: '0', pop: 10 },
-                    hallasan: { temp: 5, sky: '4', pty: '0', pop: 30 },
-                    udo: { temp: 13, sky: '3', pty: '0', pop: 20 }
-                }[locKey] || { temp: 12, sky: '1', pty: '0', pop: 20 };
-
-                max = (mockRef.temp + Math.floor(Math.random() * 4)) + '°';
-                min = (mockRef.temp - Math.floor(Math.random() * 5)) + '°';
+                // 데이터 부족 시 Mock 폴백
+                const mockRef = { jeju: 12, seogwipo: 14, hallasan: 5, udo: 13 }[locKey] || 12;
+                max = (mockRef + Math.floor(Math.random() * 4)) + '°';
+                min = (mockRef - Math.floor(Math.random() * 5)) + '°';
                 precip = Math.floor(Math.random() * 30);
-                sky = ['1', '3', '4'][Math.floor(Math.random() * 3)];
             }
 
-            const s = getSkyInfo(pty, sky);
-            const dateLabel = `${targetD.getMonth() + 1}/${targetD.getDate()}`;
             const precipHtml = `<div class="weekly-precip ${precip >= 50 ? 'precip-blue' : ''}">💧${precip}%</div>`;
             return `<div class="weekly-item">
                 <div class="weekly-day"><small>${dateLabel}</small></div>
-                <div class="weekly-icon">${s.icon}</div>
+                <div class="weekly-icon">${icon}</div>
                 <div class="weekly-temps">
                     <span class="temp-high">${max}</span> / <span class="temp-low">${min}</span>
                 </div>
@@ -1121,9 +1175,24 @@ async function fetchFestivals() {
             fetch(searchUrl)
         ]);
 
+        // 에러 상세 로깅을 위한 텍스트 추출 시도 (응답이 JSON이 아닌 경우 대비)
+        const processResponse = async (res) => {
+            const text = await res.text();
+            if (!res.ok) {
+                console.warn(`[Festival API] Status: ${res.status}, Body: ${text.slice(0, 100)}`);
+                return { items: [] };
+            }
+            try {
+                return JSON.parse(text);
+            } catch (e) {
+                console.error(`[Festival API] JSON Parse Error. Body starts with: ${text.slice(0, 100)}`);
+                return { items: [] };
+            }
+        };
+
         const [dataBase, dataSearch] = await Promise.all([
-            resBase.ok ? resBase.json() : { items: [] },
-            resSearch.ok ? resSearch.json() : { items: [] }
+            processResponse(resBase),
+            processResponse(resSearch)
         ]);
 
         // 데이터 통합 및 중복 제거
@@ -1413,9 +1482,12 @@ async function submitFeatureRequest() {
             })
         });
 
-        // GAS(Google Apps Script)나 특정 Worker 환경에서는 대개 302 리다이렉션을 반환하거나
-        // 데이터 저장 후 500 등을 반환하더라도 실무적으로는 성공한 경우가 많습니다.
-        // 따라서 응답이 오기만 하면 성공으로 간주하여 사용자 경험을 개선합니다.
+        // 응답 상태 확인
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || `Server Error (${response.status})`);
+        }
+
         statusEl.style.color = '#059669';
         statusEl.textContent = '✅ 提交成功！谢谢您的建议。';
         contentEl.value = '';
@@ -1428,18 +1500,11 @@ async function submitFeatureRequest() {
 
     } catch (e) {
         console.error('Feature Request Error:', e);
-        // 네트워크 연결 자체의 문제나 CORS 에러(Redirect 발생 시) 중에도 데이터는 서버에 도달했을 가능성이 큼
-        // 사용자의 확인에 따라 '성공' 메시지를 우선적으로 표시합니다.
-        statusEl.style.color = '#059669';
-        statusEl.textContent = '✅ 提交成功！';
+        statusEl.style.color = '#ef4444'; // Red color for error
+        statusEl.textContent = `❌ 提交失败: ${e.message}`;
         
-        if (contentEl) contentEl.value = '';
-
-        setTimeout(() => {
-            closeFeatureModal();
-            submitBtn.disabled = false;
-            submitBtn.textContent = '提交反馈';
-        }, 2000);
+        submitBtn.disabled = false;
+        submitBtn.textContent = '重试';
     }
 }
 
