@@ -25,9 +25,8 @@
     <section id="home" class="app-section active">
         <div class="home-screen">
             <div class="home-welcome">
-                <h1>测试版本</h1>
-                <p>如果您能告诉我们济州岛旅行时需要的功能，我们将不断改进并添加功能。</p>
-                <button class="feature-request-btn" onclick="openFeatureModal()">💡 功能建议 / 报错</button>
+                <p>请提出您在济州岛旅行中的不便之处！</p>
+                <button class="feature-request-btn" onclick="openFeatureModal()">💡 提交建议 / 意见反馈</button>
             </div>
 
 
@@ -257,7 +256,12 @@
                 <div style="text-align:center; margin-bottom:20px;">
                     <a href="https://www.trip.com/t/DbXrep5KzT2" target="_blank" style="display:inline-block; padding:12px 28px; background:linear-gradient(135deg,#ff9800,#f57c00); color:#fff; font-size:0.95rem; font-weight:700; border-radius:50px; text-decoration:none; box-shadow:0 4px 14px rgba(245,124,0,0.25); transition:transform 0.15s, box-shadow 0.15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 18px rgba(245,124,0,0.35)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 14px rgba(245,124,0,0.25)'">🎟️ 查看景点门票</a>
                 </div>
-                <div id="festival-list" class="festival-list"></div>
+                <!-- 월별 축제 필터 (v5.0) -->
+            <div class="festival-month-filter" id="month-filter">
+                <!-- script.js에서 동적으로 생성됩니다 -->
+            </div>
+            
+            <div id="festival-list" class="festival-list"></div>
             </div>
         </div>
     </section>
@@ -513,7 +517,8 @@
 
 
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    <script src="script.js?v=4.5" charset="UTF-8"></script>
+    <script src="assets/curated_festivals.js"></script>
+    <script src="script.js?v=4.6" charset="UTF-8"></script>
 </body>
 
 </html>

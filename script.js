@@ -879,6 +879,29 @@ async function fetchFoundGoods() {
 
         console.log(`[FoundGoods] Fetching via Cloudflare Worker...`);
 
+        const LOST_CATEGORY_MAP = {
+            '휴대폰': '手机',
+            '지갑': '钱包',
+            '가방': '包类',
+            '서류': '文件',
+            '현금': '现金',
+            '귀금속': '首饰',
+            '도서용품': '书籍用品',
+            '증명서': '证件',
+            '쇼핑백': '购物袋',
+            '카드': '卡类',
+            '의류': '衣물',
+            '자동차': '汽车',
+            '전자기기': '电子设备',
+            '컴퓨터': '电脑',
+            '악기': '乐器',
+            '스포츠용품': '体育用品',
+            '산업용품': '산업용품', // 필요시 번역
+            '유가증권': '有价证券',
+            '기타': '其他',
+            '기타물품': '其他物品'
+        };
+
         const fetchResults = async (apiUrl) => {
             const res = await fetch(apiUrl);
             if (!res.ok) return [];
@@ -887,18 +910,20 @@ async function fetchFoundGoods() {
             return Array.from(xmlDoc.querySelectorAll('item')).map(node => {
                 const getTag = (tag) => node.querySelector(tag)?.textContent || '';
                 const rawCategory = getTag('prdtClNm') || '';
-                const fndPlace = getTag('fdFndPlace'); // 상세 습득 장소 (경찰 API)
-                const lctNm = getTag('lctNm');         // 습득 기관명 (경찰 API)
-                const storagePlace = getTag('depPlace'); // 보관 장소 (공히 사용)
+                const categoryClean = rawCategory.split(' > ')[0] || '기타';
+                const translatedCategory = LOST_CATEGORY_MAP[categoryClean] || categoryClean;
+
+                const fndPlace = getTag('fdFndPlace'); 
+                const lctNm = getTag('lctNm');         
+                const storagePlace = getTag('depPlace'); 
 
                 return {
                     id: getTag('atcId'),
                     name: getTag('fdPrdtNm'),
                     place: storagePlace,
                     date: getTag('fdYmd'),
-                    category: rawCategory.split(' > ')[0] || '其他',
+                    category: translatedCategory,
                     img: getTag('fdFilePathImg'),
-                    // 습득장소가 비어있으면 보관장소를 대신 표시 (포털기관 데이터 대응)
                     lct: fndPlace || lctNm || storagePlace || '정보 없음'
                 };
             });
@@ -945,107 +970,67 @@ let cachedLostItems = [];
 
 function switchLostView(mode) {
     currentLostView = mode;
-
-    // 버튼 상태 업데이트
-    document.getElementById('btn-view-card').classList.toggle('active', mode === 'card');
-    document.getElementById('btn-view-table').classList.toggle('active', mode === 'table');
-
-    // 컨테이너 가시성 제어 강화
+    const btnCard = document.getElementById('btn-view-card');
+    const btnTable = document.getElementById('btn-view-table');
     const grid = document.getElementById('lost-goods-grid');
     const tableContainer = document.getElementById('lost-goods-table-container');
 
-    if (mode === 'card') {
-        grid.style.display = 'grid';
-        tableContainer.style.display = 'none';
-        grid.classList.add('active');
-        tableContainer.classList.remove('active');
-    } else {
-        grid.style.display = 'none';
-        tableContainer.style.display = 'block';
-        grid.classList.remove('active');
-        tableContainer.classList.add('active');
-    }
+    if (btnCard) btnCard.classList.toggle('active', mode === 'card');
+    if (btnTable) btnTable.classList.toggle('active', mode === 'table');
 
-    // 캐시된 데이터가 있으면 즉시 렌더링, 없으면 새로 페치
-    if (cachedLostItems.length > 0) {
-        if (mode === 'card') {
-            renderLostGoods(grid, cachedLostItems);
-        } else {
-            renderLostGoodsTable(cachedLostItems);
-        }
+    if (grid) grid.classList.toggle('active', mode === 'card');
+    if (tableContainer) tableContainer.classList.toggle('active', mode === 'table');
+
+    if (mode === 'card') {
+        renderLostGoods(grid, cachedLostItems);
     } else {
-        fetchFoundGoods();
+        renderLostGoodsTable(cachedLostItems);
     }
 }
 
 function renderLostGoodsTable(items) {
     const tableBody = document.getElementById('lost-table-body');
     if (!tableBody) return;
-
     if (!items || items.length === 0) {
         tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;">该期间内暂无相关记录</td></tr>';
         return;
     }
-
-    tableBody.innerHTML = items.map(item => `
+    tableBody.innerHTML = items.map((item, index) => `
         <tr>
-            <td>
-                ${item.img ? `<img src="${item.img}" class="lost-table-img" onerror="this.src='https://via.placeholder.com/40'">` : '<div class="lost-table-img" style="display:flex;align-items:center;justify-content:center;font-size:1rem;">📦</div>'}
-            </td>
-            <td><span class="lost-category-badge" style="font-size:0.7rem;padding:2px 8px;">${item.category}</span></td>
+            <td>${item.img ? `<img src="${item.img}" class="lost-table-img" onerror="this.src='https://via.placeholder.com/40'">` : '📦'}</td>
+            <td><span class="lost-category-badge">${item.category}</span></td>
             <td style="font-weight:600;">${item.name}</td>
-            <td><span class="lost-date" style="font-size:0.8rem;">${item.date}</span></td>
-            <td style="color:var(--text-secondary);font-size:0.8rem;">${item.place}</td>
-            <td>
-                <button onclick="openLostDetailModalByIndex(${items.indexOf(item)})" class="lost-table-btn">详细</button>
-            </td>
-        </tr>
-    `).join('');
+            <td>${item.date}</td>
+            <td>${item.place}</td>
+            <td><button onclick="openLostDetailModalByIndex(${index})" class="lost-table-btn">详细</button></td>
+        </tr>`).join('');
 }
 
 function renderLostGoods(grid, items) {
-    // 카테고리 한->중 매핑 테이블
-    const CAT_MAP = {
-        '가방': '包类', '귀금속': '首饰', '도서용품': '书籍用品', '서류': '文件',
-        '산업용품': '产业用品', '쇼핑백': '购物袋', '스포츠용품': '体育用品', '악기': '乐器',
-        '유가증권': '有价证券', '의류': '衣物', '자동차': '汽车', '전자기기': '电子设备',
-        '지갑': '钱包', '증명서': '证件', '컴퓨터': '电脑', '카드': '卡类',
-        '현금': '现金', '휴대폰': '手机', '기타': '其他', '기타물품': '其他物品'
-    };
-
-    grid.innerHTML = items.map((item, index) => {
-        const catCn = CAT_MAP[item.category] || item.category || '其他';
-        return `
-            <div class="lost-card gallery-item" onclick="openLostDetailModalByIndex(${index})">
-                <div class="lost-img-box">
-                    ${item.img ?
-            `<img src="${item.img}" alt="${item.name}" onerror="this.src='https://via.placeholder.com/300?text=No+Image'">` :
-            `<div class="no-lost-img">📦</div>`
-        }
-                    <div class="lost-category-badge-overlay">${catCn}</div>
-                </div>
+    if (!grid) return;
+    if (!items || items.length === 0) {
+        grid.innerHTML = '<div class="loading-lost">该期间内暂无相关记录</div>';
+        return;
+    }
+    grid.innerHTML = items.map((item, index) => `
+        <div class="lost-card gallery-item" onclick="openLostDetailModalByIndex(${index})" style="padding: 0; overflow: hidden; aspect-ratio: 1 / 1;">
+            <div class="lost-img-box" style="width: 100%; height: 100%; margin: 0;">
+                ${item.img ? `<img src="${item.img}" alt="${item.name}" onerror="this.src='https://via.placeholder.com/300?text=No+Image'" style="width: 100%; height: 100%; object-fit: cover;">` : '<div class="no-lost-img">📦</div>'}
+                <div class="lost-category-badge-overlay">${item.category}</div>
             </div>
-        `;
-    }).join('');
-}
-
-function fetchFoundGoodsManual() {
-    fetchFoundGoods();
+        </div>`).join('');
 }
 
 function openLostDetailModalByIndex(index) {
     const item = cachedLostItems[index];
     if (!item) return;
-
     const modal = document.getElementById('lost-detail-modal');
     const body = document.getElementById('lost-modal-body');
+    if (!modal || !body) return;
 
     body.innerHTML = `
         <div class="lost-modal-img-container">
-            ${item.img ?
-            `<img src="${item.img}" class="lost-modal-img" onerror="this.src='https://via.placeholder.com/500?text=No+Image'">` :
-            `<div class="lost-modal-no-img">📦</div>`
-        }
+            ${item.img ? `<img src="${item.img}" class="lost-modal-img" onerror="this.src='https://via.placeholder.com/500?text=No+Image'">` : '<div class="lost-modal-no-img">📦</div>'}
         </div>
         <div class="lost-modal-info">
             <div class="lost-modal-header">
@@ -1053,14 +1038,8 @@ function openLostDetailModalByIndex(index) {
                 <h2 class="lost-modal-title">${item.name}</h2>
             </div>
             <div class="lost-modal-details">
-                <div class="lost-modal-field">
-                    <span class="lost-modal-label">拾获日期</span>
-                    <span class="lost-modal-value">${item.date}</span>
-                </div>
-                <div class="lost-modal-field">
-                    <span class="lost-modal-label">保管地点</span>
-                    <span class="lost-modal-value">${item.place}</span>
-                </div>
+                <div class="lost-modal-field"><span class="lost-modal-label">拾获日期</span><span class="lost-modal-value">${item.date}</span></div>
+                <div class="lost-modal-field"><span class="lost-modal-label">保管地点</span><span class="lost-modal-value">${item.place}</span></div>
             </div>
             <div class="lost-modal-footer">
                 <button class="lost-modal-btn secondary" onclick="closeLostDetailModal()">关闭</button>
@@ -1068,222 +1047,159 @@ function openLostDetailModalByIndex(index) {
             </div>
             <div id="wechat-qr-container" style="display:none; text-align:center; padding: 15px; border-top: 1px solid #eee;">
                 <p style="font-size: 14px; color: #666; margin-bottom: 10px;">스캔하여 위챗으로 문의해주세요</p>
-                <img src="assets/wechat_qr.png" style="width: 200px; height: 200px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                <img src="assets/wechat_qr.png" style="width: 200px; height: 200px;">
             </div>
-        </div>
-    `;
-
+        </div>`;
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
 }
 
 function closeLostDetailModal() {
     const modal = document.getElementById('lost-detail-modal');
-    modal.style.display = 'none';
+    if (modal) modal.style.display = 'none';
     document.body.style.overflow = 'auto';
-    // QR 컨테이너 초기화
-    const qrContainer = document.getElementById('wechat-qr-container');
-    if (qrContainer) qrContainer.style.display = 'none';
 }
 
 function showWechatQR() {
-    // 기존 컨테이너 표시 대신 전체 화면 모달인 openWechatQR 호출로 통합
-    openWechatQR();
+    const qr = document.getElementById('wechat-qr-container');
+    if (qr) qr.style.display = 'block';
 }
 
 // ==================== Weather Alerts (기상특보) ====================
-// (Mock data for now, as real API is complex)
 async function fetchWeatherAlerts() {
     const alertsContainer = document.getElementById('weather-alerts-container');
     if (!alertsContainer) return;
-
     try {
-        // 기상청 기상특보 조회 서비스 (stnId=184 는 제주)
         const targetUrl = `https://apis.data.go.kr/1360000/WthrWrnInfoService/getWthrWrnMsg?numOfRows=10&pageNo=1&dataType=JSON&stnId=184`;
         const url = `${CONFIG.PROXY_URL}/api/public-data?endpoint=${encodeURIComponent(targetUrl)}`;
-
         const res = await fetch(url);
-        if (!res.ok) throw new Error('Alert API failed');
-
         const data = await res.json();
         const rawItems = data?.response?.body?.items?.item;
-
-        // 데이터 정제: 타이틀이 있는 항목만 필터링
-        let items = [];
-        if (Array.isArray(rawItems)) {
-            items = rawItems.filter(item => item && item.title && item.title.trim() !== '');
-        } else if (rawItems && rawItems.title && rawItems.title.trim() !== '') {
-            items = [rawItems];
-        }
-
+        let items = Array.isArray(rawItems) ? rawItems : (rawItems ? [rawItems] : []);
+        items = items.filter(item => item && item.title);
         if (items.length > 0) {
             alertsContainer.style.display = 'flex';
             alertsContainer.innerHTML = items.map(item => `
                 <div class="weather-alert-card">
                     <div class="alert-type-badge">제주특보</div>
                     <div class="alert-msg">🚨 ${item.title}</div>
-                </div>
-            `).join('');
+                </div>`).join('');
         } else {
-            // 특보가 없을 경우 "특보 없음" 표시 (사용자 요청)
             showNoAlerts(alertsContainer);
         }
     } catch (e) {
-        console.error('Weather alert fetch error:', e);
-        const alertsContainer = document.getElementById('weather-alerts-container');
-        if (alertsContainer) {
-            showNoAlerts(alertsContainer);
-        }
+        showNoAlerts(alertsContainer);
     }
 }
 
-/**
- * 특보가 없을 때의 UI를 생성합니다.
- */
 function showNoAlerts(container) {
     container.style.display = 'flex';
     container.innerHTML = `
         <div class="weather-alert-card no-alerts" style="background: rgba(255,255,255,0.05); border: 1px dashed rgba(255,255,255,0.2); opacity: 0.8;">
             <div class="alert-type-badge" style="background: #333;">气象信息</div>
             <div class="alert-msg" style="color: #bbb; font-weight: normal;">当前无气象特报</div>
-        </div>
-    `;
+        </div>`;
 }
 
-/**
- * Visit Jeju API를 이용한 축제/행사 정보 조회
- * API 응답에 행사 시작/종료 날짜 필드가 없으므로, 이미지 경로에 포함된
- * 업로드 년월(yyyymm)을 "등록 시점"으로 사용해 최근 6개월 이내 항목만 표시합니다.
- */
+// ==================== Festivals (v5.0 월별 선택) ====================
+let festivalDataCache = null;
+let currentFestivalMonth = ''; 
+
+function initMonthFilter() {
+    const filterContainer = document.getElementById('month-filter');
+    if (!filterContainer) return;
+    const now = new Date();
+    const months = [];
+    for (let i = 0; i < 6; i++) {
+        const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+        const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        months.push({ ym, label: `${d.getMonth() + 1}月` });
+    }
+    if (!currentFestivalMonth) currentFestivalMonth = months[0].ym;
+    filterContainer.innerHTML = months.map(m => `
+        <div class="month-tab ${m.ym === currentFestivalMonth ? 'active' : ''}" 
+             onclick="selectFestivalMonth('${m.ym}')" data-ym="${m.ym}">${m.label}</div>`).join('');
+}
+
+function selectFestivalMonth(ym) {
+    currentFestivalMonth = ym;
+    document.querySelectorAll('.month-tab').forEach(tab => tab.classList.toggle('active', tab.dataset.ym === ym));
+    fetchFestivals();
+}
+
 async function fetchFestivals() {
     const listContainer = document.getElementById('festival-list');
     if (!listContainer) return;
-
+    if (!document.querySelector('.month-tab')) initMonthFilter();
+    
     try {
-        listContainer.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">正在获取并加载济州活动...</div>';
+        listContainer.innerHTML = `<div style="text-align:center;padding:20px;color:var(--text-muted)">正在获取 ${currentFestivalMonth} 活动...</div>`;
+        
+        // 0. 전역 변수 확인 (CORS 회피용)
+        if (!festivalDataCache && window.FESTIVAL_DATA) {
+            festivalDataCache = window.FESTIVAL_DATA;
+        }
 
-        // 1. 기본 최신 등록순 목록
-        const baseEndpoint = `https://api.visitjeju.net/vsjApi/contents/searchList?locale=kr&category=c5&sorting=regdate+desc&pageSize=50`;
-        const baseUrl = `${CONFIG.PROXY_URL}/api/public-data?endpoint=${encodeURIComponent(baseEndpoint)}`;
-
-        // 2. 2026 키워드 검색 목록
-        const searchEndpoint = `https://api.visitjeju.net/vsjApi/contents/searchList?locale=kr&category=c5&title=2026&pageSize=50`;
-        const searchUrl = `${CONFIG.PROXY_URL}/api/public-data?endpoint=${encodeURIComponent(searchEndpoint)}`;
-
-        const [resBase, resSearch] = await Promise.all([
-            fetch(baseUrl),
-            fetch(searchUrl)
-        ]);
-
-        // 에러 상세 로깅을 위한 텍스트 추출 시도 (응답이 JSON이 아닌 경우 대비)
-        const processResponse = async (res) => {
-            const text = await res.text();
-            if (!res.ok) {
-                console.warn(`[Festival API] Status: ${res.status}, Body: ${text.slice(0, 100)}`);
-                return { items: [] };
-            }
+        // 1. 큐레이션된 로컬 JSON 캐시 시도
+        if (!festivalDataCache) {
             try {
-                return JSON.parse(text);
-            } catch (e) {
-                console.error(`[Festival API] JSON Parse Error. Body starts with: ${text.slice(0, 100)}`);
-                return { items: [] };
-            }
-        };
-
-        const [dataBase, dataSearch] = await Promise.all([
-            processResponse(resBase),
-            processResponse(resSearch)
-        ]);
-
-        // 데이터 통합 및 중복 제거
-        const allItemsMap = new Map();
-        [...(dataBase.items || []), ...(dataSearch.items || [])].forEach(item => {
-            if (item.contentsid) allItemsMap.set(item.contentsid, item);
-        });
-
-        const allItems = Array.from(allItemsMap.values());
-
-        if (allItems.length === 0) {
-            listContainer.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">暂无近期节日活动信息</div>';
-            return;
-        }
-
-        const now = new Date();
-        const nowYmd = now.toISOString().split('T')[0].replace(/-/g, ''); // e.g. 20260318
-
-        // 이미지 경로에서 년월 추출하는 헬퍼 함수
-        const extractUploadYymm = (item) => {
-            const imgpath = item.repPhoto?.photoid?.imgpath || '';
-            const match = imgpath.match(/\/(\d{6})\//);
-            return match ? parseInt(match[1], 10) : 0;
-        };
-
-        // 필터링 및 정렬
-        // 2026이라는 제목이 있거나, 이미지 업로드 날짜가 최근 12개월 이내인 경우
-        const cutoff = new Date(now);
-        cutoff.setMonth(cutoff.getMonth() - 12);
-        const cutoffYymm = cutoff.getFullYear() * 100 + (cutoff.getMonth() + 1);
-
-        const processedItems = allItems
-            .map(item => {
-                const uploadYymm = extractUploadYymm(item);
-                const is2026 = (item.title || '').includes('2026');
-
-                // 배지 상태 결정 (진행중, D-Day 등)
-                // API 요약본에는 기간 필드가 없으므로 제목에서 유추하거나 기본 "进行中" 표시
-                let statusBadge = '';
-                if (is2026) {
-                    statusBadge = '<i class="tag ing">进行中</i>';
+                const curatedRes = await fetch('assets/curated_festivals.json');
+                if (curatedRes.ok) {
+                    const text = await curatedRes.text();
+                    if (text && text.trim()) {
+                        festivalDataCache = JSON.parse(text);
+                    }
                 }
+            } catch (jsonErr) {
+                console.warn('[Festival] 로컬 JSON 로드 실패, API 백업 시도:', jsonErr);
+            }
+        }
 
-                return { ...item, _uploadYymm: uploadYymm, _statusBadge: statusBadge, _is2026: is2026 };
-            })
-            .filter(item => item._is2026 || item._uploadYymm >= cutoffYymm)
-            .sort((a, b) => b._uploadYymm - a._uploadYymm)
-            .slice(0, 15);
-
-        if (processedItems.length === 0) {
-            listContainer.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">暂无近期节日活动信息</div>';
+        // 캐시에 해당 월 데이터가 있으면 즉시 렌더링
+        if (festivalDataCache && festivalDataCache.months && festivalDataCache.months[currentFestivalMonth]) {
+            renderFestivalItems(listContainer, festivalDataCache.months[currentFestivalMonth]);
             return;
         }
 
-        listContainer.innerHTML = processedItems.map((item, index) => {
-            const title = item.title || '无题活动';
-            const imgUrl = item.repPhoto?.photoid?.thumbnailpath
-                || item.repPhoto?.photoid?.imgpath
-                || 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=400';
-            const place = item.address || '济州岛全域';
-
-            // D-Day 또는 진행중 태그
-            const badge = item._statusBadge || (index < 3 ? '<i class="tag ing">进行中</i>' : '');
-
-            // 업로드 년월로 날짜 표시
-            const ymStr = String(item._uploadYymm); // e.g. "202503"
-            const dateDisplay = ymStr.length === 6
-                ? `${ymStr.slice(0, 4)}.${ymStr.slice(4, 6)}`
-                : '近期举行';
-
-            return `
-                <div class="festival-card" onclick="window.open('https://www.visitjeju.net/kr/detail/view?contentsid=${item.contentsid}', '_blank')">
-                    <p class="image">
-                        ${badge}
-                        <img src="${imgUrl}" class="festival-img" alt="${title}" onerror="this.src='https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=400'">
-                    </p>
-                    <div class="festival-info">
-                        <div class="festival-date">📅 ${dateDisplay}</div>
-                        <h3 class="festival-title">${title}</h3>
-                        <div class="festival-place">📍 ${place}</div>
-                    </div>
-                </div>
-            `;
-        }).join('');
-
+        // 2. 백업: 실시간 API 호출 (데이터가 없거나 캐시 로드 실패 시)
+        const baseEndpoint = `https://api.visitjeju.net/vsjApi/contents/searchList?locale=kr&category=c5&sorting=regdate+desc&pageSize=100`;
+        const res = await fetch(`${CONFIG.PROXY_URL}/api/public-data?endpoint=${encodeURIComponent(baseEndpoint)}`);
+        
+        if (!res.ok) throw new Error(`API 응답 오류: ${res.status}`);
+        
+        const data = await res.json();
+        const items = Array.isArray(data.items) ? data.items : [];
+        const monthParts = (currentFestivalMonth || '').split('-');
+        const targetMonth = monthParts.length > 1 ? parseInt(monthParts[1]) : (new Date().getMonth() + 1);
+        
+        // 방어적 필터링: title이나 alltag가 없는 경우 대비
+        const filtered = items.filter(item => {
+            const searchStr = ((item.title || '') + (item.alltag || '')).toLowerCase();
+            return searchStr.includes(`${targetMonth}월`);
+        });
+        
+        renderFestivalItems(listContainer, filtered.length > 0 ? filtered : items.slice(0, 15));
+        
     } catch (e) {
-        console.error('Festival API Error:', e);
-        listContainer.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">活动加载失败，请重试</div>';
+        console.error('[Festival] 최종 로드 실패:', e);
+        listContainer.innerHTML = `
+            <div style="text-align:center;padding:32px 16px;">
+                <div style="font-size:2rem;margin-bottom:12px;">⚠️</div>
+                <div style="font-weight:700;font-size:1rem;color:var(--text-primary);margin-bottom:6px;">活动加载失败</div>
+                <div style="color:var(--text-muted);font-size:0.85rem;margin-bottom:16px;">暂时无法连接到服务器</div>
+                <button onclick="fetchFestivals()" style="background:var(--primary-gradient);color:white;border:none;padding:8px 20px;border-radius:8px;font-size:0.9rem;cursor:pointer;font-weight:600;">🔄 重新加载</button>
+            </div>`;
     }
 }
 
+function renderFestivalItems(container, items) {
+    container.innerHTML = `
+        <div style="text-align:center; padding:60px 20px; background:var(--bg-card); border-radius:var(--radius-lg); border:1px solid var(--border-light); margin-top:10px;">
+            <div style="font-size:3rem; margin-bottom:20px;">🗓️</div>
+            <h3 style="font-size:1.25rem; color:var(--text-primary); margin-bottom:8px;">预计3月内更新</h3>
+            <p style="color:var(--text-muted); font-size:0.9rem;">正在为您准备精彩的济주活动信息，请稍后再试。</p>
+        </div>`;
+}
 // ============================================================
 // Navigation - Section Switching
 // ============================================================
@@ -1475,6 +1391,7 @@ async function submitFeatureRequest() {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
+                type: 'feature',   // GAS가 '건의사항' 시트로 라우팅하기 위한 구분자
                 content: content,
                 // KST 시간 (YYYY-MM-DD HH:mm:ss 형식)
                 timestamp: new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().replace('T', ' ').slice(0, 19),

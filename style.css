@@ -45,7 +45,7 @@ body {
     min-height: 100vh;
 }
 
-/* ?�션 ?�환 ?�어 */
+/* ?�션 ?�환 ?�어 */
 .app-section {
     display: none;
     animation: slideIn 0.3s ease-out;
@@ -75,7 +75,7 @@ body {
     justify-content: center;
     padding: 0 16px;
     z-index: 2000;
-    position: relative; /* ?�식 absolute ?�렬 기�? */
+    position: relative; /* ?�식 absolute ?�렬 기�? */
     box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     border-bottom: 1px solid var(--border-light);
 }
@@ -111,7 +111,7 @@ body {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    pointer-events: none; /* ?�에 ?�는 ?�소 ?�릭 ?�용 */
+    pointer-events: none; /* ?�에 ?�는 ?�소 ?�릭 ?�용 */
 }
 
 /* ==================== Hero ==================== */
@@ -214,7 +214,7 @@ body {
     border: 1px solid rgba(255,255,255,0.8);
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    min-height: 110px; /* 모든 ??�� ?�기 균일??*/
+    min-height: 110px; /* 모든 ??�� ?�기 균일??*/
 }
 
 .home-item:active {
@@ -328,13 +328,13 @@ body {
     width: 100%;
 }
 .location-tab {
-    flex: 1; /* 가�?공간 균등 배분 */
+    flex: 1; /* 가�?공간 균등 배분 */
     background: var(--bg-card); border: 2px solid var(--border-light);
     padding: 12px 4px; border-radius: var(--radius-md); cursor: pointer;
     transition: all var(--transition-normal);
     display: flex; flex-direction: column; align-items: center; gap: 4px;
     box-shadow: var(--shadow-sm);
-    min-width: 0; /* flex ?�식??최소 ?�비 ?�제 */
+    min-width: 0; /* flex ?�식??최소 ?�비 ?�제 */
 }
 .location-tab:hover { background: var(--bg-card-hover); border-color: var(--accent-purple); transform: translateY(-3px); }
 .location-tab.active { background: var(--primary-gradient); border-color: transparent; box-shadow: var(--shadow-lg); }
@@ -499,11 +499,11 @@ body {
 }
 .flight-header { background: var(--bg-card-hover) !important; font-weight: 700; color: var(--text-primary); border-top: 1px solid var(--border-light); }
 .flight-col { flex: 1; text-align: center; min-width: 0; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; }
-.flight-col:nth-child(1) { flex: 1.1; font-weight: 700; } /* ??��?�명 */
-.flight-col:nth-child(2) { flex: 1.3; font-size: 0.75rem; word-break: break-all; } /* ??��?�명 복구 */
+.flight-col:nth-child(1) { flex: 1.1; font-weight: 700; } /* ??��?�명 */
+.flight-col:nth-child(2) { flex: 1.3; font-size: 0.75rem; word-break: break-all; } /* ??��?�명 복구 */
 .flight-col:nth-child(3) { flex: 1.2; word-break: break-all; } /* 출발/목적지 */
-.flight-col:nth-child(4) { flex: 1.5; } /* ?�간 */
-.flight-col:nth-child(5) { flex: 1.1; } /* ?�태 */
+.flight-col:nth-child(4) { flex: 1.5; } /* ?�간 */
+.flight-col:nth-child(5) { flex: 1.1; } /* ?�태 */
 
 .flight-row:hover:not(.flight-header) { background: var(--bg-card-hover); }
 .status-badge { padding: 4px 8px; border-radius: var(--radius-sm); font-size: 0.72rem; font-weight: 600; white-space: nowrap; }
@@ -743,12 +743,12 @@ body {
     background: #f1f5f9;
     padding: 6px;
     border-radius: 14px;
-    width: 100%; /* ?�비 100%�??�정 */
+    width: 100%; /* ?�비 100%�??�정 */
     margin-top: 10px;
 }
 
 .view-toggle-btn {
-    flex: 1; /* 5:5 비율???�해 ?�일??비중 ?�당 */
+    flex: 1; /* 5:5 비율???�해 ?�일??비중 ?�당 */
     border: none;
     background: transparent;
     padding: 10px;
@@ -921,7 +921,7 @@ body {
 
 /* Excel Style Table */
 .lost-table-container {
-    display: none; /* 기본 ?��? */
+    display: none; /* 기본 ?��? */
     width: 100%;
     overflow-x: auto;
     background: white;
@@ -1031,7 +1031,7 @@ body {
     color: var(--text-muted);
 }
 
-/* ==================== Lost & Found 고도???�터 ==================== */
+/* ==================== Lost & Found 고도???�터 ==================== */
 .search-filter-box {
     background: rgba(255, 255, 255, 0.4);
     backdrop-filter: blur(12px);
@@ -1146,7 +1146,7 @@ body {
     width: 95%; 
     max-width: 1000px; 
     position: relative; 
-    padding: 2px; /* 비디?��? �?차게 */
+    padding: 2px; /* 비디?��? �?차게 */
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     animation: modalScaleUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     overflow: hidden;
@@ -1193,7 +1193,7 @@ body {
 /* ==================== Responsive ==================== */
 @media (max-width: 1024px) { .container { padding: var(--spacing-md); } }
 
-/* ==================== ?�블�?(769px ~ 1024px) ==================== */
+/* ==================== ?�블�?(769px ~ 1024px) ==================== */
 @media screen and (max-width: 1024px) and (min-width: 769px) {
     .cctv-grid { gap: 12px; }
 }
@@ -1452,13 +1452,13 @@ body {
 /* ===== Lost & Found Table Optimization ===== */
 .lost-table th, .lost-table td {
     padding: 12px 10px;
-    white-space: nowrap; /* 줄바�?방�? */
+    white-space: nowrap; /* 줄바�?방�? */
 }
 
 .lost-table td {
     overflow: hidden;
     text-overflow: ellipsis; 
-    max-width: 200px; /* ?�절???�비 ?��? */
+    max-width: 200px; /* ?�절???�비 ?��? */
 }
 
 #wechat-qr-container {
@@ -1591,10 +1591,10 @@ body {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.badge-success { background-color: #059669; } /* 正常/已出??已到�?*/
-.badge-warning { background-color: #f59e0b; } /* 延�? */
-.badge-danger  { background-color: #dc2626; } /* ?�消/결항 */
-.badge-info    { background-color: #2563eb; } /* ?�他 */
+.badge-success { background-color: #059669; } /* 正常/已出??已到�?*/
+.badge-warning { background-color: #f59e0b; } /* 延�? */
+.badge-danger  { background-color: #dc2626; } /* ?�消/결항 */
+.badge-info    { background-color: #2563eb; } /* ?�他 */
 
 /* ==================== Flight Tabs Visibility ==================== */
 .flight-content {
@@ -1846,4 +1846,41 @@ body {
  font-weight: 700;
  margin-left: 12px;
  opacity: 0.9;
+}
+
+
+/* Festival Month Filter (v5.0) */
+.festival-month-filter {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+    padding: 10px 5px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+}
+.festival-month-filter::-webkit-scrollbar { display: none; }
+.month-tab {
+    flex: 0 0 auto;
+    padding: 8px 18px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    scroll-snap-align: start;
+}
+.month-tab.active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+.month-tab:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
 }
