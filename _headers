@@ -4,4 +4,4 @@
   X-Frame-Options: DENY
   X-XSS-Protection: 1; mode=block
   Referrer-Policy: strict-origin-when-cross-origin
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: https://hallacctv.kr https://*.hallacctv.kr; connect-src 'self' https://jejuweb.smile0300.workers.dev https://hallacctv.kr https://*.hallacctv.kr; media-src 'self' blob: https://hallacctv.kr https://*.hallacctv.kr; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.googletagmanager.com blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: https://hallacctv.kr https://*.hallacctv.kr; connect-src 'self' https://jejuweb.smile0300.workers.dev https://hallacctv.kr https://*.hallacctv.kr https://cdn.jsdelivr.net https://www.google-analytics.com; media-src 'self' blob: https://hallacctv.kr https://*.hallacctv.kr; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
