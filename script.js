@@ -1634,8 +1634,20 @@ async function submitLostReport() {
             body: JSON.stringify(reportData)
         });
 
+        // 1. HTTP 상태 코드 확인
         if (!response.ok) {
-            throw new Error('Server returned ' + response.status);
+            let errorMsg = `Server Error (${response.status})`;
+            try {
+                const errData = await response.json();
+                errorMsg = errData.error || errorMsg;
+            } catch (e) {
+                // JSON 파싱 실패 시 텍스트 응답 확인 시도
+                const text = await response.text().catch(() => '');
+                if (text.includes('Error: You') || text.includes('<!DOCTYPE html>')) {
+                    errorMsg = 'Google Script Connection Error (Permission Denied). Please check GAS deployment.';
+                }
+            }
+            throw new Error(errorMsg);
         }
 
         const result = await response.json();

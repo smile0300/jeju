@@ -5,6 +5,8 @@ account_id = "2952a38a59e8d419aefa3c409c5cdf3a"
 
 [vars]
 # 공개 가능한 변수들
-ALLOWED_ORIGIN = "https://jeju-9kn.pages.dev"
+ALLOWED_ORIGIN = "*"
+# GAS_URL은 Cloudflare Dashboard > Workers > jejuweb > Settings > Variables > Secrets 에서 관리
+VISIT_JEJU_KEY = "fd0365a6919e44c3b120034ba100678f"
 
 # [secrets] 섹션은 wrangler secret put으로 관리해야 함

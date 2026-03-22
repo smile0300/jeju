@@ -1,4 +1,4 @@
-# 제주 여행 도우미 데이터 연동 가이드 (Data Info Guide v4.1)
+# 제주 여행 도우미 데이터 연동 가이드 (Data Info Guide v4.2)
 
 웹사이트의 실시간 정보 연동 방식과 운영 중 발생한 주요 이슈 및 해결 과정을 정리한 문서입니다.
 
@@ -49,6 +49,27 @@
 ### 5.01 조회 날짜 고정 및 병합 최적화
 - **해결**: 날짜 선택 제한(`max=어제`)을 통해 미래 데이터 조회 오류를 방지하고, 경찰관서와 포털 데이터를 중복 없이 통합 정렬.
 
+### 5.02 분실물 직접 신고 기능 (Lost Item Report) 신설
+- **업데이트**: 기존 '습득물 조회' 기능에 더해, 사용자가 자신의 분실물을 직접 신고할 수 있는 UI 모달과 이미지(Base64) 전송 폼 기능 추가.
+  - **최적화**: 기존 '건의사항' 전송에 사용하던 단일 `GAS_URL` 통신 파이프라인을 재사용함. 클라이언트에서 전송 시 `type: 'lost_report'` 파라미터를 추가하여, 구글 앱스 스크립트(GAS)에서 단일 엔드포인트로 건의사항과 분실물 시트(탭)를 지능적으로 분류할 수 있도록 구성 (유지보수성 극대화).
+
+### 5.03 분실물 신고 사진 업로드 Drive 권한 오류 해결
+- **증상**: 사진 없이 신고 시 정상 동작하나, 사진 첨부 시 `Photo Save Error: You do not have permission to call DriveApp.Folder.createFile` 오류 발생.
+- **근본 원인 1 — GAS_URL Secret 미적용**: Cloudflare Worker의 `wrangler.toml`에 `GAS_URL`이 평문으로 노출되어 있었으며, 새 GAS 배포 URL로 교체가 필요했음.
+  - **해결**: `wrangler.toml`의 `[vars]`에서 `GAS_URL` 제거 후, `wrangler secret put GAS_URL` 명령으로 Cloudflare Secret에 저장.
+- **근본 원인 2 — GAS OAuth 스코프 미선언**: `appsscript.json` 매니페스트에 `oauthScopes`가 없었고, `enabledAdvancedServices`에 Drive API v3(고급 서비스)만 등록되어 `DriveApp`(기본 서비스)과 충돌.
+  - **해결**: `appsscript.json`에서 고급 서비스 제거 후, `oauthScopes`에 아래 3개 스코프를 명시적으로 선언:
+    ```json
+    "oauthScopes": [
+      "https://www.googleapis.com/auth/spreadsheets",
+      "https://www.googleapis.com/auth/drive",
+      "https://www.googleapis.com/auth/script.external_request"
+    ]
+    ```
+- **근본 원인 3 — 기존 OAuth 토큰 미갱신**: 스코프 변경 후에도 기존 OAuth 토큰이 Drive 권한 없이 캐시되어 오류 지속.
+  - **해결**: [Google 계정 권한 페이지](https://myaccount.google.com/permissions)에서 `jeju_final` 앱 연결을 완전히 취소 후, Apps Script 편집기에서 함수를 직접 실행하여 Drive 포함 전체 권한을 재승인 → 새 버전(v15)으로 재배포.
+- **최종 상태**: `Jeju_Photos` 폴더에 사진 정상 저장 및 공유 URL이 Google Sheet에 기록됨.
+
 ## 6. 축제 및 행사
 - **연동 방식**: VISIT JEJU(제주관광공사) 콘텐츠 검색 API 활용.
 - **상세**: 현재 날짜를 기준으로 진행 중이거나 예정된 축제 정보를 수집하여 중국어 간체로 인포메이션 제공.
@@ -74,6 +95,12 @@
 - **Cloudflare Worker**: API 키 은닉 및 SSRF 방지 화이트리스트 운영.
 - **보안 헤더**: `_headers` 파일을 통한 CSP, HSTS, X-Frame-Options 등 최신 보안 규격 적용.
 - **XSS 방지**: 사용자 건의사항 입력 시 `escapeHTML` 필터를 적용하여 악성 스크립트 주입 차단.
+
+### 10.02 로컬 환경 CORS 차단 해제 및 워커 배포 안정화
+- **증상**: 로컬 환경(`file://`)에서 테스트 시 브라우저에서 `Failed to fetch` 오류가 발생하며 모든 API의 통신이 먹통이 되는 현상 보고.
+- **원인**: 워커 보안 상 `ALLOWED_ORIGIN`이 운영 도메인(`jeju-9kn.pages.dev`) 전용으로 매우 엄격하게 할당되어 브라우저가 원천 차단함. 추가로, 터미널(CLI)을 통해 로컬 배포를 시도할 시 `wrangler.toml`에 환경변수가 미리 명시되지 않아 기존 서버에 저장된 중요 API 키가 덮어씌워져 날아갈 뻔한 위기 존재.
+- **해결**: 개발 편의성과 실시간 테스트 지원을 위해 Worker의 CORS 허용역을 `*`로 변경. 동시에 `wrangler.toml` 파일의 `[vars]` 섹션 내에 `VISIT_JEJU_KEY` 값을 안전하게 명시함으로써, 명령어 배포 시에도 환경변수 유실 없이 코드가 연동되도록 안정성을 높임.
+- **추가 변경 (2026-03-22)**: `GAS_URL`은 보안 강화를 위해 `[vars]`에서 제거하고 `wrangler secret put GAS_URL` 명령으로 Cloudflare Secret으로 이전. `worker.js`는 `env.GAS_URL`로 동일하게 참조하므로 코드 변경 불필요.
 
 ## 11. 기타 (Miscellaneous)
 - **위챗 연동**: `copyWechatId()`를 통한 관리자 아이디(`jeju_jk`) 원터치 복사 브릿지.

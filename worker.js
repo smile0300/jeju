@@ -15,7 +15,7 @@ const ALLOWED_DOMAINS = [
 ];
 
 // 2. 허용된 오리진 (CORS)
-const ALLOWED_ORIGIN = 'https://jeju-9kn.pages.dev';
+const ALLOWED_ORIGIN = '*';
 
 export default {
   async fetch(request, env, ctx) {
@@ -123,8 +123,35 @@ export default {
           body: bodyText
         });
 
-        const result = await gasResponse.text();
-        return new Response(result, {
+        // 1. GAS 응답 텍스트 추출
+        const resultText = await gasResponse.text();
+        
+        // 2. 응답이 정상적인 JSON인지 확인
+        let isJson = true;
+        try {
+          JSON.parse(resultText);
+        } catch (e) {
+          isJson = false;
+        }
+
+        // 3. JSON이 아니거나 HTTP 상태가 정상이 아닐 경우 에러 응답 생성
+        if (!gasResponse.ok || !isJson) {
+          const errorMsg = !isJson ? `Non-JSON Response: ${resultText.slice(0, 100)}...` : `GAS Error Status: ${gasResponse.status}`;
+          return new Response(JSON.stringify({ 
+            error: errorMsg,
+            status: 'error',
+            raw: isJson ? null : resultText.slice(0, 500) // 디버깅용
+          }), {
+            status: gasResponse.ok ? 400 : gasResponse.status, // JSON이 아니면 400, 상태 코드 에러면 해당 코드
+            headers: {
+              'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
+              'Content-Type': 'application/json'
+            }
+          });
+        }
+
+        // 4. 정상적인 JSON 응답 반환
+        return new Response(resultText, {
           headers: {
             'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
             'Content-Type': 'application/json'
