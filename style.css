@@ -391,7 +391,7 @@ body {
 .detail-label { font-size: 0.75rem; color: var(--text-muted); margin-right: 4px; }
 .detail-value { font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); }
 
-.subsection-title { font-size: 1.1rem; margin-bottom: var(--spacing-sm); text-align: center; font-weight: 700; }
+.subsection-title { font-size: 1.1rem; margin-top: var(--spacing-lg); margin-bottom: var(--spacing-sm); text-align: center; font-weight: 700; }
 .hourly-weather { margin-bottom: var(--spacing-xl); }
 .hourly-scroll { display: flex; gap: 6px; overflow-x: auto; padding: var(--spacing-sm) 0; }
 .hourly-scroll::-webkit-scrollbar { height: 4px; }

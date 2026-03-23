@@ -342,7 +342,7 @@ function parseAndRenderWeather(locKey, items, midData) {
     if (detailsEl) {
         detailsEl.innerHTML = `
             <div class="weather-detail-item"><span class="detail-icon">💧</span><span class="detail-label">湿度</span><span class="detail-value">${current.REH ?? '-'}%</span></div>
-            <div class="weather-detail-item"><span class="detail-icon">💨</span><span class="detail-label">风속</span><span class="detail-value">${current.WSD ?? '-'}m/s · ${getWindDesc(current.WSD)}</span></div>
+            <div class="weather-detail-item"><span class="detail-icon">💨</span><span class="detail-label">风速</span><span class="detail-value">${current.WSD ?? '-'}m/s · ${getWindDesc(current.WSD)}</span></div>
             <div class="weather-detail-item"><span class="detail-icon">🌂</span><span class="detail-label">降水</span><span class="detail-value">${current.PCP === '강수없음' ? '无降水' : (current.PCP ?? '-')}</span></div>
             <div class="weather-detail-item"><span class="detail-icon">📊</span><span class="detail-label">降水概率</span><span class="detail-value">${current.POP ?? '-'}%</span></div>
         `;
@@ -375,7 +375,7 @@ function parseAndRenderWeather(locKey, items, midData) {
             targetD.setDate(todayDate.getDate() + i);
             const ymd = `${targetD.getFullYear()}${String(targetD.getMonth() + 1).padStart(2, '0')}${String(targetD.getDate()).padStart(2, '0')}`;
             const dateLabel = `${targetD.getMonth() + 1}/${targetD.getDate()}`;
-            const weekday = ['일', '월', '화', '수', '목', '금', '토'][targetD.getDay()];
+            const weekday = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][targetD.getDay()];
 
             let max = '--', min = '--', icon = '🌤️', precip = 0;
 
@@ -568,7 +568,7 @@ const TRAIL_STATUS_MAP = {
     '부분통제': { cn: '部分管制', cls: 'partial' },
     '전면통제': { cn: '全面管制', cls: 'closed' },
     '통제': { cn: '全面管制', cls: 'closed' },
-    '일부통제': { cn: '부분통제', cls: 'partial' },
+    '일부통제': { cn: '部分管制', cls: 'partial' },
     '입산제한': { cn: '全面管制', cls: 'closed' }
 };
 
@@ -1240,7 +1240,7 @@ function openLostDetailModalByIndex(index) {
                 <button class="lost-modal-btn primary" onclick="showWechatQR()">咨询客服</button>
             </div>
             <div id="wechat-qr-container" style="display:none; text-align:center; padding: 15px; border-top: 1px solid #eee;">
-                <p style="font-size: 14px; color: #666; margin-bottom: 10px;">스캔하여 위챗으로 문의해주세요</p>
+                <p style="font-size: 14px; color: #666; margin-bottom: 10px;">请扫描二维码通过微信联系我们</p>
                 <img src="assets/wechat_qr.png" style="width: 200px; height: 200px;">
             </div>
         </div>`;
