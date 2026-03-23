@@ -183,17 +183,30 @@ function getWindDesc(ws) {
 
 function formatBaseTime(date) {
     const kstHour = date.getHours();
+    const kstMin = date.getMinutes();
+    
+    // 1. 단기 예보 (VilageFcst) 기준 시간
     const times = [2, 5, 8, 11, 14, 17, 20, 23];
     let base = times.filter(t => t <= kstHour).pop() || 23;
     const targetDateForShort = new Date(date);
     if (kstHour < 2) { targetDateForShort.setDate(date.getDate() - 1); base = 23; }
     const baseDate = `${targetDateForShort.getFullYear()}${String(targetDateForShort.getMonth() + 1).padStart(2, '0')}${String(targetDateForShort.getDate()).padStart(2, '0')}`;
     const baseTime = `${String(base).padStart(2, '0')}00`;
-
-    // 중기 예보 기준 시간 (오늘 0600 또는 1800)
-    let midBase = kstHour < 6 ? 18 : (kstHour < 18 ? 6 : 18);
-    const targetDateForMid = new Date(date);
-    if (kstHour < 6) { targetDateForMid.setDate(date.getDate() - 1); }
+    
+    // 2. 중기 예보 (MidFcst) 기준 시간 (06:00, 18:00)
+    // 발표 직후 약 10~40분간 데이터가 서버에 반영되지 않을 수 있으므로, 45분 여유를 둠
+    let midBase;
+    let targetDateForMid = new Date(date);
+    
+    if (kstHour < 6 || (kstHour === 6 && kstMin < 45)) {
+        midBase = 18;
+        targetDateForMid.setDate(date.getDate() - 1);
+    } else if (kstHour < 18 || (kstHour === 18 && kstMin < 45)) {
+        midBase = 6;
+    } else {
+        midBase = 18;
+    }
+    
     const tmFc = `${targetDateForMid.getFullYear()}${String(targetDateForMid.getMonth() + 1).padStart(2, '0')}${String(targetDateForMid.getDate()).padStart(2, '0')}${String(midBase).padStart(2, '0')}00`;
 
     return { baseDate, baseTime, tmFc };
@@ -212,51 +225,60 @@ function translateMidWf(wf) {
 }
 
 async function fetchMidTermWeather(loc) {
-    const { tmFc } = formatBaseTime(new Date());
+    let { tmFc } = formatBaseTime(new Date());
     const endpoints = {
         land: 'https://apis.data.go.kr/1360000/MidFcstInfoService/getMidLandFcst',
         temp: 'https://apis.data.go.kr/1360000/MidFcstInfoService/getMidTa'
     };
 
-    const landUrl = `${CONFIG.PROXY_URL}/api/public-data?endpoint=${encodeURIComponent(endpoints.land)}&pageNo=1&numOfRows=10&dataType=JSON&regId=${loc.midLandCode}&tmFc=${tmFc}`;
-    const tempUrl = `${CONFIG.PROXY_URL}/api/public-data?endpoint=${encodeURIComponent(endpoints.temp)}&pageNo=1&numOfRows=10&dataType=JSON&regId=${loc.midTaCode}&tmFc=${tmFc}`;
-
-    try {
-        console.log(`[Weather] 중기예보 호출 시작: ${loc.nameKo} (regId: ${loc.midLandCode}, tmFc: ${tmFc})`);
+    const attemptFetch = async (targetTmFc) => {
+        const landUrl = `${CONFIG.PROXY_URL}/api/public-data?endpoint=${encodeURIComponent(endpoints.land)}&pageNo=1&numOfRows=10&dataType=JSON&regId=${loc.midLandCode}&tmFc=${targetTmFc}`;
+        const tempUrl = `${CONFIG.PROXY_URL}/api/public-data?endpoint=${encodeURIComponent(endpoints.temp)}&pageNo=1&numOfRows=10&dataType=JSON&regId=${loc.midTaCode}&tmFc=${targetTmFc}`;
+        
+        console.log(`[Weather] 중기예보 시도 (tmFc: ${targetTmFc}, 지역: ${loc.nameKo})`);
         const [landRes, tempRes] = await Promise.all([fetch(landUrl), fetch(tempUrl)]);
         
-        if (!landRes.ok || !tempRes.ok) {
-            const landErr = await landRes.text();
-            const tempErr = await tempRes.text();
-            console.error('중기예보 API 호출 실패 (HTTP 오류):', { 
-                landStatus: landRes.status, 
-                landErr: landErr.substring(0, 200), 
-                tempStatus: tempRes.status, 
-                tempErr: tempErr.substring(0, 200) 
-            });
-            return null;
-        }
-
+        if (!landRes.ok || !tempRes.ok) return null;
+        
         const landJson = await landRes.json();
         const tempJson = await tempRes.json();
         
-        console.log('[Weather] 중기예보 응답 데이터:', { landJson, tempJson });
-
         const landItem = landJson?.response?.body?.items?.item?.[0];
         const tempItem = tempJson?.response?.body?.items?.item?.[0];
         
-        if (!landItem || !tempItem) {
-            console.warn('중기예보 데이터 항목 누락 (필드 확인 필요):', { 
-                landResultCode: landJson?.response?.header?.resultCode,
-                landResultMsg: landJson?.response?.header?.resultMsg,
-                tempResultCode: tempJson?.response?.header?.resultCode,
-                tempResultMsg: tempJson?.response?.header?.resultMsg
-            });
+        if (!landItem || !tempItem) return { fail: true, landJson, tempJson };
+        return { landItem, tempItem };
+    };
+
+    try {
+        let result = await attemptFetch(tmFc);
+        
+        // 데이터가 없으면(NODATA_ERROR 등) 12시간 전 데이터로 재시도
+        if (!result || result.fail) {
+            console.warn(`[Weather] ${tmFc} 데이터 없음, 12시간 전 데이터로 폴백 시도...`);
+            const fallbackDate = new Date();
+            // 현재 midBase가 18시면 당일 06시로, 06시면 전날 18시로 12시간 차이 발생
+            const midBaseIdx = tmFc.endsWith('1800') ? 6 : 18;
+            const fallbackTarget = new Date(
+                parseInt(tmFc.slice(0, 4)),
+                parseInt(tmFc.slice(4, 6)) - 1,
+                parseInt(tmFc.slice(6, 8))
+            );
+            if (midBaseIdx === 18) fallbackTarget.setDate(fallbackTarget.getDate() - 1);
+            
+            const fallbackTmFc = `${fallbackTarget.getFullYear()}${String(fallbackTarget.getMonth() + 1).padStart(2, '0')}${String(fallbackTarget.getDate()).padStart(2, '0')}${String(midBaseIdx).padStart(2, '0')}00`;
+            
+            result = await attemptFetch(fallbackTmFc);
         }
 
-        return { landItem, tempItem };
+        if (result && !result.fail) {
+            return result;
+        } else {
+            console.error('[Weather] 중기예보 최종 로드 실패 (폴백 포함):', result);
+            return null;
+        }
     } catch (e) {
-        console.warn('중기예보 로드 중 치명적 오류 (네트워크/파싱):', e);
+        console.warn('[Weather] 중기예보 로드 중 치명적 오류:', e);
         return null;
     }
 }
