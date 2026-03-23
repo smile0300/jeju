@@ -67,7 +67,9 @@ export default {
           }
         }
 
-        // 3. API Key 자동 주입
+        // 3. API Key 자동 주입 및 JSON 여부 판별
+        const isJsonExpected = url.searchParams.get('dataType') === 'JSON' || targetUrl.searchParams.get('dataType') === 'JSON' || targetUrlString.includes('dataType=JSON');
+        
         const hostname = targetUrl.hostname;
         if (hostname.includes('apis.data.go.kr') || 
             hostname.includes('openapi.airport.co.kr') ||
@@ -82,9 +84,6 @@ export default {
           if (serviceKey) {
             const keyParam = hostname.includes('api.visitjeju.net') ? 'apiKey' : 'serviceKey';
             if (!targetUrl.searchParams.has(keyParam)) {
-              // 중요: serviceKey가 이미 인코딩되어 있을 수 있으므로, 
-              // URL 객체가 다시 인코딩하지 않도록 decodeURIComponent를 거쳐서 set() 합니다.
-              // 만약 인코딩되지 않은 값이라면 그대로 들어갑니다.
               try {
                 targetUrl.searchParams.set(keyParam, decodeURIComponent(serviceKey.trim()));
               } catch (e) {
@@ -94,12 +93,11 @@ export default {
           }
         }
 
-        // 4. 헤더 설정 (XML 우선순위 유지하여 파싱 오류 방지)
+        // 4. 헤더 설정
         const headers = new Headers();
         if (isJsonExpected) {
           headers.set('Accept', 'application/json, text/plain, */*');
         } else {
-          // 중요: application/json을 완전히 제거하여 서버가 XML을 반환하도록 강제함
           headers.set('Accept', 'application/xml, text/xml, */*');
         }
         headers.set('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
@@ -110,12 +108,21 @@ export default {
           headers: headers
         });
 
-        // 결과 반환 (압축 헤더 문제를 방지하기 위해 새로운 Response 생성)
+        // 5. 응답 처리 및 에러 핸들링
+        if (!response.ok) {
+          const errorBody = await response.text();
+          return new Response(isJsonExpected ? JSON.stringify({ error: `Target API Error (${response.status})`, details: errorBody }) : errorBody, {
+            status: response.status,
+            headers: { 
+              'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
+              'Content-Type': isJsonExpected ? 'application/json' : 'text/plain'
+            }
+          });
+        }
+
         const newResponse = new Response(response.body, response);
         newResponse.headers.set('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
         newResponse.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-        
-        // 프록시 시 문제를 일으킬 수 있는 구형 헤더 제거
         newResponse.headers.delete('Content-Security-Policy');
         newResponse.headers.delete('X-Frame-Options');
 

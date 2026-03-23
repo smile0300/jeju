@@ -24,8 +24,9 @@
     <!-- ===== Home Section ===== -->
     <section id="home" class="app-section active">
         <div class="home-screen">
+            <div style="text-align: center; padding: 20px 0 10px; color: #3b82f6; font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em;">测试模式 (Test Mode)</div>
             <div class="home-welcome">
-                <p>请提出您在济州岛旅行中的不便之处！</p>
+                <p><strong>请提出您在济州岛旅行中的不便之处！</strong></p>
                 <button class="feature-request-btn" onclick="openFeatureModal()">💡 提交建议 / 意见反馈</button>
             </div>
 
@@ -134,12 +135,12 @@
                             <div class="weather-details" id="details-jeju"></div>
                         </div>
                     </div>
-                    <h3 class="subsection-title">今日逐时预报</h3>
+                    <h3 class="subsection-title">10일 장기 예보 (날짜 선택 가능)</h3>
+                    <div class="weekly-grid" id="weekly-jeju"></div>
+                    <h3 class="subsection-title" id="hourly-title-jeju">오늘의 시간대별 상세 예보</h3>
                     <div class="hourly-weather">
                         <div class="hourly-scroll" id="hourly-jeju"></div>
                     </div>
-                    <h3 class="subsection-title">未来10天长期预报</h3>
-                    <div class="weekly-grid" id="weekly-jeju"></div>
                 </div>
                 <div id="weather-content-seogwipo" class="location-weather">
                     <div class="current-weather" id="current-weather-seogwipo">
@@ -152,12 +153,12 @@
                             <div class="weather-details" id="details-seogwipo"></div>
                         </div>
                     </div>
-                    <h3 class="subsection-title">今日逐时预报</h3>
+                    <h3 class="subsection-title">10일 장기 예보 (날짜 선택 가능)</h3>
+                    <div class="weekly-grid" id="weekly-seogwipo"></div>
+                    <h3 class="subsection-title" id="hourly-title-seogwipo">오늘의 시간대별 상세 예보</h3>
                     <div class="hourly-weather">
                         <div class="hourly-scroll" id="hourly-seogwipo"></div>
                     </div>
-                    <h3 class="subsection-title">未来10天长期预报</h3>
-                    <div class="weekly-grid" id="weekly-seogwipo"></div>
                 </div>
                 <div id="weather-content-hallasan" class="location-weather">
                     <div class="current-weather" id="current-weather-hallasan">
@@ -170,12 +171,12 @@
                             <div class="weather-details" id="details-hallasan"></div>
                         </div>
                     </div>
-                    <h3 class="subsection-title">今日逐时预报</h3>
+                    <h3 class="subsection-title">10일 장기 예보 (날짜 선택 가능)</h3>
+                    <div class="weekly-grid" id="weekly-hallasan"></div>
+                    <h3 class="subsection-title" id="hourly-title-hallasan">오늘의 시간대별 상세 예보</h3>
                     <div class="hourly-weather">
                         <div class="hourly-scroll" id="hourly-hallasan"></div>
                     </div>
-                    <h3 class="subsection-title">未来10天长期预报</h3>
-                    <div class="weekly-grid" id="weekly-hallasan"></div>
                 </div>
                 <div id="weather-content-udo" class="location-weather">
                     <div class="current-weather" id="current-weather-udo">
@@ -188,12 +189,12 @@
                             <div class="weather-details" id="details-udo"></div>
                         </div>
                     </div>
-                    <h3 class="subsection-title">今日逐时预报</h3>
+                    <h3 class="subsection-title">10일 장기 예보 (날짜 선택 가능)</h3>
+                    <div class="weekly-grid" id="weekly-udo"></div>
+                    <h3 class="subsection-title" id="hourly-title-udo">오늘의 시간대별 상세 예보</h3>
                     <div class="hourly-weather">
                         <div class="hourly-scroll" id="hourly-udo"></div>
                     </div>
-                    <h3 class="subsection-title">未来10天长期预报</h3>
-                    <div class="weekly-grid" id="weekly-udo"></div>
                 </div>
             </div>
         </div>

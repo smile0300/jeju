@@ -414,8 +414,25 @@ body {
 .weekly-item {
     background: var(--bg-card); border-radius: var(--radius-md); padding: 8px 4px;
     text-align: center; border: 1px solid var(--border-light); transition: all var(--transition-fast);
+    cursor: pointer; position: relative;
 }
 .weekly-item:hover { transform: translateY(-4px); border-color: var(--accent-green); box-shadow: var(--shadow-md); }
+.weekly-item.active {
+    border-color: var(--accent-green);
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05));
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+    transform: translateY(-2px);
+}
+.weekly-item.active::after {
+    content: '▼';
+    position: absolute;
+    bottom: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--accent-green);
+    font-size: 0.8rem;
+}
+
 .weekly-day { font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 2px; }
 .weekly-icon { font-size: 1.2rem; margin: 4px 0; }
 .weekly-temps { display: flex; justify-content: center; gap: 4px; margin-top: 2px; font-size: 0.75rem; color: var(--text-muted); }

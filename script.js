@@ -222,19 +222,47 @@ async function fetchMidTermWeather(loc) {
     const tempUrl = `${CONFIG.PROXY_URL}/api/public-data?endpoint=${encodeURIComponent(endpoints.temp)}&pageNo=1&numOfRows=10&dataType=JSON&regId=${loc.midTaCode}&tmFc=${tmFc}`;
 
     try {
+        console.log(`[Weather] 중기예보 호출 시작: ${loc.nameKo} (regId: ${loc.midLandCode}, tmFc: ${tmFc})`);
         const [landRes, tempRes] = await Promise.all([fetch(landUrl), fetch(tempUrl)]);
+        
+        if (!landRes.ok || !tempRes.ok) {
+            const landErr = await landRes.text();
+            const tempErr = await tempRes.text();
+            console.error('중기예보 API 호출 실패 (HTTP 오류):', { 
+                landStatus: landRes.status, 
+                landErr: landErr.substring(0, 200), 
+                tempStatus: tempRes.status, 
+                tempErr: tempErr.substring(0, 200) 
+            });
+            return null;
+        }
+
         const landJson = await landRes.json();
         const tempJson = await tempRes.json();
         
+        console.log('[Weather] 중기예보 응답 데이터:', { landJson, tempJson });
+
         const landItem = landJson?.response?.body?.items?.item?.[0];
         const tempItem = tempJson?.response?.body?.items?.item?.[0];
         
+        if (!landItem || !tempItem) {
+            console.warn('중기예보 데이터 항목 누락 (필드 확인 필요):', { 
+                landResultCode: landJson?.response?.header?.resultCode,
+                landResultMsg: landJson?.response?.header?.resultMsg,
+                tempResultCode: tempJson?.response?.header?.resultCode,
+                tempResultMsg: tempJson?.response?.header?.resultMsg
+            });
+        }
+
         return { landItem, tempItem };
     } catch (e) {
-        console.warn('중기예보 로드 실패:', e);
+        console.warn('중기예보 로드 중 치명적 오류 (네트워크/파싱):', e);
         return null;
     }
 }
+
+// 날씨 데이터 전역 상태 관리 (지역별 데이터 캐싱)
+const WEATHER_STATE = {};
 
 async function fetchWeatherData(locKey) {
     const loc = CONFIG.WEATHER_LOCATIONS[locKey];
@@ -245,7 +273,6 @@ async function fetchWeatherData(locKey) {
     const workerUrl = `${CONFIG.PROXY_URL}/api/public-data?endpoint=${encodeURIComponent(endpoint)}&pageNo=1&numOfRows=1000&dataType=JSON&base_date=${baseDate}&base_time=${baseTime}&nx=${loc.nx}&ny=${loc.ny}`;
 
     try {
-        // 단기예보와 중기예보 병렬로 가져오기
         const [shortRes, midData] = await Promise.all([
             fetch(workerUrl),
             fetchMidTermWeather(loc)
@@ -275,10 +302,13 @@ function parseAndRenderWeather(locKey, items, midData) {
     const sortedKeys = Object.keys(grouped).sort();
     if (sortedKeys.length === 0) return;
 
+    // 상태 저장
+    WEATHER_STATE[locKey] = { items: grouped, sortedKeys, midData };
+
     const current = grouped[sortedKeys[0]];
     const sky = getSkyInfo(current.PTY, current.SKY);
 
-    // 현재 날씨 업데이트
+    // 1. 현재 날씨 업데이트
     const iconEl = document.getElementById(`icon-${locKey}`);
     const tempEl = document.getElementById(`temp-${locKey}`);
     const descEl = document.getElementById(`desc-${locKey}`);
@@ -289,42 +319,13 @@ function parseAndRenderWeather(locKey, items, midData) {
     if (detailsEl) {
         detailsEl.innerHTML = `
             <div class="weather-detail-item"><span class="detail-icon">💧</span><span class="detail-label">湿度</span><span class="detail-value">${current.REH ?? '-'}%</span></div>
-            <div class="weather-detail-item"><span class="detail-icon">💨</span><span class="detail-label">风速</span><span class="detail-value">${current.WSD ?? '-'}m/s · ${getWindDesc(current.WSD)}</span></div>
+            <div class="weather-detail-item"><span class="detail-icon">💨</span><span class="detail-label">风속</span><span class="detail-value">${current.WSD ?? '-'}m/s · ${getWindDesc(current.WSD)}</span></div>
             <div class="weather-detail-item"><span class="detail-icon">🌂</span><span class="detail-label">降水</span><span class="detail-value">${current.PCP === '강수없음' ? '无降水' : (current.PCP ?? '-')}</span></div>
             <div class="weather-detail-item"><span class="detail-icon">📊</span><span class="detail-label">降水概率</span><span class="detail-value">${current.POP ?? '-'}%</span></div>
         `;
     }
 
-    // 시간별 예보
-    const hourlyEl = document.getElementById(`hourly-${locKey}`);
-    if (hourlyEl) {
-        const now = new Date();
-        const currentYmd = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
-        const currentHm = `${String(now.getHours()).padStart(2, '0')}00`;
-        const currentKey = currentYmd + currentHm;
-        let hourlyItems = sortedKeys.filter(k => k >= currentKey).slice(0, 15);
-        if (hourlyItems.length < 5) hourlyItems = sortedKeys.slice(0, 15);
-
-        if (hourlyItems.length > 0) {
-            hourlyEl.innerHTML = hourlyItems.map(k => {
-                const d = grouped[k];
-                const s = getSkyInfo(d.PTY, d.SKY);
-                const t = k.slice(8).padStart(4, '0');
-                const h = `${t.slice(0, 2)}:${t.slice(2)}`;
-                const precipVal = d.POP !== undefined ? d.POP : (d.PCP && d.PCP !== '강수없음' ? d.PCP : null);
-                const precipHtml = precipVal !== null ? `<div class="hourly-precip precip-blue">💧${precipVal}%</div>` : '';
-                return `<div class="hourly-item">
-                    <div class="hourly-time">${h}</div>
-                    <div class="hourly-icon">${s.icon}</div>
-                    <div class="hourly-temp">${d.TMP ?? '--'}°</div>
-                    <div class="hourly-wind">🌬️${d.WSD ?? '-'}m/s</div>
-                    ${precipHtml}
-                </div>`;
-            }).join('');
-        }
-    }
-
-    // 주간 예보 (단기 1~3일 + 중기 4~10일 통합)
+    // 2. 주간 예보 (단기 1~3일 + 중기 4~10일 통합) - 먼저 렌더링
     const weeklyEl = document.getElementById(`weekly-${locKey}`);
     if (weeklyEl) {
         const dailyMap = {};
@@ -343,6 +344,7 @@ function parseAndRenderWeather(locKey, items, midData) {
         });
 
         const todayDate = new Date();
+        const todayYmd = `${todayDate.getFullYear()}${String(todayDate.getMonth() + 1).padStart(2, '0')}${String(todayDate.getDate()).padStart(2, '0')}`;
         const { landItem, tempItem } = midData || {};
 
         weeklyEl.innerHTML = Array.from({ length: 10 }, (_, i) => {
@@ -350,25 +352,24 @@ function parseAndRenderWeather(locKey, items, midData) {
             targetD.setDate(todayDate.getDate() + i);
             const ymd = `${targetD.getFullYear()}${String(targetD.getMonth() + 1).padStart(2, '0')}${String(targetD.getDate()).padStart(2, '0')}`;
             const dateLabel = `${targetD.getMonth() + 1}/${targetD.getDate()}`;
+            const weekday = ['일', '월', '화', '수', '목', '금', '토'][targetD.getDay()];
 
             let max = '--', min = '--', icon = '🌤️', precip = 0;
 
             const dt = dailyMap[ymd];
             if (dt && dt.max !== -99) {
-                // 1~3일차: 단기예보 데이터 사용
-                max = dt.max + '°';
-                min = dt.min + '°';
+                max = Math.round(dt.max) + '°';
+                min = Math.round(dt.min) + '°';
                 precip = dt.precip || 0;
                 const s = getSkyInfo(dt.pty, dt.sky);
                 icon = s.icon;
             } else if (landItem && tempItem && i >= 3) {
-                // 4~10일차: 중기예보 데이터 사용
                 const dayIdx = i + 1;
                 max = (tempItem[`taMax${dayIdx}`] ?? '--') + '°';
                 min = (tempItem[`taMin${dayIdx}`] ?? '--') + '°';
                 
+                const amPm = todayDate.getHours() < 12 ? 'Am' : 'Pm';
                 if (i <= 6) {
-                    const amPm = new Date().getHours() < 12 ? 'Am' : 'Pm';
                     precip = landItem[`rnSt${dayIdx}${amPm}`] ?? landItem[`rnSt${dayIdx}`] ?? 0;
                     const s2 = translateMidWf(landItem[`wf${dayIdx}${amPm}`] || landItem[`wf${dayIdx}`] || '');
                     icon = s2.icon;
@@ -377,24 +378,115 @@ function parseAndRenderWeather(locKey, items, midData) {
                     const s2 = translateMidWf(landItem[`wf${dayIdx}`] || '');
                     icon = s2.icon;
                 }
-            } else {
-                // 데이터 부족 시 Mock 폴백
-                const mockRef = { jeju: 12, seogwipo: 14, hallasan: 5, udo: 13 }[locKey] || 12;
-                max = (mockRef + Math.floor(Math.random() * 4)) + '°';
-                min = (mockRef - Math.floor(Math.random() * 5)) + '°';
-                precip = Math.floor(Math.random() * 30);
             }
 
-            const precipHtml = `<div class="weekly-precip ${precip >= 50 ? 'precip-blue' : ''}">💧${precip}%</div>`;
-            return `<div class="weekly-item">
-                <div class="weekly-day"><small>${dateLabel}</small></div>
-                <div class="weekly-icon">${icon}</div>
-                <div class="weekly-temps">
-                    <span class="temp-high">${max}</span> / <span class="temp-low">${min}</span>
+            const isToday = ymd === todayYmd;
+            return `
+                <div class="weekly-item ${isToday ? 'active' : ''}" data-date="${ymd}" onclick="updateHourlyWeather('${locKey}', '${ymd}')">
+                    <div class="weekly-day">${dateLabel} (${weekday})</div>
+                    <div class="weekly-icon">${icon}</div>
+                    <div class="weekly-temps">
+                        <span class="temp-high">${max}</span>/<span class="temp-low">${min}</span>
+                    </div>
+                    <div class="weekly-precip ${precip >= 50 ? 'precip-blue' : ''}">💧${precip}%</div>
                 </div>
-                ${precipHtml}
-            </div>`;
+            `;
         }).join('');
+
+        // 초기 로드시 오늘의 시간대별 날씨 표시
+        updateHourlyWeather(locKey, todayYmd);
+    }
+}
+
+// 특정 날짜의 시간대별 상세 날씨 표시
+function updateHourlyWeather(locKey, targetYmd) {
+    const state = WEATHER_STATE[locKey];
+    if (!state) return;
+
+    // 시각적 피드백: 활성 탭 표시
+    const weeklyEl = document.getElementById(`weekly-${locKey}`);
+    if (weeklyEl) {
+        weeklyEl.querySelectorAll('.weekly-item').forEach(item => {
+            item.classList.toggle('active', item.dataset.date === targetYmd);
+        });
+    }
+
+    // 제목 업데이트
+    const titleEl = document.getElementById(`hourly-title-${locKey}`);
+    if (titleEl) {
+        const m = targetYmd.slice(4, 6);
+        const d = targetYmd.slice(6, 8);
+        titleEl.textContent = `${parseInt(m)}月 ${parseInt(d)}日 详细预报`;
+    }
+
+    const hourlyEl = document.getElementById(`hourly-${locKey}`);
+    if (!hourlyEl) return;
+
+    // 1. 단기 예보 데이터가 있는 경우 (1~3일차)
+    const hourlyKeys = state.sortedKeys.filter(k => k.startsWith(targetYmd));
+    if (hourlyKeys.length > 0) {
+        hourlyEl.innerHTML = hourlyKeys.map(k => {
+            const d = state.items[k];
+            const s = getSkyInfo(d.PTY, d.SKY);
+            const time = k.slice(8, 10) + ':00';
+            const precipVal = d.POP !== undefined ? d.POP : (d.PCP && d.PCP !== '강수없음' ? d.PCP : null);
+            const precipHtml = precipVal !== null ? `<div class="hourly-precip ${precipVal >= 50 ? 'precip-blue' : ''}">💧${precipVal}%</div>` : '';
+            return `
+                <div class="hourly-item">
+                    <div class="hourly-time">${time}</div>
+                    <div class="hourly-icon">${s.icon}</div>
+                    <div class="hourly-temp">${d.TMP ?? '--'}°</div>
+                    <div class="hourly-wind">🌬️${d.WSD ?? '-'}m/s</div>
+                    ${precipHtml}
+                </div>
+            `;
+        }).join('');
+    } else {
+        // 2. 단기 예보 데이터가 없는 경우 (4~10일차) -> 중기 예보 요약 표시
+        const todayDate = new Date();
+        const todayYmd = `${todayDate.getFullYear()}${String(todayDate.getMonth() + 1).padStart(2, '0')}${String(todayDate.getDate()).padStart(2, '0')}`;
+        
+        // 날짜 차이 계산
+        const d1 = new Date(targetYmd.slice(0, 4), targetYmd.slice(4, 6) - 1, targetYmd.slice(6, 8));
+        const d2 = new Date(todayYmd.slice(0, 4), todayYmd.slice(4, 6) - 1, todayYmd.slice(6, 8));
+        const diffDays = Math.round((d1 - d2) / (1000 * 60 * 60 * 24));
+        const dayIdx = diffDays + 1;
+
+        const { landItem, tempItem } = state.midData || {};
+        if (landItem && tempItem && dayIdx >= 4 && dayIdx <= 11) {
+            // 오전/오후 요약 데이터 생성
+            let summaries = [];
+            if (dayIdx <= 7) {
+                // 3~7일째는 오전/오후 데이터가 있음
+                const amWf = landItem[`wf${dayIdx}Am`];
+                const pmWf = landItem[`wf${dayIdx}Pm`];
+                const amPr = landItem[`rnSt${dayIdx}Am`];
+                const pmPr = landItem[`rnSt${dayIdx}Pm`];
+                summaries = [
+                    { time: '上午', wf: amWf, pr: amPr },
+                    { time: '下午', wf: pmWf, pr: pmPr }
+                ];
+            } else {
+                // 8~10일째는 하루 단위 데이터만 있음
+                summaries = [
+                    { time: '全天', wf: landItem[`wf${dayIdx}`], pr: landItem[`rnSt${dayIdx}`] }
+                ];
+            }
+
+            hourlyEl.innerHTML = summaries.map(s => {
+                const sky = translateMidWf(s.wf || '');
+                return `
+                    <div class="hourly-item" style="min-width: 140px;">
+                        <div class="hourly-time">${s.time}</div>
+                        <div class="hourly-icon" style="font-size: 2.5rem;">${sky.icon}</div>
+                        <div class="hourly-temp">${sky.desc}</div>
+                        <div class="hourly-precip ${s.pr >= 50 ? 'precip-blue' : ''}">降水概率: ${s.pr}%</div>
+                    </div>
+                `;
+            }).join('');
+        } else {
+            hourlyEl.innerHTML = '<div style="padding: 20px; color: var(--text-muted);">暂无详细预报数据</div>';
+        }
     }
 }
 
@@ -1068,7 +1160,7 @@ function renderLostGoodsTable(items) {
     }
     tableBody.innerHTML = items.map((item, index) => `
         <tr>
-            <td>${item.img ? `<img src="${item.img}" class="lost-table-img" onerror="this.src='https://via.placeholder.com/40'">` : '📦'}</td>
+            <td>${item.img ? `<img src="${item.img}" class="lost-table-img" onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2240%22%20height%3D%2240%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2040%2040%22%3E%3Crect%20width%3D%2240%22%20height%3D%2240%22%20fill%3D%22%23eee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-size%3D%228%22%20text-anchor%3D%22middle%22%20alignment-baseline%3D%22middle%22%20fill%3D%22%23aaa%22%3ENo%20Img%3C%2Ftext%3E%3C%2Fsvg%3E'">` : '📦'}</td>
             <td><span class="lost-category-badge">${item.category}</span></td>
             <td style="font-weight:600;">${item.name}</td>
             <td>${item.date}</td>
@@ -1086,7 +1178,7 @@ function renderLostGoods(grid, items) {
     grid.innerHTML = items.map((item, index) => `
         <div class="lost-card gallery-item" onclick="openLostDetailModalByIndex(${index})" style="padding: 0; overflow: hidden; aspect-ratio: 1 / 1;">
             <div class="lost-img-box" style="width: 100%; height: 100%; margin: 0;">
-                ${item.img ? `<img src="${item.img}" alt="${item.name}" onerror="this.src='https://via.placeholder.com/300?text=No+Image'" style="width: 100%; height: 100%; object-fit: cover;">` : '<div class="no-lost-img">📦</div>'}
+                ${item.img ? `<img src="${item.img}" alt="${item.name}" onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22300%22%20height%3D%22300%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20300%20300%22%3E%3Crect%20width%3D%22300%22%20height%3D%22300%22%20fill%3D%22%23eee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-size%3D%2220%22%20text-anchor%3D%22middle%22%20alignment-baseline%3D%22middle%22%20fill%3D%22%23aaa%22%3ENo%20Image%3C%2Ftext%3E%3C%2Fsvg%3E'" style="width: 100%; height: 100%; object-fit: cover;">` : '<div class="no-lost-img">📦</div>'}
                 <div class="lost-category-badge-overlay">${item.category}</div>
             </div>
         </div>`).join('');
@@ -1101,7 +1193,7 @@ function openLostDetailModalByIndex(index) {
 
     body.innerHTML = `
         <div class="lost-modal-img-container">
-            ${item.img ? `<img src="${item.img}" class="lost-modal-img" onerror="this.src='https://via.placeholder.com/500?text=No+Image'">` : '<div class="lost-modal-no-img">📦</div>'}
+            ${item.img ? `<img src="${item.img}" class="lost-modal-img" onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22500%22%20height%3D%22500%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20500%20500%22%3E%3Crect%20width%3D%22500%22%20height%3D%22500%22%20fill%3D%22%23eee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-size%3D%2230%22%20text-anchor%3D%22middle%22%20alignment-baseline%3D%22middle%22%20fill%3D%22%23aaa%22%3ENo%20Image%3C%2Ftext%3E%3C%2Fsvg%3E'">` : '<div class="lost-modal-no-img">📦</div>'}
         </div>
         <div class="lost-modal-info">
             <div class="lost-modal-header">
