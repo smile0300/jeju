@@ -674,37 +674,55 @@ async function fetchFlights(type) {
         const res = await fetch(workerUrl);
         if (!res.ok) throw new Error('API request failed');
 
-        const xmlText = await res.text();
-        const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+        const text = await res.text();
+        let itemsArray = [];
 
-        const errorNode = xmlDoc.querySelector('resultMsg');
-        if (errorNode && errorNode.textContent.includes('ERROR')) throw new Error(errorNode.textContent);
+        // 헬퍼: 태그/필드 값을 유연하게 가져오는 함수
+        const getVal = (obj, tag) => {
+            if (typeof obj.getElementsByTagName === 'function') {
+                return (obj.getElementsByTagName(tag)[0]?.textContent || '').trim();
+            }
+            return (obj[tag] || '').toString().trim();
+        };
 
-        const itemsElement = xmlDoc.getElementsByTagName('item');
-        const itemsArray = Array.from(itemsElement).map(node => {
-            const getTag = (tag) => (node.getElementsByTagName(tag)[0]?.textContent || '').trim();
-            const schedText = getTag('scheduledatetime');
-            const estText = getTag('estimateddatetime');
-            const rmkKor = getTag('rmkKor');
-            const io = getTag('io');
-            const line = getTag('line');
-
+        const mapItem = (node) => {
+            const schedText = getVal(node, 'scheduledatetime');
+            const estText = getVal(node, 'estimatedatetime');
+            const rmkKor = getVal(node, 'rmkKor');
+            const io = getVal(node, 'io');
+            const line = getVal(node, 'line');
             return {
-                flight_id: (getTag('flightid') || getTag('fid') || getTag('flightId')).toUpperCase(),
+                flight_id: (getVal(node, 'flightid') || getVal(node, 'fid') || getVal(node, 'flightId')).toUpperCase(),
                 plan_time: schedText.length >= 12 ? schedText.slice(8, 12) : schedText,
                 est_time: estText.length >= 12 ? estText.slice(8, 12) : estText,
-                dep_airport: getTag('depAirport'),
-                dep_code: getTag('depAirportCode').toUpperCase(),
-                arr_airport: getTag('arrAirport'),
-                arr_code: getTag('arrAirportCode').toUpperCase(),
-                airline: getTag('airline'),
+                dep_airport: getVal(node, 'depAirport'),
+                dep_code: getVal(node, 'depAirportCode').toUpperCase(),
+                arr_airport: getVal(node, 'arrAirport'),
+                arr_code: getVal(node, 'arrAirportCode').toUpperCase(),
+                airline: getVal(node, 'airline'),
                 status: rmkKor,
-                // "국제" (\uAD6D\uC81C)
                 is_intl: io === 'I' || line?.includes('\uAD6D\uC81C')
             };
-        });
+        };
 
+        if (text.trim().startsWith('{')) {
+            try {
+                const json = JSON.parse(text);
+                const rawItems = json.response?.body?.items?.item || json.response?.body?.items || json.body?.items?.item || json.body?.items || [];
+                const items = Array.isArray(rawItems) ? rawItems : [rawItems];
+                itemsArray = items.map(mapItem);
+            } catch (e) {
+                console.error('Flight JSON parse error:', e);
+            }
+        } else {
+            const xmlDoc = new DOMParser().parseFromString(text, "text/xml");
+            const errorNode = xmlDoc.querySelector('resultMsg');
+            if (errorNode && errorNode.textContent.includes('ERROR')) throw new Error(errorNode.textContent);
+            const itemsElement = xmlDoc.getElementsByTagName('item');
+            itemsArray = Array.from(itemsElement).map(mapItem);
+        }
+
+        if (itemsArray.length > 0) {
         const filteredFlights = itemsArray.filter(f => {
             const oppositeCode = type === 'arrive' ? f.dep_code : f.arr_code;
             const localCode = type === 'arrive' ? f.arr_code : f.dep_code;
@@ -717,6 +735,7 @@ async function fetchFlights(type) {
         });
 
         renderFlightList(container, filteredFlights, type);
+        }
     } catch (e) {
         console.error('항공 API 오류:', e);
         container.innerHTML = `
@@ -914,7 +933,7 @@ async function fetchFoundGoods() {
             if (text.trim().startsWith('{')) {
                 try {
                     const json = JSON.parse(text);
-                    const rawItems = json.response?.body?.items?.item || json.body?.items?.item || json.items?.item || [];
+                    const rawItems = json.response?.body?.items?.item || json.response?.body?.items || json.body?.items?.item || json.body?.items || json.items?.item || json.items || [];
                     const items = Array.isArray(rawItems) ? rawItems : [rawItems];
                     return items.map(item => {
                         const rawCategory = item.prdtClNm || '';
