@@ -686,22 +686,44 @@ async function fetchFlights(type) {
         };
 
         const mapItem = (node) => {
-            const schedText = getVal(node, 'scheduledatetime');
-            const estText = getVal(node, 'estimatedatetime');
-            const rmkKor = getVal(node, 'rmkKor');
-            const io = getVal(node, 'io');
-            const line = getVal(node, 'line');
+            // JSON 응답에서 숫자로 올 수 있는 필드들을 문자열로 변환
+            const getStr = (tag) => {
+                const val = getVal(node, tag);
+                return (val !== undefined && val !== null) ? val.toString() : '';
+            };
+
+            const schedText = getStr('scheduledatetime');
+            const estText = getStr('estimatedatetime');
+            const rmkKor = getStr('rmkKor');
+            const io = getStr('io');
+            const line = getStr('line');
+            
+            // 공항공사 API는 JSON일 때 필드명이 소문자인 경우가 많음 (flightid, airline 등)
+            const fId = getStr('flightid') || getStr('flightId') || getStr('fid');
+            const airlineName = getStr('airline') || getStr('airlineKorean');
+            const depAirport = getStr('depAirport') || getStr('boardingKorean') || getStr('depairport');
+            const arrAirport = getStr('arrAirport') || getStr('arrivedKorean') || getStr('arrairport');
+            const depCode = (getStr('depAirportCode') || getStr('boardingEng') || getStr('depairportcode')).toUpperCase();
+            const arrCode = (getStr('arrAirportCode') || getStr('arrivedEng') || getStr('arrairportcode')).toUpperCase();
+
+            // v6.1: 필터링 보조용 필드 추가 (CJU 체크용)
+            const arr_airport_code = arrCode;
+            const airport_code = depCode;
+
             return {
-                flight_id: (getVal(node, 'flightid') || getVal(node, 'fid') || getVal(node, 'flightId')).toUpperCase(),
+                flight_id: fId.toUpperCase(),
                 plan_time: schedText.length >= 12 ? schedText.slice(8, 12) : schedText,
                 est_time: estText.length >= 12 ? estText.slice(8, 12) : estText,
-                dep_airport: getVal(node, 'depAirport'),
-                dep_code: getVal(node, 'depAirportCode').toUpperCase(),
-                arr_airport: getVal(node, 'arrAirport'),
-                arr_code: getVal(node, 'arrAirportCode').toUpperCase(),
-                airline: getVal(node, 'airline'),
+                dep_airport: depAirport,
+                dep_code: depCode,
+                arr_airport: arrAirport,
+                arr_code: arrCode,
+                airline: airlineName,
                 status: rmkKor,
-                is_intl: io === 'I' || line?.includes('\uAD6D\uC81C')
+                is_intl: io === 'I' || line?.includes('\uAD6D\uC81C'),
+                // 필터링 호환성
+                arr_airport_code: arr_airport_code,
+                airport_code: airport_code
             };
         };
 
