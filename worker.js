@@ -96,10 +96,11 @@ export default {
 
         // 4. 헤더 설정 (XML 우선순위 유지하여 파싱 오류 방지)
         const headers = new Headers();
-        if (hostname.includes('api.visitjeju.net')) {
+        if (isJsonExpected) {
           headers.set('Accept', 'application/json, text/plain, */*');
         } else {
-          headers.set('Accept', 'application/xml, text/xml, application/json, */*');
+          // 중요: application/json을 완전히 제거하여 서버가 XML을 반환하도록 강제함
+          headers.set('Accept', 'application/xml, text/xml, */*');
         }
         headers.set('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
 
@@ -121,9 +122,15 @@ export default {
         return newResponse;
 
       } catch (e) {
-        return new Response(`Proxy Error: ${e.message}`, { 
+        const errorMsg = `Proxy Error: ${e.message}`;
+        const isJson = url.searchParams.get('dataType') === 'JSON' || url.searchParams.get('endpoint')?.includes('dataType=JSON');
+        
+        return new Response(isJson ? JSON.stringify({ error: errorMsg }) : errorMsg, { 
           status: 500,
-          headers: { 'Access-Control-Allow-Origin': ALLOWED_ORIGIN }
+          headers: { 
+            'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
+            'Content-Type': isJson ? 'application/json' : 'text/plain'
+          }
         });
       }
     }
@@ -143,6 +150,8 @@ export default {
             const res = await fetch(finalFullUrl);
             const newRes = new Response(res.body, res);
             newRes.headers.set('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
+            newRes.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+            newRes.headers.set('Access-Control-Allow-Headers', '*');
             return newRes;
           }
         } catch (e) {

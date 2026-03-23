@@ -710,7 +710,10 @@ async function fetchFlights(type) {
             const localCode = type === 'arrive' ? f.arr_code : f.dep_code;
             // 엄격한 방향성 필터: 도착편은 목적지가 CJU, 출발편은 출발지가 CJU여야 함
             const directionMatch = (type === 'arrive' ? f.arr_code === 'CJU' : f.dep_code === 'CJU');
-            return directionMatch && oppositeCode && (f.is_intl || !DOMESTIC_AIRPORTS.has(oppositeCode)) && REGION_AIRPORTS.has(oppositeCode);
+            // 부가 필터링: API가 파라미터를 무시할 경우를 대비해 제주공항(CJU) 관련인 것만 확실히 체크
+            const isJejuFlight = (f.arr_airport_code === 'CJU' || f.airport_code === 'CJU');
+            
+            return isJejuFlight && directionMatch && oppositeCode && (f.is_intl || !DOMESTIC_AIRPORTS.has(oppositeCode)) && REGION_AIRPORTS.has(oppositeCode);
         });
 
         renderFlightList(container, filteredFlights, type);
@@ -905,8 +908,35 @@ async function fetchFoundGoods() {
         const fetchResults = async (apiUrl) => {
             const res = await fetch(apiUrl);
             if (!res.ok) return [];
-            const xmlText = await res.text();
-            const xmlDoc = new DOMParser().parseFromString(xmlText, "text/xml");
+            const text = await res.text();
+            
+            // JSON 응답인 경우 처리
+            if (text.trim().startsWith('{')) {
+                try {
+                    const json = JSON.parse(text);
+                    const rawItems = json.response?.body?.items?.item || json.body?.items?.item || json.items?.item || [];
+                    const items = Array.isArray(rawItems) ? rawItems : [rawItems];
+                    return items.map(item => {
+                        const rawCategory = item.prdtClNm || '';
+                        const categoryClean = rawCategory.split(' > ')[0] || '기타';
+                        const translatedCategory = LOST_CATEGORY_MAP[categoryClean] || categoryClean;
+                        return {
+                            id: item.atcId,
+                            name: item.fdPrdtNm,
+                            place: item.depPlace,
+                            date: item.fdYmd,
+                            category: translatedCategory,
+                            img: item.fdFilePathImg,
+                            lct: item.fdFndPlace || item.lctNm || item.depPlace || '정보 없음'
+                        };
+                    });
+                } catch (e) {
+                    console.error('Lost Items JSON parsing error:', e);
+                }
+            }
+
+            // XML 응답인 경우 (기존 로직)
+            const xmlDoc = new DOMParser().parseFromString(text, "text/xml");
             return Array.from(xmlDoc.querySelectorAll('item')).map(node => {
                 const getTag = (tag) => node.querySelector(tag)?.textContent || '';
                 const rawCategory = getTag('prdtClNm') || '';
