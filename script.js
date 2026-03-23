@@ -57,10 +57,10 @@ const CONFIG = {
 
     // 4개 지역 날씨 좌표 (기상청 격자 nx,ny)
     WEATHER_LOCATIONS: {
-        jeju: { nx: 53, ny: 38, nameKo: '제주시', nameCn: '济州市', midLandCode: '11G00000', midTaCode: '11G0201' },
-        seogwipo: { nx: 52, ny: 33, nameKo: '서귀포시', nameCn: '西归浦', midLandCode: '11G00000', midTaCode: '11G0202' },
-        hallasan: { nx: 52, ny: 35, nameKo: '한라산1100고지', nameCn: '汉拿山', midLandCode: '11G00000', midTaCode: '11G0201' },
-        udo: { nx: 56, ny: 38, nameKo: '우도', nameCn: '牛岛', midLandCode: '11G00000', midTaCode: '11G0202' }
+        jeju: { nx: 53, ny: 38, nameKo: '제주시', nameCn: '济州市', midLandCode: '11G00000', midTaCode: '11G0201', stationName: '이도동' },
+        seogwipo: { nx: 52, ny: 33, nameKo: '서귀포시', nameCn: '西归浦', midLandCode: '11G00000', midTaCode: '11G0202', stationName: '동홍동' },
+        hallasan: { nx: 52, ny: 35, nameKo: '한라산1100고지', nameCn: '汉拿山', midLandCode: '11G00000', midTaCode: '11G0201', stationName: '성판악' },
+        udo: { nx: 56, ny: 38, nameKo: '우도', nameCn: '牛岛', midLandCode: '11G00000', midTaCode: '11G0202', stationName: '성산읍' }
     }
 };
 
@@ -148,7 +148,7 @@ function initHlsPlayer(cam) {
 function initYoutubeEmbed(cam) {
     const container = document.getElementById(`yt-${cam.id}`);
     if (!container) return;
-    
+
     // 유튜브는 중국 내에서 차단되므로 안내 문구와 함께 로드
     container.innerHTML = `
         <div class="yt-placeholder" style="width:100%; height:100%; background:#222; display:flex; flex-direction:column; align-items:center; justify-content:center; color:white; padding:20px; text-align:center;">
@@ -184,20 +184,30 @@ function getWindDesc(ws) {
 function formatBaseTime(date) {
     const kstHour = date.getHours();
     const kstMin = date.getMinutes();
-    
+
     // 1. 단기 예보 (VilageFcst) 기준 시간
+    // 발표 시간: 02:10, 05:10, 08:10, 11:10, 14:10, 17:10, 20:10, 23:10 (1일 8회)
+    // 데이터 생성 시간 차이를 고려하여 현재 분(kstMin)이 15분 미만이면 이전 시간대 사용
     const times = [2, 5, 8, 11, 14, 17, 20, 23];
-    let base = times.filter(t => t <= kstHour).pop() || 23;
+    let base = times.filter(t => {
+        if (t === kstHour) return kstMin >= 15; // 15분 이후부터 해당 시간대 데이터 요청
+        return t < kstHour;
+    }).pop();
+
     const targetDateForShort = new Date(date);
-    if (kstHour < 2) { targetDateForShort.setDate(date.getDate() - 1); base = 23; }
+    if (base === undefined) {
+        // 현재 시간이 02:15 전이면 전날 23시 데이터 사용
+        targetDateForShort.setDate(date.getDate() - 1);
+        base = 23;
+    }
     const baseDate = `${targetDateForShort.getFullYear()}${String(targetDateForShort.getMonth() + 1).padStart(2, '0')}${String(targetDateForShort.getDate()).padStart(2, '0')}`;
     const baseTime = `${String(base).padStart(2, '0')}00`;
-    
+
     // 2. 중기 예보 (MidFcst) 기준 시간 (06:00, 18:00)
     // 발표 직후 약 10~40분간 데이터가 서버에 반영되지 않을 수 있으므로, 45분 여유를 둠
     let midBase;
     let targetDateForMid = new Date(date);
-    
+
     if (kstHour < 6 || (kstHour === 6 && kstMin < 45)) {
         midBase = 18;
         targetDateForMid.setDate(date.getDate() - 1);
@@ -206,7 +216,7 @@ function formatBaseTime(date) {
     } else {
         midBase = 18;
     }
-    
+
     const tmFc = `${targetDateForMid.getFullYear()}${String(targetDateForMid.getMonth() + 1).padStart(2, '0')}${String(targetDateForMid.getDate()).padStart(2, '0')}${String(midBase).padStart(2, '0')}00`;
 
     return { baseDate, baseTime, tmFc };
@@ -234,18 +244,18 @@ async function fetchMidTermWeather(loc) {
     const attemptFetch = async (targetTmFc) => {
         const landUrl = `${CONFIG.PROXY_URL}/api/public-data?endpoint=${encodeURIComponent(endpoints.land)}&pageNo=1&numOfRows=10&dataType=JSON&regId=${loc.midLandCode}&tmFc=${targetTmFc}`;
         const tempUrl = `${CONFIG.PROXY_URL}/api/public-data?endpoint=${encodeURIComponent(endpoints.temp)}&pageNo=1&numOfRows=10&dataType=JSON&regId=${loc.midTaCode}&tmFc=${targetTmFc}`;
-        
+
         console.log(`[Weather] 중기예보 시도 (tmFc: ${targetTmFc}, 지역: ${loc.nameKo})`);
         const [landRes, tempRes] = await Promise.all([fetch(landUrl), fetch(tempUrl)]);
-        
+
         if (!landRes.ok || !tempRes.ok) return null;
-        
+
         const landJson = await landRes.json();
         const tempJson = await tempRes.json();
-        
+
         const landItem = landJson?.response?.body?.items?.item?.[0];
         const tempItem = tempJson?.response?.body?.items?.item?.[0];
-        
+
         // 하나라도 있으면 반환하도록 수정 (기존에는 둘 다 있어야 했음)
         if (!landItem && !tempItem) return { fail: true, landJson, tempJson };
         return { landItem, tempItem };
@@ -253,7 +263,7 @@ async function fetchMidTermWeather(loc) {
 
     try {
         let result = await attemptFetch(tmFc);
-        
+
         // 데이터가 없으면(NODATA_ERROR 등) 12시간 전 데이터로 재시도
         if (!result || result.fail) {
             console.warn(`[Weather] ${tmFc} 데이터 없음, 12시간 전 데이터로 폴백 시도...`);
@@ -266,9 +276,9 @@ async function fetchMidTermWeather(loc) {
                 parseInt(tmFc.slice(6, 8))
             );
             if (midBaseIdx === 18) fallbackTarget.setDate(fallbackTarget.getDate() - 1);
-            
+
             const fallbackTmFc = `${fallbackTarget.getFullYear()}${String(fallbackTarget.getMonth() + 1).padStart(2, '0')}${String(fallbackTarget.getDate()).padStart(2, '0')}${String(midBaseIdx).padStart(2, '0')}00`;
-            
+
             result = await attemptFetch(fallbackTmFc);
         }
 
@@ -296,16 +306,26 @@ async function fetchWeatherData(locKey) {
     const workerUrl = `${CONFIG.PROXY_URL}/api/public-data?endpoint=${encodeURIComponent(endpoint)}&pageNo=1&numOfRows=1000&dataType=JSON&base_date=${baseDate}&base_time=${baseTime}&nx=${loc.nx}&ny=${loc.ny}`;
 
     try {
+        // 1. 단기 예보 및 중기 예보 먼저 실행 (대기질과 독립적)
         const [shortRes, midData] = await Promise.all([
             fetch(workerUrl),
             fetchMidTermWeather(loc)
         ]);
-        
+
         const shortJson = await shortRes.json();
         const items = shortJson?.response?.body?.items?.item;
-        if (!items) throw new Error('Short-term forecast data missing');
         
+        if (!items) {
+            console.error(`[Weather] ${locKey} 단기 예보 데이터 누락:`, shortJson);
+            throw new Error('Short-term forecast data missing');
+        }
+
+        // 날씨 데이터 먼저 렌더링
         parseAndRenderWeather(locKey, items, midData);
+
+        // 2. 대기질 정보는 별도로 요청 (날씨 렌더링에 영향 주지 않음)
+        fetchAirQuality(locKey).catch(err => console.error(`[AirQuality] ${locKey} 로드 실패:`, err));
+
     } catch (e) {
         console.error(`날씨 API 오류(${locKey}):`, e);
         renderWeatherError(locKey);
@@ -341,9 +361,8 @@ function parseAndRenderWeather(locKey, items, midData) {
     if (descEl) descEl.textContent = sky.desc;
     if (detailsEl) {
         detailsEl.innerHTML = `
-            <div class="weather-detail-item"><span class="detail-icon">💧</span><span class="detail-label">湿度</span><span class="detail-value">${current.REH ?? '-'}%</span></div>
             <div class="weather-detail-item"><span class="detail-icon">💨</span><span class="detail-label">风速</span><span class="detail-value">${current.WSD ?? '-'}m/s · ${getWindDesc(current.WSD)}</span></div>
-            <div class="weather-detail-item"><span class="detail-icon">🌂</span><span class="detail-label">降水</span><span class="detail-value">${current.PCP === '강수없음' ? '无降水' : (current.PCP ?? '-')}</span></div>
+            <div class="weather-detail-item"><span class="detail-icon">🌂</span><span class="detail-label">降水量</span><span class="detail-value">${current.PCP === '강수없음' ? '无降水' : (current.PCP ?? '-')}</span></div>
             <div class="weather-detail-item"><span class="detail-icon">📊</span><span class="detail-label">降水概率</span><span class="detail-value">${current.POP ?? '-'}%</span></div>
         `;
     }
@@ -392,7 +411,7 @@ function parseAndRenderWeather(locKey, items, midData) {
                     max = (tempItem[`taMax${dayIdx}`] ?? '--') + '°';
                     min = (tempItem[`taMin${dayIdx}`] ?? '--') + '°';
                 }
-                
+
                 if (landItem) {
                     const amPm = todayDate.getHours() < 12 ? 'Am' : 'Pm';
                     if (i <= 6) {
@@ -410,7 +429,7 @@ function parseAndRenderWeather(locKey, items, midData) {
             const isToday = ymd === todayYmd;
             return `
                 <div class="weekly-item ${isToday ? 'active' : ''}" data-date="${ymd}" onclick="updateHourlyWeather('${locKey}', '${ymd}')">
-                    <div class="weekly-day">${dateLabel} (${weekday})</div>
+                    <div class="weekly-day">${dateLabel}</div>
                     <div class="weekly-icon">${icon}</div>
                     <div class="weekly-temps">
                         <span class="temp-high">${max}</span>/<span class="temp-low">${min}</span>
@@ -456,15 +475,23 @@ function updateHourlyWeather(locKey, targetYmd) {
             const d = state.items[k];
             const s = getSkyInfo(d.PTY, d.SKY);
             const time = k.slice(8, 10) + ':00';
-            const precipVal = d.POP !== undefined ? d.POP : (d.PCP && d.PCP !== '강수없음' ? d.PCP : null);
-            const precipHtml = precipVal !== null ? `<div class="hourly-precip ${precipVal >= 50 ? 'precip-blue' : ''}">💧${precipVal}%</div>` : '';
+            const windDesc = getWindDesc(d.WSD);
+            const precipProb = d.POP !== undefined ? d.POP : '';
+            const precipAmt = d.PCP && d.PCP !== '강수없음' ? d.PCP : '';
+            let precipText = '';
+            if (precipProb !== '' && precipAmt) precipText = `💧${precipProb}% (${precipAmt})`;
+            else if (precipProb !== '') precipText = `💧${precipProb}%`;
+            else if (precipAmt) precipText = `🌂${precipAmt}`;
+            else precipText = `💧0%`;
+
             return `
                 <div class="hourly-item">
                     <div class="hourly-time">${time}</div>
                     <div class="hourly-icon">${s.icon}</div>
                     <div class="hourly-temp">${d.TMP ?? '--'}°</div>
                     <div class="hourly-wind">🌬️${d.WSD ?? '-'}m/s</div>
-                    ${precipHtml}
+                    <div class="hourly-wind-desc" style="font-size:0.7rem; color:var(--text-muted);">${windDesc}</div>
+                    <div class="hourly-precip ${d.POP >= 50 ? 'precip-blue' : ''}">${precipText}</div>
                 </div>
             `;
         }).join('');
@@ -472,7 +499,7 @@ function updateHourlyWeather(locKey, targetYmd) {
         // 2. 단기 예보 데이터가 없는 경우 (4~10일차) -> 중기 예보 요약 표시
         const todayDate = new Date();
         const todayYmd = `${todayDate.getFullYear()}${String(todayDate.getMonth() + 1).padStart(2, '0')}${String(todayDate.getDate()).padStart(2, '0')}`;
-        
+
         // 날짜 차이 계산
         const d1 = new Date(targetYmd.slice(0, 4), targetYmd.slice(4, 6) - 1, targetYmd.slice(6, 8));
         const d2 = new Date(todayYmd.slice(0, 4), todayYmd.slice(4, 6) - 1, todayYmd.slice(6, 8));
@@ -544,6 +571,103 @@ function switchWeatherLocation(loc) {
     const content = document.getElementById(`weather-content-${loc}`);
     if (btn) btn.classList.add('active');
     if (content) content.classList.add('active');
+}
+
+// ============================================================
+// 대기질: 에어코리아 API
+// ============================================================
+async function fetchAirQuality(locKey) {
+    const loc = CONFIG.WEATHER_LOCATIONS[locKey];
+    if (!loc || !loc.stationName) return;
+
+    const endpoint = 'https://apis.data.go.kr/B552584/ArpltnInforInqireSvc/getMsrstnAcctoRltmMesureDnsty';
+    const params = `stationName=${encodeURIComponent(loc.stationName)}&dataTerm=DAILY&pageNo=1&numOfRows=1&returnType=json&ver=1.3`;
+    const workerUrl = `${CONFIG.PROXY_URL}/api/public-data?endpoint=${encodeURIComponent(endpoint)}&${params}`;
+
+    try {
+        const res = await fetch(workerUrl);
+        const json = await res.json();
+        const item = json?.response?.body?.items?.[0];
+        if (item) {
+            renderAirQuality(locKey, item);
+        } else {
+            console.warn(`[AirQuality] ${locKey} 데이터 없음 (stationName: ${loc.stationName})`, json);
+            renderAirQualityError(locKey);
+        }
+    } catch (e) {
+        console.error(`대기질 API 오류(${locKey}):`, e);
+        renderAirQualityError(locKey);
+    }
+}
+
+function getAirQualityInfo(val, type) {
+    const v = parseFloat(val);
+    if (isNaN(v)) return { label: '무시', cls: 'normal', text: '暂无' };
+
+    if (type === 'pm10') {
+        if (v <= 30) return { label: '좋음', cls: 'good', text: '优' };
+        if (v <= 80) return { label: '보통', cls: 'normal', text: '良' };
+        if (v <= 150) return { label: '나쁨', cls: 'bad', text: '轻度污染' };
+        return { label: '매우나쁨', cls: 'very-bad', text: '重度污染' };
+    }
+    if (type === 'pm25') {
+        if (v <= 15) return { label: '좋음', cls: 'good', text: '优' };
+        if (v <= 35) return { label: '보통', cls: 'normal', text: '良' };
+        if (v <= 75) return { label: '나쁨', cls: 'bad', text: '轻度污染' };
+        return { label: '매우나쁨', cls: 'very-bad', text: '重度污染' };
+    }
+    if (type === 'o3') {
+        if (v <= 0.03) return { label: '좋음', cls: 'good', text: '优' };
+        if (v <= 0.09) return { label: '보통', cls: 'normal', text: '良' };
+        if (v <= 0.15) return { label: '나쁨', cls: 'bad', text: '轻度污染' };
+        return { label: '매우나쁨', cls: 'very-bad', text: '重度污染' };
+    }
+    return { label: '보통', cls: 'normal', text: '良' };
+}
+
+function renderAirQuality(locKey, item) {
+    const container = document.getElementById(`air-quality-${locKey}`);
+    if (!container) return;
+
+    const pm10 = getAirQualityInfo(item.pm10Value, 'pm10');
+    const pm25 = getAirQualityInfo(item.pm25Value, 'pm25');
+    const o3 = getAirQualityInfo(item.o3Value, 'o3');
+
+    container.innerHTML = `
+        <div class="air-quality-card">
+            <span class="aq-label">미세먼지(PM10)</span>
+            <div class="aq-value-row">
+                <span class="aq-value">${item.pm10Value || '--'}</span>
+                <span class="aq-unit">μg/m³</span>
+            </div>
+            <span class="aq-status ${pm10.cls}">${pm10.text}</span>
+        </div>
+        <div class="air-quality-card">
+            <span class="aq-label">초미세먼지(PM2.5)</span>
+            <div class="aq-value-row">
+                <span class="aq-value">${item.pm25Value || '--'}</span>
+                <span class="aq-unit">μg/m³</span>
+            </div>
+            <span class="aq-status ${pm25.cls}">${pm25.text}</span>
+        </div>
+        <div class="air-quality-card">
+            <span class="aq-label">오존(O3)</span>
+            <div class="aq-value-row">
+                <span class="aq-value">${item.o3Value || '--'}</span>
+                <span class="aq-unit">ppm</span>
+            </div>
+            <span class="aq-status ${o3.cls}">${o3.text}</span>
+        </div>
+        <div class="air-quality-info">数据基准: ${item.dataTime} (${CONFIG.WEATHER_LOCATIONS[locKey].stationName}测量站)</div>
+    `;
+}
+
+function renderAirQualityError(locKey) {
+    const container = document.getElementById(`air-quality-${locKey}`);
+    const loc = CONFIG.WEATHER_LOCATIONS[locKey];
+    if (container) {
+        container.innerHTML = `<div class="air-quality-error">无法获取[${loc.stationName}]측정소의 대기질 정보입니다.</div>`;
+    }
 }
 
 // ============================================================
@@ -706,15 +830,15 @@ const STATUS_MAP = {
     '회항': { cls: 'status-ontime', cn: '返航/备降' }
 };
 function getStatusBadge(status) {
-    if (!status || status.trim() === '-') return '-'; 
+    if (!status || status.trim() === '-') return '-';
     const s = status.trim();
-    if (s.includes('무각') || s.includes('\uB9C8\uAC10')) return `<span class="badge badge-danger">登记截止</span>`; 
-    if (s.includes('출발') || s.includes('\uCD9C\uBC1C')) return `<span class="badge badge-success">已出发</span>`; 
-    if (s.includes('도착') || s.includes('\uB3C4\uCC29')) return `<span class="badge badge-success">已到达</span>`; 
-    if (s.includes('지연') || s.includes('\uC9C0\uC5F0')) return `<span class="badge badge-warning">延误</span>`; 
-    if (s.includes('결항') || s.includes('\uACB0\uD56D')) return `<span class="badge badge-danger">取消</span>`; 
-    if (s.includes('탑승') || s.includes('\uD0D1\uC2B9')) return `<span class="badge badge-info">正在登机</span>`; 
-    if (s.includes('수속') || s.includes('\uC218\uC10D')) return `<span class="badge badge-info">正在办理</span>`; 
+    if (s.includes('무각') || s.includes('\uB9C8\uAC10')) return `<span class="badge badge-danger">登记截止</span>`;
+    if (s.includes('출발') || s.includes('\uCD9C\uBC1C')) return `<span class="badge badge-success">已出发</span>`;
+    if (s.includes('도착') || s.includes('\uB3C4\uCC29')) return `<span class="badge badge-success">已到达</span>`;
+    if (s.includes('지연') || s.includes('\uC9C0\uC5F0')) return `<span class="badge badge-warning">延误</span>`;
+    if (s.includes('결항') || s.includes('\uACB0\uD56D')) return `<span class="badge badge-danger">取消</span>`;
+    if (s.includes('탑승') || s.includes('\uD0D1\uC2B9')) return `<span class="badge badge-info">正在登机</span>`;
+    if (s.includes('수속') || s.includes('\uC218\uC10D')) return `<span class="badge badge-info">正在办理</span>`;
     return `<span class="badge badge-info">${s}</span>`;
 }
 
@@ -820,7 +944,7 @@ async function fetchFlights(type) {
             const rmkKor = getStr('rmkKor');
             const io = getStr('io');
             const line = getStr('line');
-            
+
             // 공항공사 API는 JSON일 때 필드명이 소문자인 경우가 많음 (flightid, airline 등)
             const fId = getStr('flightid') || getStr('flightId') || getStr('fid');
             const airlineName = getStr('airline') || getStr('airlineKorean');
@@ -868,18 +992,18 @@ async function fetchFlights(type) {
         }
 
         if (itemsArray.length > 0) {
-        const filteredFlights = itemsArray.filter(f => {
-            const oppositeCode = type === 'arrive' ? f.dep_code : f.arr_code;
-            const localCode = type === 'arrive' ? f.arr_code : f.dep_code;
-            // 엄격한 방향성 필터: 도착편은 목적지가 CJU, 출발편은 출발지가 CJU여야 함
-            const directionMatch = (type === 'arrive' ? f.arr_code === 'CJU' : f.dep_code === 'CJU');
-            // 부가 필터링: API가 파라미터를 무시할 경우를 대비해 제주공항(CJU) 관련인 것만 확실히 체크
-            const isJejuFlight = (f.arr_airport_code === 'CJU' || f.airport_code === 'CJU');
-            
-            return isJejuFlight && directionMatch && oppositeCode && (f.is_intl || !DOMESTIC_AIRPORTS.has(oppositeCode)) && REGION_AIRPORTS.has(oppositeCode);
-        });
+            const filteredFlights = itemsArray.filter(f => {
+                const oppositeCode = type === 'arrive' ? f.dep_code : f.arr_code;
+                const localCode = type === 'arrive' ? f.arr_code : f.dep_code;
+                // 엄격한 방향성 필터: 도착편은 목적지가 CJU, 출발편은 출발지가 CJU여야 함
+                const directionMatch = (type === 'arrive' ? f.arr_code === 'CJU' : f.dep_code === 'CJU');
+                // 부가 필터링: API가 파라미터를 무시할 경우를 대비해 제주공항(CJU) 관련인 것만 확실히 체크
+                const isJejuFlight = (f.arr_airport_code === 'CJU' || f.airport_code === 'CJU');
 
-        renderFlightList(container, filteredFlights, type);
+                return isJejuFlight && directionMatch && oppositeCode && (f.is_intl || !DOMESTIC_AIRPORTS.has(oppositeCode)) && REGION_AIRPORTS.has(oppositeCode);
+            });
+
+            renderFlightList(container, filteredFlights, type);
         }
     } catch (e) {
         console.error('항공 API 오류:', e);
@@ -1073,7 +1197,7 @@ async function fetchFoundGoods() {
             const res = await fetch(apiUrl);
             if (!res.ok) return [];
             const text = await res.text();
-            
+
             // JSON 응답인 경우 처리
             if (text.trim().startsWith('{')) {
                 try {
@@ -1107,9 +1231,9 @@ async function fetchFoundGoods() {
                 const categoryClean = rawCategory.split(' > ')[0] || '기타';
                 const translatedCategory = LOST_CATEGORY_MAP[categoryClean] || categoryClean;
 
-                const fndPlace = getTag('fdFndPlace'); 
-                const lctNm = getTag('lctNm');         
-                const storagePlace = getTag('depPlace'); 
+                const fndPlace = getTag('fdFndPlace');
+                const lctNm = getTag('lctNm');
+                const storagePlace = getTag('depPlace');
 
                 return {
                     id: getTag('atcId'),
@@ -1297,7 +1421,7 @@ function showNoAlerts(container) {
 
 // ==================== Festivals (v5.0 월별 선택) ====================
 let festivalDataCache = null;
-let currentFestivalMonth = ''; 
+let currentFestivalMonth = '';
 
 function initMonthFilter() {
     const filterContainer = document.getElementById('month-filter');
@@ -1325,10 +1449,10 @@ async function fetchFestivals() {
     const listContainer = document.getElementById('festival-list');
     if (!listContainer) return;
     if (!document.querySelector('.month-tab')) initMonthFilter();
-    
+
     try {
         listContainer.innerHTML = `<div style="text-align:center;padding:20px;color:var(--text-muted)">正在获取 ${currentFestivalMonth} 活动...</div>`;
-        
+
         // 0. 전역 변수 확인 (CORS 회피용)
         if (!festivalDataCache && window.FESTIVAL_DATA) {
             festivalDataCache = window.FESTIVAL_DATA;
@@ -1358,22 +1482,22 @@ async function fetchFestivals() {
         // 2. 백업: 실시간 API 호출 (데이터가 없거나 캐시 로드 실패 시)
         const baseEndpoint = `https://api.visitjeju.net/vsjApi/contents/searchList?locale=kr&category=c5&sorting=regdate+desc&pageSize=100`;
         const res = await fetch(`${CONFIG.PROXY_URL}/api/public-data?endpoint=${encodeURIComponent(baseEndpoint)}`);
-        
+
         if (!res.ok) throw new Error(`API 응답 오류: ${res.status}`);
-        
+
         const data = await res.json();
         const items = Array.isArray(data.items) ? data.items : [];
         const monthParts = (currentFestivalMonth || '').split('-');
         const targetMonth = monthParts.length > 1 ? parseInt(monthParts[1]) : (new Date().getMonth() + 1);
-        
+
         // 방어적 필터링: title이나 alltag가 없는 경우 대비
         const filtered = items.filter(item => {
             const searchStr = ((item.title || '') + (item.alltag || '')).toLowerCase();
             return searchStr.includes(`${targetMonth}월`);
         });
-        
+
         renderFestivalItems(listContainer, filtered.length > 0 ? filtered : items.slice(0, 15));
-        
+
     } catch (e) {
         console.error('[Festival] 최종 로드 실패:', e);
         listContainer.innerHTML = `
@@ -1458,15 +1582,15 @@ window.addEventListener('load', () => {
     if (dateInput) {
         // 현재 한국 시간 기준 어제 날짜 계산 (타임존 오차 방지)
         const now = new Date();
-        const kstTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Seoul"}));
+        const kstTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
         const yesterday = new Date(kstTime);
         yesterday.setDate(yesterday.getDate() - 1);
-        
+
         const yyyy = yesterday.getFullYear();
         const mm = String(yesterday.getMonth() + 1).padStart(2, '0');
         const dd = String(yesterday.getDate()).padStart(2, '0');
         const yyyymmdd = `${yyyy}-${mm}-${dd}`;
-        
+
         dateInput.value = yyyymmdd;
         dateInput.setAttribute('max', yyyymmdd);
     }
@@ -1613,7 +1737,7 @@ async function submitFeatureRequest() {
         console.error('Feature Request Error:', e);
         statusEl.style.color = '#ef4444'; // Red color for error
         statusEl.textContent = `❌ 提交失败: ${e.message}`;
-        
+
         submitBtn.disabled = false;
         submitBtn.textContent = '重试';
     }
@@ -1646,32 +1770,32 @@ let lostReportImageBase64 = null;
 function openLostReportModal() {
     document.getElementById('lost-report-modal').style.display = 'flex';
     document.getElementById('lost-report-location').value = '';
-    
+
     const now = new Date();
     const kstTime = new Date(now.getTime() + (9 * 60 * 60 * 1000));
     const yyyy = kstTime.getUTCFullYear();
     const mm = String(kstTime.getUTCMonth() + 1).padStart(2, '0');
     const dd = String(kstTime.getUTCDate()).padStart(2, '0');
-    
+
     document.getElementById('lost-report-date').value = `${yyyy}-${mm}-${dd}`;
     document.getElementById('lost-report-time').value = '';
     document.getElementById('lost-report-item').value = '';
     document.getElementById('lost-report-specifics').value = '';
     document.getElementById('lost-report-photo').value = '';
     document.getElementById('lost-report-wechat').value = '';
-    
+
     const preview = document.getElementById('lost-report-photo-preview');
     preview.style.display = 'none';
     preview.innerHTML = '';
     lostReportImageBase64 = null;
-    
+
     const statusDiv = document.getElementById('lost-report-status');
     statusDiv.style.display = 'none';
     statusDiv.className = 'form-status';
-    
+
     document.getElementById('lost-report-submit-btn').disabled = false;
     document.getElementById('lost-report-submit-btn').innerText = '提交报失登记';
-    
+
     document.body.style.overflow = 'hidden';
 }
 
@@ -1695,7 +1819,7 @@ function handleLostImageChange(event) {
     }
 
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = function (e) {
         lostReportImageBase64 = e.target.result;
         const preview = document.getElementById('lost-report-photo-preview');
         preview.innerHTML = `<img src="${lostReportImageBase64}" alt="Preview">`;
@@ -1711,7 +1835,7 @@ async function submitLostReport() {
     const itemName = document.getElementById('lost-report-item').value.trim();
     const specifics = document.getElementById('lost-report-specifics').value.trim();
     const wechatId = document.getElementById('lost-report-wechat').value.trim();
-    
+
     const statusDiv = document.getElementById('lost-report-status');
     const submitBtn = document.getElementById('lost-report-submit-btn');
 
@@ -1767,7 +1891,7 @@ async function submitLostReport() {
             statusDiv.className = 'form-status success';
             statusDiv.innerText = '✅ 提交成功！如果您找到物品，我们将通过微信联系您。';
             statusDiv.style.display = 'block';
-            
+
             setTimeout(() => {
                 closeLostReportModal();
             }, 3000);
