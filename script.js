@@ -490,8 +490,7 @@ function updateHourlyWeather(locKey, targetYmd) {
                     <div class="hourly-icon">${s.icon}</div>
                     <div class="hourly-temp">${d.TMP ?? '--'}°</div>
                     <div class="hourly-wind">🌬️${d.WSD ?? '-'}m/s</div>
-                    <div class="hourly-wind-desc" style="font-size:0.7rem; color:var(--text-muted);">${windDesc}</div>
-                    <div class="hourly-precip ${d.POP >= 50 ? 'precip-blue' : ''}">${precipText}</div>
+                    <div class="hourly-precip ${d.POP >= 50 ? 'precip-blue' : ''}" style="margin-top:2px;">${precipText}</div>
                 </div>
             `;
         }).join('');
