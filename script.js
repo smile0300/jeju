@@ -586,6 +586,12 @@ async function fetchAirQuality(locKey) {
 
     try {
         const res = await fetch(workerUrl);
+        if (!res.ok) {
+            const errorText = await res.text();
+            console.warn(`[AirQuality] ${locKey} API 응답 에러 (${res.status}):`, errorText);
+            renderAirQualityError(locKey);
+            return;
+        }
         const json = await res.json();
         const item = json?.response?.body?.items?.[0];
         if (item) {

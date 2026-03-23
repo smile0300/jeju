@@ -68,7 +68,10 @@ export default {
         }
 
         // 3. API Key 자동 주입 및 JSON 여부 판별
-        const isJsonExpected = url.searchParams.get('dataType') === 'JSON' || targetUrl.searchParams.get('dataType') === 'JSON' || targetUrlString.includes('dataType=JSON');
+        const isJsonExpected = url.searchParams.get('dataType') === 'JSON' || 
+                               targetUrl.searchParams.get('dataType') === 'JSON' || 
+                               targetUrlString.toLowerCase().includes('datatype=json') ||
+                               targetUrlString.toLowerCase().includes('returntype=json');
         
         const hostname = targetUrl.hostname;
         if (hostname.includes('apis.data.go.kr') || 
