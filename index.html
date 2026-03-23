@@ -3,28 +3,33 @@
 
 <head>
     <!-- Google Tag Manager -->
-    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-K8FTRPST');</script>
+    <script>(function (w, d, s, l, i) {
+            w[l] = w[l] || []; w[l].push({
+                'gtm.start':
+                    new Date().getTime(), event: 'gtm.js'
+            }); var f = d.getElementsByTagName(s)[0],
+                j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+                    'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+        })(window, document, 'script', 'dataLayer', 'GTM-K8FTRPST');</script>
     <!-- End Google Tag Manager -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css?v=3.2">
+    <link rel="stylesheet" href="style.css?v=6.0">
 </head>
 
 <body>
     <!-- Google Tag Manager (noscript) -->
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-K8FTRPST"
-    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-K8FTRPST" height="0" width="0"
+            style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
     <header class="app-bar home-bar" id="main-app-bar"></header>
 
     <!-- ===== Home Section ===== -->
     <section id="home" class="app-section active">
         <div class="home-screen">
-            <div style="text-align: center; padding: 20px 0 10px; color: #3b82f6; font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em;">测试模式 (Test Mode)</div>
+            <div
+                style="text-align: center; padding: 20px 0 10px; color: #3b82f6; font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em;">
+                测试模式</div>
             <div class="home-welcome">
                 <p><strong>请提出您在济州岛旅行中的不便之处！</strong></p>
                 <button class="feature-request-btn" onclick="openFeatureModal()">💡 提交建议 / 意见反馈</button>
@@ -128,10 +133,10 @@
                     <div class="current-weather" id="current-weather-jeju">
                         <div class="weather-main">
                             <div class="weather-icon" id="icon-jeju">⏳</div>
-                            <div class="weather-temp-wrap">
-                                <div class="weather-temp"><span class="temp-value" id="temp-jeju">--</span>°C</div>
-                                <div class="weather-desc" id="desc-jeju">加载中...</div>
-                            </div>
+                                <div class="weather-temp">
+                                    <span class="temp-value" id="temp-jeju">--</span>°C
+                                    <span class="weather-desc" id="desc-jeju">加载中...</span>
+                                </div>
                             <div class="weather-details" id="details-jeju"></div>
                         </div>
                     </div>
@@ -141,15 +146,17 @@
                     <div class="hourly-weather">
                         <div class="hourly-scroll" id="hourly-jeju"></div>
                     </div>
+                    <h3 class="cmp-cur-weather-head">대기질정보</h3>
+                    <div id="air-quality-jeju" class="air-quality-grid"></div>
                 </div>
                 <div id="weather-content-seogwipo" class="location-weather">
                     <div class="current-weather" id="current-weather-seogwipo">
                         <div class="weather-main">
                             <div class="weather-icon" id="icon-seogwipo">⏳</div>
-                            <div class="weather-temp-wrap">
-                                <div class="weather-temp"><span class="temp-value" id="temp-seogwipo">--</span>°C</div>
-                                <div class="weather-desc" id="desc-seogwipo">加载中...</div>
-                            </div>
+                                <div class="weather-temp">
+                                    <span class="temp-value" id="temp-seogwipo">--</span>°C
+                                    <span class="weather-desc" id="desc-seogwipo">加载中...</span>
+                                </div>
                             <div class="weather-details" id="details-seogwipo"></div>
                         </div>
                     </div>
@@ -159,15 +166,17 @@
                     <div class="hourly-weather">
                         <div class="hourly-scroll" id="hourly-seogwipo"></div>
                     </div>
+                    <h3 class="cmp-cur-weather-head">대기질정보</h3>
+                    <div id="air-quality-seogwipo" class="air-quality-grid"></div>
                 </div>
                 <div id="weather-content-hallasan" class="location-weather">
                     <div class="current-weather" id="current-weather-hallasan">
                         <div class="weather-main">
                             <div class="weather-icon" id="icon-hallasan">⏳</div>
-                            <div class="weather-temp-wrap">
-                                <div class="weather-temp"><span class="temp-value" id="temp-hallasan">--</span>°C</div>
-                                <div class="weather-desc" id="desc-hallasan">加载中...</div>
-                            </div>
+                                <div class="weather-temp">
+                                    <span class="temp-value" id="temp-hallasan">--</span>°C
+                                    <span class="weather-desc" id="desc-hallasan">加载中...</span>
+                                </div>
                             <div class="weather-details" id="details-hallasan"></div>
                         </div>
                     </div>
@@ -177,15 +186,17 @@
                     <div class="hourly-weather">
                         <div class="hourly-scroll" id="hourly-hallasan"></div>
                     </div>
+                    <h3 class="cmp-cur-weather-head">대기질정보</h3>
+                    <div id="air-quality-hallasan" class="air-quality-grid"></div>
                 </div>
                 <div id="weather-content-udo" class="location-weather">
                     <div class="current-weather" id="current-weather-udo">
                         <div class="weather-main">
                             <div class="weather-icon" id="icon-udo">⏳</div>
-                            <div class="weather-temp-wrap">
-                                <div class="weather-temp"><span class="temp-value" id="temp-udo">--</span>°C</div>
-                                <div class="weather-desc" id="desc-udo">加载中...</div>
-                            </div>
+                                <div class="weather-temp">
+                                    <span class="temp-value" id="temp-udo">--</span>°C
+                                    <span class="weather-desc" id="desc-udo">加载中...</span>
+                                </div>
                             <div class="weather-details" id="details-udo"></div>
                         </div>
                     </div>
@@ -195,6 +206,8 @@
                     <div class="hourly-weather">
                         <div class="hourly-scroll" id="hourly-udo"></div>
                     </div>
+                    <h3 class="cmp-cur-weather-head">대기질정보</h3>
+                    <div id="air-quality-udo" class="air-quality-grid"></div>
                 </div>
             </div>
         </div>
@@ -226,7 +239,11 @@
                     style="text-align:center;font-size:0.85rem;color:var(--text-muted);margin-bottom:8px;opacity:0.9;">
                 </div>
                 <div style="text-align:center; margin-bottom:16px;">
-                    <a href="https://www.trip.com/t/epPtOVtJzT2" target="_blank" style="display:inline-block; padding:12px 28px; background:linear-gradient(135deg,#003580,#0055b8); color:#fff; font-size:0.95rem; font-weight:700; border-radius:50px; text-decoration:none; box-shadow:0 4px 14px rgba(0,53,128,0.25); transition:transform 0.15s, box-shadow 0.15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 18px rgba(0,53,128,0.35)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 14px rgba(0,53,128,0.25)'">✈️ 中国 ↔ 济州 机票查询</a>
+                    <a href="https://www.trip.com/t/epPtOVtJzT2" target="_blank"
+                        style="display:inline-block; padding:12px 28px; background:linear-gradient(135deg,#003580,#0055b8); color:#fff; font-size:0.95rem; font-weight:700; border-radius:50px; text-decoration:none; box-shadow:0 4px 14px rgba(0,53,128,0.25); transition:transform 0.15s, box-shadow 0.15s;"
+                        onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 18px rgba(0,53,128,0.35)'"
+                        onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 14px rgba(0,53,128,0.25)'">✈️
+                        中国 ↔ 济州 机票查询</a>
                 </div>
                 <div class="flight-tabs">
                     <button class="flight-tab active" id="tab-arrive" onclick="switchFlightTab('arrive')">到达航班</button>
@@ -255,14 +272,18 @@
         <div class="section">
             <div class="container">
                 <div style="text-align:center; margin-bottom:20px;">
-                    <a href="https://www.trip.com/t/DbXrep5KzT2" target="_blank" style="display:inline-block; padding:12px 28px; background:linear-gradient(135deg,#ff9800,#f57c00); color:#fff; font-size:0.95rem; font-weight:700; border-radius:50px; text-decoration:none; box-shadow:0 4px 14px rgba(245,124,0,0.25); transition:transform 0.15s, box-shadow 0.15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 18px rgba(245,124,0,0.35)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 14px rgba(245,124,0,0.25)'">🎟️ 查看景点门票</a>
+                    <a href="https://www.trip.com/t/DbXrep5KzT2" target="_blank"
+                        style="display:inline-block; padding:12px 28px; background:linear-gradient(135deg,#ff9800,#f57c00); color:#fff; font-size:0.95rem; font-weight:700; border-radius:50px; text-decoration:none; box-shadow:0 4px 14px rgba(245,124,0,0.25); transition:transform 0.15s, box-shadow 0.15s;"
+                        onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 18px rgba(245,124,0,0.35)'"
+                        onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 14px rgba(245,124,0,0.25)'">🎟️
+                        查看景点门票</a>
                 </div>
                 <!-- 월별 축제 필터 (v5.0) -->
-            <div class="festival-month-filter" id="month-filter">
-                <!-- script.js에서 동적으로 생성됩니다 -->
-            </div>
-            
-            <div id="festival-list" class="festival-list"></div>
+                <div class="festival-month-filter" id="month-filter">
+                    <!-- script.js에서 동적으로 생성됩니다 -->
+                </div>
+
+                <div id="festival-list" class="festival-list"></div>
             </div>
         </div>
     </section>
@@ -310,12 +331,12 @@
                                     const kstTime = new Date(now.getTime() + (9 * 60 * 60 * 1000));
                                     const yesterday = new Date(kstTime);
                                     yesterday.setDate(yesterday.getDate() - 1);
-                                    
+
                                     const yyyy = yesterday.getUTCFullYear();
                                     const mm = String(yesterday.getUTCMonth() + 1).padStart(2, '0');
                                     const dd = String(yesterday.getUTCDate()).padStart(2, '0');
                                     const yyyymmdd = `${yyyy}-${mm}-${dd}`;
-                                    
+
                                     const dateInput = document.getElementById('lost-date');
                                     dateInput.setAttribute('max', yyyymmdd);
                                     dateInput.value = yyyymmdd;
@@ -324,7 +345,7 @@
                             <button class="search-btn" onclick="fetchFoundGoodsManual()">🔍</button>
                         </div>
                     </div>
-                    
+
                     <!-- 분실물 신고 버튼 추가 -->
                     <div style="margin-bottom: 25px;">
                         <button class="lost-report-btn" onclick="openLostReportModal()">
@@ -368,7 +389,8 @@
                     <div class="footer-qr-container">
                         <div class="qr-item">
                             <!-- 소홍서 프로필 직접 연동 -->
-                            <a href="https://www.xiaohongshu.com/user/profile/671324ca000000001d0207f6?xhsshare=userQrCode" target="_blank">
+                            <a href="https://www.xiaohongshu.com/user/profile/671324ca000000001d0207f6?xhsshare=userQrCode"
+                                target="_blank">
                                 <img src="assets/qr.jpg" alt="Xiaohongshu QR" class="qr-img">
                             </a>
                             <p class="qr-label">小红书</p>
@@ -420,15 +442,16 @@
             <img src="assets/wechat_qr.png"
                 style="width: 100%; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px;">
             <div class="wechat-copy-box" style="display:flex; gap:8px;">
-                <input type="text" id="wechat-id-input" value="jeju_jk" readonly 
+                <input type="text" id="wechat-id-input" value="jeju_jk" readonly
                     style="flex:1; padding:10px; border-radius:8px; border:1px solid #ddd; font-size:0.9rem; text-align:center;">
-                <button onclick="copyWechatId()" 
+                <button onclick="copyWechatId()"
                     style="padding:10px 15px; background:var(--primary-gradient); color:white; border:none; border-radius:8px; font-weight:700; cursor:pointer;">复制</button>
             </div>
         </div>
     </div>
     <!-- ===== Lost Report Form Modal ===== -->
-    <div id="lost-report-modal" class="modal-overlay" style="display:none; z-index: 10001;" onclick="closeLostReportModal()">
+    <div id="lost-report-modal" class="modal-overlay" style="display:none; z-index: 10001;"
+        onclick="closeLostReportModal()">
         <div class="modal-content lost-report-form-content" onclick="event.stopPropagation()">
             <button class="modal-close" onclick="closeLostReportModal()">✕</button>
             <div class="lost-report-header">
@@ -461,7 +484,8 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>📸 物品照片 (如有)</label>
-                        <input type="file" id="lost-report-photo" accept="image/*" onchange="handleLostImageChange(event)">
+                        <input type="file" id="lost-report-photo" accept="image/*"
+                            onchange="handleLostImageChange(event)">
                         <div id="lost-report-photo-preview" class="photo-preview"></div>
                     </div>
                     <div class="form-group">
@@ -474,52 +498,10 @@
             </div>
         </div>
     </div>
-    <!-- ===== Emergency Section ===== -->
-    <section id="emergency" class="app-section">
-        <header class="app-bar">
-            <button class="back-btn" onclick="showSection('home')">←</button>
-            <h2 class="bar-title">☎️ 紧急电话</h2>
-        </header>
-        <div class="section">
-            <div class="container">
-                <div class="emergency-list">
-                    <div class="emergency-item" onclick="window.location.href='tel:112'">
-                        <div class="emergency-info">
-                            <h3>🚨 警察局 (Police)</h3>
-                            <p>112</p>
-                        </div>
-                        <span class="call-icon">📞</span>
-                    </div>
-                    <div class="emergency-item" onclick="window.location.href='tel:119'">
-                        <div class="emergency-info">
-                            <h3>🔥 消防 / 急救 (Fire / Ambulance)</h3>
-                            <p>119</p>
-                        </div>
-                        <span class="call-icon">📞</span>
-                    </div>
-                    <div class="emergency-item" onclick="window.location.href='tel:1330'">
-                        <div class="emergency-info">
-                            <h3>📞 旅游咨询翻译 (Travel)</h3>
-                            <p>1330 (提供中文服务)</p>
-                        </div>
-                        <span class="call-icon">📞</span>
-                    </div>
-                    <div class="emergency-item" onclick="window.location.href='tel:064-120'">
-                        <div class="emergency-info">
-                            <h3>🏢 济州呼叫中心 (Jeju Call)</h3>
-                            <p>064-120</p>
-                        </div>
-                        <span class="call-icon">📞</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
 
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="assets/curated_festivals.js"></script>
-    <script src="script.js?v=4.6" charset="UTF-8"></script>
+    <script src="script.js?v=6.0" charset="UTF-8"></script>
 </body>
 
 </html>
