@@ -17,12 +17,20 @@ const ALLOWED_DOMAINS = [
 // 2. 허용된 오리진 (CORS)
 const ALLOWED_ORIGIN = '*';
 
-// 공통 응답 생성기 (CORS 헤더 포함)
+// 공통 응답 생성기 (CORS 헤더 포함 및 불필요한 헤더 정리)
 function createCorsResponse(body, init = {}) {
   const headers = new Headers(init.headers || {});
+  
+  // CORS 핵심 헤더 설정
   headers.set('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
   headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  
+  // 프록시 시 문제를 일으킬 수 있는 헤더 제거 (압축 및 길이 관련)
+  // Cloudflare가 이미 처리했거나 새로운 body와 맞지 않을 수 있음
+  headers.delete('Content-Encoding');
+  headers.delete('Content-Length');
+  headers.delete('Transfer-Encoding');
   
   return new Response(body, { ...init, headers });
 }
@@ -89,10 +97,19 @@ export default {
         const maskedUrl = finalUrl.replace(/serviceKey=[^&]+/, 'serviceKey=REDACTED').replace(/apiKey=[^&]+/, 'apiKey=REDACTED');
         console.log(`[Proxy Request] ${maskedUrl}`);
 
+        // Accept 헤더 전략: 데이터 요청 타입에 맞춰 우선순위 조정
+        // dataType=JSON이 명시되었거나 특정 API인 경우 JSON 우선, 나머지는 XML 우선(브라우저 파싱용)
+        const isJsonExpected = targetUrl.searchParams.get('dataType') === 'JSON' || 
+                               targetUrl.hostname.includes('api.visitjeju.net');
+        
+        const acceptHeader = isJsonExpected ? 
+          'application/json, text/plain, */*' : 
+          'application/xml, application/json, text/xml, */*';
+
         const response = await fetch(finalUrl, {
           method: 'GET',
           headers: {
-            'Accept': targetUrl.hostname.includes('api.visitjeju.net') ? 'application/json, */*' : 'application/json, application/xml, */*',
+            'Accept': acceptHeader,
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
           }
         });
@@ -128,7 +145,7 @@ export default {
             const parentPath = baseUrl.origin + baseUrl.pathname.substring(0, baseUrl.pathname.lastIndexOf('/') + 1);
             const finalFullUrl = parentPath + url.pathname.substring(1);
 
-            console.log(`[HLS Sub-request] ${finalFullUrl}`);
+            console.log(`[HLS Sub-request] Proxying to: ${finalFullUrl}`);
             const res = await fetch(finalFullUrl);
             return createCorsResponse(res.body, {
               status: res.status,
@@ -137,8 +154,10 @@ export default {
           }
         } catch (e) {
           console.error(`[HLS Proxy Error] ${e.message}`);
+          return createCorsResponse(`HLS Proxy Error: ${e.message}`, { status: 500 });
         }
       }
+      // Referer가 없는 경우에도 기본적으로 404와 함께 CORS 헤더를 반환하도록 유도 (상위 블록에서 처리됨)
     }
 
     // /api/feature-request 및 /api/lost-report 엔드포인트 처리 (Google Sheets 연동)
