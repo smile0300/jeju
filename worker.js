@@ -17,16 +17,31 @@ const ALLOWED_DOMAINS = [
 // 2. 허용된 오리진 (CORS)
 const ALLOWED_ORIGIN = '*';
 
+// 공통 응답 생성기 (CORS 헤더 포함)
+function createCorsResponse(body, init = {}) {
+  const headers = new Headers(init.headers || {});
+  headers.set('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
+  headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  
+  return new Response(body, { ...init, headers });
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
-    // /api/public-data 엔드포인트 처리
+    // CORS Preflight 처리
+    if (request.method === 'OPTIONS') {
+      return createCorsResponse(null, { status: 204 });
+    }
+
+    // 1. /api/public-data 엔드포인트 처리
     if (url.pathname === '/api/public-data' || url.searchParams.has('url')) {
       const targetUrlString = url.searchParams.get('endpoint') || url.searchParams.get('url');
 
       if (!targetUrlString) {
-        return new Response('Missing target URL', { status: 400 });
+        return createCorsResponse('Missing target URL', { status: 400 });
       }
 
       try {
@@ -38,67 +53,91 @@ export default {
         );
 
         if (!isAllowed) {
-          return new Response('Forbidden: Target domain not in whitelist', { status: 403 });
+          return createCorsResponse(`Forbidden: Target domain (${targetUrl.hostname}) not in whitelist`, { status: 403 });
         }
 
-        // 3. API Key 자동 주입 및 쿼리 파라미터 전달 개선
-        // (상단 line 30에서 이미 선언된 targetUrl을 사용합니다)
-
         // 원본 요청의 모든 쿼리 파라미터를 대상 URL에 복사 (endpoint/url 제외)
+        // 팁: endpoint URL 내부에 이미 파라미터가 있는 경우, 중복을 피하기 위해 set() 사용
         for (const [key, value] of url.searchParams) {
-          if (key !== 'endpoint' && key !== 'url') {
+          if (key !== 'endpoint' && key !== 'url' && key !== '_') {
             targetUrl.searchParams.set(key, value);
           }
         }
 
-        // 3. API Key 자동 주입
-        if (targetUrl.hostname.includes('apis.data.go.kr') || 
-            targetUrl.hostname.includes('openapi.airport.co.kr') ||
-            targetUrl.hostname.includes('api.visitjeju.net')) {
+        // 3. API Key 자동 주입 (기상청, 공항공사 등)
+        const hostname = targetUrl.hostname;
+        if (hostname.includes('apis.data.go.kr') || 
+            hostname.includes('openapi.airport.co.kr') ||
+            hostname.includes('api.visitjeju.net')) {
           
           let serviceKey = env.SECRET_PUBLIC_DATA_KEY || env.PUBLIC_DATA_KEY;
           
-          // VisitJeju 전용 키가 있다면 우선 사용
-          if (targetUrl.hostname.includes('api.visitjeju.net') && (env.VISIT_JEJU_KEY || env.SECRET_VIS_JEJU_KEY)) {
+          if (hostname.includes('api.visitjeju.net') && (env.VISIT_JEJU_KEY || env.SECRET_VIS_JEJU_KEY)) {
             serviceKey = env.VISIT_JEJU_KEY || env.SECRET_VIS_JEJU_KEY;
           }
 
           if (serviceKey) {
-            // VisitJeju는 apiKey, 나머지는 serviceKey 명칭 사용
-            const keyParam = targetUrl.hostname.includes('api.visitjeju.net') ? 'apiKey' : 'serviceKey';
+            const keyParam = hostname.includes('api.visitjeju.net') ? 'apiKey' : 'serviceKey';
+            // 이미 URL에 키가 포함되어 있지 않은 경우에만 주입 (보안 및 중복 방지)
             if (!targetUrl.searchParams.has(keyParam)) {
-              targetUrl.searchParams.set(keyParam, serviceKey);
+              targetUrl.searchParams.set(keyParam, serviceKey.trim());
             }
           }
         }
 
-        // 4. 항공 API 417 오류 해결 및 JSON/XML 호환을 위한 헤더 초기화
-        const minimalHeaders = new Headers();
-        // script.js가 XML 파싱을 기대하므로 XML을 우선순위로 설정 (단, VisitJeju는 JSON 우선)
-        if (targetUrl.hostname.includes('api.visitjeju.net')) {
-          minimalHeaders.set('Accept', 'application/json, text/plain, */*');
-        } else {
-          minimalHeaders.set('Accept', 'application/xml, text/xml, application/json, */*');
-        }
-        minimalHeaders.set('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
-
         const finalUrl = targetUrl.toString();
+        const maskedUrl = finalUrl.replace(/serviceKey=[^&]+/, 'serviceKey=REDACTED').replace(/apiKey=[^&]+/, 'apiKey=REDACTED');
+        console.log(`[Proxy Request] ${maskedUrl}`);
 
-        // 원본 요청 실행 (모든 요청을 GET으로 고정 - 날씨/항공 모두 GET 방식임)
         const response = await fetch(finalUrl, {
           method: 'GET',
-          headers: minimalHeaders
+          headers: {
+            'Accept': targetUrl.hostname.includes('api.visitjeju.net') ? 'application/json, */*' : 'application/json, application/xml, */*',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+          }
         });
 
-        // 결과 반환 (CORS 헤더 추가)
-        const newResponse = new Response(response.body, response);
-        newResponse.headers.set('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
-        newResponse.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+        // 504 및 다른 서버 에러 핸들링
+        if (!response.ok) {
+           console.error(`[Proxy Error] Status: ${response.status}, URL: ${maskedUrl}`);
+           return createCorsResponse(`Proxy Error from Source: ${response.status}`, { status: response.status });
+        }
 
-        return newResponse;
+        // 응답 반환 (CORS 헤더 추가)
+        return createCorsResponse(response.body, {
+          status: response.status,
+          statusText: response.statusText,
+          headers: response.headers
+        });
 
       } catch (e) {
-        return new Response('Invalid URL format', { status: 400 });
+        console.error(`[Worker Error] ${e.message}`);
+        return createCorsResponse(`Invalid URL or Internal Error: ${e.message}`, { status: 400 });
+      }
+    }
+
+    // 2. CCTV HLS 자식 파일(.m3u8, .ts) 프록시 처리
+    if (url.pathname.endsWith('.m3u8') || url.pathname.endsWith('.ts')) {
+      const referer = request.headers.get('Referer');
+      if (referer) {
+        try {
+          const refUrl = new URL(referer);
+          const originalUrl = refUrl.searchParams.get('url');
+          if (originalUrl) {
+            const baseUrl = new URL(originalUrl);
+            const parentPath = baseUrl.origin + baseUrl.pathname.substring(0, baseUrl.pathname.lastIndexOf('/') + 1);
+            const finalFullUrl = parentPath + url.pathname.substring(1);
+
+            console.log(`[HLS Sub-request] ${finalFullUrl}`);
+            const res = await fetch(finalFullUrl);
+            return createCorsResponse(res.body, {
+              status: res.status,
+              headers: res.headers
+            });
+          }
+        } catch (e) {
+          console.error(`[HLS Proxy Error] ${e.message}`);
+        }
       }
     }
 
@@ -107,12 +146,9 @@ export default {
       try {
         const gasUrl = env.GAS_URL || env.SECRET_GAS_URL;
         if (!gasUrl) {
-          return new Response(JSON.stringify({ error: 'GAS_URL secret is not configured in Worker' }), {
+          return createCorsResponse(JSON.stringify({ error: 'GAS_URL secret is not configured' }), { 
             status: 500,
-            headers: {
-              'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
-              'Content-Type': 'application/json'
-            }
+            headers: { 'Content-Type': 'application/json' }
           });
         }
 
@@ -123,66 +159,19 @@ export default {
           body: bodyText
         });
 
-        // 1. GAS 응답 텍스트 추출
         const resultText = await gasResponse.text();
-        
-        // 2. 응답이 정상적인 JSON인지 확인
-        let isJson = true;
-        try {
-          JSON.parse(resultText);
-        } catch (e) {
-          isJson = false;
-        }
-
-        // 3. JSON이 아니거나 HTTP 상태가 정상이 아닐 경우 에러 응답 생성
-        if (!gasResponse.ok || !isJson) {
-          const errorMsg = !isJson ? `Non-JSON Response: ${resultText.slice(0, 100)}...` : `GAS Error Status: ${gasResponse.status}`;
-          return new Response(JSON.stringify({ 
-            error: errorMsg,
-            status: 'error',
-            raw: isJson ? null : resultText.slice(0, 500) // 디버깅용
-          }), {
-            status: gasResponse.ok ? 400 : gasResponse.status, // JSON이 아니면 400, 상태 코드 에러면 해당 코드
-            headers: {
-              'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
-              'Content-Type': 'application/json'
-            }
-          });
-        }
-
-        // 4. 정상적인 JSON 응답 반환
-        return new Response(resultText, {
-          headers: {
-            'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
-            'Content-Type': 'application/json'
-          }
+        return createCorsResponse(resultText, {
+          status: gasResponse.status,
+          headers: { 'Content-Type': 'application/json' }
         });
       } catch (e) {
-        return new Response(JSON.stringify({ 
-          error: e.message,
-          stack: e.stack,
-          type: 'WORKER_INTERNAL_ERROR'
-        }), {
+        return createCorsResponse(JSON.stringify({ error: e.message, type: 'WORKER_INTERNAL_ERROR' }), {
           status: 500,
-          headers: {
-            'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
-            'Content-Type': 'application/json'
-          }
+          headers: { 'Content-Type': 'application/json' }
         });
       }
     }
 
-    // CORS Preflight 처리
-    if (request.method === 'OPTIONS') {
-      return new Response(null, {
-        headers: {
-          'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
-          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type',
-        }
-      });
-    }
-
-    return new Response('Not Found', { status: 404 });
+    return createCorsResponse('Not Found', { status: 404 });
   }
 };
