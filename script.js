@@ -246,7 +246,8 @@ async function fetchMidTermWeather(loc) {
         const landItem = landJson?.response?.body?.items?.item?.[0];
         const tempItem = tempJson?.response?.body?.items?.item?.[0];
         
-        if (!landItem || !tempItem) return { fail: true, landJson, tempJson };
+        // 하나라도 있으면 반환하도록 수정 (기존에는 둘 다 있어야 했음)
+        if (!landItem && !tempItem) return { fail: true, landJson, tempJson };
         return { landItem, tempItem };
     };
 
@@ -385,20 +386,24 @@ function parseAndRenderWeather(locKey, items, midData) {
                 precip = dt.precip || 0;
                 const s = getSkyInfo(dt.pty, dt.sky);
                 icon = s.icon;
-            } else if (landItem && tempItem && i >= 3) {
+            } else if ((landItem || tempItem) && i >= 3) {
                 const dayIdx = i + 1;
-                max = (tempItem[`taMax${dayIdx}`] ?? '--') + '°';
-                min = (tempItem[`taMin${dayIdx}`] ?? '--') + '°';
+                if (tempItem) {
+                    max = (tempItem[`taMax${dayIdx}`] ?? '--') + '°';
+                    min = (tempItem[`taMin${dayIdx}`] ?? '--') + '°';
+                }
                 
-                const amPm = todayDate.getHours() < 12 ? 'Am' : 'Pm';
-                if (i <= 6) {
-                    precip = landItem[`rnSt${dayIdx}${amPm}`] ?? landItem[`rnSt${dayIdx}`] ?? 0;
-                    const s2 = translateMidWf(landItem[`wf${dayIdx}${amPm}`] || landItem[`wf${dayIdx}`] || '');
-                    icon = s2.icon;
-                } else {
-                    precip = landItem[`rnSt${dayIdx}`] ?? 0;
-                    const s2 = translateMidWf(landItem[`wf${dayIdx}`] || '');
-                    icon = s2.icon;
+                if (landItem) {
+                    const amPm = todayDate.getHours() < 12 ? 'Am' : 'Pm';
+                    if (i <= 6) {
+                        precip = landItem[`rnSt${dayIdx}${amPm}`] ?? landItem[`rnSt${dayIdx}`] ?? 0;
+                        const s2 = translateMidWf(landItem[`wf${dayIdx}${amPm}`] || landItem[`wf${dayIdx}`] || '');
+                        icon = s2.icon;
+                    } else {
+                        precip = landItem[`rnSt${dayIdx}`] ?? 0;
+                        const s2 = translateMidWf(landItem[`wf${dayIdx}`] || '');
+                        icon = s2.icon;
+                    }
                 }
             }
 
@@ -475,24 +480,28 @@ function updateHourlyWeather(locKey, targetYmd) {
         const dayIdx = diffDays + 1;
 
         const { landItem, tempItem } = state.midData || {};
-        if (landItem && tempItem && dayIdx >= 4 && dayIdx <= 11) {
+        if ((landItem || tempItem) && dayIdx >= 4 && dayIdx <= 11) {
             // 오전/오후 요약 데이터 생성
             let summaries = [];
-            if (dayIdx <= 7) {
-                // 3~7일째는 오전/오후 데이터가 있음
-                const amWf = landItem[`wf${dayIdx}Am`];
-                const pmWf = landItem[`wf${dayIdx}Pm`];
-                const amPr = landItem[`rnSt${dayIdx}Am`];
-                const pmPr = landItem[`rnSt${dayIdx}Pm`];
-                summaries = [
-                    { time: '上午', wf: amWf, pr: amPr },
-                    { time: '下午', wf: pmWf, pr: pmPr }
-                ];
+            if (landItem) {
+                if (dayIdx <= 7) {
+                    // 3~7일째는 오전/오후 데이터가 있음
+                    const amWf = landItem[`wf${dayIdx}Am`];
+                    const pmWf = landItem[`wf${dayIdx}Pm`];
+                    const amPr = landItem[`rnSt${dayIdx}Am`];
+                    const pmPr = landItem[`rnSt${dayIdx}Pm`];
+                    summaries = [
+                        { time: '上午', wf: amWf, pr: amPr },
+                        { time: '下午', wf: pmWf, pr: pmPr }
+                    ];
+                } else {
+                    // 8~10일째는 하루 단위 데이터만 있음
+                    summaries = [
+                        { time: '全天', wf: landItem[`wf${dayIdx}`], pr: landItem[`rnSt${dayIdx}`] }
+                    ];
+                }
             } else {
-                // 8~10일째는 하루 단위 데이터만 있음
-                summaries = [
-                    { time: '全天', wf: landItem[`wf${dayIdx}`], pr: landItem[`rnSt${dayIdx}`] }
-                ];
+                summaries = [{ time: '数据缺失', wf: '', pr: '-' }];
             }
 
             hourlyEl.innerHTML = summaries.map(s => {
@@ -501,7 +510,7 @@ function updateHourlyWeather(locKey, targetYmd) {
                     <div class="hourly-item" style="min-width: 140px;">
                         <div class="hourly-time">${s.time}</div>
                         <div class="hourly-icon" style="font-size: 2.5rem;">${sky.icon}</div>
-                        <div class="hourly-temp">${sky.desc}</div>
+                        <div class="hourly-temp">${sky.desc || '暂无数据'}</div>
                         <div class="hourly-precip ${s.pr >= 50 ? 'precip-blue' : ''}">降水概率: ${s.pr}%</div>
                     </div>
                 `;
