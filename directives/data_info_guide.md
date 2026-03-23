@@ -12,8 +12,7 @@
   - **Mobile-First**: 스마트폰 환경 최적화 UI/UX.
   - **China Accessibility**: 중국 본토 내 접근성을 고려한 리소스 최적화 및 VPN 안내.
 - **버전 및 변경 이력**:
-| 버전 | 날짜 | 주요 변경 사항 |
-| :--- | :--- | :--- |
+| v6.1 | 2026-03-23 | 항공편/습득물 JSON 하이브리드 파싱 및 필드명/타입 호환성 해결 |
 | v5.0 | 2026-03-22 | 월별 축제 큐레이션 자동화, 습득물 UI 및 중국어 번역 고도화 |
 | v4.2 | 2026-03-21 | 분실물 신고 기능 추가 및 GAS 권한 이슈 해결 |
 | ... | ... | (이전 버전 이력 누적 위치) |
@@ -55,3 +54,17 @@
 - **CORS 정책**: `worker.js`에서 `Access-Control-Allow-Origin: *`를 통해 로컬 및 운영 환경 통합 지원.
 - **GAS 보안**: 중요 URL인 `GAS_URL`은 Cloudflare Secret으로 관리하여 노출 차단.
 - **API 키 통합**: `wrangler.toml`의 `[vars]` 섹션에 `VISIT_JEJU_KEY`를 상주시켜 배포 시 유실 방지.
+
+## 11. 주요 이슈 해결 및 교훈 (Troubleshooting & Lessons)
+
+### 11.01 API JSON 필드명 및 데이터 타입 불일치 (2026-03-23)
+- **현상**: API 응답은 정상(200 OK)이나 화면에 데이터가 표시되지 않음.
+- **원인**: 
+  - **대소문자**: XML 기반 태그(`flightId`)와 달리 JSON 응답 시 필드명이 모두 소문자(`flightid`)로 반환되는 경우 발생.
+  - **데이터 타입**: 시간 정보(`scheduledatetime`)가 문자열이 아닌 숫자(`Number`)로 반환되어 `.slice()` 등 문자열 함수 사용 시 오류 발생.
+- **해결**: `script.js`에 하이브리드 파싱 로직을 도입하여 XML/JSON을 모두 수용하고, 모든 필드에 대해 `.toString()` 변환 및 소문자 폴백(`getStr('flightid') || getStr('flightId')`) 적용.
+
+### 11.02 API 키 이중 인코딩 이슈
+- **현상**: `data.go.kr` 등 특정 API 호출 시 "SERVICE_KEY_IS_NOT_REGISTERED" 오류 발생.
+- **원인**: Cloudflare Worker의 `URL.searchParams.set()` 함수가 값을 자동으로 인코딩함. 이미 인코딩된 API 키를 그대로 넣으면 이중으로 인코딩되어 인증 실패.
+- **해결**: Worker에서 `targetUrl.searchParams.set(key, decodeURIComponent(serviceKey))`와 같이 키를 먼저 디코딩한 후 주입하여 최종적으로 한 번만 인코딩되도록 보장.
