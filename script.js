@@ -373,8 +373,7 @@ function parseAndRenderWeather(locKey, items, midData) {
             <div class="weather-main">
                 <div class="weather-icon" id="icon-${locKey}"></div>
                 <div class="weather-temp">
-                    <span class="temp-value" id="temp-${locKey}">--</span>°C
-                    <span class="weather-desc" id="desc-${locKey}">--</span>
+                    <span class="temp-value" id="temp-${locKey}">--</span><span class="temp-unit">°C</span>
                 </div>
                 <div class="weather-details" id="details-${locKey}"></div>
             </div>
@@ -383,11 +382,9 @@ function parseAndRenderWeather(locKey, items, midData) {
 
     const iconEl = document.getElementById(`icon-${locKey}`);
     const tempEl = document.getElementById(`temp-${locKey}`);
-    const descEl = document.getElementById(`desc-${locKey}`);
     const detailsEl = document.getElementById(`details-${locKey}`);
     if (iconEl) iconEl.textContent = sky.icon;
     if (tempEl) tempEl.textContent = current.TMP ?? current.T1H ?? '--';
-    if (descEl) descEl.textContent = sky.desc;
     if (detailsEl) {
         detailsEl.innerHTML = `
             <div class="weather-detail-item"><span class="detail-icon">💨</span><span class="detail-label">风速</span><span class="detail-value">${current.WSD ?? '-'}m/s · ${getWindDesc(current.WSD)}</span></div>
