@@ -181,6 +181,13 @@ function getWindDesc(ws) {
     return '强风';
 }
 
+// 강수량 표시 형식 변환 (v6.5)
+function formatPrecip(pcp) {
+    if (!pcp || pcp === '강수없음' || pcp === '0' || pcp === '0.0') return '0mm';
+    if (typeof pcp === 'string' && pcp.includes('미만')) return '<1mm';
+    return pcp;
+}
+
 function formatBaseTime(date) {
     const kstHour = date.getHours();
     const kstMin = date.getMinutes();
@@ -367,8 +374,8 @@ function parseAndRenderWeather(locKey, items, midData) {
     if (descEl) descEl.textContent = sky.desc;
     if (detailsEl) {
         detailsEl.innerHTML = `
-            <div class="weather-detail-item"><span class="detail-icon">💨</span><span class="detail-label">风速</span><span class="detail-value">${current.WSD ?? '-'}m/s · ${getWindDesc(current.WSD)}</span></div>
-            <div class="weather-detail-item"><span class="detail-icon">🌂</span><span class="detail-label">降水量</span><span class="detail-value">${(!current.PCP || current.PCP === '강수없음' || current.PCP === '0') ? '0mm' : current.PCP}</span></div>
+            <div class="weather-detail-item"><span class="detail-icon">💨</span><span class="detail-label">风속</span><span class="detail-value">${current.WSD ?? '-'}m/s · ${getWindDesc(current.WSD)}</span></div>
+            <div class="weather-detail-item"><span class="detail-icon">🌂</span><span class="detail-label">降水量</span><span class="detail-value">${formatPrecip(current.PCP)}</span></div>
             <div class="weather-detail-item"><span class="detail-icon">📊</span><span class="detail-label">降水概率</span><span class="detail-value">${current.POP ?? '-'}%</span></div>
         `;
     }
@@ -486,7 +493,7 @@ function updateHourlyWeather(locKey, targetYmd) {
             const time = k.slice(8, 10) + ':00';
             const windDesc = getWindDesc(d.WSD);
             const precipProb = d.POP !== undefined ? d.POP : '0';
-            const precipAmt = (!d.PCP || d.PCP === '강수없음' || d.PCP === '0') ? '0mm' : d.PCP;
+            const precipAmt = formatPrecip(d.PCP);
             let precipText = `💧${precipProb}% (${precipAmt})`;
 
             return `
@@ -645,7 +652,7 @@ function renderAirQuality(locKey, item) {
 
     container.innerHTML = `
         <div class="air-quality-card">
-            <span class="aq-label">미세먼지(PM10)</span>
+            <span class="aq-label">微尘 (PM10)</span>
             <div class="aq-value-row">
                 <span class="aq-value">${item.pm10Value || '--'}</span>
                 <span class="aq-unit">μg/m³</span>
@@ -653,7 +660,7 @@ function renderAirQuality(locKey, item) {
             <span class="aq-status ${pm10.cls}">${pm10.text}</span>
         </div>
         <div class="air-quality-card">
-            <span class="aq-label">초미세먼지(PM2.5)</span>
+            <span class="aq-label">细微尘 (PM2.5)</span>
             <div class="aq-value-row">
                 <span class="aq-value">${item.pm25Value || '--'}</span>
                 <span class="aq-unit">μg/m³</span>
@@ -661,7 +668,7 @@ function renderAirQuality(locKey, item) {
             <span class="aq-status ${pm25.cls}">${pm25.text}</span>
         </div>
         <div class="air-quality-card">
-            <span class="aq-label">오존(O3)</span>
+            <span class="aq-label">臭氧 (O3)</span>
             <div class="aq-value-row">
                 <span class="aq-value">${item.o3Value || '--'}</span>
                 <span class="aq-unit">ppm</span>
@@ -676,7 +683,14 @@ function renderAirQualityError(locKey) {
     const container = document.getElementById(`air-quality-${locKey}`);
     const loc = CONFIG.WEATHER_LOCATIONS[locKey];
     if (container) {
-        container.innerHTML = `<div class="air-quality-error">无法获取[${loc.stationName}]측정소의 대기질 정보입니다.</div>`;
+        container.innerHTML = `
+            <div class="air-quality-error">
+                <p>无法获取 [${loc.stationName}] 观测站的空气质量信息。</p>
+                <div style="font-size:0.75rem; margin-top:10px; color:var(--text-muted); line-height:1.4;">
+                    * 请确认公共数据门户 (data.go.kr) 的 API Key 是否已申请 "ArpltnInforInqireSvc" 服务。<br>
+                    * (API 403 Forbidden: 未经授权的服务)
+                </div>
+            </div>`;
     }
 }
 
