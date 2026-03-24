@@ -314,6 +314,8 @@ async function fetchWeatherData(locKey) {
     const loc = CONFIG.WEATHER_LOCATIONS[locKey];
     if (!loc) return;
 
+    renderWeatherLoading(locKey);
+
     const { baseDate, baseTime } = formatBaseTime(new Date());
     const endpoint = 'https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst';
     const workerUrl = `${CONFIG.PROXY_URL}/api/public-data?endpoint=${encodeURIComponent(endpoint)}&pageNo=1&numOfRows=1000&dataType=JSON&base_date=${baseDate}&base_time=${baseTime}&nx=${loc.nx}&ny=${loc.ny}`;
@@ -364,7 +366,21 @@ function parseAndRenderWeather(locKey, items, midData) {
     const current = grouped[sortedKeys[0]];
     const sky = getSkyInfo(current.PTY, current.SKY);
 
-    // 1. 현재 날씨 업데이트
+    // 1. 현재 날씨 업데이트 (로더 제거 및 구조 생성)
+    const container = document.getElementById(`current-weather-${locKey}`);
+    if (container && (container.querySelector('.weather-loader') || !document.getElementById(`icon-${locKey}`))) {
+        container.innerHTML = `
+            <div class="weather-main">
+                <div class="weather-icon" id="icon-${locKey}"></div>
+                <div class="weather-temp">
+                    <span class="temp-value" id="temp-${locKey}">--</span>°C
+                    <span class="weather-desc" id="desc-${locKey}">--</span>
+                </div>
+                <div class="weather-details" id="details-${locKey}"></div>
+            </div>
+        `;
+    }
+
     const iconEl = document.getElementById(`icon-${locKey}`);
     const tempEl = document.getElementById(`temp-${locKey}`);
     const descEl = document.getElementById(`desc-${locKey}`);
@@ -559,18 +575,31 @@ function updateHourlyWeather(locKey, targetYmd) {
     }
 }
 
+function renderWeatherLoading(locKey) {
+    const container = document.getElementById(`current-weather-${locKey}`);
+    if (container) {
+        container.innerHTML = `
+            <div class="weather-loader">
+                <div class="weather-spinner"></div>
+                <div class="weather-loading-text">정보를 불러오고있습니다</div>
+            </div>
+        `;
+    }
+}
+
 function renderWeatherError(locKey) {
-    const iconEl = document.getElementById(`icon-${locKey}`);
-    const tempEl = document.getElementById(`temp-${locKey}`);
-    const descEl = document.getElementById(`desc-${locKey}`);
-    const detailsEl = document.getElementById(`details-${locKey}`);
+    const container = document.getElementById(`current-weather-${locKey}`);
+    if (container) {
+        container.innerHTML = `
+            <div class="weather-loader" style="color:var(--accent-red);">
+                <div style="font-size:2rem; margin-bottom:10px;">⚠️</div>
+                <div class="weather-loading-text" style="color:var(--accent-red);">天气数据加载失败</div>
+                <p style="font-size:0.75rem; color:var(--text-muted); margin-top:5px;">暂时无法获取实时天气信息，请稍后再试。</p>
+            </div>
+        `;
+    }
     const hourlyEl = document.getElementById(`hourly-${locKey}`);
     const weeklyEl = document.getElementById(`weekly-${locKey}`);
-
-    if (iconEl) iconEl.textContent = '⚠️';
-    if (tempEl) tempEl.textContent = '--';
-    if (descEl) descEl.textContent = '天气数据加载失败';
-    if (detailsEl) detailsEl.innerHTML = '<p style="font-size:0.8rem; color:var(--text-muted); padding:10px;">暂时无法获取实时天气信息，请稍后再试。</p>';
     if (hourlyEl) hourlyEl.innerHTML = '';
     if (weeklyEl) weeklyEl.innerHTML = '';
 }
