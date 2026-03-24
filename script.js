@@ -247,8 +247,12 @@ async function fetchMidTermWeather(loc) {
 
         console.log(`[Weather] 중기예보 시도 (tmFc: ${targetTmFc}, 지역: ${loc.nameKo})`);
         const [landRes, tempRes] = await Promise.all([fetch(landUrl), fetch(tempUrl)]);
+        console.log(`[Weather] 중기예보 응답 상태 (Land: ${landRes.status}, Temp: ${tempRes.status})`);
 
-        if (!landRes.ok || !tempRes.ok) return null;
+        if (!landRes.ok || !tempRes.ok) {
+            console.error('[Weather] 중기예보 HTTP 오류 발생');
+            return null;
+        }
 
         const landJson = await landRes.json();
         const tempJson = await tempRes.json();
@@ -256,8 +260,10 @@ async function fetchMidTermWeather(loc) {
         const landItem = landJson?.response?.body?.items?.item?.[0];
         const tempItem = tempJson?.response?.body?.items?.item?.[0];
 
-        // 하나라도 있으면 반환하도록 수정 (기존에는 둘 다 있어야 했음)
+        // 하나라도 있으면 반환하도록 수정
         if (!landItem && !tempItem) return { fail: true, landJson, tempJson };
+        console.log(`[Weather] 중기예보 로드 성공 (Land fields: ${Object.keys(landItem || {}).length}, Temp fields: ${Object.keys(tempItem || {}).length})`);
+        console.log(`[Weather] TempItem Sample:`, tempItem);
         return { landItem, tempItem };
     };
 
@@ -362,7 +368,7 @@ function parseAndRenderWeather(locKey, items, midData) {
     if (detailsEl) {
         detailsEl.innerHTML = `
             <div class="weather-detail-item"><span class="detail-icon">💨</span><span class="detail-label">风速</span><span class="detail-value">${current.WSD ?? '-'}m/s · ${getWindDesc(current.WSD)}</span></div>
-            <div class="weather-detail-item"><span class="detail-icon">🌂</span><span class="detail-label">降水量</span><span class="detail-value">${current.PCP === '강수없음' ? '无降水' : (current.PCP ?? '-')}</span></div>
+            <div class="weather-detail-item"><span class="detail-icon">🌂</span><span class="detail-label">降水量</span><span class="detail-value">${(!current.PCP || current.PCP === '강수없음' || current.PCP === '0') ? '0mm' : current.PCP}</span></div>
             <div class="weather-detail-item"><span class="detail-icon">📊</span><span class="detail-label">降水概率</span><span class="detail-value">${current.POP ?? '-'}%</span></div>
         `;
     }
@@ -406,21 +412,24 @@ function parseAndRenderWeather(locKey, items, midData) {
                 const s = getSkyInfo(dt.pty, dt.sky);
                 icon = s.icon;
             } else if ((landItem || tempItem) && i >= 3) {
-                const dayIdx = i + 1;
+                const dayIdx = i; // 수정: i + 1 -> i (기상청 중기예보 인덱스는 tmFc 기준 일수와 일치)
                 if (tempItem) {
-                    max = (tempItem[`taMax${dayIdx}`] ?? '--') + '°';
-                    min = (tempItem[`taMin${dayIdx}`] ?? '--') + '°';
+                    // 대소문자 모두 대응 (taMax3, tamax3)
+                    max = (tempItem[`taMax${dayIdx}`] ?? tempItem[`tamax${dayIdx}`] ?? '--') + '°';
+                    min = (tempItem[`taMin${dayIdx}`] ?? tempItem[`tamin${dayIdx}`] ?? '--') + '°';
                 }
 
                 if (landItem) {
                     const amPm = todayDate.getHours() < 12 ? 'Am' : 'Pm';
                     if (i <= 6) {
-                        precip = landItem[`rnSt${dayIdx}${amPm}`] ?? landItem[`rnSt${dayIdx}`] ?? 0;
-                        const s2 = translateMidWf(landItem[`wf${dayIdx}${amPm}`] || landItem[`wf${dayIdx}`] || '');
+                        precip = landItem[`rnSt${dayIdx}${amPm}`] ?? landItem[`rnst${dayIdx}${amPm.toLowerCase()}`] ?? landItem[`rnSt${dayIdx}`] ?? landItem[`rnst${dayIdx}`] ?? 0;
+                        const wfVal = landItem[`wf${dayIdx}${amPm}`] || landItem[`wf${dayIdx}${amPm.toLowerCase()}`] || landItem[`wf${dayIdx}`] || '';
+                        const s2 = translateMidWf(wfVal);
                         icon = s2.icon;
                     } else {
-                        precip = landItem[`rnSt${dayIdx}`] ?? 0;
-                        const s2 = translateMidWf(landItem[`wf${dayIdx}`] || '');
+                        precip = landItem[`rnSt${dayIdx}`] ?? landItem[`rnst${dayIdx}`] ?? 0;
+                        const wfVal = landItem[`wf${dayIdx}`] || '';
+                        const s2 = translateMidWf(wfVal);
                         icon = s2.icon;
                     }
                 }
@@ -434,7 +443,7 @@ function parseAndRenderWeather(locKey, items, midData) {
                     <div class="weekly-temps">
                         <span class="temp-high">${max}</span>/<span class="temp-low">${min}</span>
                     </div>
-                    <div class="weekly-precip ${precip >= 50 ? 'precip-blue' : ''}">💧${precip}%</div>
+                    <div class="weekly-precip ${precip >= 50 ? 'precip-blue' : ''}">💧${precip}% (0mm)</div>
                 </div>
             `;
         }).join('');
@@ -476,13 +485,9 @@ function updateHourlyWeather(locKey, targetYmd) {
             const s = getSkyInfo(d.PTY, d.SKY);
             const time = k.slice(8, 10) + ':00';
             const windDesc = getWindDesc(d.WSD);
-            const precipProb = d.POP !== undefined ? d.POP : '';
-            const precipAmt = d.PCP && d.PCP !== '강수없음' ? d.PCP : '';
-            let precipText = '';
-            if (precipProb !== '' && precipAmt) precipText = `💧${precipProb}% (${precipAmt})`;
-            else if (precipProb !== '') precipText = `💧${precipProb}%`;
-            else if (precipAmt) precipText = `🌂${precipAmt}`;
-            else precipText = `💧0%`;
+            const precipProb = d.POP !== undefined ? d.POP : '0';
+            const precipAmt = (!d.PCP || d.PCP === '강수없음' || d.PCP === '0') ? '0mm' : d.PCP;
+            let precipText = `💧${precipProb}% (${precipAmt})`;
 
             return `
                 <div class="hourly-item">
@@ -503,19 +508,19 @@ function updateHourlyWeather(locKey, targetYmd) {
         const d1 = new Date(targetYmd.slice(0, 4), targetYmd.slice(4, 6) - 1, targetYmd.slice(6, 8));
         const d2 = new Date(todayYmd.slice(0, 4), todayYmd.slice(4, 6) - 1, todayYmd.slice(6, 8));
         const diffDays = Math.round((d1 - d2) / (1000 * 60 * 60 * 24));
-        const dayIdx = diffDays + 1;
+        const dayIdx = diffDays; // 수정: diffDays + 1 -> diffDays
 
         const { landItem, tempItem } = state.midData || {};
-        if ((landItem || tempItem) && dayIdx >= 4 && dayIdx <= 11) {
+        if ((landItem || tempItem) && dayIdx >= 3 && dayIdx <= 10) {
             // 오전/오후 요약 데이터 생성
             let summaries = [];
             if (landItem) {
                 if (dayIdx <= 7) {
                     // 3~7일째는 오전/오후 데이터가 있음
-                    const amWf = landItem[`wf${dayIdx}Am`];
-                    const pmWf = landItem[`wf${dayIdx}Pm`];
-                    const amPr = landItem[`rnSt${dayIdx}Am`];
-                    const pmPr = landItem[`rnSt${dayIdx}Pm`];
+                    const amWf = landItem[`wf${dayIdx}Am`] || landItem[`wf${dayIdx}am`] || landItem[`wf${dayIdx}`];
+                    const pmWf = landItem[`wf${dayIdx}Pm`] || landItem[`wf${dayIdx}pm`] || landItem[`wf${dayIdx}`];
+                    const amPr = landItem[`rnSt${dayIdx}Am`] || landItem[`rnst${dayIdx}am`] || landItem[`rnSt${dayIdx}`] || landItem[`rnst${dayIdx}`];
+                    const pmPr = landItem[`rnSt${dayIdx}Pm`] || landItem[`rnst${dayIdx}pm`] || landItem[`rnSt${dayIdx}`] || landItem[`rnst${dayIdx}`];
                     summaries = [
                         { time: '上午', wf: amWf, pr: amPr },
                         { time: '下午', wf: pmWf, pr: pmPr }
@@ -523,7 +528,7 @@ function updateHourlyWeather(locKey, targetYmd) {
                 } else {
                     // 8~10일째는 하루 단위 데이터만 있음
                     summaries = [
-                        { time: '全天', wf: landItem[`wf${dayIdx}`], pr: landItem[`rnSt${dayIdx}`] }
+                        { time: '全天', wf: landItem[`wf${dayIdx}`] || landItem[`wf${dayIdx}`.toLowerCase()], pr: landItem[`rnSt${dayIdx}`] || landItem[`rnst${dayIdx}`] }
                     ];
                 }
             } else {
@@ -537,7 +542,7 @@ function updateHourlyWeather(locKey, targetYmd) {
                         <div class="hourly-time">${s.time}</div>
                         <div class="hourly-icon" style="font-size: 2.5rem;">${sky.icon}</div>
                         <div class="hourly-temp">${sky.desc || '暂无数据'}</div>
-                        <div class="hourly-precip ${s.pr >= 50 ? 'precip-blue' : ''}">降水概率: ${s.pr}%</div>
+                        <div class="hourly-precip ${s.pr >= 50 ? 'precip-blue' : ''}">降水概率: ${s.pr}% (0mm)</div>
                     </div>
                 `;
             }).join('');
