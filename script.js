@@ -676,32 +676,39 @@ function renderAirQuality(locKey, item) {
     if (!container) return;
 
     const metrics = [
-        { key: 'pm10', title: '微尘 (PM10)', val: item.pm10Value, unit: 'μg/m³' },
-        { key: 'pm25', title: '细微尘 (PM2.5)', val: item.pm25Value, unit: 'μg/m³' },
-        { key: 'o3', title: '臭氧 (O3)', val: item.o3Value, unit: 'ppm' }
+        { key: 'pm10', title: 'PM10', val: item.pm10Value, unit: 'μg/m³' },
+        { key: 'pm25', title: 'PM2.5', val: item.pm25Value, unit: 'μg/m³' },
+        { key: 'o3', title: 'O3', val: item.o3Value, unit: 'ppm' }
     ];
+
+    const circumference = 2 * Math.PI * 30; // Radius 30 for 70x70 box
 
     let html = '';
     metrics.forEach(m => {
         const info = getAirQualityInfo(m.val, m.key);
+        const offset = circumference * (1 - info.percent / 100);
         html += `
             <div class="air-quality-item">
-                <div class="air-item-header">
-                    <span class="air-label">${m.title}</span>
-                    <span class="air-lv-text air-lv${info.level}">${info.text}</span>
+                <div class="air-label">${m.title}</div>
+                <div class="air-svg-box">
+                    <svg width="70" height="70">
+                        <circle class="air-circle-bg" cx="35" cy="35" r="30"></circle>
+                        <circle class="air-circle-bar air-lv${info.level}" 
+                                cx="35" cy="35" r="30"
+                                stroke-dasharray="${circumference}" 
+                                stroke-dashoffset="${offset}"></circle>
+                    </svg>
+                    <div class="air-circle-status air-lv${info.level}">${info.text}</div>
                 </div>
                 <div class="air-lvv-wrap air-lv${info.level}">
                     <span class="air-lvv">${m.val || '--'}</span>
                     <small class="unit">${m.unit}</small>
                 </div>
-                <div class="air-gauge-bg">
-                    <div class="air-gauge-bar air-bg-lv${info.level}" style="width: ${info.percent}%"></div>
-                </div>
             </div>
         `;
     });
 
-    html += `<div class="air-quality-info" style="grid-column: 1 / -1; margin-top: 5px; text-align:center;">数据基准: ${item.dataTime} (${CONFIG.WEATHER_LOCATIONS[locKey].stationName}测量站)</div>`;
+    html += `<div class="air-quality-info" style="grid-column: 1 / -1; margin-top: 5px; text-align:center; font-size:0.75rem; color:var(--text-muted);">数据基准: ${item.dataTime} (${CONFIG.WEATHER_LOCATIONS[locKey].stationName}测量站)</div>`;
     container.innerHTML = html;
 }
 

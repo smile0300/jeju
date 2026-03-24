@@ -1,4 +1,4 @@
-/* ==================== Reset & Base ==================== */
+﻿/* ==================== Reset & Base ==================== */
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
@@ -45,7 +45,7 @@ body {
     min-height: 100vh;
 }
 
-/* ?�션 ?�환 ?�어 */
+/* ?占쎌뀡 ?占쏀솚 ?占쎌뼱 */
 .app-section {
     display: none;
     animation: slideIn 0.3s ease-out;
@@ -75,7 +75,7 @@ body {
     justify-content: center;
     padding: 0 16px;
     z-index: 2000;
-    position: relative; /* ?�식 absolute ?�렬 기�? */
+    position: relative; /* ?占쎌떇 absolute ?占쎈젹 湲곤옙? */
     box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     border-bottom: 1px solid var(--border-light);
 }
@@ -86,7 +86,7 @@ body {
 
 .app-bar .back-btn {
     position: absolute;
-    left: 16px; /* 좌측 고정 */
+    left: 16px; /* 醫뚯륫 怨좎젙 */
     width: 40px;
     height: 40px;
     display: flex;
@@ -111,7 +111,7 @@ body {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    pointer-events: none; /* ?�에 ?�는 ?�소 ?�릭 ?�용 */
+    pointer-events: none; /* ?占쎌뿉 ?占쎈뒗 ?占쎌냼 ?占쎈┃ ?占쎌슜 */
 }
 
 /* ==================== Hero ==================== */
@@ -214,7 +214,7 @@ body {
     border: 1px solid rgba(255,255,255,0.8);
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    min-height: 110px; /* 모든 ??�� ?�기 균일??*/
+    min-height: 110px; /* 紐⑤뱺 ??占쏙옙 ?占쎄린 洹좎씪??*/
 }
 
 .home-item:active {
@@ -328,13 +328,13 @@ body {
     width: 100%;
 }
 .location-tab {
-    flex: 1; /* 가�?공간 균등 배분 */
+    flex: 1; /* 媛占?怨듦컙 洹좊벑 諛곕텇 */
     background: var(--bg-card); border: 2px solid var(--border-light);
     padding: 12px 4px; border-radius: var(--radius-md); cursor: pointer;
     transition: all var(--transition-normal);
     display: flex; flex-direction: column; align-items: center; gap: 4px;
     box-shadow: var(--shadow-sm);
-    min-width: 0; /* flex ?�식??최소 ?�비 ?�제 */
+    min-width: 0; /* flex ?占쎌떇??理쒖냼 ?占쎈퉬 ?占쎌젣 */
 }
 .location-tab:hover { background: var(--bg-card-hover); border-color: var(--accent-purple); transform: translateY(-3px); }
 .location-tab.active { background: var(--primary-gradient); border-color: transparent; box-shadow: var(--shadow-lg); }
@@ -468,7 +468,7 @@ body {
     transform: translateY(-2px);
 }
 .weekly-item.active::after {
-    content: '▼';
+    content: '??;
     position: absolute;
     bottom: -15px;
     left: 50%;
@@ -505,7 +505,7 @@ body {
 .status-content h3 { font-size: 1.6rem; margin-bottom: 4px; }
 .status-time { font-size: 0.9rem; color: var(--text-muted); }
 
-.trails-grid { display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: var(--spacing-lg); } /* 모바??1??강제 */
+.trails-grid { display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: var(--spacing-lg); } /* 紐⑤컮??1??媛뺤젣 */
 .trail-card {
     background: var(--bg-card); border-radius: var(--radius-md);
     padding: 10px; border: 1px solid var(--border-light);
@@ -560,11 +560,11 @@ body {
 }
 .flight-header { background: var(--bg-card-hover) !important; font-weight: 700; color: var(--text-primary); border-top: 1px solid var(--border-light); }
 .flight-col { flex: 1; text-align: center; min-width: 0; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; }
-.flight-col:nth-child(1) { flex: 1.1; font-weight: 700; } /* ??��?�명 */
-.flight-col:nth-child(2) { flex: 1.3; font-size: 0.75rem; word-break: break-all; } /* ??��?�명 복구 */
-.flight-col:nth-child(3) { flex: 1.2; word-break: break-all; } /* 출발/목적지 */
-.flight-col:nth-child(4) { flex: 1.5; } /* ?�간 */
-.flight-col:nth-child(5) { flex: 1.1; } /* ?�태 */
+.flight-col:nth-child(1) { flex: 1.1; font-weight: 700; } /* ??占쏙옙?占쎈챸 */
+.flight-col:nth-child(2) { flex: 1.3; font-size: 0.75rem; word-break: break-all; } /* ??占쏙옙?占쎈챸 蹂듦뎄 */
+.flight-col:nth-child(3) { flex: 1.2; word-break: break-all; } /* 異쒕컻/紐⑹쟻吏 */
+.flight-col:nth-child(4) { flex: 1.5; } /* ?占쎄컙 */
+.flight-col:nth-child(5) { flex: 1.1; } /* ?占쏀깭 */
 
 .flight-row:hover:not(.flight-header) { background: var(--bg-card-hover); }
 .status-badge { padding: 4px 8px; border-radius: var(--radius-sm); font-size: 0.72rem; font-weight: 600; white-space: nowrap; }
@@ -804,12 +804,12 @@ body {
     background: #f1f5f9;
     padding: 6px;
     border-radius: 14px;
-    width: 100%; /* ?�비 100%�??�정 */
+    width: 100%; /* ?占쎈퉬 100%占??占쎌젙 */
     margin-top: 10px;
 }
 
 .view-toggle-btn {
-    flex: 1; /* 5:5 비율???�해 ?�일??비중 ?�당 */
+    flex: 1; /* 5:5 鍮꾩쑉???占쏀빐 ?占쎌씪??鍮꾩쨷 ?占쎈떦 */
     border: none;
     background: transparent;
     padding: 10px;
@@ -915,7 +915,7 @@ body {
 
 .lost-goods-grid {
     display: none;
-    grid-template-columns: repeat(3, 1fr); /* 3??고정 */
+    grid-template-columns: repeat(3, 1fr); /* 3??怨좎젙 */
     gap: 10px;
     margin-top: 20px;
 }
@@ -982,7 +982,7 @@ body {
 
 /* Excel Style Table */
 .lost-table-container {
-    display: none; /* 기본 ?��? */
+    display: none; /* 湲곕낯 ?占쏙옙? */
     width: 100%;
     overflow-x: auto;
     background: white;
@@ -1092,7 +1092,7 @@ body {
     color: var(--text-muted);
 }
 
-/* ==================== Lost & Found 고도???�터 ==================== */
+/* ==================== Lost & Found 怨좊룄???占쏀꽣 ==================== */
 .search-filter-box {
     background: rgba(255, 255, 255, 0.4);
     backdrop-filter: blur(12px);
@@ -1207,7 +1207,7 @@ body {
     width: 95%; 
     max-width: 1000px; 
     position: relative; 
-    padding: 2px; /* 비디?��? �?차게 */
+    padding: 2px; /* 鍮꾨뵒?占쏙옙? 占?李④쾶 */
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     animation: modalScaleUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     overflow: hidden;
@@ -1254,7 +1254,7 @@ body {
 /* ==================== Responsive ==================== */
 @media (max-width: 1024px) { .container { padding: var(--spacing-md); } }
 
-/* ==================== ?�블�?(769px ~ 1024px) ==================== */
+/* ==================== ?占쎈툝占?(769px ~ 1024px) ==================== */
 @media screen and (max-width: 1024px) and (min-width: 769px) {
     .cctv-grid { gap: 12px; }
 }
@@ -1413,7 +1413,7 @@ body {
 }
 
 
-/* ==================== Festival & Events (축제) ==================== */
+/* ==================== Festival & Events (異뺤젣) ==================== */
 .festival-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -1513,13 +1513,13 @@ body {
 /* ===== Lost & Found Table Optimization ===== */
 .lost-table th, .lost-table td {
     padding: 12px 10px;
-    white-space: nowrap; /* 줄바�?방�? */
+    white-space: nowrap; /* 以꾨컮占?諛⑼옙? */
 }
 
 .lost-table td {
     overflow: hidden;
     text-overflow: ellipsis; 
-    max-width: 200px; /* ?�절???�비 ?��? */
+    max-width: 200px; /* ?占쎌젅???占쎈퉬 ?占쏙옙? */
 }
 
 #wechat-qr-container {
@@ -1652,10 +1652,10 @@ body {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.badge-success { background-color: #059669; } /* 正常/已出??已到�?*/
-.badge-warning { background-color: #f59e0b; } /* 延�? */
-.badge-danger  { background-color: #dc2626; } /* ?�消/결항 */
-.badge-info    { background-color: #2563eb; } /* ?�他 */
+.badge-success { background-color: #059669; } /* 閭ｅ만/藥꿨눣??藥꿨댆占?*/
+.badge-warning { background-color: #f59e0b; } /* 兩띰옙? */
+.badge-danger  { background-color: #dc2626; } /* ?占썸텋/寃고빆 */
+.badge-info    { background-color: #2563eb; } /* ?占썰퍟 */
 
 /* ==================== Flight Tabs Visibility ==================== */
 .flight-content {
@@ -1945,70 +1945,81 @@ body {
     background: rgba(255, 255, 255, 0.1);
     color: var(--text-primary);
 }
-/* Air Quality Visual UI (v6.7) */
+
+/* Air Quality Circular UI (v6.8) */
 .air-quality-grid {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 12px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
     margin-top: 15px;
 }
 .air-quality-item {
     background: var(--bg-card);
-    border-radius: var(--radius-md);
-    padding: 16px;
+    border-radius: var(--radius-lg);
+    padding: 12px 4px;
     border: 1px solid var(--border-light);
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    box-shadow: var(--shadow-sm);
-}
-.air-item-header {
-    display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: 8px;
+    box-shadow: var(--shadow-sm);
+    text-align: center;
+}
+.air-svg-box {
+    position: relative;
+    width: 70px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.air-svg-box svg {
+    transform: rotate(-90deg);
+}
+.air-circle-bg {
+    fill: none;
+    stroke: #e2e8f0;
+    stroke-width: 5.5;
+}
+.air-circle-bar {
+    fill: none;
+    stroke-width: 5.5;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.air-circle-status {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.9rem;
+    font-weight: 800;
+    margin: 0;
+    line-height: 1;
 }
 .air-label {
-    font-size: 0.9rem;
+    font-size: 0.72rem;
     font-weight: 700;
-    color: var(--text-secondary);
-}
-.air-lv-text {
-    font-size: 0.8rem;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 4px;
+    color: var(--text-muted);
+    white-space: nowrap;
 }
 .air-lvv-wrap {
     display: flex;
     align-items: baseline;
-    gap: 4px;
+    gap: 1px;
+    margin-top: -2px;
 }
 .air-lvv {
-    font-size: 1.8rem;
+    font-size: 1.05rem;
     font-weight: 800;
     line-height: 1;
 }
 .air-lvv-wrap .unit {
-    font-size: 0.8rem;
+    font-size: 0.55rem;
     color: var(--text-muted);
-    font-weight: 500;
 }
-/* Level Colors & Gauges */
-.air-gauge-bg {
-    width: 100%;
-    height: 6px;
-    background: #e2e8f0;
-    border-radius: 3px;
-    overflow: hidden;
-    position: relative;
-    margin-top: 4px;
-}
-.air-gauge-bar {
-    height: 100%;
-    border-radius: 3px;
-    transition: width 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-/* Level mapping (Jeju patterns) */
+
+/* Level mapping (Jeju patterns) - v6.8 유지 */
 .air-lv1 { color: #2563eb; } .air-bg-lv1 { background: #2563eb; } .air-lv-text.air-lv1 { background: rgba(37, 99, 235, 0.1); }
 .air-lv2 { color: #059669; } .air-bg-lv2 { background: #059669; } .air-lv-text.air-lv2 { background: rgba(5, 150, 105, 0.1); }
 .air-lv3 { color: #f59e0b; } .air-bg-lv3 { background: #f59e0b; } .air-lv-text.air-lv3 { background: rgba(245, 158, 11, 0.1); }
