@@ -390,7 +390,7 @@ function parseAndRenderWeather(locKey, items, midData) {
     if (descEl) descEl.textContent = sky.desc;
     if (detailsEl) {
         detailsEl.innerHTML = `
-            <div class="weather-detail-item"><span class="detail-icon">💨</span><span class="detail-label">风속</span><span class="detail-value">${current.WSD ?? '-'}m/s · ${getWindDesc(current.WSD)}</span></div>
+            <div class="weather-detail-item"><span class="detail-icon">💨</span><span class="detail-label">风速</span><span class="detail-value">${current.WSD ?? '-'}m/s · ${getWindDesc(current.WSD)}</span></div>
             <div class="weather-detail-item"><span class="detail-icon">🌂</span><span class="detail-label">降水量</span><span class="detail-value">${formatPrecip(current.PCP)}</span></div>
             <div class="weather-detail-item"><span class="detail-icon">📊</span><span class="detail-label">降水概率</span><span class="detail-value">${current.POP ?? '-'}%</span></div>
         `;
@@ -708,7 +708,6 @@ function renderAirQuality(locKey, item) {
         `;
     });
 
-    html += `<div class="air-quality-info" style="grid-column: 1 / -1; margin-top: 5px; text-align:center; font-size:0.75rem; color:var(--text-muted);">数据基准: ${item.dataTime} (${CONFIG.WEATHER_LOCATIONS[locKey].stationName}测量站)</div>`;
     container.innerHTML = html;
 }
 
