@@ -648,64 +648,61 @@ async function fetchAirQuality(locKey) {
 
 function getAirQualityInfo(val, type) {
     const v = parseFloat(val);
-    if (isNaN(v)) return { label: '무시', cls: 'normal', text: '暂无' };
+    if (isNaN(v)) return { level: 2, percent: 50, text: '良' };
+
+    let level = 2, percent = 50, text = '良';
 
     if (type === 'pm10') {
-        if (v <= 30) return { label: '좋음', cls: 'good', text: '优' };
-        if (v <= 80) return { label: '보통', cls: 'normal', text: '良' };
-        if (v <= 150) return { label: '나쁨', cls: 'bad', text: '轻度污染' };
-        return { label: '매우나쁨', cls: 'very-bad', text: '重度污染' };
+        if (v <= 30) { level = 1; text = '优'; percent = (v / 30) * 25; }
+        else if (v <= 80) { level = 2; text = '良'; percent = 25 + ((v - 30) / 50) * 25; }
+        else if (v <= 150) { level = 3; text = '轻度'; percent = 50 + ((v - 80) / 70) * 25; }
+        else { level = 4; text = '重度'; percent = 75 + Math.min(((v - 150) / 150) * 25, 25); }
+    } else if (type === 'pm25') {
+        if (v <= 15) { level = 1; text = '优'; percent = (v / 15) * 25; }
+        else if (v <= 35) { level = 2; text = '良'; percent = 25 + ((v - 15) / 20) * 25; }
+        else if (v <= 75) { level = 3; text = '轻度'; percent = 50 + ((v - 35) / 40) * 25; }
+        else { level = 4; text = '重度'; percent = 75 + Math.min(((v - 75) / 75) * 25, 25); }
+    } else if (type === 'o3') {
+        if (v <= 0.03) { level = 1; text = '优'; percent = (v / 0.03) * 25; }
+        else if (v <= 0.09) { level = 2; text = '良'; percent = 25 + ((v - 0.03) / 0.06) * 25; }
+        else if (v <= 0.15) { level = 3; text = '轻度'; percent = 50 + ((v - 0.09) / 0.06) * 25; }
+        else { level = 4; text = '重度'; percent = 75 + Math.min(((v - 0.15) / 0.15) * 25, 25); }
     }
-    if (type === 'pm25') {
-        if (v <= 15) return { label: '좋음', cls: 'good', text: '优' };
-        if (v <= 35) return { label: '보통', cls: 'normal', text: '良' };
-        if (v <= 75) return { label: '나쁨', cls: 'bad', text: '轻度污染' };
-        return { label: '매우나쁨', cls: 'very-bad', text: '重度污染' };
-    }
-    if (type === 'o3') {
-        if (v <= 0.03) return { label: '좋음', cls: 'good', text: '优' };
-        if (v <= 0.09) return { label: '보통', cls: 'normal', text: '良' };
-        if (v <= 0.15) return { label: '나쁨', cls: 'bad', text: '轻度污染' };
-        return { label: '매우나쁨', cls: 'very-bad', text: '重度污染' };
-    }
-    return { label: '보통', cls: 'normal', text: '良' };
+    return { level, percent, text };
 }
 
 function renderAirQuality(locKey, item) {
     const container = document.getElementById(`air-quality-${locKey}`);
     if (!container) return;
 
-    const pm10 = getAirQualityInfo(item.pm10Value, 'pm10');
-    const pm25 = getAirQualityInfo(item.pm25Value, 'pm25');
-    const o3 = getAirQualityInfo(item.o3Value, 'o3');
+    const metrics = [
+        { key: 'pm10', title: '微尘 (PM10)', val: item.pm10Value, unit: 'μg/m³' },
+        { key: 'pm25', title: '细微尘 (PM2.5)', val: item.pm25Value, unit: 'μg/m³' },
+        { key: 'o3', title: '臭氧 (O3)', val: item.o3Value, unit: 'ppm' }
+    ];
 
-    container.innerHTML = `
-        <div class="air-quality-card">
-            <span class="aq-label">微尘 (PM10)</span>
-            <div class="aq-value-row">
-                <span class="aq-value">${item.pm10Value || '--'}</span>
-                <span class="aq-unit">μg/m³</span>
+    let html = '';
+    metrics.forEach(m => {
+        const info = getAirQualityInfo(m.val, m.key);
+        html += `
+            <div class="air-quality-item">
+                <div class="air-item-header">
+                    <span class="air-label">${m.title}</span>
+                    <span class="air-lv-text air-lv${info.level}">${info.text}</span>
+                </div>
+                <div class="air-lvv-wrap air-lv${info.level}">
+                    <span class="air-lvv">${m.val || '--'}</span>
+                    <small class="unit">${m.unit}</small>
+                </div>
+                <div class="air-gauge-bg">
+                    <div class="air-gauge-bar air-bg-lv${info.level}" style="width: ${info.percent}%"></div>
+                </div>
             </div>
-            <span class="aq-status ${pm10.cls}">${pm10.text}</span>
-        </div>
-        <div class="air-quality-card">
-            <span class="aq-label">细微尘 (PM2.5)</span>
-            <div class="aq-value-row">
-                <span class="aq-value">${item.pm25Value || '--'}</span>
-                <span class="aq-unit">μg/m³</span>
-            </div>
-            <span class="aq-status ${pm25.cls}">${pm25.text}</span>
-        </div>
-        <div class="air-quality-card">
-            <span class="aq-label">臭氧 (O3)</span>
-            <div class="aq-value-row">
-                <span class="aq-value">${item.o3Value || '--'}</span>
-                <span class="aq-unit">ppm</span>
-            </div>
-            <span class="aq-status ${o3.cls}">${o3.text}</span>
-        </div>
-        <div class="air-quality-info">数据基准: ${item.dataTime} (${CONFIG.WEATHER_LOCATIONS[locKey].stationName}测量站)</div>
-    `;
+        `;
+    });
+
+    html += `<div class="air-quality-info" style="grid-column: 1 / -1; margin-top: 5px; text-align:center;">数据基准: ${item.dataTime} (${CONFIG.WEATHER_LOCATIONS[locKey].stationName}测量站)</div>`;
+    container.innerHTML = html;
 }
 
 function renderAirQualityError(locKey) {

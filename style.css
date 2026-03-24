@@ -1945,3 +1945,71 @@ body {
     background: rgba(255, 255, 255, 0.1);
     color: var(--text-primary);
 }
+/* Air Quality Visual UI (v6.7) */
+.air-quality-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-top: 15px;
+}
+.air-quality-item {
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    border: 1px solid var(--border-light);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-shadow: var(--shadow-sm);
+}
+.air-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.air-label {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+.air-lv-text {
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+.air-lvv-wrap {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+}
+.air-lvv {
+    font-size: 1.8rem;
+    font-weight: 800;
+    line-height: 1;
+}
+.air-lvv-wrap .unit {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+/* Level Colors & Gauges */
+.air-gauge-bg {
+    width: 100%;
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+    margin-top: 4px;
+}
+.air-gauge-bar {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+/* Level mapping (Jeju patterns) */
+.air-lv1 { color: #2563eb; } .air-bg-lv1 { background: #2563eb; } .air-lv-text.air-lv1 { background: rgba(37, 99, 235, 0.1); }
+.air-lv2 { color: #059669; } .air-bg-lv2 { background: #059669; } .air-lv-text.air-lv2 { background: rgba(5, 150, 105, 0.1); }
+.air-lv3 { color: #f59e0b; } .air-bg-lv3 { background: #f59e0b; } .air-lv-text.air-lv3 { background: rgba(245, 158, 11, 0.1); }
+.air-lv4 { color: #dc2626; } .air-bg-lv4 { background: #dc2626; } .air-lv-text.air-lv4 { background: rgba(220, 38, 38, 0.1); }
