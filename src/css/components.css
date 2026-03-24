@@ -1,0 +1,139 @@
+/* ==================== Tabs & Toggle ==================== */
+.view-toggle-container {
+    display: flex;
+    gap: 8px;
+    background: #f1f5f9;
+    padding: 6px;
+    border-radius: 14px;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.view-toggle-btn {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.view-toggle-btn.active {
+    background: white;
+    color: var(--accent-blue);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+}
+
+/* ==================== Badges ==================== */
+.badge {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: white;
+    display: inline-block;
+    min-width: 65px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.badge-success { background-color: #059669; }
+.badge-warning { background-color: #f59e0b; }
+.badge-danger  { background-color: #dc2626; }
+.badge-info    { background-color: #2563eb; }
+
+.status-badge {
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    font-size: 0.72rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.status-badge.status-ontime { background: var(--success-gradient); color: white; }
+.status-badge.status-delayed { background: var(--warning-gradient); color: white; }
+.status-badge.status-cancelled { background: var(--danger-gradient); color: white; }
+.status-badge.status-landed, .status-badge.status-departed { background: var(--accent-gradient); color: white; }
+.status-badge.status-boarding { background: var(--primary-gradient); color: white; }
+
+/* ==================== Modals ==================== */
+.modal-overlay { 
+    position: fixed; 
+    inset: 0; 
+    background: rgba(0,0,0,0.6); 
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 9999; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-content { 
+    background: #000; 
+    border-radius: var(--radius-xl); 
+    width: 95%; 
+    max-width: 1000px; 
+    position: relative; 
+    padding: 2px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    animation: modalScaleUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+@keyframes modalScaleUp {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.modal-close { 
+    position: absolute; 
+    top: 15px; 
+    right: 15px; 
+    background: rgba(255,255,255,0.2); 
+    backdrop-filter: blur(4px);
+    border: none; 
+    color: white; 
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 1.2rem; 
+    cursor: pointer; 
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.modal-close:hover {
+    background: rgba(255,255,255,0.3);
+    transform: rotate(90deg);
+}
+
+/* ==================== Special Feature Modals (White Background) ==================== */
+#feature-request-modal .modal-content,
+#lost-report-modal .modal-content,
+#lost-detail-modal .modal-content,
+#wechat-qr-modal .modal-content {
+    background: white;
+    color: var(--text-primary);
+    max-width: 500px;
+}
+
+#feature-request-modal .modal-close,
+#lost-report-modal .modal-close,
+#lost-detail-modal .modal-close,
+#wechat-qr-modal .modal-close {
+    color: var(--text-primary);
+    background: rgba(0,0,0,0.05);
+}

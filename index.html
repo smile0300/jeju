@@ -14,7 +14,32 @@
     <!-- End Google Tag Manager -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css?v=7.5">
+    <link rel="stylesheet" href="src/css/base.css">
+    <link rel="stylesheet" href="src/css/layout.css">
+    <link rel="stylesheet" href="src/css/components.css">
+    <link rel="stylesheet" href="src/css/sections.css">
+    <script>
+        // Global fallback stubs to prevent ReferenceError before modules load
+        window.showSection = window.showSection || (() => {});
+        window.openCctvModalById = window.openCctvModalById || (() => {});
+        window.switchWeatherLocation = window.switchWeatherLocation || (() => {});
+        window.switchFlightTab = window.switchFlightTab || (() => {});
+        window.switchLostView = window.switchLostView || (() => {});
+        window.selectFestivalMonth = window.selectFestivalMonth || (() => {});
+        window.openFeatureModal = window.openFeatureModal || (() => {});
+        window.closeFeatureModal = window.closeFeatureModal || (() => {});
+        window.submitFeatureRequest = window.submitFeatureRequest || (() => {});
+        window.openLostReportModal = window.openLostReportModal || (() => {});
+        window.closeLostReportModal = window.closeLostReportModal || (() => {});
+        window.submitLostReport = window.submitLostReport || (() => {});
+        window.fetchFoundGoodsManual = window.fetchFoundGoodsManual || (() => {});
+        window.openWechatQR = window.openWechatQR || (() => {});
+        window.closeWechatQR = window.closeWechatQR || (() => {});
+        window.copyWechatId = window.copyWechatId || (() => {});
+        window.closeCctvModal = window.closeCctvModal || (() => {});
+        window.closeLostDetailModal = window.closeLostDetailModal || (() => {});
+        window.handleLostImageChange = window.handleLostImageChange || (() => {});
+    </script>
 </head>
 
 <body>
@@ -27,10 +52,8 @@
     <!-- ===== Home Section ===== -->
     <section id="home" class="app-section active">
         <div class="home-screen">
-            <div
-                style="text-align: center; padding: 20px 0 10px; color: #3b82f6; font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em;">
-                测试模式</div>
             <div class="home-welcome">
+                <h1>测试模式</h1>
                 <p><strong>请提出您在济州岛旅行中的不便之处！</strong></p>
                 <button class="feature-request-btn" onclick="openFeatureModal()">💡 提交建议 / 意见反馈</button>
             </div>
@@ -181,7 +204,7 @@
                     <div class="current-weather" id="current-weather-udo">
                         <div class="weather-loader">
                             <div class="weather-spinner"></div>
-                            <div class="weather-loading-text">정보를 불러오고있습니다</div>
+                            <div class="weather-loading-text">正在加载信息...</div>
                         </div>
                     </div>
                     <h3 class="subsection-title">未来10天长期预报 (可选日期)</h3>
@@ -310,7 +333,6 @@
                             <input type="date" id="lost-date" class="date-input" style="flex:1;">
                             <script>
                                 (function () {
-                                    // 현재 한국 시간(KST) 기준 어제 날짜 계산
                                     const now = new Date();
                                     const kstTime = new Date(now.getTime() + (9 * 60 * 60 * 1000));
                                     const yesterday = new Date(kstTime);
@@ -336,7 +358,7 @@
                             <span class="btn-icon">📝</span> 找不到我的物品？在此登记报失
                         </button>
                     </div>
-                    <div id="lost-result-count" class="lost-result-count"></div>
+                    <div id="lost-result-count" class="lost-result-count">共查询到 <strong>0</strong> 件丢失物品。</div>
                     <div class="view-toggle-container">
                         <button id="btn-view-card" class="view-toggle-btn active"
                             onclick="switchLostView('card')">卡片模式</button>
@@ -467,10 +489,10 @@
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>📸 物品照片 (如有)</label>
+                        <label>选择文件</label>
                         <input type="file" id="lost-report-photo" accept="image/*"
                             onchange="handleLostImageChange(event)">
-                        <div id="lost-report-photo-preview" class="photo-preview"></div>
+                        <div id="lost-report-photo-preview" class="photo-preview" style="display: none;"></div>
                     </div>
                     <div class="form-group">
                         <label>💬 您的微信 ID (必填)</label>
@@ -485,7 +507,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="assets/curated_festivals.js"></script>
-    <script src="script.js?v=7.5" charset="UTF-8"></script>
+    <script type="module" src="src/js/main.js"></script>
 </body>
 
 </html>
