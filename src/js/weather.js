@@ -341,7 +341,7 @@ export function renderWeatherError(locKey) {
             <div class="weather-loader" style="color:var(--accent-red);">
                 <div style="font-size:2rem; margin-bottom:10px;">⚠️</div>
                 <div class="weather-loading-text" style="color:var(--accent-red);">天气数据加载失败</div>
-                <p style="font-size:0.75rem; color:var(--text-muted); margin-top:5px;">暂时无法获取实时天气 information，请稍后再试。</p>
+                <p style="font-size:0.75rem; color:var(--text-muted); margin-top:5px;">暂时无法获取实时天气信息，请稍后再试。</p>
             </div>
         `;
     }

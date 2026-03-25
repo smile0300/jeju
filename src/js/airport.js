@@ -141,7 +141,7 @@ export async function fetchFlights(type) {
             });
             renderFlightList(container, filteredFlights, type);
         } else {
-             container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">暂无相关航班 information</div>';
+             container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">暂无相关航班信息</div>';
         }
     } catch (e) {
         console.error('항공 API 오류:', e);
@@ -167,7 +167,7 @@ export function renderFlightList(container, items, type) {
     </div>`;
 
     if (!items.length) {
-        container.innerHTML = html + '<div style="text-align:center;padding:20px;color:var(--text-muted)">暂无相关航班 information</div>';
+        container.innerHTML = html + '<div style="text-align:center;padding:20px;color:var(--text-muted)">暂无相关航班信息</div>';
         return;
     }
 
