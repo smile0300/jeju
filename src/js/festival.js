@@ -1,11 +1,11 @@
 import { CONFIG } from './config.js';
 
-let festivalDataCache = null;
 let currentFestivalMonth = '';
 
 export function initMonthFilter() {
     const filterContainer = document.getElementById('month-filter');
     if (!filterContainer) return;
+
     const now = new Date();
     const months = [];
     for (let i = 0; i < 6; i++) {
@@ -13,15 +13,20 @@ export function initMonthFilter() {
         const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
         months.push({ ym, label: `${d.getMonth() + 1}月` });
     }
+
     if (!currentFestivalMonth) currentFestivalMonth = months[0].ym;
+
     filterContainer.innerHTML = months.map(m => `
         <div class="month-tab ${m.ym === currentFestivalMonth ? 'active' : ''}" 
              onclick="selectFestivalMonth('${m.ym}')" data-ym="${m.ym}">${m.label}</div>`).join('');
 }
 
 export function selectFestivalMonth(ym) {
+    console.log('Selecting festival month:', ym);
     currentFestivalMonth = ym;
-    document.querySelectorAll('.month-tab').forEach(tab => tab.classList.toggle('active', tab.dataset.ym === ym));
+    document.querySelectorAll('.month-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.ym === ym);
+    });
     fetchFestivals();
 }
 
@@ -29,7 +34,6 @@ export async function fetchFestivals() {
     const listContainer = document.getElementById('festival-list');
     if (!listContainer) return;
 
-    // FESTIVAL_DATA가 없거나 데이터가 비어있으면 공지 표시
     if (!window.FESTIVAL_DATA || !window.FESTIVAL_DATA.months) {
         renderFestivalNotice(listContainer);
         return;
@@ -38,7 +42,7 @@ export async function fetchFestivals() {
     const today = new Date().toISOString().split('T')[0];
     const monthData = window.FESTIVAL_DATA.months[currentFestivalMonth] || [];
     
-    // 기간이 지난 축제 필터링 (클라이언트 사이드 이중 체크)
+    // Filter expired items
     const activeItems = monthData.filter(item => {
         if (!item.period || !item.period.includes('~')) return true;
         const endPart = item.period.split('~')[1].trim();
@@ -49,8 +53,10 @@ export async function fetchFestivals() {
     if (activeItems.length === 0) {
         listContainer.innerHTML = `
             <div style="text-align:center;padding:40px;color:var(--text-muted)">
-                该月暂无进行中的活动<br>
-                <span style="font-size:1.1rem; color:var(--accent-blue); font-weight:800; display:block; margin-top:10px;">将于 4월 (4月) 内进行更新</span>
+                该月目前暂无进行中的活动<br>
+                <span style="font-size:1.1rem; color:var(--accent-blue); font-weight:800; display:block; margin-top:10px;">
+                    我们将持续为您更新 ${currentFestivalMonth.split('-')[1]}月的精彩活动
+                </span>
             </div>`;
     } else {
         renderFestivalItems(listContainer, activeItems);
@@ -62,35 +68,40 @@ export function renderFestivalNotice(container) {
         <div class="festival-notice-container">
             <div class="festival-notice-card">
                 <div class="notice-icon">🗓️</div>
-                <h3 class="notice-title">✨ 济州节庆 <span class="notice-highlight">4月 中旬</span> 更新预定</h3>
+                <h3 class="notice-title">✨ 济州节庆 data 正在加载中</h3>
             </div>
         </div>
     `;
 }
 
 const FESTIVAL_TRANSLATIONS = {
-    '2026 제주들불축제': '2026 济州野火节',
-    '한림공원 튤립축제': '翰林公园郁金香节',
-    '제19회 전농로 왕벚꽃 축제': '第19届典农路大樱花节',
-    '제3회 신풍벚꽃터널축제': '第3届新丰樱花隧道节',
-    '제주북페어 2026': '济州书展 2026',
-    '제28회 서귀포 유채꽃 국제걷기대회': '第28届西归浦油菜花国际徒步大会',
+    '한라수목원과 함께하는 주말 자연생태체험 프로그램': '汉拿树木园周末自然生态体验',
+    '2026년 기상기후 사진 전시회': '2026年气象气候摄影展',
+    '2026 블키의 모찌공방': '2026 Blki의麻薯工坊',
+    '2026 봄줍 : 봄을 줍는 여행길': '2026 拾春：拾起春天的旅行之路',
+    '2026년 제주교육박물관 「문화가 있는 날」': '2026年济州教育博物馆「文化日」',
+    '한림공원 튤립축제': '翰林公园郁금香节',
     '제주 유채꽃 축제': '济州油菜花节',
-    '제14회 가파도 청보리 축제': '第14届加波岛青麦节',
-    '제주 황금녕 고사리 축제': '济州黄金宁蕨菜节',
-    '제16회 산지천 축제': '第16届山地川节',
-    '2026 제주 반려동물 문화축제': '2026 济州宠物文化节'
+    '가파도 청보리 축제': '加波岛青麦节',
+    '제78주년 4.3 예술축전 창작극': '第78周年4.3艺术节创作剧',
+    '2026 제주경향하우징페어': '2026 济州京乡住房博览会',
+    '제30회 한라산 청정 고사리축제': '第30届汉拿山清净蕨菜节',
+    '제19회 전농로왕벚꽃축제': '第19届典农路大王樱花节',
+    '제28회 서귀포 유채꽃 국제걷기대회': '第28届西귀浦油菜花国际步行大会',
+    '제주북페어 2026': '济州书展 2026',
+    '2026 작가의 산책길 이야기 탐방': '2026 作家散步道故事探訪',
+    '소노 런트립 180K in JEJU': 'Sono Run Trip 180K in JEJU',
+    '작가의 산책길 2026! 봄을 여는 서귀포 생활문화예술 축제': '2026作家散步道！开启春天的西귀浦生活文化艺术节',
+    '진행중': '进行中',
+    '진행예정': '即将开始'
 };
 
 const FESTIVAL_IMAGE_MAP = {
-    "제주들불축제": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202602/09/6bcf74ce-d5e0-4d25-a78a-7c63970cd6d5.png",
-    "왕벚꽃": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/201804/30/8c825e12-c750-446e-a972-1a5473e84a30.webp",
-    "신풍벚꽃": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202503/19/90338712-aa76-43a9-b354-8345adeb92af.webp",
-    "제주북페어": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202603/17/2368016c-f540-4ef5-accc-b35cab6971be.webp",
-    "유채꽃": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202403/08/3987eef0-d52c-4a75-baeb-68df967e60f2.webp",
-    "한림공원 튤립": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/201904/11/417d4ac0-366b-4836-90b4-357a1f6b25c4.webp",
-    "가파도 청보리": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202603/24/fab44c8c-c839-4103-a369-73f089cac9a3.webp",
-    "보롬왓": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202602/25/10c0e0c9-6310-42e0-af94-3601bc9df469.webp"
+    "한라수목원": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202603/20/480650a6-a6f0-4bff-b310-6491cb1fecab.webp",
+    "기상기후": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202603/25/de292028-ac2f-4d9b-bdf8-e56c1298acf7.webp",
+    "모찌공방": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202603/12/1fd4248a-82a5-4c29-85ee-6e31f89aa0ab.jpg",
+    "봄줍": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202602/26/d3e6aeec-7888-4600-90a4-a499acb4fde7.webp",
+    "문화가 있는 날": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202603/12/83a0f4bb-5d75-46b2-bad2-ead172b892e4.webp"
 };
 
 function getFestivalImage(title, originalImg) {
@@ -102,25 +113,27 @@ function getFestivalImage(title, originalImg) {
 
 export function renderFestivalItems(container, items) {
     const today = new Date().toISOString().split('T')[0];
-    if (!items || items.length === 0) {
-        container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-muted)">该月暂无相关活动</div>`;
-        return;
-    }
-
-    const noImg = 'https://images.unsplash.com/photo-1518005020251-582c7edff267?auto=format&fit=crop&w=500&q=80'; // 한라산 포스터 느낌의 세로형 이미지
+    const noImg = 'https://images.unsplash.com/photo-1518005020251-582c7edff267?auto=format&fit=crop&w=500&q=80';
 
     container.innerHTML = items.map(item => {
         const title = item.title || '无标题活动';
         const rawImg = item.thumbnail || item.imgpath || item.img || '';
         const img = getFestivalImage(title, rawImg) || noImg;
-        const tag = (window.FESTIVAL_TRANSLATIONS && window.FESTIVAL_TRANSLATIONS[title]) || item.tag || '济州活动';
+        
+        // Hashtag translation: use title mapping or fallback
+        const tag = FESTIVAL_TRANSLATIONS[title] || '济州活动';
+        
         const date = item.period || item.date || '';
-        const link = item.link || (item.contentsid ? `https://www.visitjeju.net/kr/detail/view?contentsid=${item.contentsid}` : '#');
+        const link = item.link || '#';
         
         let statusText = '进行中';
         let statusClass = 'ing';
         
-        if (date.includes('~')) {
+        // Priority status from data
+        if (item.status === 'upcoming') {
+            statusText = '即将开始';
+            statusClass = 'upcoming';
+        } else if (date.includes('~')) {
             const startPart = date.split('~')[0].trim();
             const startDate = startPart.replace(/\./g, '-');
             if (startDate > today) {

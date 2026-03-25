@@ -17,3 +17,11 @@ secret.json
 # 4. 의존성 및 용량 최적화
 node_modules/
 package-lock.json
+
+# 5. 디버그 및 임시 스크립트 (자동화 작업 중 생성됨)
+debug_*
+inspect_page.js
+test_api.py
+execution/debug_crawl.png
+*.webp
+*.png
