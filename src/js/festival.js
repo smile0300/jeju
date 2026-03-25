@@ -82,6 +82,24 @@ const FESTIVAL_TRANSLATIONS = {
     '2026 제주 반려동물 문화축제': '2026 济州宠物文化节'
 };
 
+const FESTIVAL_IMAGE_MAP = {
+    "제주들불축제": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202602/09/6bcf74ce-d5e0-4d25-a78a-7c63970cd6d5.png",
+    "왕벚꽃": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/201804/30/8c825e12-c750-446e-a972-1a5473e84a30.webp",
+    "신풍벚꽃": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202503/19/90338712-aa76-43a9-b354-8345adeb92af.webp",
+    "제주북페어": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202603/17/2368016c-f540-4ef5-accc-b35cab6971be.webp",
+    "유채꽃": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202403/08/3987eef0-d52c-4a75-baeb-68df967e60f2.webp",
+    "한림공원 튤립": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/201904/11/417d4ac0-366b-4836-90b4-357a1f6b25c4.webp",
+    "가파도 청보리": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202603/24/fab44c8c-c839-4103-a369-73f089cac9a3.webp",
+    "보롬왓": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202602/25/10c0e0c9-6310-42e0-af94-3601bc9df469.webp"
+};
+
+function getFestivalImage(title, originalImg) {
+    for (const key in FESTIVAL_IMAGE_MAP) {
+        if (title.includes(key)) return FESTIVAL_IMAGE_MAP[key];
+    }
+    return originalImg;
+}
+
 export function renderFestivalItems(container, items) {
     const today = new Date().toISOString().split('T')[0];
     if (!items || items.length === 0) {
@@ -89,12 +107,13 @@ export function renderFestivalItems(container, items) {
         return;
     }
 
-    const noImg = 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=500&q=60';
+    const noImg = 'https://images.unsplash.com/photo-1518005020251-582c7edff267?auto=format&fit=crop&w=500&q=80'; // 한라산 포스터 느낌의 세로형 이미지
 
     container.innerHTML = items.map(item => {
         const title = item.title || '无标题活动';
-        const img = item.thumbnail || item.imgpath || item.img || noImg;
-        const tag = FESTIVAL_TRANSLATIONS[title] || item.tag || '济州活动';
+        const rawImg = item.thumbnail || item.imgpath || item.img || '';
+        const img = getFestivalImage(title, rawImg) || noImg;
+        const tag = (window.FESTIVAL_TRANSLATIONS && window.FESTIVAL_TRANSLATIONS[title]) || item.tag || '济州活动';
         const date = item.period || item.date || '';
         const link = item.link || (item.contentsid ? `https://www.visitjeju.net/kr/detail/view?contentsid=${item.contentsid}` : '#');
         
@@ -112,14 +131,14 @@ export function renderFestivalItems(container, items) {
         
         return `
             <div class="festival-card" onclick="window.open('${link}', '_blank')">
-                <div style="position:relative;">
+                <div class="festival-img-wrapper">
                     <img src="${img}" class="festival-img" alt="${title}" onerror="this.src='${noImg}'">
                     <div class="tag ${statusClass}">${statusText}</div>
                 </div>
-                <div class="festival-info" style="text-align:center;">
+                <div class="festival-info">
                     <div style="font-size:0.75rem; color:var(--accent-blue); font-weight:700; margin-bottom:4px;"># ${tag}</div>
-                    <h3 style="font-size:1.1rem; font-weight:800; margin-bottom:6px; line-height:1.3;">${title}</h3>
-                    <div style="font-size:0.85rem; color:var(--text-muted); display:flex; align-items:center; justify-content:center; gap:4px;">
+                    <h3 style="font-size:1.05rem; font-weight:800; margin-bottom:8px; line-height:1.4; color:var(--text-primary);">${title}</h3>
+                    <div style="font-size:0.85rem; color:var(--text-muted); display:flex; align-items:center; justify-content:center; gap:4px; margin-top:auto;">
                         <span>📅</span> ${date}
                     </div>
                 </div>
