@@ -50,8 +50,7 @@ export async function fetchFestivals() {
         listContainer.innerHTML = `
             <div style="text-align:center;padding:40px;color:var(--text-muted)">
                 该月暂无进行中的活动<br>
-                <span style="font-size:1.1rem; color:var(--accent-blue); font-weight:800; display:block; margin-top:10px;">将于 4월 (4月) 内进行更新</span><br>
-                <span style="font-size:0.8rem;color:var(--accent-blue);font-weight:600;">(每周一、周四 09:00 自动更新)</span>
+                <span style="font-size:1.1rem; color:var(--accent-blue); font-weight:800; display:block; margin-top:10px;">将于 4월 (4月) 内进行更新</span>
             </div>`;
     } else {
         renderFestivalItems(listContainer, activeItems);
