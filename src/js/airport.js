@@ -99,25 +99,26 @@ export async function fetchFlights(type) {
 
         const mapItem = (node) => {
             const getStr = (tag) => getVal(node, tag);
-            const schedText = getStr('scheduledatetime');
-            const estText = getStr('estimatedatetime');
-            const fId = getStr('flightid') || getStr('flightId') || getStr('fid');
-            const airlineName = getStr('airline') || getStr('airlineKorean');
-            const depAirport = getStr('depAirport') || getStr('boardingKorean') || getStr('depairport');
-            const arrAirport = getStr('arrAirport') || getStr('arrivedKorean') || getStr('arrairport');
-            const depCode = (getStr('depAirportCode') || getStr('boardingEng') || getStr('depairportcode')).toUpperCase();
-            const arrCode = (getStr('arrAirportCode') || getStr('arrivedEng') || getStr('arrairportcode')).toUpperCase();
+            // 대소문자 및 유사 태그 대응 강화
+            const schedText = getStr('scheduledatetime') || getStr('scheduledatetime'.toUpperCase()) || '';
+            const estText = getStr('estimatedatetime') || getStr('estimatedatetime'.toUpperCase()) || '';
+            const fId = getStr('flightid') || getStr('flightId') || getStr('fid') || '';
+            const airlineName = getStr('airline') || getStr('airlineKorean') || '';
+            const depAirport = getStr('depAirport') || getStr('boardingKorean') || getStr('depairport') || '';
+            const arrAirport = getStr('arrAirport') || getStr('arrivedKorean') || getStr('arrairport') || '';
+            const depCode = (getStr('depAirportCode') || getStr('boardingEng') || getStr('depairportcode') || '').toUpperCase();
+            const arrCode = (getStr('arrAirportCode') || getStr('arrivedEng') || getStr('arrairportcode') || '').toUpperCase();
 
             return {
                 flight_id: fId.toUpperCase(),
-                plan_time: schedText.length >= 12 ? schedText.slice(8, 12) : schedText,
-                est_time: estText.length >= 12 ? estText.slice(8, 12) : estText,
+                plan_time: (schedText.length >= 12 ? schedText.slice(8, 12) : (schedText.length >= 4 ? schedText : '')),
+                est_time: (estText.length >= 12 ? estText.slice(8, 12) : (estText.length >= 4 ? estText : '')),
                 dep_airport: depAirport,
                 dep_code: depCode,
                 arr_airport: arrAirport,
                 arr_code: arrCode,
                 airline: airlineName,
-                status: getStr('rmkKor'),
+                status: getStr('rmkKor') || getStr('rmkEng') || '',
                 is_intl: getStr('io') === 'I' || getStr('line')?.includes('국제')
             };
         };
