@@ -10,73 +10,53 @@ const CONFIG = {
     CRAWL_MONTHS: 4,
 };
 
-async function crawlMonthFestivals(browser, year, month) {
+async function fetchMonthFestivals(year, month) {
     const monthStr = String(month).padStart(2, '0');
-    const url = `https://visitjeju.net/kr/festival/list?year=${year}&month=${monthStr}`;
-    const todayStr = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    // 비짓제주 공식 리스트 API (브라우저 분석 결과)
+    const url = `https://api.visitjeju.net/api/contents/list?_siteId=jejuavj&locale=kr&device=pc&sorting=likecnt+desc&year=${year}&month=${monthStr}&festivalcontents=y&contentscd=c5&pageSize=50&page=1&state=all`;
+    const todayStr = new Date().toISOString().split('T')[0].replace(/-/g, ''); // YYYYMMDD
     
-    console.log(`  크롤링: ${year}-${monthStr}`);
-    const page = await browser.newPage();
-    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+    console.log(`  데이터 호출: ${year}-${monthStr}`);
     try {
-        await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
-        await page.waitForSelector('.festival_list, .no_result, .list_wrap', { timeout: 15000 }).catch(() => {});
-        await new Promise(r => setTimeout(r, 2000));
-        await page.evaluate(async () => {
-            for (let i = 0; i < 10; i++) {
-                window.scrollBy(0, 800);
-                await new Promise(r => setTimeout(r, 300));
+        const response = await fetch(url, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Referer': 'https://www.visitjeju.net/'
             }
         });
-        await new Promise(r => setTimeout(r, 1000));
-        const items = await page.evaluate((today) => {
-            const results = [];
-            const cards = document.querySelectorAll('.festival_list li, .list_wrap li, ul.list li');
-            cards.forEach(card => {
-                const titleEl = card.querySelector('.item_tit strong, .tit, strong');
-                const title = titleEl?.textContent?.trim();
-                if (!title) return;
+        const data = await response.json();
+        const items = data.items || [];
+        console.log(`    [디버그] 전체 아이템 수: ${items.length}, 기준일: ${todayStr}`);
+        
+        const results = items.map(item => {
+            const fc = item.festivalcontents?.[0] || {};
+            // 날짜 형식 변환: 20260320 -> 2026.03.20
+            const formatD = (s) => s ? `${s.slice(0,4)}.${s.slice(4,6)}.${s.slice(6,8)}` : '';
+            const period = fc.stday ? `${formatD(fc.stday)} ~ ${formatD(fc.fnsday)}` : '';
+            
+            console.log(`      - 후보: ${item.title} (종료일: ${fc.fnsday})`);
+            
+            // 기간 필터링: 종료일이 오늘보다 이전이면 제외
+            if (fc.fnsday && fc.fnsday < todayStr) {
+                console.log(`        -> 제외 (기간 만료)`);
+                return null;
+            }
 
-                const periodEl = card.querySelector('.item_period, .period, [class*="period"]');
-                const period = periodEl?.textContent?.trim() || '';
-                
-                // 기간 필터링: 종료일이 오늘보다 이전이면 제외
-                if (period && period.includes('~')) {
-                    const parts = period.split('~');
-                    const endPart = parts[1].trim(); // "2026.03.15"
-                    const endDate = endPart.replace(/\./g, '-'); // "2026-03-15"
-                    if (endDate < today) return;
-                }
+            return {
+                contentsid: item.contentsid || '',
+                title: item.title,
+                period: period,
+                address: item.address || '',
+                img: item.repPhoto?.photoid?.imgpath || item.repPhoto?.photoid?.thumbnailpath || '',
+                link: item.contentsid ? `https://www.visitjeju.net/kr/detail/view?contentsid=${item.contentsid}` : '#'
+            };
+        }).filter(it => it !== null);
 
-                const linkEl = card.querySelector('a');
-                let contentsid = null;
-                const href = linkEl?.getAttribute('href') || linkEl?.getAttribute('onclick') || '';
-                
-                const idMatch = href.match(/contentsid=([A-Z0-9_]+)/i) || href.match(/(CNTS_[A-Z0-9]+)/i);
-                if (idMatch) contentsid = idMatch[1];
-
-                const addrEl = card.querySelector('.item_address, .address, [class*="address"]');
-                const address = addrEl?.textContent?.trim() || '';
-                
-                if (title) {
-                    results.push({ 
-                        title, 
-                        period, 
-                        contentsid, 
-                        address,
-                        link: contentsid ? `https://www.visitjeju.net/kr/detail/view?contentsid=${contentsid}` : '#'
-                    });
-                }
-            });
-            return results;
-        }, todayStr);
-        console.log(`    -> ${items.length}개 추출 (종료된 축제 제외 완료)`);
-        return items;
+        console.log(`    -> ${results.length}개 유효 데이터 확보`);
+        return results;
     } catch (e) {
-        console.warn(`  ! ${year}-${monthStr} 크롤링 실패:`, e.message);
+        console.error(`  ! ${year}-${monthStr} API 호출 실패:`, e.message);
         return [];
-    } finally {
-        await page.close();
     }
 }
 
@@ -95,40 +75,22 @@ const FESTIVAL_TRANSLATIONS = {
 };
 
 async function enrichWithApi(items) {
-    const apiUrl = `${CONFIG.API_BASE}?locale=kr&category=c5&apiKey=${CONFIG.API_KEY}&pageSize=500`;
-    const res = await fetch(apiUrl);
-    const data = await res.json();
-    const apiItems = data.items || [];
-    const apiMap = {};
-    apiItems.forEach(it => { apiMap[it.contentsid] = it; });
     return items.map(item => {
-        const apiData = item.contentsid ? apiMap[item.contentsid] : null;
-        const fuzzyMatch = !apiData && apiItems.find(it =>
-            it.title && item.title && (
-                it.title.includes(item.title.slice(0, 10)) ||
-                item.title.includes(it.title.slice(0, 10))
-            )
-        );
-        const matched = apiData || fuzzyMatch;
         return {
-            contentsid: matched?.contentsid || item.contentsid || '',
+            contentsid: item.contentsid,
             title: item.title,
             tag: FESTIVAL_TRANSLATIONS[item.title] || '济州活动',
-            period: item.period || '',
-            address: item.address || matched?.address || '',
-            imgpath: matched?.repPhoto?.photoid?.imgpath || '',
-            thumbnail: matched?.repPhoto?.photoid?.thumbnailpath || '',
-            alltag: matched?.alltag || '',
+            period: item.period,
+            address: item.address,
+            imgpath: item.img,
+            thumbnail: item.img,
+            alltag: '',
         };
     });
 }
 
 async function updateFestivals() {
-    console.log('--- [v7.0] 비짓제주 크롤링 기반 축제 데이터 갱신 시작 ---');
-    const browser = await puppeteer.launch({
-        headless: 'new',
-        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
-    });
+    console.log('--- [v7.1] 비짓제주 공식 API 기반 축제 데이터 갱신 시작 ---');
     try {
         const now = new Date();
         const monthlyData = {};
@@ -137,7 +99,7 @@ async function updateFestivals() {
             const year = d.getFullYear();
             const month = d.getMonth() + 1;
             const key = `${year}-${String(month).padStart(2, '0')}`;
-            const rawItems = await crawlMonthFestivals(browser, year, month);
+            const rawItems = await fetchMonthFestivals(year, month);
             if (rawItems.length > 0) {
                 const enriched = await enrichWithApi(rawItems);
                 monthlyData[key] = enriched;
@@ -153,9 +115,7 @@ async function updateFestivals() {
         const monthsStr = Object.keys(monthlyData).map(k => `${k}(${monthlyData[k].length}건)`).join(', ');
         console.log(`성공: ${monthsStr} 데이터 갱신 완료.`);
     } catch (e) {
-        console.error('!!! 크롤링 오류:', e);
-    } finally {
-        await browser.close();
+        console.error('!!! 데이터 갱신 오류:', e);
     }
 }
 

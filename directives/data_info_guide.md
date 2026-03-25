@@ -56,13 +56,15 @@
   - **번역 연동**: `LOST_CATEGORY_MAP`을 이용한 중국어 간체 자동 로컬라이징.
 - **JSON 경로 대응**: API 응답 구조 변화에 따라 `response.body.items` 배열을 직접 참조하도록 파싱 안정화 (2026-03-23).
 
-## 6. 축제 및 행사 (Festival)
-- **연동 방식**: 하이브리드 수집 시스템 (Puppeteer 크롤링 + Visit Jeju API + 정적 캐싱).
-- **데이터 처리 프로세스 (`execution/update_festivals.js`)**:
-  1. **크롤링 (Crawling)**: 비짓제주 공식 홈페이지의 월별 리스트에서 '축제 기간' 텍스트 데이터를 추출.
-  2. **API 보충 (Enrichment)**: 축제명을 기반으로 상세 API를 호출하여 고유 `contentsid`와 이미지를 확보.
-  3. **자동 번역 (Translation)**: `FESTIVAL_TRANSLATIONS` 맵을 사용하여 한국어 제목을 중국어 간체 태그로 자동 변환.
-  4. **데이터 정제**: 기간이 종료된 행사는 수집 단계에서 1차 제외.
+## 6. 축제 및 행사 (Festivals)
+- **데이터 소스**: 비짓제주 공식 API (`api.visitjeju.net/api/contents/list`)
+- **수집 방식**: 매주 월요일 GitHub Actions를 통해 자동 업데이트 (`execution/update_festivals.js`)
+- **UI 요구사항**:
+    - 모든 카드는 중앙 정렬 (`text-align: center`)
+    - 상단에 중국어 간체 번역 태그 표시 (FESTIVAL_TRANSLATIONS 맵 활용)
+    - 진행중(빨강) / 예정(파랑) 라벨은 카드 이미지 왼쪽 상단에 위치
+    - 데이터가 없는 경우 "(每周一自动更新)" 안내 문구 파란색으로 표시
+- **유지보수**: 새로운 축제 번역이 필요한 경우 `execution/update_festivals.js`의 `FESTIVAL_TRANSLATIONS` 객체에 추가
 - **클라이언트 사이드 렌더링 (`src/js/festival.js`)**:
   - **정적 캐싱**: 수집된 데이터를 `assets/curated_festivals.js`에 저장하여 속도 및 접근성 보장.
   - **UI 최적화 (v7.0)**: 
