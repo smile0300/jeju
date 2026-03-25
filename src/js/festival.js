@@ -50,7 +50,8 @@ export async function fetchFestivals() {
         listContainer.innerHTML = `
             <div style="text-align:center;padding:40px;color:var(--text-muted)">
                 该月暂无进行中的活动<br>
-                <span style="font-size:0.8rem;color:var(--accent-blue);font-weight:600;">(每周一自动更新)</span>
+                <span style="font-size:1.1rem; color:var(--accent-blue); font-weight:800; display:block; margin-top:10px;">将于 4월 (4月) 内进行更新</span><br>
+                <span style="font-size:0.8rem;color:var(--accent-blue);font-weight:600;">(每周一、周四 09:00 自动更新)</span>
             </div>`;
     } else {
         renderFestivalItems(listContainer, activeItems);
@@ -130,15 +131,14 @@ export function renderFestivalItems(container, items) {
         }
         
         return `
-            <div class="festival-card" onclick="window.open('${link}', '_blank')">
-                <div class="festival-img-wrapper">
-                    <img src="${img}" class="festival-img" alt="${title}" onerror="this.src='${noImg}'">
-                    <div class="tag ${statusClass}">${statusText}</div>
-                </div>
+            <div class="festival-card text-only" onclick="window.open('${link}', '_blank')">
                 <div class="festival-info">
-                    <div style="font-size:0.75rem; color:var(--accent-blue); font-weight:700; margin-bottom:4px;"># ${tag}</div>
-                    <h3 style="font-size:1.05rem; font-weight:800; margin-bottom:8px; line-height:1.4; color:var(--text-primary);">${title}</h3>
-                    <div style="font-size:0.85rem; color:var(--text-muted); display:flex; align-items:center; justify-content:center; gap:4px; margin-top:auto;">
+                    <div class="festival-header">
+                        <span class="tag ${statusClass}">${statusText}</span>
+                        <span class="chinese-title"># ${tag}</span>
+                    </div>
+                    <h3 class="festival-title">${title}</h3>
+                    <div class="festival-date">
                         <span>📅</span> ${date}
                     </div>
                 </div>
