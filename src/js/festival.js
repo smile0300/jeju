@@ -29,8 +29,32 @@ export async function fetchFestivals() {
     const listContainer = document.getElementById('festival-list');
     if (!listContainer) return;
 
-    // v12.0: 4월 업데이트 예고 공지 상시 노출 (기존 로직 우회)
-    renderFestivalNotice(listContainer);
+    // FESTIVAL_DATA가 없거나 데이터가 비어있으면 공지 표시
+    if (!window.FESTIVAL_DATA || !window.FESTIVAL_DATA.months) {
+        renderFestivalNotice(listContainer);
+        return;
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    const monthData = window.FESTIVAL_DATA.months[currentFestivalMonth] || [];
+    
+    // 기간이 지난 축제 필터링 (클라이언트 사이드 이중 체크)
+    const activeItems = monthData.filter(item => {
+        if (!item.period || !item.period.includes('~')) return true;
+        const endPart = item.period.split('~')[1].trim();
+        const endDate = endPart.replace(/\./g, '-');
+        return endDate >= today;
+    });
+
+    if (activeItems.length === 0) {
+        listContainer.innerHTML = `
+            <div style="text-align:center;padding:40px;color:var(--text-muted)">
+                该月暂无进行中的活动<br>
+                <span style="font-size:0.8rem;color:var(--accent-blue);font-weight:600;">(每周一自动更新)</span>
+            </div>`;
+    } else {
+        renderFestivalItems(listContainer, activeItems);
+    }
 }
 
 export function renderFestivalNotice(container) {
@@ -44,28 +68,58 @@ export function renderFestivalNotice(container) {
     `;
 }
 
+const FESTIVAL_TRANSLATIONS = {
+    '2026 제주들불축제': '2026 济州野火节',
+    '한림공원 튤립축제': '翰林公园郁金香节',
+    '제19회 전농로 왕벚꽃 축제': '第19届典农路大樱花节',
+    '제3회 신풍벚꽃터널축제': '第3届新丰樱花隧道节',
+    '제주북페어 2026': '济州书展 2026',
+    '제28회 서귀포 유채꽃 국제걷기대회': '第28届西归浦油菜花国际徒步大会',
+    '제주 유채꽃 축제': '济州油菜花节',
+    '제14회 가파도 청보리 축제': '第14届加波岛青麦节',
+    '제주 황금녕 고사리 축제': '济州黄金宁蕨菜节',
+    '제16회 산지천 축제': '第16届山地川节',
+    '2026 제주 반려동물 문화축제': '2026 济州宠物文化节'
+};
+
 export function renderFestivalItems(container, items) {
+    const today = new Date().toISOString().split('T')[0];
     if (!items || items.length === 0) {
-        container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-muted)">该月份暂无相关活动 information</div>`;
+        container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-muted)">该月暂无相关活动</div>`;
         return;
     }
 
+    const noImg = 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=500&q=60';
+
     container.innerHTML = items.map(item => {
-        const title = item.title || item.label || '无标题活动';
-        const img = item.img || item.thumbnail || (item.repPhoto?.photoid?.thumbnailpath) || '';
-        const tag = item.tag || '济州活动';
-        const date = item.date || item.eventstartdate || '';
+        const title = item.title || '无标题活动';
+        const img = item.thumbnail || item.imgpath || item.img || noImg;
+        const tag = FESTIVAL_TRANSLATIONS[title] || item.tag || '济州活动';
+        const date = item.period || item.date || '';
+        const link = item.link || (item.contentsid ? `https://www.visitjeju.net/kr/detail/view?contentsid=${item.contentsid}` : '#');
+        
+        let statusText = '进行中';
+        let statusClass = 'ing';
+        
+        if (date.includes('~')) {
+            const startPart = date.split('~')[0].trim();
+            const startDate = startPart.replace(/\./g, '-');
+            if (startDate > today) {
+                statusText = '即将开始';
+                statusClass = 'upcoming';
+            }
+        }
         
         return `
-            <div class="festival-card" onclick="window.open('${item.link || '#'}', '_blank')">
+            <div class="festival-card" onclick="window.open('${link}', '_blank')">
                 <div style="position:relative;">
-                    <img src="${img}" class="festival-img" alt="${title}" onerror="this.src='https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=500&q=60'">
-                    <div class="tag ing">进行中</div>
+                    <img src="${img}" class="festival-img" alt="${title}" onerror="this.src='${noImg}'">
+                    <div class="tag ${statusClass}">${statusText}</div>
                 </div>
-                <div class="festival-info">
+                <div class="festival-info" style="text-align:center;">
                     <div style="font-size:0.75rem; color:var(--accent-blue); font-weight:700; margin-bottom:4px;"># ${tag}</div>
                     <h3 style="font-size:1.1rem; font-weight:800; margin-bottom:6px; line-height:1.3;">${title}</h3>
-                    <div style="font-size:0.85rem; color:var(--text-muted); display:flex; align-items:center; gap:4px;">
+                    <div style="font-size:0.85rem; color:var(--text-muted); display:flex; align-items:center; justify-content:center; gap:4px;">
                         <span>📅</span> ${date}
                     </div>
                 </div>

@@ -13,6 +13,8 @@ const CONFIG = {
 async function crawlMonthFestivals(browser, year, month) {
     const monthStr = String(month).padStart(2, '0');
     const url = `https://visitjeju.net/kr/festival/list?year=${year}&month=${monthStr}`;
+    const todayStr = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    
     console.log(`  크롤링: ${year}-${monthStr}`);
     const page = await browser.newPage();
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
@@ -22,33 +24,53 @@ async function crawlMonthFestivals(browser, year, month) {
         await new Promise(r => setTimeout(r, 2000));
         await page.evaluate(async () => {
             for (let i = 0; i < 10; i++) {
-                window.scrollBy(0, 600);
+                window.scrollBy(0, 800);
                 await new Promise(r => setTimeout(r, 300));
             }
         });
         await new Promise(r => setTimeout(r, 1000));
-        const items = await page.evaluate(() => {
+        const items = await page.evaluate((today) => {
             const results = [];
             const cards = document.querySelectorAll('.festival_list li, .list_wrap li, ul.list li');
             cards.forEach(card => {
                 const titleEl = card.querySelector('.item_tit strong, .tit, strong');
                 const title = titleEl?.textContent?.trim();
                 if (!title) return;
+
                 const periodEl = card.querySelector('.item_period, .period, [class*="period"]');
-                const period = periodEl?.textContent?.trim();
+                const period = periodEl?.textContent?.trim() || '';
+                
+                // 기간 필터링: 종료일이 오늘보다 이전이면 제외
+                if (period && period.includes('~')) {
+                    const parts = period.split('~');
+                    const endPart = parts[1].trim(); // "2026.03.15"
+                    const endDate = endPart.replace(/\./g, '-'); // "2026-03-15"
+                    if (endDate < today) return;
+                }
+
                 const linkEl = card.querySelector('a');
+                let contentsid = null;
                 const href = linkEl?.getAttribute('href') || linkEl?.getAttribute('onclick') || '';
+                
                 const idMatch = href.match(/contentsid=([A-Z0-9_]+)/i) || href.match(/(CNTS_[A-Z0-9]+)/i);
-                const contentsid = idMatch ? idMatch[1] : null;
+                if (idMatch) contentsid = idMatch[1];
+
                 const addrEl = card.querySelector('.item_address, .address, [class*="address"]');
                 const address = addrEl?.textContent?.trim() || '';
-                if (title && period) {
-                    results.push({ title, period, contentsid, address });
+                
+                if (title) {
+                    results.push({ 
+                        title, 
+                        period, 
+                        contentsid, 
+                        address,
+                        link: contentsid ? `https://www.visitjeju.net/kr/detail/view?contentsid=${contentsid}` : '#'
+                    });
                 }
             });
             return results;
-        });
-        console.log(`    -> ${items.length}개 추출`);
+        }, todayStr);
+        console.log(`    -> ${items.length}개 추출 (종료된 축제 제외 완료)`);
         return items;
     } catch (e) {
         console.warn(`  ! ${year}-${monthStr} 크롤링 실패:`, e.message);
@@ -57,6 +79,20 @@ async function crawlMonthFestivals(browser, year, month) {
         await page.close();
     }
 }
+
+const FESTIVAL_TRANSLATIONS = {
+    '2026 제주들불축제': '2026 济州野火节',
+    '한림공원 튤립축제': '翰林公园郁金香节',
+    '제19회 전농로 왕벚꽃 축제': '第19届典农路大樱花节',
+    '제3회 신풍벚꽃터널축제': '第3届新丰樱花隧道节',
+    '제주북페어 2026': '济州书展 2026',
+    '제28회 서귀포 유채꽃 국제걷기대회': '第28届西归浦油菜花国际徒步大会',
+    '제주 유채꽃 축제': '济州油菜花节',
+    '제14회 가파도 청보리 축제': '第14届加波岛青麦节',
+    '제주 황금녕 고사리 축제': '济州黄金宁蕨菜节',
+    '제16회 산지천 축제': '第16届山地川节',
+    '2026 제주 반려동물 문화축제': '2026 济州宠物文化节'
+};
 
 async function enrichWithApi(items) {
     const apiUrl = `${CONFIG.API_BASE}?locale=kr&category=c5&apiKey=${CONFIG.API_KEY}&pageSize=500`;
@@ -77,6 +113,7 @@ async function enrichWithApi(items) {
         return {
             contentsid: matched?.contentsid || item.contentsid || '',
             title: item.title,
+            tag: FESTIVAL_TRANSLATIONS[item.title] || '济州活动',
             period: item.period || '',
             address: item.address || matched?.address || '',
             imgpath: matched?.repPhoto?.photoid?.imgpath || '',

@@ -4,7 +4,7 @@ import { fetchWeatherData, switchWeatherLocation, updateHourlyWeather, fetchWeat
 import { fetchHallasanStatus } from './hallasan.js';
 import { fetchFlights, switchFlightTab } from './airport.js';
 import { fetchFoundGoods, switchLostView, openLostDetailModalByIndex, openLostReportModal, handleLostImageChange, submitLostReport } from './lost-found.js';
-import { fetchFestivals, selectFestivalMonth } from './festival.js';
+import { fetchFestivals, selectFestivalMonth, initMonthFilter } from './festival.js';
 import { showSection, openWechatQR, closeWechatQR, openFeatureModal, closeFeatureModal, submitFeatureRequest, copyWechatId } from './ui.js';
 
 // Global function assignments for HTML event handlers
@@ -38,6 +38,7 @@ window.addEventListener('load', () => {
     fetchHallasanStatus();
     fetchFlights('arrive');
     fetchFoundGoods();
+    initMonthFilter();
     fetchFestivals();
     showSection('home');
 

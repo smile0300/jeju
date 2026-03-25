@@ -57,9 +57,19 @@
 - **JSON 경로 대응**: API 응답 구조 변화에 따라 `response.body.items` 배열을 직접 참조하도록 파싱 안정화 (2026-03-23).
 
 ## 6. 축제 및 행사 (Festival)
-- **연동 방식**: 하이브리드 시스템 (큐레이션 JSON + 실시간 API Fallback).
-- **자동 업데이트**: `execution/update_festivals.js`가 공식 홈페이지(VISIT JEJU)를 크롤링하여 부적절한 정보 필터링 및 `assets/curated_festivals.json` 생성.
-- **월별 필터**: 사용자 선택에 따른 6개월간의 월별 탭 브라우징 지원.
+- **연동 방식**: 하이브리드 수집 시스템 (Puppeteer 크롤링 + Visit Jeju API + 정적 캐싱).
+- **데이터 처리 프로세스 (`execution/update_festivals.js`)**:
+  1. **크롤링 (Crawling)**: 비짓제주 공식 홈페이지의 월별 리스트에서 '축제 기간' 텍스트 데이터를 추출.
+  2. **API 보충 (Enrichment)**: 축제명을 기반으로 상세 API를 호출하여 고유 `contentsid`와 이미지를 확보.
+  3. **자동 번역 (Translation)**: `FESTIVAL_TRANSLATIONS` 맵을 사용하여 한국어 제목을 중국어 간체 태그로 자동 변환.
+  4. **데이터 정제**: 기간이 종료된 행사는 수집 단계에서 1차 제외.
+- **클라이언트 사이드 렌더링 (`src/js/festival.js`)**:
+  - **정적 캐싱**: 수집된 데이터를 `assets/curated_festivals.js`에 저장하여 속도 및 접근성 보장.
+  - **UI 최적화 (v7.0)**: 
+    - **가운데 정렬**: 모든 축제 정보(태그, 제목, 날짜)를 카드 중앙에 배치.
+    - **상태 라벨**: '진행중'(ing)과 '예정'(upcoming) 라벨을 상단 동일 위치에 표시 (색상으로 구분).
+    - **자동 업데이트 안내**: 데이터 부재 시 "(每周一自动更新)" 안내 문구를 파란색 강조로 노출.
+  - **최종 필터링**: 현재 날짜 기준으로 종료 여부 최종 판별.
 
 ## 10. 보안 및 환경설정 (Security & Config)
 - **CORS 정책**: `worker.js`에서 `Access-Control-Allow-Origin: *`를 통한 전역 지원.

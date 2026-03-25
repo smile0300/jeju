@@ -309,9 +309,20 @@
 }
 .festival-img { width: 100%; aspect-ratio: 4/3; object-fit: cover; }
 .festival-info { padding: 20px; }
-.tag.ing {
-    position: absolute; top: 15px; left: 15px; background: #ff2442; color: white; padding: 4px 12px; border-radius: 10px; font-weight: 800; font-size: 0.8rem;
+.tag {
+    position: absolute; 
+    top: 15px; 
+    left: 15px; 
+    color: white; 
+    padding: 4px 12px; 
+    border-radius: 10px; 
+    font-weight: 800; 
+    font-size: 0.8rem;
+    z-index: 2;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
+.tag.ing { background: #ff2442; }
+.tag.upcoming { background: #2563eb; }
 
 /* ==================== Lost & Found ==================== */
 .search-filter-box {

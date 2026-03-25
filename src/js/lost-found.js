@@ -206,8 +206,8 @@ export async function submitLostReport() {
         userAgent: navigator.userAgent
     };
 
-    if (!data.location || !data.date || !data.itemName || !data.wechatId) {
-        alert('请填写所有必填项'); return;
+    if (!data.location || !data.date || !data.time || !data.itemName || !data.specifics || !data.wechatId) {
+        alert('请填写完整的信息'); return;
     }
 
     try {
@@ -218,7 +218,8 @@ export async function submitLostReport() {
         const result = await res.json();
         if (result.result === 'success') {
             alert('提交成功！');
-            window.closeLostReportModal();
+            if (window.closeLostReportModal) window.closeLostReportModal();
+            else if (typeof closeLostReportModal === 'function') closeLostReportModal();
         } else throw new Error(result.error);
     } catch (e) {
         alert(`提交失败: ${e.message}`);
