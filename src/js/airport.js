@@ -105,9 +105,12 @@ export async function fetchFlights(type) {
 
         const mapItem = (node) => {
             const getStr = (tag) => getVal(node, tag);
-            // 대소문자 및 유사 태그 대응 강화
-            const schedText = getStr('scheduledatetime') || getStr('scheduledatetime'.toUpperCase()) || '';
-            const estText = getStr('estimatedatetime') || getStr('estimatedatetime'.toUpperCase()) || '';
+            
+            // v21.3: 시간 필드명 철자 및 대소문자 변칙에 완벽 대응
+            // scheduledatetime, scheduledDateTime, scheduleddatetime, schtime 등 다양한 변종 시도
+            const schedText = getStr('scheduledatetime') || getStr('scheduledDateTime') || getStr('scheduledatetime'.toUpperCase()) || getStr('planTime') || '';
+            const estText = getStr('estimatedatetime') || getStr('estimatedatetime') || getStr('estimatedDateTime') || getStr('estimatedatetime'.toUpperCase()) || getStr('estTime') || '';
+            
             const fId = getStr('flightid') || getStr('flightId') || getStr('fid') || '';
             const airlineName = getStr('airline') || getStr('airlineKorean') || '';
             const depAirport = getStr('depAirport') || getStr('boardingKorean') || getStr('depairport') || '';
@@ -117,8 +120,9 @@ export async function fetchFlights(type) {
 
             return {
                 flight_id: fId.toUpperCase(),
-                plan_time: (schedText.length >= 12 ? schedText.slice(8, 12) : (schedText.length >= 4 ? schedText : '')),
-                est_time: (estText.length >= 12 ? estText.slice(8, 12) : (estText.length >= 4 ? estText : '')),
+                // 12자리(YYYYMMDDHHMM) 또는 4자리(HHMM) 대응
+                plan_time: (schedText.length >= 12 ? schedText.slice(8, 12) : (schedText.length >= 4 ? schedText.slice(-4) : '')),
+                est_time: (estText.length >= 12 ? estText.slice(8, 12) : (estText.length >= 4 ? estText.slice(-4) : '')),
                 dep_airport: depAirport,
                 dep_code: depCode,
                 arr_airport: arrAirport,
