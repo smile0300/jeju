@@ -28,8 +28,8 @@ window.FESTIVAL_DATA = {
         "tag": "作家散步道",
         "period": "2026.03.01 ~ 2026.11.30",
         "address": "서귀포시 서귀동 416-2",
-        "imgpath": "https://api.cdn.visitjeju.net/photomng/imgpath/202603/11/17f83e3c-8e4a-4d37-8e65-98319f390065.webp",
-        "thumbnail": "https://api.cdn.visitjeju.net/photomng/imgpath/202603/11/17f83e3c-8e4a-4d37-8e65-98319f390065.webp",
+        "imgpath": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202603/10/9c689bdd-3219-4bfe-8fe4-f7fa2fc98904.jpg",
+        "thumbnail": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202603/10/9c689bdd-3219-4bfe-8fe4-f7fa2fc98904.jpg",
         "alltag": ""
       },
       {
@@ -58,8 +58,8 @@ window.FESTIVAL_DATA = {
         "tag": "作家散步道",
         "period": "2026.03.22 ~ 2026.10.25",
         "address": "서귀포시 서귀동 416-2",
-        "imgpath": "https://api.cdn.visitjeju.net/photomng/imgpath/202602/05/77d7334a-974d-4e98-bd03-8d069a531f8f.webp",
-        "thumbnail": "https://api.cdn.visitjeju.net/photomng/imgpath/202602/05/77d7334a-974d-4e98-bd03-8d069a531f8f.webp",
+        "imgpath": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202602/10/7ae98839-7a65-42a7-bb78-9d3680d5fda8.webp",
+        "thumbnail": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202602/10/7ae98839-7a65-42a7-bb78-9d3680d5fda8.webp",
         "alltag": ""
       },
       {
@@ -88,8 +88,8 @@ window.FESTIVAL_DATA = {
         "tag": "第19届典农路王樱花节",
         "period": "2026.03.27 ~ 2026.03.29",
         "address": "제주시 삼도1동 730-10",
-        "imgpath": "https://api.cdn.visitjeju.net/photomng/imgpath/202602/10/9b7d7ed1-06a4-4a5d-b3f4-79354784a60c.webp",
-        "thumbnail": "https://api.cdn.visitjeju.net/photomng/imgpath/202602/10/9b7d7ed1-06a4-4a5d-b3f4-79354784a60c.webp",
+        "imgpath": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202402/21/d6e6df9f-cc94-4b75-bab9-c57679091b34.webp",
+        "thumbnail": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202402/21/d6e6df9f-cc94-4b75-bab9-c57679091b34.webp",
         "alltag": ""
       },
       {
@@ -118,8 +118,8 @@ window.FESTIVAL_DATA = {
         "tag": "济州活动",
         "period": "2026.03.20 ~ 2026.10.09",
         "address": "제주시 이도이동 539-14",
-        "imgpath": "https://api.cdn.visitjeju.net/photomng/imgpath/202603/12/0c38107e-4ec7-42af-8f1b-91ba355d1d5f.webp",
-        "thumbnail": "https://api.cdn.visitjeju.net/photomng/imgpath/202603/12/0c38107e-4ec7-42af-8f1b-91ba355d1d5f.webp",
+        "imgpath": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202603/12/83a0f4bb-5d75-46b2-bad2-ead172b892e4.webp",
+        "thumbnail": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202603/12/83a0f4bb-5d75-46b2-bad2-ead172b892e4.webp",
         "alltag": ""
       },
       {
@@ -148,8 +148,8 @@ window.FESTIVAL_DATA = {
         "tag": "济州活动",
         "period": "2026.03.25 ~ 2026.04.15",
         "address": "제주시 구좌읍 종달리 555",
-        "imgpath": "https://api.cdn.visitjeju.net/photomng/imgpath/202603/16/7767c63e-6d1b-4171-8cc6-466ae4432a50.webp",
-        "thumbnail": "https://api.cdn.visitjeju.net/photomng/imgpath/202603/16/7767c63e-6d1b-4171-8cc6-466ae4432a50.webp",
+        "imgpath": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202603/13/9c7dc516-1d96-448b-93df-dae32ed6c3e3.webp",
+        "thumbnail": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202603/13/9c7dc516-1d96-448b-93df-dae32ed6c3e3.webp",
         "alltag": ""
       }
     ],
@@ -160,8 +160,8 @@ window.FESTIVAL_DATA = {
         "tag": "蕨菜节",
         "period": "2026.04.25 ~ 2026.04.26",
         "address": "서귀포시 남원읍 한남리 산 76-7",
-        "imgpath": "https://api.cdn.visitjeju.net/photomng/imgpath/202603/23/fab3f9f3-00a3-4941-ae23-c49b2fd387af.webp",
-        "thumbnail": "https://api.cdn.visitjeju.net/photomng/imgpath/202603/23/fab3f9f3-00a3-4941-ae23-c49b2fd387af.webp",
+        "imgpath": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202603/20/3d58fbc2-339b-41d1-a7a3-147228575237.webp",
+        "thumbnail": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202603/20/3d58fbc2-339b-41d1-a7a3-147228575237.webp",
         "alltag": ""
       },
       {
@@ -180,8 +180,8 @@ window.FESTIVAL_DATA = {
         "tag": "济州活动",
         "period": "2026.04.11 ~ 2026.10.30",
         "address": "서귀포시 서귀동 416-2",
-        "imgpath": "https://api.cdn.visitjeju.net/photomng/imgpath/202603/20/40b9f9f3-00a3-4941-ae23-c49b2fd387af.webp",
-        "thumbnail": "https://api.cdn.visitjeju.net/photomng/imgpath/202603/20/40b9f9f3-00a3-4941-ae23-c49b2fd387af.webp",
+        "imgpath": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202603/20/60aa8a1b-9144-48cb-aa8c-d16c0fb64cec.webp",
+        "thumbnail": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202603/20/60aa8a1b-9144-48cb-aa8c-d16c0fb64cec.webp",
         "alltag": ""
       },
       {
@@ -220,8 +220,8 @@ window.FESTIVAL_DATA = {
         "tag": "济州活动",
         "period": "2026.04.01 ~ 2026.11.30",
         "address": "서귀포시 성산읍 성산리 1",
-        "imgpath": "https://api.cdn.visitjeju.net/photomng/imgpath/202602/05/99d7334a-974d-4e98-bd03-8d069a531f8f.webp",
-        "thumbnail": "https://api.cdn.visitjeju.net/photomng/imgpath/202602/05/99d7334a-974d-4e98-bd03-8d069a531f8f.webp",
+        "imgpath": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202602/11/1c5e7b0c-003a-455a-bba4-be70813ee782.webp",
+        "thumbnail": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202602/11/1c5e7b0c-003a-455a-bba4-be70813ee782.webp",
         "alltag": ""
       },
       {
@@ -240,8 +240,8 @@ window.FESTIVAL_DATA = {
         "tag": "加파岛青麦节",
         "period": "2026.04.17 ~ 2026.05.17",
         "address": "서귀포시 대정읍 가파리 373",
-        "imgpath": "https://api.cdn.visitjeju.net/photomng/imgpath/202603/24/fab44c8c-c839-4103-a369-73f089cac9a3.webp",
-        "thumbnail": "https://api.cdn.visitjeju.net/photomng/imgpath/202603/24/fab44c8c-c839-4103-a369-73f089cac9a3.webp",
+        "imgpath": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202603/24/4a680ef7-5e2e-4e86-bb1f-3fc2e77d91bf.webp",
+        "thumbnail": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202603/24/4a680ef7-5e2e-4e86-bb1f-3fc2e77d91bf.webp",
         "alltag": ""
       }
     ],
@@ -252,8 +252,8 @@ window.FESTIVAL_DATA = {
         "tag": "济州面包跑 (Bread Run)",
         "period": "2026.05.30 ~ 2026.05.30",
         "address": "제주시 구좌읍 김녕리 497-1",
-        "imgpath": "https://api.cdn.visitjeju.net/photomng/imgpath/202603/17/cff27077-9f56-43d3-8f54-c130b4c37ccc.webp",
-        "thumbnail": "https://api.cdn.visitjeju.net/photomng/imgpath/202603/17/cff27077-9f56-43d3-8f54-c130b4c37ccc.webp",
+        "imgpath": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202603/17/9c7f2304-6c55-490a-a924-c16e76669038.webp",
+        "thumbnail": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202603/17/9c7f2304-6c55-490a-a924-c16e76669038.webp",
         "alltag": ""
       },
       {
@@ -262,8 +262,8 @@ window.FESTIVAL_DATA = {
         "tag": "济州活动",
         "period": "2026.05.02 ~ 2026.05.03",
         "address": "서귀포시 대포동 1190",
-        "imgpath": "https://api.cdn.visitjeju.net/photomng/imgpath/202602/13/73bce0c9-6310-42e0-af94-3601bc9df469.webp",
-        "thumbnail": "https://api.cdn.visitjeju.net/photomng/imgpath/202602/13/73bce0c9-6310-42e0-af94-3601bc9df469.webp",
+        "imgpath": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202602/13/9647ec4d-4504-4b95-adf5-24cf33a92a44.webp",
+        "thumbnail": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202602/13/9647ec4d-4504-4b95-adf5-24cf33a92a44.webp",
         "alltag": ""
       },
       {
@@ -272,8 +272,8 @@ window.FESTIVAL_DATA = {
         "tag": "济州美食与葡萄酒节",
         "period": "2026.05.23 ~ 2026.06.13",
         "address": "서귀포시 안덕면 서광리 산 24",
-        "imgpath": "https://api.cdn.visitjeju.net/photomng/imgpath/202603/20/713f9c31-8b4d-46cc-9bc9-dc8f503dea39.webp",
-        "thumbnail": "https://api.cdn.visitjeju.net/photomng/imgpath/202603/20/713f9c31-8b4d-46cc-9bc9-dc8f503dea39.webp",
+        "imgpath": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202603/20/9e27fb14-9245-4f16-b29e-68dd5cf22e40.webp",
+        "thumbnail": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202603/20/9e27fb14-9245-4f16-b29e-68dd5cf22e40.webp",
         "alltag": ""
       }
     ],
@@ -294,8 +294,8 @@ window.FESTIVAL_DATA = {
         "tag": "济州美食节 (Eat-Suda)",
         "period": "2026.06.12 ~ 2026.06.14",
         "address": "서귀포시 중문동 2642",
-        "imgpath": "https://api.cdn.visitjeju.net/photomng/imgpath/202603/20/c1cc6bbc-3473-4e5f-a06e-3788bfa6d80b.webp",
-        "thumbnail": "https://api.cdn.visitjeju.net/photomng/imgpath/202603/20/c1cc6bbc-3473-4e5f-a06e-3788bfa6d80b.webp",
+        "imgpath": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202603/20/e6373d94-5f42-43b8-9947-e7c693874637.webp",
+        "thumbnail": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202603/20/e6373d94-5f42-43b8-9947-e7c693874637.webp",
         "alltag": ""
       }
     ]
