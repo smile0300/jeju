@@ -91,10 +91,16 @@ export async function fetchFlights(type) {
         let itemsArray = [];
 
         const getVal = (obj, tag) => {
+            if (!obj) return '';
+            // 1. XML Element인 경우
             if (typeof obj.getElementsByTagName === 'function') {
-                return (obj.getElementsByTagName(tag)[0]?.textContent || '').trim();
+                let el = obj.getElementsByTagName(tag)[0] || obj.getElementsByTagName(tag.toLowerCase())[0] || obj.getElementsByTagName(tag.toUpperCase())[0];
+                return (el?.textContent || '').trim();
             }
-            return (obj[tag] || '').toString().trim();
+            // 2. JSON Object인 경우 (대소문자 무시 검색)
+            const targetKey = tag.toLowerCase();
+            const actualKey = Object.keys(obj).find(k => k.toLowerCase() === targetKey);
+            return (actualKey ? (obj[actualKey] || '') : (obj[tag] || '')).toString().trim();
         };
 
         const mapItem = (node) => {
