@@ -19,6 +19,7 @@ window.openLostDetailModalByIndex = openLostDetailModalByIndex;
 window.openLostReportModal = openLostReportModal;
 window.handleLostImageChange = handleLostImageChange;
 window.submitLostReport = submitLostReport;
+window.fetchFoundGoodsManual = fetchFoundGoods;
 window.selectFestivalMonth = selectFestivalMonth;
 window.openWechatQR = openWechatQR;
 window.closeWechatQR = closeWechatQR;
