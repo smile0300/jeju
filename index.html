@@ -315,7 +315,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 <div class="lost-header-row" style="margin-top: 45px;">
                     <div class="lost-filter-container search-filter-box">
                         <div class="filter-row">
-                            <select id="pkupCmdtyLclsfCd" class="filter-select">
+                            <select id="pkupCmdtyLclsfCd" class="filter-select" onchange="fetchFoundGoodsManual()">
                                 <option value="">选择物品分类</option>
                                 <option value="PRA000">包类</option>
                                 <option value="PRO000">首饰</option>
@@ -339,7 +339,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                             </select>
                         </div>
                         <div class="filter-row" style="display:flex;gap:10px;">
-                            <input type="date" id="lost-date" class="date-input" style="flex:1;">
+                            <input type="date" id="lost-date" class="date-input" style="flex:1;" onchange="fetchFoundGoodsManual()">
                             <script>
                                 (function () {
                                     const now = new Date();
@@ -367,7 +367,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                             <span class="btn-icon">📝</span> 找不到我的物品？在此登记报失
                         </button>
                     </div>
-                    <div id="lost-result-count" class="lost-result-count">共查询到 <strong>0</strong> 件丢失物品。</div>
+                    <div id="lost-result-count" class="lost-result-count">正在查询...</div>
                     <div class="view-toggle-container">
                         <button id="btn-view-card" class="view-toggle-btn active"
                             onclick="switchLostView('card')">卡片模式</button>

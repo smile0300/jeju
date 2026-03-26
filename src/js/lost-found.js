@@ -32,6 +32,7 @@ export async function fetchFoundGoods() {
         const category = categoryInput?.value || '';
 
         const countDisplay = document.getElementById('lost-result-count');
+        if (countDisplay) countDisplay.innerHTML = `正在查询...`;
         grid.innerHTML = '<div class="loading-lost"><p>正在加载信息...</p></div>';
 
         const commonParams = [`numOfRows=200`, `pageNo=1`, `N_FD_LCT_CD=LCP000`, `fdYmd=${selectedDate}`];
@@ -86,6 +87,8 @@ export async function fetchFoundGoods() {
         else renderLostGoodsTable(items);
     } catch (e) {
         console.error('Lost & Found API Error:', e);
+        const countDisplay = document.getElementById('lost-result-count');
+        if (countDisplay) countDisplay.innerHTML = `查询出错`;
         grid.innerHTML = '<div class="loading-lost">无法加载实时数据，请稍后再试</div>';
     }
 }
