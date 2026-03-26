@@ -386,6 +386,7 @@
 .search-filter-box {
     background: white; border-radius: 24px; padding: 24px; margin-top: 15px; margin-bottom: 30px;
     border: 1px solid var(--border-light); box-shadow: var(--shadow-md);
+    display: flex; flex-direction: column; gap: 12px;
 }
 .filter-select, .date-input {
     width: 100%; padding: 14px 16px; border-radius: 14px; border: 1.5px solid #edf2f7;
