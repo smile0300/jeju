@@ -3,7 +3,7 @@ import { initCCTV } from './cctv.js';
 import { fetchWeatherData } from './weather.js';
 import { fetchHallasanStatus } from './hallasan.js';
 import { fetchFlights } from './airport.js';
-import { fetchFoundGoods } from './lost-found.js';
+import { fetchFoundGoods } from './lost-found.v1.js';
 import { fetchFestivals } from './festival.js';
 
 export function showSection(sectionId) {

@@ -3,7 +3,7 @@ import { initCCTV, openCctvModalById, openCctvModal } from './cctv.js';
 import { fetchWeatherData, switchWeatherLocation, updateHourlyWeather, fetchWeatherAlerts } from './weather.js';
 import { fetchHallasanStatus } from './hallasan.js';
 import { fetchFlights, switchFlightTab } from './airport.js';
-import { submitLostReport, openLostReportModal, closeLostReportModal, handleLostImageChange, searchLostItems } from './lost-found.v1.js';
+import { fetchFoundGoods, switchLostView, openLostDetailModalByIndex, openLostReportModal, handleLostImageChange, submitLostReport } from './lost-found.v1.js';
 import { fetchFestivals, selectFestivalMonth, initMonthFilter } from './festival.js';
 import { showSection, openWechatQR, closeWechatQR, openFeatureModal, closeFeatureModal, submitFeatureRequest, copyWechatId } from './ui.js';
 
