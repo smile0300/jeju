@@ -222,6 +222,17 @@ export async function submitLostReport() {
         return;
     }
 
+    if (!data.photo) {
+        if (statusEl) {
+            statusEl.textContent = '请上传物品照片 (必填)';
+            statusEl.className = 'form-status error';
+            statusEl.style.display = 'block';
+        } else {
+            alert('请上传物品照片 (必填)');
+        }
+        return;
+    }
+
     try {
         if (statusEl) {
             statusEl.textContent = '正在提交...';
