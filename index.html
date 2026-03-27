@@ -14,10 +14,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="src/css/base.css">
-    <link rel="stylesheet" href="src/css/layout.css">
-    <link rel="stylesheet" href="src/css/components.css">
-    <link rel="stylesheet" href="src/css/sections.css">
+    <link rel="stylesheet" href="src/css/base.css?v=1.1">
+    <link rel="stylesheet" href="src/css/layout.css?v=1.1">
+    <link rel="stylesheet" href="src/css/components.css?v=1.1">
+    <link rel="stylesheet" href="src/css/sections.css?v=1.1">
     <script>
         // Global fallback stubs to prevent ReferenceError before modules load
         window.showSection = window.showSection || (() => { });
@@ -515,14 +515,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     </div>
                 </div>
                 <div id="lost-report-status" class="form-status"></div>
-                <button id="lost-report-submit-btn" class="form-submit-btn" onclick="submitLostReport()">提交报失登记</button>
+                <div class="form-row" style="margin-top: 15px; gap: 10px;">
+                    <button type="button" class="form-submit-btn secondary" style="flex: 1; margin-top: 0; background: #f1f5f9; color: #475569; box-shadow: none;" onclick="closeLostReportModal()">取消</button>
+                    <button id="lost-report-submit-btn" class="form-submit-btn" style="flex: 2; margin-top: 0;" onclick="submitLostReport()">提交报失登记</button>
+                </div>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    <script src="assets/curated_festivals.js"></script>
-    <script type="module" src="src/js/main.js"></script>
+    <script src="assets/curated_festivals.js?v=1.1"></script>
+    <script type="module" src="src/js/main.js?v=1.1"></script>
 </body>
 
 </html>
