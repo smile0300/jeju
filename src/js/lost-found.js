@@ -35,7 +35,7 @@ export async function fetchFoundGoods() {
         if (countDisplay) countDisplay.innerHTML = `正在查询...`;
         grid.innerHTML = '<div class="loading-lost"><p>正在加载信息...</p></div>';
 
-        const commonParams = [`numOfRows=200`, `pageNo=1`, `N_FD_LCT_CD=LCP019`, `fdYmd=${selectedDate}`];
+        const commonParams = [`numOfRows=200`, `pageNo=1`, `N_FD_LCT_CD=LCP000`, `fdYmd=${selectedDate}`];
         if (category) commonParams.push(`PRDT_CL_CD_01=${category}`);
 
         const polEndpoint = `http://apis.data.go.kr/1320000/LosfundInfoInqireService/getLosfundInfoAccToClAreaPd`;
