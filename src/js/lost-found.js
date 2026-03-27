@@ -196,6 +196,9 @@ export function handleLostImageChange(event) {
 }
 
 export async function submitLostReport() {
+    const statusEl = document.getElementById('lost-report-status');
+    const submitBtn = document.getElementById('lost-report-submit-btn');
+    
     const data = {
         type: 'lost_report',
         location: document.getElementById('lost-report-location').value.trim(),
@@ -209,21 +212,50 @@ export async function submitLostReport() {
     };
 
     if (!data.location || !data.date || !data.time || !data.itemName || !data.specifics || !data.wechatId) {
-        alert('请填写完整的信息'); return;
+        if (statusEl) {
+            statusEl.textContent = '请填写完整的信息';
+            statusEl.className = 'form-status error';
+            statusEl.style.display = 'block';
+        } else {
+            alert('请填写完整的信息');
+        }
+        return;
     }
 
     try {
+        if (statusEl) {
+            statusEl.textContent = '正在提交...';
+            statusEl.className = 'form-status';
+            statusEl.style.display = 'block';
+        }
+        if (submitBtn) submitBtn.disabled = true;
+
         const res = await fetch(`${CONFIG.PROXY_URL}/api/lost-report`, {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
         const result = await res.json();
         if (result.result === 'success') {
-            alert('提交成功！');
-            if (window.closeLostReportModal) window.closeLostReportModal();
-            else if (typeof closeLostReportModal === 'function') closeLostReportModal();
+            if (statusEl) {
+                statusEl.textContent = '提交成功！';
+                statusEl.className = 'form-status success';
+            } else {
+                alert('提交成功！');
+            }
+            
+            setTimeout(() => {
+                if (window.closeLostReportModal) window.closeLostReportModal();
+                else if (typeof closeLostReportModal === 'function') closeLostReportModal();
+            }, 1500);
         } else throw new Error(result.error);
     } catch (e) {
-        alert(`提交失败: ${e.message}`);
+        if (statusEl) {
+            statusEl.textContent = `提交失败: ${e.message}`;
+            statusEl.className = 'form-status error';
+        } else {
+            alert(`提交失败: ${e.message}`);
+        }
+    } finally {
+        if (submitBtn) submitBtn.disabled = false;
     }
 }

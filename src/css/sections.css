@@ -526,10 +526,10 @@
 .lost-report-btn:hover { background: rgba(37, 99, 235, 0.05); border-style: solid; transform: translateY(-2px); box-shadow: var(--shadow-sm); }
 
 /* Lost Report Form Premium Styles (v8.2) */
-.lost-report-form-content { max-width: 500px; padding: 30px; border-radius: 24px; }
+.lost-report-form-content { width: 95%; max-width: 500px; padding: 30px; border-radius: 24px; }
 .lost-report-header { text-align: center; margin-bottom: 25px; }
 .lost-report-header h3 { font-size: 1.4rem; color: var(--text-primary); margin-bottom: 8px; }
-.lost-report-header p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; }
+.lost-report-header p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; padding: 0 10px; }
 
 .lost-report-body .form-group { margin-bottom: 18px; display: flex; flex-direction: column; gap: 6px; }
 .lost-report-body label { font-size: 0.82rem; font-weight: 800; color: var(--text-secondary); margin-left: 4px; }
@@ -558,3 +558,11 @@
 .form-status { margin-top: 15px; padding: 12px; border-radius: 10px; font-size: 0.85rem; font-weight: 700; text-align: center; animation: fadeIn 0.3s ease; }
 .form-status.success { background: #ecfdf5; color: #059669; }
 .form-status.error { background: #fef2f2; color: #dc2626; }
+
+@media (max-width: 600px) {
+    .lost-report-form-content { padding: 20px 15px; border-radius: 16px; }
+    .lost-report-header h3 { font-size: 1.2rem; }
+    .lost-report-body .form-row { flex-direction: column; gap: 0; }
+    .lost-report-body input, .lost-report-body textarea { padding: 10px 12px; font-size: 0.88rem; }
+    .form-submit-btn { padding: 14px; font-size: 1rem; }
+}

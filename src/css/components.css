@@ -72,8 +72,10 @@
     -webkit-backdrop-filter: blur(8px);
     z-index: 9999; 
     display: flex; 
-    align-items: center; 
+    align-items: flex-start; /* Tall content starts from top */
     justify-content: center; 
+    padding: 40px 10px; /* Space for scroll on small screens */
+    overflow-y: auto; /* Enable scrolling */
     animation: fadeIn 0.3s ease;
 }
 
@@ -86,8 +88,12 @@
     padding: 2px;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     animation: modalScaleUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    overflow: hidden;
+    /* Remove overflow: hidden to allow internal scroll if needed, 
+       but keeping it might be okay if overlay scrolls. 
+       However, the form might need its own scroll if it's very complex. 
+       For now, let's keep it but ensure the overlay handles it. */
     border: 1px solid rgba(255,255,255,0.1);
+    margin: auto 0; /* Keeps it centered if content is smaller than viewport */
 }
 
 @keyframes modalScaleUp {
