@@ -127,6 +127,8 @@
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     min-height: 110px;
+    outline: none; /* Add this to remove blue outline on focus */
+    font-family: inherit; /* Ensure font matches app */
 }
 
 .home-item:active {
