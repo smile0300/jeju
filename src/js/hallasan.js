@@ -36,24 +36,19 @@ export async function fetchHallasanStatus() {
         </div>`;
 
     try {
-        const targetUrl = 'https://jeju.go.kr/hallasan/index.htm';
-        const url = `${CONFIG.PROXY_URL}/api/public-data?endpoint=${encodeURIComponent(targetUrl)}`;
+        const url = `${CONFIG.PROXY_URL}/api/hallasan-status`;
         const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
-        const html = await res.text();
-
-        const blockPattern = /<dl[^>]*class="main-visit-list"[\s\S]*?<\/dl>/g;
-        const namePattern = /<dt>(.*?)<\/dt>/;
-        const statusPattern = /<dd[^>]*class="situation"[^>]*>(.*?)<\/dd>/;
-
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        
+        const statusMapList = await res.json();
+        
+        // Convert list to easy-access map
         const statusMap = {};
-        let block;
-        while ((block = blockPattern.exec(html)) !== null) {
-            const nm = namePattern.exec(block[0]);
-            const st = statusPattern.exec(block[0]);
-            if (nm && st) statusMap[nm[1].trim()] = st[1].trim();
-        }
+        statusMapList.forEach(item => {
+            statusMap[item.name] = item.status;
+        });
 
-        if (Object.keys(statusMap).length === 0) throw new Error('파싱 결과 없음');
+        if (Object.keys(statusMap).length === 0) throw new Error('API 반환값 비어있음');
 
         const trails = HALLASAN_TRAILS.map(t => {
             const koStatus = statusMap[t.nameKo] || '정상운영';

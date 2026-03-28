@@ -201,6 +201,48 @@ export default {
       }
     }
 
+    // 3. 한라산 탐방로 상태 JSON 변환 엔드포인트
+    if (url.pathname === '/api/hallasan-status') {
+      try {
+        const targetUrl = 'https://jeju.go.kr/hallasan/index.htm';
+        const response = await fetch(targetUrl, {
+          headers: { 
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' 
+          }
+        });
+        const html = await response.text();
+
+        const blockPattern = /<dl[^>]*class="main-visit-list"[\s\S]*?<\/dl>/g;
+        const namePattern = /<dt>(.*?)<\/dt>/;
+        const statusPattern = /<dd[^>]*class="situation"[^>]*>(.*?)<\/dd>/;
+
+        const results = [];
+        let match;
+        while ((match = blockPattern.exec(html)) !== null) {
+          const nameMatch = namePattern.exec(match[0]);
+          const statusMatch = statusPattern.exec(match[0]);
+          if (nameMatch && statusMatch) {
+            results.push({
+              name: nameMatch[1].trim(),
+              status: statusMatch[1].trim()
+            });
+          }
+        }
+
+        return new Response(JSON.stringify(results), {
+          headers: { 
+            'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
+            'Content-Type': 'application/json; charset=utf-8' 
+          }
+        });
+      } catch (e) {
+        return new Response(JSON.stringify({ error: `Server-side parsing failed: ${e.message}` }), {
+          status: 500,
+          headers: { 'Access-Control-Allow-Origin': ALLOWED_ORIGIN, 'Content-Type': 'application/json' }
+        });
+      }
+    }
+
     return new Response('Not Found', { 
       status: 404,
       headers: { 'Access-Control-Allow-Origin': ALLOWED_ORIGIN }
