@@ -5,7 +5,8 @@ import { fetchHallasanStatus } from './hallasan.js';
 import { fetchFlights, switchFlightTab } from './airport.js';
 import { fetchFoundGoods, switchLostView, openLostDetailModalByIndex, openLostReportModal, handleLostImageChange, submitLostReport } from './lost-found.v1.js';
 import { fetchFestivals, selectFestivalMonth, initMonthFilter } from './festival.js';
-import { showSection, openWechatQR, closeWechatQR, openFeatureModal, closeFeatureModal, submitFeatureRequest, copyWechatId } from './ui.js';
+import { showSection, openWechatQR, closeWechatQR, openFeatureModal, closeFeatureModal, submitFeatureRequest, copyWechatId, openWeatherSummaryModal, closeWeatherSummaryModal } from './ui.js';
+
 
 // Global function assignments for HTML event handlers
 window.showSection = showSection;
@@ -27,6 +28,9 @@ window.openFeatureModal = openFeatureModal;
 window.closeFeatureModal = closeFeatureModal;
 window.submitFeatureRequest = submitFeatureRequest;
 window.copyWechatId = copyWechatId;
+window.openWeatherSummaryModal = openWeatherSummaryModal;
+window.closeWeatherSummaryModal = closeWeatherSummaryModal;
+
 // Modals closing
 window.closeCctvModal = () => { document.getElementById('cctv-modal').style.display = 'none'; document.getElementById('modal-body').innerHTML = ''; };
 window.closeLostDetailModal = () => { document.getElementById('lost-detail-modal').style.display = 'none'; document.body.style.overflow = 'auto'; };

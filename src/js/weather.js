@@ -261,6 +261,19 @@ export function updateHourlyWeather(locKey, targetYmd) {
         const m = targetYmd.slice(4, 6);
         const d = targetYmd.slice(6, 8);
         titleEl.textContent = `${parseInt(m)}月 ${parseInt(d)}日 详细预报`;
+
+        // jeju 탭에만 '간략하게 보기' 버튼을 제목 옆에 삽입
+        if (locKey === 'jeju') {
+            const titleWrap = titleEl.parentElement;
+            if (titleWrap && !titleWrap.querySelector('.weather-summary-btn')) {
+                titleWrap.style.cssText = 'display:flex;align-items:center;gap:10px;flex-wrap:wrap;';
+                const btn = document.createElement('button');
+                btn.className = 'weather-summary-btn';
+                btn.textContent = '간략하게 보기';
+                btn.onclick = () => window.openWeatherSummaryModal();
+                titleWrap.appendChild(btn);
+            }
+        }
     }
 
     const hourlyEl = document.getElementById(`hourly-${locKey}`);

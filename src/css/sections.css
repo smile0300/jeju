@@ -566,3 +566,190 @@
     .lost-report-body input, .lost-report-body textarea { padding: 10px 12px; font-size: 0.88rem; }
     .form-submit-btn { padding: 14px; font-size: 1rem; }
 }
+
+/* ==================== 날씨 요약 버튼 ==================== */
+.weather-summary-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 14px;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: white;
+    font-size: 0.78rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    box-shadow: 0 3px 10px rgba(79, 70, 229, 0.3);
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+.weather-summary-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 16px rgba(79, 70, 229, 0.4);
+}
+.weather-summary-btn:active { transform: scale(0.97); }
+
+/* ==================== 날씨 요약 모달 ==================== */
+.wsm-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(6px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9000;
+    padding: 16px;
+    box-sizing: border-box;
+}
+
+.wsm-panel {
+    background: linear-gradient(145deg, #0f1728, #1a2440);
+    border-radius: 28px;
+    width: 100%;
+    max-width: 820px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    flex-direction: column;
+    scrollbar-width: none;
+}
+.wsm-panel::-webkit-scrollbar { display: none; }
+
+/* 헤더 */
+.wsm-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 22px 24px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    position: sticky;
+    top: 0;
+    background: linear-gradient(145deg, #0f1728, #1a2440);
+    z-index: 1;
+    border-radius: 28px 28px 0 0;
+}
+.wsm-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #e2e8f0;
+    letter-spacing: -0.3px;
+}
+.wsm-date {
+    font-size: 0.82rem;
+    color: #64748b;
+    font-weight: 600;
+    margin-top: 3px;
+}
+.wsm-close-btn {
+    background: rgba(255,255,255,0.08);
+    border: none;
+    color: #94a3b8;
+    font-size: 1rem;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s;
+}
+.wsm-close-btn:hover { background: rgba(255,255,255,0.15); color: white; }
+
+/* 4열 그리드 */
+.wsm-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    padding: 0 8px 8px;
+}
+
+.wsm-col {
+    padding: 12px 6px;
+    border-right: 1px solid rgba(255,255,255,0.06);
+}
+.wsm-col:last-child { border-right: none; }
+
+.wsm-col-head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 10px 0 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    margin-bottom: 8px;
+}
+.wsm-col-icon { font-size: 1.6rem; }
+.wsm-col-label {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: #93c5fd;
+    letter-spacing: 0.3px;
+}
+
+/* 시간별 행 */
+.wsm-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 8px 4px;
+    border-radius: 10px;
+    transition: background 0.15s;
+}
+.wsm-row:hover { background: rgba(255,255,255,0.05); }
+
+.wsm-time {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #64748b;
+}
+.wsm-icon { font-size: 1.3rem; }
+.wsm-temp {
+    font-size: 1rem;
+    font-weight: 900;
+    color: #e2e8f0;
+}
+.wsm-wind {
+    font-size: 0.68rem;
+    color: #94a3b8;
+    font-weight: 600;
+}
+.wsm-pop {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: #94a3b8;
+}
+.wsm-pop.pop-hi { color: #60a5fa; }
+
+.wsm-nodata {
+    text-align: center;
+    color: #475569;
+    font-size: 0.78rem;
+    padding: 20px 0;
+}
+
+/* 푸터 */
+.wsm-footer {
+    text-align: center;
+    padding: 12px 16px 18px;
+    font-size: 0.75rem;
+    color: #334155;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+/* 모바일 반응형 */
+@media (max-width: 600px) {
+    .wsm-panel { border-radius: 20px; max-height: 92vh; }
+    .wsm-grid { grid-template-columns: repeat(2, 1fr); }
+    .wsm-col:nth-child(2) { border-right: none; }
+    .wsm-title { font-size: 1.05rem; }
+}
+
