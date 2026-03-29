@@ -93,63 +93,73 @@ export function copyWechatId() {
 
 // ─── 날씨 요약 모달 ────────────────────────────────────────────
 const LOC_META = {
-    jeju:     { label: '济州市', icon: '🏙' },
-    seogwipo: { label: '西归浦', icon: '🌊' },
-    hallasan: { label: '汉拿山', icon: '⛰️' },
-    udo:      { label: '牛岛',   icon: '🐄' },
+    jeju:     { title: '济州市 (莲洞)', sub: 'Yeon-dong' },
+    seogwipo: { title: '西归浦 (中文)', sub: 'Jungmun' },
+    hallasan: { title: '汉拿山 (御里牧)', sub: 'Halla Mountain' },
+    udo:      { title: '牛岛', sub: 'Udo Island' },
 };
 
 function _buildSummaryHTML() {
     const kstNow = new Date(Date.now() + 9 * 60 * 60 * 1000);
     const todayYmd = kstNow.toISOString().slice(0, 10).replace(/-/g, '');
-    const dateLabel = `${parseInt(todayYmd.slice(4,6))}月${parseInt(todayYmd.slice(6,8))}日`;
-    const nowHH = kstNow.getUTCHours();
+    const dateLabel = `${parseInt(todayYmd.slice(4,6))}月 ${parseInt(todayYmd.slice(6,8))}日`;
 
-    let cols = '';
+    let content = '';
     for (const [locKey, meta] of Object.entries(LOC_META)) {
         const state = WEATHER_STATE[locKey];
-        let rows = '';
+        let itemsHTML = '';
         if (state) {
-            const keys = state.sortedKeys.filter(k => k.startsWith(todayYmd));
-            const startIdx = Math.max(0, keys.findIndex(k => parseInt(k.slice(8,10)) >= nowHH));
-            const slots = keys.slice(startIdx, startIdx + 9);
+            const keys = state.sortedKeys.filter(k => {
+                if(!k.startsWith(todayYmd)) return false;
+                const h = parseInt(k.slice(8, 10));
+                return h >= 6 && h <= 23;
+            });
 
-            rows = slots.map(k => {
+            itemsHTML = keys.map(k => {
                 const d = state.items[k];
                 const sky = getSkyInfo(d?.PTY, d?.SKY);
-                const time = k.slice(8,10) + ':00';
+                const hStr = parseInt(k.slice(8, 10)) + 'h';
                 const tmp  = d?.TMP ?? '--';
                 const wsd  = d?.WSD ?? '-';
-                const pop  = d?.POP ?? '0';
-                return `<div class="wsm-row">
-                    <div class="wsm-time">${time}</div>
-                    <div class="wsm-icon">${sky.icon}</div>
-                    <div class="wsm-temp">${tmp}°</div>
-                    <div class="wsm-wind">💨${wsd}m/s</div>
-                    <div class="wsm-pop ${parseInt(pop)>=50?'pop-hi':''}">💧${pop}%</div>
+                
+                let pcp = '0mm';
+                let isRain = false;
+                if (d?.PCP && d.PCP !== '강수없음') {
+                    isRain = true;
+                    if (d.PCP.includes('미만')) pcp = '~1mm';
+                    else if (d.PCP.includes('이상')) pcp = d.PCP.replace('이상', '').trim();
+                    else pcp = d.PCP;
+                }
+
+                return `<div class="wsm-h-item">
+                    <div class="h-time">${hStr}</div>
+                    <div class="h-icon">${sky.icon}</div>
+                    <div class="h-temp">${tmp}°</div>
+                    <div class="h-wind">${wsd}m/s</div>
+                    <div class="h-precip ${isRain ? 'p-blue' : ''}">${pcp}</div>
                 </div>`;
             }).join('');
         }
-        if (!rows) rows = `<div class="wsm-nodata">로딩 중...</div>`;
+        if (!itemsHTML) itemsHTML = `<div class="wsm-nodata">加载中...</div>`;
 
-        cols += `<div class="wsm-col">
-            <div class="wsm-col-head">
-                <span class="wsm-col-icon">${meta.icon}</span>
-                <span class="wsm-col-label">${meta.label}</span>
-            </div>
-            <div class="wsm-rows">${rows}</div>
+        content += `
+        <div class="wsm-loc-block">
+            <h3 class="wsm-loc-title">${meta.title} <span class="wsm-loc-sub">${meta.sub}</span></h3>
+            <div class="wsm-hourly-grid">${itemsHTML}</div>
         </div>`;
     }
 
-    return `<div class="wsm-header">
-        <div>
-            <div class="wsm-title">🗾 제주도 오늘 날씨</div>
-            <div class="wsm-date">${dateLabel} 실시간 시간대별 날씨</div>
+    return `
+    <div class="wsm-header2">
+        <div class="wsm-title-bar">
+            <span>☀️ 今日逐时预报 (全天)</span>
+            <span class="wsm-date-badge">${dateLabel}</span>
         </div>
-        <button class="wsm-close-btn" onclick="window.closeWeatherSummaryModal()">✕</button>
+        <button class="wsm-close-btn2" onclick="window.closeWeatherSummaryModal()">✕</button>
     </div>
-    <div class="wsm-grid">${cols}</div>
-    <div class="wsm-footer">jeju-live.com · 济州旅行秘书 · 실시간 제주 날씨</div>`;
+    <div class="wsm-body2">
+        ${content}
+    </div>`;
 }
 
 export function openWeatherSummaryModal() {

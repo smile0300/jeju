@@ -277,7 +277,7 @@ export function updateHourlyWeather(locKey, targetYmd) {
             if (!btn) {
                 btn = document.createElement('button');
                 btn.className = 'weather-summary-btn';
-                btn.textContent = '간략하게 보기';
+                btn.textContent = '今日逐时预报';
                 btn.onclick = () => window.openWeatherSummaryModal();
                 titleWrap.appendChild(btn);
             }
