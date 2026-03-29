@@ -199,8 +199,29 @@
     font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
-.hourly-scroll { display: flex; gap: 8px; overflow-x: auto; padding: 16px 4px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-.hourly-scroll::-webkit-scrollbar { display: none; }
+.hourly-scroll { 
+    display: flex; 
+    gap: 8px; 
+    overflow-x: auto; 
+    padding: 16px 4px 20px; 
+    -webkit-overflow-scrolling: touch; 
+}
+
+/* Custom Scrollbar for Hourly Section */
+.hourly-scroll::-webkit-scrollbar {
+    height: 4px; /* Thin scrollbar */
+    display: block;
+}
+.hourly-scroll::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
+}
+.hourly-scroll::-webkit-scrollbar-thumb {
+    background: var(--accent-blue);
+    opacity: 0.5;
+    border-radius: 10px;
+}
+
 .hourly-item {
     background: white; border-radius: 16px;
     padding: 12px 8px; min-width: 80px; text-align: center;
@@ -213,8 +234,24 @@
 .hourly-wind { font-size: 0.72rem; color: var(--text-muted); font-weight: 600; margin-bottom: 2px; }
 .hourly-precip { font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); }
 .hourly-precip.precip-blue { color: var(--accent-blue); }
+
 /* Titles and Alignment */
-.subsection-title, .cmp-cur-weather-head { text-align: center; margin-top: 35px; margin-bottom: 20px; width: 100%; display: block; font-size: 1.15rem; font-weight: 800; }
+.subsection-title-wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 35px;
+    margin-bottom: 20px;
+    padding: 0 4px;
+}
+.subsection-title, .cmp-cur-weather-head { 
+    margin: 0; 
+    font-size: 1.15rem; 
+    font-weight: 800; 
+}
+.weather-summary-btn {
+    margin-left: auto; /* Push to the right */
+}
 .bar-title { flex: 1; text-align: center; margin-right: 40px; }
 
 .weekly-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }

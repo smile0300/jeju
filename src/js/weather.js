@@ -262,12 +262,20 @@ export function updateHourlyWeather(locKey, targetYmd) {
         const d = targetYmd.slice(6, 8);
         titleEl.textContent = `${parseInt(m)}月 ${parseInt(d)}日 详细预报`;
 
-        // jeju 탭에만 '간략하게 보기' 버튼을 제목 옆에 삽입
+        // Wrap title in a flex container if not already
+        let titleWrap = titleEl.parentElement;
+        if (!titleWrap.classList.contains('subsection-title-wrap')) {
+            titleWrap = document.createElement('div');
+            titleWrap.className = 'subsection-title-wrap';
+            titleEl.parentNode.insertBefore(titleWrap, titleEl);
+            titleWrap.appendChild(titleEl);
+        }
+
+        // Add '간략하게 보기' button only for Jeju tab
         if (locKey === 'jeju') {
-            const titleWrap = titleEl.parentElement;
-            if (titleWrap && !titleWrap.querySelector('.weather-summary-btn')) {
-                titleWrap.style.cssText = 'display:flex;align-items:center;gap:10px;flex-wrap:wrap;';
-                const btn = document.createElement('button');
+            let btn = titleWrap.querySelector('.weather-summary-btn');
+            if (!btn) {
+                btn = document.createElement('button');
                 btn.className = 'weather-summary-btn';
                 btn.textContent = '간략하게 보기';
                 btn.onclick = () => window.openWeatherSummaryModal();
@@ -351,10 +359,11 @@ export function renderWeatherError(locKey) {
     const container = document.getElementById(`current-weather-${locKey}`);
     if (container) {
         container.innerHTML = `
-            <div class="weather-loader" style="color:var(--accent-red);">
+            <div class="weather-loader" style="color:var(--accent-red); padding: 40px 20px;">
                 <div style="font-size:2rem; margin-bottom:10px;">⚠️</div>
-                <div class="weather-loading-text" style="color:var(--accent-red);">天气数据加载失败</div>
-                <p style="font-size:0.75rem; color:var(--text-muted); margin-top:5px;">暂时无法获取实时天气信息，请稍后再试。</p>
+                <div class="weather-loading-text" style="color:var(--accent-red); margin-bottom: 12px;">天气数据加载失败</div>
+                <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom: 20px;">暂时无法获取实时天气信息，请稍后再试。</p>
+                <button class="feature-request-btn" onclick="switchWeatherLocation('${locKey}')" style="font-size: 0.85rem; padding: 8px 18px; border-color: var(--accent-red); color: var(--accent-red);">🔄 刷新 / 다시 시도</button>
             </div>
         `;
     }
