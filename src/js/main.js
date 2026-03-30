@@ -1,11 +1,11 @@
 import { CONFIG } from './config.js';
 import { initCCTV, openCctvModalById, openCctvModal } from './cctv.js';
-import { fetchWeatherData, switchWeatherLocation, updateHourlyWeather, fetchWeatherAlerts } from './weather.js?v=2';
+import { fetchWeatherData, switchWeatherLocation, updateHourlyWeather, fetchWeatherAlerts } from './weather.js';
 import { fetchHallasanStatus } from './hallasan.js';
 import { fetchFlights, switchFlightTab } from './airport.js';
 import { fetchFoundGoods, switchLostView, openLostDetailModalByIndex, openLostReportModal, handleLostImageChange, submitLostReport } from './lost-found.v1.js';
 import { fetchFestivals, selectFestivalMonth, initMonthFilter } from './festival.js';
-import { showSection, openWechatQR, closeWechatQR, openFeatureModal, closeFeatureModal, submitFeatureRequest, copyWechatId, openWeatherSummaryModal, closeWeatherSummaryModal } from './ui.js?v=2';
+import { showSection, openWechatQR, closeWechatQR, openFeatureModal, closeFeatureModal, submitFeatureRequest, copyWechatId, openWeatherSummaryModal, closeWeatherSummaryModal } from './ui.js';
 
 
 // Global function assignments for HTML event handlers
