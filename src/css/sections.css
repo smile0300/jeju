@@ -241,21 +241,43 @@
     justify-content: center;
     align-items: center;
     position: relative;
-    margin-top: 35px;
-    margin-bottom: 20px;
+    margin: 0;
     padding: 0 4px;
 }
 .subsection-title, .cmp-cur-weather-head { 
-    margin: 0; 
+    margin: 35px 0 20px 0; 
     font-size: 1.15rem; 
     font-weight: 800; 
     text-align: center;
     width: 100%;
 }
+.subsection-title-wrap .subsection-title {
+    padding: 0 75px; 
+    box-sizing: border-box;
+}
 .weather-summary-btn {
     position: absolute;
     right: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 5px 10px;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 3px 10px rgba(79, 70, 229, 0.3);
+    transition: transform 0.15s, box-shadow 0.15s;
 }
+.weather-summary-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 16px rgba(79, 70, 229, 0.4);
+}
+.weather-summary-btn:active { transform: scale(0.97); }
 .bar-title { flex: 1; text-align: center; margin-right: 40px; }
 
 .weekly-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
@@ -609,28 +631,7 @@
 }
 
 /* ==================== 날씨 요약 버튼 ==================== */
-.weather-summary-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 5px 14px;
-    background: linear-gradient(135deg, #4f46e5, #7c3aed);
-    color: white;
-    font-size: 0.78rem;
-    font-weight: 700;
-    border: none;
-    border-radius: 20px;
-    cursor: pointer;
-    white-space: nowrap;
-    flex-shrink: 0;
-    box-shadow: 0 3px 10px rgba(79, 70, 229, 0.3);
-    transition: transform 0.15s, box-shadow 0.15s;
-}
-.weather-summary-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 5px 16px rgba(79, 70, 229, 0.4);
-}
-.weather-summary-btn:active { transform: scale(0.97); }
+/* weather-summary-btn is defined in the top titles area */
 
 /* ==================== 날씨 요약 모달 ==================== */
 .wsm-overlay {

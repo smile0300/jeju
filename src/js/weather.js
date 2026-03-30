@@ -271,13 +271,13 @@ export function updateHourlyWeather(locKey, targetYmd) {
             titleWrap.appendChild(titleEl);
         }
 
-        // Add '간략하게 보기' button only for Jeju tab
+        // Add '简略查看' button only for Jeju tab
         if (locKey === 'jeju') {
             let btn = titleWrap.querySelector('.weather-summary-btn');
             if (!btn) {
                 btn = document.createElement('button');
                 btn.className = 'weather-summary-btn';
-                btn.textContent = '今日逐时预报';
+                btn.textContent = '简略查看';
                 btn.onclick = () => window.openWeatherSummaryModal();
                 titleWrap.appendChild(btn);
             }
