@@ -578,6 +578,96 @@
     border: 1px solid var(--border-light);
 }
 
+/* Lost Item Modal Layout Fix */
+.lost-modal-img-container {
+    width: 100%;
+    height: 250px;
+    background: #f8fafc;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 20px 20px 0 0;
+}
+.lost-modal-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* Prevents image from stretching out of bounds */
+}
+.lost-modal-no-img {
+    font-size: 3rem;
+    color: #cbd5e1;
+}
+.lost-modal-info {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.lost-modal-header {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.lost-modal-category {
+    font-size: 0.8rem;
+    color: var(--accent-blue);
+    font-weight: 800;
+}
+.lost-modal-title {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1.3;
+}
+.lost-modal-details {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: #f8fafc;
+    padding: 16px;
+    border-radius: 16px;
+}
+.lost-modal-field {
+    display: flex;
+    gap: 12px;
+    font-size: 0.95rem;
+}
+.lost-modal-label {
+    color: var(--text-muted);
+    font-weight: 600;
+    min-width: 70px;
+}
+.lost-modal-value {
+    color: var(--text-primary);
+    font-weight: 700;
+}
+.lost-modal-footer {
+    padding-top: 5px;
+    display: flex;
+    gap: 12px;
+}
+.lost-modal-btn {
+    flex: 1;
+    padding: 14px;
+    border-radius: 14px;
+    font-weight: 800;
+    text-align: center;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+.lost-modal-btn.primary {
+    background: var(--primary-gradient);
+    color: white;
+}
+.lost-modal-btn.secondary {
+    background: #f1f5f9;
+    color: var(--text-secondary);
+}
+
 .lost-report-btn {
     width: 100%; padding: 16px; border-radius: 16px; border: 1.5px dashed var(--accent-blue);
     background: white; color: var(--accent-blue);
