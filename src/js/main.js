@@ -1,3 +1,4 @@
+
 import { CONFIG } from './config.js';
 import { initCCTV, openCctvModalById, openCctvModal } from './cctv.js';
 import { fetchWeatherData, switchWeatherLocation, updateHourlyWeather, fetchWeatherAlerts } from './weather.js';
