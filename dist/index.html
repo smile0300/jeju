@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-PH989GKL');</script>
+<!-- End Google Tag Manager -->
+    <!-- Google AdSense Manual Ads Loader -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9426998811195324"
+        crossorigin="anonymous"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        // Global fallback stubs to prevent ReferenceError before modules load
+        window.showSection = window.showSection || (() => { });
+        window.openCctvModalById = window.openCctvModalById || (() => { });
+        window.switchWeatherLocation = window.switchWeatherLocation || (() => { });
+        window.switchFlightTab = window.switchFlightTab || (() => { });
+        window.switchLostView = window.switchLostView || (() => { });
+        window.selectFestivalMonth = window.selectFestivalMonth || (() => { });
+        window.openFeatureModal = window.openFeatureModal || (() => { });
+        window.closeFeatureModal = window.closeFeatureModal || (() => { });
+        window.submitFeatureRequest = window.submitFeatureRequest || (() => { });
+        window.openLostReportModal = window.openLostReportModal || (() => { });
+        window.closeLostReportModal = window.closeLostReportModal || (() => { });
+        window.submitLostReport = window.submitLostReport || (() => { });
+        window.fetchFoundGoodsManual = window.fetchFoundGoodsManual || (() => { });
+        window.openWechatQR = window.openWechatQR || (() => { });
+        window.closeWechatQR = window.closeWechatQR || (() => { });
+        window.copyWechatId = window.copyWechatId || (() => { });
+        window.closeCctvModal = window.closeCctvModal || (() => { });
+        window.closeLostDetailModal = window.closeLostDetailModal || (() => { });
+        window.handleLostImageChange = window.handleLostImageChange || (() => { });
+
+        // Mobile global error handler for debugging
+        window.onerror = function(msg, url, lineNo, columnNo, error) {
+            const errorMsg = "❌ JS Error: " + msg + "\nAt: " + lineNo + ":" + columnNo + "\nUrl: " + url;
+            console.error(errorMsg);
+            // Show alert only for non-GTM related errors to avoid noise
+            if (!url.includes('gtm.js') && !url.includes('adsbygoogle.js')) {
+                alert(errorMsg + "\n\n请截图此错误并联系开发人员。");
+            }
+            return false;
+        };
+
+        // CORS detection for local file protocol
+        if (window.location.protocol === 'file:') {
+            console.warn('⚠️ 济州旅行秘书: 检测到正在通过 file:// 协议访问。由于浏览器 CORS 安全策略，ES 模块(JS)可能无法加载。建议使用 VS Code Live Server 或 Local Web Server。');
+            window.addEventListener('load', () => {
+                setTimeout(() => {
+                    if (window.showSection.toString().includes('() => { }') || window.showSection.toString().includes('()=>{}')) {
+                        const msg = '❌ 脚本加载失败: 浏览器阻止了本地 JS 模块的加载。\n\n解决办法:\n1. 使用 VS Code 의 "Live Server" 插件运行\n2. 或者在终端运行 "python -m http.server"\n3. 然后通过 http://localhost... 访问';
+                        console.error(msg);
+                        alert(msg);
+                    }
+                }, 1500);
+            });
+        }
+    </script>
+
+  <script type="module" crossorigin src="/assets/index-ieMOUuT2.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-BPA89mEK.css">
+</head>
+
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PH989GKL"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+    <header class="app-bar home-bar" id="main-app-bar"></header>
+
+    <!-- ===== Home Section ===== -->
+<section id="home" class="app-section active">
+    <div class="home-screen">
+        <div class="home-welcome">
+            <h1>测试模式</h1>
+            <p><strong>请提出您在济州岛旅行中的不便之处！</strong></p>
+            <button class="feature-request-btn" onclick="openFeatureModal()">💡 提交建议 / 意见反馈</button>
+        </div>
+
+        <!-- ===== Feature Request Modal ===== -->
+        <div id="feature-request-modal" class="modal-overlay" style="display:none; z-index: 10001;"
+            onclick="closeFeatureModal()">
+            <div class="modal-content" style="max-width: 400px; padding: 30px; background: white;"
+                onclick="event.stopPropagation()">
+                <button class="modal-close" style="color: #333;" onclick="closeFeatureModal()">✕</button>
+                <h3 style="margin-bottom: 12px; font-size: 1.25rem; color: var(--text-primary);">💡 提交建议或功能请求</h3>
+                <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 20px;">您的反馈对我们非常重要！</p>
+                <textarea id="feature-content" placeholder="在此输入您的建议或发现的漏洞..."
+                    style="width: 100%; min-height: 120px; padding: 15px; border-radius: 12px; border: 1.5px solid #eee; font-family: inherit; font-size: 0.95rem; resize: vertical; margin-bottom: 20px; outline: none; transition: border-color 0.2s;"></textarea>
+                <button id="feature-submit-btn" onclick="submitFeatureRequest()"
+                    style="width: 100%; padding: 14px; border-radius: 12px; background: var(--primary-gradient); color: white; border: none; font-size: 1rem; font-weight: 700; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;">提交反馈</button>
+                <div id="feature-status"
+                    style="margin-top: 15px; font-size: 0.85rem; text-align: center; display: none;"></div>
+            </div>
+        </div>
+        <div class="home-grid">
+            <button class="home-item item-cctv" onclick="showSection('cctv')" type="button">
+                <span class="item-icon">📹</span>
+                <span class="item-label">实时监控</span>
+            </button>
+            <button class="home-item item-weather" onclick="showSection('weather')" type="button">
+                <span class="item-icon">🌤️</span>
+                <span class="item-label">天气预报</span>
+            </button>
+            <button class="home-item item-hallasan" onclick="showSection('hallasan')" type="button">
+                <span class="item-icon">⛰️</span>
+                <span class="item-label">汉拿山</span>
+            </button>
+            <button class="home-item item-airport" onclick="showSection('airport')" type="button">
+                <span class="item-icon">✈️</span>
+                <span class="item-label">机场信息</span>
+            </button>
+            <button class="home-item item-lost" onclick="showSection('lost-found')" type="button">
+                <span class="item-icon">🔍</span>
+                <span class="item-label">失物招领</span>
+            </button>
+            <button class="home-item item-festival" onclick="showSection('festival')" type="button">
+                <span class="item-icon">🎉</span>
+                <span class="item-label">节日活动</span>
+            </button>
+            <!-- 빈 항목들 -->
+            <div class="home-item item-empty"></div>
+            <div class="home-item item-empty"></div>
+            <div class="home-item item-empty"></div>
+        </div>
+    </div>
+</section>
+
+    <!-- ===== CCTV Section ===== -->
+<section id="cctv" class="app-section">
+    <header class="app-bar">
+        <button class="back-btn" onclick="showSection('home')">←</button>
+        <h2 class="bar-title">📹 实时监控</h2>
+    </header>
+    <div class="section">
+        <div class="container">
+            <div class="cctv-grid" id="cctv-grid">
+                <!-- CCTV Cards will be injected by JS -->
+            </div>
+        </div>
+    </div>
+</section>
+
+    <!-- ===== Weather Section ===== -->
+<section id="weather" class="app-section">
+    <header class="app-bar">
+        <button class="back-btn" onclick="showSection('home')">←</button>
+        <h2 class="bar-title">🌤️ 天气预报</h2>
+    </header>
+    <div class="section section-alt">
+        <div class="container">
+            <div id="weather-alerts-container" class="weather-alerts-container"
+                style="display: none; margin-top: 45px;"></div>
+            <div class="location-tabs" id="location-tabs">
+                <button class="location-tab active" data-loc="jeju" onclick="switchWeatherLocation('jeju')">
+                    <span class="tab-icon">🏙️</span>
+                    <span class="tab-name">济州市</span>
+                </button>
+                <button class="location-tab" data-loc="seogwipo" onclick="switchWeatherLocation('seogwipo')">
+                    <span class="tab-icon">🌺</span>
+                    <span class="tab-name">西归浦</span>
+                </button>
+                <button class="location-tab" data-loc="hallasan" onclick="switchWeatherLocation('hallasan')">
+                    <span class="tab-icon">⛰️</span>
+                    <span class="tab-name">汉拿山</span>
+                </button>
+                <button class="location-tab" data-loc="udo" onclick="switchWeatherLocation('udo')">
+                    <span class="tab-icon">🐄</span>
+                    <span class="tab-name">牛岛</span>
+                </button>
+            </div>
+
+            <div id="weather-content-jeju" class="location-weather active">
+                <div class="current-weather" id="current-weather-jeju">
+                    <div class="weather-loader">
+                        <div class="weather-spinner"></div>
+                        <div class="weather-loading-text">正在加载信息...</div>
+                    </div>
+                </div>
+                <h3 class="subsection-title">未来10天长期预报 (可选日期)</h3>
+                <div class="weekly-grid" id="weekly-jeju"></div>
+                <h3 class="subsection-title" id="hourly-title-jeju">当日分时详细预报</h3>
+                <div class="hourly-weather">
+                    <div class="hourly-scroll" id="hourly-jeju"></div>
+                </div>
+                <h3 class="cmp-cur-weather-head">空气质量信息</h3>
+                <div id="air-quality-jeju" class="air-quality-grid"></div>
+            </div>
+            <div id="weather-content-seogwipo" class="location-weather">
+                <div class="current-weather" id="current-weather-seogwipo">
+                    <div class="weather-loader">
+                        <div class="weather-spinner"></div>
+                        <div class="weather-loading-text">正在加载信息...</div>
+                    </div>
+                </div>
+                <h3 class="subsection-title">未来10天长期预报 (可选日期)</h3>
+                <div class="weekly-grid" id="weekly-seogwipo"></div>
+                <h3 class="subsection-title" id="hourly-title-seogwipo">当日分时详细预报</h3>
+                <div class="hourly-weather">
+                    <div class="hourly-scroll" id="hourly-seogwipo"></div>
+                </div>
+                <h3 class="cmp-cur-weather-head">空气质量信息</h3>
+                <div id="air-quality-seogwipo" class="air-quality-grid"></div>
+            </div>
+            <div id="weather-content-hallasan" class="location-weather">
+                <div class="current-weather" id="current-weather-hallasan">
+                    <div class="weather-loader">
+                        <div class="weather-spinner"></div>
+                        <div class="weather-loading-text">正在加载信息...</div>
+                    </div>
+                </div>
+                <h3 class="subsection-title">未来10天长期预报 (可选日期)</h3>
+                <div class="weekly-grid" id="weekly-hallasan"></div>
+                <h3 class="subsection-title" id="hourly-title-hallasan">当日分时详细预报</h3>
+                <div class="hourly-weather">
+                    <div class="hourly-scroll" id="hourly-hallasan"></div>
+                </div>
+                <h3 class="cmp-cur-weather-head">空气质量信息</h3>
+                <div id="air-quality-hallasan" class="air-quality-grid"></div>
+            </div>
+            <div id="weather-content-udo" class="location-weather">
+                <div class="current-weather" id="current-weather-udo">
+                    <div class="weather-loader">
+                        <div class="weather-spinner"></div>
+                        <div class="weather-loading-text">正在加载信息...</div>
+                    </div>
+                </div>
+                <h3 class="subsection-title">未来10天长期预报 (可选日期)</h3>
+                <div class="weekly-grid" id="weekly-udo"></div>
+                <h3 class="subsection-title" id="hourly-title-udo">当日分时详细预报</h3>
+                <div class="hourly-weather">
+                    <div class="hourly-scroll" id="hourly-udo"></div>
+                </div>
+                <h3 class="cmp-cur-weather-head">空气质量信息</h3>
+                <div id="air-quality-udo" class="air-quality-grid"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+    <!-- ===== Hallasan Section ===== -->
+<section id="hallasan" class="app-section">
+    <header class="app-bar">
+        <button class="back-btn" onclick="showSection('home')">←</button>
+        <h2 class="bar-title">⛰️ 汉拿山登山信息</h2>
+    </header>
+    <div class="section">
+        <div class="container">
+            <div id="hallasan-status-container" style="margin-top: 45px;"></div>
+            <div class="trails-grid" id="trails-grid"></div>
+        </div>
+    </div>
+</section>
+
+    <!-- ===== Airport Section ===== -->
+<section id="airport" class="app-section">
+    <header class="app-bar">
+        <button class="back-btn" onclick="showSection('home')">←</button>
+        <h2 class="bar-title">✈️ 济州国际机场</h2>
+    </header>
+    <div class="section section-alt">
+        <div class="container">
+            <div id="flight-update-time"
+                style="text-align:center;font-size:0.85rem;color:var(--text-muted);margin-bottom:8px;opacity:0.9;">
+            </div>
+            <div style="text-align:center; margin-top: 45px; margin-bottom:16px; display: flex; flex-direction: column; gap: 10px; align-items: center;">
+                <a href="https://www.trip.com/t/epPtOVtJzT2" target="_blank"
+                    style="width: 250px; padding:12px 28px; background:linear-gradient(135deg,#003580,#0055b8); color:#fff; font-size:0.95rem; font-weight:700; border-radius:50px; text-decoration:none; box-shadow:0 4px 14px rgba(0,53,128,0.25); transition:transform 0.15s, box-shadow 0.15s;"
+                    onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 18px rgba(0,53,128,0.35)'"
+                    onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 14px rgba(0,53,128,0.25)'">✈️
+                    中国 ↔ 济州 机票查询</a>
+            </div>
+
+            <div class="flight-tabs">
+                <button class="flight-tab active" id="tab-arrive" onclick="switchFlightTab('arrive')">到达航班</button>
+                <button class="flight-tab" id="tab-depart" onclick="switchFlightTab('depart')">出发航班</button>
+            </div>
+            <div id="flight-content-arrive" class="flight-content active">
+                <div class="flight-table">
+                    <div id="arrive-data"></div>
+                </div>
+            </div>
+            <div id="flight-content-depart" class="flight-content">
+                <div class="flight-table">
+                    <div id="depart-data"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+    <!-- ===== Festival Section ===== -->
+<section id="festival" class="app-section">
+    <header class="app-bar">
+        <button class="back-btn" onclick="showSection('home')">←</button>
+        <h2 class="bar-title">🎉 济州精彩活动</h2>
+    </header>
+    <div class="section">
+        <div class="container">
+            <div style="text-align:center; margin-top: 45px; margin-bottom:20px;">
+                <a href="https://www.trip.com/t/DbXrep5KzT2" target="_blank"
+                    style="display:inline-block; padding:12px 28px; background:linear-gradient(135deg,#ff9800,#f57c00); color:#fff; font-size:0.95rem; font-weight:700; border-radius:50px; text-decoration:none; box-shadow:0 4px 14px rgba(245,124,0,0.25); transition:transform 0.15s, box-shadow 0.15s;"
+                    onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 18px rgba(245,124,0,0.35)'"
+                    onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 14px rgba(245,124,0,0.25)'">🎟️
+                    查看景点门票</a>
+            </div>
+            <!-- 월별 축제 필터 (v5.0) -->
+            <div class="festival-month-filter" id="month-filter">
+                <!-- script.js에서 동적으로 생성됩니다 -->
+            </div>
+
+            <!-- Ad Unit: Festival Filter Bottom -->
+            <div class="ad-container festival-ad">
+                <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-9426998811195324"
+                    data-ad-slot="0987654321" data-ad-format="fluid" data-ad-layout-key="-fb+5w+4e-db+86"
+                    data-full-width-responsive="true"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+            </div>
+
+            <div id="festival-list" class="festival-list"></div>
+        </div>
+    </div>
+</section>
+
+    <!-- ===== Lost & Found Section ===== -->
+<section id="lost-found" class="app-section">
+    <header class="app-bar">
+        <button class="back-btn" onclick="showSection('home')">←</button>
+        <h2 class="bar-title">🔍 济州失物招领</h2>
+    </header>
+    <div class="section">
+        <div class="container">
+            <div class="lost-header-row" style="margin-top: 45px;">
+                <div class="lost-filter-container search-filter-box">
+                    <div class="filter-row">
+                        <select id="pkupCmdtyLclsfCd" class="filter-select" onchange="fetchFoundGoodsManual()">
+                            <option value="">选择物品分类</option>
+                            <option value="PRA000">包类</option>
+                            <option value="PRO000">首饰</option>
+                            <option value="PRB000">书籍用品</option>
+                            <option value="PRC000">文件</option>
+                            <option value="PRD000">产业用品</option>
+                            <option value="PRQ000">购物袋</option>
+                            <option value="PRE000">体育用品</option>
+                            <option value="PRR000">乐器</option>
+                            <option value="PRM000">有价证券</option>
+                            <option value="PRK000">衣物</option>
+                            <option value="PRF000">汽车</option>
+                            <option value="PRG000">电子设备</option>
+                            <option value="PRH000">钱包</option>
+                            <option value="PRN000">证件</option>
+                            <option value="PRI000">电脑</option>
+                            <option value="PRP000">卡类</option>
+                            <option value="PRL000">现金</option>
+                            <option value="PRJ000">手机</option>
+                            <option value="PRZ000">其他物品</option>
+                        </select>
+                    </div>
+                    <div class="filter-row" style="display:flex;gap:10px;">
+                        <input type="date" id="lost-date" class="date-input" style="flex:1;" onchange="fetchFoundGoodsManual()">
+                        <script>
+                            (function () {
+                                const now = new Date();
+                                const kstTime = new Date(now.getTime() + (9 * 60 * 60 * 1000));
+                                const yesterday = new Date(kstTime);
+                                yesterday.setDate(yesterday.getDate() - 1);
+
+                                const yyyy = yesterday.getUTCFullYear();
+                                const mm = String(yesterday.getUTCMonth() + 1).padStart(2, '0');
+                                const dd = String(yesterday.getUTCDate()).padStart(2, '0');
+                                const yyyymmdd = `${yyyy}-${mm}-${dd}`;
+
+                                const dateInput = document.getElementById('lost-date');
+                                dateInput.setAttribute('max', yyyymmdd);
+                                dateInput.value = yyyymmdd;
+                            })();
+                        </script>
+                        <button class="search-btn" onclick="fetchFoundGoodsManual()">🔍</button>
+                    </div>
+                </div>
+
+                <!-- 분실물 신고 버튼 추가 -->
+                <div style="margin-bottom: 25px;">
+                    <button class="lost-report-btn" onclick="openLostReportModal()">
+                        <span class="btn-icon">📝</span> 找不到我的物品？在此登记报失
+                    </button>
+                </div>
+                <div id="lost-result-count" class="lost-result-count">正在查询...</div>
+                <div class="view-toggle-container">
+                    <button id="btn-view-card" class="view-toggle-btn active"
+                        onclick="switchLostView('card')">卡片模式</button>
+                    <button id="btn-view-table" class="view-toggle-btn"
+                        onclick="switchLostView('table')">表格模式</button>
+                </div>
+            </div>
+
+            <div id="lost-goods-grid" class="lost-goods-grid active"></div>
+
+            <div id="lost-goods-table-container" class="lost-table-container">
+                <table class="lost-table">
+                    <thead>
+                        <tr>
+                            <th>照片</th>
+                            <th>分类</th>
+                            <th>物品名</th>
+                            <th>拾获日期</th>
+                            <th>查看详情</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lost-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+    <!-- ===== Footer ===== -->
+<footer class="app-footer">
+    <div class="container">
+        <div class="footer-grid">
+            <div class="footer-section">
+                <div class="footer-qr-container">
+                    <div class="qr-item">
+                        <!-- 소홍서 프로필 직접 연동 -->
+                        <a href="https://www.xiaohongshu.com/user/profile/671324ca000000001d0207f6?xhsshare=userQrCode"
+                            target="_blank">
+                            <img src="/assets/qr-UWf3nn0s.jpg" alt="Xiaohongshu QR" class="qr-img">
+                        </a>
+                        <p class="qr-label">小红书</p>
+                    </div>
+                    <div class="qr-item">
+                        <a href="javascript:void(0)" onclick="openWechatQR()">
+                            <img src="/assets/wechat_qr-zJclmEkZ.png" alt="WeChat QR" class="qr-img">
+                        </a>
+                        <p class="qr-label">微信</p>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-section source-compact" style="text-align: center; margin-top: 10px;">
+                <p class="source-text"
+                    style="font-size: 0.7rem; color: var(--text-muted); opacity: 0.8; margin-bottom: 4px;">
+                    数据为实时观测资料，根据数据接收情况可能会出现未接收的情况。</p>
+                <p class="source-text" style="font-size: 0.7rem; color: var(--text-muted); opacity: 0.8;">Data
+                    Sources: KMA, KAC, KECO, Jeju Province, Visit Jeju, LOST112</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2026 济州旅行秘书 · 保留所有权利</p>
+        </div>
+    </div>
+</footer>
+
+    <!-- ===== CCTV Modal ===== -->
+<div id="cctv-modal" class="modal-overlay" style="display:none" onclick="closeCctvModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeCctvModal()">✕</button>
+        <div id="modal-body"></div>
+    </div>
+</div>
+
+<!-- ===== Lost Detail Modal ===== -->
+<div id="lost-detail-modal" class="modal-overlay" style="display:none" onclick="closeLostDetailModal()">
+    <div class="modal-content lost-detail-content" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeLostDetailModal()">✕</button>
+        <div id="lost-modal-body" class="lost-modal-body">
+            <!-- Data will be injected here -->
+        </div>
+    </div>
+</div>
+
+<!-- ===== WeChat QR Modal ===== -->
+<div id="wechat-qr-modal" class="modal-overlay" style="display:none; z-index: 10001;" onclick="closeWechatQR()">
+    <div class="modal-content" style="max-width: 320px; text-align: center; padding: 30px;"
+        onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeWechatQR()">✕</button>
+        <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: #3b82f6;">联系我们 (WeChat)</h3>
+        <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">通过扫描下方二维码或复制ID添加我的微信</p>
+        <img src="/assets/wechat_qr-zJclmEkZ.png"
+            style="width: 100%; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px;">
+        <div class="wechat-copy-box" style="display:flex; gap:8px;">
+            <input type="text" id="wechat-id-input" value="jeju_jk" readonly
+                style="flex:1; padding:10px; border-radius:8px; border:1px solid #ddd; font-size:0.9rem; text-align:center;">
+            <button onclick="copyWechatId()"
+                style="padding:10px 15px; background:var(--primary-gradient); color:white; border:none; border-radius:8px; font-weight:700; cursor:pointer;">复制</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== Lost Report Form Modal ===== -->
+<div id="lost-report-modal" class="modal-overlay" style="display:none; z-index: 10001;"
+    onclick="closeLostReportModal()">
+    <div class="modal-content lost-report-form-content" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeLostReportModal()">✕</button>
+        <div class="lost-report-header">
+            <h3>📝 登记报失物品</h3>
+            <p>请填写以下信息，我们将协助您在 LOST112 登记。 (填写越详细找回概率越高)</p>
+        </div>
+        <div class="lost-report-body">
+            <div class="form-group">
+                <label>📍 丢失地点 (尽量详细)</label>
+                <textarea id="lost-report-location" placeholder="例如：西归浦每日奥来市场, 红色出租车内, GD咖啡厅2层靠窗位..."></textarea>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>📅 丢失日期</label>
+                    <input type="date" id="lost-report-date">
+                </div>
+                <div class="form-group">
+                    <label>⏰ 大概时间</label>
+                    <input type="time" id="lost-report-time">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>📦 物品名称</label>
+                <input type="text" id="lost-report-item" placeholder="例如：黑色iPhone 15, 棕色古驰钱包, 蓝色背包...">
+            </div>
+            <div class="form-group">
+                <label>🔍 物品特征 (颜色,品牌,内部物品等)</label>
+                <textarea id="lost-report-specifics" placeholder="请详细描述物品特征, 帮助我们精准匹配..."></textarea>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>📸 选择文件 (必选)</label>
+                    <input type="file" id="lost-report-photo" accept="image/*"
+                        onchange="handleLostImageChange(event)">
+                    <div id="lost-report-photo-preview" class="photo-preview" style="display: none;"></div>
+                </div>
+                <div class="form-group">
+                    <label>💬 您的微信 ID (必填)</label>
+                    <input type="text" id="lost-report-wechat" placeholder="方便找到后及时联系您">
+                </div>
+            </div>
+            <div id="lost-report-status" class="form-status"></div>
+            <div class="form-row" style="margin-top: 15px; gap: 10px;">
+                <button type="button" class="form-submit-btn secondary" style="flex: 1; margin-top: 0; background: #f1f5f9; color: #475569; box-shadow: none;" onclick="closeLostReportModal()">取消</button>
+                <button id="lost-report-submit-btn" class="form-submit-btn" style="flex: 2; margin-top: 0;" onclick="submitLostReport()">提交报失登记</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="assets/curated_festivals.js?v=1.2"></script>
+</body>
+
+</html>
