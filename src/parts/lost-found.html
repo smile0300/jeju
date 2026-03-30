@@ -1,0 +1,91 @@
+<!-- ===== Lost & Found Section ===== -->
+<section id="lost-found" class="app-section">
+    <header class="app-bar">
+        <button class="back-btn" onclick="showSection('home')">←</button>
+        <h2 class="bar-title">🔍 济州失物招领</h2>
+    </header>
+    <div class="section">
+        <div class="container">
+            <div class="lost-header-row" style="margin-top: 45px;">
+                <div class="lost-filter-container search-filter-box">
+                    <div class="filter-row">
+                        <select id="pkupCmdtyLclsfCd" class="filter-select" onchange="fetchFoundGoodsManual()">
+                            <option value="">选择物品分类</option>
+                            <option value="PRA000">包类</option>
+                            <option value="PRO000">首饰</option>
+                            <option value="PRB000">书籍用品</option>
+                            <option value="PRC000">文件</option>
+                            <option value="PRD000">产业用品</option>
+                            <option value="PRQ000">购物袋</option>
+                            <option value="PRE000">体育用品</option>
+                            <option value="PRR000">乐器</option>
+                            <option value="PRM000">有价证券</option>
+                            <option value="PRK000">衣物</option>
+                            <option value="PRF000">汽车</option>
+                            <option value="PRG000">电子设备</option>
+                            <option value="PRH000">钱包</option>
+                            <option value="PRN000">证件</option>
+                            <option value="PRI000">电脑</option>
+                            <option value="PRP000">卡类</option>
+                            <option value="PRL000">现金</option>
+                            <option value="PRJ000">手机</option>
+                            <option value="PRZ000">其他物品</option>
+                        </select>
+                    </div>
+                    <div class="filter-row" style="display:flex;gap:10px;">
+                        <input type="date" id="lost-date" class="date-input" style="flex:1;" onchange="fetchFoundGoodsManual()">
+                        <script>
+                            (function () {
+                                const now = new Date();
+                                const kstTime = new Date(now.getTime() + (9 * 60 * 60 * 1000));
+                                const yesterday = new Date(kstTime);
+                                yesterday.setDate(yesterday.getDate() - 1);
+
+                                const yyyy = yesterday.getUTCFullYear();
+                                const mm = String(yesterday.getUTCMonth() + 1).padStart(2, '0');
+                                const dd = String(yesterday.getUTCDate()).padStart(2, '0');
+                                const yyyymmdd = `${yyyy}-${mm}-${dd}`;
+
+                                const dateInput = document.getElementById('lost-date');
+                                dateInput.setAttribute('max', yyyymmdd);
+                                dateInput.value = yyyymmdd;
+                            })();
+                        </script>
+                        <button class="search-btn" onclick="fetchFoundGoodsManual()">🔍</button>
+                    </div>
+                </div>
+
+                <!-- 분실물 신고 버튼 추가 -->
+                <div style="margin-bottom: 25px;">
+                    <button class="lost-report-btn" onclick="openLostReportModal()">
+                        <span class="btn-icon">📝</span> 找不到我的物品？在此登记报失
+                    </button>
+                </div>
+                <div id="lost-result-count" class="lost-result-count">正在查询...</div>
+                <div class="view-toggle-container">
+                    <button id="btn-view-card" class="view-toggle-btn active"
+                        onclick="switchLostView('card')">卡片模式</button>
+                    <button id="btn-view-table" class="view-toggle-btn"
+                        onclick="switchLostView('table')">表格模式</button>
+                </div>
+            </div>
+
+            <div id="lost-goods-grid" class="lost-goods-grid active"></div>
+
+            <div id="lost-goods-table-container" class="lost-table-container">
+                <table class="lost-table">
+                    <thead>
+                        <tr>
+                            <th>照片</th>
+                            <th>分类</th>
+                            <th>物品名</th>
+                            <th>拾获日期</th>
+                            <th>查看详情</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lost-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>

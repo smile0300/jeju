@@ -1,0 +1,96 @@
+<!-- ===== Weather Section ===== -->
+<section id="weather" class="app-section">
+    <header class="app-bar">
+        <button class="back-btn" onclick="showSection('home')">←</button>
+        <h2 class="bar-title">🌤️ 天气预报</h2>
+    </header>
+    <div class="section section-alt">
+        <div class="container">
+            <div id="weather-alerts-container" class="weather-alerts-container"
+                style="display: none; margin-top: 45px;"></div>
+            <div class="location-tabs" id="location-tabs">
+                <button class="location-tab active" data-loc="jeju" onclick="switchWeatherLocation('jeju')">
+                    <span class="tab-icon">🏙️</span>
+                    <span class="tab-name">济州市</span>
+                </button>
+                <button class="location-tab" data-loc="seogwipo" onclick="switchWeatherLocation('seogwipo')">
+                    <span class="tab-icon">🌺</span>
+                    <span class="tab-name">西归浦</span>
+                </button>
+                <button class="location-tab" data-loc="hallasan" onclick="switchWeatherLocation('hallasan')">
+                    <span class="tab-icon">⛰️</span>
+                    <span class="tab-name">汉拿山</span>
+                </button>
+                <button class="location-tab" data-loc="udo" onclick="switchWeatherLocation('udo')">
+                    <span class="tab-icon">🐄</span>
+                    <span class="tab-name">牛岛</span>
+                </button>
+            </div>
+
+            <div id="weather-content-jeju" class="location-weather active">
+                <div class="current-weather" id="current-weather-jeju">
+                    <div class="weather-loader">
+                        <div class="weather-spinner"></div>
+                        <div class="weather-loading-text">正在加载信息...</div>
+                    </div>
+                </div>
+                <h3 class="subsection-title">未来10天长期预报 (可选日期)</h3>
+                <div class="weekly-grid" id="weekly-jeju"></div>
+                <h3 class="subsection-title" id="hourly-title-jeju">当日分时详细预报</h3>
+                <div class="hourly-weather">
+                    <div class="hourly-scroll" id="hourly-jeju"></div>
+                </div>
+                <h3 class="cmp-cur-weather-head">空气质量信息</h3>
+                <div id="air-quality-jeju" class="air-quality-grid"></div>
+            </div>
+            <div id="weather-content-seogwipo" class="location-weather">
+                <div class="current-weather" id="current-weather-seogwipo">
+                    <div class="weather-loader">
+                        <div class="weather-spinner"></div>
+                        <div class="weather-loading-text">正在加载信息...</div>
+                    </div>
+                </div>
+                <h3 class="subsection-title">未来10天长期预报 (可选日期)</h3>
+                <div class="weekly-grid" id="weekly-seogwipo"></div>
+                <h3 class="subsection-title" id="hourly-title-seogwipo">当日分时详细预报</h3>
+                <div class="hourly-weather">
+                    <div class="hourly-scroll" id="hourly-seogwipo"></div>
+                </div>
+                <h3 class="cmp-cur-weather-head">空气质量信息</h3>
+                <div id="air-quality-seogwipo" class="air-quality-grid"></div>
+            </div>
+            <div id="weather-content-hallasan" class="location-weather">
+                <div class="current-weather" id="current-weather-hallasan">
+                    <div class="weather-loader">
+                        <div class="weather-spinner"></div>
+                        <div class="weather-loading-text">正在加载信息...</div>
+                    </div>
+                </div>
+                <h3 class="subsection-title">未来10天长期预报 (可选日期)</h3>
+                <div class="weekly-grid" id="weekly-hallasan"></div>
+                <h3 class="subsection-title" id="hourly-title-hallasan">当日分时详细预报</h3>
+                <div class="hourly-weather">
+                    <div class="hourly-scroll" id="hourly-hallasan"></div>
+                </div>
+                <h3 class="cmp-cur-weather-head">空气质量信息</h3>
+                <div id="air-quality-hallasan" class="air-quality-grid"></div>
+            </div>
+            <div id="weather-content-udo" class="location-weather">
+                <div class="current-weather" id="current-weather-udo">
+                    <div class="weather-loader">
+                        <div class="weather-spinner"></div>
+                        <div class="weather-loading-text">正在加载信息...</div>
+                    </div>
+                </div>
+                <h3 class="subsection-title">未来10天长期预报 (可选日期)</h3>
+                <div class="weekly-grid" id="weekly-udo"></div>
+                <h3 class="subsection-title" id="hourly-title-udo">当日分时详细预报</h3>
+                <div class="hourly-weather">
+                    <div class="hourly-scroll" id="hourly-udo"></div>
+                </div>
+                <h3 class="cmp-cur-weather-head">空气质量信息</h3>
+                <div id="air-quality-udo" class="air-quality-grid"></div>
+            </div>
+        </div>
+    </div>
+</section>
