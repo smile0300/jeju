@@ -13,6 +13,7 @@ window.showSection = showSection;
 window.openCctvModalById = openCctvModalById;
 window.openCctvModal = openCctvModal;
 window.switchWeatherLocation = switchWeatherLocation;
+window.fetchWeatherData = fetchWeatherData;
 window.updateHourlyWeather = updateHourlyWeather;
 window.switchFlightTab = switchFlightTab;
 window.switchLostView = switchLostView;

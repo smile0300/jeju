@@ -238,8 +238,9 @@
 /* Titles and Alignment */
 .subsection-title-wrap {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
+    position: relative;
     margin-top: 35px;
     margin-bottom: 20px;
     padding: 0 4px;
@@ -248,9 +249,12 @@
     margin: 0; 
     font-size: 1.15rem; 
     font-weight: 800; 
+    text-align: center;
+    width: 100%;
 }
 .weather-summary-btn {
-    margin-left: auto; /* Push to the right */
+    position: absolute;
+    right: 4px;
 }
 .bar-title { flex: 1; text-align: center; margin-right: 40px; }
 
