@@ -51,8 +51,30 @@ export async function fetchHallasanStatus() {
         if (Object.keys(statusMap).length === 0) throw new Error('API 반환값 비어있음');
 
         const trails = HALLASAN_TRAILS.map(t => {
-            const koStatus = statusMap[t.nameKo] || '정상운영';
-            const info = TRAIL_STATUS_MAP[koStatus] || { cn: '正常开放', cls: 'open' };
+            const koStatus = statusMap[t.nameKo];
+            
+            let info;
+            if (!koStatus) {
+                // 데이터 매칭 없음
+                info = { cn: '--', cls: 'partial' };
+            } else {
+                // 정밀 매칭 시도
+                info = TRAIL_STATUS_MAP[koStatus];
+
+                // 매칭 실패 시 키워드 기반 폴백 판별
+                if (!info) {
+                    if (koStatus.includes('전면통제') || koStatus.includes('입산제한') || (koStatus.includes('통제') && !koStatus.includes('부분') && !koStatus.includes('일부'))) {
+                        info = TRAIL_STATUS_MAP['전면통제'];
+                    } else if (koStatus.includes('부분통제') || koStatus.includes('일부통제')) {
+                        info = TRAIL_STATUS_MAP['부분통제'];
+                    } else if (koStatus.includes('정상')) {
+                        info = TRAIL_STATUS_MAP['정상운영'];
+                    } else {
+                        info = { cn: '--', cls: 'partial' }; // 알 수 없는 상태
+                    }
+                }
+            }
+            
             return { ...t, statusCn: info.cn, statusCls: info.cls };
         });
 
@@ -81,12 +103,12 @@ export async function fetchHallasanStatus() {
             </div>`).join('');
 
     } catch (e) {
-        console.warn('한라산 실시간 로드 실패, 기본값 표시:', e);
+        console.warn('한라산 실시간 로드 실패:', e);
         container.innerHTML = `
-            <div class="status-card status-open">
-                <div class="status-icon">✅</div>
+            <div class="status-card status-closed">
+                <div class="status-icon">⚠️</div>
                 <div class="status-content">
-                    <h3>汉拿山各路线正常运营</h3>
+                    <h3>获取实时数据失败</h3>
                     <p class="status-time">更新时间: ${now}<br>
                     <a href="https://jeju.go.kr/hallasan/index.htm" target="_blank" style="color:var(--accent-blue);font-weight:600;">查看官方实时状态 →</a></p>
                 </div>
@@ -95,7 +117,7 @@ export async function fetchHallasanStatus() {
             <div class="trail-card">
                 <div class="trail-header">
                     <h4>${t.nameCn}</h4>
-                    <span class="trail-status-badge open">正常开放</span>
+                    <span class="trail-status-badge partial">--</span>
                 </div>
                 <div class="trail-info-compact">
                     <span>📏 ${t.distanceCn}</span>

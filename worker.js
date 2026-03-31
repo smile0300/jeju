@@ -212,9 +212,9 @@ export default {
         });
         const html = await response.text();
 
-        const blockPattern = /<dl[^>]*class="main-visit-list"[\s\S]*?<\/dl>/g;
+        const blockPattern = /<dl>[\s\S]*?<\/dl>/g;
         const namePattern = /<dt>(.*?)<\/dt>/;
-        const statusPattern = /<dd[^>]*class="situation"[^>]*>(.*?)<\/dd>/;
+        const statusPattern = /<dd>.*?<\/dd>\s*<dd[^>]*>(.*?)<\/dd>/;
 
         const results = [];
         let match;
