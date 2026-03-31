@@ -130,10 +130,11 @@ export async function onRequest(context) {
     }
   }
 
-  // 2. 한라산 탐방로 상태 JSON 변환
+  // 2. 한라산 탐방로 상태 JSON 변환 (v2.0: 동적 소스 타겟팅)
   if (pathname === '/api/hallasan-status') {
     try {
-      const targetUrl = 'https://jeju.go.kr/hallasan/index.htm';
+      // 메인 페이지(index.htm)는 데이터를 비동기로 가져오므로 실제 데이터 소스인 road-body.jsp를 직접 호출
+      const targetUrl = 'https://jeju.go.kr/tool/hallasan/road-body.jsp';
       const response = await fetch(targetUrl, {
         headers: { 
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' 
@@ -141,12 +142,13 @@ export async function onRequest(context) {
       });
       const html = await response.text();
 
-      // v6.0 개선: 태그 내 속성이나 공백에 유연하게 대응하도록 정규식 완화
+      // 분석된 RAW HTML 구조에 최적화된 정규표현식
       const blockPattern = /<dl[^>]*>[\s\S]*?<\/dl>/g;
       const namePattern = /<dt[^>]*>([\s\S]*?)<\/dt>/;
-      const statusPattern = /<dd[^>]*>[\s\S]*?<\/dd>\s*<dd[^>]*>([\s\S]*?)<\/dd>/;
+      // 상태값은 dd.situation 클래스에 위치함
+      const statusPattern = /<dd[^>]*class="situation"[^>]*>([\s\S]*?)<\/dd>/;
       
-      const stripTags = (str) => (str || '').replace(/<[^>]*>?/gm, '').trim();
+      const stripTags = (str) => (str || '').replace(/<[^>]*>?/gm, '').replace(/&nbsp;/g, '').trim();
 
       const results = [];
       let match;
