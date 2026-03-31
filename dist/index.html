@@ -13,7 +13,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9426998811195324"
         crossorigin="anonymous"></script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script>
         // Global fallback stubs to prevent ReferenceError before modules load
         window.showSection = window.showSection || (() => { });
@@ -40,8 +40,15 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         window.onerror = function(msg, url, lineNo, columnNo, error) {
             const errorMsg = "❌ JS Error: " + msg + "\nAt: " + lineNo + ":" + columnNo + "\nUrl: " + url;
             console.error(errorMsg);
-            // Show alert only for non-GTM related errors to avoid noise
-            if (!url.includes('gtm.js') && !url.includes('adsbygoogle.js')) {
+            
+            // 중국 내 만리방화벽(GFW) 차단 및 외부 라이브러리 지연으로 인한 'Script error.' 무시
+            if (!url || msg === 'Script error.' || lineNo === 0) {
+                return false; 
+            }
+
+            // GTM, AdSense 등의 트래킹 에러는 사용자 팝업에서 제외함 (조용한 실패 처리)
+            const lowerUrl = url.toLowerCase();
+            if (!lowerUrl.includes('gtm.js') && !lowerUrl.includes('adsbygoogle.js') && !lowerUrl.includes('analytics')) {
                 alert(errorMsg + "\n\n请截图此错误并联系开发人员。");
             }
             return false;
@@ -62,8 +69,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         }
     </script>
 
-  <script type="module" crossorigin src="/assets/index-ieMOUuT2.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-BPA89mEK.css">
+  <script type="module" crossorigin src="/assets/index-BwSAw36I.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-C-FPSbsL.css">
 </head>
 
 <body>
@@ -77,8 +84,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <section id="home" class="app-section active">
     <div class="home-screen">
         <div class="home-welcome">
-            <h1>测试模式</h1>
-            <p><strong>请提出您在济州岛旅行中的不便之处！</strong></p>
+            <h1>JEJU LIVE</h1>
+            <p><strong>请输入您想要查看CCTV影像的地点</strong></p>
             <button class="feature-request-btn" onclick="openFeatureModal()">💡 提交建议 / 意见反馈</button>
         </div>
 
@@ -429,13 +436,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         <!-- 소홍서 프로필 직접 연동 -->
                         <a href="https://www.xiaohongshu.com/user/profile/671324ca000000001d0207f6?xhsshare=userQrCode"
                             target="_blank">
-                            <img src="/assets/qr-UWf3nn0s.jpg" alt="Xiaohongshu QR" class="qr-img">
+                            <img src="/assets/qr.jpg" alt="Xiaohongshu QR" class="qr-img">
                         </a>
                         <p class="qr-label">小红书</p>
                     </div>
                     <div class="qr-item">
                         <a href="javascript:void(0)" onclick="openWechatQR()">
-                            <img src="/assets/wechat_qr-zJclmEkZ.png" alt="WeChat QR" class="qr-img">
+                            <img src="/assets/wechat_qr.png" alt="WeChat QR" class="qr-img">
                         </a>
                         <p class="qr-label">微信</p>
                     </div>
@@ -480,7 +487,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <button class="modal-close" onclick="closeWechatQR()">✕</button>
         <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: #3b82f6;">联系我们 (WeChat)</h3>
         <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">通过扫描下方二维码或复制ID添加我的微信</p>
-        <img src="/assets/wechat_qr-zJclmEkZ.png"
+        <img src="/assets/wechat_qr.png"
             style="width: 100%; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px;">
         <div class="wechat-copy-box" style="display:flex; gap:8px;">
             <input type="text" id="wechat-id-input" value="jeju_jk" readonly
@@ -545,8 +552,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </div>
 
 
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    <script src="assets/curated_festivals.js?v=1.2"></script>
+    <script src="assets/libs/hls.min.js" crossorigin="anonymous"></script>
+    <script src="assets/curated_festivals.js"></script>
 </body>
 
 </html>
