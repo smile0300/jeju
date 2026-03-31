@@ -1,6 +1,6 @@
 export const CONFIG = {
     // Cloudflare Worker 보안 프록시 URL
-    PROXY_URL: 'https://jejuweb.smile0300.workers.dev',
+    PROXY_URL: window.location.origin,
 
     // CCTV HLS 스트림 소스
     CCTV: [
