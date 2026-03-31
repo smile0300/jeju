@@ -15,5 +15,12 @@ export default defineConfig({
   server: {
     port: 3000,
     open: true,
+    proxy: {
+      // API 요청을 wrangler pages dev 서버로 전달 (기본 8788 포트)
+      '/api': {
+        target: 'http://localhost:8788',
+        changeOrigin: true,
+      },
+    },
   },
 });
