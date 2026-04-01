@@ -116,6 +116,7 @@ function _buildSummaryHTML() {
             });
 
             itemsHTML = keys.map(k => {
+                const d = state.items[k];
                 const fHour = parseInt(k.slice(8, 10));
                 const sky = getSkyInfo(d?.PTY, d?.SKY, fHour);
                 const hStr = parseInt(k.slice(8, 10)) + 'h';

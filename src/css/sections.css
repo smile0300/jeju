@@ -341,15 +341,14 @@
 .status-card.status-open { border-color: #10b981; background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0.02) 100%); }
 .status-card.status-closed { border-color: #ef4444; background: linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, rgba(239, 68, 68, 0.02) 100%); }
 
-.trails-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.trails-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; }
 .trail-card {
-    background: white; border-radius: 12px;
-    padding: 10px 12px; border: 1px solid var(--border-light);
+    background: white; border-radius: 10px;
+    padding: 6px 8px; border: 1px solid var(--border-light);
     box-shadow: var(--shadow-sm);
     display: flex;
-    flex-direction: column; /* 2열에서는 세로 배치가 더 가독성 높음 */
-    gap: 8px;
-    min-height: 100px;
+    flex-direction: column;
+    gap: 5px;
     justify-content: space-between;
 }
 .trail-header { 
@@ -370,7 +369,7 @@
     align-items: center;
     width: 100%;
     border-top: 1px dashed var(--border-light);
-    padding-top: 8px;
+    padding-top: 5px;
 }
 .trail-info-compact span {
     font-size: 0.65rem;
@@ -583,7 +582,7 @@
 /* ==================== Responsive Sections ==================== */
 @media (max-width: 480px) {
     .cctv-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-    .trails-grid { grid-template-columns: 1fr; gap: 10px; }
+    .trails-grid { grid-template-columns: repeat(2, 1fr); gap: 4px; }
     .weekly-grid { grid-template-columns: repeat(5, 1fr); gap: 4px; }
     .weekly-item { padding: 8px 1px; min-width: 0; }
     .weekly-day { font-size: 0.72rem; }
