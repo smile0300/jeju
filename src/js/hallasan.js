@@ -27,14 +27,7 @@ export async function fetchHallasanStatus() {
 
     const now = new Date().toLocaleString('zh-CN');
 
-    container.innerHTML = `
-        <div class="status-card status-loading">
-            <div class="status-icon">⏳</div>
-            <div class="status-content">
-                <h3>正在加载信息...</h3>
-                <p class="status-time">正在从 jeju.go.kr 获取实时数据</p>
-            </div>
-        </div>`;
+    container.innerHTML = `<span style="font-size: 0.7rem; opacity: 0.6;">데이터 로딩 중...</span>`;
 
     try {
         const url = `${CONFIG.PROXY_URL}/api/hallasan-status`;
@@ -82,15 +75,7 @@ export async function fetchHallasanStatus() {
         const closedCount = trails.filter(t => t.statusCls === 'closed').length;
         const overallOpen = closedCount === 0;
 
-        container.innerHTML = `
-            <div class="status-card ${overallOpen ? 'status-open' : 'status-closed'}">
-                <div class="status-icon">${overallOpen ? '✅' : '⚠️'}</div>
-                <div class="status-content">
-                    <h3>${overallOpen ? '汉拿山各路线正常运营' : `部分路线限制（${closedCount}条）`}</h3>
-                    <p class="status-time">更新时间: ${now}<br>
-                    <a href="https://jeju.go.kr/hallasan/index.htm" target="_blank" style="display: inline-block; margin-top: 8px; color: var(--accent-blue); font-weight: 800; text-decoration: none; border: 1px solid var(--accent-blue); padding: 4px 12px; border-radius: 20px; font-size: 0.75rem;">🔗 홈페이지가기 / 访问官网</a></p>
-                </div>
-            </div>`;
+        container.innerHTML = `한라산 등산 정보 업데이트: ${now}`;
 
         trailsEl.innerHTML = trails.map(t => `
             <div class="trail-card">
@@ -106,15 +91,7 @@ export async function fetchHallasanStatus() {
 
     } catch (e) {
         console.warn('한라산 실시간 로드 실패:', e);
-        container.innerHTML = `
-            <div class="status-card status-closed">
-                <div class="status-icon">⚠️</div>
-                <div class="status-content">
-                    <h3>获取实时数据失败</h3>
-                    <p class="status-time">更新时间: ${now}<br>
-                    <a href="https://jeju.go.kr/hallasan/index.htm" target="_blank" style="color:var(--accent-blue);font-weight:600;">查看官方实时状态 →</a></p>
-                </div>
-            </div>`;
+        container.innerHTML = `⚠️ 데이터 업데이트 실패 (홈페이지 확인 권장)`;
         trailsEl.innerHTML = HALLASAN_TRAILS.map(t => `
             <div class="trail-card">
                 <div class="trail-header">

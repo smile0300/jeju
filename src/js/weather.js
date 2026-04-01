@@ -171,8 +171,8 @@ export function parseAndRenderWeather(locKey, items, midData, mountainData) {
         renderHallasanDashboard();
     }
 
-    const current = grouped[sortedKeys[0]];
-    const sky = getSkyInfo(current.PTY, current.SKY);
+    const currentHour = current.time ? parseInt(current.time.slice(0, 2)) : new Date().getHours();
+    const sky = getSkyInfo(current.PTY, current.SKY, currentHour);
 
     const container = document.getElementById(`current-weather-${locKey}`);
     if (container && (container.querySelector('.weather-loader') || !document.getElementById(`icon-${locKey}`))) {
@@ -338,7 +338,8 @@ export function updateHourlyWeather(locKey, targetYmd) {
     if (hourlyKeys.length > 0) {
         hourlyEl.innerHTML = hourlyKeys.map(k => {
             const d = state.items[k];
-            const s = getSkyInfo(d.PTY, d.SKY);
+            const fHour = parseInt(k.slice(8, 10));
+            const s = getSkyInfo(d.PTY, d.SKY, fHour);
             const time = k.slice(8, 10) + ':00';
             const precipProb = d.POP !== undefined ? d.POP : '0';
             const precipAmt = formatPrecip(d.PCP);
@@ -353,6 +354,7 @@ export function updateHourlyWeather(locKey, targetYmd) {
             `;
         }).join('');
     } else {
+
         const todayDate = new Date();
         const todayYmd = `${todayDate.getFullYear()}${String(todayDate.getMonth() + 1).padStart(2, '0')}${String(todayDate.getDate()).padStart(2, '0')}`;
         const d1 = new Date(targetYmd.slice(0, 4), targetYmd.slice(4, 6) - 1, targetYmd.slice(6, 8));
@@ -396,7 +398,7 @@ export function renderWeatherLoading(locKey) {
         container.innerHTML = `
             <div class="weather-loader">
                 <img src="/src/img/weather-loading.png" alt="Loading...">
-                <div class="weather-loading-text">正在加载信息...</div>
+                <div class="weather-loading-text">로딩 중...</div>
             </div>
         `;
     }

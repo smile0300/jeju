@@ -116,8 +116,8 @@ function _buildSummaryHTML() {
             });
 
             itemsHTML = keys.map(k => {
-                const d = state.items[k];
-                const sky = getSkyInfo(d?.PTY, d?.SKY);
+                const fHour = parseInt(k.slice(8, 10));
+                const sky = getSkyInfo(d?.PTY, d?.SKY, fHour);
                 const hStr = parseInt(k.slice(8, 10)) + 'h';
                 const tmp  = d?.TMP ?? '--';
                 const wsd  = d?.WSD ?? '-';
@@ -149,10 +149,13 @@ function _buildSummaryHTML() {
         </div>`;
     }
 
+    const currentHour = new Date().getHours();
+    const summaryIcon = (currentHour >= 19 || currentHour < 6) ? '🌙' : '☀️';
+
     return `
     <div class="wsm-header2">
         <div class="wsm-title-bar">
-            <span>☀️ 今日逐时预报 (全天)</span>
+            <span>${summaryIcon} 今日逐时预报 (全天)</span>
             <span class="wsm-date-badge">${dateLabel}</span>
         </div>
         <button class="wsm-close-btn2" onclick="window.closeWeatherSummaryModal()">✕</button>

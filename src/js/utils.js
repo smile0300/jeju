@@ -1,13 +1,17 @@
 // 날씨 코드 → 이모지 & 중국어 설명
-export function getSkyInfo(pty, sky) {
+export function getSkyInfo(pty, sky, hour) {
+    const isNight = hour !== undefined && (hour >= 19 || hour < 6);
     if (pty === '1') return { icon: '🌧️', desc: '雨' };
     if (pty === '2') return { icon: '🌨️', desc: '雨夹雪' };
     if (pty === '3') return { icon: '🌨️', desc: '雪' };
-    if (sky === '1') return { icon: '☀️', desc: '晴' };
-    if (sky === '3') return { icon: '⛅', desc: '多云' };
+    if (sky === '1') return { icon: isNight ? '🌙' : '☀️', desc: '晴' };
+    if (sky === '3') return { icon: isNight ? '☁️' : '⛅', desc: '多云' };
     if (sky === '4') return { icon: '☁️', desc: '阴' };
-    return { icon: '🌤️', desc: '晴' };
+    return { icon: isNight ? '🌙' : '🌤️', desc: '晴' };
 }
+
+
+
 
 export function getWindDesc(ws) {
     const v = parseFloat(ws);
