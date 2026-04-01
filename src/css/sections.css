@@ -344,15 +344,39 @@
 .trails-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
 .trail-card {
     background: white; border-radius: 16px;
-    padding: 12px; border: 1px solid var(--border-light);
+    padding: 12px 14px; border: 1px solid var(--border-light);
     box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
 }
-.trail-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-.trail-header h4 { font-size: 0.95rem; font-weight: 700; color: var(--text-primary); }
-.trail-status-badge { padding: 3px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; color: white; }
+.trail-header { 
+    display: flex; 
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    flex: 1;
+}
+.trail-header h4 { font-size: 0.9rem; font-weight: 800; color: var(--text-primary); margin: 0; }
+.trail-status-badge { padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; font-weight: 800; color: white; }
 .trail-status-badge.open { background: var(--success-gradient); }
 .trail-status-badge.partial { background: var(--warning-gradient); }
 .trail-status-badge.closed { background: var(--danger-gradient); }
+
+.trail-info-compact {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    min-width: fit-content;
+}
+.trail-info-compact span {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
 
 /* ==================== Flights ==================== */
 .flight-tabs {
