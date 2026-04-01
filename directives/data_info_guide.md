@@ -7,7 +7,7 @@
 
 ## 0. 프로젝트 개요 (Project Overview)
 - **목적**: 중국 관광객을 위한 실시간 제주도 여행 정보 제공.
-- **배포 주소**: [https://jeju-9kn.pages.dev/](https://jeju-9kn.pages.dev/)
+- **배포 주소**: [https://jeju-live.com](https://jeju-9kn.pages.dev/)
 - **최적화 방침**: 
   - **Mobile-First**: 스마트폰 환경 최적화 UI/UX.
   - **China Accessibility**: 중국 본토 내 접근성을 고려한 리소스 최적화 및 VPN 안내.
