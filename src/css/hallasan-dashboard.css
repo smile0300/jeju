@@ -39,7 +39,11 @@
 
 .mini-info {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex: 1;
+    gap: 12px;
 }
 
 .mini-label {
