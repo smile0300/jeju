@@ -1,6 +1,7 @@
 import { CONFIG } from './config.js';
 import { getSkyInfo, getWindDesc, formatPrecip, formatBaseTime, translateMidWf, getMidTempVal } from './utils.js';
 import { fetchPublicDataJson } from './api.js';
+import loadingImg from '../img/weather-loading.png';
 
 // 날씨 데이터 전역 상태 관리 (지역별 데이터 캐싱)
 export const WEATHER_STATE = {};
@@ -398,7 +399,7 @@ export function renderWeatherLoading(locKey) {
     if (container) {
         container.innerHTML = `
             <div class="weather-loader">
-                <img src="/src/img/weather-loading.png" alt="Loading...">
+                <img src="${loadingImg}" alt="Loading...">
                 <div class="weather-loading-text">正在加载中...</div>
             </div>
         `;

@@ -4,32 +4,9 @@ import { CONFIG } from './config.js';
 // CCTV 초기화
 // ============================================================
 export function initCCTV() {
+    // CCTV grid is removed from HTML. This function now does nothing as requested.
     const grid = document.getElementById('cctv-grid');
     if (!grid) return;
-
-    grid.innerHTML = CONFIG.CCTV.map(cam => `
-        <div class="cctv-card" onclick="openCctvModalById('${cam.id}')">
-            <div class="cctv-video-container">
-                ${cam.type === 'hls' ?
-            `<video id="video-${cam.id}" class="cctv-video-el" muted playsinline></video>` :
-            `<div id="yt-${cam.id}" class="cctv-video-el"></div>`
-        }
-                <div class="cctv-tag">LIVE</div>
-            </div>
-            <div class="cctv-info">
-                <span class="cctv-name">${cam.nameKo}</span>
-                <span class="cctv-name-cn">${cam.nameCn}</span>
-            </div>
-        </div>
-    `).join('');
-
-    CONFIG.CCTV.forEach(cam => {
-        if (cam.type === 'hls') {
-            initHlsPlayer(cam);
-        } else if (cam.type === 'youtube') {
-            initYoutubeEmbed(cam);
-        }
-    });
 }
 
 
