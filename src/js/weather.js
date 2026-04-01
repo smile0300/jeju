@@ -88,10 +88,17 @@ export async function fetchWeatherData(locKey) {
     };
 
     try {
-        const [shortJson, midData] = await Promise.all([
+        const fetchPromises = [
             fetchPublicDataJson(endpoint, params),
             fetchMidTermWeather(loc)
-        ]);
+        ];
+
+        // v4.0: 한라산인 경우 산림청 산악기상 데이터 추가 수집
+        if (locKey === 'hallasan' && loc.obsid) {
+            fetchPromises.push(fetchMountainWeather(loc.obsid));
+        }
+
+        const [shortJson, midData, mountainData] = await Promise.all(fetchPromises);
 
         const items = shortJson?.response?.body?.items?.item;
         
@@ -100,7 +107,7 @@ export async function fetchWeatherData(locKey) {
             throw new Error('Short-term forecast data missing');
         }
 
-        parseAndRenderWeather(locKey, items, midData);
+        parseAndRenderWeather(locKey, items, midData, mountainData);
         fetchAirQuality(locKey).catch(err => console.error(`[AirQuality] ${locKey} 로드 실패:`, err));
 
     } catch (e) {
@@ -109,7 +116,42 @@ export async function fetchWeatherData(locKey) {
     }
 }
 
-export function parseAndRenderWeather(locKey, items, midData) {
+/**
+ * v4.0: 산림청 산악기상정보 API 호출 (실시간 관측 데이터)
+ * v6.0: 일부 지점 JSON 미지원 대응을 위해 XML로 요청 후 프록시 레이어에서 파싱
+ */
+export async function fetchMountainWeather(obsid) {
+    const endpoint = 'https://apis.data.go.kr/1400377/mtweather';
+    
+    // 산림청 API 전용 시간 포맷 (YYYYMMDDHHMM)
+    const now = new Date();
+    const tm = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}${String(now.getHours()).padStart(2, '0')}${String(Math.floor(now.getMinutes() / 10) * 10).padStart(2, '0')}`;
+    
+    const params = {
+        obsid: obsid,
+        _type: 'xml', 
+        // tm: tm, // 일부 환경에서 특정 시간을 요구할 수 있으나, 보통 최신 데이터는 생략 가능. 500 에러 시 시도.
+        numOfRows: '1',
+        pageNo: '1'
+    };
+
+    try {
+        const json = await fetchPublicDataJson(endpoint, params);
+        // 산림청 API는 response.body.list 또는 items 아래에 데이터가 올 수 있음
+        const list = json?.response?.body?.list || json?.response?.body?.items?.item;
+        return Array.isArray(list) ? list[0] : list;
+    } catch (e) {
+        console.warn(`[MountainWeather] ${obsid} 로드 실패:`, e.message);
+        if (e.details) {
+            console.error('[MountainWeather] 상세 에러 내용:', e.details);
+        }
+        return null;
+    }
+}
+
+import { renderHallasanDashboard } from './hallasan-dashboard.js';
+
+export function parseAndRenderWeather(locKey, items, midData, mountainData) {
     const grouped = {};
     items.forEach(it => {
         const key = `${it.fcstDate}${it.fcstTime}`;
@@ -122,7 +164,12 @@ export function parseAndRenderWeather(locKey, items, midData) {
     const sortedKeys = Object.keys(grouped).sort();
     if (sortedKeys.length === 0) return;
 
-    WEATHER_STATE[locKey] = { items: grouped, sortedKeys, midData };
+    WEATHER_STATE[locKey] = { items: grouped, sortedKeys, midData, mountainData };
+
+    // 한라산 데이터인 경우 대시보드 가시성 리포트 갱신 (상태 할당 후 실행)
+    if (locKey === 'hallasan' && typeof renderHallasanDashboard === 'function') {
+        renderHallasanDashboard();
+    }
 
     const current = grouped[sortedKeys[0]];
     const sky = getSkyInfo(current.PTY, current.SKY);

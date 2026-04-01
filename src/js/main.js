@@ -3,6 +3,7 @@ import { CONFIG } from './config.js';
 import { initCCTV, openCctvModalById, openCctvModal } from './cctv.js';
 import { fetchWeatherData, switchWeatherLocation, updateHourlyWeather, fetchWeatherAlerts } from './weather.js';
 import { fetchHallasanStatus } from './hallasan.js';
+import { renderHallasanDashboard } from './hallasan-dashboard.js';
 import { fetchFlights, switchFlightTab } from './airport.js';
 import { fetchFoundGoods, switchLostView, openLostDetailModalByIndex, openLostReportModal, handleLostImageChange, submitLostReport } from './lost-found.v1.js';
 import { fetchFestivals, selectFestivalMonth, initMonthFilter } from './festival.js';
@@ -43,6 +44,7 @@ window.addEventListener('load', () => {
     Object.keys(CONFIG.WEATHER_LOCATIONS).forEach(loc => fetchWeatherData(loc));
     fetchWeatherAlerts(); // 기상특보 초기 호출 추가
     fetchHallasanStatus();
+    renderHallasanDashboard();
     fetchFlights('arrive');
     fetchFoundGoods();
     initMonthFilter();
@@ -56,7 +58,8 @@ window.addEventListener('load', () => {
     }, 60000);
     setInterval(() => {
         Object.keys(CONFIG.WEATHER_LOCATIONS).forEach(loc => fetchWeatherData(loc));
-        fetchWeatherAlerts(); // 기상특보 주기적 업데이트 (30분)
-    }, 30 * 60 * 1000);
+        fetchWeatherAlerts();
+        renderHallasanDashboard(); 
+    }, 10 * 60 * 1000); // 10분 간격 (v4.0 반영)
     setInterval(fetchFoundGoods, 30 * 60 * 1000);
 });
