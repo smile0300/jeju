@@ -1,0 +1,105 @@
+/* ==================== Hallasan Dashboard (Simplified Mini) ==================== */
+#hallasan-dashboard-container {
+    margin-bottom: 24px;
+    width: 100%;
+}
+
+.hallasan-mini-dashboard {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-xl);
+    padding: 16px;
+    box-shadow: var(--shadow-sm);
+}
+
+.mini-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    background: var(--bg-card-hover);
+    border-radius: var(--radius-lg);
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.mini-item:hover {
+    border-color: var(--accent-blue);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.mini-icon {
+    font-size: 1.8rem;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+.mini-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.mini-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.mini-value {
+    font-size: 1.2rem;
+    font-weight: 900;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* 로딩 및 에러 상태 */
+.dashboard-placeholder, .dashboard-error {
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-xl);
+    padding: 20px;
+    text-align: center;
+}
+
+.loader-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.loading-spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid var(--bg-card-hover);
+    border-top: 3px solid var(--accent-blue);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.loading-text {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 모바일 대응 */
+@media (max-width: 600px) {
+    .hallasan-mini-dashboard {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+    .mini-item {
+        padding: 10px;
+    }
+}

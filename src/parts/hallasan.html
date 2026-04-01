@@ -6,8 +6,21 @@
     </header>
     <div class="section">
         <div class="container">
-            <div id="hallasan-status-container" style="margin-top: 45px;"></div>
+            <!-- [NEW] 한라산 가시성 & 일출 실시간 리포트 대시보드 -->
+            <div id="hallasan-dashboard-container"></div>
+            
+            <div id="hallasan-status-container" style="margin-top: 30px;"></div>
             <div class="trails-grid" id="trails-grid"></div>
+
+            <!-- 실시간 CCTV 센터 (5종 통합) -->
+            <div id="hallasan-cctv-container" style="margin-top: 40px; border-top: 1px dashed var(--border-light); padding-top: 25px;">
+                <h3 style="font-size:1.1rem; font-weight:800; margin-bottom:15px; display:flex; align-items:center; gap:8px;">
+                    📹 한라산 실시간 CCTV
+                </h3>
+                <div class="cctv-grid" id="hallasan-cctv-grid">
+                    <!-- CCTV 카드가 이곳에 동적으로 주입됩니다. -->
+                </div>
+            </div>
         </div>
     </div>
 </section>

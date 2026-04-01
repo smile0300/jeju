@@ -1,4 +1,5 @@
 import { CONFIG } from './config.js';
+import { initHlsPlayer, openCctvModalById } from './cctv.js';
 
 export const HALLASAN_TRAILS = [
     { nameKo: '어리목탐방로', nameCn: '御里牧登山路', distanceCn: '6.8km（单程）', timeCn: '约3小时' },
@@ -86,7 +87,8 @@ export async function fetchHallasanStatus() {
                 <div class="status-icon">${overallOpen ? '✅' : '⚠️'}</div>
                 <div class="status-content">
                     <h3>${overallOpen ? '汉拿山各路线正常运营' : `部分路线限制（${closedCount}条）`}</h3>
-                    <p class="status-time">更新时间: ${now}<br>数据来源: jeju.go.kr 官方网站</p>
+                    <p class="status-time">更新时间: ${now}<br>
+                    <a href="https://jeju.go.kr/hallasan/index.htm" target="_blank" style="display: inline-block; margin-top: 8px; color: var(--accent-blue); font-weight: 800; text-decoration: none; border: 1px solid var(--accent-blue); padding: 4px 12px; border-radius: 20px; font-size: 0.75rem;">🔗 홈페이지가기 / 访问官网</a></p>
                 </div>
             </div>`;
 
@@ -125,4 +127,34 @@ export async function fetchHallasanStatus() {
                 </div>
             </div>`).join('');
     }
+
+    // CCTV 렌더링 추가
+    renderHallasanCCTV();
 }
+
+/**
+ * 한라산 전용 CCTV 5종 렌더링
+ */
+export function renderHallasanCCTV() {
+    const grid = document.getElementById('hallasan-cctv-grid');
+    if (!grid) return;
+
+    grid.innerHTML = CONFIG.CCTV.map(cam => `
+        <div class="cctv-card" onclick="openCctvModalById('${cam.id}')">
+            <div class="cctv-video-container">
+                <video id="hallasan-video-${cam.id}" class="cctv-video-el" muted playsinline></video>
+                <div class="cctv-tag">LIVE</div>
+            </div>
+            <div class="cctv-info" style="padding: 10px; text-align: center;">
+                <span class="cctv-name" style="font-weight: 800; font-size: 0.9rem;">${cam.nameKo}</span>
+            </div>
+        </div>
+    `).join('');
+
+    CONFIG.CCTV.forEach(cam => {
+        initHlsPlayer(cam, `hallasan-video-${cam.id}`);
+    });
+}
+
+// 모달 전역 접근 허용
+window.openCctvModalById = openCctvModalById;

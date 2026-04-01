@@ -78,12 +78,17 @@ export async function onRequest(context) {
         }
 
         if (serviceKey) {
-          const keyParam = hostname.includes('api.visitjeju.net') ? 'apiKey' : 'serviceKey';
+          const isMountainApi = hostname.includes('apis.data.go.kr') && targetUrlString.includes('mtweather');
+          const keyParam = hostname.includes('api.visitjeju.net') ? 'apiKey' : (isMountainApi ? 'ServiceKey' : 'serviceKey');
+          
           if (!targetUrl.searchParams.has(keyParam)) {
+            const rawKey = serviceKey.trim();
             try {
-              targetUrl.searchParams.set(keyParam, decodeURIComponent(serviceKey.trim()));
+              // 이미 인코딩된 키인 경우 그대로 사용, 아닐 경우 decode 후 URLSearchParams가 인코딩하도록 함
+              const decoded = decodeURIComponent(rawKey);
+              targetUrl.searchParams.set(keyParam, decoded);
             } catch (e) {
-              targetUrl.searchParams.set(keyParam, serviceKey.trim());
+              targetUrl.searchParams.set(keyParam, rawKey);
             }
           }
         }
@@ -91,8 +96,10 @@ export async function onRequest(context) {
 
       const isJsonExpected = url.searchParams.get('dataType') === 'JSON' || 
                              targetUrl.searchParams.get('dataType') === 'JSON' || 
+                             targetUrl.searchParams.get('_type') === 'json' ||
                              targetUrlString.toLowerCase().includes('datatype=json') ||
-                             targetUrlString.toLowerCase().includes('returntype=json');
+                             targetUrlString.toLowerCase().includes('returntype=json') ||
+                             targetUrlString.toLowerCase().includes('_type=json');
 
       const headers = new Headers();
       headers.set('Accept', isJsonExpected ? 'application/json, text/plain, */*' : 'application/xml, text/xml, */*');
@@ -105,7 +112,8 @@ export async function onRequest(context) {
 
       if (!response.ok) {
         const errorBody = await response.text();
-        return new Response(isJsonExpected ? JSON.stringify({ error: `Target API Error (${response.status})`, details: errorBody }) : errorBody, {
+        console.error(`[Proxy] Target API Error: ${response.status}`, errorBody);
+        return new Response(isJsonExpected ? JSON.stringify({ error: `Target API Error (${response.status})`, details: errorBody, url: targetUrl.toString() }) : errorBody, {
           status: response.status,
           headers: { 
             'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
