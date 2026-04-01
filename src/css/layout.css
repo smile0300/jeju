@@ -63,15 +63,30 @@
     animation: fadeInDown 0.8s ease-out;
 }
 
-.home-welcome h1 {
-    font-size: 2.15rem;
-    font-weight: 900;
-    background: var(--primary-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 12px;
-    letter-spacing: -1.5px;
+.brand-logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.main-logo {
+    width: 240px;
+    height: auto;
+    max-width: 90%;
+    filter: drop-shadow(0 4px 10px rgba(67, 56, 202, 0.15));
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
 }
 
 .home-welcome p {
@@ -278,5 +293,8 @@
     }
     .home-welcome h1 {
         font-size: 1.5rem;
+    }
+    .main-logo {
+        width: 180px;
     }
 }
