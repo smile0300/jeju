@@ -174,7 +174,7 @@ export function parseAndRenderWeather(locKey, items, midData, mountainData) {
     const current = grouped[sortedKeys[0]];
     const currentHour = current.time ? parseInt(current.time.slice(0, 2)) : new Date().getHours();
     const sky = getSkyInfo(current.PTY, current.SKY, currentHour);
- Randy
+
     const container = document.getElementById(`current-weather-${locKey}`);
     if (container && (container.querySelector('.weather-loader') || !document.getElementById(`icon-${locKey}`))) {
         container.innerHTML = `
