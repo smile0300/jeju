@@ -1,5 +1,5 @@
 import { CONFIG } from './config.js';
-import { initHlsPlayer, openCctvModalById } from './cctv.js';
+// import { initHlsPlayer, openCctvModalById } from './cctv.js'; // 순환 참조 우려 및 로딩 에러 방지를 위해 제거
 
 export const HALLASAN_TRAILS = [
     { nameKo: '어리목탐방로', nameCn: '御里牧登山路', distanceCn: '6.8km（单程）', timeCn: '约3小时' },
@@ -129,9 +129,11 @@ export function renderHallasanCCTV() {
     `).join('');
 
     CONFIG.CCTV.forEach(cam => {
-        initHlsPlayer(cam, `hallasan-video-${cam.id}`);
+        if (window.initHlsPlayer) {
+            window.initHlsPlayer(cam, `hallasan-video-${cam.id}`);
+        }
     });
 }
 
 // 모달 전역 접근 허용
-window.openCctvModalById = openCctvModalById;
+// 모달 전역 접근 허용은 main.js에서 통합 관리합니다.
