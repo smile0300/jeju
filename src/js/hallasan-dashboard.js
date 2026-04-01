@@ -15,7 +15,7 @@ export function renderHallasanDashboard() {
             <div class="dashboard-placeholder">
                 <div class="loader-wrapper">
                     <div class="loading-spinner"></div>
-                    <div class="loading-text">데이터 로딩 중...</div>
+                    <div class="loading-text">正在加载中...</div>
                 </div>
             </div>`;
         return;
@@ -31,7 +31,7 @@ export function renderHallasanDashboard() {
     if (!rawData) {
         container.innerHTML = `
             <div class="dashboard-error">
-                <div class="error-msg">⚠️ 데이터 로드 실패</div>
+                <div class="error-msg">⚠️ 数据加载失败</div>
             </div>`;
         return;
     }
@@ -56,21 +56,21 @@ export function renderHallasanDashboard() {
             <div class="mini-item">
                 <div class="mini-icon">⛰️</div>
                 <div class="mini-info">
-                    <span class="mini-label">백록담 가시성</span>
+                    <span class="mini-label">白鹿潭观赏概率</span>
                     <span class="mini-value">${visibility}%</span>
                 </div>
             </div>
             <div class="mini-item">
                 <div class="mini-icon">✨</div>
                 <div class="mini-info">
-                    <span class="mini-label">일출 관측</span>
+                    <span class="mini-label">日出观赏概率</span>
                     <span class="mini-value">${sunriseInfo.successProb}%</span>
                 </div>
             </div>
             <div class="mini-item">
                 <div class="mini-icon">🌅</div>
                 <div class="mini-info">
-                    <span class="mini-label">일출 시간</span>
+                    <span class="mini-label">日出时间</span>
                     <span class="mini-value">${sunriseInfo.time}</span>
                 </div>
             </div>
@@ -96,8 +96,8 @@ function calculateVisibilityScore(data) {
 }
 
 export function getVisibilityStatus(score) {
-    if (score >= 80) return { icon: "⛰️", text: "매우 맑음", desc: "공기가 건조하고 구름이 적어 백록담 바닥까지 선명하게 보입니다." };
-    if (score >= 50) return { icon: "⛅", text: "부분 관측", desc: "구름이 조금 있어 백록담이 간헐적으로 보일 수 있습니다." };
-    if (score >= 20) return { icon: "🌫️", text: "시야 흐림", desc: "습도가 높거나 구름으로 인해 시야가 제한될 수 있습니다." };
-    return { icon: "☁️", text: "관측 불가능", desc: "안개 또는 강수로 인해 현재 백록담을 보기 어렵습니다." };
+    if (score >= 80) return { icon: "⛰️", text: "非常清晰", desc: "由于空气干燥且云量较少，您可以清晰地看到白鹿潭的底部。" };
+    if (score >= 50) return { icon: "⛅", text: "部分可见", desc: "由于云量适中，白록담可能会间歇性地显露出来。" };
+    if (score >= 20) return { icon: "🌫️", text: "视线模糊", desc: "由于湿度较大或有云，视线可能会受到阻碍。" };
+    return { icon: "☁️", text: "难以观测", desc: "受雾气或降수影响，目前很难看到白鹿潭。" };
 }
