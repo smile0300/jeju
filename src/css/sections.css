@@ -348,7 +348,7 @@
     box-shadow: var(--shadow-sm);
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 12px;
     justify-content: space-between;
 }
 .trail-header { 
@@ -369,7 +369,7 @@
     align-items: center;
     width: 100%;
     border-top: 1px dashed var(--border-light);
-    padding-top: 5px;
+    padding-top: 8px;
 }
 .trail-info-compact span {
     font-size: 0.65rem;
