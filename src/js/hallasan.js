@@ -75,7 +75,7 @@ export async function fetchHallasanStatus() {
         const closedCount = trails.filter(t => t.statusCls === 'closed').length;
         const overallOpen = closedCount === 0;
 
-        container.innerHTML = `한라산 등산 정보 업데이트: ${now}`;
+        container.innerHTML = `汉拿山登山信息更新: ${now}`;
 
         trailsEl.innerHTML = trails.map(t => `
             <div class="trail-card">
@@ -122,8 +122,8 @@ export function renderHallasanCCTV() {
                 <video id="hallasan-video-${cam.id}" class="cctv-video-el" muted playsinline></video>
                 <div class="cctv-tag">LIVE</div>
             </div>
-            <div class="cctv-info" style="padding: 10px; text-align: center;">
-                <span class="cctv-name" style="font-weight: 800; font-size: 0.9rem;">${cam.nameKo}</span>
+            <div class="cctv-info" style="padding: 6px 4px; text-align: center;">
+                <span class="cctv-name" style="font-weight: 800; font-size: 0.85rem;">${cam.nameCn}</span>
             </div>
         </div>
     `).join('');

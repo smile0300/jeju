@@ -341,41 +341,41 @@
 .status-card.status-open { border-color: #10b981; background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0.02) 100%); }
 .status-card.status-closed { border-color: #ef4444; background: linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, rgba(239, 68, 68, 0.02) 100%); }
 
-.trails-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.trails-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
 .trail-card {
-    background: white; border-radius: 16px;
-    padding: 12px 14px; border: 1px solid var(--border-light);
+    background: white; border-radius: 12px;
+    padding: 10px 12px; border: 1px solid var(--border-light);
     box-shadow: var(--shadow-sm);
     display: flex;
-    align-items: center;
+    flex-direction: column; /* 2열에서는 세로 배치가 더 가독성 높음 */
+    gap: 8px;
+    min-height: 100px;
     justify-content: space-between;
-    gap: 15px;
 }
 .trail-header { 
     display: flex; 
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-    flex: 1;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
 }
-.trail-header h4 { font-size: 0.9rem; font-weight: 800; color: var(--text-primary); margin: 0; }
-.trail-status-badge { padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; font-weight: 800; color: white; }
+.trail-header h4 { font-size: 0.8rem; font-weight: 800; color: var(--text-primary); margin: 0; }
+.trail-status-badge { padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; font-weight: 800; color: white; }
 .trail-status-badge.open { background: var(--success-gradient); }
 .trail-status-badge.partial { background: var(--warning-gradient); }
 .trail-status-badge.closed { background: var(--danger-gradient); }
 
 .trail-info-compact {
     display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 2px;
-    min-width: fit-content;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    border-top: 1px dashed var(--border-light);
+    padding-top: 8px;
 }
 .trail-info-compact span {
-    font-size: 0.72rem;
+    font-size: 0.65rem;
     font-weight: 700;
     color: var(--text-muted);
-    white-space: nowrap;
 }
 
 /* ==================== Flights ==================== */
