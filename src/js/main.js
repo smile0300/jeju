@@ -1,6 +1,6 @@
 
 import { CONFIG } from './config.js';
-import { initCCTV, openCctvModalById, openCctvModal } from './cctv.js';
+import { initCCTV, openCctvModalById, openCctvModal, initHlsPlayer } from './cctv.js';
 import { fetchWeatherData, switchWeatherLocation, updateHourlyWeather, fetchWeatherAlerts } from './weather.js';
 import { fetchHallasanStatus } from './hallasan.js';
 import { renderHallasanDashboard } from './hallasan-dashboard.js';
@@ -14,6 +14,7 @@ import { showSection, openWechatQR, closeWechatQR, openFeatureModal, closeFeatur
 window.showSection = showSection;
 window.openCctvModalById = openCctvModalById;
 window.openCctvModal = openCctvModal;
+window.initHlsPlayer = initHlsPlayer;
 window.switchWeatherLocation = switchWeatherLocation;
 window.fetchWeatherData = fetchWeatherData;
 window.updateHourlyWeather = updateHourlyWeather;
