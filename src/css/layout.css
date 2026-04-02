@@ -57,36 +57,51 @@
 
 .home-welcome {
     text-align: center;
-    margin-bottom: 40px;
-    margin-top: 40px; /* 상단 여백 30px -> 40px */
-    padding: 0 20px;
+    margin-bottom: 50px; /* 여백 증가 */
+    margin-top: 50px;    /* 상하 동일하게 여백 증가 */
+    padding: 20px;
     animation: fadeInDown 0.8s ease-out;
 }
 
-.brand-logo {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 5px;
-}
-
 .main-logo {
-    width: 240px;
-    height: auto;
-    max-width: 90%;
-    filter: drop-shadow(0 4px 10px rgba(67, 56, 202, 0.15));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4.8rem; /* 사이즈 획기적으로 증대 */
+    font-weight: 900;
+    color: var(--text-primary);
+    margin: 0;
+    letter-spacing: -3px; /* 사이즈 확대에 따른 자간 조정 */
+    text-transform: uppercase;
+    line-height: 1;
 }
 
-.sr-only {
+.live-dot {
+    position: relative;
+    font-size: inherit;
+    color: inherit;
+    font-style: normal;
+    display: inline-flex;
+    align-items: baseline;
+}
+
+.live-dot::after {
+    content: '';
     position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border-width: 0;
+    top: -15%; /* 위로 올려서 I의 기둥과 분리 */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 14px; /* 로고 확대에 맞춰 도트도 확대 */
+    height: 14px;
+    background-color: #ff2442;
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(255, 36, 66, 0.4);
+    animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: translateX(-50%) scale(1); }
+    50% { opacity: 0.3; transform: translateX(-50%) scale(0.8); }
 }
 
 .home-welcome p {
@@ -291,10 +306,12 @@
     .item-label {
         font-size: 0.75rem;
     }
-    .home-welcome h1 {
-        font-size: 1.5rem;
-    }
     .main-logo {
-        width: 180px;
+        font-size: 2rem;
+        letter-spacing: -1px;
+    }
+    .live-dot::after {
+        width: 7px;
+        height: 7px;
     }
 }
