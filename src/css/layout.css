@@ -65,29 +65,49 @@
 
 .main-logo {
     display: flex;
-    align-items: center;
     justify-content: center;
-    font-size: 5.8rem; /* 크기 확대 */
-    font-weight: 1000; /* 지원되는 브라우저에서 최대 두께 */
-    color: var(--text-primary);
+    align-items: center;
+    font-size: 5.8rem;
+    font-weight: 1000;
     margin: 0;
-    letter-spacing: -4px; /* 더 좁게 하여 더 굵어 보이는 효과 */
+    letter-spacing: -4px;
     text-transform: uppercase;
     line-height: 1;
-    background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+    /* 생동감 넘치는 물결 그라데이션 */
+    background: linear-gradient(
+        120deg, 
+        #0f172a 0%, 
+        #1e293b 20%, 
+        #2563eb 40%, 
+        #60a5fa 60%, 
+        #2563eb 80%, 
+        #0f172a 100%
+    );
+    background-size: 300% auto;
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    text-shadow: 0 4px 10px rgba(0,0,0,0.05); /* 그라데이션과 어울리는 부드러운 그림자 */
+    color: transparent;
+    animation: wavy-motion 6s ease-in-out infinite;
+}
+
+@keyframes wavy-motion {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 .live-dot {
     position: relative;
     font-size: inherit;
-    color: inherit;
     font-style: normal;
-    display: inline-flex;
-    align-items: baseline;
+    display: inline;
+    /* 부모 그라데이션을 완벽하게 동기화하여 I 글자 노출 */
+    background: inherit;
+    background-attachment: inherit;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .live-dot::after {
