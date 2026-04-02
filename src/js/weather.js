@@ -414,7 +414,7 @@ export function renderWeatherError(locKey) {
                 <div style="font-size:2rem; margin-bottom:10px;">⚠️</div>
                 <div class="weather-loading-text" style="color:var(--accent-red); margin-bottom: 12px;">天气数据加载失败</div>
                 <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom: 20px;">暂时无法获取实时天气信息，请稍后再试。</p>
-                <button class="feature-request-btn" onclick="fetchWeatherData('${locKey}')" style="font-size: 0.85rem; padding: 8px 18px; border-color: var(--accent-red); color: var(--accent-red);">🔄 刷新 / 다시 시도</button>
+                <button class="feature-request-btn" onclick="fetchWeatherData('${locKey}')" style="font-size: 0.85rem; padding: 8px 18px; border-color: var(--accent-red); color: var(--accent-red);">🔄 刷新</button>
             </div>
         `;
     }

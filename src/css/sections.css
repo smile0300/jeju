@@ -370,11 +370,15 @@
     width: 100%;
     border-top: 1px dashed var(--border-light);
     padding-top: 8px;
+    flex-wrap: nowrap; /* 줄바꿈 방지 */
+    gap: 5px; /* 요소 간 최소 간격 */
 }
 .trail-info-compact span {
     font-size: 0.65rem;
     font-weight: 700;
     color: var(--text-muted);
+    white-space: nowrap; /* 텍스트 줄바꿈 방지 */
+    flex-shrink: 0; /* 요소가 줄어들지 않도록 설정 */
 }
 
 /* ==================== Flights ==================== */

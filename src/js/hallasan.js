@@ -27,7 +27,7 @@ export async function fetchHallasanStatus() {
 
     const now = new Date().toLocaleString('zh-CN');
 
-    container.innerHTML = `<span style="font-size: 0.7rem; opacity: 0.6;">데이터 로딩 중...</span>`;
+    container.innerHTML = `<span style="font-size: 0.7rem; opacity: 0.6;">正在加载数据...</span>`;
 
     try {
         const url = `${CONFIG.PROXY_URL}/api/hallasan-status`;
@@ -91,7 +91,7 @@ export async function fetchHallasanStatus() {
 
     } catch (e) {
         console.warn('한라산 실시간 로드 실패:', e);
-        container.innerHTML = `⚠️ 데이터 업데이트 실패 (홈페이지 확인 권장)`;
+        container.innerHTML = `⚠️ 数据更新失败 (请在官网确认)`;
         trailsEl.innerHTML = HALLASAN_TRAILS.map(t => `
             <div class="trail-card">
                 <div class="trail-header">
