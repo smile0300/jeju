@@ -5,7 +5,7 @@ import { fetchWeatherData, switchWeatherLocation, updateHourlyWeather, fetchWeat
 import { fetchHallasanStatus } from './hallasan.js';
 import { renderHallasanDashboard } from './hallasan-dashboard.js';
 import { fetchFlights, switchFlightTab } from './airport.js';
-import { fetchFoundGoods, switchLostView, openLostDetailModalByIndex, openLostReportModal, handleLostImageChange, submitLostReport } from './lost-found.v1.js';
+import { fetchFoundGoods, switchLostView, openLostDetailModalByIndex, openLostReportModal, handleLostImageChange, submitLostReport, showWechatQR } from './lost-found.v1.js';
 import { fetchFestivals, selectFestivalMonth, initMonthFilter } from './festival.js';
 import { showSection, openWechatQR, closeWechatQR, openFeatureModal, closeFeatureModal, submitFeatureRequest, copyWechatId, openWeatherSummaryModal, closeWeatherSummaryModal } from './ui.js';
 
@@ -25,6 +25,7 @@ window.openLostReportModal = openLostReportModal;
 window.handleLostImageChange = handleLostImageChange;
 window.submitLostReport = submitLostReport;
 window.fetchFoundGoodsManual = fetchFoundGoods;
+window.showWechatQR = showWechatQR;
 window.selectFestivalMonth = selectFestivalMonth;
 window.openWechatQR = openWechatQR;
 window.closeWechatQR = closeWechatQR;

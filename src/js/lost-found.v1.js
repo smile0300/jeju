@@ -166,11 +166,20 @@ export function openLostDetailModalByIndex(index) {
             </div>
             <div id="wechat-qr-container" style="display:none; text-align:center; padding: 15px; border-top: 1px solid #eee;">
                 <p style="font-size: 14px; color: #666; margin-bottom: 10px;">请扫描二维码通过微信联系我们</p>
-                <img src="assets/wechat_qr.png" style="width: 200px; height: 200px;">
+                <img src="/assets/wechat_qr.png" style="width: 200px; height: 200px;">
             </div>
         </div>`;
     document.getElementById('lost-detail-modal').style.display = 'flex';
     document.body.style.overflow = 'hidden';
+}
+
+export function showWechatQR() {
+    const container = document.getElementById('wechat-qr-container');
+    if (container) {
+        container.style.display = 'block';
+        // QR 코드가 보이도록 스크롤 이동 (필요한 경우)
+        container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
 }
 
 export function openLostReportModal() {
