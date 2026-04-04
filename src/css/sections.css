@@ -1032,19 +1032,20 @@
     border-bottom: 1px solid #f1f5f9;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
+    position: relative;
 }
 
 .alert-modal-title {
     font-size: 1.1rem;
     font-weight: 800;
     color: #0f172a;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    text-align: center;
 }
 
 .alert-modal-close {
+    position: absolute;
+    right: 24px;
     background: #f1f5f9;
     border: none;
     width: 32px; height: 32px;

@@ -660,7 +660,9 @@ window.openWeatherAlertModal = function() {
             title = title.split('/').slice(1).join('/').trim();
         }
         const timeStr = formatTime(item.tmFc);
-        const translatedContent = translateWeatherAlert(title);
+        let translatedContent = translateWeatherAlert(title);
+        // (*) 문자열 제거
+        translatedContent = translatedContent.replace(/\(\*\)/g, '').trim();
 
         return `
             <div class="alert-history-item">
@@ -672,7 +674,7 @@ window.openWeatherAlertModal = function() {
     modal.innerHTML = `
         <div class="alert-modal-panel animate-slide-up">
             <div class="alert-modal-header">
-                <div class="alert-modal-title">📉 济州气象特报历史</div>
+                <div class="alert-modal-title">济州气象特报历史</div>
                 <button class="alert-modal-close" onclick="window.closeWeatherAlertModal()">✕</button>
             </div>
             <div class="alert-modal-body">
