@@ -6,6 +6,9 @@ import loadingImg from '../img/weather-loading.png';
 // 날씨 데이터 전역 상태 관리 (지역별 데이터 캐싱)
 export const WEATHER_STATE = {};
 
+// 기상특보 순환 노출을 위한 전역 변수
+let alertRotationInterval = null;
+
 export async function fetchMidTermWeather(loc) {
     let { tmFc } = formatBaseTime(new Date());
     const endpoints = {
@@ -530,12 +533,41 @@ export async function fetchWeatherAlerts() {
 
         if (items.length > 0) {
             alertsContainer.style.display = 'flex';
-            alertsContainer.innerHTML = items.map(item => `
-                <div class="weather-alert-card">
-                    <div class="alert-type-badge">济州特报</div>
-                    <div class="alert-msg">🚨 ${item.title}</div>
-                </div>`).join('');
+            
+            // 기존 상구하고 있던 인터벌(Timer) 제거
+            if (alertRotationInterval) clearInterval(alertRotationInterval);
+
+            let currentIndex = 0;
+            const renderAlert = (index) => {
+                const item = items[index] || {};
+                let title = item.title || '기상 특보 정보가 없습니다.';
+                
+                // [특보] ... : ... / 헤더 제거 로직
+                if (title.includes('/')) {
+                    title = title.split('/').slice(1).join('/').trim();
+                }
+
+                alertsContainer.innerHTML = `
+                    <div class="weather-alert-card animate-slide-up">
+                        <div class="alert-type-badge">济州特报</div>
+                        <div class="alert-msg">🚨 ${title}</div>
+                    </div>`;
+            };
+
+            renderAlert(0);
+
+            if (items.length > 1) {
+                alertRotationInterval = setInterval(() => {
+                    currentIndex = (currentIndex + 1) % items.length;
+                    renderAlert(currentIndex);
+                }, 3000); // 3초 간격 순환
+            }
         } else {
+            // 특보가 없을 경우 인터벌 정지 및 메시지 출력
+            if (alertRotationInterval) {
+                clearInterval(alertRotationInterval);
+                alertRotationInterval = null;
+            }
             showNoAlerts(alertsContainer);
         }
     } catch (e) {
