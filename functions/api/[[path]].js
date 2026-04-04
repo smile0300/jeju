@@ -13,6 +13,7 @@ export async function onRequest(context) {
     'jeju.go.kr',           // 한라산 탐방로 정보 (스크래핑용)
     'openapi.airport.co.kr', // 공항공사 항공 정보 API
     'api.visitjeju.net',    // 제주관광공사 축제/행사 API
+    'api.jejuits.go.kr',    // 제주 ITS 교통 정보 API
     '123.140.197.51',       // CCTV 스트리밍 서버 IP
     'hallacctv.kr',         // 한라산 CCTV 스트리밍 서버 (Root)
     'www.hallacctv.kr'      // 한라산 CCTV 스트리밍 서버 (Sub)
@@ -69,7 +70,8 @@ export async function onRequest(context) {
       const hostname = targetUrl.hostname;
       if (hostname.includes('apis.data.go.kr') || 
           hostname.includes('openapi.airport.co.kr') ||
-          hostname.includes('api.visitjeju.net')) {
+          hostname.includes('api.visitjeju.net') ||
+          hostname.includes('api.jejuits.go.kr')) {
         
         let serviceKey = env.SECRET_PUBLIC_DATA_KEY || env.PUBLIC_DATA_KEY;
         
@@ -77,9 +79,15 @@ export async function onRequest(context) {
           serviceKey = env.VISIT_JEJU_KEY || env.SECRET_VIS_JEJU_KEY;
         }
 
+        if (hostname.includes('api.jejuits.go.kr') && (env.ITS_KEY || env.SECRET_ITS_KEY)) {
+          serviceKey = env.ITS_KEY || env.SECRET_ITS_KEY;
+        }
+
         if (serviceKey) {
           const isMountainApi = hostname.includes('apis.data.go.kr') && targetUrlString.includes('mtweather');
-          const keyParam = hostname.includes('api.visitjeju.net') ? 'apiKey' : (isMountainApi ? 'ServiceKey' : 'serviceKey');
+          const keyParam = hostname.includes('api.visitjeju.net') ? 'apiKey' : 
+                           (hostname.includes('api.jejuits.go.kr') ? 'authApiKey' : 
+                           (isMountainApi ? 'ServiceKey' : 'serviceKey'));
           
           if (!targetUrl.searchParams.has(keyParam)) {
             const rawKey = serviceKey.trim();

@@ -18,7 +18,7 @@ export default defineConfig({
     proxy: {
       // API 요청을 wrangler pages dev 서버로 전달 (기본 8788 포트)
       '/api': {
-        target: 'http://localhost:8788',
+        target: 'http://127.0.0.1:8788',
         changeOrigin: true,
       },
     },

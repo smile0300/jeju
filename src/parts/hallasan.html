@@ -6,19 +6,31 @@
     </header>
     <div class="section">
         <div class="container">
-            <div id="hallasan-status-container" style="text-align: center; margin-top: 45px; margin-bottom: 12px; font-size: 0.85rem; font-weight: 700; color: var(--text-muted);"></div>
+            <!-- 실시간 탐방 통제 현황 (Status Badge) -->
+            <div id="hallasan-status-container" style="margin-bottom: 20px;"></div>
 
             <!-- [NEW] 한라산 가시성 & 일출 실시간 리포트 대시보드 -->
-            <div id="hallasan-dashboard-container" style="margin-bottom: 25px;"></div>
+            <div class="dashboard-wrapper" style="margin-bottom: 30px; background: white; border-radius: 24px; padding: 5px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid var(--border-light);">
+                <div id="hallasan-dashboard-container"></div>
+            </div>
             
             <!-- 실시간 CCTV 센터 (5종 통합) -->
-            <div id="hallasan-cctv-container" style="margin-bottom: 30px; border-top: 1px dashed var(--border-light); padding-top: 20px;">
+            <div class="subtitle-wrap" style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding-left: 5px;">
+                <span style="font-size: 1.1rem;">📹</span>
+                <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: var(--text-primary);">실시간 영상 센터</h3>
+            </div>
+            <div id="hallasan-cctv-container" style="margin-bottom: 35px;">
                 <div class="cctv-grid" id="hallasan-cctv-grid">
                     <!-- CCTV 카드가 이곳에 동적으로 주입됩니다. -->
                 </div>
             </div>
 
-            <div class="trails-grid" id="trails-grid" style="margin-top: 15px; border-top: 1px dashed var(--border-light); padding-top: 20px;"></div>
+            <!-- 산행 코스 상세 정보 -->
+            <div class="subtitle-wrap" style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding-left: 5px;">
+                <span style="font-size: 1.1rem;">🥾</span>
+                <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: var(--text-primary);">등산 코스 현황</h3>
+            </div>
+            <div class="trails-grid" id="trails-grid" style="padding-bottom: 30px;"></div>
         </div>
     </div>
 </section>
