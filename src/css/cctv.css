@@ -1,0 +1,248 @@
+/* CCTV 전용 스타일 (SVG 지도 및 카드 레이아웃) */
+
+#cctv {
+    padding: 0;
+    background: #ffffff; /* Page background set to white as requested */
+    --color-jeju: #bcac9c;
+    --color-seogwipo: #a49484;
+    --color-east: #81a1c1;
+    --color-west: #a3be8c;
+    --color-hallasan: #eceff4;
+    --color-udo: #fbc531;
+    --color-all: #81a1c1;
+}
+
+#cctv .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 10px;
+}
+
+/* 지역 선택 탭 */
+.cctv-tabs {
+    display: flex;
+    justify-content: center;
+    overflow-x: auto;
+    gap: 12px;
+    padding: 15px 10px 25px;
+    scrollbar-width: none;
+    position: sticky;
+    top: 56px; /* 아래 app-bar 높이 대응 */
+    z-index: 100;
+    mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+}
+
+.cctv-tabs::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+}
+
+.tab-btn {
+    flex: 0 0 auto;
+    padding: 12px 24px;
+    border-radius: 16px;
+    background: rgba(241, 242, 246, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #57606f;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+    backdrop-filter: blur(5px);
+}
+
+.tab-btn:hover {
+    background: #ffffff;
+    color: #2f3542;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.tab-btn.active {
+    background: var(--btn-grad, linear-gradient(135deg, #ff4757, #ff6b81));
+    color: #ffffff;
+    box-shadow: 0 10px 25px var(--glow-color, rgba(255, 71, 87, 0.4)), 
+                inset 0 2px 4px rgba(255, 255, 255, 0.3);
+    font-weight: 800;
+    transform: translateY(-4px) scale(1.05);
+    border: none;
+}
+
+.tab-btn[data-region="jeju"].active { --btn-grad: linear-gradient(135deg, #bcac9c, #dcd0c4); --glow-color: rgba(188, 172, 156, 0.5); }
+.tab-btn[data-region="seogwipo"].active { --btn-grad: linear-gradient(135deg, #a49484, #c4b4a4); --glow-color: rgba(164, 148, 132, 0.5); }
+.tab-btn[data-region="east"].active { --btn-grad: linear-gradient(135deg, #81a1c1, #a3be8c); --glow-color: rgba(129, 161, 193, 0.5); }
+.tab-btn[data-region="west"].active { --btn-grad: linear-gradient(135deg, #a3be8c, #c5d4b5); --glow-color: rgba(163, 190, 140, 0.5); }
+.tab-btn[data-region="hallasan"].active { --btn-grad: linear-gradient(135deg, #4c566a, #2e3440); --glow-color: rgba(76, 86, 106, 0.4); }
+.tab-btn[data-region="udo"].active { --btn-grad: linear-gradient(135deg, #fbc531, #f9ca24); --glow-color: rgba(251, 197, 49, 0.5); }
+.tab-btn[data-region="all"].active { --btn-grad: linear-gradient(135deg, #81a1c1, #5e81ac); --glow-color: rgba(129, 161, 193, 0.5); }
+
+/* 지도 컨테이너 */
+.cctv-map-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1.8 / 1;
+    background: #fff;
+    border-radius: 24px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.jeju-svg-map {
+    width: 100%;
+    height: 100%;
+    max-height: 500px;
+}
+
+.jeju-region {
+    fill-opacity: 0.25; /* 기본 상태에서도 연하게 색상 보임 */
+    stroke: #fff;
+    stroke-width: 1px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    vector-effect: non-scaling-stroke;
+}
+
+.jeju-region-bg {
+    pointer-events: none;
+    transition: all 0.3s ease;
+}
+
+.jeju-region:hover {
+    fill-opacity: 0.5;
+}
+
+.jeju-region.active {
+    fill-opacity: 0.8; /* 선택 시 더 선명하게 */
+    filter: url(#region-outline); /* SVG 필터를 사용하여 외곽선만 굵게 표시 */
+    z-index: 10;
+}
+
+/* 지역별 전용 색상 연결 */
+.region-jeju { fill: var(--color-jeju); }
+.region-seogwipo { fill: var(--color-seogwipo); }
+.region-east { fill: var(--color-east); }
+.region-west { fill: var(--color-west); }
+.region-hallasan { fill: var(--color-hallasan); }
+.region-udo { fill: var(--color-udo); }
+
+/* CCTV 마커 (Simple Red Dot) */
+.cctv-marker {
+    cursor: pointer;
+}
+
+.cctv-marker circle.marker-dot {
+    fill: #ff4757; /* Simple Red Color */
+    stroke: none;
+    r: 15px;
+}
+
+.cctv-marker:hover circle.marker-dot {
+    filter: brightness(0.8); /* Slight feedback on hover but no scale/effect */
+}
+
+.cctv-marker.marker-jeju { --marker-color: var(--color-jeju); }
+.cctv-marker.marker-seogwipo { --marker-color: var(--color-seogwipo); }
+.cctv-marker.marker-east { --marker-color: var(--color-east); }
+.cctv-marker.marker-west { --marker-color: var(--color-west); }
+.cctv-marker.marker-hallasan { --marker-color: var(--color-hallasan); }
+.cctv-marker.marker-udo { --marker-color: var(--color-udo); }
+
+/* 행정구역 지명 라벨 (가독성 강화) */
+.region-label {
+    fill: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    pointer-events: none;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.6); /* 어두운 윤곽선 추가 */
+    dominant-baseline: middle;
+    text-anchor: middle;
+}
+
+/* @keyframes pulse removed - markers are now static */
+
+/* CCTV 목록 / 활성 카드 */
+.cctv-detail-card {
+    background: #fff;
+    border-radius: 24px;
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.08);
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    z-index: 1000;
+    transform: translateY(120%);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    overflow: hidden;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.cctv-detail-card.show {
+    transform: translateY(0);
+}
+
+.cctv-player-container {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #000;
+}
+
+.cctv-player-container video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cctv-info-bar {
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cctv-info-text h3 {
+    font-size: 1.1rem;
+    margin: 0;
+    color: #2f3542;
+}
+
+.cctv-info-text p {
+    font-size: 0.8rem;
+    margin: 4px 0 0;
+    color: #747d8c;
+}
+
+.close-card-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #f1f2f6;
+    border: none;
+    font-size: 1.2rem;
+    color: #2f3542;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 모바일 대응 */
+@media (max-width: 600px) {
+    .cctv-map-wrapper {
+        aspect-ratio: 1 / 1;
+        padding: 10px;
+    }
+    
+    .cctv-detail-card {
+        bottom: 0;
+        left: 0;
+        right: 0;
+        border-radius: 24px 24px 0 0;
+        max-width: none;
+    }
+}
