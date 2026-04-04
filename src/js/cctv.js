@@ -182,7 +182,7 @@ function renderCctvHallasanGrid() {
     // 각 비디오 요소에 HLS 플레이어 연결
     setTimeout(() => {
         hallasanCams.forEach(cam => {
-            initHlsPlayer(cam, `cctv-grid-video-${cam.id}`);
+            initHlsPlayer(cam.url, `cctv-grid-video-${cam.id}`);
         });
     }, 100);
 }

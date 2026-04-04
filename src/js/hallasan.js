@@ -137,7 +137,7 @@ export function renderHallasanCCTV() {
 
     hallasanCams.forEach(cam => {
         if (window.initHlsPlayer) {
-            window.initHlsPlayer(cam, `hallasan-video-${cam.id}`);
+            window.initHlsPlayer(cam.url, `hallasan-video-${cam.id}`);
         }
     });
 }
