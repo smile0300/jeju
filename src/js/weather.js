@@ -6,7 +6,58 @@ import loadingImg from '../img/weather-loading.png';
 // 날씨 데이터 전역 상태 관리 (지역별 데이터 캐싱)
 export const WEATHER_STATE = {};
 
-// 기상특보 순환 노출을 위한 전역 변수
+// 기상 특보 번역 매핑 (직역 위주)
+const ALERT_TRANSLATIONS = {
+    '강풍': '强风',
+    '풍랑': '风浪',
+    '호우': '豪雨',
+    '대설': '大雪',
+    '한파': '寒潮',
+    '건조': '干燥',
+    '폭염': '酷暑',
+    '안개': '大雾',
+    '태풍': '台风',
+    '주의보': '注意报',
+    '경보': '警报',
+    '발표': '发布',
+    '해제': '解除',
+    '발효': '生效',
+    '변경': '变更',
+    '기상': '气象',
+    '특보': '特报',
+    '제주도': '济州岛',
+    '제주': '济州',
+    '산지': '山区',
+    '서부': '西部',
+    '동부': '东部',
+    '남부': '南部',
+    '북부': '北部',
+    '추자도': '楸子岛',
+    '앞바다': '近海',
+    '먼바다': '远海',
+    '황사': '沙尘',
+    '폭풍해일': '风暴潮',
+    '지진해일': '海啸',
+    '제': '第',
+    '호': '号'
+};
+
+// 최신 특보 데이터를 모달에서 참조하기 위한 전역 변수
+let LATEST_ALERTS = [];
+
+/**
+ * 기상 특보 한글 메시지를 중국어 간체로 번역
+ */
+function translateWeatherAlert(text) {
+    if (!text) return '';
+    let result = text;
+    for (const [ko, cn] of Object.entries(ALERT_TRANSLATIONS)) {
+        result = result.replace(new RegExp(ko, 'g'), cn);
+    }
+    return result;
+}
+
+// 기상특보 순환 노출을 위한 전역 변수 (v20.0: 단일 노출로 변경됨에 따라 참조용 유지 또는 제거 가능)
 let alertRotationInterval = null;
 
 export async function fetchMidTermWeather(loc) {
@@ -530,40 +581,35 @@ export async function fetchWeatherAlerts() {
         const rawItems = json?.response?.body?.items?.item;
         let items = Array.isArray(rawItems) ? rawItems : (rawItems ? [rawItems] : []);
         items = items.filter(item => item && item.title);
+        LATEST_ALERTS = items; // 모달용 저장
 
         if (items.length > 0) {
             alertsContainer.style.display = 'flex';
             
-            // 기존 상구하고 있던 인터벌(Timer) 제거
-            if (alertRotationInterval) clearInterval(alertRotationInterval);
-
-            let currentIndex = 0;
-            const renderAlert = (index) => {
-                const item = items[index] || {};
-                let title = item.title || '기상 특보 정보가 없습니다.';
-                
-                // [특보] ... : ... / 헤더 제거 로직
-                if (title.includes('/')) {
-                    title = title.split('/').slice(1).join('/').trim();
-                }
-
-                alertsContainer.innerHTML = `
-                    <div class="weather-alert-card animate-slide-up">
-                        <div class="alert-type-badge">济州特报</div>
-                        <div class="alert-msg">🚨 ${title}</div>
-                    </div>`;
-            };
-
-            renderAlert(0);
-
-            if (items.length > 1) {
-                alertRotationInterval = setInterval(() => {
-                    currentIndex = (currentIndex + 1) % items.length;
-                    renderAlert(currentIndex);
-                }, 3000); // 3초 간격 순환
+            // v20.0: 순환 노출 제거 -> 최신 정보(첫 번째) 하나만 표시
+            if (alertRotationInterval) {
+                clearInterval(alertRotationInterval);
+                alertRotationInterval = null;
             }
+
+            const item = items[0] || {};
+            let title = item.title || '无气象特报信息';
+            
+            // [특보] ... : ... / 헤더 제거
+            if (title.includes('/')) {
+                title = title.split('/').slice(1).join('/').trim();
+            }
+
+            // 중국어 간체 번역 적용 (직역)
+            const translatedTitle = translateWeatherAlert(title);
+
+            alertsContainer.innerHTML = `
+                <div class="weather-alert-card animate-slide-up" onclick="window.openWeatherAlertModal()">
+                    <div class="alert-type-badge">济州特报</div>
+                    <div class="alert-msg">🚨 ${translatedTitle}</div>
+                </div>`;
         } else {
-            // 특보가 없을 경우 인터벌 정지 및 메시지 출력
+            // 특보가 없을 경우 기존 인터벌 정지 및 메시지 출력
             if (alertRotationInterval) {
                 clearInterval(alertRotationInterval);
                 alertRotationInterval = null;
@@ -571,6 +617,7 @@ export async function fetchWeatherAlerts() {
             showNoAlerts(alertsContainer);
         }
     } catch (e) {
+        console.error('[WeatherAlerts] 로드 실패:', e);
         showNoAlerts(alertsContainer);
     }
 }
@@ -579,8 +626,70 @@ function showNoAlerts(container) {
     container.style.display = 'flex';
     container.style.marginTop = '15px'; // 상단의 약간의 공간 추가
     container.innerHTML = `
-        <div class="weather-alert-card no-alerts" style="background: rgba(255,255,255,0.05); border: 1px dashed rgba(255,255,255,0.2); opacity: 0.8; padding: 12px 16px; border-radius: 12px; width: 100%; display: flex; align-items: center; gap: 10px;">
+        <div class="weather-alert-card no-alerts" style="background: rgba(255,255,255,0.05); border: 1px dashed rgba(255,255,255,0.2); opacity: 0.8; padding: 12px 16px; border-radius: 12px; width: 100%; display: flex; align-items: center; gap: 10px; cursor: default;">
             <div class="alert-type-badge" style="background: #333; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">气象信息</div>
             <div class="alert-msg" style="color: #bbb; font-weight: normal; font-size: 0.85rem;">当前无气象特报</div>
         </div>`;
 }
+
+/**
+ * 기상특보 상세 내역 모달 열기
+ */
+window.openWeatherAlertModal = function() {
+    if (!LATEST_ALERTS || LATEST_ALERTS.length === 0) return;
+
+    let modal = document.getElementById('weather-alert-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'weather-alert-modal';
+        modal.className = 'alert-modal-overlay';
+        modal.onclick = (e) => { if (e.target === modal) window.closeWeatherAlertModal(); };
+        document.body.appendChild(modal);
+    }
+
+    const formatTime = (tmFc) => {
+        if (!tmFc || tmFc.length < 12) return tmFc;
+        return `${tmFc.slice(0,4)}-${tmFc.slice(4,6)}-${tmFc.slice(6,8)} ${tmFc.slice(8,10)}:${tmFc.slice(10,12)}`;
+    };
+
+    const itemsHTML = LATEST_ALERTS.map(item => {
+        let title = item.title || '';
+        // 헤더 가공
+        if (title.includes('/')) {
+            title = title.split('/').slice(1).join('/').trim();
+        }
+        const timeStr = formatTime(item.tmFc);
+        const translatedContent = translateWeatherAlert(title);
+
+        return `
+            <div class="alert-history-item">
+                <div class="alert-history-time">📅 ${timeStr} 发布</div>
+                <div class="alert-history-text">${translatedContent}</div>
+            </div>`;
+    }).join('');
+
+    modal.innerHTML = `
+        <div class="alert-modal-panel animate-slide-up">
+            <div class="alert-modal-header">
+                <div class="alert-modal-title">📉 济州气象特报历史</div>
+                <button class="alert-modal-close" onclick="window.closeWeatherAlertModal()">✕</button>
+            </div>
+            <div class="alert-modal-body">
+                ${itemsHTML}
+            </div>
+        </div>`;
+
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+};
+
+/**
+ * 기상특보 상세 내역 모달 닫기
+ */
+window.closeWeatherAlertModal = function() {
+    const modal = document.getElementById('weather-alert-modal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+};
