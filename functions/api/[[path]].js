@@ -164,7 +164,8 @@ export async function onRequest(context) {
       // 상태값은 dd.situation 클래스에 위치함
       const statusPattern = /<dd[^>]*class="[^"]*situation[^"]*"[^>]*>([\s\S]*?)<\/dd>/;
       
-      const stripTags = (str) => (str || '').replace(/<[^>]*>?/gm, '').replace(/&nbsp;/g, '').trim();
+      const decodeHtmlEntities = (str) => str.replace(/&#(\d+);/g, (match, dec) => String.fromCharCode(dec));
+      const stripTags = (str) => decodeHtmlEntities((str || '').replace(/<[^>]*>?/gm, '').replace(/&nbsp;/g, '').trim());
 
       const results = [];
       let match;
