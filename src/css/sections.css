@@ -207,6 +207,77 @@
     -webkit-overflow-scrolling: touch; 
 }
 
+/* Weather Alert Rotation */
+.weather-alerts-container {
+    width: 100%;
+    margin-top: 45px;
+}
+
+.weather-alert-card {
+    background: rgba(255, 36, 66, 0.08); /* 연한 빨간색 배경 */
+    border: 1.5px solid rgba(255, 36, 66, 0.2);
+    border-radius: 14px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    box-sizing: border-box;
+    box-shadow: 0 4px 15px rgba(255, 36, 66, 0.05);
+}
+
+.weather-alert-card.no-alerts {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+    opacity: 0.8;
+}
+
+.alert-type-badge {
+    background: #ff2442;
+    color: white;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    white-space: nowrap;
+    letter-spacing: -0.2px;
+}
+
+.no-alerts .alert-type-badge {
+    background: #333;
+}
+
+.alert-msg {
+    color: #222;
+    font-weight: 700;
+    font-size: 0.92rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1;
+}
+
+.no-alerts .alert-msg {
+    color: #666;
+    font-weight: normal;
+    font-size: 0.88rem;
+}
+
+.animate-slide-up {
+    animation: alertSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes alertSlideUp {
+    from { 
+        opacity: 0; 
+        transform: translateY(20px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
 /* Custom Scrollbar for Hourly Section */
 .hourly-scroll::-webkit-scrollbar {
     height: 4px; /* Thin scrollbar */
