@@ -521,12 +521,13 @@ export async function fetchWeatherAlerts() {
     const alertsContainer = document.getElementById('weather-alerts-container');
     if (!alertsContainer) return;
     try {
-        const endpoint = 'https://apis.data.go.kr/1360000/WthrWrnInfoService/getWthrWrnMsg';
+        const endpoint = 'https://apis.data.go.kr/1360000/WthrWrnInfoService/getWthrWrnList';
         const params = { numOfRows: 10, pageNo: 1, dataType: 'JSON', stnId: 184 };
         const json = await fetchPublicDataJson(endpoint, params);
         const rawItems = json?.response?.body?.items?.item;
         let items = Array.isArray(rawItems) ? rawItems : (rawItems ? [rawItems] : []);
         items = items.filter(item => item && item.title);
+
         if (items.length > 0) {
             alertsContainer.style.display = 'flex';
             alertsContainer.innerHTML = items.map(item => `

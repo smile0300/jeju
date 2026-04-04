@@ -254,8 +254,17 @@ export async function submitLostReport() {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
-        const result = await res.json();
-        if (result.result === 'success') {
+        
+        let result = { result: 'error', message: 'Unknown error' };
+        try {
+            result = await res.json();
+        } catch (je) {
+            const rawText = await res.text();
+            console.error('API Response Parse error:', je, rawText);
+            throw new Error('服务器响应格式错误 (데이터 형식이 올바르지 않습니다)');
+        }
+
+        if (result.result === 'success' || result.status === 'success') {
             if (statusEl) {
                 statusEl.textContent = '提交成功！';
                 statusEl.className = 'form-status success';
@@ -266,8 +275,20 @@ export async function submitLostReport() {
             setTimeout(() => {
                 if (window.closeLostReportModal) window.closeLostReportModal();
                 else if (typeof closeLostReportModal === 'function') closeLostReportModal();
-            }, 1500);
-        } else throw new Error(result.error);
+                
+                // 폼 초기화
+                const form = document.querySelector('.lost-report-form-content');
+                if (form) {
+                    const inputs = form.querySelectorAll('input, textarea');
+                    inputs.forEach(input => { if (input.type !== 'date') input.value = ''; });
+                    const preview = document.getElementById('lost-report-photo-preview');
+                    if (preview) preview.innerHTML = '';
+                    lostReportImageBase64 = null;
+                }
+            }, 2500);
+        } else {
+            throw new Error(result.error || result.message || 'Unknown Server Error');
+        }
     } catch (e) {
         if (statusEl) {
             statusEl.textContent = `提交失败: ${e.message}`;

@@ -116,7 +116,10 @@ export function renderHallasanCCTV() {
     const grid = document.getElementById('hallasan-cctv-grid');
     if (!grid) return;
 
-    grid.innerHTML = CONFIG.CCTV.map(cam => `
+    // 한라산 전용 5종만 필터링
+    const hallasanCams = CONFIG.CCTV.filter(cam => cam.category === 'hallasan');
+
+    grid.innerHTML = hallasanCams.map(cam => `
         <div class="cctv-card" onclick="openCctvModalById('${cam.id}')">
             <div class="cctv-video-container">
                 <video id="hallasan-video-${cam.id}" class="cctv-video-el" muted playsinline></video>
@@ -128,7 +131,7 @@ export function renderHallasanCCTV() {
         </div>
     `).join('');
 
-    CONFIG.CCTV.forEach(cam => {
+    hallasanCams.forEach(cam => {
         if (window.initHlsPlayer) {
             window.initHlsPlayer(cam, `hallasan-video-${cam.id}`);
         }
