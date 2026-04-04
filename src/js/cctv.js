@@ -81,24 +81,34 @@ export function renderMarkers(region = 'all') {
         : CONFIG.CCTV.filter(c => c.category === region);
 
     filtered.forEach(cam => {
-        const pos = getMockPosition(cam);
+        const x = cam.x;
+        const y = cam.y;
         
         const marker = document.createElementNS("http://www.w3.org/2000/svg", "g");
-        marker.setAttribute("class", `cctv-marker marker-${cam.category}`);
+        marker.setAttribute("class", `cctv-marker marker-${cam.category} ${region === 'all' ? 'is-mini' : 'is-expanded'}`);
         marker.setAttribute("data-id", cam.id);
         marker.style.cursor = 'pointer';
-        marker.style.pointerEvents = 'all'; // 전체 그룹이 포인터 이벤트 수신
+        marker.style.pointerEvents = 'all'; 
         
+        // 줌 레벨에 따라 디자인 변경
+        const isAll = region === 'all';
+        const dotRadius = isAll ? 12 : 20;
+        const fontSize = isAll ? 20 : 32;
+
         marker.innerHTML = `
-            <!-- 투명한 클릭 영역 확장 (클릭 레이어) -->
-            <circle cx="${pos.x}" cy="${pos.y}" r="50" fill="white" fill-opacity="0" pointer-events="all" />
-            <!-- 시각적 빨간 도트 -->
-            <circle cx="${pos.x}" cy="${pos.y}" r="15" class="marker-dot" pointer-events="none" />
-            <!-- 텍스트 라벨 (그림자 제거) -->
-            <text x="${pos.x}" y="${pos.y + 45}" font-size="28" text-anchor="middle" fill="white" font-weight="900" style="pointer-events: none;">${cam.nameCn}</text>
+            <!-- 투명한 클릭 영역 확장 -->
+            <circle cx="${x}" cy="${y}" r="60" fill="white" fill-opacity="0" pointer-events="all" />
+            <!-- 시각적 도트 -->
+            <circle cx="${x}" cy="${y}" r="${dotRadius}" class="marker-dot" pointer-events="none" />
+            <!-- 텍스트 라벨 -->
+            <text x="${x}" y="${y + (isAll ? 40 : 55)}" font-size="${fontSize}" text-anchor="middle" fill="white" font-weight="900" 
+                  class="marker-label" style="pointer-events: none; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">
+                ${cam.nameCn}
+            </text>
         `;
         layer.appendChild(marker);
     });
+
 }
 
 /**
@@ -120,6 +130,13 @@ export function filterByRegion(region) {
             path.parentElement.appendChild(path);
         }
     });
+
+    // 마커 레이어를 항상 최상단(마지막 자식)으로 유지하여 권역강조에 가려지지 않게 함
+    const markersLayer = document.getElementById('cctv-markers-layer');
+    if (markersLayer) {
+        markersLayer.parentElement.appendChild(markersLayer);
+    }
+
 
     renderMarkers(region);
     animateZoom(region);
@@ -224,7 +241,7 @@ export function openCctvCard(id) {
 
     nameEl.textContent = `${cam.nameCn}`;
     card.classList.add('show');
-    card.style.display = 'block'; // 강제 표시 확인
+    card.style.display = 'block';
 
     // 이전 스트림 정지
     if (currentHls) {
@@ -232,14 +249,44 @@ export function openCctvCard(id) {
         currentHls = null;
     }
 
-    const streamUrl = cam.type === 'its' 
-        ? `${CONFIG.PROXY_URL}/api/public-data?url=${encodeURIComponent(`http://api.jejuits.go.kr/api/getFrafficInfo?code=${cam.code}&type=L`)}`
-        : cam.url;
-
-    // ITS API의 경우 실제로는 m3u8 URL을 먼저 받아와야 할 수도 있으나, 
-    // 여기서는 사용자가 제공한 형태를 기반으로 직접 재생 시도 (또는 프록시 처리)
-    initHlsPlayer(cam, 'cctv-live-video');
+    // 영상 로딩 상태 표시 (추가 가능)
+    videoEl.poster = ""; 
+    
+    // 스트리밍 허브: 타입에 따른 URL 획득 및 재생
+    resolveStreamUrl(cam).then(url => {
+        if (url) {
+            initHlsPlayer(url, 'cctv-live-video');
+        } else {
+            console.error('[CCTV] Failed to resolve stream URL');
+            nameEl.textContent = `${cam.nameCn} (영상 로드 실패)`;
+        }
+    });
 }
+
+/**
+ * 스트리밍 URL 분석 및 획득 (ITS API 대응)
+ */
+async function resolveStreamUrl(cam) {
+    if (cam.type === 'hls') return cam.url;
+    
+    if (cam.type === 'its') {
+        const apiUrl = `http://api.jejuits.go.kr/api/getTrafficInfo?code=${cam.code}&type=L`;
+        const proxiedApi = `${CONFIG.PROXY_URL}/api/public-data?url=${encodeURIComponent(apiUrl)}`;
+        
+        try {
+            const resp = await fetch(proxiedApi);
+            const data = await resp.json();
+            // 제주 ITS API는 보통 결과 JSON 내에 m3u8 주소를 포함하거나 직접 URL을 반환함
+            // 실제 응답 구조에 맞게 파싱 로직 필요 (가정: data.url 또는 data.result.url)
+            return data.url || data.streamUrl || apiUrl; 
+        } catch (e) {
+            console.warn('[CCTV] ITS API Fetch failed, falling back to direct proxy', e);
+            return apiUrl;
+        }
+    }
+    return cam.url;
+}
+
 
 export function closeCctvCard() {
     const card = document.getElementById('cctv-detail-card');
@@ -252,36 +299,30 @@ export function closeCctvCard() {
 }
 
 /**
- * HLS 재생 엔진 로직 (기존 로직 계승 및 최적화)
+ * HLS 재생 엔진 로직
  */
-export function initHlsPlayer(cam, videoId) {
+export function initHlsPlayer(streamUrl, videoId) {
     const videoEl = document.getElementById(videoId);
     if (!videoEl) return;
 
-    let targetUrl = cam.url;
-
-    // ITS 타입인 경우 API를 통해 스트리밍 URL을 가져오는 단계가 필요할 수 있음
-    // 임시로 직접 URL을 사용하거나 프록시를 경유하게 함
-    if (cam.type === 'its') {
-        // 실제로는 교통정보 API 결과에서 m3u8 주소를 파싱해야 함
-        // 예시를 위해 프록시된 API 주소를 사용 (가정: API가 직접 M3U8을 반환하거나 리다이렉트함)
-        targetUrl = `${CONFIG.PROXY_URL}/api/public-data?url=${encodeURIComponent(`http://api.jejuits.go.kr/api/getFrafficInfo?code=${cam.code}&type=L`)}`;
-    }
-
-    const proxiedUrl = `${CONFIG.PROXY_URL}/api/public-data?url=${encodeURIComponent(targetUrl)}`;
+    const proxiedUrl = streamUrl.includes(CONFIG.PROXY_URL) 
+        ? streamUrl 
+        : `${CONFIG.PROXY_URL}/api/public-data?url=${encodeURIComponent(streamUrl)}`;
 
     if (typeof Hls !== 'undefined' && Hls.isSupported()) {
         const hls = new Hls({
             enableWorker: true,
             xhrSetup: function (xhr, url) {
-                if (url.startsWith('http://') && !url.includes(CONFIG.PROXY_URL)) {
+                if (url.startsWith('http://') && !url.includes(CONFIG.PROXY_URL) && !url.includes('localhost')) {
                     xhr.open('GET', `${CONFIG.PROXY_URL}/api/public-data?url=${encodeURIComponent(url)}`, true);
                 }
             }
         });
         hls.loadSource(proxiedUrl);
         hls.attachMedia(videoEl);
-        hls.on(Hls.Events.MANIFEST_PARSED, () => videoEl.play().catch(() => {}));
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+            videoEl.play().catch(err => console.warn('[CCTV] Autoplay blocked or failed', err));
+        });
         currentHls = hls;
     } else if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
         videoEl.src = proxiedUrl;
@@ -289,21 +330,4 @@ export function initHlsPlayer(cam, videoId) {
     }
 }
 
-/**
- * 데모용 좌표 생성 (실제 좌표 데이터가 생기기 전까지 권역별로 무작위 배치)
- */
-function getMockPosition(cam) {
-    const mocks = {
-        'hallasan': { x: 1750, y: 1240 },
-        'jeju': { x: 1750, y: 700 },
-        'seogwipo': { x: 1750, y: 1800 },
-        'east': { x: 2600, y: 1200 },
-        'west': { x: 900, y: 1200 },
-        'udo': { x: 3250, y: 550 }
-    };
-    
-    const base = mocks[cam.category] || { x: 1750, y: 1240 };
-    // 정밀 좌표계에서 겹치지 않도록 오프셋 조절
-    const offset = (cam.id.length % 5) * 50 - 100;
-    return { x: base.x + offset, y: base.y + (offset / 3) };
-}
+

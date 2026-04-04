@@ -4,33 +4,33 @@ export const CONFIG = {
 
     // CCTV 스트림 소스 (HLS 및 ITS API 지원)
     CCTV: [
-        // --- 한라산 권역 ---
-        { id: 'baenglokdam', category: 'hallasan', nameKo: '백록담', nameCn: '白鹿潭', type: 'hls', url: 'https://hallacctv.kr/live/cctv01.stream_360p/playlist.m3u8' },
-        { id: 'wang-gwanreung', category: 'hallasan', nameKo: '왕관릉', nameCn: '王冠陵', type: 'hls', url: 'https://hallacctv.kr/live/cctv02.stream_360p/playlist.m3u8' },
-        { id: 'witseoreum', category: 'hallasan', nameKo: '윗세오름', nameCn: '威世岳', type: 'hls', url: 'https://hallacctv.kr/live/cctv03.stream_360p/playlist.m3u8' },
-        { id: 'eoseungsaengak', category: 'hallasan', nameKo: '어승생악', nameCn: '御乘生岳', type: 'hls', url: 'https://hallacctv.kr/live/cctv04.stream_360p/playlist.m3u8' },
-        { id: '1100road', category: 'hallasan', nameKo: '1100도로', nameCn: '1100道路', type: 'hls', url: 'https://hallacctv.kr/live/cctv05.stream_360p/playlist.m3u8' },
+        // --- 한라산 권역 (Center) ---
+        { id: 'baenglokdam', category: 'hallasan', nameKo: '백록담', nameCn: '白鹿潭', type: 'hls', url: 'https://hallacctv.kr/live/cctv01.stream_360p/playlist.m3u8', x: 1750, y: 1240 },
+        { id: 'wang-gwanreung', category: 'hallasan', nameKo: '왕관릉', nameCn: '王冠陵', type: 'hls', url: 'https://hallacctv.kr/live/cctv02.stream_360p/playlist.m3u8', x: 1850, y: 1180 },
+        { id: 'witseoreum', category: 'hallasan', nameKo: '윗세오름', nameCn: '威世岳', type: 'hls', url: 'https://hallacctv.kr/live/cctv03.stream_360p/playlist.m3u8', x: 1650, y: 1300 },
+        { id: 'eoseungsaengak', category: 'hallasan', nameKo: '어승생악', nameCn: '御乘生岳', type: 'hls', url: 'https://hallacctv.kr/live/cctv04.stream_360p/playlist.m3u8', x: 1540, y: 1120 },
+        { id: '1100road', category: 'hallasan', nameKo: '1100도로', nameCn: '1100道路', type: 'hls', url: 'https://hallacctv.kr/live/cctv05.stream_360p/playlist.m3u8', x: 1750, y: 1240 },
 
-        // --- 제주시 권역 ---
-        { id: 'jeju-airport', category: 'jeju', nameKo: '제주공항입구', nameCn: '济州机场入口', type: 'its', code: 'ITSC-0001' }, // Placeholder codes until verified
-        { id: 'nohyeong', category: 'jeju', nameKo: '노형오거리', nameCn: '老衡五거리', type: 'its', code: 'ITSC-0002' },
-        { id: 'yongdam', category: 'jeju', nameKo: '용담해안도로', nameCn: '龙潭海岸道路', type: 'its', code: 'ITSC-0003' },
+        // --- 제주시 권역 (North) ---
+        { id: 'C10', category: 'jeju', nameKo: '노형오거리', nameCn: '老衡五거리', type: 'its', code: 'C10', x: 1780, y: 720 },
+        { id: 'C62', category: 'jeju', nameKo: '공항입구', nameCn: '济州机场入口', type: 'its', code: 'C62', x: 1850, y: 640 },
+        { id: 'C13', category: 'jeju', nameKo: '광양사거리', nameCn: '光阳四거리', type: 'its', code: 'C13', x: 1950, y: 680 },
+        { id: 'C54', category: 'jeju', nameKo: '노형(애조로)', nameCn: '老衡(崖草路)', type: 'its', code: 'C54', x: 1790, y: 820 },
 
-        // --- 서귀포시 권역 ---
-        { id: 'jungmun', category: 'seogwipo', nameKo: '중문단지입구', nameCn: '中文旅游区入口', type: 'its', code: 'ITSC-0004' },
-        { id: 'seogwipo-port', category: 'seogwipo', nameKo: '서귀포항', nameCn: '西归浦港', type: 'its', code: 'ITSC-0005' },
+        // --- 서귀포시 권역 (South) ---
+        { id: 'W162', category: 'seogwipo', nameKo: '공천포', nameCn: '公泉浦', type: 'its', code: 'W162', x: 2360, y: 1610 },
+        { id: 'C41', category: 'seogwipo', nameKo: '남원교차로', nameCn: '南元交叉路', type: 'its', code: 'C41', x: 2650, y: 1540 },
 
-        // --- 동쪽 권역 ---
-        { id: 'seongsan', category: 'east', nameKo: '성산일출봉', nameCn: '城山日出峰', type: 'its', code: '860767' },
-        { id: 'hamdeok', category: 'east', nameKo: '함덕해수욕장', nameCn: '咸德海水浴场', type: 'its', code: 'ITSC-0006' },
-        { id: 'udo-port', category: 'east', nameKo: '성산항(우도행)', nameCn: '城山港(去牛岛)', type: 'its', code: 'ITSC-0009' },
+        // --- 동부 권역 (East) ---
+        { id: 'C42', category: 'east', nameKo: '고성(성산)', nameCn: '古城(城山)', type: 'its', code: 'C42', x: 2780, y: 890 },
+        { id: 'C93', category: 'east', nameKo: '김녕항구', nameCn: '金宁港口', type: 'its', code: 'C93', x: 2520, y: 550 },
+        { id: 'C72', category: 'east', nameKo: '교래사거리', nameCn: '桥来四거리', type: 'its', code: 'C72', x: 2480, y: 960 },
+        { id: 'C6_hamdeok', category: 'east', nameKo: '함덕해수욕장', nameCn: '咸德海水浴场', type: 'its', code: 'C6_hamdeok', x: 2470, y: 470 },
 
-        // --- 서쪽 권역 ---
-        { id: 'hyeopjae', category: 'west', nameKo: '협재해수욕장', nameCn: '挟才海水浴场', type: 'its', code: 'ITSC-0007' },
-        { id: 'aewol', category: 'west', nameKo: '애월해안도로', nameCn: '涯月海岸道路', type: 'its', code: 'ITSC-0008' },
-
-        // --- 우도 권역 ---
-        // (Moved 'udo-port' to 'east' segment)
+        // --- 서부 권역 (West) ---
+        { id: 'C39', category: 'west', nameKo: '고산3교차로', nameCn: '高山3交叉路', type: 'its', code: 'C39', x: 880, y: 1350 },
+        { id: 'C58', category: 'west', nameKo: '곽금초(협재)', nameCn: '郭金초(挟才)', type: 'its', code: 'C58', x: 1140, y: 980 },
+        { id: 'C34', category: 'west', nameKo: '구엄교차로', nameCn: '旧严交叉路', type: 'its', code: 'C34', x: 1450, y: 830 },
     ],
 
     // 4개 지역 날씨 좌표 (기상청 격자 nx,ny)

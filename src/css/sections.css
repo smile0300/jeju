@@ -1082,3 +1082,12 @@
     color: #1e293b;
     line-height: 1.5;
 }
+
+/* CCTV Map Marker Premium Styles */
+.cctv-marker { cursor: pointer; transition: none !important; transform: none !important; }
+.marker-dot { fill: #ef4444; stroke: #ffffff; stroke-width: 4px; filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.8)); transition: none !important; }
+.marker-label { font-family: "Outfit", sans-serif; pointer-events: none; opacity: 0.9; transition: none !important; }
+.jeju-region { pointer-events: auto; }
+.jeju-region.active { filter: url(#region-outline); }
+
+

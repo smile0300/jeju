@@ -17,7 +17,8 @@ const TRAIL_STATUS_MAP = {
     '전면통제': { cn: '全面管制', cls: 'closed' },
     '통제': { cn: '全面管制', cls: 'closed' },
     '일부통제': { cn: '部分管制', cls: 'partial' },
-    '입산제한': { cn: '全面管制', cls: 'closed' }
+    '입산제한': { cn: '全面管制', cls: 'closed' },
+    '탐방불가': { cn: '全面管制', cls: 'closed' }
 };
 
 export async function fetchHallasanStatus() {
@@ -57,14 +58,17 @@ export async function fetchHallasanStatus() {
 
                 // 매칭 실패 시 키워드 기반 폴백 판별
                 if (!info) {
-                    if (koStatus.includes('전면통제') || koStatus.includes('입산제한') || (koStatus.includes('통제') && !koStatus.includes('부분') && !koStatus.includes('일부'))) {
+                    if (koStatus.includes('전면통제') || koStatus.includes('입산제한') || koStatus.includes('탐방불가') || (koStatus.includes('통제') && !koStatus.includes('부분') && !koStatus.includes('일부'))) {
                         info = TRAIL_STATUS_MAP['전면통제'];
-                    } else if (koStatus.includes('부분통제') || koStatus.includes('일부통제')) {
+                    } else if (koStatus.includes('부분') || koStatus.includes('일부') || koStatus.includes('제한') || koStatus.includes('까지')) {
                         info = TRAIL_STATUS_MAP['부분통제'];
                     } else if (koStatus.includes('정상')) {
                         info = TRAIL_STATUS_MAP['정상운영'];
+                    } else if (koStatus.length > 0) {
+                        // 기타 상세 문구가 있는 경우 부분통제로 간주하여 정보를 제공하도록 함
+                        info = { cn: '部分管制', cls: 'partial' };
                     } else {
-                        info = { cn: '--', cls: 'partial' }; // 알 수 없는 상태
+                        info = { cn: '--', cls: 'partial' };
                     }
                 }
             }
