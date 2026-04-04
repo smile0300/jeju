@@ -22,27 +22,23 @@
 .cctv-tabs {
     display: flex;
     justify-content: center;
-    overflow-x: auto;
-    gap: 12px;
-    padding: 15px 10px 25px;
-    scrollbar-width: none;
+    flex-wrap: wrap; /* 줄바꿈 허용으로 모든 버튼 노출 */
+    gap: 8px; /* 간격 최적화 */
+    padding: 15px 10px;
     position: sticky;
-    top: 56px; /* 아래 app-bar 높이 대응 */
+    top: 56px;
     z-index: 100;
-    mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
-}
-
-.cctv-tabs::-webkit-scrollbar {
-    display: none; /* Chrome/Safari */
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
 }
 
 .tab-btn {
-    flex: 0 0 auto;
-    padding: 12px 24px;
-    border-radius: 16px;
+    flex: 0 1 auto; /* 유연하게 크기 조절 */
+    padding: 10px 18px; /* 패딩 최적화 */
+    border-radius: 14px;
     background: rgba(241, 242, 246, 0.8);
     border: 1px solid rgba(255, 255, 255, 0.3);
-    font-size: 0.9rem;
+    font-size: 0.85rem; /* 폰트 리사이징 */
     font-weight: 600;
     color: #57606f;
     cursor: pointer;
