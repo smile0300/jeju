@@ -162,7 +162,7 @@ export async function onRequest(context) {
       const blockPattern = /<dl[^>]*>[\s\S]*?<\/dl>/g;
       const namePattern = /<dt[^>]*>([\s\S]*?)<\/dt>/;
       // 상태값은 dd.situation 클래스에 위치함
-      const statusPattern = /<dd[^>]*class="situation"[^>]*>([\s\S]*?)<\/dd>/;
+      const statusPattern = /<dd[^>]*class="[^"]*situation[^"]*"[^>]*>([\s\S]*?)<\/dd>/;
       
       const stripTags = (str) => (str || '').replace(/<[^>]*>?/gm, '').replace(/&nbsp;/g, '').trim();
 

@@ -97,13 +97,13 @@
 }
 
 .jeju-region {
-    fill-opacity: 0.25; /* 기본 상태에서도 연하게 색상 보임 */
+    fill-opacity: 0.25;
     stroke: #fff;
     stroke-width: 1px;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     vector-effect: non-scaling-stroke;
 }
+
 
 .jeju-region-bg {
     pointer-events: none;
@@ -128,20 +128,26 @@
 .region-hallasan { fill: var(--color-hallasan); }
 .region-udo { fill: var(--color-udo); }
 
-/* CCTV 마커 (Simple Red Dot) */
+/* CCTV 마커 (Simple Red Dot) - 완전 정적 상태 유지 */
 .cctv-marker {
     cursor: pointer;
+    pointer-events: all;
+    transition: none !important;
+    transform: none !important;
 }
 
 .cctv-marker circle.marker-dot {
-    fill: #ff4757; /* Simple Red Color */
-    stroke: none;
+    fill: #ff4757;
+    stroke: #ffffff;
+    stroke-width: 2px;
     r: 15px;
+    transition: none !important;
 }
 
 .cctv-marker:hover circle.marker-dot {
-    filter: brightness(0.8); /* Slight feedback on hover but no scale/effect */
+    filter: none !important;
 }
+
 
 .cctv-marker.marker-jeju { --marker-color: var(--color-jeju); }
 .cctv-marker.marker-seogwipo { --marker-color: var(--color-seogwipo); }
