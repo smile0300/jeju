@@ -648,12 +648,13 @@ window.openWeatherAlertModal = function() {
     }
 
     const formatTime = (tmFc) => {
-        if (!tmFc || tmFc.length < 12) return tmFc;
-        return `${tmFc.slice(0,4)}-${tmFc.slice(4,6)}-${tmFc.slice(6,8)} ${tmFc.slice(8,10)}:${tmFc.slice(10,12)}`;
+        const str = String(tmFc || '');
+        if (str.length < 12) return str;
+        return `${str.slice(0,4)}-${str.slice(4,6)}-${str.slice(6,8)} ${str.slice(8,10)}:${str.slice(10,12)}`;
     };
 
     const itemsHTML = LATEST_ALERTS.map(item => {
-        let title = item.title || '';
+        let title = String(item.title || '');
         // 헤더 가공
         if (title.includes('/')) {
             title = title.split('/').slice(1).join('/').trim();
