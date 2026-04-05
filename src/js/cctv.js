@@ -334,9 +334,14 @@ export function initHlsPlayer(streamUrl, videoId) {
     const videoEl = document.getElementById(videoId);
     if (!videoEl) return;
 
-    const proxiedUrl = streamUrl.includes(CONFIG.PROXY_URL) 
-        ? streamUrl 
-        : `${CONFIG.PROXY_URL}/api/public-data?url=${encodeURIComponent(streamUrl)}`;
+    const isCorsFriendly = streamUrl.includes('hallacctv.kr');
+
+    let proxiedUrl = streamUrl;
+    if (!isCorsFriendly) {
+        proxiedUrl = streamUrl.includes(CONFIG.PROXY_URL) 
+            ? streamUrl 
+            : `${CONFIG.PROXY_URL}/api/public-data?url=${encodeURIComponent(streamUrl)}`;
+    }
 
     if (typeof Hls !== 'undefined' && Hls.isSupported()) {
         // 기존 비디오 요소에 등록된 hls 플레이어가 있으면 메모리 누수 방지 차원에서 파괴
@@ -347,8 +352,9 @@ export function initHlsPlayer(streamUrl, videoId) {
         const hls = new Hls({
             enableWorker: true,
             xhrSetup: function (xhr, url) {
-                // 외부 도메인(&& http/https 모두) 요청에 대해 프록시를 타도록 보강
-                if (url.startsWith('http') && !url.includes(CONFIG.PROXY_URL) && !url.includes('localhost')) {
+                // 원본 도메인이 CORS를 지원(예: hallacctv.kr)하면 프록시를 건너뜀
+                const isUrlCorsFriendly = url.includes('hallacctv.kr');
+                if (!isUrlCorsFriendly && url.startsWith('http') && !url.includes(CONFIG.PROXY_URL) && !url.includes('localhost')) {
                     xhr.open('GET', `${CONFIG.PROXY_URL}/api/public-data?url=${encodeURIComponent(url)}`, true);
                 }
             }

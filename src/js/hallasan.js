@@ -138,11 +138,14 @@ export function renderHallasanCCTV() {
         </div>
     `).join('');
 
-    hallasanCams.forEach(cam => {
-        if (window.initHlsPlayer) {
-            window.initHlsPlayer(cam.url, `hallasan-video-${cam.id}`);
-        }
-    });
+    // 비디오 요소가 DOM에 완전히 붙은 후에 HLS 초기화를 진행 (안정성 확보)
+    setTimeout(() => {
+        hallasanCams.forEach(cam => {
+            if (window.initHlsPlayer) {
+                window.initHlsPlayer(cam.url, `hallasan-video-${cam.id}`);
+            }
+        });
+    }, 50);
 }
 
 // 모달 전역 접근 허용
