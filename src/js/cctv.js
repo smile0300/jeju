@@ -252,6 +252,8 @@ export function openCctvCard(id) {
     nameEl.textContent = cam.nameCn;
     card.classList.add('show');
     card.style.display = 'block';
+    
+    if (window.pushModalState) window.pushModalState();
 
     // 이전 스트림 정지
     if (currentHls) {
@@ -303,11 +305,15 @@ async function resolveStreamUrl(cam) {
 }
 
 
-export function closeCctvCard() {
+export function closeCctvCard(fromPopState = false) {
     const card = document.getElementById('cctv-detail-card');
     if (!card) return;
     card.classList.remove('show');
     card.style.display = 'none';
+
+    if (!fromPopState && window.location.hash === '#modal') {
+        window.history.back();
+    }
 
     // 영상 미지원 메시지 제거
     const noStreamMsg = card.querySelector('.no-stream-msg');

@@ -173,6 +173,7 @@ export function openLostDetailModalByIndex(index) {
         </div>`;
     document.getElementById('lost-detail-modal').style.display = 'flex';
     document.body.style.overflow = 'hidden';
+    if (window.pushModalState) window.pushModalState();
 }
 
 export function showWechatQR() {
@@ -190,6 +191,7 @@ export function openLostReportModal() {
     const kstTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
     document.getElementById('lost-report-date').value = kstTime.toISOString().split('T')[0];
     document.body.style.overflow = 'hidden';
+    if (window.pushModalState) window.pushModalState();
 }
 
 export function handleLostImageChange(event) {

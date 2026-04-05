@@ -37,22 +37,32 @@ export function showSection(sectionId, pushHistory = true) {
 
 export function openWechatQR() {
     const modal = document.getElementById('wechat-qr-modal');
-    if (modal) { modal.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
+    if (modal) { 
+        modal.style.display = 'flex'; 
+        document.body.style.overflow = 'hidden'; 
+        if (window.pushModalState) window.pushModalState();
+    }
 }
 
-export function closeWechatQR() {
+export function closeWechatQR(fromPopState = false) {
     const modal = document.getElementById('wechat-qr-modal');
-    if (modal) { modal.style.display = 'none'; document.body.style.overflow = 'auto'; }
+    if (modal) { 
+        modal.style.display = 'none'; 
+        document.body.style.overflow = ''; 
+        if (!fromPopState && window.location.hash === '#modal') window.history.back();
+    }
 }
 
 export function openFeatureModal() {
     document.getElementById('feature-request-modal').style.display = 'flex';
     document.body.style.overflow = 'hidden';
+    if (window.pushModalState) window.pushModalState();
 }
 
-export function closeFeatureModal() {
+export function closeFeatureModal(fromPopState = false) {
     document.getElementById('feature-request-modal').style.display = 'none';
-    document.body.style.overflow = 'auto';
+    document.body.style.overflow = '';
+    if (!fromPopState && window.location.hash === '#modal') window.history.back();
 }
 
 export async function submitFeatureRequest() {
@@ -185,9 +195,14 @@ export function openWeatherSummaryModal() {
     modal.innerHTML = `<div class="wsm-panel">${_buildSummaryHTML()}</div>`;
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
+    if (window.pushModalState) window.pushModalState();
 }
 
-export function closeWeatherSummaryModal() {
+export function closeWeatherSummaryModal(fromPopState = false) {
     const modal = document.getElementById('weather-summary-modal');
-    if (modal) { modal.style.display = 'none'; document.body.style.overflow = ''; }
+    if (modal) { 
+        modal.style.display = 'none'; 
+        document.body.style.overflow = ''; 
+        if (!fromPopState && window.location.hash === '#modal') window.history.back();
+    }
 }
