@@ -21,10 +21,18 @@ const TRAIL_STATUS_MAP = {
     '탐방불가': { cn: '全面管制', cls: 'closed' }
 };
 
+let isFetchingHallasanStatus = false;
+
 export async function fetchHallasanStatus() {
+    if (isFetchingHallasanStatus) return;
+    isFetchingHallasanStatus = true;
+
     const container = document.getElementById('hallasan-status-container');
     const trailsEl = document.getElementById('trails-grid');
-    if (!container || !trailsEl) return;
+    if (!container || !trailsEl) {
+        isFetchingHallasanStatus = false;
+        return;
+    }
 
     const now = new Date().toLocaleString('zh-CN');
 
@@ -104,6 +112,8 @@ export async function fetchHallasanStatus() {
 
     // CCTV 렌더링 추가
     renderHallasanCCTV();
+    
+    isFetchingHallasanStatus = false;
 }
 
 /**
@@ -113,8 +123,8 @@ export function renderHallasanCCTV() {
     const grid = document.getElementById('hallasan-cctv-grid');
     if (!grid) return;
 
-    // 한라산 전용 5종만 필터링
-    const hallasanCams = CONFIG.CCTV.filter(cam => cam.category === 'hallasan');
+    // 한라산 전용 5종만 필터링 (placeholder 제외)
+    const hallasanCams = CONFIG.CCTV.filter(cam => cam.category === 'hallasan' && cam.url && !cam.url.includes('placeholder'));
 
     grid.innerHTML = hallasanCams.map(cam => `
         <div class="cctv-card" onclick="toggleFullscreen('hallasan-video-${cam.id}')" style="cursor: pointer;">
