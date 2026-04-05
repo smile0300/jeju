@@ -59,7 +59,7 @@ export function initCCTV() {
         });
     }
 
-    // 마커 클릭 이벤트 위임
+    // 마커 클릭 이벤트 위임 (2단계: 전체→지역확대, 확대→CCTV 열기)
     const markersLayer = document.getElementById('cctv-markers-layer');
     if (markersLayer) {
         markersLayer.addEventListener('click', (e) => {
@@ -67,7 +67,15 @@ export function initCCTV() {
             if (marker) {
                 e.stopPropagation();
                 const camId = marker.getAttribute('data-id');
-                window.openCctvCard(camId);
+                const isMini = marker.classList.contains('is-mini');
+                if (isMini) {
+                    // 1단계: 전체보기 → 해당 지역 확대
+                    const cam = CONFIG.CCTV.find(c => c.id === camId);
+                    if (cam) filterByRegion(cam.category);
+                } else {
+                    // 2단계: 확대된 상태 → CCTV 카드 열기
+                    window.openCctvCard(camId);
+                }
             }
         });
     }
@@ -236,7 +244,7 @@ export function openCctvCard(id) {
         return;
     }
 
-    nameEl.textContent = `${cam.nameCn}`;
+    nameEl.textContent = cam.nameCn;
     card.classList.add('show');
     card.style.display = 'block';
 
@@ -246,49 +254,62 @@ export function openCctvCard(id) {
         currentHls = null;
     }
 
-    // 영상 로딩 상태 표시 (추가 가능)
-    videoEl.poster = ""; 
-    
-    // 스트리밍 허브: 타입에 따른 URL 획득 및 재생
+    // 영상 미지원 안내 메시지 초기화
+    let noStreamMsg = card.querySelector('.no-stream-msg');
+    if (noStreamMsg) noStreamMsg.remove();
+    videoEl.style.display = 'block';
+    videoEl.src = '';
+    videoEl.poster = '';
+
+    // 스트리밍 URL 획득 후 재생
     resolveStreamUrl(cam).then(url => {
         if (url) {
             initHlsPlayer(url, 'cctv-live-video');
         } else {
-            console.error('[CCTV] Failed to resolve stream URL');
-            nameEl.textContent = `${cam.nameCn} (영상 로드 실패)`;
+            // 영상 미지원: 안내 메시지 표시
+            videoEl.style.display = 'none';
+            const msg = document.createElement('div');
+            msg.className = 'no-stream-msg';
+            msg.innerHTML = `
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:180px;gap:10px;color:#aaa;">
+                    <span style="font-size:2rem;">📷</span>
+                    <span style="font-size:0.9rem;font-weight:600;">暂不支持实时视频</span>
+                    <span style="font-size:0.75rem;opacity:0.7;">该监控点视频暂未开放</span>
+                </div>`;
+            videoEl.parentElement.appendChild(msg);
         }
     });
 }
 
 /**
- * 스트리밍 URL 분석 및 획득 (ITS API 대응)
+ * 스트리밍 URL 분석 및 획득
+ * - hls 타입이며 placeholder가 아닌 경우만 실제 URL 반환
+ * - its 타입 및 placeholder URL은 null 반환 (영상 미지원)
  */
 async function resolveStreamUrl(cam) {
-    if (cam.type === 'hls') return cam.url;
-    
-    if (cam.type === 'its') {
-        const apiUrl = `http://api.jejuits.go.kr/api/getTrafficInfo?code=${cam.code}&type=L`;
-        const proxiedApi = `${CONFIG.PROXY_URL}/api/public-data?url=${encodeURIComponent(apiUrl)}`;
-        
-        try {
-            const resp = await fetch(proxiedApi);
-            const data = await resp.json();
-            // 제주 ITS API는 보통 결과 JSON 내에 m3u8 주소를 포함하거나 직접 URL을 반환함
-            // 실제 응답 구조에 맞게 파싱 로직 필요 (가정: data.url 또는 data.result.url)
-            return data.url || data.streamUrl || apiUrl; 
-        } catch (e) {
-            console.warn('[CCTV] ITS API Fetch failed, falling back to direct proxy', e);
-            return apiUrl;
-        }
+    if (cam.type === 'hls') {
+        // placeholder URL이면 영상 미지원
+        if (!cam.url || cam.url.includes('placeholder')) return null;
+        return cam.url;
     }
-    return cam.url;
+    // ITS 타입: 공공 API에서 m3u8 URL을 공개 제공하지 않으므로 영상 미지원
+    if (cam.type === 'its') return null;
+    return null;
 }
 
 
 export function closeCctvCard() {
     const card = document.getElementById('cctv-detail-card');
+    if (!card) return;
     card.classList.remove('show');
-    
+    card.style.display = 'none';
+
+    // 영상 미지원 메시지 제거
+    const noStreamMsg = card.querySelector('.no-stream-msg');
+    if (noStreamMsg) noStreamMsg.remove();
+    const videoEl = document.getElementById('cctv-live-video');
+    if (videoEl) { videoEl.style.display = 'block'; videoEl.src = ''; }
+
     if (currentHls) {
         currentHls.destroy();
         currentHls = null;
@@ -310,7 +331,8 @@ export function initHlsPlayer(streamUrl, videoId) {
         const hls = new Hls({
             enableWorker: true,
             xhrSetup: function (xhr, url) {
-                if (url.startsWith('http://') && !url.includes(CONFIG.PROXY_URL) && !url.includes('localhost')) {
+                // 외부 도메인(&& http/https 모두) 요청에 대해 프록시를 타도록 보강
+                if (url.startsWith('http') && !url.includes(CONFIG.PROXY_URL) && !url.includes('localhost')) {
                     xhr.open('GET', `${CONFIG.PROXY_URL}/api/public-data?url=${encodeURIComponent(url)}`, true);
                 }
             }

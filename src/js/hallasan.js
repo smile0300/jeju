@@ -30,9 +30,6 @@ export async function fetchHallasanStatus() {
 
     container.innerHTML = `<span style="font-size: 0.7rem; opacity: 0.6;">正在加载数据...</span>`;
 
-    // CCTV 렌더링은 데이터 상태와 관계없이 항상 시도
-    renderHallasanCCTV();
-
     try {
         const url = `${CONFIG.PROXY_URL}/api/hallasan-status`;
         const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
@@ -122,7 +119,7 @@ export function renderHallasanCCTV() {
     grid.innerHTML = hallasanCams.map(cam => `
         <div class="cctv-card" onclick="openCctvModalById('${cam.id}')">
             <div class="cctv-video-container">
-                <video id="hallasan-video-${cam.id}" class="cctv-video-el" muted playsinline></video>
+                <video id="hallasan-video-${cam.id}" class="cctv-video-el" muted playsinline autoplay></video>
                 <div class="cctv-tag">LIVE</div>
             </div>
             <div class="cctv-info" style="padding: 6px 4px; text-align: center;">
