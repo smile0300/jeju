@@ -76,11 +76,13 @@ export async function fetchFoundGoods() {
         };
 
         const [polItems, portalItems] = await Promise.all([fetchResults(polUrl), fetchResults(portalUrl)]);
-        const items = [...polItems, ...portalItems]
+        const allItems = [...polItems, ...portalItems]
             .sort((a, b) => b.date.localeCompare(a.date));
+        // 이미지가 있는 항목만 표시
+        const items = allItems.filter(item => item.img && item.img.trim() !== '');
 
         cachedLostItems = items;
-        if (countDisplay) countDisplay.innerHTML = `共查询到 <strong>${items.length}</strong> 件丢失物品。`;
+        if (countDisplay) countDisplay.innerHTML = `共查询到 <strong>${items.length}</strong> 件含图片的物品。`;
 
         if (currentLostView === 'card') renderLostGoods(grid, items);
         else renderLostGoodsTable(items);
