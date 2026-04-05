@@ -153,16 +153,20 @@ export async function fetchWeatherData(locKey) {
             fetchPromises.push(fetchMountainWeather(loc.obsid));
         }
 
-        const [shortJson, midData, mountainData] = await Promise.all(fetchPromises);
+        // v20.1: 개별 API 실패가 전체 데이터 로드 중단으로 이어지지 않도록 래핑
+        const results = await Promise.allSettled(fetchPromises);
+        const shortJson = results[0].status === 'fulfilled' ? results[0].value : null;
+        const midData = results[1].status === 'fulfilled' ? results[1].value : null;
+        const mountainData = results[2]?.status === 'fulfilled' ? results[2].value : null;
 
         const items = shortJson?.response?.body?.items?.item;
         
-        if (!items) {
-            console.error(`[Weather] ${locKey} 단기 예보 데이터 누락:`, shortJson);
-            throw new Error('Short-term forecast data missing');
+        if (!items && !mountainData) {
+            console.error(`[Weather] ${locKey} 필수 데이터 누락:`, shortJson);
+            throw new Error('Required weather data missing');
         }
 
-        parseAndRenderWeather(locKey, items, midData, mountainData);
+        parseAndRenderWeather(locKey, items || [], midData, mountainData);
         fetchAirQuality(locKey).catch(err => console.error(`[AirQuality] ${locKey} 로드 실패:`, err));
 
     } catch (e) {
@@ -601,7 +605,7 @@ export async function fetchWeatherAlerts() {
             }
 
             // 중국어 간체 번역 적용 (직역)
-            const translatedTitle = translateWeatherAlert(title);
+            const translatedTitle = translateWeatherAlert(title).replace(/\(\*\)/g, '').trim();
 
             alertsContainer.innerHTML = `
                 <div class="weather-alert-card animate-slide-up" onclick="window.openWeatherAlertModal()">

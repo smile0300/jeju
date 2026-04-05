@@ -30,6 +30,9 @@ export async function fetchHallasanStatus() {
 
     container.innerHTML = `<span style="font-size: 0.7rem; opacity: 0.6;">正在加载数据...</span>`;
 
+    // CCTV 렌더링은 데이터 상태와 관계없이 항상 시도
+    renderHallasanCCTV();
+
     try {
         const url = `${CONFIG.PROXY_URL}/api/hallasan-status`;
         const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
@@ -39,9 +42,11 @@ export async function fetchHallasanStatus() {
         
         // Convert list to easy-access map
         const statusMap = {};
-        statusMapList.forEach(item => {
-            statusMap[item.name] = item.status;
-        });
+        if (Array.isArray(statusMapList)) {
+            statusMapList.forEach(item => {
+                statusMap[item.name] = item.status;
+            });
+        }
 
         if (Object.keys(statusMap).length === 0) throw new Error('API 반환값 비어있음');
 
@@ -76,9 +81,6 @@ export async function fetchHallasanStatus() {
             return { ...t, statusCn: info.cn, statusCls: info.cls };
         });
 
-        const closedCount = trails.filter(t => t.statusCls === 'closed').length;
-        const overallOpen = closedCount === 0;
-
         container.innerHTML = `汉拿山登山信息更新: ${now}`;
 
         trailsEl.innerHTML = trails.map(t => `
@@ -95,18 +97,12 @@ export async function fetchHallasanStatus() {
 
     } catch (e) {
         console.warn('한라산 실시간 로드 실패:', e);
-        container.innerHTML = `⚠️ 数据更新失败 (请在官网确认)`;
-        trailsEl.innerHTML = HALLASAN_TRAILS.map(t => `
-            <div class="trail-card">
-                <div class="trail-header">
-                    <h4>${t.nameCn}</h4>
-                    <span class="trail-status-badge partial">--</span>
-                </div>
-                <div class="trail-info-compact">
-                    <span>📏 ${t.distanceCn}</span>
-                    <span>⏱️ ${t.timeCn}</span>
-                </div>
-            </div>`).join('');
+        if (trailsEl) {
+            trailsEl.innerHTML = `<div class="error-msg" style="grid-column: 1/-1; text-align:center; padding: 20px;">
+                <p style="color: var(--text-muted); font-size: 0.85rem;">暂时无法加载登山路状态</p>
+                <button onclick="location.reload()" style="margin-top:10px; padding: 8px 16px; border-radius: 8px; border:none; background:var(--primary-gradient); color:white; font-weight:700;">重新加载</button>
+            </div>`;
+        }
     }
 
     // CCTV 렌더링 추가

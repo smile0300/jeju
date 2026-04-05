@@ -24,24 +24,24 @@ export function renderHallasanDashboard(containerId = 'hallasan-dashboard-contai
     let rawData = weatherData.mountainData;
     let isLive = !!rawData;
 
-    if (!isLive) {
-        rawData = weatherData.items[weatherData.sortedKeys[0]];
-    }
-    
-    if (!rawData) {
+    if (!isLive && (!weatherData.items || weatherData.sortedKeys.length === 0)) {
         container.innerHTML = `
-            <div class="dashboard-error">
-                <div class="error-msg">⚠️ 数据加载失败</div>
+            <div class="dashboard-error" style="padding: 20px; text-align: center;">
+                <div class="error-msg" style="color: var(--accent-red); margin-bottom: 10px;">⚠️ 暂时无法获取实时观测数据</div>
+                <button class="feature-request-btn" onclick="fetchWeatherData('hallasan')" style="font-size: 0.8rem; padding: 6px 12px;">🔄 刷新</button>
             </div>`;
         return;
     }
+
+    const currentKey = weatherData.sortedKeys?.[0];
+    const shortTermData = currentKey ? weatherData.items[currentKey] : {};
     
-    // 데이터 매핑
+    // 데이터 매핑 (산악기상 데이터 우선, 없으면 단기예보 활용)
     const mtData = {
-        hm: parseFloat(rawData.hm || rawData.REH || 50),
-        ws: parseFloat(rawData.ws || rawData.WSD || 2),
-        rn: rawData.rn ? parseFloat(rawData.rn) : (rawData.PCP ? (parseFloat(rawData.PCP.replace(/[^0-9.]/g, '')) || 0) : 0),
-        temp: rawData.tm_val || rawData.TMP || '--'
+        hm: parseFloat(rawData?.hm || shortTermData?.REH || 50),
+        ws: parseFloat(rawData?.ws || shortTermData?.WSD || 2),
+        rn: rawData?.rn ? parseFloat(rawData.rn) : (shortTermData?.PCP ? (parseFloat(shortTermData.PCP.replace(/[^0-9.]/g, '')) || 0) : 0),
+        temp: rawData?.tm_val || shortTermData?.TMP || '--'
     };
 
     const visibility = calculateVisibilityScore(mtData);
