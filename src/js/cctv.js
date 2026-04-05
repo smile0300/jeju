@@ -12,12 +12,39 @@ let zoomAnimationId = null;
 const REGION_VIEWBOXES = {
     all: [0, 0, 3507, 2480],
     jeju: [1300, 200, 900, 1100],
-    seogwipo: [1300, 1300, 900, 1100],
-    east: [2000, 500, 1500, 1800],
-    west: [0, 500, 1500, 1800],
+    seogwipo: [1400, 1300, 900, 600],
+    east: [2000, 350, 1100, 1400],
+    west: [700, 700, 950, 950],
     hallasan: [1400, 900, 700, 700],
     udo: [3000, 400, 500, 500]
 };
+
+/**
+ * 위경도를 현재 SVG 지도의 x, y 픽셀로 변환 (역산 가능 선형 보간)
+ */
+function projectLatLonToMap(lat, lon, id = '') {
+    if (!lat || !lon) return [0, 0];
+
+    // --- 수작업 SVG 지도 예외 보정 ---
+    // 1. 우도는 시각적 가독성을 위해 훨씬 동쪽(X:3200)에 그려져 있으므로 예외 처리
+    if (id === 'C_cheonjin') return [3275, 565];
+    if (id === 'C_haumokdong') return [3260, 535];
+    // --- 제주 본섬 비례식 ---
+    const MIN_LON = 126.161; 
+
+    const MAX_LON = 126.938; 
+    const MAP_X_MIN = 880;   
+    const MAP_X_MAX = 2950;  
+
+    const MIN_LAT = 33.242;  
+    const MAX_LAT = 33.516;  
+    const MAP_Y_MIN = 1580;  
+    const MAP_Y_MAX = 600;   
+
+    const x = MAP_X_MIN + ((lon - MIN_LON) / (MAX_LON - MIN_LON)) * (MAP_X_MAX - MAP_X_MIN);
+    const y = MAP_Y_MIN - ((lat - MIN_LAT) / (MAX_LAT - MIN_LAT)) * (MAP_Y_MIN - MAP_Y_MAX);
+    return [Math.round(x), Math.round(y)];
+}
 
 export function initCCTV() {
     console.log('[CCTV] Initializing Map UI...');
@@ -81,8 +108,13 @@ export function renderMarkers(region = 'all') {
         : CONFIG.CCTV.filter(c => c.category === region);
 
     filtered.forEach(cam => {
-        const x = cam.x;
-        const y = cam.y;
+        let x, y;
+        if (cam.lat && cam.lon) {
+            [x, y] = projectLatLonToMap(cam.lat, cam.lon, cam.id);
+        } else {
+            x = cam.x || 0;
+            y = cam.y || 0;
+        }
         
         const marker = document.createElementNS("http://www.w3.org/2000/svg", "g");
         marker.setAttribute("class", `cctv-marker marker-${cam.category} ${region === 'all' ? 'is-mini' : 'is-expanded'}`);
@@ -149,48 +181,13 @@ export function filterByRegion(region) {
         if (dashboard) dashboard.style.display = 'block';
         if (mapWrapper) mapWrapper.style.transition = 'all 0.5s ease';
         // 한라산 선택 시 지도는 상단에 작게 유지 (또는 취향에 따라 숨김)
-        renderCctvHallasanGrid();
         renderHallasanDashboard('cctv-hallasan-weather-info'); // 가시성 리포트 렌더링
     } else {
         if (dashboard) dashboard.style.display = 'none';
-        // 한라산에서 다른 권역으로 갈 때 그리드 내부 영상 정지
-        stopAllHallasanGridVideos();
     }
 }
 
-/**
- * 한라산 전용 5종 CCTV 그리드 렌더링 (CCTV 섹션용)
- */
-function renderCctvHallasanGrid() {
-    const grid = document.getElementById('cctv-hallasan-grid');
-    if (!grid) return;
 
-    const hallasanCams = CONFIG.CCTV.filter(c => c.category === 'hallasan');
-    
-    grid.innerHTML = hallasanCams.map(cam => `
-        <div class="cctv-card" onclick="openCctvCard('${cam.id}')">
-            <div class="cctv-video-container">
-                <video id="cctv-grid-video-${cam.id}" class="cctv-video-el" muted playsinline></video>
-                <div class="cctv-tag">LIVE</div>
-            </div>
-            <div class="cctv-info" style="padding: 8px; text-align: center;">
-                <span class="cctv-name" style="font-weight: 800;">${cam.nameCn}</span>
-            </div>
-        </div>
-    `).join('');
-
-    // 각 비디오 요소에 HLS 플레이어 연결
-    setTimeout(() => {
-        hallasanCams.forEach(cam => {
-            initHlsPlayer(cam.url, `cctv-grid-video-${cam.id}`);
-        });
-    }, 100);
-}
-
-function stopAllHallasanGridVideos() {
-    const grid = document.getElementById('cctv-hallasan-grid');
-    if (grid) grid.innerHTML = '';
-}
 
 /**
  * SVG viewBox 애니메이션 (클로즈업 효과)
