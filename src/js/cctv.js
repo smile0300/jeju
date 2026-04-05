@@ -328,6 +328,11 @@ export function initHlsPlayer(streamUrl, videoId) {
         : `${CONFIG.PROXY_URL}/api/public-data?url=${encodeURIComponent(streamUrl)}`;
 
     if (typeof Hls !== 'undefined' && Hls.isSupported()) {
+        // 기존 비디오 요소에 등록된 hls 플레이어가 있으면 메모리 누수 방지 차원에서 파괴
+        if (videoEl.hls) {
+            videoEl.hls.destroy();
+        }
+        
         const hls = new Hls({
             enableWorker: true,
             xhrSetup: function (xhr, url) {
@@ -342,7 +347,13 @@ export function initHlsPlayer(streamUrl, videoId) {
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
             videoEl.play().catch(err => console.warn('[CCTV] Autoplay blocked or failed', err));
         });
-        currentHls = hls;
+        
+        videoEl.hls = hls; // element 속성에 저장하여 다중 영상 추상화
+        
+        // 모달 팝업 등에 사용되는 전역 관리 변수 덮어쓰기 로직 보완 (모달 ID인 경우만 currentHls 할당)
+        if (videoId === 'cctv-live-video') {
+            currentHls = hls;
+        }
     } else if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
         videoEl.src = proxiedUrl;
         videoEl.play().catch(() => {});

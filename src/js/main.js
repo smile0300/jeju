@@ -15,6 +15,19 @@ window.showSection = showSection;
 window.openCctvModalById = openCctvModalById;
 window.openCctvModal = openCctvModal;
 window.initHlsPlayer = initHlsPlayer;
+window.toggleFullscreen = function(videoId) {
+    const video = document.getElementById(videoId);
+    if (!video) return;
+    if (video.requestFullscreen) {
+        video.requestFullscreen();
+    } else if (video.webkitEnterFullscreen) {
+        video.webkitEnterFullscreen(); // iOS 모바일 Safari 지원
+    } else if (video.webkitRequestFullscreen) {
+        video.webkitRequestFullscreen();
+    } else if (video.msRequestFullscreen) {
+        video.msRequestFullscreen();
+    }
+};
 window.switchWeatherLocation = switchWeatherLocation;
 window.fetchWeatherData = fetchWeatherData;
 window.updateHourlyWeather = updateHourlyWeather;

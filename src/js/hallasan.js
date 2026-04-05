@@ -117,7 +117,7 @@ export function renderHallasanCCTV() {
     const hallasanCams = CONFIG.CCTV.filter(cam => cam.category === 'hallasan');
 
     grid.innerHTML = hallasanCams.map(cam => `
-        <div class="cctv-card" onclick="openCctvModalById('${cam.id}')">
+        <div class="cctv-card" onclick="toggleFullscreen('hallasan-video-${cam.id}')" style="cursor: pointer;">
             <div class="cctv-video-container">
                 <video id="hallasan-video-${cam.id}" class="cctv-video-el" muted playsinline autoplay></video>
                 <div class="cctv-tag">LIVE</div>
