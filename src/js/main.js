@@ -50,9 +50,47 @@ window.openWeatherSummaryModal = openWeatherSummaryModal;
 window.closeWeatherSummaryModal = closeWeatherSummaryModal;
 
 // Modals closing
-window.closeCctvModal = () => { document.getElementById('cctv-modal').style.display = 'none'; document.getElementById('modal-body').innerHTML = ''; };
-window.closeLostDetailModal = () => { document.getElementById('lost-detail-modal').style.display = 'none'; document.body.style.overflow = 'auto'; };
-window.closeLostReportModal = () => { document.getElementById('lost-report-modal').style.display = 'none'; document.body.style.overflow = ''; };
+const closeAllModals = () => {
+    const modals = document.querySelectorAll('.wsm-overlay, #cctv-detail-card, #cctv-modal, #lost-detail-modal, #lost-report-modal, #feature-request-modal, #wechat-qr-modal');
+    let wasOpen = false;
+    modals.forEach(m => {
+        if (m.style.display === 'block' || m.style.display === 'flex' || m.classList.contains('show')) {
+            wasOpen = true;
+            m.style.display = 'none';
+            m.classList.remove('show');
+        }
+    });
+    
+    // 특정 모달들의 잔여물 지우기 (비디오 중지 등)
+    if (window.closeCctvCard) window.closeCctvCard(true); // true means skip history.back()
+    if (window.closeCctvModal) window.closeCctvModal();
+    if (window.closeLostDetailModal) window.closeLostDetailModal();
+    if (window.closeLostReportModal) window.closeLostReportModal();
+    document.body.style.overflow = '';
+    return wasOpen;
+};
+
+window.pushModalState = () => {
+    if (window.location.hash !== '#modal') {
+        history.pushState({ ...history.state, isModal: true }, '', window.location.pathname + '#modal');
+    }
+};
+
+window.closeCctvModal = (fromPopState = false) => { 
+    document.getElementById('cctv-modal').style.display = 'none'; 
+    document.getElementById('modal-body').innerHTML = ''; 
+    if (!fromPopState && window.location.hash === '#modal') window.history.back();
+};
+window.closeLostDetailModal = (fromPopState = false) => { 
+    document.getElementById('lost-detail-modal').style.display = 'none'; 
+    document.body.style.overflow = 'auto'; 
+    if (!fromPopState && window.location.hash === '#modal') window.history.back();
+};
+window.closeLostReportModal = (fromPopState = false) => { 
+    document.getElementById('lost-report-modal').style.display = 'none'; 
+    document.body.style.overflow = ''; 
+    if (!fromPopState && window.location.hash === '#modal') window.history.back();
+};
 
 const ROUTE_MAP = {
     '/': 'home',
@@ -81,6 +119,20 @@ function handleRouting() {
 }
 
 window.addEventListener('popstate', (event) => {
+    // 1. 모달 닫기
+    closeAllModals();
+
+    // 2. 뒤로가기로 인해 해시만 변경된 경우(모달만 닫힌 거라면) 라우팅 중단
+    const path = window.location.pathname;
+    let sectionId = ROUTE_MAP[path];
+    if (!sectionId) sectionId = 'home';
+    const currentActive = document.querySelector('.app-section.active');
+    
+    // 경로에 해당하는 섹션이 이미 켜져 있다면, 그냥 모달만 닫고 화면 전환은 패스
+    if (currentActive && currentActive.id === sectionId) {
+        return;
+    }
+
     // URL 창 뒤로가기 시
     if (event.state && event.state.section) {
         showSection(event.state.section, false);
