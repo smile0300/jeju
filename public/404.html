@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Jeju Live Redirect</title>
+    <script>
+      // 브라우저 세션에 원래 요청한 URL을 저장하고 루트(/)로 이동시킵니다.
+      sessionStorage.setItem('gh_pages_redirect', window.location.href);
+      window.location.replace('/');
+    </script>
+  </head>
+  <body>
+  </body>
+</html>

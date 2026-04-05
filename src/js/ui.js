@@ -7,7 +7,7 @@ import { fetchFoundGoods } from './lost-found.v1.js';
 import { fetchFestivals } from './festival.js';
 import { getSkyInfo } from './utils.js';
 
-export function showSection(sectionId) {
+export function showSection(sectionId, pushHistory = true) {
     document.querySelectorAll('.app-section').forEach(s => s.classList.remove('active'));
     const target = document.getElementById(sectionId);
     if (target) {
@@ -26,6 +26,13 @@ export function showSection(sectionId) {
     }
     if (sectionId === 'lost-found') fetchFoundGoods();
     if (sectionId === 'festival') fetchFestivals();
+
+    if (pushHistory) {
+        const path = sectionId === 'home' ? '/' : `/${sectionId}`;
+        if (window.location.pathname !== path) {
+            history.pushState({ section: sectionId }, '', path);
+        }
+    }
 }
 
 export function openWechatQR() {

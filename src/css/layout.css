@@ -228,12 +228,12 @@
 .app-section.active {
     display: block;
     padding-top: 30px; /* 모든 페이지 상단 여백 사용자 요청 반영 (40px -> 30px) */
-    animation: fadeInSlide 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    animation: simpleFade 0.4s ease-in-out forwards;
 }
 
-@keyframes fadeInSlide {
-    from { opacity: 0; transform: translateY(15px); }
-    to { opacity: 1; transform: translateY(0); }
+@keyframes simpleFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 .section {
