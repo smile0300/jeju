@@ -46,7 +46,12 @@ function projectLatLonToMap(lat, lon, id = '') {
     return [Math.round(x), Math.round(y)];
 }
 
+let isCctvInitialized = false;
+
 export function initCCTV() {
+    if (isCctvInitialized) return;
+    isCctvInitialized = true;
+    
     console.log('[CCTV] Initializing Map UI...');
     renderMarkers('all');
     

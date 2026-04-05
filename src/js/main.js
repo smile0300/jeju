@@ -54,6 +54,41 @@ window.closeCctvModal = () => { document.getElementById('cctv-modal').style.disp
 window.closeLostDetailModal = () => { document.getElementById('lost-detail-modal').style.display = 'none'; document.body.style.overflow = 'auto'; };
 window.closeLostReportModal = () => { document.getElementById('lost-report-modal').style.display = 'none'; document.body.style.overflow = ''; };
 
+const ROUTE_MAP = {
+    '/': 'home',
+    '/cctv': 'cctv',
+    '/weather': 'weather',
+    '/hallasan': 'hallasan',
+    '/airport': 'airport',
+    '/festival': 'festival',
+    '/lost-found': 'lost-found'
+};
+
+function handleRouting() {
+    // GitHub Pages SPA redirect 방어 로직 (404.html 연계)
+    const ghRedirect = sessionStorage.getItem('gh_pages_redirect');
+    if (ghRedirect) {
+        sessionStorage.removeItem('gh_pages_redirect');
+        const url = new URL(ghRedirect);
+        window.history.replaceState(null, '', url.pathname + url.search);
+    }
+
+    const path = window.location.pathname;
+    let sectionId = ROUTE_MAP[path];
+    if (!sectionId) sectionId = 'home';
+    // 히스토리에 다시 쌓이지 않도록 false 전달
+    showSection(sectionId, false);
+}
+
+window.addEventListener('popstate', (event) => {
+    // URL 창 뒤로가기 시
+    if (event.state && event.state.section) {
+        showSection(event.state.section, false);
+    } else {
+        handleRouting();
+    }
+});
+
 window.addEventListener('load', () => {
     initCCTV();
     Object.keys(CONFIG.WEATHER_LOCATIONS).forEach(loc => fetchWeatherData(loc));
@@ -64,7 +99,9 @@ window.addEventListener('load', () => {
     fetchFoundGoods();
     initMonthFilter();
     fetchFestivals();
-    showSection('home');
+    
+    // 초기 로딩 시 URL에 맞는 페이지 열기
+    handleRouting();
 
     // Update loops
     setInterval(() => {
