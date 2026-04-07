@@ -329,6 +329,99 @@
     display: block;
 }
 
+/* Share Specific Styles */
+.share-icon-placeholder {
+    width: 140px;
+    height: 140px;
+    border-radius: 16px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    margin-bottom: 12px;
+    border: 1px solid rgba(0,0,0,0.03);
+    transition: all 0.3s ease;
+}
+
+.share-icon-placeholder:hover {
+    background: #f8fafc;
+    transform: scale(1.05);
+}
+
+.share-emoji {
+    font-size: 3rem;
+}
+
+.share-option-btn {
+    transition: all 0.2s ease;
+}
+
+.share-option-btn:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.08);
+    border-color: var(--accent-blue) !important;
+}
+
+.wechat-btn .share-icon { color: #07c160; }
+.xhs-btn .share-icon { color: #ff2442; }
+.universal-btn .share-icon { color: #3b82f6; }
+
+/* New Footer Share Top Styles */
+.footer-share-top {
+    width: 100%;
+    border-bottom: 1px solid var(--border-light);
+    padding-bottom: 25px;
+    margin-bottom: 25px;
+}
+
+.share-circles-row {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: center !important;
+    align-items: flex-start !important;
+    gap: 35px !important;
+    padding: 10px 0 !important;
+    flex-wrap: nowrap !important;
+    width: 100% !important;
+}
+
+.share-circle-item {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    width: 80px !important;
+    cursor: pointer !important;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.share-circle-item:hover {
+    transform: translateY(-5px);
+}
+
+.share-circle {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin-bottom: 10px;
+    transition: all 0.3s ease;
+}
+
+.xhs-circle { background: #ff2442; box-shadow: 0 4px 12px rgba(255, 36, 66, 0.25); }
+.wechat-circle { background: #07c160; box-shadow: 0 4px 12px rgba(7, 193, 96, 0.25); }
+.url-circle { background: #f1f5f9; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); }
+
+.share-circle-item span {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-align: center;
+    white-space: nowrap;
+}
+
 /* ==================== Responsive ==================== */
 @media (max-width: 480px) {
     .home-grid {
