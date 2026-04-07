@@ -119,7 +119,7 @@ const LOC_META = {
 function _buildSummaryHTML() {
     const kstNow = new Date(Date.now() + 9 * 60 * 60 * 1000);
     const todayYmd = kstNow.toISOString().slice(0, 10).replace(/-/g, '');
-    const dateLabel = `${parseInt(todayYmd.slice(4,6))}月 ${parseInt(todayYmd.slice(6,8))}日`;
+    const dateLabel = `${parseInt(todayYmd.slice(4,6))}月 ${parseInt(todayYmd.slice(6,8))}일`;
 
     let content = '';
     for (const [locKey, meta] of Object.entries(LOC_META)) {
@@ -204,5 +204,69 @@ export function closeWeatherSummaryModal(fromPopState = false) {
         modal.style.display = 'none'; 
         document.body.style.overflow = ''; 
         if (!fromPopState && window.location.hash === '#modal') window.history.back();
+    }
+}
+
+// ─── 공유 모달 (Share Modal) ──────────────────────────────────
+export function openShareModal() {
+    const modal = document.getElementById('share-modal');
+    const input = document.getElementById('share-url-input');
+    if (input) input.value = window.location.origin + window.location.pathname;
+    
+    if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        if (window.pushModalState) window.pushModalState();
+    }
+}
+
+export function closeShareModal(fromPopState = false) {
+    const modal = document.getElementById('share-modal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+        const statusEl = document.getElementById('share-status');
+        if (statusEl) statusEl.style.display = 'none';
+        if (!fromPopState && window.location.hash === '#modal') window.history.back();
+    }
+}
+
+/**
+ * Real sharing functionality using Web Share API where supported,
+ * falling back to platform-specific actions or silent copy.
+ */
+export async function shareToPlatform(platform) {
+    const shareData = {
+        title: '济州岛实时旅行信息',
+        text: '分享来自《济州岛实时旅行信息》的精彩内容',
+        url: window.location.origin + window.location.pathname
+    };
+
+    // 1. Try Web Share API (Official Mobile/Native Share)
+    if (navigator.share) {
+        try {
+            await navigator.share(shareData);
+            return;
+        } catch (error) {
+            console.log('Share error or cancelled:', error);
+            if (error.name === 'AbortError') return; 
+        }
+    }
+
+    // 2. Fallbacks for Desktop or unsupported browsers
+    if (platform === 'wechat') {
+        if (typeof openWechatQR === 'function') openWechatQR();
+    } else {
+        // Silent copy for XHS/Link/Any (No status messages as requested)
+        try {
+            await navigator.clipboard.writeText(shareData.url);
+        } catch (err) {
+            const textarea = document.createElement('textarea');
+            textarea.value = shareData.url;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+        }
     }
 }
