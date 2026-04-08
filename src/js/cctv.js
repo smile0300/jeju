@@ -10,14 +10,15 @@ let currentViewBox = [0, 0, 3507, 2480];
 let zoomAnimationId = null;
 
 const REGION_VIEWBOXES = {
-    all: [0, 0, 3507, 2480],
-    jeju: [1300, 200, 900, 1100],
-    seogwipo: [1400, 1300, 900, 600],
-    east: [2000, 350, 1100, 1400],
-    west: [700, 700, 950, 950],
-    hallasan: [1400, 900, 700, 700],
-    udo: [3000, 400, 500, 500]
+    all:        [0, 0, 3507, 2480],         // 본섬 전체 (전체보기 시 잘림 방지)
+    jeju:       [1410, 310, 800, 900],      // 제주시 중심 북부 영역
+    seogwipo:   [1150, 1150, 1100, 950],     // 서귀포시 중심 남부 영역
+    east:       [1750, 300, 1600, 1600],    // 동부 해안 전체
+    west:       [150, 350, 1600, 1950],     // 서부 해안 전체
+    hallasan:   [1500, 800, 500, 500],      // 한라산 중앙
+    udo:        [3150, 500, 300, 300]       // 우도 전용 줌
 };
+
 
 /**
  * 위경도를 현재 SVG 지도의 x, y 픽셀로 변환 (역산 가능 선형 보간)
@@ -25,25 +26,58 @@ const REGION_VIEWBOXES = {
 function projectLatLonToMap(lat, lon, id = '') {
     if (!lat || !lon) return [0, 0];
 
-    // --- 수작업 SVG 지도 예외 보정 ---
-    // 1. 우도는 시각적 가독성을 위해 훨씬 동쪽(X:3200)에 그려져 있으므로 예외 처리
-    if (id === 'C_cheonjin') return [3275, 565];
-    if (id === 'C_haumokdong') return [3260, 535];
-    // --- 제주 본섬 비례식 ---
-    const MIN_LON = 126.161; 
+    // =========================================================
+    // SVG 좌표 직접 매핑 (viewBox: 0 0 3507 2480)
+    // 선형 보간 불가 - SVG는 비선형 수작업 투영이므로
+    // 각 지점별 SVG 픽셀 좌표를 직접 측정/할당합니다.
+    // =========================================================
 
-    const MAX_LON = 126.938; 
-    const MAP_X_MIN = 880;   
-    const MAP_X_MAX = 2950;  
+    // [우도] SVG 상 오른쪽 섬
+    if (id === 'C_cheonjin')   return [3250, 680];
+    if (id === 'C_haumokdong') return [3230, 560];
+    if (id === 'C_udobiyang')  return [3285, 560];
+    if (id === 'C_mangsapo')   return [3285, 500];
+    if (id === 'C_geommeolle') return [3310, 680];
 
-    const MIN_LAT = 33.242;  
-    const MAX_LAT = 33.516;  
-    const MAP_Y_MIN = 1580;  
-    const MAP_Y_MAX = 600;   
+    // [제주시 북쪽 해안] - 제주 시내 및 인근
+    if (id === 'C_gamundong')  return [1480, 550];
+    if (id === 'C_ihotewoo')   return [1580, 520];
+    if (id === 'C_samyang')    return [1950, 485];
 
-    const x = MAP_X_MIN + ((lon - MIN_LON) / (MAX_LON - MIN_LON)) * (MAP_X_MAX - MAP_X_MIN);
-    const y = MAP_Y_MIN - ((lat - MIN_LAT) / (MAX_LAT - MIN_LAT)) * (MAP_Y_MIN - MAP_Y_MAX);
-    return [Math.round(x), Math.round(y)];
+    // [동부 북/동 해안] - 조천, 구좌, 성산
+    if (id === 'C_hamdeok')    return [2145, 470];
+    if (id === 'C_gimnyeong')  return [2375, 430];
+    if (id === 'C_woljeongri') return [2520, 410];
+    if (id === 'C_suma')       return [3180, 800];
+    if (id === 'C_seongsanhang') return [3200, 720];
+    if (id === 'C_seongsanilchulbong') return [3230, 760];
+    if (id === 'C_sinsan')     return [3080, 1080];
+
+    // [서부 북/서 해안] - 애월, 한림, 한경, 대정
+    if (id === 'C_gwakji')     return [1065, 690];
+    if (id === 'C_hyeopjae')   return [830, 830];
+    if (id === 'C_panpo')      return [665, 1000];
+    if (id === 'C_sindo')      return [360, 1380];
+    if (id === 'C_hamo')       return [565, 1650];
+
+    // [서귀포시 남쪽 해안] - 중문, 서귀포, 남원
+    if (id === 'C_jungmun')    return [1350, 1715];
+    if (id === 'C_daepo')      return [1450, 1785];
+    if (id === 'C_beophwan')   return [1550, 1830];
+    if (id === 'C_bomok')      return [1770, 1820];
+    if (id === 'C_jungmun_p')  return [1380, 1755];
+    if (id === 'C_secheon')    return [2150, 1730];
+    if (id === 'C_taeheung')   return [2350, 1630];
+
+    // [한라산]
+    if (id === 'H_baengnokdam') return [1750, 1150];
+    if (id === 'H_witse')      return [1680, 1180];
+    if (id === 'H_yeongsil')   return [1620, 1250];
+    if (id === 'H_eoseungsaeng')return [1680, 1050];
+    if (id === 'H_seongpanak') return [1850, 1180];
+
+    // fallback: 제주도 중앙 한라산 부근
+    return [1720, 1150];
 }
 
 let isCctvInitialized = false;
@@ -117,7 +151,7 @@ export function renderMarkers(region = 'all') {
     layer.innerHTML = ''; // 기존 마커 제거
 
     const filtered = region === 'all' 
-        ? CONFIG.CCTV 
+        ? CONFIG.CCTV.filter(c => c.category !== 'hallasan') 
         : CONFIG.CCTV.filter(c => c.category === region);
 
     filtered.forEach(cam => {
