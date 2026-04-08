@@ -14,7 +14,11 @@ export async function onRequest(context) {
     'openapi.airport.co.kr', // 공항공사 항공 정보 API
     'api.visitjeju.net',    // 제주관광공사 축제/행사 API
     'api.jejuits.go.kr',    // 제주 ITS 교통 정보 API
-    '123.140.197.51',       // CCTV 스트리밍 서버 IP
+    '123.140.197.51',       // CCTV 스트리밍 서버 IP (구)
+    '211.114.96.121',       // CCTV 스트리밍 서버 IP (제주시 1권역)
+    '211.34.191.215',       // CCTV 스트리밍 서버 IP (서귀포/동부/서부)
+    '59.8.86.15',           // CCTV 스트리밍 서버 IP (서귀포 일부)
+    '119.65.216.155',       // 한라산 CCTV 스트리밍 서버 IP
     'hallacctv.kr',         // 한라산 CCTV 스트리밍 서버 (Root)
     'www.hallacctv.kr'      // 한라산 CCTV 스트리밍 서버 (Sub)
   ];
