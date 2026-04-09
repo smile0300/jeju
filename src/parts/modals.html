@@ -7,15 +7,18 @@
 </div>
 
 <!-- CCTV 상세 정보 카드 (전역 사용) -->
-<div id="cctv-detail-card" class="cctv-detail-card">
-    <div class="detail-header">
-        <h3 id="cctv-target-name">监控名称</h3>
-        <button class="detail-close" onclick="closeCctvCard()">✕</button>
-    </div>
-    <div class="detail-body">
-        <div class="video-wrapper">
-            <video id="cctv-live-video" muted playsinline autoplay></video>
-            <div class="live-indicator">LIVE</div>
+<!-- CCTV 상세 정보 카드 (전역 사용) -->
+<div id="cctv-detail-card" class="cctv-detail-card" onclick="if(event.target===this)closeCctvCard()">
+    <div class="cctv-detail-inner">
+        <div class="detail-header">
+            <h3 id="cctv-target-name">监控名称</h3>
+            <button class="detail-close" onclick="closeCctvCard()">✕</button>
+        </div>
+        <div class="detail-body">
+            <div class="video-wrapper">
+                <video id="cctv-live-video" muted playsinline autoplay></video>
+                <div class="live-indicator">LIVE</div>
+            </div>
         </div>
     </div>
 </div>

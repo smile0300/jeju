@@ -5,11 +5,11 @@ export const CONFIG = {
     // CCTV 스트림 소스 (HLS 및 ITS API 지원)
     CCTV: [
         // --- 한라산 권역 (Hallasan) - 타 페이지 호환성 유지용 ---
-        { id: 'baenglokdam', category: 'hallasan', nameKo: '백록담', nameCn: '白鹿潭', type: 'hls', url: 'http://119.65.216.155:1935/live/cctv01.stream_360p/playlist.m3u8', lat: 33.3614, lon: 126.5294 },
-        { id: 'wang-gwanreung', category: 'hallasan', nameKo: '왕관릉', nameCn: '王冠陵', type: 'hls', url: 'http://119.65.216.155:1935/live/cctv02.stream_360p/playlist.m3u8', lat: 33.3551, lon: 126.5458 },
-        { id: 'witseoreum', category: 'hallasan', nameKo: '윗세오름', nameCn: '威世岳', type: 'hls', url: 'http://119.65.216.155:1935/live/cctv03.stream_360p/playlist.m3u8', lat: 33.3592, lon: 126.5057 },
-        { id: 'eoseungsaengak', category: 'hallasan', nameKo: '어승생악', nameCn: '御乘生岳', type: 'hls', url: 'http://119.65.216.155:1935/live/cctv04.stream_360p/playlist.m3u8', lat: 33.3855, lon: 126.5015 },
-        { id: '1100road', category: 'hallasan', nameKo: '1100도로', nameCn: '1100道路', type: 'hls', url: 'http://119.65.216.155:1935/live/cctv05.stream_360p/playlist.m3u8', lat: 33.3571, lon: 126.4632 },
+        { id: 'baenglokdam', category: 'hallasan', nameKo: '백록담', nameCn: '白鹿潭', type: 'hls', url: 'https://hallacctv.kr/live/cctv01.stream_360p/playlist.m3u8', lat: 33.3614, lon: 126.5294 },
+        { id: 'wang-gwanreung', category: 'hallasan', nameKo: '왕관릉', nameCn: '王冠陵', type: 'hls', url: 'https://hallacctv.kr/live/cctv02.stream_360p/playlist.m3u8', lat: 33.3551, lon: 126.5458 },
+        { id: 'witseoreum', category: 'hallasan', nameKo: '윗세오름', nameCn: '威世岳', type: 'hls', url: 'https://hallacctv.kr/live/cctv03.stream_360p/playlist.m3u8', lat: 33.3592, lon: 126.5057 },
+        { id: 'eoseungsaengak', category: 'hallasan', nameKo: '어승생악', nameCn: '御乘生岳', type: 'hls', url: 'https://hallacctv.kr/live/cctv04.stream_360p/playlist.m3u8', lat: 33.3855, lon: 126.5015 },
+        { id: '1100road', category: 'hallasan', nameKo: '1100도로', nameCn: '1100道路', type: 'hls', url: 'https://hallacctv.kr/live/cctv05.stream_360p/playlist.m3u8', lat: 33.3571, lon: 126.4632 },
 
         // --- 제주시 권역 (North) ---
         { id: 'C_gamundong', category: 'jeju', nameKo: '가문동포구', nameCn: '加文洞浦口', type: 'hls', url: 'http://211.114.96.121:1935/jejusi6/11-15.stream/playlist.m3u8', lat: 33.4930, lon: 126.4357 },
