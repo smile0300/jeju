@@ -28,7 +28,7 @@ const CITY_NAMES = {
     '난창': '南昌', '란저우': '兰州', '시닝': '西宁', '후허하오터': '呼和浩特',
     '우루무치': '乌鲁木齐', '창사': '长沙', '장가계': '张家界', '옌타이': '烟台',
     '웨이하이': '威海', '이우': '义乌', '낙양': '洛阳', '진저우': '锦州',
-    '린이': '临沂', '은스': '恩施', '인촨': '银川', '화이안': '淮안',
+    '린이': '临沂', '은스': '恩施', '인촨': '银川', '화이안': '淮安',
     '가오슝': '高雄', '타이중': '台中', '타이난': '台南', '마카오': '澳门'
 };
 
@@ -51,6 +51,8 @@ export function getStatusBadge(status) {
     if (s.includes('결항') || s.includes('\uACB0\uD56D')) return `<span class="badge badge-danger">取消</span>`;
     if (s.includes('탑승') || s.includes('\uD0D1\uC2B9')) return `<span class="badge badge-info">正在登机</span>`;
     if (s.includes('수속') || s.includes('\uC218\uC10D')) return `<span class="badge badge-info">正在办理</span>`;
+    if (s.includes('회항') || s.includes('\uD68C\uD56D')) return `<span class="badge badge-danger">备降/返航</span>`;
+    if (s.includes('착륙') || s.includes('\uCC29\uB959')) return `<span class="badge badge-success">已着陆</span>`;
     return `<span class="badge badge-info">${s}</span>`;
 }
 
@@ -155,7 +157,7 @@ export async function fetchFlights(type) {
              container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">暂无相关航班信息</div>';
         }
     } catch (e) {
-        console.error('항공 API 오류:', e);
+        console.error('Airport API Error:', e);
         container.innerHTML = `<div style="text-align:center;padding:32px 16px;">Error: ${e.message}</div>`;
     }
 }
