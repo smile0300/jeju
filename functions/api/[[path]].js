@@ -20,7 +20,8 @@ export async function onRequest(context) {
     '59.8.86.15',           // CCTV 스트리밍 서버 IP (서귀포 일부)
     '119.65.216.155',       // 한라산 CCTV 스트리밍 서버 IP
     'hallacctv.kr',         // 한라산 CCTV 스트리밍 서버 (Root)
-    'www.hallacctv.kr'      // 한라산 CCTV 스트리밍 서버 (Sub)
+    'www.hallacctv.kr',     // 한라산 CCTV 스트리밍 서버 (Sub)
+    '1.245.193.152'         // 성산 지역 CCTV 스트리밍 서버
   ];
 
   const ALLOWED_ORIGIN = '*';
@@ -106,6 +107,8 @@ export async function onRequest(context) {
         }
       }
 
+      const isHls = targetUrlString.toLowerCase().includes('.m3u8') || targetUrlString.toLowerCase().includes('.ts');
+
       const isJsonExpected = url.searchParams.get('dataType') === 'JSON' || 
                              targetUrl.searchParams.get('dataType') === 'JSON' || 
                              targetUrl.searchParams.get('_type') === 'json' ||
@@ -114,7 +117,11 @@ export async function onRequest(context) {
                              targetUrlString.toLowerCase().includes('_type=json');
 
       const headers = new Headers();
-      headers.set('Accept', isJsonExpected ? 'application/json, text/plain, */*' : 'application/xml, text/xml, */*');
+      if (isHls) {
+        headers.set('Accept', '*/*');
+      } else {
+        headers.set('Accept', isJsonExpected ? 'application/json, text/plain, */*' : 'application/xml, text/xml, */*');
+      }
       headers.set('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
 
       const response = await fetch(targetUrl.toString(), {
@@ -134,18 +141,35 @@ export async function onRequest(context) {
         });
       }
 
-      const newResponse = new Response(response.body, response);
-      newResponse.headers.set('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
-      newResponse.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-      newResponse.headers.delete('Content-Security-Policy');
-      newResponse.headers.delete('X-Frame-Options');
+      // 500 에러 방지용 헤더 복사 (불필요한 헤더 제외)
+      const newHeaders = new Headers();
+      
+      // 보안 및 CORS 헤더 설정
+      newHeaders.set('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
+      newHeaders.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+      
+      // 원본 헤더 중 안전한 것들만 복사
+      for (const [key, value] of response.headers.entries()) {
+        const lowerKey = key.toLowerCase();
+        // Cloudflare 환경에서 문제를 일으킬 수 있는 헤더 제외
+        if (lowerKey !== 'content-encoding' && 
+            lowerKey !== 'content-length' && 
+            lowerKey !== 'transfer-encoding' &&
+            lowerKey !== 'content-security-policy') {
+          newHeaders.set(key, value);
+        }
+      }
 
-      return newResponse;
+      return new Response(response.body, {
+        status: response.status,
+        headers: newHeaders
+      });
 
     } catch (e) {
-      return new Response(JSON.stringify({ error: `Proxy Error: ${e.message}` }), { 
+      console.error('[Proxy Error]', e.stack);
+      return new Response(`Proxy Error: ${e.stack || e.message}`, { 
         status: 500,
-        headers: { 'Access-Control-Allow-Origin': ALLOWED_ORIGIN, 'Content-Type': 'application/json' }
+        headers: { 'Access-Control-Allow-Origin': ALLOWED_ORIGIN }
       });
     }
   }
@@ -237,9 +261,24 @@ export async function onRequest(context) {
           const finalFullUrl = parentPath + pathname.substring(pathname.lastIndexOf('/') + 1);
 
           const res = await fetch(finalFullUrl);
-          const newRes = new Response(res.body, res);
-          newRes.headers.set('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
-          return newRes;
+          
+          // 헤더 재구성 (500 에러 방지)
+          const hlsHeaders = new Headers();
+          hlsHeaders.set('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
+          
+          for (const [key, value] of res.headers.entries()) {
+            const lowerKey = key.toLowerCase();
+            if (lowerKey !== 'content-encoding' && 
+                lowerKey !== 'content-length' && 
+                lowerKey !== 'transfer-encoding') {
+              hlsHeaders.set(key, value);
+            }
+          }
+
+          return new Response(res.body, {
+            status: res.status,
+            headers: hlsHeaders
+          });
         }
       } catch (e) {}
     }
