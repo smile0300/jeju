@@ -33,7 +33,7 @@ function projectLatLonToMap(lat, lon, id = '') {
     // =========================================================
 
     // [우도] SVG 상 오른쪽 섬
-    if (id === 'C_cheonjin')   return [3250, 680];
+    if (id === 'C_cheonjin')   return [3270, 560];
     if (id === 'C_haumokdong') return [3230, 560];
     if (id === 'C_udobiyang')  return [3285, 560];
     if (id === 'C_mangsapo')   return [3285, 500];
