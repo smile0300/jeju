@@ -1,0 +1,8 @@
+{
+  "name": "jeju-live-proxy",
+  "version": "1.0.0",
+  "main": "api/proxy.js",
+  "dependencies": {
+    "node-fetch": "^2.6.7"
+  }
+}

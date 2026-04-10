@@ -76,6 +76,20 @@ function projectLatLonToMap(lat, lon, id = '') {
     if (id === 'H_eoseungsaeng')return [1680, 1050];
     if (id === 'H_seongpanak') return [1850, 1180];
 
+    // --- 새로운 방재 CCTV (해안가 정밀 배치) ---
+    if (id === 'tapdong_emg')      return [1730, 490];  // 제주시 탑동
+    if (id === 'seogwihang_emg')   return [1810, 1810]; // 서귀포항
+    if (id === 'beophwan_p_emg')   return [1600, 1840]; // 법환포구
+    if (id === 'beophwan_v_emg')   return [1600, 1860]; // 법환어촌계
+    if (id === 'jungmun_emg')      return [1350, 1715]; // 중문해수욕장
+    if (id === 'onpyeong_emg')     return [2900, 1250]; // 온평어촌계
+    if (id === 'gujwa_emg')        return [2650, 430];  // 구좌읍사무소
+    if (id === 'ongpo_emg')        return [830, 830];   // 옹포항 (협재 인근)
+    if (id === 'sanbangsan_emg')   return [1050, 1650]; // 산방산
+    if (id === 'pyeonghwagyo_emg') return [2450, 1550]; // 평화교
+    if (id === 'namwon_emg')       return [2250, 1720]; // 남원어촌계
+    if (id === 'sinchang_emg')     return [500, 1300];  // 신창리포구
+
     // fallback: 제주도 중앙 한라산 부근
     return [1720, 1150];
 }
@@ -372,9 +386,15 @@ export function initHlsPlayer(streamUrl, videoId) {
 
     let proxiedUrl = streamUrl;
     if (!isCorsFriendly) {
-        proxiedUrl = streamUrl.includes(CONFIG.PROXY_URL) 
-            ? streamUrl 
-            : `${CONFIG.PROXY_URL}/api/public-data?url=${encodeURIComponent(streamUrl)}`;
+        // 1935 포트 또는 8080 포트가 포함되어 있고 외부 프록시가 설정된 경우 외부 프록시 사용 (Cloudflare 제한 우회)
+        if ((streamUrl.includes(':1935') || streamUrl.includes(':8080')) && CONFIG.EXTERNAL_PROXY_URL) {
+            proxiedUrl = `${CONFIG.EXTERNAL_PROXY_URL}${encodeURIComponent(streamUrl)}`;
+        } else {
+            // 기본 Cloudflare 프록시 사용 (80, 443 포트 등 표준)
+            proxiedUrl = streamUrl.includes(CONFIG.PROXY_URL) 
+                ? streamUrl 
+                : `${CONFIG.PROXY_URL}/api/public-data?url=${encodeURIComponent(streamUrl)}`;
+        }
     }
 
     if (typeof Hls !== 'undefined' && Hls.isSupported()) {
@@ -388,7 +408,7 @@ export function initHlsPlayer(streamUrl, videoId) {
             xhrSetup: function (xhr, url) {
                 // 원본 도메인이 CORS를 지원(예: hallacctv.kr)하면 프록시를 건너뜀
                 const isUrlCorsFriendly = url.includes('hallacctv.kr');
-                if (!isUrlCorsFriendly && url.startsWith('http') && !url.includes(CONFIG.PROXY_URL) && !url.includes('localhost')) {
+                if (!isUrlCorsFriendly && url.startsWith('http') && !url.includes(CONFIG.PROXY_URL) && !url.includes('localhost') && !url.includes('vercel.app')) {
                     xhr.open('GET', `${CONFIG.PROXY_URL}/api/public-data?url=${encodeURIComponent(url)}`, true);
                 }
             }
