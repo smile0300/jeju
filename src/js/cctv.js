@@ -69,26 +69,43 @@ function projectLatLonToMap(lat, lon, id = '') {
     if (id === 'C_secheon')    return [2150, 1730];
     if (id === 'C_taeheung')   return [2350, 1630];
 
-    // [한라산]
+    // --- 한라산 영역 (중앙) ---
     if (id === 'H_baengnokdam') return [1750, 1150];
     if (id === 'H_witse')      return [1680, 1180];
     if (id === 'H_yeongsil')   return [1620, 1250];
     if (id === 'H_eoseungsaeng')return [1680, 1050];
     if (id === 'H_seongpanak') return [1850, 1180];
 
-    // --- 새로운 방재 CCTV (해안가 정밀 배치) ---
-    if (id === 'tapdong_emg')      return [1730, 490];  // 제주시 탑동
-    if (id === 'seogwihang_emg')   return [1810, 1810]; // 서귀포항
-    if (id === 'beophwan_p_emg')   return [1600, 1840]; // 법환포구
-    if (id === 'beophwan_v_emg')   return [1600, 1860]; // 법환어촌계
-    if (id === 'jungmun_emg')      return [1350, 1715]; // 중문해수욕장
-    if (id === 'onpyeong_emg')     return [2900, 1250]; // 온평어촌계
-    if (id === 'gujwa_emg')        return [2650, 430];  // 구좌읍사무소
-    if (id === 'ongpo_emg')        return [830, 830];   // 옹포항 (협재 인근)
-    if (id === 'sanbangsan_emg')   return [1050, 1650]; // 산방산
-    if (id === 'pyeonghwagyo_emg') return [2450, 1550]; // 평화교
-    if (id === 'namwon_emg')       return [2250, 1720]; // 남원어촌계
-    if (id === 'sinchang_emg')     return [500, 1300];  // 신창리포구
+    // --- 북부 / 제주시 권역 (내륙 보정) ---
+    if (id === 'tapdong_emg')      return [1730, 560];  // 제주시 탑동
+    if (id === 'samyang_tour')     return [1950, 580];  // 삼양 해수욕장
+    if (id === 'iho_tour')         return [1550, 610];  // 이호 해수욕장
+
+    // --- 남부 / 서귀포 권역 (내륙 보정) ---
+    if (id === 'seogwihang_emg')   return [1810, 1740]; // 서귀포항
+    if (id === 'beophwan_p_emg')   return [1600, 1770]; // 법환포구
+    if (id === 'beophwan_v_emg')   return [1600, 1790]; // 법환어촌계
+    if (id === 'jungmun_emg')      return [1350, 1640]; // 중문해수욕장
+
+    // --- 동부 권역 (신규 및 내륙 보정) ---
+    if (id === 'seongsan_tour')    return [3050, 1050]; // 성산 일출봉
+    if (id === 'sanhang_tour')     return [3000, 1000]; // 성산항
+    if (id === 'cheonjin_udo')     return [3280, 780];  // 우도 천진항
+    if (id === 'haumok_udo')       return [3260, 750];  // 우도 하우목동항
+    if (id === 'hamdeok_tour')     return [2200, 550];  // 함덕 해수욕장
+    if (id === 'woljeong_tour')    return [2650, 580];  // 월정리 해수욕장
+    if (id === 'onpyeong_emg')     return [2800, 1250]; // 온평어촌계
+    if (id === 'gujwa_emg')        return [2580, 500];  // 구좌읍사무소
+    if (id === 'pyeonghwagyo_emg') return [2380, 1500]; // 평화교
+    if (id === 'namwon_emg')       return [2180, 1650]; // 남원어촌계
+
+    // --- 서부 권역 (신규 및 내륙 보정) ---
+    if (id === 'hyeopjae_tour')    return [720, 950];   // 협재 해수욕장
+    if (id === 'gwakji_tour')      return [1000, 780];  // 곽지 해수욕장
+    if (id === 'panpo_tour')       return [620, 1150];  // 판포포구
+    if (id === 'ongpo_emg')        return [900, 830];   // 옹포항
+    if (id === 'sanbangsan_emg')   return [1100, 1580]; // 산방산
+    if (id === 'sinchang_emg')     return [600, 1300];  // 신창리포구
 
     // fallback: 제주도 중앙 한라산 부근
     return [1720, 1150];
@@ -115,32 +132,40 @@ export function initCCTV() {
     // 마커 클릭 이벤트 위임 (2단계: 전체→지역확대, 확대→CCTV 열기)
     const markersLayer = document.getElementById('cctv-markers-layer');
     if (markersLayer) {
+        console.log('[CCTV] markersLayer found, attaching listener...');
         markersLayer.addEventListener('click', (e) => {
             const marker = e.target.closest('.cctv-marker');
+            console.log('[CCTV] Map Clicked, Target:', e.target.tagName, 'Marker found:', !!marker);
+            
             if (marker) {
+                e.preventDefault();
                 e.stopPropagation();
                 const camId = marker.getAttribute('data-id');
                 const isMini = marker.classList.contains('is-mini');
+                console.log('[CCTV] Marker Clicked ID:', camId, 'isMini:', isMini);
+                
                 if (isMini) {
-                    // 1단계: 전체보기 → 해당 지역 확대
+                    console.log('[CCTV] Action: Zooming into region');
                     const cam = CONFIG.CCTV.find(c => c.id === camId);
                     if (cam) filterByRegion(cam.category);
                 } else {
-                    // 2단계: 확대된 상태 → CCTV 카드 열기
+                    console.log('[CCTV] Action: Opening CCTV Card');
                     window.openCctvCard(camId);
                 }
             }
-        });
+        }, true); // useCapture를 true로 설정하여 버블링 간섭 최소화
+    } else {
+        console.error('[CCTV] markersLayer NOT found during init');
     }
 
-    // 전역 함수 연결 (HTML onclick 대응)
+    // 전역 함수 연결 (HTML onclick 및 외부 접근 용)
     window.filterByRegion = (region, event) => {
         if (event) event.stopPropagation();
         filterByRegion(region);
     };
     window.openCctvCard = openCctvCard;
     window.closeCctvCard = closeCctvCard;
-    window.openCctvModal = openCctvModal; // 이전 버전 호환성 유지
+    window.openCctvModal = openCctvModal;
     window.openCctvModalById = openCctvModalById;
 }
 
@@ -148,11 +173,15 @@ export function initCCTV() {
  * 이전 버전 호환성 및 전역 접근을 위한 익스포트
  */
 export function openCctvModalById(id) {
+    console.log('[CCTV] openCctvModalById called:', id);
     openCctvCard(id);
 }
 
 export function openCctvModal(cam) {
-    if (cam && cam.id) openCctvCard(cam.id);
+    if (cam && cam.id) {
+        console.log('[CCTV] openCctvModal called for cam object:', cam.id);
+        openCctvCard(cam.id);
+    }
 }
 
 /**
@@ -166,7 +195,10 @@ export function renderMarkers(region = 'all') {
 
     const filtered = region === 'all' 
         ? CONFIG.CCTV.filter(c => c.category !== 'hallasan') 
-        : CONFIG.CCTV.filter(c => c.category === region);
+        : CONFIG.CCTV.filter(c => {
+            if (region === 'east') return c.category === 'east' || c.category === 'udo';
+            return c.category === region;
+        });
 
     filtered.forEach(cam => {
         let x, y;
@@ -284,24 +316,33 @@ function animateZoom(region) {
  * CCTV 상세 카드 열기 (영상 재생)
  */
 export function openCctvCard(id) {
+    console.log('[CCTV] --- openCctvCard Init --- ID:', id);
     const cam = CONFIG.CCTV.find(c => c.id === id);
-    if (!cam) return;
+    
+    if (!cam) {
+        console.error('[CCTV] Camera data NOT found for ID:', id);
+        return;
+    }
 
-    console.log('[CCTV] Opening Card for:', cam.nameCn);
+    console.log('[CCTV] Target CCTV:', cam.nameCn, 'URL Type:', cam.type, 'Port:', cam.port);
     const card = document.getElementById('cctv-detail-card');
     const nameEl = document.getElementById('cctv-target-name');
     const videoEl = document.getElementById('cctv-live-video');
 
     if (!card || !nameEl || !videoEl) {
-        console.error('[CCTV] Card elements not found');
+        console.error('[CCTV] Critical UI elements missing! Card:', !!card, 'NameEl:', !!nameEl, 'VideoEl:', !!videoEl);
         return;
     }
 
     nameEl.textContent = cam.nameCn;
     card.classList.add('show');
     card.style.display = 'flex';
+    console.log('[CCTV] Modal Card Displayed (flex + show)');
     
-    if (window.pushModalState) window.pushModalState();
+    if (window.pushModalState) {
+        console.log('[CCTV] Pushing history state for modal');
+        window.pushModalState();
+    }
 
     // 이전 스트림 정지
     if (currentHls) {
@@ -386,10 +427,15 @@ export function initHlsPlayer(streamUrl, videoId) {
 
     let proxiedUrl = streamUrl;
     if (!isCorsFriendly) {
-        // 1935 포트 또는 8080 포트가 포함되어 있고 외부 프록시가 설정된 경우 외부 프록시 사용 (Cloudflare 제한 우회)
-        if ((streamUrl.includes(':1935') || streamUrl.includes(':8080')) && CONFIG.EXTERNAL_PROXY_URL) {
+        // 1935 포트는 클라우드플레어가 차단하므로 외부 전용 프록시 사용
+        if (streamUrl.includes(':1935') && CONFIG.EXTERNAL_PROXY_URL) {
             proxiedUrl = `${CONFIG.EXTERNAL_PROXY_URL}${encodeURIComponent(streamUrl)}`;
-        } else {
+        } 
+        // 8080 포트는 클라우드플레어 워커에서 직접 호출 가능하므로 내부 프록시로 돌려 비용 절감
+        else if (streamUrl.includes(':8080')) {
+            proxiedUrl = `${CONFIG.PROXY_URL}/api/public-data?url=${encodeURIComponent(streamUrl)}`;
+        }
+        else {
             // 기본 Cloudflare 프록시 사용 (80, 443 포트 등 표준)
             proxiedUrl = streamUrl.includes(CONFIG.PROXY_URL) 
                 ? streamUrl 

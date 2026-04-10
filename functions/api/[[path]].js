@@ -21,7 +21,8 @@ export async function onRequest(context) {
     '119.65.216.155',       // 한라산 CCTV 스트리밍 서버 IP
     'hallacctv.kr',         // 한라산 CCTV 스트리밍 서버 (Root)
     'www.hallacctv.kr',     // 한라산 CCTV 스트리밍 서버 (Sub)
-    '1.245.193.152'         // 성산 지역 CCTV 스트리밍 서버
+    '1.245.193.152',        // 성산 지역 CCTV 스트리밍 서버
+    '59.8.86.94'            // 방재 시스템 CCTV 스트리밍 서버 (8080 포트)
   ];
 
   const ALLOWED_ORIGIN = '*';
