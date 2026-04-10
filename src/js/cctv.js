@@ -285,7 +285,7 @@ export function openCctvCard(id) {
 
     nameEl.textContent = cam.nameCn;
     card.classList.add('show');
-    card.style.display = 'block';
+    card.style.display = 'flex';
     
     if (window.pushModalState) window.pushModalState();
 
