@@ -30,3 +30,4 @@ execution/debug_crawl.png
 *.png
 !public/assets/*.png
 !public/assets/*.webp
+.vercel
