@@ -10,6 +10,8 @@ export const CONFIG = {
     CCTV: [
         // --- 북부 / 제주시 권역 ---
         { id: 'tapdong_emg', category: 'jeju', nameKo: '탑동', nameCn: '塔洞', type: 'hls', url: 'http://59.8.86.94:8080/media/api/v1/hls/vurix/192871/100001/0/0', lat: 33.5186, lon: 126.5262 },
+        { id: 'samyang_tour', category: 'jeju', nameKo: '삼양 해수욕장', nameCn: '三阳海水浴场', type: 'hls', url: 'http://211.114.96.121:1935/jejusi6/11-14.stream/playlist.m3u8', lat: 33.5255, lon: 126.5866 },
+        { id: 'iho_tour', category: 'jeju', nameKo: '이호 해수욕장', nameCn: '梨湖海水浴场', type: 'hls', url: 'http://211.114.96.121:1935/jejusi7/11-30T.stream/playlist.m3u8', lat: 33.4984, lon: 126.4529 },
 
         // --- 남부 / 서귀포 권역 ---
         { id: 'seogwihang_emg', category: 'seogwipo', nameKo: '서귀항', nameCn: '西归浦港', type: 'hls', url: 'http://59.8.86.94:8080/media/api/v1/hls/vurix/192871/100009/0/0', lat: 33.2425, lon: 126.5645 },
@@ -18,12 +20,21 @@ export const CONFIG = {
         { id: 'jungmun_emg', category: 'seogwipo', nameKo: '중문해수욕장', nameCn: '中文海水浴场', type: 'hls', url: 'http://59.8.86.94:8080/media/api/v1/hls/vurix/192871/100010/0/0', lat: 33.2464, lon: 126.4137 },
 
         // --- 동부 권역 ---
+        { id: 'seongsan_tour', category: 'east', nameKo: '성산 일출봉', nameCn: '城山日出峰', type: 'hls', url: 'http://123.140.197.51/stream/34/play.m3u8', lat: 33.4586, lon: 126.9421 },
+        { id: 'sanhang_tour', category: 'east', nameKo: '성산항', nameCn: '城山港', type: 'hls', url: 'http://211.34.191.215:1935/live/1-140.stream/playlist.m3u8', lat: 33.4735, lon: 126.9332 },
+        { id: 'cheonjin_udo', category: 'udo', nameKo: '우도 천진항', nameCn: '牛岛天津港', type: 'hls', url: 'http://211.114.96.121:1935/jejusi7/11-24.stream/playlist.m3u8', lat: 33.4965, lon: 126.9535 },
+        { id: 'haumok_udo', category: 'udo', nameKo: '우도 하우목동항', nameCn: '牛岛下牛木洞港', type: 'hls', url: 'http://211.114.96.121:1935/jejusi7/11-23.stream/playlist.m3u8', lat: 33.5105, lon: 126.9432 },
+        { id: 'hamdeok_tour', category: 'east', nameKo: '함덕 해수욕장', nameCn: '咸德海水浴场', type: 'hls', url: 'http://211.114.96.121:1935/jejusi6/11-19.stream/playlist.m3u8', lat: 33.5434, lon: 126.6692 },
+        { id: 'woljeong_tour', category: 'east', nameKo: '월정리 해수욕장', nameCn: '月汀里海水浴场', type: 'hls', url: 'http://211.114.96.121:1935/jejusi7/11-21.stream/playlist.m3u8', lat: 33.5562, lon: 126.7958 },
         { id: 'onpyeong_emg', category: 'east', nameKo: '온평어촌계', nameCn: '温平渔村', type: 'hls', url: 'http://59.8.86.94:8080/media/api/v1/hls/vurix/192871/100011/0/0', lat: 33.4079, lon: 126.9085 },
         { id: 'gujwa_emg', category: 'east', nameKo: '구좌읍사무소', nameCn: '旧左邑事务所', type: 'hls', url: 'http://59.8.86.94:8080/media/api/v1/hls/vurix/192871/100002/0/0', lat: 33.5152, lon: 126.8530 },
         { id: 'pyeonghwagyo_emg', category: 'east', nameKo: '평화교', nameCn: '平和桥', type: 'hls', url: 'http://59.8.86.94:8080/media/api/v1/hls/vurix/192871/100013/0/0', lat: 33.3283, lon: 126.8158 },
-        { id: 'namwon_emg', category: 'east', nameKo: '남원어촌계', nameCn: '南元渔村', type: 'hls', url: 'http://59.8.86.94:8080/media/api/v1/hls/vurix/192871/100006/0/0', lat: 33.2754, lon: 126.7118 },
+        { id: 'namwon_emg', category: 'east', nameKo: '남원어촌계', nameCn: '남원渔村', type: 'hls', url: 'http://59.8.86.94:8080/media/api/v1/hls/vurix/192871/100006/0/0', lat: 33.2754, lon: 126.7118 },
 
         // --- 서부 권역 ---
+        { id: 'hyeopjae_tour', category: 'west', nameKo: '협재 해수욕장', nameCn: '挟才海水浴场', type: 'hls', url: 'http://211.114.96.121:1935/jejusi6/11-17.stream/playlist.m3u8', lat: 33.3934, lon: 126.2392 },
+        { id: 'gwakji_tour', category: 'west', nameKo: '곽지 해수욕장', nameCn: '郭支海水浴场', type: 'hls', url: 'http://211.114.96.121:1935/jejusi6/11-16.stream/playlist.m3u8', lat: 33.4515, lon: 126.3105 },
+        { id: 'panpo_tour', category: 'west', nameKo: '판포포구', nameCn: '板浦浦口', type: 'hls', url: 'http://211.114.96.121:1935/jejusi6/11-18.stream/playlist.m3u8', lat: 33.3615, lon: 126.2005 },
         { id: 'ongpo_emg', category: 'west', nameKo: '옹포항', nameCn: '瓮浦港', type: 'hls', url: 'http://59.8.86.94:8080/media/api/v1/hls/vurix/192871/100005/0/0', lat: 33.3965, lon: 126.2415 },
         { id: 'sanbangsan_emg', category: 'west', nameKo: '산방산', nameCn: '山房山', type: 'hls', url: 'http://59.8.86.94:8080/media/api/v1/hls/vurix/192871/100012/0/0', lat: 33.2355, lon: 126.3129 },
         { id: 'sinchang_emg', category: 'west', nameKo: '신창리포구', nameCn: '新昌里浦口', type: 'hls', url: 'http://59.8.86.94:8080/media/api/v1/hls/vurix/192871/100004/0/0', lat: 33.3524, lon: 126.1774 }
