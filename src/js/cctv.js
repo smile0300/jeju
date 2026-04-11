@@ -77,35 +77,35 @@ function projectLatLonToMap(lat, lon, id = '') {
     if (id === 'H_seongpanak') return [1850, 1180];
 
     // --- 북부 / 제주시 권역 (내륙 보정) ---
-    if (id === 'tapdong_emg')      return [1730, 560];  // 제주시 탑동
-    if (id === 'samyang_tour')     return [1950, 580];  // 삼양 해수욕장
-    if (id === 'iho_tour')         return [1550, 610];  // 이호 해수욕장
+    if (id === 'tapdong_emg')      return [1730, 520];  // 제주시 탑동 (해안선 맞춤)
+    if (id === 'samyang_tour')     return [1950, 485];  // 삼양 해수욕장해안
+    if (id === 'iho_tour')         return [1580, 520];  // 이호 해수욕장해안
 
     // --- 남부 / 서귀포 권역 (내륙 보정) ---
-    if (id === 'seogwihang_emg')   return [1810, 1740]; // 서귀포항
-    if (id === 'beophwan_p_emg')   return [1600, 1770]; // 법환포구
-    if (id === 'beophwan_v_emg')   return [1600, 1790]; // 법환어촌계
-    if (id === 'jungmun_emg')      return [1350, 1640]; // 중문해수욕장
+    if (id === 'seogwihang_emg')   return [1810, 1810]; // 서귀포항해안
+    if (id === 'beophwan_p_emg')   return [1550, 1830]; // 법환포구해안
+    if (id === 'beophwan_v_emg')   return [1530, 1830]; // 법환어촌계해안
+    if (id === 'jungmun_emg')      return [1350, 1715]; // 중문해수욕장해안
 
     // --- 동부 권역 (신규 및 내륙 보정) ---
-    if (id === 'seongsan_tour')    return [3050, 1050]; // 성산 일출봉
-    if (id === 'sanhang_tour')     return [3000, 1000]; // 성산항
+    if (id === 'seongsan_tour')    return [3230, 760];  // 성산 일출봉
+    if (id === 'sanhang_tour')     return [3200, 720];  // 성산항
     if (id === 'cheonjin_udo')     return [3270, 560];  // 우도 천진항
     if (id === 'haumok_udo')       return [3230, 560];  // 우도 하우목동항
     if (id === 'hamdeok_tour')     return [2145, 470];  // 함덕 해수욕장
     if (id === 'woljeong_tour')    return [2520, 410];  // 월정리 해수욕장
-    if (id === 'onpyeong_emg')     return [2800, 1250]; // 온평어촌계
-    if (id === 'gujwa_emg')        return [2580, 415];  // 구좌읍사무소
-    if (id === 'pyeonghwagyo_emg') return [2380, 1500]; // 평화교
-    if (id === 'namwon_emg')       return [2180, 1650]; // 남원어촌계
+    if (id === 'onpyeong_emg')     return [2900, 1150]; // 온평어촌계해안
+    if (id === 'gujwa_emg')        return [2580, 400];  // 구좌읍사무소 -> 세화해변 맞춤
+    if (id === 'pyeonghwagyo_emg') return [2400, 1600]; // 평화교 -> 남원쪽 해안
+    if (id === 'namwon_emg')       return [2180, 1710]; // 남원어촌계해안
 
     // --- 서부 권역 (신규 및 내륙 보정) ---
-    if (id === 'hyeopjae_tour')    return [720, 950];   // 협재 해수욕장
-    if (id === 'gwakji_tour')      return [1000, 780];  // 곽지 해수욕장
-    if (id === 'panpo_tour')       return [620, 1150];  // 판포포구
-    if (id === 'ongpo_emg')        return [900, 830];   // 옹포항
-    if (id === 'sanbangsan_emg')   return [1100, 1580]; // 산방산
-    if (id === 'sinchang_emg')     return [600, 1300];  // 신창리포구
+    if (id === 'hyeopjae_tour')    return [830, 830];   // 협재 해수욕장해안
+    if (id === 'gwakji_tour')      return [1065, 690];  // 곽지 해수욕장해안
+    if (id === 'panpo_tour')       return [665, 1000];  // 판포포구해안
+    if (id === 'ongpo_emg')        return [860, 800];   // 옹포항해안
+    if (id === 'sanbangsan_emg')   return [700, 1600];  // 산방산 -> 사계 해수욕장 근처
+    if (id === 'sinchang_emg')     return [550, 1050];  // 신창리포구해안
 
     // fallback: 제주도 중앙 한라산 부근
     return [1720, 1150];
