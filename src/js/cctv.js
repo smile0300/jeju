@@ -90,12 +90,12 @@ function projectLatLonToMap(lat, lon, id = '') {
     // --- 동부 권역 (신규 및 내륙 보정) ---
     if (id === 'seongsan_tour')    return [3050, 1050]; // 성산 일출봉
     if (id === 'sanhang_tour')     return [3000, 1000]; // 성산항
-    if (id === 'cheonjin_udo')     return [3280, 780];  // 우도 천진항
-    if (id === 'haumok_udo')       return [3260, 750];  // 우도 하우목동항
-    if (id === 'hamdeok_tour')     return [2200, 550];  // 함덕 해수욕장
-    if (id === 'woljeong_tour')    return [2650, 580];  // 월정리 해수욕장
+    if (id === 'cheonjin_udo')     return [3270, 560];  // 우도 천진항
+    if (id === 'haumok_udo')       return [3230, 560];  // 우도 하우목동항
+    if (id === 'hamdeok_tour')     return [2145, 470];  // 함덕 해수욕장
+    if (id === 'woljeong_tour')    return [2520, 410];  // 월정리 해수욕장
     if (id === 'onpyeong_emg')     return [2800, 1250]; // 온평어촌계
-    if (id === 'gujwa_emg')        return [2580, 500];  // 구좌읍사무소
+    if (id === 'gujwa_emg')        return [2580, 415];  // 구좌읍사무소
     if (id === 'pyeonghwagyo_emg') return [2380, 1500]; // 평화교
     if (id === 'namwon_emg')       return [2180, 1650]; // 남원어촌계
 
