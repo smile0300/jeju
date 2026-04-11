@@ -265,7 +265,7 @@ export async function submitLostReport() {
         } catch (je) {
             const rawText = await res.text();
             console.error('API Response Parse error:', je, rawText);
-            throw new Error('服务器响应格式错误 (데이터 형식이 올바르지 않습니다)');
+            throw new Error('服务器响应格式错误');
         }
 
         if (result.result === 'success' || result.status === 'success') {

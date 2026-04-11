@@ -5,6 +5,7 @@ import { fetchHallasanStatus } from './hallasan.js';
 import { fetchFlights } from './airport.js';
 import { fetchFoundGoods } from './lost-found.v1.js';
 import { fetchFestivals } from './festival.js';
+import { initReward } from './reward.js';
 import { getSkyInfo } from './utils.js';
 
 export function showSection(sectionId, pushHistory = true) {
@@ -26,6 +27,7 @@ export function showSection(sectionId, pushHistory = true) {
     }
     if (sectionId === 'lost-found') fetchFoundGoods();
     if (sectionId === 'festival') fetchFestivals();
+    if (sectionId === 'reward') initReward();
 
     if (pushHistory) {
         const path = sectionId === 'home' ? '/' : `/${sectionId}`;

@@ -249,6 +249,32 @@ export async function onRequest(context) {
     }
   }
 
+  // 3.1 /api/reward-list (GET) [NEW]
+  if (pathname === '/api/reward-list' && request.method === 'GET') {
+    try {
+      const gasUrl = env.GAS_URL || env.SECRET_GAS_URL;
+      if (!gasUrl) {
+        // GAS_URL이 설정되지 않은 경우 빈 배열 반환 (기본값 대응)
+        return new Response(JSON.stringify([]), {
+          headers: { 'Access-Control-Allow-Origin': ALLOWED_ORIGIN, 'Content-Type': 'application/json' }
+        });
+      }
+
+      // GAS Script는 GET 요청 시 시트 데이터를 반환하도록 설계됨
+      const gasResponse = await fetch(gasUrl, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' }
+      });
+
+      const result = await gasResponse.text();
+      return new Response(result, {
+        headers: { 'Access-Control-Allow-Origin': ALLOWED_ORIGIN, 'Content-Type': 'application/json' }
+      });
+    } catch (e) {
+      return new Response(JSON.stringify({ error: e.message }), { status: 500 });
+    }
+  }
+
   // 4. CCTV HLS 자식 파일(.m3u8, .ts) 프록시 처리
   if (pathname.endsWith('.m3u8') || pathname.endsWith('.ts')) {
     const referer = request.headers.get('Referer');

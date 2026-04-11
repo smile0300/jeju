@@ -17,6 +17,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="stylesheet" href="src/css/sections.css">
     <link rel="stylesheet" href="src/css/hallasan-dashboard.css">
     <link rel="stylesheet" href="src/css/cctv.css">
+    <link rel="stylesheet" href="src/css/reward.css">
     <script>
         // Global fallback stubs to prevent ReferenceError before modules load
         window.showSection = window.showSection || (() => { });
@@ -38,6 +39,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         window.closeCctvModal = window.closeCctvModal || (() => { });
         window.closeLostDetailModal = window.closeLostDetailModal || (() => { });
         window.handleLostImageChange = window.handleLostImageChange || (() => { });
+        window.openRewardDetail = window.openRewardDetail || (() => { });
+        window.closeRewardDetailModal = window.closeRewardDetailModal || (() => { });
+        window.applyRewardMission = window.applyRewardMission || (() => { });
+        window.closeRewardWechatModal = window.closeRewardWechatModal || (() => { });
 
         // Mobile global error handler for debugging
         window.onerror = function(msg, url, lineNo, columnNo, error) {
@@ -59,11 +64,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
         // CORS detection for local file protocol
         if (window.location.protocol === 'file:') {
-            console.warn('⚠️ 济州旅行秘书: 检测到正在通过 file:// 协议访问。由于浏览器 CORS 安全策略，ES 模块(JS)可能无法加载。建议使用 VS Code Live Server 或 Local Web Server。');
+            console.warn('⚠️ 济州岛实时: 检测到正在通过 file:// 协议访问。由于浏览器 CORS 安全策略，ES 模块(JS)可能无法加载。建议使用 VS Code Live Server 或本地 Web 服务器。');
             window.addEventListener('load', () => {
                 setTimeout(() => {
                     if (window.showSection.toString().includes('() => { }') || window.showSection.toString().includes('()=>{}')) {
-                        const msg = '❌ 脚本加载失败: 浏览器阻止了本地 JS 模块的加载。\n\n解决办法:\n1. 使用 VS Code 의 "Live Server" 插件运行\n2. 或者在终端运行 "python -m http.server"\n3. 然后通过 http://localhost... 访问';
+                        const msg = '❌ 脚本加载失败: 浏览器阻止了本地 JS 模块的加载。\n\n解决办法:\n1. 请使用 VS Code 的 "Live Server" 插件运行\n2. 或者在终端运行 "python -m http.server"\n3. 然后通过 http://localhost... 访问';
                         console.error(msg);
                         alert(msg);
                     }
