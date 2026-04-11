@@ -78,14 +78,16 @@ export async function fetchFoundGoods() {
         const [polItems, portalItems] = await Promise.all([fetchResults(polUrl), fetchResults(portalUrl)]);
         const allItems = [...polItems, ...portalItems]
             .sort((a, b) => b.date.localeCompare(a.date));
-        // 이미지가 있고, 플레이스홀더(이미지 준비중)가 아닌 항목만 표시
-        const items = allItems.filter(item => item.img && item.img.trim() !== '' && !item.img.includes('img02_no_img.gif'));
+        cachedLostItems = allItems;
+        const hasImgCount = allItems.filter(item => item.img && item.img.trim() !== '' && !item.img.includes('img02_no_img.gif')).length;
+        if (countDisplay) countDisplay.innerHTML = `共查询到 <strong>${allItems.length}</strong> 件物品 (含图片 ${hasImgCount} 件)。`;
 
-        cachedLostItems = items;
-        if (countDisplay) countDisplay.innerHTML = `共查询到 <strong>${items.length}</strong> 件含图片的物品。`;
-
-        if (currentLostView === 'card') renderLostGoods(grid, items);
-        else renderLostGoodsTable(items);
+        if (currentLostView === 'card') {
+            const cardItems = allItems.filter(item => item.img && item.img.trim() !== '' && !item.img.includes('img02_no_img.gif'));
+            renderLostGoods(grid, cardItems);
+        } else {
+            renderLostGoodsTable(allItems);
+        }
     } catch (e) {
         console.error('Lost & Found API Error:', e);
         const countDisplay = document.getElementById('lost-result-count');
@@ -106,8 +108,12 @@ export function switchLostView(mode) {
     grid?.classList.toggle('active', mode === 'card');
     tableContainer?.classList.toggle('active', mode === 'table');
 
-    if (mode === 'card') renderLostGoods(grid, cachedLostItems);
-    else renderLostGoodsTable(cachedLostItems);
+    if (mode === 'card') {
+        const cardItems = cachedLostItems.filter(item => item.img && item.img.trim() !== '' && !item.img.includes('img02_no_img.gif'));
+        renderLostGoods(grid, cardItems);
+    } else {
+        renderLostGoodsTable(cachedLostItems);
+    }
 }
 
 export function renderLostGoods(grid, items) {

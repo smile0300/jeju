@@ -60,7 +60,7 @@ export function renderRewardList() {
     listContainer.innerHTML = REWARD_DATA_CACHED.map((item) => `
         <div class="reward-card" onclick="applyRewardMission()">
             <div class="reward-img-side">
-                <img src="${item.imageUrl}" alt="${item.title}" onerror="this.src='https://placehold.co/100x130?text=No+Image'">
+                <img src="${item.imageUrl}" alt="${item.title}" onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22100%22%20height%3D%22130%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20130%22%3E%3Crect%20width%3D%22100%22%20height%3D%22130%22%20fill%3D%22%23f3f4f6%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-size%3D%2214%22%20text-anchor%3D%22middle%22%20alignment-baseline%3D%22middle%22%20fill%3D%22%239ca3af%22%3ENo%20Image%3C%2Ftext%3E%3C%2Fsvg%3E'">
             </div>
             <div class="reward-content-side">
                 <h4 class="reward-item-name">${item.title}</h4>
