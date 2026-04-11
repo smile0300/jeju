@@ -1090,4 +1090,19 @@
 .jeju-region { pointer-events: auto; }
 .jeju-region.active { filter: url(#region-outline); }
 
+/* Lost & Found Status Tag */
+.lost-status-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    background: #f1f5f9;
+    color: #64748b;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+.lost-status-tag.active {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
 
