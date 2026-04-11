@@ -161,6 +161,53 @@ export async function onRequest(context) {
         }
       }
 
+      // M3U8 스트림의 경우, 재생 목록의 상대 경로를 프록시 타겟으로 Rewrite 해준다
+      const contentType = response.headers.get('content-type') || '';
+      const isM3U8Response = contentType.includes('application/vnd.apple.mpegurl') || 
+                             contentType.includes('audio/mpegurl') || 
+                             targetUrlString.toLowerCase().includes('.m3u8');
+
+      if (isM3U8Response) {
+        const sourceText = await response.text();
+        const isActuallyM3U8 = sourceText.trim().startsWith('#EXTM3U');
+        
+        if (isActuallyM3U8 || targetUrlString.toLowerCase().includes('.m3u8')) {
+          const proxyBaseUrl = new URL(request.url);
+          const proxyBase = proxyBaseUrl.origin + '/api/public-data?url=';
+          
+          const lines = sourceText.split('\n');
+          const rewrittenLines = lines.map(line => {
+            const trimmedLine = line.trim();
+            // 주석/헤더가 아닌 실제 세그먼트/하위 목록 경로 처리
+            if (trimmedLine.length > 0 && !trimmedLine.startsWith('#')) {
+              let absoluteUrl;
+              try {
+                // targetUrlString을 Base로 사용하여 상대 경로를 완벽한 절대 주소로 해석
+                absoluteUrl = new URL(trimmedLine, targetUrlString).href;
+              } catch (e) {
+                const baseUrl = targetUrlString.substring(0, targetUrlString.lastIndexOf('/') + 1);
+                absoluteUrl = baseUrl + trimmedLine;
+              }
+              // 프록시 주소로 감싸서 리턴
+              return `${proxyBase}${encodeURIComponent(absoluteUrl)}`;
+            }
+            return line;
+          });
+
+          newHeaders.set('Content-Type', 'application/vnd.apple.mpegurl');
+          return new Response(rewrittenLines.join('\n'), {
+            status: response.status,
+            headers: newHeaders
+          });
+        }
+        
+        // Content-Type 낚시이거나 내용이 M3U8이 아닐 경우 그대로 리턴
+        return new Response(sourceText, {
+          status: response.status,
+          headers: newHeaders
+        });
+      }
+
       return new Response(response.body, {
         status: response.status,
         headers: newHeaders
@@ -275,41 +322,7 @@ export async function onRequest(context) {
     }
   }
 
-  // 4. CCTV HLS 자식 파일(.m3u8, .ts) 프록시 처리
-  if (pathname.endsWith('.m3u8') || pathname.endsWith('.ts')) {
-    const referer = request.headers.get('Referer');
-    if (referer) {
-      try {
-        const refUrl = new URL(referer);
-        const originalUrl = refUrl.searchParams.get('url');
-        if (originalUrl) {
-          const baseUrl = new URL(originalUrl);
-          const parentPath = baseUrl.origin + baseUrl.pathname.substring(0, baseUrl.pathname.lastIndexOf('/') + 1);
-          const finalFullUrl = parentPath + pathname.substring(pathname.lastIndexOf('/') + 1);
-
-          const res = await fetch(finalFullUrl);
-          
-          // 헤더 재구성 (500 에러 방지)
-          const hlsHeaders = new Headers();
-          hlsHeaders.set('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
-          
-          for (const [key, value] of res.headers.entries()) {
-            const lowerKey = key.toLowerCase();
-            if (lowerKey !== 'content-encoding' && 
-                lowerKey !== 'content-length' && 
-                lowerKey !== 'transfer-encoding') {
-              hlsHeaders.set(key, value);
-            }
-          }
-
-          return new Response(res.body, {
-            status: res.status,
-            headers: hlsHeaders
-          });
-        }
-      } catch (e) {}
-    }
-  }
+  // (4번 HLS 프록시 섹션은 상대경로 변환(Rewrite) 로직으로 대체되어 완전히 삭제되었습니다.)
 
   return new Response('Not Found', { status: 404 });
 }
