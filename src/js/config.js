@@ -29,7 +29,7 @@ export const CONFIG = {
         { id: 'onpyeong_emg', category: 'east', nameKo: '온평어촌계', nameCn: '温平渔村', type: 'hls', url: 'http://59.8.86.94:8080/media/api/v1/hls/vurix/192871/100011/0/0', lat: 33.4079, lon: 126.9085 },
         { id: 'gujwa_emg', category: 'east', nameKo: '구좌읍사무소', nameCn: '旧左邑事务所', type: 'hls', url: 'http://59.8.86.94:8080/media/api/v1/hls/vurix/192871/100002/0/0', lat: 33.5152, lon: 126.8530 },
         { id: 'pyeonghwagyo_emg', category: 'east', nameKo: '평화교', nameCn: '平和桥', type: 'hls', url: 'http://59.8.86.94:8080/media/api/v1/hls/vurix/192871/100013/0/0', lat: 33.3283, lon: 126.8158 },
-        { id: 'namwon_emg', category: 'east', nameKo: '남원어촌계', nameCn: '남원渔村', type: 'hls', url: 'http://59.8.86.94:8080/media/api/v1/hls/vurix/192871/100006/0/0', lat: 33.2754, lon: 126.7118 },
+        { id: 'namwon_emg', category: 'east', nameKo: '남원어촌계', nameCn: '南元渔村', type: 'hls', url: 'http://59.8.86.94:8080/media/api/v1/hls/vurix/192871/100006/0/0', lat: 33.2754, lon: 126.7118 },
 
         // --- 서부 권역 ---
         { id: 'hyeopjae_tour', category: 'west', nameKo: '협재 해수욕장', nameCn: '挟才海水浴场', type: 'hls', url: 'http://211.114.96.121:1935/jejusi6/11-17.stream/playlist.m3u8', lat: 33.3934, lon: 126.2392 },

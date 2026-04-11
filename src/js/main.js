@@ -7,6 +7,7 @@ import { renderHallasanDashboard } from './hallasan-dashboard.js';
 import { fetchFlights, switchFlightTab } from './airport.js';
 import { fetchFoundGoods, switchLostView, openLostDetailModalByIndex, openLostReportModal, handleLostImageChange, submitLostReport, showWechatQR } from './lost-found.v1.js';
 import { fetchFestivals, selectFestivalMonth, initMonthFilter } from './festival.js';
+import { initReward } from './reward.js';
 import { showSection, openWechatQR, closeWechatQR, openFeatureModal, closeFeatureModal, submitFeatureRequest, copyWechatId, openWeatherSummaryModal, closeWeatherSummaryModal, openShareModal, closeShareModal, shareToPlatform } from './ui.js';
 
 
@@ -102,7 +103,8 @@ const ROUTE_MAP = {
     '/hallasan': 'hallasan',
     '/airport': 'airport',
     '/festival': 'festival',
-    '/lost-found': 'lost-found'
+    '/lost-found': 'lost-found',
+    '/reward': 'reward'
 };
 
 function handleRouting() {
@@ -154,6 +156,7 @@ window.addEventListener('load', () => {
     fetchFoundGoods();
     initMonthFilter();
     fetchFestivals();
+    initReward();
     
     // 초기 로딩 시 URL에 맞는 페이지 열기
     handleRouting();
