@@ -3,7 +3,7 @@
     <header class="app-bar">
         <button class="back-btn" onclick="showSection('home')">←</button>
         <h2 class="bar-title">💰 赏金任务</h2>
-        <button class="header-action-btn" onclick="publishRewardMission()">发布</button>
+        <button class="header-action-btn" onclick="publishRewardMission()">등록문의</button>
     </header>
 
     <div class="section">
@@ -18,18 +18,3 @@
         </div>
     </div>
 </section>
-
-<!-- Reward Detail Modal - Removed as per request (direct to WeChat) -->
-
-<!-- WeChat QR Modal -->
-<div id="reward-wechat-modal" class="modal-overlay" style="display: none;">
-    <div class="modal-content wechat-qr-content">
-        <button class="modal-close" onclick="closeRewardWechatModal()">✕</button>
-        <h3 class="wechat-title">扫码联系管理员</h3>
-        <p class="wechat-desc">请扫描下方二维码 or 添加微信号：<br><strong id="reward-wechat-id">JEJULIVE_ADMIN</strong></p>
-        <div class="wechat-qr-box">
-            <img src="assets/img/wechat-qr.png" alt="WeChat QR" onerror="this.src='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=JEJULIVE_ADMIN'">
-        </div>
-        <button class="copy-btn" onclick="copyRewardWechatId()">复制微信号</button>
-    </div>
-</div>
