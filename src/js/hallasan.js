@@ -117,16 +117,24 @@ export async function fetchHallasanStatus() {
 }
 
 /**
+ * 한라산 전용 CCTV 데이터 (별도로 관리)
+ */
+const HALLASAN_CCTV = [
+    { id: 'baengnokdam', nameKo: '백록담', nameCn: '白鹿潭', url: 'http://119.65.216.155:1935/live/cctv01.stream_360p/playlist.m3u8' },
+    { id: 'wanggwalleung', nameKo: '왕관릉', nameCn: '王冠陵', url: 'http://119.65.216.155:1935/live/cctv02.stream_360p/playlist.m3u8' },
+    { id: 'witseoreum', nameKo: '윗세오름', nameCn: '威势岳', url: 'http://119.65.216.155:1935/live/cctv03.stream_360p/playlist.m3u8' },
+    { id: 'eoseungsaengak', nameKo: '어승생악', nameCn: '御乘生岳', url: 'http://119.65.216.155:1935/live/cctv04.stream_360p/playlist.m3u8' },
+    { id: '1100doro', nameKo: '1100고지', nameCn: '1100高地', url: 'http://119.65.216.155:1935/live/cctv05.stream_360p/playlist.m3u8' }
+];
+
+/**
  * 한라산 전용 CCTV 5종 렌더링
  */
 export function renderHallasanCCTV() {
     const grid = document.getElementById('hallasan-cctv-grid');
     if (!grid) return;
 
-    // 한라산 전용 5종만 필터링 (placeholder 제외)
-    const hallasanCams = CONFIG.CCTV.filter(cam => cam.category === 'hallasan' && cam.url && !cam.url.includes('placeholder'));
-
-    grid.innerHTML = hallasanCams.map(cam => `
+    grid.innerHTML = HALLASAN_CCTV.map(cam => `
         <div class="cctv-card" onclick="toggleFullscreen('hallasan-video-${cam.id}')" style="cursor: pointer;">
             <div class="cctv-video-container">
                 <video id="hallasan-video-${cam.id}" class="cctv-video-el" muted playsinline autoplay></video>
@@ -138,9 +146,9 @@ export function renderHallasanCCTV() {
         </div>
     `).join('');
 
-    // 비디오 요소가 DOM에 완전히 붙은 후에 HLS 초기화를 진행 (안정성 확보)
+    // 비디오 요소가 DOM에 완전히 붙은 후에 HLS 초기화를 진행
     setTimeout(() => {
-        hallasanCams.forEach(cam => {
+        HALLASAN_CCTV.forEach(cam => {
             if (window.initHlsPlayer) {
                 window.initHlsPlayer(cam.url, `hallasan-video-${cam.id}`);
             }
