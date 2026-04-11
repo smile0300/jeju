@@ -75,29 +75,9 @@ export function renderRewardList() {
 }
 
 window.applyRewardMission = function() {
-    document.getElementById('reward-wechat-modal').style.display = 'flex';
+    if (window.openWechatQR) window.openWechatQR();
 };
 
 window.publishRewardMission = function() {
-    document.getElementById('reward-wechat-modal').style.display = 'flex';
-};
-
-window.closeRewardWechatModal = function() {
-    document.getElementById('reward-wechat-modal').style.display = 'none';
-};
-
-window.copyRewardWechatId = function() {
-    const wechatId = document.getElementById('reward-wechat-id').textContent;
-    navigator.clipboard.writeText(wechatId).then(() => {
-        alert('微信号已复制: ' + wechatId);
-    }).catch(err => {
-        // Fallback
-        const textarea = document.createElement('textarea');
-        textarea.value = wechatId;
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textarea);
-        alert('微信号已复制: ' + wechatId);
-    });
+    if (window.openWechatQR) window.openWechatQR();
 };
