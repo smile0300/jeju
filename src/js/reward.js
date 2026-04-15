@@ -19,6 +19,29 @@ let REWARD_DATA_CACHED = [
     }
 ];
 
+/**
+ * 구글 드라이브 및 다양한 필드명에 대응하는 이미지 URL 추출 헬퍼
+ */
+function resolveImageUrl(item) {
+    if (!item) return '';
+    
+    // 1. 다양한 필드명 후보군 체크 (구글 시트 헤더 다양성 대응)
+    const url = item.imageUrl || item.imageURL || item.image || item.ImageUrl || item['이미지'] || item['사진'] || '';
+    
+    if (typeof url !== 'string' || !url.startsWith('http')) return '';
+
+    // 2. 구글 드라이브 공유 링크 -> 이미지 전용 URL 변환
+    if (url.includes('drive.google.com')) {
+        const driveMatch = url.match(/\/d\/([^\/]+)/) || url.match(/id=([^\&]+)/);
+        if (driveMatch && driveMatch[1]) {
+            // uc?export=view 가 가장 범용적임
+            return `https://drive.google.com/uc?export=view&id=${driveMatch[1]}`;
+        }
+    }
+    
+    return url;
+}
+
 export async function initReward() {
     renderRewardLoading();
     try {
@@ -26,7 +49,6 @@ export async function initReward() {
         if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
         
-        // 데이터가 배열이고 하나 이상의 항목이 있을 때만 업데이트
         if (Array.isArray(data) && data.length > 0) {
             REWARD_DATA_CACHED = data;
         }
@@ -57,21 +79,25 @@ export function renderRewardList() {
         return;
     }
 
-    listContainer.innerHTML = REWARD_DATA_CACHED.map((item) => `
-        <div class="reward-card" onclick="applyRewardMission()">
-            <div class="reward-img-side">
-                <img src="${item.imageUrl}" alt="${item.title}" onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22100%22%20height%3D%22130%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20130%22%3E%3Crect%20width%3D%22100%22%20height%3D%22130%22%20fill%3D%22%23f3f4f6%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-size%3D%2214%22%20text-anchor%3D%22middle%22%20alignment-baseline%3D%22middle%22%20fill%3D%22%239ca3af%22%3ENo%20Image%3C%2Ftext%3E%3C%2Fsvg%3E'">
-            </div>
-            <div class="reward-content-side">
-                <h4 class="reward-item-name">${item.title}</h4>
-                <div class="reward-footer">
-                    <div class="reward-amount">
-                        <small>赏金:</small> ${item.reward} <small>RMB</small>
+    listContainer.innerHTML = REWARD_DATA_CACHED.map((item) => {
+        const displayImageUrl = resolveImageUrl(item);
+        
+        return `
+            <div class="reward-card" onclick="applyRewardMission()">
+                <div class="reward-img-side">
+                    <img src="${displayImageUrl}" alt="${item.title}" onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22100%22%20height%3D%22130%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20130%22%3E%3Crect%20width%3D%22100%22%20height%3D%22130%22%20fill%3D%22%23f3f4f6%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-size%3D%2214%22%20text-anchor%3D%22middle%22%20alignment-baseline%3D%22middle%22%20fill%3D%22%239ca3af%22%3ENo%20Image%3C%2Ftext%3E%3C%2Fsvg%3E'">
+                </div>
+                <div class="reward-content-side">
+                    <h4 class="reward-item-name">${item.title || '赏금 任务'}</h4>
+                    <div class="reward-footer">
+                        <div class="reward-amount">
+                            <small>赏金:</small> ${item.reward || 0} <small>RMB</small>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 window.applyRewardMission = function() {
