@@ -1,5 +1,5 @@
 import { CONFIG } from './config.js';
-// import { initHlsPlayer, openCctvModalById } from './cctv.js'; // 순환 참조 우려 및 로딩 에러 방지를 위해 제거
+import { initHlsPlayer } from './cctv.js'; // 순환 참조 없음: hallasan-dashboard.js → weather.js / cctv.js → hallasan-dashboard.js
 
 export const HALLASAN_TRAILS = [
     { nameKo: '어리목탐방로', nameCn: '御里牧登山路', distanceCn: '6.8km（单程）', timeCn: '约3小时' },
@@ -120,11 +120,11 @@ export async function fetchHallasanStatus() {
  * 한라산 전용 CCTV 데이터 (별도로 관리)
  */
 const HALLASAN_CCTV = [
-    { id: 'baengnokdam', nameKo: '백록담', nameCn: '白鹿潭', url: 'http://119.65.216.155:1935/live/cctv01.stream_360p/playlist.m3u8' },
-    { id: 'wanggwalleung', nameKo: '왕관릉', nameCn: '王冠陵', url: 'http://119.65.216.155:1935/live/cctv02.stream_360p/playlist.m3u8' },
-    { id: 'witseoreum', nameKo: '윗세오름', nameCn: '威势岳', url: 'http://119.65.216.155:1935/live/cctv03.stream_360p/playlist.m3u8' },
-    { id: 'eoseungsaengak', nameKo: '어승생악', nameCn: '御乘生岳', url: 'http://119.65.216.155:1935/live/cctv04.stream_360p/playlist.m3u8' },
-    { id: '1100doro', nameKo: '1100고지', nameCn: '1100高地', url: 'http://119.65.216.155:1935/live/cctv05.stream_360p/playlist.m3u8' }
+    { id: 'baengnokdam', nameKo: '백록담', nameCn: '白鹿潭', url: 'https://hallacctv.kr/live/cctv01.stream_360p/playlist.m3u8' },
+    { id: 'wanggwalleung', nameKo: '왕관릉', nameCn: '王冠陵', url: 'https://hallacctv.kr/live/cctv02.stream_360p/playlist.m3u8' },
+    { id: 'witseoreum', nameKo: '윗세오름', nameCn: '威势岳', url: 'https://hallacctv.kr/live/cctv03.stream_360p/playlist.m3u8' },
+    { id: 'eoseungsaengak', nameKo: '어승생악', nameCn: '御乘生岳', url: 'https://hallacctv.kr/live/cctv04.stream_360p/playlist.m3u8' },
+    { id: '1100doro', nameKo: '1100고지', nameCn: '1100高地', url: 'https://hallacctv.kr/live/cctv05.stream_360p/playlist.m3u8' }
 ];
 
 /**
@@ -149,9 +149,8 @@ export function renderHallasanCCTV() {
     // 비디오 요소가 DOM에 완전히 붙은 후에 HLS 초기화를 진행
     setTimeout(() => {
         HALLASAN_CCTV.forEach(cam => {
-            if (window.initHlsPlayer) {
-                window.initHlsPlayer(cam.url, `hallasan-video-${cam.id}`);
-            }
+            // 직접 import한 initHlsPlayer 사용 (window.initHlsPlayer 타이밍 의존 제거)
+            initHlsPlayer(cam.url, `hallasan-video-${cam.id}`);
         });
     }, 50);
 }
