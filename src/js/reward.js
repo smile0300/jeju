@@ -103,7 +103,7 @@ export function renderRewardList() {
                     <h4 class="reward-item-name">${item.title || '赏금 任务'}</h4>
                     <div class="reward-footer">
                         <div class="reward-amount">
-                            <small>赏金:</small> ${item.reward || 0} <small>RMB</small>
+                            REWARD : ${item.reward || 0} <small>RMB</small>
                         </div>
                     </div>
                 </div>
