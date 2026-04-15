@@ -20,22 +20,33 @@ let REWARD_DATA_CACHED = [
 ];
 
 /**
- * 구글 드라이브 및 다양한 필드명에 대응하는 이미지 URL 추출 헬퍼
+ * 구글 드라이브 및 다양한 필드명에 대응하는 이미지 URL 추출 헬퍼 (v2.1: 대소문자 무시 및 드라이브 파싱 강화)
  */
 function resolveImageUrl(item) {
     if (!item) return '';
-    
-    // 1. 다양한 필드명 후보군 체크 (구글 시트 헤더 다양성 대응)
-    const url = item.imageUrl || item.imageURL || item.image || item.ImageUrl || item['이미지'] || item['사진'] || '';
-    
-    if (typeof url !== 'string' || !url.startsWith('http')) return '';
 
-    // 2. 구글 드라이브 공유 링크 -> 이미지 전용 URL 변환
+    // 1. 대소문자 구분 없이 이미지 관련 필드 찾기
+    const entries = Object.entries(item);
+    // 가장 먼저 정확한 매칭 확인, 없으면 'image'나 '사진', '이미지'가 포함된 키 찾기
+    const imageEntry = entries.find(([k]) => k.toLowerCase() === 'imageurl') || 
+                       entries.find(([k]) => k.toLowerCase() === 'image') ||
+                       entries.find(([k]) => k.toLowerCase().includes('image')) ||
+                       entries.find(([k]) => k.includes('사진') || k.includes('이미지'));
+    
+    let url = imageEntry ? imageEntry[1] : '';
+    
+    if (typeof url !== 'string' || !url.trim().startsWith('http')) return '';
+
+    url = url.trim();
+
+    // 2. 구글 드라이브 공유 링크 -> 이미지 전용 URL 변환 (더 강력한 정규식)
     if (url.includes('drive.google.com')) {
-        const driveMatch = url.match(/\/d\/([^\/]+)/) || url.match(/id=([^\&]+)/);
+        // file/d/ID/view 나 id=ID 형태 모두 추출
+        const driveMatch = url.match(/\/d\/([a-zA-Z0-9_-]{25,})/) || url.match(/[?&]id=([a-zA-Z0-9_-]{25,})/);
         if (driveMatch && driveMatch[1]) {
-            // uc?export=view 가 가장 범용적임
-            return `https://drive.google.com/uc?export=view&id=${driveMatch[1]}`;
+            const fileId = driveMatch[1];
+            // thumbnail 주소가 권한 문제나 용량 문제에서 더 안정적임
+            return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
         }
     }
     
@@ -49,6 +60,8 @@ export async function initReward() {
         if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
         
+        console.log('[Reward] Data received:', data); // 디버깅용 로그
+
         if (Array.isArray(data) && data.length > 0) {
             REWARD_DATA_CACHED = data;
         }
