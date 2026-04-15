@@ -56,17 +56,17 @@
 
 .trust-title {
     color: #fbbf24;
-    font-size: 1.1rem;
-    font-weight: 800;
+    font-size: 1.25rem;
+    font-weight: 900;
     margin-bottom: 4px;
     letter-spacing: -0.5px;
 }
 
 .trust-desc {
     color: #94a3b8;
-    font-size: 0.85rem;
+    font-size: 1rem;
     line-height: 1.5;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 /* Mission List Grid */
@@ -121,8 +121,8 @@
 }
 
 .reward-item-name {
-    font-size: 1.1rem;
-    font-weight: 800;
+    font-size: 1.25rem;
+    font-weight: 900;
     color: var(--text-primary);
     line-height: 1.3;
 }
@@ -216,13 +216,13 @@
 .header-action-btn {
     position: absolute;
     right: 16px;
-    padding: 6px 14px;
+    padding: 6px 16px;
     background: var(--primary-gradient);
     color: white;
     border: none;
-    border-radius: 18px;
-    font-size: 0.85rem;
-    font-weight: 800;
+    border-radius: 20px;
+    font-size: 1rem;
+    font-weight: 900;
     cursor: pointer;
     box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
