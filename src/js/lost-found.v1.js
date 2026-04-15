@@ -126,13 +126,17 @@ export function renderLostGoods(grid, items) {
     }
     const noImgSvg = `data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22300%22%20height%3D%22300%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20300%20300%22%3E%3Crect%20width%3D%22300%22%20height%3D%22300%22%20fill%3D%22%23eee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-size%3D%2220%22%20text-anchor%3D%22middle%22%20alignment-baseline%3D%22middle%22%20fill%3D%22%23aaa%22%3E%E6%9A%82%E6%97%A0%E5%9B%BE%E7%89%87%3C%2Ftext%3E%3C%2Fsvg%3E`;
 
-    grid.innerHTML = items.map((item, index) => `
-        <div class="lost-card gallery-item" onclick="openLostDetailModalByIndex(${index})" style="padding: 0; overflow: hidden; aspect-ratio: 1 / 1;">
+    // cachedLostItems 기준 실제 인덱스를 전달해야 올바른 상세정보가 열림
+    grid.innerHTML = items.map((item) => {
+        const realIndex = cachedLostItems.indexOf(item);
+        return `
+        <div class="lost-card gallery-item" onclick="openLostDetailModalByIndex(${realIndex})" style="padding: 0; overflow: hidden; aspect-ratio: 1 / 1;">
             <div class="lost-img-box" style="width: 100%; height: 100%; margin: 0;">
                 <img src="${item.img || noImgSvg}" alt="${item.name}" onerror="this.src='${noImgSvg}'" style="width: 100%; height: 100%; object-fit: cover;">
                 <div class="lost-category-badge-overlay">${item.category}</div>
             </div>
-        </div>`).join('');
+        </div>`;
+    }).join('');
 }
 
 export function renderLostGoodsTable(items) {
@@ -142,7 +146,10 @@ export function renderLostGoodsTable(items) {
         tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;">该期间内暂无相关记录</td></tr>';
         return;
     }
-    tableBody.innerHTML = items.map((item, index) => `
+    // cachedLostItems 기준 실제 인덱스를 전달해야 올바른 상세정보가 열림
+    tableBody.innerHTML = items.map((item) => {
+        const realIndex = cachedLostItems.indexOf(item);
+        return `
         <tr>
             <td>${item.img ? `<img src="${item.img}" class="lost-table-img" onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2240%22%20height%3D%2240%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2040%2040%22%3E%3Crect%20width%3D%2240%22%20height%3D%2240%22%20fill%3D%22%23eee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-size%3D%228%22%20text-anchor%3D%22middle%22%20alignment-baseline%3D%22middle%22%20fill%3D%22%23aaa%22%3E%E6%9A%82%E6%97%A0%E5%9B%BE%E7%89%87%3C%2Ftext%3E%3C%2Fsvg%3E'">` : '📦'}</td>
             <td><span class="lost-category-badge">${item.category}</span></td>
@@ -151,8 +158,9 @@ export function renderLostGoodsTable(items) {
             <td>${item.date}</td>
             <td>${item.place}</td>
             <td style="font-size: 11px; opacity: 0.7;">${item.id}</td>
-            <td><button onclick="openLostDetailModalByIndex(${index})" class="lost-table-btn">详细</button></td>
-        </tr>`).join('');
+            <td><button onclick="openLostDetailModalByIndex(${realIndex})" class="lost-table-btn">详细</button></td>
+        </tr>`;
+    }).join('');
 }
 
 export function openLostDetailModalByIndex(index) {

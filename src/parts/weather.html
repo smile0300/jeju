@@ -24,6 +24,10 @@
                     <span class="tab-icon">🐄</span>
                     <span class="tab-name">牛岛</span>
                 </button>
+                <button class="location-tab" data-loc="seongsan" onclick="switchWeatherLocation('seongsan')">
+                    <span class="tab-icon">🌅</span>
+                    <span class="tab-name">城山日出峰</span>
+                </button>
             </div>
 
             <div id="weather-content-jeju" class="location-weather active">
@@ -89,6 +93,22 @@
                 </div>
                 <h3 class="cmp-cur-weather-head">空气质量信息</h3>
                 <div id="air-quality-udo" class="air-quality-grid"></div>
+            </div>
+            <div id="weather-content-seongsan" class="location-weather">
+                <div class="current-weather" id="current-weather-seongsan">
+                    <div class="weather-loader">
+                        <div class="weather-spinner"></div>
+                        <div class="weather-loading-text">正在加载信息...</div>
+                    </div>
+                </div>
+                <h3 class="subsection-title">未来10天长期预报</h3>
+                <div class="weekly-grid" id="weekly-seongsan"></div>
+                <h3 class="subsection-title" id="hourly-title-seongsan">当日分时详细预报</h3>
+                <div class="hourly-weather">
+                    <div class="hourly-scroll" id="hourly-seongsan"></div>
+                </div>
+                <h3 class="cmp-cur-weather-head">空气质量信息</h3>
+                <div id="air-quality-seongsan" class="air-quality-grid"></div>
             </div>
         </div>
     </div>

@@ -455,7 +455,12 @@ export function initHlsPlayer(streamUrl, videoId) {
                 // 원본 도메인이 CORS를 지원(예: hallacctv.kr)하면 프록시를 건너뜀
                 const isUrlCorsFriendly = url.includes('hallacctv.kr');
                 if (!isUrlCorsFriendly && url.startsWith('http') && !url.includes(CONFIG.PROXY_URL) && !url.includes('localhost') && !url.includes('vercel.app')) {
-                    xhr.open('GET', `${CONFIG.PROXY_URL}/api/public-data?url=${encodeURIComponent(url)}`, true);
+                    // 1935 포트는 Cloudflare가 차단하므로 외부 프록시(Vercel)로 라우팅
+                    if (url.includes(':1935') && CONFIG.EXTERNAL_PROXY_URL) {
+                        xhr.open('GET', `${CONFIG.EXTERNAL_PROXY_URL}${encodeURIComponent(url)}`, true);
+                    } else {
+                        xhr.open('GET', `${CONFIG.PROXY_URL}/api/public-data?url=${encodeURIComponent(url)}`, true);
+                    }
                 }
             }
         });
