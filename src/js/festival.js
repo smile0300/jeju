@@ -105,7 +105,15 @@ const FESTIVAL_TRANSLATIONS = {
     '제1회 반려견과 함께하는 조수리 \'좋아요런\'': '第一届伴侣犬‘좋아요런’',
     '2026 제주 빵빵런': '2026 济州面包跑',
     '2026 펠롱펠롱 제주올레 글로벌 어린이걷기축제': '2026 闪耀济州偶来全球儿童徒步节',
-    '2026 JFWF 제주푸드앤와인페스티벌': '2026 济州美食艺术与葡萄酒节'
+    '2026 JFWF 제주푸드앤와인페스티벌': '2026 济州美食艺术与葡萄酒节',
+    '에코랜드 좀비 트레인:제주행 리부트': 'ECO Land 僵尸列车：济州行',
+    '판타지 포레스트 With Friends': 'Fantasy Forest 与朋友们',
+    '제주국제관광마라톤축제': '济州国际观光马拉松赛',
+    '제주세계청소년합창축제': '济州世界青少年合唱节',
+    '이호 필터 페스티벌': '梨湖 Filter 庆典',
+    '카멜리아힐 수국 축제': 'Camellia Hill 绣球花节',
+    '컬러풀 산지 페스티벌': '多姿多彩山地川庆典',
+    '서귀포 오페라 페스티벌': '西归浦歌剧节'
 };
 
 const FESTIVAL_IMAGE_MAP = {
@@ -113,7 +121,13 @@ const FESTIVAL_IMAGE_MAP = {
     "기상기후": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202603/25/de292028-ac2f-4d9b-bdf8-e56c1298acf7.webp",
     "모찌공방": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202603/12/1fd4248a-82a5-4c29-85ee-6e31f89aa0ab.jpg",
     "봄줍": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202602/26/d3e6aeec-7888-4600-90a4-a499acb4fde7.webp",
-    "문화가 있는 날": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202603/12/83a0f4bb-5d75-46b2-bad2-ead172b892e4.webp"
+    "문화가 있는 날": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202603/12/83a0f4bb-5d75-46b2-bad2-ead172b892e4.webp",
+    "에코랜드": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202604/10/ec825e12-c750-446e-a972-1a5473e84a30.webp",
+    "판타지 포레스트": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202604/05/8c825e12-c750-446e-a972-1a5473e84a30.webp",
+    "마라톤": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202404/08/3987eef0-d52c-4a75-baeb-68df967e60f2.webp",
+    "합창": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202603/20/480650a6-a6f0-4bff-b310-6491cb1fecab.webp",
+    "수국": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202603/12/83a0f4bb-5d75-46b2-bad2-ead172b892e4.webp",
+    "오페라": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202603/25/de292028-ac2f-4d9b-bdf8-e56c1298acf7.webp"
 };
 
 function getFestivalImage(title, originalImg) {
