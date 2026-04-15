@@ -39,8 +39,8 @@
     width: 100%;
     text-align: center;
     left: 0;
-    font-size: 1.15rem;
-    font-weight: 700;
+    font-size: 1.25rem;
+    font-weight: 800;
     z-index: -1; 
     background: var(--primary-gradient);
     -webkit-background-clip: text;
@@ -187,8 +187,8 @@
 }
 
 .item-label {
-    font-size: 0.85rem;
-    font-weight: 700;
+    font-size: 0.95rem;
+    font-weight: 800;
     color: var(--text-primary);
     text-align: center;
 }
@@ -292,8 +292,8 @@
 .xhs-qr-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 
 .xhs-info-section h4 { font-size: 1rem; color: var(--text-primary); margin-bottom: 4px; }
-.xhs-info-section .xhs-id { font-size: 0.8rem; color: #ff2442; font-weight: 700; margin-bottom: 2px; }
-.xhs-info-section p { font-size: 0.75rem; color: var(--text-muted); }
+.xhs-info-section .xhs-id { font-size: 0.95rem; color: #ff2442; font-weight: 800; margin-bottom: 2px; }
+.xhs-info-section p { font-size: 0.9rem; color: var(--text-muted); font-weight: 500; }
 .xhs-qr-box { width: 80px; height: 80px; background: #f8fafc; border-radius: 8px; padding: 4px; border: 1px solid var(--border-light); }
 .xhs-qr-box img { width: 100%; height: 100%; object-fit: contain; }
 
@@ -328,7 +328,7 @@
 }
 
 .qr-label {
-    font-size: 0.95rem;
+    font-size: 1.05rem;
     font-weight: 800;
     color: var(--text-primary);
     background: var(--primary-gradient);
@@ -441,7 +441,7 @@
         font-size: 1.8rem;
     }
     .item-label {
-        font-size: 0.75rem;
+        font-size: 0.9rem;
     }
     .main-logo {
         font-size: 4.2rem; /* 모바일 크기 추가 상향 (3.8rem -> 4.2rem) */
