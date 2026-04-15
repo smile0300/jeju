@@ -97,11 +97,11 @@
 }
 
 .reward-img-side {
-    width: 100px;
-    height: auto;
+    flex: 1; /* 사진 칸과 내용 칸을 반반으로 설정 */
+    min-height: 120px;
     background: #f1f5f9;
     position: relative;
-    flex-shrink: 0;
+    overflow: hidden;
 }
 
 .reward-img-side img {
@@ -111,12 +111,13 @@
 }
 
 .reward-content-side {
-    flex: 1;
+    flex: 1; /* 내용 칸도 반반 */
     padding: 16px;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 8px;
+    gap: 10px;
+    background: white;
 }
 
 .reward-item-name {
@@ -206,7 +207,7 @@
     .trust-title { font-size: 0.95rem; }
     .trust-desc { font-size: 0.75rem; }
     
-    .reward-img-side { width: 90px; }
+    .reward-img-side { flex: 1; }
     .reward-item-name { font-size: 1rem; }
     .reward-amount { font-size: 1.1rem; }
 }
