@@ -36,9 +36,40 @@ module.exports = async (req, res) => {
         }
 
         // 원본 컨텐츠 타입 전달 (m3u8, ts 등)
-        const contentType = response.headers.get('content-type');
+        const contentType = response.headers.get('content-type') || '';
         if (contentType) {
             res.setHeader('Content-Type', contentType);
+        }
+
+        const isM3U8 = contentType.includes('application/vnd.apple.mpegurl') || 
+                       contentType.includes('audio/mpegurl') || 
+                       url.toLowerCase().includes('.m3u8');
+
+        if (isM3U8) {
+            const text = await response.text();
+            
+            // Rewrite M3U8 relative paths to absolute proxy paths
+            const proxyBase = `https://${req.headers.host}/api/proxy?url=`;
+            
+            const lines = text.split('\n');
+            const rewrittenLines = lines.map(line => {
+                const trimmedLine = line.trim();
+                // 주석/헤더가 아닌 실제 세그먼트/하위 목록 경로 처리
+                if (trimmedLine.length > 0 && !trimmedLine.startsWith('#')) {
+                    let absoluteUrl;
+                    try {
+                        absoluteUrl = new URL(trimmedLine, url).href;
+                    } catch (e) {
+                        const baseUrl = url.substring(0, url.lastIndexOf('/') + 1);
+                        absoluteUrl = baseUrl + trimmedLine;
+                    }
+                    return `${proxyBase}${encodeURIComponent(absoluteUrl)}`;
+                }
+                return line;
+            });
+
+            res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
+            return res.send(rewrittenLines.join('\n'));
         }
 
         // 스트림 대역폭 효율을 위해 버퍼로 전달
