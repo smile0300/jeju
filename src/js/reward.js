@@ -77,7 +77,6 @@ export function renderRewardLoading() {
     if (!listContainer) return;
     listContainer.innerHTML = `
         <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #64748b;">
-            <div class="loading-spinner" style="margin-bottom: 10px;">⌛</div>
             <p>正在加载任务列表...</p>
         </div>
     `;
