@@ -35,6 +35,11 @@ function resolveImageUrl(item) {
     
     let url = imageEntry ? imageEntry[1] : '';
     
+    if (typeof url === 'string' && !url.trim().startsWith('http')) {
+        const filename = url.trim();
+        return filename ? { primary: `/img/rewards/${filename}`, fallback: '', id: '' } : '';
+    }
+
     if (typeof url !== 'string' || !url.trim().startsWith('http')) return '';
 
     url = url.trim();
