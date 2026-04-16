@@ -1,12 +1,12 @@
 import { CONFIG } from './config.js';
-import { initHlsPlayer } from './cctv.js'; // 순환 참조 없음: hallasan-dashboard.js → weather.js / cctv.js → hallasan-dashboard.js
+import { initHlsPlayer } from './cctv.js';
 
 export const HALLASAN_TRAILS = [
     { nameKo: '어리목탐방로', nameCn: '御里牧登山路', distanceCn: '6.8km（单程）', timeCn: '约3小时' },
     { nameKo: '영실탐방로', nameCn: '灵室登山路', distanceCn: '5.8km（单程）', timeCn: '约2.5小时' },
     { nameKo: '어승생악탐방로', nameCn: '御乘生岳登山路', distanceCn: '1.3km（单程）', timeCn: '约30分钟' },
     { nameKo: '돈내코탐방로', nameCn: '顿乃科登山路', distanceCn: '9.1km（单程）', timeCn: '约4.5小时' },
-    { nameKo: '석굴암탐방로', nameCn: '石窟庵登山路', distanceCn: '1.5km（单程）', timeCn: '约50分钟' },
+    { nameKo: '석굴암탐방로', nameCn: '石굴암登山路', distanceCn: '1.5km（单程）', timeCn: '约50分钟' },
     { nameKo: '관음사탐방로', nameCn: '观音寺登山路', distanceCn: '8.7km（单程）', timeCn: '约5小时' },
     { nameKo: '성판악탐방로', nameCn: '城板岳登山路', distanceCn: '9.6km（单程）', timeCn: '约4.5小时' }
 ];
@@ -35,38 +35,41 @@ export async function fetchHallasanStatus() {
     }
 
     const now = new Date().toLocaleString('zh-CN');
-
     container.innerHTML = `<span style="font-size: 0.7rem; opacity: 0.6;">正在加载数据...</span>`;
 
     try {
         const url = `${CONFIG.PROXY_URL}/api/hallasan-status`;
-        const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        let response;
+        let retryCount = 1;
+
+        while (retryCount >= 0) {
+            try {
+                response = await fetch(url, { signal: AbortSignal.timeout(15000) });
+                if (!response.ok) throw new Error(`HTTP \${response.status}`);
+                break;
+            } catch (err) {
+                if (retryCount === 0) throw err;
+                console.warn('[Hallasan] Fetch failed, retrying...', err);
+                retryCount--;
+                await new Promise(r => setTimeout(r, 1000));
+            }
+        }
         
-        const statusMapList = await res.json();
-        
-        // Convert list to easy-access map
+        const statusMapList = await response.json();
         const statusMap = {};
         if (Array.isArray(statusMapList)) {
-            statusMapList.forEach(item => {
-                statusMap[item.name] = item.status;
-            });
+            statusMapList.forEach(item => { statusMap[item.name] = item.status; });
         }
 
-        if (Object.keys(statusMap).length === 0) throw new Error('API 반환값 비어있음');
+        if (Object.keys(statusMap).length === 0) throw new Error('API return empty');
 
         const trails = HALLASAN_TRAILS.map(t => {
             const koStatus = statusMap[t.nameKo];
-            
             let info;
             if (!koStatus) {
-                // 데이터 매칭 없음
                 info = { cn: '--', cls: 'partial' };
             } else {
-                // 정밀 매칭 시도
                 info = TRAIL_STATUS_MAP[koStatus];
-
-                // 매칭 실패 시 키워드 기반 폴백 판별
                 if (!info) {
                     if (koStatus.includes('전면통제') || koStatus.includes('입산제한') || koStatus.includes('탐방불가') || (koStatus.includes('통제') && !koStatus.includes('부분') && !koStatus.includes('일부'))) {
                         info = TRAIL_STATUS_MAP['전면통제'];
@@ -75,50 +78,43 @@ export async function fetchHallasanStatus() {
                     } else if (koStatus.includes('정상')) {
                         info = TRAIL_STATUS_MAP['정상운영'];
                     } else if (koStatus.length > 0) {
-                        // 기타 상세 문구가 있는 경우 부분통제로 간주하여 정보를 제공하도록 함
                         info = { cn: '部分管制', cls: 'partial' };
                     } else {
                         info = { cn: '--', cls: 'partial' };
                     }
                 }
             }
-            
             return { ...t, statusCn: info.cn, statusCls: info.cls };
         });
 
-        container.innerHTML = `汉拿山登山信息更新: ${now}`;
-
+        container.innerHTML = `汉拿山登山信息更新: \${now}`;
         trailsEl.innerHTML = trails.map(t => `
             <div class="trail-card">
                 <div class="trail-header">
-                    <h4>${t.nameCn}</h4>
-                    <span class="trail-status-badge ${t.statusCls}">${t.statusCn}</span>
+                    <h4>\${t.nameCn}</h4>
+                    <span class="trail-status-badge \${t.statusCls}">\${t.statusCn}</span>
                 </div>
                 <div class="trail-info-compact">
-                    <span>📏 ${t.distanceCn}</span>
-                    <span>⏱️ ${t.timeCn}</span>
+                    <span>📏 \${t.distanceCn}</span>
+                    <span>⏱️ \${t.timeCn}</span>
                 </div>
             </div>`).join('');
 
     } catch (e) {
         console.warn('한라산 실시간 로드 실패:', e);
         if (trailsEl) {
+            const isTimeout = e.name === 'TimeoutError' || e.message.includes('timeout') || e.message.includes('signal');
+            const errorText = isTimeout ? '官方网站响应延迟中 (请稍后再试)' : '暂时無法加载登山路状态';
             trailsEl.innerHTML = `<div class="error-msg" style="grid-column: 1/-1; text-align:center; padding: 20px;">
-                <p style="color: var(--text-muted); font-size: 0.85rem;">暂时无法加载登山路状态</p>
+                <p style="color: var(--text-muted); font-size: 0.85rem;">\${errorText}</p>
                 <button onclick="location.reload()" style="margin-top:10px; padding: 8px 16px; border-radius: 8px; border:none; background:var(--primary-gradient); color:white; font-weight:700;">重新加载</button>
             </div>`;
         }
     }
-
-    // CCTV 렌더링 추가
     renderHallasanCCTV();
-    
     isFetchingHallasanStatus = false;
 }
 
-/**
- * 한라산 전용 CCTV 데이터 (별도로 관리)
- */
 const HALLASAN_CCTV = [
     { id: 'baengnokdam', nameKo: '백록담', nameCn: '白鹿潭', url: 'https://hallacctv.kr/live/cctv01.stream_360p/playlist.m3u8' },
     { id: 'wanggwalleung', nameKo: '왕관릉', nameCn: '王冠陵', url: 'https://hallacctv.kr/live/cctv02.stream_360p/playlist.m3u8' },
@@ -127,43 +123,28 @@ const HALLASAN_CCTV = [
     { id: '1100doro', nameKo: '1100고지', nameCn: '1100高地', url: 'https://hallacctv.kr/live/cctv05.stream_360p/playlist.m3u8' }
 ];
 
-/**
- * 한라산 전용 CCTV 5종 렌더링
- */
 export function renderHallasanCCTV() {
     const grid = document.getElementById('hallasan-cctv-grid');
     if (!grid) return;
-
-    // 만약 이미 CCTV 노드가 존재하고 로딩 중이라면 재렌더링 방지
-    if (grid.querySelectorAll('.cctv-card').length === HALLASAN_CCTV.length) {
-        console.log('[Hallasan] CCTV grid already populated, skipping re-render');
-        return;
-    }
-
+    if (grid.querySelectorAll('.cctv-card').length === HALLASAN_CCTV.length) return;
     grid.innerHTML = HALLASAN_CCTV.map(cam => `
-        <div class="cctv-card" onclick="toggleFullscreen('hallasan-video-${cam.id}')" style="cursor: pointer;">
+        <div class="cctv-card" onclick="toggleFullscreen('hallasan-video-\${cam.id}')" style="cursor: pointer;">
             <div class="cctv-video-container">
-                <video id="hallasan-video-${cam.id}" class="cctv-video-el" muted playsinline autoplay></video>
+                <video id="hallasan-video-\${cam.id}" class="cctv-video-el" muted playsinline autoplay></video>
                 <div class="cctv-tag">LIVE</div>
             </div>
             <div class="cctv-info" style="padding: 6px 4px; text-align: center;">
-                <span class="cctv-name" style="font-weight: 800; font-size: 0.85rem;">${cam.nameCn}</span>
+                <span class="cctv-name" style="font-weight: 800; font-size: 0.85rem;">\${cam.nameCn}</span>
             </div>
-        </div>
-    `).join('');
+        </div>`).join('');
 
-    // 비디오 요소가 DOM에 완전히 붙은 후에 HLS 초기화를 진행 (모바일 브라우저 안정성을 위해 지연 시간 소폭 상향)
     setTimeout(() => {
         HALLASAN_CCTV.forEach((cam, index) => {
-            // 순차적 초기화로 모바일 부하 분산
             setTimeout(() => {
-                if (document.getElementById(`hallasan-video-${cam.id}`)) {
-                    initHlsPlayer(cam.url, `hallasan-video-${cam.id}`);
+                if (document.getElementById(\`hallasan-video-\${cam.id}\`)) {
+                    initHlsPlayer(cam.url, \`hallasan-video-\${cam.id}\`);
                 }
-            }, index * 50); 
+            }, index * 50);
         });
     }, 150);
 }
-
-// 모달 전역 접근 허용
-// 모달 전역 접근 허용은 main.js에서 통합 관리합니다.

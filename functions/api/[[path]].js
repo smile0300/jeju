@@ -230,7 +230,8 @@ export async function onRequest(context) {
       const response = await fetch(targetUrl, {
         headers: { 
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' 
-        }
+        },
+        signal: AbortSignal.timeout(20000) // 서버측 20초 타임아웃
       });
       const html = await response.text();
 
