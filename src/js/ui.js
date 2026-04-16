@@ -135,7 +135,7 @@ function _buildSummaryHTML(targetYmd) {
     const dateLabel = `${parseInt(displayYmd.slice(4,6))}月 ${parseInt(displayYmd.slice(6,8))}日`;
 
     const isToday = displayYmd === todayYmd;
-    const titleText = isToday ? '今日预报 (全天)' : `${parseInt(displayYmd.slice(4,6))}月 ${parseInt(displayYmd.slice(6,8))}日 预报`;
+    const titleText = `${parseInt(displayYmd.slice(4,6))}月 ${parseInt(displayYmd.slice(6,8))}日`;
 
     let content = '';
     for (const [locKey, meta] of Object.entries(LOC_META)) {
@@ -189,7 +189,7 @@ function _buildSummaryHTML(targetYmd) {
     return `
     <div class="wsm-header2">
         <div class="wsm-title-bar">
-            <span>${summaryIcon} ${titleText}</span>
+            <span>${titleText}</span>
         </div>
         <div class="wsm-header-btns">
             <button class="wsm-capture-btn" onclick="window.captureWeatherSummary()" title="Capture Screenshot">📸</button>
