@@ -41,20 +41,23 @@ function resolveImageUrl(item) {
 
     // 2. 구글 드라이브 공유 링크 -> 이미지 전용 URL 변환 (더 강력한 정규식)
     if (url.includes('drive.google.com')) {
-        // file/d/ID/view 나 id=ID 형태 모두 추출
         const driveMatch = url.match(/\/d\/([a-zA-Z0-9_-]{25,})/) || 
                            url.match(/[?&]id=([a-zA-Z0-9_-]{25,})/) ||
                            url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
         
         if (driveMatch && driveMatch[1]) {
             const fileId = driveMatch[1];
-            // thumbnail 주소가 권한 문제나 용량 문제에서 더 안정적임
-            // sz=w1000으로 충분한 해상도 확보
-            return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
+            // 1순위: uc?id (모바일 호환성 높음), 2순위: thumbnail (resizing)
+            // HTML에서 data-id를 통해 fallback 처리 예정
+            return {
+                primary: `https://drive.google.com/uc?id=${fileId}`,
+                fallback: `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`,
+                id: fileId
+            };
         }
     }
     
-    return url;
+    return { primary: url, fallback: '', id: '' };
 }
 
 export async function initReward() {
@@ -96,12 +99,16 @@ export function renderRewardList() {
     }
 
     listContainer.innerHTML = REWARD_DATA_CACHED.map((item) => {
-        const displayImageUrl = resolveImageUrl(item);
+        const imgData = resolveImageUrl(item);
+        const placeholder = `data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22100%22%20height%3D%22130%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20130%22%3E%3Crect%20width%3D%22100%22%20height%3D%22130%22%20fill%3D%22%23f3f4f6%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-size%3D%2214%22%20text-anchor%3D%22middle%22%20alignment-baseline%3D%22middle%22%20fill%3D%22%239ca3af%22%3ENo%20Image%3C%2Ftext%3E%3C%2Fsvg%3E`;
         
         return `
             <div class="reward-card" onclick="applyRewardMission()">
                 <div class="reward-img-side">
-                    <img src="${displayImageUrl}" alt="${item.title}" onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22100%22%20height%3D%22130%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20130%22%3E%3Crect%20width%3D%22100%22%20height%3D%22130%22%20fill%3D%22%23f3f4f6%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-size%3D%2214%22%20text-anchor%3D%22middle%22%20alignment-baseline%3D%22middle%22%20fill%3D%22%239ca3af%22%3ENo%20Image%3C%2Ftext%3E%3C%2Fsvg%3E'">
+                    <img src="${imgData.primary || placeholder}" 
+                         data-fallback="${imgData.fallback}"
+                         alt="${item.title}" 
+                         onerror="handleRewardImageError(this)">
                 </div>
                 <div class="reward-content-side">
                     <h4 class="reward-item-name">${item.title || '赏금 任务'}</h4>
@@ -115,6 +122,20 @@ export function renderRewardList() {
         `;
     }).join('');
 }
+
+window.handleRewardImageError = function(img) {
+    const fallback = img.getAttribute('data-fallback');
+    const placeholder = `data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22100%22%20height%3D%22130%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20130%22%3E%3Crect%20width%3D%22100%22%20height%3D%22130%22%20fill%3D%22%23f3f4f6%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-size%3D%2214%22%20text-anchor%3D%22middle%22%20alignment-baseline%3D%22middle%22%20fill%3D%22%239ca3af%22%3ENo%20Image%3C%2Ftext%3E%3C%2Fsvg%3E`;
+    
+    if (fallback && img.src !== fallback) {
+        console.warn('[Reward] Image failed, trying fallback:', fallback);
+        img.src = fallback;
+    } else {
+        console.error('[Reward] All image sources failed');
+        img.src = placeholder;
+        img.onerror = null; // Infinite loop prevention
+    }
+};
 
 window.applyRewardMission = function() {
     if (window.openWechatQR) window.openWechatQR();
