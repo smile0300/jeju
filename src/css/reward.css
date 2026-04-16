@@ -97,26 +97,32 @@
 }
 
 .reward-img-side {
-    flex: 1; /* 사진 칸과 내용 칸을 반반으로 설정 */
-    min-height: 120px;
-    background: #f1f5f9;
+    flex: 0 0 45%; /* Slightly less than half to give more room for text */
+    min-height: 140px;
+    background: #f8fafc;
     position: relative;
     overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid var(--border-light);
 }
 
 .reward-img-side img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain; /* Don't crop, show full image */
+    padding: 10px;
+    transition: transform 0.5s ease;
 }
 
 .reward-content-side {
-    flex: 1; /* 내용 칸도 반반 */
+    flex: 1;
     padding: 16px;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 10px;
+    gap: 8px;
     background: white;
 }
 

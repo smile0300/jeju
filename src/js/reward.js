@@ -42,10 +42,14 @@ function resolveImageUrl(item) {
     // 2. 구글 드라이브 공유 링크 -> 이미지 전용 URL 변환 (더 강력한 정규식)
     if (url.includes('drive.google.com')) {
         // file/d/ID/view 나 id=ID 형태 모두 추출
-        const driveMatch = url.match(/\/d\/([a-zA-Z0-9_-]{25,})/) || url.match(/[?&]id=([a-zA-Z0-9_-]{25,})/);
+        const driveMatch = url.match(/\/d\/([a-zA-Z0-9_-]{25,})/) || 
+                           url.match(/[?&]id=([a-zA-Z0-9_-]{25,})/) ||
+                           url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+        
         if (driveMatch && driveMatch[1]) {
             const fileId = driveMatch[1];
             // thumbnail 주소가 권한 문제나 용량 문제에서 더 안정적임
+            // sz=w1000으로 충분한 해상도 확보
             return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
         }
     }
