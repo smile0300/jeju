@@ -274,7 +274,13 @@ export function parseAndRenderWeather(locKey, items, midData, mountainData) {
                 if (tmp < dailyMap[date].min) dailyMap[date].min = tmp;
             }
             if (d.PTY && d.PTY !== '0') dailyMap[date].pty = d.PTY;
-            if (d.SKY) dailyMap[date].sky = d.SKY;
+            // SKY는 가장 나쁜 값(4:흐림 > 3:구름많음 > 1:맑음)으로 누적하여
+            // 맑은 시간대가 비오는 시간대를 덮어쓰는 현상 방지
+            if (d.SKY) {
+                const skyCurrent = parseInt(dailyMap[date].sky) || 1;
+                const skyNew = parseInt(d.SKY) || 1;
+                if (skyNew > skyCurrent) dailyMap[date].sky = d.SKY;
+            }
             if (d.POP) dailyMap[date].precip = Math.max(dailyMap[date].precip, parseInt(d.POP));
             
             // v19.0: 강수량(PCP) 합산 로직
