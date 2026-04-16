@@ -317,12 +317,30 @@ export function parseAndRenderWeather(locKey, items, midData, mountainData) {
                     min = Math.round(dt.min) + '°';
                 }
                 if (landItem) {
-                    const amPm = todayDate.getHours() < 12 ? 'Am' : 'Pm';
                     if (i <= 6) {
-                        const rnSt = landItem[`rnSt${dayIdx}${amPm}`] ?? landItem[`rnst${dayIdx}${amPm.toLowerCase()}`] ?? landItem[`rnSt${dayIdx}`] ?? landItem[`rnst${dayIdx}`] ?? 0;
-                        const wfVal = landItem[`wf${dayIdx}${amPm}`] || landItem[`wf${dayIdx}${amPm.toLowerCase()}`] || landItem[`wf${dayIdx}`] || '';
-                        precip = rnSt;
-                        icon = translateMidWf(wfVal).icon;
+                        // 오전/오후 날씨를 각각 가져와서 더 나쁜 쪽(비>눈>흐림>구름>맑음)을 대표 아이콘으로 사용
+                        const rnStAm = landItem[`rnSt${dayIdx}Am`] ?? landItem[`rnst${dayIdx}am`] ?? 0;
+                        const rnStPm = landItem[`rnSt${dayIdx}Pm`] ?? landItem[`rnst${dayIdx}pm`] ?? 0;
+                        const wfAm = landItem[`wf${dayIdx}Am`] || landItem[`wf${dayIdx}am`] || '';
+                        const wfPm = landItem[`wf${dayIdx}Pm`] || landItem[`wf${dayIdx}pm`] || '';
+
+                        // 더 높은 강수확률을 기준으로 대표 날씨 결정
+                        precip = Math.max(Number(rnStAm), Number(rnStPm));
+
+                        // 날씨 우선순위: 비 > 눈 > 비/눈 > 흐림 > 구름많음 > 맑음
+                        const getWeatherPriority = (wf) => {
+                            if (!wf) return 0;
+                            if (wf.includes('비') || wf.includes('소나기')) return 5;
+                            if (wf.includes('눈')) return 4;
+                            if (wf.includes('흐림')) return 3;
+                            if (wf.includes('구름많음')) return 2;
+                            if (wf.includes('맑음')) return 1;
+                            return 0;
+                        };
+
+                        // 우선순위가 높은(더 나쁜) 날씨 아이콘을 사용
+                        const worstWf = getWeatherPriority(wfAm) >= getWeatherPriority(wfPm) ? wfAm : wfPm;
+                        icon = translateMidWf(worstWf || wfAm || wfPm).icon;
                     } else {
                         const rnSt = landItem[`rnSt${dayIdx}`] ?? landItem[`rnst${dayIdx}`] ?? 0;
                         const wfVal = landItem[`wf${dayIdx}`] || landItem[`wf${dayIdx}`.toLowerCase()] || '';
