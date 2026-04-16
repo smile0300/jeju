@@ -227,7 +227,7 @@ export function closeWeatherSummaryModal(fromPopState = false) {
 
 /**
  * Weather Summary Modal Capture Logic
- * 지역별 개별 캡처 후 순차 다운로드
+ * 지역별 개별 캡처 후 갤러리 모달로 출력 (모바일 저장 안정성 확보)
  */
 window.captureWeatherSummary = async function() {
     if (!window.html2canvas) {
@@ -246,6 +246,8 @@ window.captureWeatherSummary = async function() {
     const titleEl = document.querySelector('.wsm-title-bar > span');
     const titleText = titleEl?.textContent || '';
 
+    const capturedImages = [];
+
     try {
         for (let i = 0; i < blocks.length; i++) {
             const block = blocks[i];
@@ -253,7 +255,7 @@ window.captureWeatherSummary = async function() {
 
             btn.textContent = `${i + 1}/${blocks.length}`;
 
-            // 캡처 전 헤더 임시 삽입 (날짜 정보 포함)
+            // 캡처 전 헤더 임시 삽입
             const captureWrapper = document.createElement('div');
             captureWrapper.style.cssText = 'background:#f1f5f9; padding:16px; border-radius:20px; font-family:inherit;';
 
@@ -265,7 +267,6 @@ window.captureWeatherSummary = async function() {
             captureWrapper.appendChild(captureHeader);
             captureWrapper.appendChild(clonedBlock);
 
-            // 임시로 body에 숨겨서 렌더링
             captureWrapper.style.position = 'fixed';
             captureWrapper.style.top = '-9999px';
             captureWrapper.style.left = '-9999px';
@@ -282,21 +283,17 @@ window.captureWeatherSummary = async function() {
             });
 
             document.body.removeChild(captureWrapper);
+            capturedImages.push({ url: canvas.toDataURL('image/png'), name: locName });
 
-            const image = canvas.toDataURL('image/png');
-            const link = document.createElement('a');
-            link.href = image;
-            link.download = `JejuWeather_${dateStr}_${locName}.png`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-            // 브라우저가 다운로드 처리할 시간을 위해 대기
-            await new Promise(r => setTimeout(r, 500));
+            await new Promise(r => setTimeout(r, 100));
         }
 
         btn.textContent = '✅';
-        setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 2500);
+        setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 2000);
+
+        // 결과 갤러리 표시
+        showCaptureGallery(capturedImages);
+
     } catch (e) {
         console.error('Capture failed:', e);
         btn.textContent = '❌';
@@ -304,6 +301,44 @@ window.captureWeatherSummary = async function() {
         alert('캡처에 실패했습니다. 다시 시도해 주세요.');
     }
 };
+
+/**
+ * 캡처된 이미지들을 갤러리 형태로 보여주는 모달
+ */
+function showCaptureGallery(images) {
+    const overlay = document.createElement('div');
+    overlay.className = 'capture-gallery-overlay';
+    
+    let itemsHTML = images.map(img => `
+        <div class="capture-gallery-item">
+            <img src="${img.url}" class="capture-gallery-img" alt="${img.name}">
+            <div class="capture-gallery-item-info">${img.name}</div>
+        </div>
+    `).join('');
+
+    overlay.innerHTML = `
+        <button class="capture-gallery-close">✕</button>
+        <div class="capture-gallery-header">
+            <h2>📸 캡처 완료</h2>
+            <p>사진을 길게 눌러서 사진첩에 저장하세요.</p>
+        </div>
+        <div class="capture-gallery-grid">
+            ${itemsHTML}
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+
+    const closeBtn = overlay.querySelector('.capture-gallery-close');
+    closeBtn.onclick = () => {
+        document.body.removeChild(overlay);
+        document.body.style.overflow = '';
+    };
+
+    // 현재 모달 히스토리에 추가 (뒤로가기 대응)
+    if (window.pushModalState) window.pushModalState();
+}
 
 // ─── 공유 모달 (Share Modal) ──────────────────────────────────
 export function openShareModal() {
