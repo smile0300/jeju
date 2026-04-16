@@ -508,6 +508,11 @@ export function switchWeatherLocation(loc) {
     document.querySelectorAll('.location-weather').forEach(c => c.classList.remove('active'));
     document.querySelector(`.location-tab[data-loc="${loc}"]`)?.classList.add('active');
     document.getElementById(`weather-content-${loc}`)?.classList.add('active');
+
+    // v20.2: 데이터가 아직 로드되지 않았다면(지연 로딩 중이거나 실패 시) 즉시 호출
+    if (!WEATHER_STATE[loc]) {
+        fetchWeatherData(loc);
+    }
 }
 
 // Air Quality logic

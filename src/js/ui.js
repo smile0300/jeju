@@ -19,7 +19,16 @@ export function showSection(sectionId, pushHistory = true) {
     if (mainAppBar) mainAppBar.style.display = (sectionId === 'home' ? 'flex' : 'none');
 
     if (sectionId === 'cctv') initCCTV();
-    if (sectionId === 'weather') Object.keys(CONFIG.WEATHER_LOCATIONS).forEach(loc => fetchWeatherData(loc));
+    if (sectionId === 'weather') {
+        const activeLoc = document.querySelector('.location-tab.active')?.dataset.loc || 'jeju';
+        fetchWeatherData(activeLoc);
+
+        // 나머지 지역은 1초 간격으로 순차적(지연) 로드하여 429 에러 방지
+        const otherLocs = Object.keys(CONFIG.WEATHER_LOCATIONS).filter(l => l !== activeLoc);
+        otherLocs.forEach((loc, index) => {
+            setTimeout(() => fetchWeatherData(loc), (index + 1) * 1000);
+        });
+    }
     if (sectionId === 'hallasan') fetchHallasanStatus();
     if (sectionId === 'airport') {
         const arriveData = document.getElementById('arrive-data');
