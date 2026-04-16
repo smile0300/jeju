@@ -20,14 +20,13 @@ let REWARD_DATA_CACHED = [
 ];
 
 /**
- * 구글 드라이브 및 다양한 필드명에 대응하는 이미지 URL 추출 헬퍼 (v2.1: 대소문자 무시 및 드라이브 파싱 강화)
+ * 구글 드라이브 및 다양한 필드명에 대응하는 이미지 URL 추출 헬퍼 (v2.2: 로컬 이미지 폴백 및 HEIC 경고 추가)
  */
 function resolveImageUrl(item) {
     if (!item) return '';
 
     // 1. 대소문자 구분 없이 이미지 관련 필드 찾기
     const entries = Object.entries(item);
-    // 가장 먼저 정확한 매칭 확인, 없으면 'image'나 '사진', '이미지'가 포함된 키 찾기
     const imageEntry = entries.find(([k]) => k.toLowerCase() === 'imageurl') || 
                        entries.find(([k]) => k.toLowerCase() === 'image') ||
                        entries.find(([k]) => k.toLowerCase().includes('image')) ||
@@ -35,19 +34,28 @@ function resolveImageUrl(item) {
     
     let url = imageEntry ? imageEntry[1] : '';
     
-    if (typeof url === 'string' && !url.trim().startsWith('http')) {
-        const filename = url.trim();
-        return filename ? { primary: `/img/rewards/${filename}`, fallback: '', id: '' } : '';
+    // 로컬 파일명인 경우 (http로 시작하지 않음)
+    if (typeof url === 'string' && url.trim() && !url.trim().startsWith('http')) {
+        let filename = url.trim();
+        
+        // HEIC 형식인 경우 브라우저 미지원 경고 출력
+        if (filename.toLowerCase().endsWith('.heic')) {
+            console.error(`[Reward] HEIC format detected: "${filename}". This format is NOT supported by browsers. Please convert to JPG/PNG.`);
+        }
+
+        // 기본 경로 반환. 에러 발생 시 handleRewardImageError에서 확장자 폴백 처리함.
+        return { 
+            primary: `/img/rewards/${filename}`, 
+            fallback: '', // 로컬 파일의 경우 1차 실패 시 handleRewardImageError가 동적으로 생성
+            id: '' 
+        };
     }
 
     if (typeof url !== 'string' || !url.trim().startsWith('http')) return '';
 
     url = url.trim();
 
-    // 2. 구글 드라이브 공유 링크 → 서버사이드 이미지 프록시 사용
-    // 이유: drive.google.com은 구글 계정 쿠키가 없는 브라우저(삼성인터넷, 파이어폭스 등)에서
-    //       로그인 페이지로 리디렉트되어 이미지를 표시할 수 없음.
-    //       /api/image-proxy가 서버에서 대신 fetch하여 브라우저에 직접 전달함.
+    // 2. 구글 드라이브 공유 링크 → 서버사이드 이미지 프록시 사용 (v2.2 유지)
     if (url.includes('drive.google.com')) {
         const driveMatch = url.match(/\/d\/([a-zA-Z0-9_-]{25,})/) || 
                            url.match(/[?&]id=([a-zA-Z0-9_-]{25,})/) ||
@@ -73,7 +81,7 @@ export async function initReward() {
         if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
         
-        console.log('[Reward] Data received:', data); // 디버깅용 로그
+        console.log('[Reward] Data received:', data);
 
         if (Array.isArray(data) && data.length > 0) {
             REWARD_DATA_CACHED = data;
@@ -100,7 +108,7 @@ export function renderRewardList() {
     if (!listContainer) return;
 
     if (REWARD_DATA_CACHED.length === 0) {
-        listContainer.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #64748b;">暂无赏金任务</div>`;
+        listContainer.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #64748b;">暂无赏금 任务</div>`;
         return;
     }
 
@@ -113,6 +121,7 @@ export function renderRewardList() {
                 <div class="reward-img-side">
                     <img src="${imgData.primary || placeholder}" 
                          data-fallback="${imgData.fallback}"
+                         data-retry="0"
                          alt="${item.title}" 
                          onerror="handleRewardImageError(this)">
                 </div>
@@ -130,17 +139,45 @@ export function renderRewardList() {
 }
 
 window.handleRewardImageError = function(img) {
+    const retryCount = parseInt(img.getAttribute('data-retry') || '0');
     const fallback = img.getAttribute('data-fallback');
     const placeholder = `data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22100%22%20height%3D%22130%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20130%22%3E%3Crect%20width%3D%22100%22%20height%3D%22130%22%20fill%3D%22%23f3f4f6%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-size%3D%2214%22%20text-anchor%3D%22middle%22%20alignment-baseline%3D%22middle%22%20fill%3D%22%239ca3af%22%3ENo%20Image%3C%2Ftext%3E%3C%2Fsvg%3E`;
     
+    // 1단계: 명시된 fallback이 있으면 시도
     if (fallback && img.src !== fallback) {
         console.warn('[Reward] Image failed, trying fallback:', fallback);
         img.src = fallback;
-    } else {
-        console.error('[Reward] All image sources failed');
-        img.src = placeholder;
-        img.onerror = null; // Infinite loop prevention
+        return;
+    } 
+
+    // 2단계: 로컬 파일의 경우 다른 확장자나 소문자/대문자 변환 시도
+    if (img.src.includes('/img/rewards/') && retryCount < 5) {
+        const currentSrc = img.src;
+        const lastSlash = currentSrc.lastIndexOf('/');
+        const dir = currentSrc.substring(0, lastSlash + 1);
+        const fullFilename = currentSrc.substring(lastSlash + 1);
+        const extIndex = fullFilename.lastIndexOf('.');
+        const base = extIndex > -1 ? fullFilename.substring(0, extIndex) : fullFilename;
+        
+        const extensions = ['.jpg', '.JPG', '.png', '.PNG', '.jpeg', '.webp'];
+        
+        if (retryCount < extensions.length) {
+            const nextExt = extensions[retryCount];
+            // 원본이 HEIC인 경우 특히 안내
+            if (fullFilename.toLowerCase().endsWith('.heic')) {
+                console.warn(`[Reward] HEIC failed, trying auto-correct to ${nextExt}`);
+            }
+            
+            img.setAttribute('data-retry', (retryCount + 1).toString());
+            img.src = dir + base + nextExt;
+            return;
+        }
     }
+
+    // 최종 실패
+    console.error('[Reward] All image sources failed');
+    img.src = placeholder;
+    img.onerror = null; 
 };
 
 window.applyRewardMission = function() {
