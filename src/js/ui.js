@@ -191,7 +191,10 @@ function _buildSummaryHTML(targetYmd) {
             <span>${summaryIcon} ${titleText}</span>
             <span class="wsm-date-badge">${dateLabel}</span>
         </div>
-        <button class="wsm-close-btn2" onclick="window.closeWeatherSummaryModal()">✕</button>
+        <div class="wsm-header-btns">
+            <button class="wsm-capture-btn" onclick="window.captureWeatherSummary()" title="Capture Screenshot">📸</button>
+            <button class="wsm-close-btn2" onclick="window.closeWeatherSummaryModal()">✕</button>
+        </div>
     </div>
     <div class="wsm-body2">
         ${content}
@@ -221,6 +224,53 @@ export function closeWeatherSummaryModal(fromPopState = false) {
         if (!fromPopState && window.location.hash === '#modal') window.history.back();
     }
 }
+
+/**
+ * Weather Summary Modal Capture Logic
+ */
+window.captureWeatherSummary = async function() {
+    const panel = document.querySelector('.wsm-panel');
+    if (!panel || !window.html2canvas) return;
+
+    const btn = document.querySelector('.wsm-capture-btn');
+    const originalText = btn.textContent;
+    btn.textContent = '...';
+    btn.disabled = true;
+
+    try {
+        const canvas = await html2canvas(panel, {
+            scale: 2, // High resolution for mobile
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: '#f1f5f9', // Matching the background
+            logging: false,
+            onclone: (clonedDoc) => {
+                // Hide header buttons in the capture
+                const clonedBtns = clonedDoc.querySelector('.wsm-header-btns');
+                if (clonedBtns) clonedBtns.style.display = 'none';
+            }
+        });
+
+        const image = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        const dateStr = document.querySelector('.wsm-date-badge')?.textContent.replace(/ /g, '') || 'weather';
+        
+        link.href = image;
+        link.download = `JejuWeather_${dateStr}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // Success Feedback
+        btn.textContent = '✅';
+        setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 2000);
+    } catch (e) {
+        console.error('Capture failed:', e);
+        btn.textContent = '❌';
+        setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 2000);
+        alert('캡처에 실패했습니다. 다시 시도해 주세요.');
+    }
+};
 
 // ─── 공유 모달 (Share Modal) ──────────────────────────────────
 export function openShareModal() {
