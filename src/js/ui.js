@@ -118,10 +118,14 @@ const LOC_META = {
     udo:      { title: '牛岛', sub: 'Udo Island' },
 };
 
-function _buildSummaryHTML() {
+function _buildSummaryHTML(targetYmd) {
     const kstNow = new Date(Date.now() + 9 * 60 * 60 * 1000);
     const todayYmd = kstNow.toISOString().slice(0, 10).replace(/-/g, '');
-    const dateLabel = `${parseInt(todayYmd.slice(4,6))}月 ${parseInt(todayYmd.slice(6,8))}일`;
+    const displayYmd = targetYmd || todayYmd;
+    const dateLabel = `${parseInt(displayYmd.slice(4,6))}月 ${parseInt(displayYmd.slice(6,8))}日`;
+
+    const isToday = displayYmd === todayYmd;
+    const titleText = isToday ? '今日逐时预报 (全天)' : `${parseInt(displayYmd.slice(4,6))}月 ${parseInt(displayYmd.slice(6,8))}日 逐时预报`;
 
     let content = '';
     for (const [locKey, meta] of Object.entries(LOC_META)) {
@@ -129,9 +133,9 @@ function _buildSummaryHTML() {
         let itemsHTML = '';
         if (state) {
             const keys = state.sortedKeys.filter(k => {
-                if(!k.startsWith(todayYmd)) return false;
+                if(!k.startsWith(displayYmd)) return false;
                 const h = parseInt(k.slice(8, 10));
-                return h >= 6 && h <= 23;
+                return h >= 0 && h <= 23; // 전 실시간 구역 노출 (0~23시)
             });
 
             itemsHTML = keys.map(k => {
@@ -175,7 +179,7 @@ function _buildSummaryHTML() {
     return `
     <div class="wsm-header2">
         <div class="wsm-title-bar">
-            <span>${summaryIcon} 今日逐时预报 (全天)</span>
+            <span>${summaryIcon} ${titleText}</span>
             <span class="wsm-date-badge">${dateLabel}</span>
         </div>
         <button class="wsm-close-btn2" onclick="window.closeWeatherSummaryModal()">✕</button>
@@ -185,7 +189,7 @@ function _buildSummaryHTML() {
     </div>`;
 }
 
-export function openWeatherSummaryModal() {
+export function openWeatherSummaryModal(targetYmd) {
     let modal = document.getElementById('weather-summary-modal');
     if (!modal) {
         modal = document.createElement('div');
@@ -194,7 +198,7 @@ export function openWeatherSummaryModal() {
         modal.onclick = e => { if (e.target === modal) closeWeatherSummaryModal(); };
         document.body.appendChild(modal);
     }
-    modal.innerHTML = `<div class="wsm-panel">${_buildSummaryHTML()}</div>`;
+    modal.innerHTML = `<div class="wsm-panel">${_buildSummaryHTML(targetYmd)}</div>`;
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
     if (window.pushModalState) window.pushModalState();

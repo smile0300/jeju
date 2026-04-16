@@ -409,7 +409,7 @@ export function updateHourlyWeather(locKey, targetYmd) {
                 btn = document.createElement('button');
                 btn.className = 'weather-summary-btn';
                 btn.textContent = '简略查看';
-                btn.onclick = () => window.openWeatherSummaryModal();
+                btn.onclick = () => window.openWeatherSummaryModal(targetYmd);
                 titleWrap.appendChild(btn);
             }
         }
