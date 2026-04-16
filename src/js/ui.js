@@ -176,7 +176,7 @@ function _buildSummaryHTML(targetYmd) {
         if (!itemsHTML) itemsHTML = `<div class="wsm-nodata">加载中...</div>`;
 
         content += `
-        <div class="wsm-loc-block">
+        <div class="wsm-loc-block" data-locname="${meta.title}" data-lockey="${locKey}">
             <h3 class="wsm-loc-title">${meta.title} <span class="wsm-loc-sub">${meta.sub}</span></h3>
             <div class="wsm-hourly-grid">${itemsHTML}</div>
         </div>`;
@@ -227,43 +227,76 @@ export function closeWeatherSummaryModal(fromPopState = false) {
 
 /**
  * Weather Summary Modal Capture Logic
+ * 지역별 개별 캡처 후 순차 다운로드
  */
 window.captureWeatherSummary = async function() {
-    const panel = document.querySelector('.wsm-panel');
-    if (!panel || !window.html2canvas) return;
+    if (!window.html2canvas) {
+        alert('캡처 라이브러리 로딩 중입니다. 잠시 후 다시 시도해 주세요.');
+        return;
+    }
+
+    const blocks = document.querySelectorAll('.wsm-loc-block');
+    if (!blocks.length) return;
 
     const btn = document.querySelector('.wsm-capture-btn');
     const originalText = btn.textContent;
-    btn.textContent = '...';
     btn.disabled = true;
 
+    const dateStr = document.querySelector('.wsm-date-badge')?.textContent.replace(/\s/g, '') || 'weather';
+    const titleEl = document.querySelector('.wsm-title-bar > span');
+    const titleText = titleEl?.textContent || '';
+
     try {
-        const canvas = await html2canvas(panel, {
-            scale: 2, // High resolution for mobile
-            useCORS: true,
-            allowTaint: true,
-            backgroundColor: '#f1f5f9', // Matching the background
-            logging: false,
-            onclone: (clonedDoc) => {
-                // Hide header buttons in the capture
-                const clonedBtns = clonedDoc.querySelector('.wsm-header-btns');
-                if (clonedBtns) clonedBtns.style.display = 'none';
-            }
-        });
+        for (let i = 0; i < blocks.length; i++) {
+            const block = blocks[i];
+            const locName = block.dataset.locname || `지역${i + 1}`;
 
-        const image = canvas.toDataURL('image/png');
-        const link = document.createElement('a');
-        const dateStr = document.querySelector('.wsm-date-badge')?.textContent.replace(/ /g, '') || 'weather';
-        
-        link.href = image;
-        link.download = `JejuWeather_${dateStr}.png`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+            btn.textContent = `${i + 1}/${blocks.length}`;
 
-        // Success Feedback
+            // 캡처 전 헤더 임시 삽입 (날짜 정보 포함)
+            const captureWrapper = document.createElement('div');
+            captureWrapper.style.cssText = 'background:#f1f5f9; padding:16px; border-radius:20px; font-family:inherit;';
+
+            const captureHeader = document.createElement('div');
+            captureHeader.style.cssText = 'font-size:0.85rem; color:#64748b; margin-bottom:12px; font-weight:600;';
+            captureHeader.textContent = titleText;
+
+            const clonedBlock = block.cloneNode(true);
+            captureWrapper.appendChild(captureHeader);
+            captureWrapper.appendChild(clonedBlock);
+
+            // 임시로 body에 숨겨서 렌더링
+            captureWrapper.style.position = 'fixed';
+            captureWrapper.style.top = '-9999px';
+            captureWrapper.style.left = '-9999px';
+            captureWrapper.style.width = '360px';
+            captureWrapper.style.zIndex = '-1';
+            document.body.appendChild(captureWrapper);
+
+            const canvas = await html2canvas(captureWrapper, {
+                scale: 2,
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: '#f1f5f9',
+                logging: false,
+            });
+
+            document.body.removeChild(captureWrapper);
+
+            const image = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.href = image;
+            link.download = `JejuWeather_${dateStr}_${locName}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // 브라우저가 다운로드 처리할 시간을 위해 대기
+            await new Promise(r => setTimeout(r, 500));
+        }
+
         btn.textContent = '✅';
-        setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 2000);
+        setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 2500);
     } catch (e) {
         console.error('Capture failed:', e);
         btn.textContent = '❌';
