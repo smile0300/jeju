@@ -39,7 +39,10 @@ function resolveImageUrl(item) {
 
     url = url.trim();
 
-    // 2. 구글 드라이브 공유 링크 -> 이미지 전용 URL 변환 (더 강력한 정규식)
+    // 2. 구글 드라이브 공유 링크 → 서버사이드 이미지 프록시 사용
+    // 이유: drive.google.com은 구글 계정 쿠키가 없는 브라우저(삼성인터넷, 파이어폭스 등)에서
+    //       로그인 페이지로 리디렉트되어 이미지를 표시할 수 없음.
+    //       /api/image-proxy가 서버에서 대신 fetch하여 브라우저에 직접 전달함.
     if (url.includes('drive.google.com')) {
         const driveMatch = url.match(/\/d\/([a-zA-Z0-9_-]{25,})/) || 
                            url.match(/[?&]id=([a-zA-Z0-9_-]{25,})/) ||
@@ -47,10 +50,8 @@ function resolveImageUrl(item) {
         
         if (driveMatch && driveMatch[1]) {
             const fileId = driveMatch[1];
-            // 1순위: uc?id (모바일 호환성 높음), 2순위: thumbnail (resizing)
-            // HTML에서 data-id를 통해 fallback 처리 예정
             return {
-                primary: `https://drive.google.com/uc?id=${fileId}`,
+                primary: `/api/image-proxy?id=${fileId}`,
                 fallback: `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`,
                 id: fileId
             };
