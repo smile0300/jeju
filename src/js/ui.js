@@ -125,6 +125,7 @@ const LOC_META = {
     seogwipo: { title: '西归浦 (中文)', sub: 'Jungmun' },
     hallasan: { title: '汉拿山 (御里牧)', sub: 'Halla Mountain' },
     udo:      { title: '牛岛', sub: 'Udo Island' },
+    seongsan: { title: '城山日出峰', sub: 'Seongsan' },
 };
 
 function _buildSummaryHTML(targetYmd) {
@@ -134,7 +135,7 @@ function _buildSummaryHTML(targetYmd) {
     const dateLabel = `${parseInt(displayYmd.slice(4,6))}月 ${parseInt(displayYmd.slice(6,8))}日`;
 
     const isToday = displayYmd === todayYmd;
-    const titleText = isToday ? '今日逐时预报 (全天)' : `${parseInt(displayYmd.slice(4,6))}月 ${parseInt(displayYmd.slice(6,8))}日 逐时预报`;
+    const titleText = isToday ? '今日预报 (全天)' : `${parseInt(displayYmd.slice(4,6))}月 ${parseInt(displayYmd.slice(6,8))}日 预报`;
 
     let content = '';
     for (const [locKey, meta] of Object.entries(LOC_META)) {
