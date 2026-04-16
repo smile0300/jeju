@@ -322,7 +322,59 @@ export async function onRequest(context) {
     }
   }
 
-  // (4번 HLS 프록시 섹션은 상대경로 변환(Rewrite) 로직으로 대체되어 완전히 삭제되었습니다.)
+  // 4. /api/image-proxy (GET) — 구글 드라이브 이미지를 서버사이드에서 가져와 브라우저 호환성 보장
+  if (pathname === '/api/image-proxy') {
+    const fileId = url.searchParams.get('id');
+    if (!fileId || !/^[a-zA-Z0-9_-]{10,100}$/.test(fileId)) {
+      return new Response('Missing or invalid Google Drive file ID', { 
+        status: 400,
+        headers: { 'Access-Control-Allow-Origin': ALLOWED_ORIGIN }
+      });
+    }
+
+    // 1순위: 직접 다운로드 링크, 실패 시 썸네일로 폴백
+    const driveUrls = [
+      `https://drive.google.com/uc?export=view&id=${fileId}`,
+      `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`
+    ];
+
+    for (const driveUrl of driveUrls) {
+      try {
+        const imageResponse = await fetch(driveUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (compatible; JejuLiveBot/1.0)',
+            'Accept': 'image/*,*/*'
+          },
+          redirect: 'follow'
+        });
+
+        if (!imageResponse.ok) continue;
+
+        const contentType = imageResponse.headers.get('content-type') || '';
+        // Google이 HTML(로그인 페이지)을 반환하는 경우 다음 URL로 시도
+        if (contentType.includes('text/html')) continue;
+
+        const resHeaders = new Headers();
+        resHeaders.set('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
+        resHeaders.set('Content-Type', contentType || 'image/jpeg');
+        // 6시간 캐시 → Cloudflare 엣지에서 캐싱하여 반복 호출 최소화
+        resHeaders.set('Cache-Control', 'public, max-age=21600, stale-while-revalidate=3600');
+
+        return new Response(imageResponse.body, { 
+          status: 200, 
+          headers: resHeaders 
+        });
+      } catch (e) {
+        console.warn('[ImageProxy] Drive fetch failed:', e.message);
+      }
+    }
+
+    // 모두 실패 시 404
+    return new Response('Image not found or not public', { 
+      status: 404,
+      headers: { 'Access-Control-Allow-Origin': ALLOWED_ORIGIN }
+    });
+  }
 
   return new Response('Not Found', { status: 404 });
 }
