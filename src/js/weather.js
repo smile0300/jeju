@@ -391,7 +391,7 @@ export function updateHourlyWeather(locKey, targetYmd) {
     if (titleEl) {
         const m = targetYmd.slice(4, 6);
         const d = targetYmd.slice(6, 8);
-        titleEl.textContent = `${parseInt(m)}月 ${parseInt(d)}日 详细预报`;
+        titleEl.textContent = `${parseInt(m)}月 ${parseInt(d)}日`;
 
         // Wrap title in a flex container if not already
         let titleWrap = titleEl.parentElement;
