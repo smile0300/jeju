@@ -1140,3 +1140,7 @@
 .wsm-capture-btn:active {
     transform: scale(0.9);
 }
+
+/* Centering title fix */
+.wsm-header2 { position: relative !important; display: flex !important; justify-content: flex-end !important; }
+.wsm-title-bar { position: absolute !important; left: 50% !important; transform: translateX(-50%) !important; pointer-events: none !important; }
