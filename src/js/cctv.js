@@ -480,9 +480,30 @@ export function initHlsPlayer(streamUrl, videoId) {
             }
         });
         hls.loadSource(proxiedUrl);
-        hls.attachMedia(videoEl);
+
+        // [Fix] InvalidStateError 방어를 위해 try-catch 및 DOM 연결 확인
+        try {
+            if (document.body.contains(videoEl)) {
+                hls.attachMedia(videoEl);
+            } else {
+                console.warn('[CCTV] Video element detached before HLS attach');
+                hls.destroy();
+                return;
+            }
+        } catch (e) {
+            console.error('[CCTV] HLS attachMedia failed:', e);
+            hls.destroy();
+            return;
+        }
+
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
-            videoEl.play().catch(err => console.warn('[CCTV] Autoplay blocked or failed', err));
+            if (document.body.contains(videoEl)) {
+                videoEl.play().catch(err => {
+                    if (err.name !== 'AbortError') {
+                        console.warn('[CCTV] Autoplay blocked or failed', err);
+                    }
+                });
+            }
         });
         hls.on(Hls.Events.ERROR, (event, data) => {
             if (data.fatal) {

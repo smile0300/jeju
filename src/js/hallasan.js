@@ -134,6 +134,12 @@ export function renderHallasanCCTV() {
     const grid = document.getElementById('hallasan-cctv-grid');
     if (!grid) return;
 
+    // 만약 이미 CCTV 노드가 존재하고 로딩 중이라면 재렌더링 방지
+    if (grid.querySelectorAll('.cctv-card').length === HALLASAN_CCTV.length) {
+        console.log('[Hallasan] CCTV grid already populated, skipping re-render');
+        return;
+    }
+
     grid.innerHTML = HALLASAN_CCTV.map(cam => `
         <div class="cctv-card" onclick="toggleFullscreen('hallasan-video-${cam.id}')" style="cursor: pointer;">
             <div class="cctv-video-container">
@@ -146,13 +152,17 @@ export function renderHallasanCCTV() {
         </div>
     `).join('');
 
-    // 비디오 요소가 DOM에 완전히 붙은 후에 HLS 초기화를 진행
+    // 비디오 요소가 DOM에 완전히 붙은 후에 HLS 초기화를 진행 (모바일 브라우저 안정성을 위해 지연 시간 소폭 상향)
     setTimeout(() => {
-        HALLASAN_CCTV.forEach(cam => {
-            // 직접 import한 initHlsPlayer 사용 (window.initHlsPlayer 타이밍 의존 제거)
-            initHlsPlayer(cam.url, `hallasan-video-${cam.id}`);
+        HALLASAN_CCTV.forEach((cam, index) => {
+            // 순차적 초기화로 모바일 부하 분산
+            setTimeout(() => {
+                if (document.getElementById(`hallasan-video-${cam.id}`)) {
+                    initHlsPlayer(cam.url, `hallasan-video-${cam.id}`);
+                }
+            }, index * 50); 
         });
-    }, 50);
+    }, 150);
 }
 
 // 모달 전역 접근 허용

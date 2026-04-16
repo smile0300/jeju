@@ -54,9 +54,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 return false; 
             }
 
-            // GTM, AdSense 등의 트래킹 에러는 사용자 팝업에서 제외함 (조용한 실패 처리)
+            // GTM, AdSense 등의 트래킹 에러 및 HLS.js의 InvalidStateError(Race condition)는 사용자 팝업에서 제외함
             const lowerUrl = url.toLowerCase();
-            if (!lowerUrl.includes('gtm.js') && !lowerUrl.includes('adsbygoogle.js') && !lowerUrl.includes('analytics')) {
+            const isTracking = lowerUrl.includes('gtm.js') || lowerUrl.includes('adsbygoogle.js') || lowerUrl.includes('analytics');
+            const isInvalidState = msg.includes('InvalidStateError');
+
+            if (!isTracking && !isInvalidState) {
                 alert(errorMsg + "\n\n请截图此错误并联系开发人员。");
             }
             return false;
