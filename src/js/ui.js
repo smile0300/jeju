@@ -190,7 +190,6 @@ function _buildSummaryHTML(targetYmd) {
     <div class="wsm-header2">
         <div class="wsm-title-bar">
             <span>${summaryIcon} ${titleText}</span>
-            <span class="wsm-date-badge">${dateLabel}</span>
         </div>
         <div class="wsm-header-btns">
             <button class="wsm-capture-btn" onclick="window.captureWeatherSummary()" title="Capture Screenshot">📸</button>
