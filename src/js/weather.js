@@ -409,9 +409,10 @@ export function updateHourlyWeather(locKey, targetYmd) {
                 btn = document.createElement('button');
                 btn.className = 'weather-summary-btn';
                 btn.textContent = '简略查看';
-                btn.onclick = () => window.openWeatherSummaryModal(targetYmd);
                 titleWrap.appendChild(btn);
             }
+            // 매번 현재 선택된 targetYmd로 핸들러 갱신
+            btn.onclick = () => window.openWeatherSummaryModal(targetYmd);
         }
     }
 
