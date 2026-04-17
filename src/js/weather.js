@@ -402,18 +402,16 @@ export function updateHourlyWeather(locKey, targetYmd) {
             titleWrap.appendChild(titleEl);
         }
 
-        // Add '简略查看' button only for Jeju tab
-        if (locKey === 'jeju') {
-            let btn = titleWrap.querySelector('.weather-summary-btn');
-            if (!btn) {
-                btn = document.createElement('button');
-                btn.className = 'weather-summary-btn';
-                btn.textContent = '简略查看';
-                titleWrap.appendChild(btn);
-            }
-            // 매번 현재 선택된 targetYmd로 핸들러 갱신
-            btn.onclick = () => window.openWeatherSummaryModal(targetYmd);
+        // Add '简略查看' button for all locations
+        let btn = titleWrap.querySelector('.weather-summary-btn');
+        if (!btn) {
+            btn = document.createElement('button');
+            btn.className = 'weather-summary-btn';
+            btn.textContent = '简略查看';
+            titleWrap.appendChild(btn);
         }
+        // 매번 현재 선택된 targetYmd로 핸들러 갱신
+        btn.onclick = () => window.openWeatherSummaryModal(targetYmd);
     }
 
     const hourlyEl = document.getElementById(`hourly-${locKey}`);
