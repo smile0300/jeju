@@ -1308,18 +1308,18 @@
 }
 
 .wsm-panel.fullscreen .wsm-loc-block {
-    min-width: 100% !important;
     width: 100% !important;
     scroll-snap-align: start !important;
     margin: 0 !important;
-    padding: 60px 20px !important;
+    padding: 50px 15px 30px 15px !important;
     box-sizing: border-box !important;
     display: flex !important;
     flex-direction: column !important;
     background: transparent !important;
     box-shadow: none !important;
     height: 100% !important;
-    overflow-y: auto !important;
+    overflow-y: hidden !important; /* Fixed: Remove scroll */
+    justify-content: center;
 }
 
 .wsm-page-indicator {
@@ -1348,3 +1348,33 @@
 
 .wsm-nav-zone.prev { left: 0; }
 .wsm-nav-zone.next { right: 0; }
+
+
+/* Fullscreen Compact Layout Optimization */
+.wsm-panel.fullscreen .wsm-loc-title {
+    font-size: 1.1rem !important;
+    margin-bottom: 15px !important;
+}
+.wsm-panel.fullscreen .wsm-hourly-grid {
+    display: grid !important;
+    grid-template-columns: repeat(6, 1fr) !important;
+    gap: 6px 4px !important;
+    width: 100% !important;
+}
+.wsm-panel.fullscreen .wsm-h-item {
+    padding: 6px 2px !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-radius: 8px !important;
+}
+.wsm-panel.fullscreen .h-time { font-size: 0.65rem !important; opacity: 0.8; }
+.wsm-panel.fullscreen .h-icon { font-size: 1.4rem !important; margin: 2px 0 !important; }
+.wsm-panel.fullscreen .h-temp { font-size: 0.85rem !important; font-weight: 800 !important; }
+.wsm-panel.fullscreen .h-wind { font-size: 0.6rem !important; }
+.wsm-panel.fullscreen .h-precip { font-size: 0.6rem !important; }
+
+@media (max-height: 700px) {
+    .wsm-panel.fullscreen .wsm-loc-block { padding-top: 40px !important; }
+    .wsm-panel.fullscreen .wsm-hourly-grid { grid-template-columns: repeat(8, 1fr) !important; gap: 4px 2px !important; }
+    .wsm-panel.fullscreen .h-icon { font-size: 1.1rem !important; }
+    .wsm-panel.fullscreen .wsm-loc-title { font-size: 0.9rem !important; margin-bottom: 8px !important; }
+}
