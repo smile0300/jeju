@@ -65,11 +65,13 @@ const closeAllModals = () => {
         }
     });
     
-    // 특정 모달들의 잔여물 지우기 (비디오 중지 등)
+    // 특정 모달들의 잔여물 지우기 (비디오 중지 및 전체화면 해제 등)
     if (window.closeCctvCard) window.closeCctvCard(true); // true means skip history.back()
-    if (window.closeCctvModal) window.closeCctvModal();
-    if (window.closeLostDetailModal) window.closeLostDetailModal();
-    if (window.closeLostReportModal) window.closeLostReportModal();
+    if (window.closeCctvModal) window.closeCctvModal(true);
+    if (window.closeLostDetailModal) window.closeLostDetailModal(true);
+    if (window.closeLostReportModal) window.closeLostReportModal(true);
+    if (window.exitWeatherFullscreen) window.exitWeatherFullscreen();
+    
     document.body.style.overflow = '';
     return wasOpen;
 };
