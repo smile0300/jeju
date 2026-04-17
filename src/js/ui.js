@@ -265,6 +265,16 @@ window.enterWeatherFullscreen = function() {
         document.body.appendChild(hint);
     }
     
+    // Add watermark
+    let watermark = document.getElementById('wsm-watermark');
+    if (!watermark) {
+        watermark = document.createElement('div');
+        watermark.id = 'wsm-watermark';
+        watermark.className = 'wsm-watermark';
+        watermark.innerHTML = 'JEJU LIVE';
+        modal.appendChild(watermark);
+    }
+    
     setTimeout(() => hint.classList.add('show'), 100);
     setTimeout(() => {
         if (hint) {
@@ -345,6 +355,7 @@ window.exitWeatherFullscreen = function() {
     document.getElementById('wsm-fs-indicator')?.remove();
     document.getElementById('wsm-nav-prev')?.remove();
     document.getElementById('wsm-nav-next')?.remove();
+    document.getElementById('wsm-watermark')?.remove();
     
     // Restore original click handler
     modal.onclick = e => { if (e.target === modal) window.closeWeatherSummaryModal(); };

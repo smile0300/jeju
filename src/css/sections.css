@@ -1465,3 +1465,26 @@
     opacity: 1 !important;
     visibility: visible !important;
 }
+
+/* Weather Fullscreen Watermark */
+.wsm-watermark {
+    position: fixed !important;
+    bottom: 25px !important;
+    right: 25px !important;
+    font-size: 1.8rem !important;
+    font-weight: 1000 !important;
+    color: #0f172a !important;
+    opacity: 0.08 !important;
+    letter-spacing: -1px !important;
+    text-transform: uppercase !important;
+    pointer-events: none !important;
+    z-index: 9999 !important;
+    font-family: inherit !important;
+    user-select: none !important;
+    animation: fadeInWatermark 1s ease-out forwards;
+}
+
+@keyframes fadeInWatermark {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 0.08; transform: translateY(0); }
+}
