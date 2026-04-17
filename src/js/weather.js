@@ -400,12 +400,19 @@ export function updateHourlyWeather(locKey, targetYmd) {
         }
     }
 
-    // Handle Summary Button - Place it near the hourly results
+    // Handle Summary Button - Place it below air quality info
+    const airQualityEl = document.getElementById(`air-quality-${locKey}`);
     let btnContainer = hourlyEl.parentElement.querySelector('.weather-summary-btn-container');
     if (!btnContainer) {
         btnContainer = document.createElement('div');
         btnContainer.className = 'weather-summary-btn-container';
-        hourlyEl.parentNode.insertBefore(btnContainer, hourlyEl);
+    }
+    
+    // Always move/ensure it's after air quality if exists, otherwise after hourly
+    if (airQualityEl) {
+        airQualityEl.parentNode.insertBefore(btnContainer, airQualityEl.nextSibling);
+    } else {
+        hourlyEl.parentNode.insertBefore(btnContainer, hourlyEl.nextSibling);
     }
     
     let btn = btnContainer.querySelector('.weather-summary-btn');
