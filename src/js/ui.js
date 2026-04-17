@@ -241,18 +241,18 @@ window.enterWeatherFullscreen = function() {
     panel.classList.add('fullscreen');
     btnContainer?.classList.add('wsm-fullscreen-hide');
     
-    // Add floating exit button
+    // Add exit button to header
     let exitBtn = document.getElementById('wsm-fs-exit');
     if (!exitBtn) {
-        exitBtn = document.createElement('div');
+        exitBtn = document.createElement('button');
         exitBtn.id = 'wsm-fs-exit';
-        exitBtn.className = 'wsm-fullscreen-exit-btn';
+        exitBtn.className = 'wsm-fs-close-btn'; // Updated class for header placement
         exitBtn.innerHTML = '✕';
         exitBtn.onclick = (e) => {
             e.stopPropagation();
             window.exitWeatherFullscreen();
         };
-        document.body.appendChild(exitBtn);
+        btnContainer?.appendChild(exitBtn);
     }
     
     // Add hint toast
@@ -280,8 +280,8 @@ window.enterWeatherFullscreen = function() {
         if (!indicator) {
             indicator = document.createElement('div');
             indicator.id = 'wsm-fs-indicator';
-            indicator.className = 'wsm-page-indicator';
-            document.body.appendChild(indicator);
+            indicator.className = 'wsm-fs-indicator-header'; // Updated class for header placement
+            btnContainer?.insertBefore(indicator, exitBtn);
         }
 
         const updateIndicator = () => {
