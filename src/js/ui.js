@@ -192,6 +192,7 @@ function _buildSummaryHTML(targetYmd) {
             <span>${titleText}</span>
         </div>
         <div class="wsm-header-btns">
+            <button class="wsm-capture-btn" onclick="window.enterWeatherFullscreen()" title="Full Screen View">📱</button>
             <button class="wsm-capture-btn" onclick="window.captureWeatherSummary()" title="Capture Screenshot">📸</button>
             <button class="wsm-close-btn2" onclick="window.closeWeatherSummaryModal()">✕</button>
         </div>
@@ -221,9 +222,86 @@ export function closeWeatherSummaryModal(fromPopState = false) {
     if (modal) { 
         modal.style.display = 'none'; 
         document.body.style.overflow = ''; 
+        if (modal.classList.contains('fullscreen')) window.exitWeatherFullscreen();
         if (!fromPopState && window.location.hash === '#modal') window.history.back();
     }
 }
+
+/**
+ * Weather Summary Fullscreen (Clean View) Logic
+ */
+window.enterWeatherFullscreen = function() {
+    const modal = document.getElementById('weather-summary-modal');
+    const panel = modal?.querySelector('.wsm-panel');
+    const btnContainer = modal?.querySelector('.wsm-header-btns');
+    const body = modal?.querySelector('.wsm-body2');
+    
+    if (!modal || !panel) return;
+
+    modal.classList.add('fullscreen');
+    panel.classList.add('fullscreen');
+    btnContainer?.classList.add('wsm-fullscreen-hide');
+    
+    // Add floating exit button
+    let exitBtn = document.getElementById('wsm-fs-exit');
+    if (!exitBtn) {
+        exitBtn = document.createElement('div');
+        exitBtn.id = 'wsm-fs-exit';
+        exitBtn.className = 'wsm-fullscreen-exit-btn';
+        exitBtn.innerHTML = '✕';
+        exitBtn.onclick = (e) => {
+            e.stopPropagation();
+            window.exitWeatherFullscreen();
+        };
+        document.body.appendChild(exitBtn);
+    }
+    
+    // Add hint toast
+    let hint = document.getElementById('wsm-fs-hint');
+    if (!hint) {
+        hint = document.createElement('div');
+        hint.id = 'wsm-fs-hint';
+        hint.className = 'wsm-exit-hint';
+        hint.innerHTML = '📸 캡처 후 화면을 탭하면 돌아옵니다';
+        document.body.appendChild(hint);
+    }
+    
+    setTimeout(() => hint.classList.add('show'), 100);
+    setTimeout(() => {
+        if (hint) {
+            hint.classList.remove('show');
+            setTimeout(() => hint?.remove(), 500);
+        }
+    }, 4000);
+    
+    // Ensure no accidental tap-to-exit on modal background
+    modal.onclick = (e) => {
+        if (!modal.classList.contains('fullscreen')) {
+            if (e.target === modal) window.closeWeatherSummaryModal();
+        }
+    };
+
+    window.scrollTo(0, 0);
+    if (body) body.scrollTop = 0;
+};
+
+window.exitWeatherFullscreen = function() {
+    const modal = document.getElementById('weather-summary-modal');
+    const panel = modal?.querySelector('.wsm-panel');
+    const btnContainer = modal?.querySelector('.wsm-header-btns');
+    
+    if (!modal || !panel) return;
+
+    modal.classList.remove('fullscreen');
+    panel.classList.remove('fullscreen');
+    btnContainer?.classList.remove('wsm-fullscreen-hide');
+    
+    document.getElementById('wsm-fs-exit')?.remove();
+    document.getElementById('wsm-fs-hint')?.remove();
+    
+    // Restore original click handler
+    modal.onclick = e => { if (e.target === modal) window.closeWeatherSummaryModal(); };
+};
 
 /**
  * Weather Summary Modal Capture Logic

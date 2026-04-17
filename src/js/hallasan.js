@@ -45,7 +45,7 @@ export async function fetchHallasanStatus() {
         while (retryCount >= 0) {
             try {
                 response = await fetch(url, { signal: AbortSignal.timeout(15000) });
-                if (!response.ok) throw new Error(`HTTP \${response.status}`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 break;
             } catch (err) {
                 if (retryCount === 0) throw err;
@@ -87,16 +87,16 @@ export async function fetchHallasanStatus() {
             return { ...t, statusCn: info.cn, statusCls: info.cls };
         });
 
-        container.innerHTML = `汉拿山登山信息更新: \${now}`;
+        container.innerHTML = `汉拿山登山信息更新: ${now}`;
         trailsEl.innerHTML = trails.map(t => `
             <div class="trail-card">
                 <div class="trail-header">
-                    <h4>\${t.nameCn}</h4>
-                    <span class="trail-status-badge \${t.statusCls}">\${t.statusCn}</span>
+                    <h4>${t.nameCn}</h4>
+                    <span class="trail-status-badge ${t.statusCls}">${t.statusCn}</span>
                 </div>
                 <div class="trail-info-compact">
-                    <span>📏 \${t.distanceCn}</span>
-                    <span>⏱️ \${t.timeCn}</span>
+                    <span>📏 ${t.distanceCn}</span>
+                    <span>⏱️ ${t.timeCn}</span>
                 </div>
             </div>`).join('');
 
@@ -106,7 +106,7 @@ export async function fetchHallasanStatus() {
             const isTimeout = e.name === 'TimeoutError' || e.message.includes('timeout') || e.message.includes('signal');
             const errorText = isTimeout ? '官方网站响应延迟中 (请稍后再试)' : '暂时無法加载登山路状态';
             trailsEl.innerHTML = `<div class="error-msg" style="grid-column: 1/-1; text-align:center; padding: 20px;">
-                <p style="color: var(--text-muted); font-size: 0.85rem;">\${errorText}</p>
+                <p style="color: var(--text-muted); font-size: 0.85rem;">${errorText}</p>
                 <button onclick="location.reload()" style="margin-top:10px; padding: 8px 16px; border-radius: 8px; border:none; background:var(--primary-gradient); color:white; font-weight:700;">重新加载</button>
             </div>`;
         }
@@ -128,21 +128,21 @@ export function renderHallasanCCTV() {
     if (!grid) return;
     if (grid.querySelectorAll('.cctv-card').length === HALLASAN_CCTV.length) return;
     grid.innerHTML = HALLASAN_CCTV.map(cam => `
-        <div class="cctv-card" onclick="toggleFullscreen('hallasan-video-\${cam.id}')" style="cursor: pointer;">
+        <div class="cctv-card" onclick="toggleFullscreen('hallasan-video-${cam.id}')" style="cursor: pointer;">
             <div class="cctv-video-container">
-                <video id="hallasan-video-\${cam.id}" class="cctv-video-el" muted playsinline autoplay></video>
+                <video id="hallasan-video-${cam.id}" class="cctv-video-el" muted playsinline autoplay></video>
                 <div class="cctv-tag">LIVE</div>
             </div>
             <div class="cctv-info" style="padding: 6px 4px; text-align: center;">
-                <span class="cctv-name" style="font-weight: 800; font-size: 0.85rem;">\${cam.nameCn}</span>
+                <span class="cctv-name" style="font-weight: 800; font-size: 0.85rem;">${cam.nameCn}</span>
             </div>
         </div>`).join('');
 
     setTimeout(() => {
         HALLASAN_CCTV.forEach((cam, index) => {
             setTimeout(() => {
-                if (document.getElementById(\`hallasan-video-\${cam.id}\`)) {
-                    initHlsPlayer(cam.url, \`hallasan-video-\${cam.id}\`);
+                if (document.getElementById(`hallasan-video-${cam.id}`)) {
+                    initHlsPlayer(cam.url, `hallasan-video-${cam.id}`);
                 }
             }, index * 50);
         });
