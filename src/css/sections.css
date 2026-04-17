@@ -1290,3 +1290,42 @@
 .wsm-fullscreen-exit-btn { position: fixed; top: 15px; right: 15px; width: 36px; height: 36px; background: rgba(255, 255, 255, 0.4) !important; backdrop-filter: blur(2px) !important; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: #475569; z-index: 9999; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.03); border: 1px solid rgba(255,255,255,0.2); transition: all 0.2s; }
 .wsm-fullscreen-exit-btn:hover { background: rgba(255, 255, 255, 0.8) !important; transform: scale(1.1); }
 
+
+/* ==================== Weather Summary Slider Mode ==================== */
+.wsm-panel.fullscreen .wsm-body2 {
+    display: flex !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory !important;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 !important;
+    height: 100% !important;
+}
+
+.wsm-panel.fullscreen .wsm-loc-block {
+    min-width: 100% !important;
+    width: 100% !important;
+    scroll-snap-align: start !important;
+    margin: 0 !important;
+    padding: 60px 20px !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    height: 100% !important;
+    overflow-y: auto !important;
+}
+
+.wsm-page-indicator {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(4px);
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    color: #475569;
+    font-weight: 800;
+    z-index: 10000;
+}
