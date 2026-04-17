@@ -322,7 +322,11 @@ window.enterWeatherFullscreen = function() {
     };
 
     window.scrollTo(0, 0);
-    if (body) body.scrollLeft = 0;
+    if (body) {
+        setTimeout(() => {
+            body.scrollLeft = 0;
+        }, 50);
+    }
 };
 
 window.exitWeatherFullscreen = function() {

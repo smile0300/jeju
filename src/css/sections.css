@@ -1,4 +1,4 @@
-﻿/* ==================== CCTV ==================== */
+/* ==================== CCTV ==================== */
 .cctv-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -1289,7 +1289,18 @@
 /* ==================== Weather Summary Fullscreen (Clean View) ==================== */
 .wsm-overlay.fullscreen { background: #f8fafc !important; backdrop-filter: none !important; padding: 0 !important; }
 .wsm-panel.fullscreen { max-width: none !important; max-height: 100% !important; height: 100% !important; border-radius: 0 !important; box-shadow: none !important; }
-.wsm-panel.fullscreen .wsm-body2 { flex: 1 !important; height: auto !important; max-height: none !important; }
+.wsm-panel.fullscreen .wsm-body2 {
+    display: flex !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory !important;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 !important;
+    margin: 0 !important;
+    height: 100% !important;
+    width: 100% !important;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+}
 .wsm-fullscreen-hide { display: none !important; }
 .wsm-exit-hint { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: rgba(15, 23, 42, 0.7); color: white; padding: 10px 20px; border-radius: 25px; font-size: 0.9rem; pointer-events: none; opacity: 0; transition: opacity 0.5s; z-index: 10000; white-space: nowrap; }
 .wsm-exit-hint.show { opacity: 1; }
@@ -1304,11 +1315,17 @@
     scroll-snap-type: x mandatory !important;
     -webkit-overflow-scrolling: touch;
     padding: 0 !important;
+    margin: 0 !important;
     height: 100% !important;
+    width: 100% !important;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
 }
 
 .wsm-panel.fullscreen .wsm-loc-block {
     width: 100% !important;
+    min-width: 100% !important;
+    flex-shrink: 0 !important;
     scroll-snap-align: start !important;
     margin: 0 !important;
     padding: 50px 15px 30px 15px !important;
@@ -1318,8 +1335,20 @@
     background: transparent !important;
     box-shadow: none !important;
     height: 100% !important;
-    overflow-y: hidden !important; /* Fixed: Remove scroll */
+    overflow-y: hidden !important;
     justify-content: center;
+}
+
+.wsm-page-indicator {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(4px);
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    color: #475569;
 }
 
 .wsm-page-indicator {
@@ -1339,10 +1368,10 @@
 /* ==================== Navigation Tap Zones ==================== */
 .wsm-nav-zone {
     position: fixed;
-    top: 60px; /* ���� �� �Ʒ����� */
+    top: 60px; /* Header 영역 제외 */
     bottom: 0;
-    width: 25%;
-    z-index: 9998; /* �ε������ͺ��ٴ� ���� ī�庸�ٴ� ��� */
+    width: 30%;
+    z-index: 9998;
     cursor: pointer;
 }
 
@@ -1373,7 +1402,22 @@
 .wsm-panel.fullscreen .h-precip { font-size: 0.6rem !important; }
 
 @media (max-height: 700px) {
-    .wsm-panel.fullscreen .wsm-loc-block { padding-top: 40px !important; }
+    .wsm-panel.fullscreen .wsm-loc-block {
+    width: 100% !important;
+    min-width: 100% !important;
+    flex-shrink: 0 !important;
+    scroll-snap-align: start !important;
+    margin: 0 !important;
+    padding: 50px 15px 30px 15px !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    height: 100% !important;
+    overflow-y: hidden !important;
+    justify-content: center;
+}
     .wsm-panel.fullscreen .wsm-hourly-grid { grid-template-columns: repeat(8, 1fr) !important; gap: 4px 2px !important; }
     .wsm-panel.fullscreen .h-icon { font-size: 1.1rem !important; }
     .wsm-panel.fullscreen .wsm-loc-title { font-size: 0.9rem !important; margin-bottom: 8px !important; }
