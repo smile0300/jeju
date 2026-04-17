@@ -308,6 +308,28 @@
 
 /* Titles and Alignment */
 .subsection-title-wrap {
+    display: none !important; /* Title removed per user request */
+}
+
+/* Weather Dashboard UI Improvements */
+.weekly-item.active .weekly-day { 
+    color: var(--accent-blue) !important; 
+    font-weight: 900 !important; 
+}
+
+.weather-summary-btn-container {
+    display: flex;
+    justify-content: center;
+    margin: 10px 0 20px 0;
+}
+
+.weather-summary-btn.inline {
+    position: static !important;
+    transform: none !important;
+    margin: 0 auto !important;
+}
+
+.subsection-title-wrap {
     display: flex;
     justify-content: center;
     align-items: center;

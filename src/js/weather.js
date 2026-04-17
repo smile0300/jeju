@@ -387,32 +387,31 @@ export function updateHourlyWeather(locKey, targetYmd) {
         });
     }
 
+    const hourlyEl = document.getElementById(`hourly-${locKey}`);
+    if (!hourlyEl) return;
+
+    // Remove old title wrap if exists or hide title logic
     const titleEl = document.getElementById(`hourly-title-${locKey}`);
-    if (titleEl) {
-        const m = targetYmd.slice(4, 6);
-        const d = targetYmd.slice(6, 8);
-        titleEl.textContent = `${parseInt(m)}月 ${parseInt(d)}日`;
-
-        // Wrap title in a flex container if not already
-        let titleWrap = titleEl.parentElement;
-        if (!titleWrap.classList.contains('subsection-title-wrap')) {
-            titleWrap = document.createElement('div');
-            titleWrap.className = 'subsection-title-wrap';
-            titleEl.parentNode.insertBefore(titleWrap, titleEl);
-            titleWrap.appendChild(titleEl);
-        }
-
-        // Add '简略查看' button for all locations
-        let btn = titleWrap.querySelector('.weather-summary-btn');
-        if (!btn) {
-            btn = document.createElement('button');
-            btn.className = 'weather-summary-btn';
-            btn.textContent = '简略查看';
-            titleWrap.appendChild(btn);
-        }
-        // 매번 현재 선택된 targetYmd로 핸들러 갱신
-        btn.onclick = () => window.openWeatherSummaryModal(targetYmd);
+    if (titleEl && titleEl.parentElement.classList.contains('subsection-title-wrap')) {
+        titleEl.parentElement.style.display = 'none';
     }
+
+    // Handle Summary Button - Place it near the hourly results
+    let btnContainer = hourlyEl.parentElement.querySelector('.weather-summary-btn-container');
+    if (!btnContainer) {
+        btnContainer = document.createElement('div');
+        btnContainer.className = 'weather-summary-btn-container';
+        hourlyEl.parentNode.insertBefore(btnContainer, hourlyEl);
+    }
+    
+    let btn = btnContainer.querySelector('.weather-summary-btn');
+    if (!btn) {
+        btn = document.createElement('button');
+        btn.className = 'weather-summary-btn inline';
+        btn.textContent = '简略查看';
+        btnContainer.appendChild(btn);
+    }
+    btn.onclick = () => window.openWeatherSummaryModal(targetYmd);
 
     const hourlyEl = document.getElementById(`hourly-${locKey}`);
     if (!hourlyEl) return;
