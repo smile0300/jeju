@@ -1279,71 +1279,14 @@
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
     z-index: 10003;
 }
-@charset " UTF-8\;
 
 /* ==================== Weather Summary Fullscreen (Clean View) ==================== */
-.wsm-overlay.fullscreen {
-    background: #f8fafc !important;
-    backdrop-filter: none !important;
-    padding: 0 !important;
-}
+.wsm-overlay.fullscreen { background: #f8fafc !important; backdrop-filter: none !important; padding: 0 !important; }
+.wsm-panel.fullscreen { max-width: none !important; max-height: 100% !important; height: 100% !important; border-radius: 0 !important; box-shadow: none !important; }
+.wsm-panel.fullscreen .wsm-body2 { flex: 1 !important; height: auto !important; max-height: none !important; }
+.wsm-fullscreen-hide { display: none !important; }
+.wsm-exit-hint { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: rgba(15, 23, 42, 0.7); color: white; padding: 10px 20px; border-radius: 25px; font-size: 0.9rem; pointer-events: none; opacity: 0; transition: opacity 0.5s; z-index: 10000; white-space: nowrap; }
+.wsm-exit-hint.show { opacity: 1; }
+.wsm-fullscreen-exit-btn { position: fixed; top: 15px; right: 15px; width: 36px; height: 36px; background: rgba(255, 255, 255, 0.4) !important; backdrop-filter: blur(2px) !important; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: #475569; z-index: 9999; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.03); border: 1px solid rgba(255,255,255,0.2); transition: all 0.2s; }
+.wsm-fullscreen-exit-btn:hover { background: rgba(255, 255, 255, 0.8) !important; transform: scale(1.1); }
 
-.wsm-panel.fullscreen {
-    max-width: none !important;
-    max-height: 100% !important;
-    height: 100% !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-}
-
-.wsm-panel.fullscreen .wsm-body2 {
-    flex: 1 !important;
-    height: auto !important;
-    max-height: none !important;
-}
-
-.wsm-fullscreen-hide {
-    display: none !important;
-}
-
-.wsm-exit-hint {
-    position: fixed;
-    bottom: 80px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(15, 23, 42, 0.7);
-    color: white;
-    padding: 10px 20px;
-    border-radius: 25px;
-    font-size: 0.9rem;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.5s;
-    z-index: 10000;
-    white-space: nowrap;
-}
-
-.wsm-exit-hint.show {
-    opacity: 1;
-}
-
-.wsm-fullscreen-exit-btn {
-    position: fixed;
-    top: 15px;
-    right: 15px;
-    width: 36px;
-    height: 36px;
-    background: rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(4px);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
-    color: #475569;
-    z-index: 9999;
-    cursor: pointer;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    border: 1px solid rgba(255,255,255,0.3);
-}
-.wsm-fullscreen-exit-btn { background: rgba(255, 255, 255, 0.4) !important; backdrop-filter: blur(2px) !important; transition: all 0.2s; } .wsm-fullscreen-exit-btn:hover { background: rgba(255, 255, 255, 0.8) !important; transform: scale(1.1); }
