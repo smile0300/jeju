@@ -73,6 +73,7 @@
     font-weight: 1000;
     letter-spacing: -4px;
     text-transform: uppercase;
+    white-space: nowrap;
     line-height: 1;
     /* 생동감 넘치는 물결 그라데이션 */
     background: linear-gradient(
