@@ -293,6 +293,26 @@ window.enterWeatherFullscreen = function() {
 
         body.addEventListener('scroll', updateIndicator);
         updateIndicator();
+
+        // Add tap-to-navigate zones
+        const prevZone = document.createElement('div');
+        prevZone.id = 'wsm-nav-prev';
+        prevZone.className = 'wsm-nav-zone prev';
+        prevZone.onclick = (e) => {
+            e.stopPropagation();
+            body.scrollBy({ left: -body.clientWidth, behavior: 'smooth' });
+        };
+        
+        const nextZone = document.createElement('div');
+        nextZone.id = 'wsm-nav-next';
+        nextZone.className = 'wsm-nav-zone next';
+        nextZone.onclick = (e) => {
+            e.stopPropagation();
+            body.scrollBy({ left: body.clientWidth, behavior: 'smooth' });
+        };
+
+        document.body.appendChild(prevZone);
+        document.body.appendChild(nextZone);
     }
 
     // Ensure no accidental tap-to-exit on modal background
@@ -320,6 +340,8 @@ window.exitWeatherFullscreen = function() {
     document.getElementById('wsm-fs-exit')?.remove();
     document.getElementById('wsm-fs-hint')?.remove();
     document.getElementById('wsm-fs-indicator')?.remove();
+    document.getElementById('wsm-nav-prev')?.remove();
+    document.getElementById('wsm-nav-next')?.remove();
     
     // Restore original click handler
     modal.onclick = e => { if (e.target === modal) window.closeWeatherSummaryModal(); };

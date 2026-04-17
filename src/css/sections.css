@@ -1329,3 +1329,16 @@
     font-weight: 800;
     z-index: 10000;
 }
+
+/* ==================== Navigation Tap Zones ==================== */
+.wsm-nav-zone {
+    position: fixed;
+    top: 60px; /* 제목 바 아래부터 */
+    bottom: 0;
+    width: 25%;
+    z-index: 9998; /* 인디케이터보다는 낮고 카드보다는 높게 */
+    cursor: pointer;
+}
+
+.wsm-nav-zone.prev { left: 0; }
+.wsm-nav-zone.next { right: 0; }
