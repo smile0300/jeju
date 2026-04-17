@@ -1,4 +1,4 @@
-/* ==================== CCTV ==================== */
+﻿/* ==================== CCTV ==================== */
 .cctv-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -1421,4 +1421,47 @@
     .wsm-panel.fullscreen .wsm-hourly-grid { grid-template-columns: repeat(8, 1fr) !important; gap: 4px 2px !important; }
     .wsm-panel.fullscreen .h-icon { font-size: 1.1rem !important; }
     .wsm-panel.fullscreen .wsm-loc-title { font-size: 0.9rem !important; margin-bottom: 8px !important; }
+}
+
+/* Fullscreen Header Elements */
+.wsm-fs-indicator-header {
+    font-size: 0.8rem !important;
+    background: rgba(0, 0, 0, 0.05) !important;
+    padding: 4px 12px !important;
+    border-radius: 20px !important;
+    color: #475569 !important;
+    font-weight: 800 !important;
+    margin-right: 12px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+}
+.wsm-fs-close-btn {
+    background: rgba(0, 0, 0, 0.05) !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 50% !important;
+    color: #475569 !important;
+    font-size: 1.1rem !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.2s !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+    z-index: 10001 !important;
+}
+.wsm-fs-close-btn:hover {
+    background: rgba(0, 0, 0, 0.1) !important;
+    transform: scale(1.1);
+}
+.wsm-header-btns.wsm-fullscreen-hide > button:not(.wsm-fs-close-btn) {
+    display: none !important;
+}
+.wsm-header-btns.wsm-fullscreen-hide {
+    display: flex !important;
+    align-items: center !important;
+    opacity: 1 !important;
+    visibility: visible !important;
 }
