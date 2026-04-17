@@ -272,7 +272,7 @@ window.enterWeatherFullscreen = function() {
         watermark.id = 'wsm-watermark';
         watermark.className = 'wsm-watermark';
         watermark.innerHTML = 'jeju-live.com';
-        modal.appendChild(watermark);
+        document.body.appendChild(watermark);
     }
     
     setTimeout(() => hint.classList.add('show'), 100);
