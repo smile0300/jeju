@@ -522,10 +522,23 @@ export function switchWeatherLocation(loc) {
     }
 }
 
+// 대기질 데이터 캐싱 (지역별 데이터 및 타임스탬프)
+const AIR_QUALITY_CACHE = {};
+const AQ_CACHE_TTL = 30 * 60 * 1000; // 30분 유효
+
 // Air Quality logic
 export async function fetchAirQuality(locKey) {
     const loc = CONFIG.WEATHER_LOCATIONS[locKey];
     if (!loc || !loc.stationName) return;
+
+    // 캐시 확인: 유효한 캐시가 있으면 네트워크 요청 생략
+    const now = Date.now();
+    const cached = AIR_QUALITY_CACHE[locKey];
+    if (cached && (now - cached.timestamp < AQ_CACHE_TTL)) {
+        console.log(`[AirQuality] 캐시 데이터 사용 (${locKey})`);
+        renderAirQuality(locKey, cached.data);
+        return;
+    }
 
     const endpoint = 'https://apis.data.go.kr/B552584/ArpltnInforInqireSvc/getMsrstnAcctoRltmMesureDnsty';
     const params = {
@@ -540,11 +553,24 @@ export async function fetchAirQuality(locKey) {
     try {
         const json = await fetchPublicDataJson(endpoint, params);
         const item = json?.response?.body?.items?.[0];
-        if (item) renderAirQuality(locKey, item);
-        else renderAirQualityError(locKey);
+        if (item) {
+            // 성공 시 캐시 저장
+            AIR_QUALITY_CACHE[locKey] = {
+                timestamp: Date.now(),
+                data: item
+            };
+            renderAirQuality(locKey, item);
+        } else {
+            renderAirQualityError(locKey);
+        }
     } catch (e) {
-        console.error(`대기질 API 오류(${locKey}):`, e);
-        renderAirQualityError(locKey);
+        // 429 에러 등 발생 시 기존 캐시가 있다면 최대한 유지하거나 에러 메시지 억제
+        console.warn(`[AirQuality] API 지연/제한 (${locKey}):`, e.message);
+        if (cached) {
+            renderAirQuality(locKey, cached.data);
+        } else {
+            renderAirQualityError(locKey);
+        }
     }
 }
 
