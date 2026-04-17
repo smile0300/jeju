@@ -390,10 +390,14 @@ export function updateHourlyWeather(locKey, targetYmd) {
     const hourlyEl = document.getElementById(`hourly-${locKey}`);
     if (!hourlyEl) return;
 
-    // Remove old title wrap if exists or hide title logic
+    // Ensure title is hidden (user request to remove it)
     const titleEl = document.getElementById(`hourly-title-${locKey}`);
-    if (titleEl && titleEl.parentElement.classList.contains('subsection-title-wrap')) {
-        titleEl.parentElement.style.display = 'none';
+    if (titleEl) {
+        titleEl.style.display = 'none';
+        // If it was wrapped by previous logic, hide the wrap too
+        if (titleEl.parentElement.classList.contains('subsection-title-wrap')) {
+            titleEl.parentElement.style.display = 'none';
+        }
     }
 
     // Handle Summary Button - Place it near the hourly results
