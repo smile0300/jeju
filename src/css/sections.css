@@ -1488,8 +1488,16 @@
     visibility: visible !important;
 }
 
-/* Weather Fullscreen Watermark */
-.wsm-watermark {
+/* Force hide all weather titles across all locations */
+#weather .subsection-title,
+[id^="hourly-title-"] {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+}
     position: fixed !important;
     top: 55% !important; /* Slightly lower than exact center for visual balance */
     left: 50% !important;
@@ -1516,4 +1524,15 @@
 @keyframes fadeInWatermark {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 0.08; transform: translateY(0); }
+}
+
+/* Force hide all weather titles across all locations */
+#weather .subsection-title,
+[id^="hourly-title-"] {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
 }

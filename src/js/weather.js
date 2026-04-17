@@ -731,3 +731,15 @@ window.closeWeatherAlertModal = function() {
         document.body.style.overflow = 'auto';
     }
 };
+
+// Force remove any leftover weather titles on load (Safety Fallback)
+document.addEventListener('DOMContentLoaded', () => {
+    const removeTitles = () => {
+        document.querySelectorAll('[id^="hourly-title-"]').forEach(el => {
+            el.remove();
+        });
+    };
+    removeTitles();
+    setTimeout(removeTitles, 500); // Retry after a short delay for dynamic content
+    setTimeout(removeTitles, 2000); // Final check
+});
