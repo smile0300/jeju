@@ -1498,6 +1498,7 @@
     padding: 0 !important;
     overflow: hidden !important;
 }
+.wsm-watermark {
     position: fixed !important;
     top: 55% !important; /* Slightly lower than exact center for visual balance */
     left: 50% !important;
