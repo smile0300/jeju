@@ -262,7 +262,7 @@ window.enterWeatherFullscreen = function() {
         hint = document.createElement('div');
         hint.id = 'wsm-fs-hint';
         hint.className = 'wsm-exit-hint';
-        hint.innerHTML = '📸 캡처 후 화면을 탭하면 돌아옵니다';
+        hint.innerHTML = '📸 좌우로 밀어서 지역을 변경하세요';
         document.body.appendChild(hint);
     }
     
@@ -274,6 +274,27 @@ window.enterWeatherFullscreen = function() {
         }
     }, 4000);
     
+    // Slider indicator logic
+    const blocks = body?.querySelectorAll('.wsm-loc-block');
+    if (blocks && blocks.length > 0) {
+        let indicator = document.getElementById('wsm-fs-indicator');
+        if (!indicator) {
+            indicator = document.createElement('div');
+            indicator.id = 'wsm-fs-indicator';
+            indicator.className = 'wsm-page-indicator';
+            document.body.appendChild(indicator);
+        }
+
+        const updateIndicator = () => {
+            if (!body) return;
+            const index = Math.round(body.scrollLeft / body.clientWidth);
+            indicator.innerHTML = `${index + 1} / ${blocks.length}`;
+        };
+
+        body.addEventListener('scroll', updateIndicator);
+        updateIndicator();
+    }
+
     // Ensure no accidental tap-to-exit on modal background
     modal.onclick = (e) => {
         if (!modal.classList.contains('fullscreen')) {
@@ -282,7 +303,7 @@ window.enterWeatherFullscreen = function() {
     };
 
     window.scrollTo(0, 0);
-    if (body) body.scrollTop = 0;
+    if (body) body.scrollLeft = 0;
 };
 
 window.exitWeatherFullscreen = function() {
@@ -298,6 +319,7 @@ window.exitWeatherFullscreen = function() {
     
     document.getElementById('wsm-fs-exit')?.remove();
     document.getElementById('wsm-fs-hint')?.remove();
+    document.getElementById('wsm-fs-indicator')?.remove();
     
     // Restore original click handler
     modal.onclick = e => { if (e.target === modal) window.closeWeatherSummaryModal(); };
