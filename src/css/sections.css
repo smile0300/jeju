@@ -1472,7 +1472,7 @@
     top: 55% !important; /* Slightly lower than exact center for visual balance */
     left: 50% !important;
     transform: translate(-50%, -50%) rotate(-15deg) !important;
-    font-size: 15vw !important;
+    font-size: 12vw !important;
     font-weight: 1000 !important;
     color: #0f172a !important;
     opacity: 0.03 !important;
