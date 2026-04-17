@@ -417,8 +417,7 @@ export function updateHourlyWeather(locKey, targetYmd) {
     }
     btn.onclick = () => window.openWeatherSummaryModal(targetYmd);
 
-    const hourlyEl = document.getElementById(`hourly-${locKey}`);
-    if (!hourlyEl) return;
+
 
     const hourlyKeys = state.sortedKeys.filter(k => k.startsWith(targetYmd));
     if (hourlyKeys.length > 0) {
