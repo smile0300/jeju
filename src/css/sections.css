@@ -1,4 +1,4 @@
-﻿/* ==================== CCTV ==================== */
+/* ==================== CCTV ==================== */
 .cctv-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -1472,10 +1472,10 @@
     top: 55% !important; /* Slightly lower than exact center for visual balance */
     left: 50% !important;
     transform: translate(-50%, -50%) rotate(-15deg) !important;
-    font-size: 6rem !important;
+    font-size: 15vw !important;
     font-weight: 1000 !important;
     color: #0f172a !important;
-    opacity: 0.04 !important;
+    opacity: 0.03 !important;
     letter-spacing: -2px !important;
     text-transform: uppercase !important;
     pointer-events: none !important;
