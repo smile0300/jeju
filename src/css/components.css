@@ -1,3 +1,55 @@
+/* ==================== Shared Buttons ==================== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 24px;
+    border-radius: var(--radius-lg); /* 16px radius for buttons */
+    font-size: 0.95rem;
+    font-weight: 800; /* Unified font weight for buttons */
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    border: none;
+    outline: none;
+    font-family: inherit;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.btn-primary {
+    background: var(--primary-gradient);
+    color: white;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
+}
+
+.btn-primary:active {
+    transform: scale(0.97);
+}
+
+.btn-outline {
+    background: white;
+    color: var(--accent-blue);
+    border: 1.5px solid var(--accent-blue);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+}
+
+.btn-outline:hover {
+    background: var(--primary-gradient);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
+    border-color: transparent;
+}
+
+.btn-outline:active {
+    transform: scale(0.97);
+}
+
 /* ==================== Tabs & Toggle ==================== */
 .view-toggle-container {
     display: flex;
@@ -34,10 +86,10 @@
 
 /* ==================== Badges ==================== */
 .badge {
-    padding: 4px 8px;
-    border-radius: 6px;
+    padding: 4px 10px;
+    border-radius: 8px; /* unified radius */
     font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: 800; /* unified weight */
     color: white;
     display: inline-block;
     min-width: 65px;

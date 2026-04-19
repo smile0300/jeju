@@ -51,6 +51,7 @@ body {
     background: #f0f4f8;
     color: var(--text-primary);
     line-height: 1.6;
+    font-weight: 500;
     overflow-x: hidden;
     min-height: 100vh;
     width: 100%;
@@ -61,12 +62,12 @@ body {
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 var(--spacing-lg);
+    padding: 0 var(--spacing-lg); /* 32px or 2rem */
 }
 
 @media (max-width: 480px) {
     .container {
-        padding: 0 12px;
+        padding: 0 16px; /* unified left-right margin */
     }
 }
 

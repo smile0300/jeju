@@ -121,30 +121,15 @@
 }
 
 .feature-request-btn {
-    background: white;
-    color: var(--accent-blue);
-    border: 1.5px solid var(--accent-blue);
-    padding: 10px 24px;
-    border-radius: 25px;
-    font-size: 0.95rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
-}
-
-.feature-request-btn:hover {
-    background: var(--primary-gradient);
-    color: white;
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
-    border-color: transparent;
+    /* Keeping any specific sizing if needed, but styling is handled by .btn .btn-outline */
+    margin: 0 auto;
+    display: inline-flex;
 }
 
 .home-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
+    gap: 16px; /* unified 16px gap */
     max-width: 600px;
     margin: 0 auto;
 }
@@ -237,7 +222,7 @@
 
 .app-section.active {
     display: block;
-    padding-top: 30px; /* 모든 페이지 상단 여백 사용자 요청 반영 (40px -> 30px) */
+    padding-top: 24px; /* unified top margin from header */
     animation: simpleFade 0.4s ease-in-out forwards;
 }
 
@@ -247,7 +232,7 @@
 }
 
 .section {
-    padding-bottom: 40px; /* 모든 섹션 하단에 여유 공간 추가 */
+    padding-bottom: 40px; /* unified section bottom spacing */
 }
 
 .section-header {
@@ -270,7 +255,7 @@
     padding: 20px 0; 
     background: #f8fafc; 
     border-top: 1px solid var(--border-light); 
-    margin-top: 20px;
+    margin-top: 40px; /* unified top margin to footer */
 }
 .footer-grid { 
     display: flex; 
@@ -436,7 +421,7 @@
 @media (max-width: 480px) {
     .home-grid {
         grid-template-columns: repeat(3, 1fr);
-        gap: 12px;
+        gap: 12px; /* slightly smaller on mobile to fit screen */
     }
     .item-icon {
         font-size: 1.8rem;
