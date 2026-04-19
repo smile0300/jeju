@@ -427,9 +427,14 @@ export function updateHourlyWeather(locKey) {
     if (!hourlyContainer) return;
 
     const loc = CONFIG.WEATHER_LOCATIONS[locKey];
-    const sunTimes = getSunTimes(loc.lat, loc.lng, new Date());
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
 
-    const hourlyKeys = state.sortedKeys.slice(0, 24);
+    const sunToday = getSunTimes(loc.lat, loc.lng, today);
+    const sunTomorrow = getSunTimes(loc.lat, loc.lng, tomorrow);
+
+    const hourlyKeys = state.sortedKeys; // 전체 데이터 (연속 스크롤)
     if (hourlyKeys.length === 0) {
         hourlyContainer.innerHTML = '<div style="padding: 24px; text-align: center; color: #adb5bd;">暂无详细时间预报</div>';
         return;
@@ -452,33 +457,14 @@ export function updateHourlyWeather(locKey) {
         const d = state.items[k];
         const dateStr = k.slice(4, 6) + '/' + k.slice(6, 8);
         const hour = parseInt(k.slice(8, 10));
-        
-        // 일출/일몰 주입 체크 (이전 시간과 현재 시간 사이)
-        if (idx > 0) {
-            const prevHour = parseInt(hourlyKeys[idx-1].slice(8, 10));
-            
-            const checkSun = (sunHour, sunTime, label, icon) => {
-                if (sunHour === prevHour) {
-                    html += `
-                        <div class="hourly-col sun-col">
-                            <div class="h-top-section">
-                                <span class="h-date-sub" style="color:#ffa94d;">${dateStr}</span>
-                                <span class="h-time sun-time">${sunTime}</span>
-                                <span class="sun-badge">${label}${icon}</span>
-                                <span class="h-temp" style="color:#dee2e6;">--</span>
-                                <span class="h-pop" style="color:#dee2e6;">--</span>
-                            </div>
-                            <div class="h-divider" style="opacity:0.3;"></div>
-                            <div class="h-meta-row">
-                                <span class="h-meta-val" style="color:#dee2e6;">-</span>
-                                <span class="h-meta-val" style="color:#dee2e6;">-</span>
-                                <span class="h-meta-val" style="color:#dee2e6;">-</span>
-                            </div>
-                        </div>`;
-                }
-            };
-            checkSun(sunTimes.sunriseHour, sunTimes.sunrise, '日出', '↑');
-            checkSun(sunTimes.sunsetHour, sunTimes.sunset, '日落', '↓');
+        const dayOffset = k.slice(0, 8) === hourlyKeys[0].slice(0, 8) ? 0 : 1;
+        const currentSunTimes = dayOffset === 0 ? sunToday : sunTomorrow;
+
+        // 일출/일몰 주입 체크: 해당 시간에 도달하면 바로 앞에 주입
+        if (hour === currentSunTimes.sunriseHour) {
+            html += renderSunCol(dateStr, currentSunTimes.sunrise, '日出', '↑');
+        } else if (hour === currentSunTimes.sunsetHour) {
+            html += renderSunCol(dateStr, currentSunTimes.sunset, '日落', '↓');
         }
 
         const sky = getSkyInfo(d.PTY, d.SKY, hour);
@@ -507,6 +493,25 @@ export function updateHourlyWeather(locKey) {
     hourlyContainer.innerHTML = html;
 }
 
+function renderSunCol(dateStr, sunTime, label, icon) {
+    return `
+        <div class="hourly-col sun-col">
+            <div class="h-top-section">
+                <span class="h-date-sub" style="color:#ffa94d;">${dateStr}</span>
+                <span class="h-time sun-time">${sunTime}</span>
+                <span class="sun-badge">${label}${icon}</span>
+                <span class="h-temp" style="color:#dee2e6; visibility:hidden;">--</span>
+                <span class="h-pop" style="color:#dee2e6; visibility:hidden;">--</span>
+            </div>
+            <div class="h-divider" style="opacity:0;"></div>
+            <div class="h-meta-row">
+                <span class="h-meta-val" style="color:transparent;">-</span>
+                <span class="h-meta-val" style="color:transparent;">-</span>
+                <span class="h-meta-val" style="color:transparent;">-</span>
+            </div>
+        </div>`;
+}
+
 export function renderWeatherLoading(locKey) {
     const container = document.getElementById(`current-card-${locKey}`);
     if (container) {
@@ -517,7 +522,7 @@ export function renderWeatherLoading(locKey) {
 export function renderWeatherError(locKey) {
     const container = document.getElementById(`current-card-${locKey}`);
     if (container) {
-        container.innerHTML = `<div style="padding:40px; text-align:center; color: #fa5252;">⚠️ 天气数据加载失败</div>`;
+        container.innerHTML = `<div style="padding:40px; text-align:center; color: #fa5252;">⚠️ 天气 data 加载失败</div>`;
     }
 }
 
@@ -553,7 +558,7 @@ export async function fetchAirQuality(locKey) {
 
 function getAirQualityInfo(val, type) {
     const v = parseFloat(val);
-    if (isNaN(v)) return { level: 0, percent: 0, text: '--' };
+    if (isNaN(v)) return { level: 0, text: '--' };
     let level = 2, text = '良';
     if (type === 'pm10') {
         if (v <= 30) { level = 1; text = '优'; }
@@ -577,7 +582,7 @@ export function renderAirQuality(locKey, item) {
     const container = document.getElementById(`air-quality-${locKey}`);
     if (container) {
         const infoPM10 = getAirQualityInfo(item.pm10Value, 'pm10');
-        const infoPM25 = getAirQualityInfo(item.pm25Value, 'pm10'); // PM2.5 roughly similar thresholds for UI
+        const infoPM25 = getAirQualityInfo(item.pm25Value, 'pm10');
         const infoO3 = getAirQualityInfo(item.o3Value, 'o3');
 
         container.innerHTML = `

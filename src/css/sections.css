@@ -1905,37 +1905,40 @@
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     grid-template-rows: repeat(2, auto);
-    gap: 8px;
+    gap: 5px;
     margin-top: 10px;
+    width: 100%;
 }
 .weekly-card {
     background: #ffffff;
     border: 1px solid #f1f3f5;
     border-radius: 12px;
-    padding: 10px 4px;
+    padding: 8px 2px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
     transition: transform 0.2s;
+    min-width: 0;
 }
 .weekly-card:active { transform: scale(0.95); }
-.w-date-box { font-size: 0.7rem; font-weight: 700; color: #4dabf7; margin-bottom: -2px; }
-.w-icon { font-size: 1.3rem; }
-.w-temps { font-size: 0.75rem; font-weight: 800; display: flex; align-items: center; gap: 1px; justify-content: center; width: 100%; }
-.w-max { color: #fa5252; font-size: 0.75rem !important; }
-.w-min { color: #228be6; font-size: 0.75rem !important; }
-.w-slash { color: #dee2e6; font-size: 0.6rem; margin: 0 1px; }
+.w-date-box { font-size: 0.65rem; font-weight: 700; color: #4dabf7; margin-bottom: -2px; }
+.w-icon { font-size: 1.2rem; }
+.w-temps { font-size: 0.7rem; font-weight: 800; display: flex; align-items: center; gap: 1px; justify-content: center; width: 100%; }
+.w-max { color: #fa5252; font-size: 0.7rem !important; }
+.w-min { color: #228be6; font-size: 0.7rem !important; }
+.w-slash { color: #dee2e6; font-size: 0.55rem; margin: 0 1px; }
 .w-meta-info {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1px;
-    font-size: 0.6rem;
+    gap: 0px;
+    font-size: 0.55rem;
     font-weight: 700;
     color: #868e96;
+    line-height: 1;
 }
-.w-pop { color: #228be6; font-size: 0.65rem !important; }
+.w-pop { color: #228be6; font-size: 0.6rem !important; }
 
 /* Hourly Table Refinement (Continuous Scroll) */
 .h-date-sub {
