@@ -406,7 +406,7 @@ function renderWeeklyList(locKey, grouped, sortedKeys, midData) {
         }
 
         html += `
-            <div class="weekly-card">
+            <div class="weekly-card" onclick="window.weatherApp.scrollToHourly('${locKey}', '${ymd}')">
                 <div class="w-date-box"><span class="w-date">${dateLabel}</span></div>
                 <div class="w-icon">${icon}</div>
                 <div class="w-temps"><span class="w-max">${max}°</span><span class="w-slash">/</span><span class="w-min">${min}°</span></div>
@@ -418,6 +418,37 @@ function renderWeeklyList(locKey, grouped, sortedKeys, midData) {
     }
     html += '</div>';
     container.innerHTML = html;
+}
+
+/**
+ * 시간별 예보 목록 내부에 삽입될 날짜 요약 컬럼 렌더링
+ */
+function renderDateSummaryCol(locKey, ymd, grouped, midData) {
+    const targetD = new Date(ymd.slice(0, 4), parseInt(ymd.slice(4, 6)) - 1, ymd.slice(6, 8));
+    const dateLabel = `${targetD.getMonth() + 1}/${targetD.getDate()}`;
+    
+    // 주간 데이터에서 해당 날짜 요약 추출 (또는 계산)
+    const hl = getHighLow(grouped, ymd);
+    const summary = getDailySummary(grouped, ymd, midData);
+    
+    return `
+        <div class="hourly-col date-summary-col" id="h-${locKey}-${ymd}">
+            <div class="h-top-section">
+                <span class="h-date-sub" style="color:#4dabf7; font-weight:800;">${dateLabel}</span>
+                <span class="h-time" style="font-weight:800; color:#212529;">摘要</span>
+                <span class="h-icon" style="font-size:1.4rem; margin: 2px 0;">${summary.pmIcon}</span>
+                <div class="h-temp" style="font-size:0.85rem; display:flex; flex-direction:column; gap:1px;">
+                    <span style="color:#fa5252;">${hl.max}°</span>
+                    <span style="color:#228be6;">${hl.min}°</span>
+                </div>
+            </div>
+            <div class="h-divider" style="background:#e9ecef;"></div>
+            <div class="h-meta-row">
+                <span class="h-meta-val" style="font-size:0.65rem; color:#adb5bd;">-</span>
+                <span class="h-meta-val" style="font-size:0.65rem; color:#adb5bd;">-</span>
+                <span class="h-meta-val" style="font-size:0.65rem; color:#adb5bd;">-</span>
+            </div>
+        </div>`;
 }
 
 export function updateHourlyWeather(locKey) {
@@ -453,10 +484,19 @@ export function updateHourlyWeather(locKey) {
         </div>
         <div class="hourly-table">`;
 
+    let lastYmd = null;
     hourlyKeys.forEach((k, idx) => {
         const d = state.items[k];
+        const ymd = k.slice(0, 8);
         const dateStr = k.slice(4, 6) + '/' + k.slice(6, 8);
         const hour = parseInt(k.slice(8, 10));
+        
+        // 날짜가 바뀌는 시점에 날짜 요약 컬럼 주입
+        if (ymd !== lastYmd) {
+            html += renderDateSummaryCol(locKey, ymd, state.items, state.midData);
+            lastYmd = ymd;
+        }
+
         const dayOffset = k.slice(0, 8) === hourlyKeys[0].slice(0, 8) ? 0 : 1;
         const currentSunTimes = dayOffset === 0 ? sunToday : sunTomorrow;
 
@@ -668,6 +708,28 @@ window.openWeatherAlertModal = function() {
 window.closeWeatherAlertModal = function() {
     const modal = document.getElementById('weather-alert-modal');
     if (modal) modal.style.display = 'none';
+};
+
+// 외부 호출을 위한 전역 네임스페이스
+window.weatherApp = {
+    scrollToHourly: (locKey, ymd) => {
+        const targetId = `h-${locKey}-${ymd}`;
+        const targetEl = document.getElementById(targetId);
+        if (targetEl) {
+            targetEl.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'nearest', 
+                inline: 'start' 
+            });
+            
+            // 시각적 피드백: 잠시 강조
+            targetEl.style.transition = 'background 0.5s';
+            targetEl.style.background = 'rgba(77, 187, 247, 0.1)';
+            setTimeout(() => targetEl.style.background = 'transparent', 1000);
+        } else {
+            console.warn(`[Weather] Target hour not found for ${ymd} (probably over the forecast range)`);
+        }
+    }
 };
 
 document.addEventListener('DOMContentLoaded', () => {
