@@ -71,7 +71,27 @@
 #festival .ad-container {
     display: block;
     margin-bottom: 25px;
-    border-radius: 12px;
+    border-radius: var(--radius-lg);
+    background: #f8fafc;
+    border: 1px dashed var(--border-light);
+    position: relative;
+    min-height: 100px;
+}
+
+#festival .ad-container::before {
+    content: '광고 로드 중...';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+#festival .ad-container ins {
+    position: relative;
+    z-index: 1;
 }
 
 @media (max-width: 768px) {
@@ -522,8 +542,18 @@
 }
 .festival-card.text-only {
     min-height: 140px;
-    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-    border: 1.5px solid var(--border-light);
+    background: white;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg); /* unified rounding 16px */
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.festival-card.text-only:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--accent-blue);
 }
 .festival-card.text-only .festival-info {
     padding: 20px;
@@ -825,14 +855,20 @@
 }
 
 .lost-report-btn {
-    width: 100%; padding: 16px; border-radius: 16px; border: 1.5px dashed var(--accent-blue);
+    width: 100%; padding: 16px; border-radius: var(--radius-lg); border: 1.5px solid var(--accent-blue); /* Solid as requested */
     background: white; color: var(--accent-blue);
-    font-weight: 700; font-size: 1.05rem; cursor: pointer;
+    font-weight: 800; font-size: 1.05rem; cursor: pointer;
     display: flex; align-items: center; justify-content: center; gap: 10px;
-    transition: all 0.2s ease;
+    transition: all var(--transition-normal);
     box-shadow: 0 4px 12px rgba(37, 99, 235, 0.05);
 }
-.lost-report-btn:hover { background: rgba(37, 99, 235, 0.05); border-style: solid; transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+.lost-report-btn:hover { 
+    background: var(--primary-gradient); 
+    color: white;
+    border-color: transparent;
+    transform: translateY(-2px); 
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.2); 
+}
 
 /* Lost Report Form Premium Styles (v8.2) */
 .lost-report-form-content { width: 95%; max-width: 500px; padding: 30px; border-radius: 24px; }
