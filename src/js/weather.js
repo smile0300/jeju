@@ -266,20 +266,33 @@ export function parseAndRenderWeather(locKey, items, midData, mountainData) {
         sortedKeys.forEach(k => {
             const d = grouped[k];
             const date = k.slice(0, 8);
-            if (!dailyMap[date]) dailyMap[date] = { max: -99, min: 199, sky: '1', pty: '0', precip: 0, pcpSum: 0 };
+            if (!dailyMap[date]) {
+                dailyMap[date] = { 
+                    max: -99, min: 199, 
+                    daytimeSkyCounts: {1:0, 3:0, 4:0}, daytimePty: 0,
+                    allSkyCounts: {1:0, 3:0, 4:0}, allPty: 0,
+                    precip: 0, pcpSum: 0 
+                };
+            }
             
             const tmp = parseFloat(d.TMP);
             if (!isNaN(tmp)) {
                 if (tmp > dailyMap[date].max) dailyMap[date].max = tmp;
                 if (tmp < dailyMap[date].min) dailyMap[date].min = tmp;
             }
-            if (d.PTY && d.PTY !== '0') dailyMap[date].pty = d.PTY;
-            // SKY는 가장 나쁜 값(4:흐림 > 3:구름많음 > 1:맑음)으로 누적하여
-            // 맑은 시간대가 비오는 시간대를 덮어쓰는 현상 방지
+
+            const hour = parseInt(k.slice(8, 10));
+            const isDaytime = hour >= 9 && hour <= 21;
+
+            if (d.PTY && d.PTY !== '0') {
+                const ptyVal = parseInt(d.PTY);
+                if (isDaytime) dailyMap[date].daytimePty = Math.max(dailyMap[date].daytimePty, ptyVal);
+                dailyMap[date].allPty = Math.max(dailyMap[date].allPty, ptyVal);
+            }
+            
             if (d.SKY) {
-                const skyCurrent = parseInt(dailyMap[date].sky) || 1;
-                const skyNew = parseInt(d.SKY) || 1;
-                if (skyNew > skyCurrent) dailyMap[date].sky = d.SKY;
+                if (isDaytime) dailyMap[date].daytimeSkyCounts[d.SKY] = (dailyMap[date].daytimeSkyCounts[d.SKY] || 0) + 1;
+                dailyMap[date].allSkyCounts[d.SKY] = (dailyMap[date].allSkyCounts[d.SKY] || 0) + 1;
             }
             if (d.POP) dailyMap[date].precip = Math.max(dailyMap[date].precip, parseInt(d.POP));
             
@@ -307,8 +320,28 @@ export function parseAndRenderWeather(locKey, items, midData, mountainData) {
                 max = Math.round(dt.max) + '°';
                 min = Math.round(dt.min) + '°';
                 precip = dt.precip || 0;
-                icon = getSkyInfo(dt.pty, dt.sky).icon;
                 pcpDisp = dt.pcpSum > 0 ? (dt.pcpSum < 1 ? '<1mm' : Math.round(dt.pcpSum) + 'mm') : '0mm';
+
+                // 여행 시간대(09~21시) 기준 날씨 도출
+                let targetSkyCounts = dt.daytimeSkyCounts;
+                let targetPty = dt.daytimePty;
+                
+                // 만약 오늘 밤(21시 이후)처럼 여행 시간대 데이터가 아예 없다면 전체 시간대 데이터 사용
+                const daytimeTotal = targetSkyCounts['1'] + targetSkyCounts['3'] + targetSkyCounts['4'];
+                if (daytimeTotal === 0) {
+                    targetSkyCounts = dt.allSkyCounts;
+                    targetPty = dt.allPty;
+                }
+
+                // 주된 하늘 상태 계산 (가장 많이 나오는 날씨)
+                let finalSky = '1';
+                if (targetSkyCounts['4'] >= targetSkyCounts['3'] && targetSkyCounts['4'] >= targetSkyCounts['1']) {
+                    finalSky = '4'; // 흐림이 1등이거나 공동 1등
+                } else if (targetSkyCounts['3'] >= targetSkyCounts['1']) {
+                    finalSky = '3'; // 구름많음이 1등
+                }
+
+                icon = getSkyInfo(targetPty.toString(), finalSky).icon;
             } else if ((landItem || tempItem) && i >= 3) {
                 const dayIdx = i;
                 if (tempItem) {
