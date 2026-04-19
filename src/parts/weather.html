@@ -12,6 +12,14 @@
                     <span class="tab-icon">🏙️</span>
                     <span class="tab-name">济州市</span>
                 </button>
+                <button class="location-tab" data-loc="aewol" onclick="switchWeatherLocation('aewol')">
+                    <span class="tab-icon">☕</span>
+                    <span class="tab-name">涯月</span>
+                </button>
+                <button class="location-tab" data-loc="hyeopjae" onclick="switchWeatherLocation('hyeopjae')">
+                    <span class="tab-icon">🏝️</span>
+                    <span class="tab-name">挟才</span>
+                </button>
                 <button class="location-tab" data-loc="seogwipo" onclick="switchWeatherLocation('seogwipo')">
                     <span class="tab-icon">🌺</span>
                     <span class="tab-name">西归浦</span>
@@ -19,6 +27,14 @@
                 <button class="location-tab" data-loc="hallasan" onclick="switchWeatherLocation('hallasan')">
                     <span class="tab-icon">⛰️</span>
                     <span class="tab-name">汉拿山</span>
+                </button>
+                <button class="location-tab" data-loc="hamdeok" onclick="switchWeatherLocation('hamdeok')">
+                    <span class="tab-icon">🏖️</span>
+                    <span class="tab-name">咸德</span>
+                </button>
+                <button class="location-tab" data-loc="woljeong" onclick="switchWeatherLocation('woljeong')">
+                    <span class="tab-icon">🌊</span>
+                    <span class="tab-name">月汀</span>
                 </button>
                 <button class="location-tab" data-loc="udo" onclick="switchWeatherLocation('udo')">
                     <span class="tab-icon">🐄</span>
@@ -110,6 +126,52 @@
                 <h3 class="cmp-cur-weather-head">空气质量信息</h3>
                 <div id="air-quality-seongsan" class="air-quality-grid"></div>
             </div>
+
+            <!-- New Locations -->
+            <div id="weather-content-aewol" class="location-weather">
+                <div class="current-weather" id="current-weather-aewol">
+                    <div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text">正在加载信息...</div></div>
+                </div>
+                <div class="weekly-grid" id="weekly-aewol"></div>
+                <h3 class="subsection-title" id="hourly-title-aewol">当日分时详细预报</h3>
+                <div class="hourly-weather"><div class="hourly-scroll" id="hourly-aewol"></div></div>
+                <h3 class="cmp-cur-weather-head">空气质量信息</h3>
+                <div id="air-quality-aewol" class="air-quality-grid"></div>
+            </div>
+
+            <div id="weather-content-hyeopjae" class="location-weather">
+                <div class="current-weather" id="current-weather-hyeopjae">
+                    <div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text">正在加载信息...</div></div>
+                </div>
+                <div class="weekly-grid" id="weekly-hyeopjae"></div>
+                <h3 class="subsection-title" id="hourly-title-hyeopjae">当日分时详细预报</h3>
+                <div class="hourly-weather"><div class="hourly-scroll" id="hourly-hyeopjae"></div></div>
+                <h3 class="cmp-cur-weather-head">空气质量信息</h3>
+                <div id="air-quality-hyeopjae" class="air-quality-grid"></div>
+            </div>
+
+            <div id="weather-content-hamdeok" class="location-weather">
+                <div class="current-weather" id="current-weather-hamdeok">
+                    <div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text">正在加载信息...</div></div>
+                </div>
+                <div class="weekly-grid" id="weekly-hamdeok"></div>
+                <h3 class="subsection-title" id="hourly-title-hamdeok">当日分时详细预报</h3>
+                <div class="hourly-weather"><div class="hourly-scroll" id="hourly-hamdeok"></div></div>
+                <h3 class="cmp-cur-weather-head">空气质量信息</h3>
+                <div id="air-quality-hamdeok" class="air-quality-grid"></div>
+            </div>
+
+            <div id="weather-content-woljeong" class="location-weather">
+                <div class="current-weather" id="current-weather-woljeong">
+                    <div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text">正在加载信息...</div></div>
+                </div>
+                <div class="weekly-grid" id="weekly-woljeong"></div>
+                <h3 class="subsection-title" id="hourly-title-woljeong">当日分时详细预报</h3>
+                <div class="hourly-weather"><div class="hourly-scroll" id="hourly-woljeong"></div></div>
+                <h3 class="cmp-cur-weather-head">空气质量信息</h3>
+                <div id="air-quality-woljeong" class="air-quality-grid"></div>
+            </div>
+
         </div>
     </div>
 </section>

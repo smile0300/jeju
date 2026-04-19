@@ -40,11 +40,15 @@ export const CONFIG = {
         { id: 'sinchang_emg', category: 'west', nameKo: '신창리포구', nameCn: '新昌里浦口', type: 'hls', url: 'http://59.8.86.94:8080/media/api/v1/hls/vurix/192871/100004/0/0', lat: 33.3524, lon: 126.1774 }
     ],
 
-    // 4개 지역 날씨 좌표 (기상청 격자 nx,ny)
+    // 날씨 좌표 (기상청 격자 nx,ny)
     WEATHER_LOCATIONS: {
         jeju: { nx: 52, ny: 38, nameKo: '제주시(연동)', nameCn: '济州市(莲洞)', midLandCode: '11G00000', midTaCode: '11G00201', stationName: '연동' },
+        aewol: { nx: 52, ny: 38, nameKo: '애월(한담)', nameCn: '涯月', midLandCode: '11G00000', midTaCode: '11G00201', stationName: '애월읍' },
+        hyeopjae: { nx: 50, ny: 37, nameKo: '협재(해수욕장)', nameCn: '挟才', midLandCode: '11G00000', midTaCode: '11G00201', stationName: '한림읍' },
         seogwipo: { nx: 52, ny: 33, nameKo: '서귀포시', nameCn: '西归浦', midLandCode: '11G00000', midTaCode: '11G00401', stationName: '동홍동' },
         hallasan: { nx: 54, ny: 35, nameKo: '한라산(성판악)', nameCn: '汉拿山(城板岳)', midLandCode: '11G00000', midTaCode: '11G00201', stationName: '조천읍', obsid: '1885' },
+        hamdeok: { nx: 55, ny: 38, nameKo: '함덕(해수욕장)', nameCn: '咸德', midLandCode: '11G00000', midTaCode: '11G00201', stationName: '조천읍' },
+        woljeong: { nx: 58, ny: 38, nameKo: '월정(해수욕장)', nameCn: '月汀', midLandCode: '11G00000', midTaCode: '11G00201', stationName: '구좌읍' },
         udo: { nx: 56, ny: 38, nameKo: '우도', nameCn: '牛岛', midLandCode: '11G00000', midTaCode: '11G00101', stationName: '성산읍' },
         seongsan: { nx: 61, ny: 38, nameKo: '성산일출봉', nameCn: '城山日出峰', midLandCode: '11G00000', midTaCode: '11G00401', stationName: '성산읍' }
     }
