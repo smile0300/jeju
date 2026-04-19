@@ -47,128 +47,223 @@
             </div>
 
             <div id="weather-content-jeju" class="location-weather active">
-                <div class="current-weather" id="current-weather-jeju">
+                <!-- 상단 헤더: 지역명 및 CCTV 버튼 -->
+                <div class="weather-header-container" id="header-jeju">
+                    <div class="location-info">
+                        <span class="location-star">★</span>
+                        <h3 class="location-name">济州市(莲洞)</h3>
+                    </div>
+                    <div class="header-cctv" id="cctv-btn-jeju"></div>
+                </div>
+
+                <!-- 오늘/내일 비교 카드 -->
+                <div class="naver-card current-compare-card" id="current-card-jeju">
                     <div class="weather-loader">
                         <div class="weather-spinner"></div>
-                        <div class="weather-loading-text">正在加载中...</div>
+                        <div class="weather-loading-text">正在加载...</div>
                     </div>
                 </div>
 
-                <div class="weekly-grid" id="weekly-jeju"></div>
-                <h3 class="subsection-title" id="hourly-title-jeju">当日分时详细预报</h3>
-                <div class="hourly-weather">
-                    <div class="hourly-scroll" id="hourly-jeju"></div>
+                <!-- 상세 지표 가로 스크롤 바 -->
+                <div class="weather-details-bar" id="details-bar-jeju"></div>
+
+                <!-- 시간별 상세 예보 테이블 -->
+                <div class="naver-card hourly-forecast-card">
+                    <div class="card-header">
+                        <span class="day-label active">今天</span>
+                        <span class="day-label">明天</span>
+                    </div>
+                    <div class="hourly-table-container" id="hourly-table-jeju"></div>
                 </div>
-                <h3 class="cmp-cur-weather-head">空气质量信息</h3>
+
+                <!-- 주간 예보 가로형 리스트 -->
+                <div class="naver-card weekly-forecast-card">
+                    <h3 class="card-title">一周天气</h3>
+                    <div class="weekly-list-container" id="weekly-list-jeju"></div>
+                </div>
+                
+                <!-- 대기질(공기질) 상세 요약 (원형 유지 또는 텍스트 전환) -->
                 <div id="air-quality-jeju" class="air-quality-grid"></div>
             </div>
             <div id="weather-content-seogwipo" class="location-weather">
-                <div class="current-weather" id="current-weather-seogwipo">
-                    <div class="weather-loader">
-                        <div class="weather-spinner"></div>
-                        <div class="weather-loading-text">正在加载中...</div>
+                <div class="weather-header-container" id="header-seogwipo">
+                    <div class="location-info">
+                        <span class="location-star">★</span>
+                        <h3 class="location-name">西归浦</h3>
                     </div>
+                    <div class="header-cctv" id="cctv-btn-seogwipo"></div>
                 </div>
-
-                <div class="weekly-grid" id="weekly-seogwipo"></div>
-                <h3 class="subsection-title" id="hourly-title-seogwipo">当日分时详细预报</h3>
-                <div class="hourly-weather">
-                    <div class="hourly-scroll" id="hourly-seogwipo"></div>
+                <div class="naver-card current-compare-card" id="current-card-seogwipo">
+                    <div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text">正在加载...</div></div>
                 </div>
-                <h3 class="cmp-cur-weather-head">空气质量信息</h3>
+                <div class="weather-details-bar" id="details-bar-seogwipo"></div>
+                <div class="naver-card hourly-forecast-card">
+                    <div class="card-header"><span class="day-label active">今天</span><span class="day-label">明天</span></div>
+                    <div class="hourly-table-container" id="hourly-table-seogwipo"></div>
+                </div>
+                <div class="naver-card weekly-forecast-card">
+                    <h3 class="card-title">一周天气</h3>
+                    <div class="weekly-list-container" id="weekly-list-seogwipo"></div>
+                </div>
                 <div id="air-quality-seogwipo" class="air-quality-grid"></div>
             </div>
             <div id="weather-content-hallasan" class="location-weather">
-                <div class="current-weather" id="current-weather-hallasan">
-                    <div class="weather-loader">
-                        <div class="weather-spinner"></div>
-                        <div class="weather-loading-text">正在加载中...</div>
+                <div class="weather-header-container" id="header-hallasan">
+                    <div class="location-info">
+                        <span class="location-star">★</span>
+                        <h3 class="location-name">汉拿山(城板岳)</h3>
                     </div>
+                    <div class="header-cctv" id="cctv-btn-hallasan"></div>
                 </div>
-
-                <div class="weekly-grid" id="weekly-hallasan"></div>
-                <h3 class="subsection-title" id="hourly-title-hallasan">当日分时详细预报</h3>
-                <div class="hourly-weather">
-                    <div class="hourly-scroll" id="hourly-hallasan"></div>
+                <div class="naver-card current-compare-card" id="current-card-hallasan">
+                    <div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text">正在加载...</div></div>
                 </div>
-                <h3 class="cmp-cur-weather-head">空气质量信息</h3>
+                <div class="weather-details-bar" id="details-bar-hallasan"></div>
+                <div class="naver-card hourly-forecast-card">
+                    <div class="card-header"><span class="day-label active">今天</span><span class="day-label">明天</span></div>
+                    <div class="hourly-table-container" id="hourly-table-hallasan"></div>
+                </div>
+                <div class="naver-card weekly-forecast-card">
+                    <h3 class="card-title">一周天气</h3>
+                    <div class="weekly-list-container" id="weekly-list-hallasan"></div>
+                </div>
                 <div id="air-quality-hallasan" class="air-quality-grid"></div>
             </div>
             <div id="weather-content-udo" class="location-weather">
-                <div class="current-weather" id="current-weather-udo">
-                    <div class="weather-loader">
-                        <div class="weather-spinner"></div>
-                        <div class="weather-loading-text">正在加载信息...</div>
+                <div class="weather-header-container" id="header-udo">
+                    <div class="location-info">
+                        <span class="location-star">★</span>
+                        <h3 class="location-name">牛岛</h3>
                     </div>
+                    <div class="header-cctv" id="cctv-btn-udo"></div>
                 </div>
-
-                <div class="weekly-grid" id="weekly-udo"></div>
-                <h3 class="subsection-title" id="hourly-title-udo">当日分时详细预报</h3>
-                <div class="hourly-weather">
-                    <div class="hourly-scroll" id="hourly-udo"></div>
+                <div class="naver-card current-compare-card" id="current-card-udo">
+                    <div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text">正在加载...</div></div>
                 </div>
-                <h3 class="cmp-cur-weather-head">空气质量信息</h3>
+                <div class="weather-details-bar" id="details-bar-udo"></div>
+                <div class="naver-card hourly-forecast-card">
+                    <div class="card-header"><span class="day-label active">今天</span><span class="day-label">明天</span></div>
+                    <div class="hourly-table-container" id="hourly-table-udo"></div>
+                </div>
+                <div class="naver-card weekly-forecast-card">
+                    <h3 class="card-title">一周天气</h3>
+                    <div class="weekly-list-container" id="weekly-list-udo"></div>
+                </div>
                 <div id="air-quality-udo" class="air-quality-grid"></div>
             </div>
             <div id="weather-content-seongsan" class="location-weather">
-                <div class="current-weather" id="current-weather-seongsan">
-                    <div class="weather-loader">
-                        <div class="weather-spinner"></div>
-                        <div class="weather-loading-text">正在加载信息...</div>
+                <div class="weather-header-container" id="header-seongsan">
+                    <div class="location-info">
+                        <span class="location-star">★</span>
+                        <h3 class="location-name">城山日出峰</h3>
                     </div>
+                    <div class="header-cctv" id="cctv-btn-seongsan"></div>
                 </div>
-
-                <div class="weekly-grid" id="weekly-seongsan"></div>
-                <h3 class="subsection-title" id="hourly-title-seongsan">当日分时详细预报</h3>
-                <div class="hourly-weather">
-                    <div class="hourly-scroll" id="hourly-seongsan"></div>
+                <div class="naver-card current-compare-card" id="current-card-seongsan">
+                    <div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text">正在加载...</div></div>
                 </div>
-                <h3 class="cmp-cur-weather-head">空气质量信息</h3>
+                <div class="weather-details-bar" id="details-bar-seongsan"></div>
+                <div class="naver-card hourly-forecast-card">
+                    <div class="card-header"><span class="day-label active">今天</span><span class="day-label">明天</span></div>
+                    <div class="hourly-table-container" id="hourly-table-seongsan"></div>
+                </div>
+                <div class="naver-card weekly-forecast-card">
+                    <h3 class="card-title">一周天气</h3>
+                    <div class="weekly-list-container" id="weekly-list-seongsan"></div>
+                </div>
                 <div id="air-quality-seongsan" class="air-quality-grid"></div>
             </div>
 
             <!-- New Locations -->
             <div id="weather-content-aewol" class="location-weather">
-                <div class="current-weather" id="current-weather-aewol">
-                    <div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text">正在加载信息...</div></div>
+                <div class="weather-header-container" id="header-aewol">
+                    <div class="location-info">
+                        <span class="location-star">★</span>
+                        <h3 class="location-name">涯月</h3>
+                    </div>
+                    <div class="header-cctv" id="cctv-btn-aewol"></div>
                 </div>
-                <div class="weekly-grid" id="weekly-aewol"></div>
-                <h3 class="subsection-title" id="hourly-title-aewol">当日分时详细预报</h3>
-                <div class="hourly-weather"><div class="hourly-scroll" id="hourly-aewol"></div></div>
-                <h3 class="cmp-cur-weather-head">空气质量信息</h3>
+                <div class="naver-card current-compare-card" id="current-card-aewol">
+                    <div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text">正在加载...</div></div>
+                </div>
+                <div class="weather-details-bar" id="details-bar-aewol"></div>
+                <div class="naver-card hourly-forecast-card">
+                    <div class="card-header"><span class="day-label active">今天</span><span class="day-label">明天</span></div>
+                    <div class="hourly-table-container" id="hourly-table-aewol"></div>
+                </div>
+                <div class="naver-card weekly-forecast-card">
+                    <h3 class="card-title">一周天气</h3>
+                    <div class="weekly-list-container" id="weekly-list-aewol"></div>
+                </div>
                 <div id="air-quality-aewol" class="air-quality-grid"></div>
             </div>
 
             <div id="weather-content-hyeopjae" class="location-weather">
-                <div class="current-weather" id="current-weather-hyeopjae">
-                    <div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text">正在加载信息...</div></div>
+                <div class="weather-header-container" id="header-hyeopjae">
+                    <div class="location-info">
+                        <span class="location-star">★</span>
+                        <h3 class="location-name">挟才</h3>
+                    </div>
+                    <div class="header-cctv" id="cctv-btn-hyeopjae"></div>
                 </div>
-                <div class="weekly-grid" id="weekly-hyeopjae"></div>
-                <h3 class="subsection-title" id="hourly-title-hyeopjae">当日分时详细预报</h3>
-                <div class="hourly-weather"><div class="hourly-scroll" id="hourly-hyeopjae"></div></div>
-                <h3 class="cmp-cur-weather-head">空气质量信息</h3>
+                <div class="naver-card current-compare-card" id="current-card-hyeopjae">
+                    <div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text">正在加载...</div></div>
+                </div>
+                <div class="weather-details-bar" id="details-bar-hyeopjae"></div>
+                <div class="naver-card hourly-forecast-card">
+                    <div class="card-header"><span class="day-label active">今天</span><span class="day-label">明天</span></div>
+                    <div class="hourly-table-container" id="hourly-table-hyeopjae"></div>
+                </div>
+                <div class="naver-card weekly-forecast-card">
+                    <h3 class="card-title">一周天气</h3>
+                    <div class="weekly-list-container" id="weekly-list-hyeopjae"></div>
+                </div>
                 <div id="air-quality-hyeopjae" class="air-quality-grid"></div>
             </div>
 
             <div id="weather-content-hamdeok" class="location-weather">
-                <div class="current-weather" id="current-weather-hamdeok">
-                    <div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text">正在加载信息...</div></div>
+                <div class="weather-header-container" id="header-hamdeok">
+                    <div class="location-info">
+                        <span class="location-star">★</span>
+                        <h3 class="location-name">咸德</h3>
+                    </div>
+                    <div class="header-cctv" id="cctv-btn-hamdeok"></div>
                 </div>
-                <div class="weekly-grid" id="weekly-hamdeok"></div>
-                <h3 class="subsection-title" id="hourly-title-hamdeok">当日分时详细预报</h3>
-                <div class="hourly-weather"><div class="hourly-scroll" id="hourly-hamdeok"></div></div>
-                <h3 class="cmp-cur-weather-head">空气质量信息</h3>
+                <div class="naver-card current-compare-card" id="current-card-hamdeok">
+                    <div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text">正在加载...</div></div>
+                </div>
+                <div class="weather-details-bar" id="details-bar-hamdeok"></div>
+                <div class="naver-card hourly-forecast-card">
+                    <div class="card-header"><span class="day-label active">今天</span><span class="day-label">明天</span></div>
+                    <div class="hourly-table-container" id="hourly-table-hamdeok"></div>
+                </div>
+                <div class="naver-card weekly-forecast-card">
+                    <h3 class="card-title">一周天气</h3>
+                    <div class="weekly-list-container" id="weekly-list-hamdeok"></div>
+                </div>
                 <div id="air-quality-hamdeok" class="air-quality-grid"></div>
             </div>
 
             <div id="weather-content-woljeong" class="location-weather">
-                <div class="current-weather" id="current-weather-woljeong">
-                    <div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text">正在加载信息...</div></div>
+                <div class="weather-header-container" id="header-woljeong">
+                    <div class="location-info">
+                        <span class="location-star">★</span>
+                        <h3 class="location-name">月汀</h3>
+                    </div>
+                    <div class="header-cctv" id="cctv-btn-woljeong"></div>
                 </div>
-                <div class="weekly-grid" id="weekly-woljeong"></div>
-                <h3 class="subsection-title" id="hourly-title-woljeong">当日分时详细预报</h3>
-                <div class="hourly-weather"><div class="hourly-scroll" id="hourly-woljeong"></div></div>
-                <h3 class="cmp-cur-weather-head">空气质量信息</h3>
+                <div class="naver-card current-compare-card" id="current-card-woljeong">
+                    <div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text">正在加载...</div></div>
+                </div>
+                <div class="weather-details-bar" id="details-bar-woljeong"></div>
+                <div class="naver-card hourly-forecast-card">
+                    <div class="card-header"><span class="day-label active">今天</span><span class="day-label">明天</span></div>
+                    <div class="hourly-table-container" id="hourly-table-woljeong"></div>
+                </div>
+                <div class="naver-card weekly-forecast-card">
+                    <h3 class="card-title">一周天气</h3>
+                    <div class="weekly-list-container" id="weekly-list-woljeong"></div>
+                </div>
                 <div id="air-quality-woljeong" class="air-quality-grid"></div>
             </div>
 
