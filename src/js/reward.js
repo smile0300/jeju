@@ -228,6 +228,14 @@ window.handleRewardImageError = function(img) {
 
 window.applyRewardMission = function() {
     if (window.openWechatQR) window.openWechatQR();
+
+    if (window.dataLayer) {
+        window.dataLayer.push({
+            'event': 'reward_apply_click',
+            'category': 'interaction',
+            'action': 'apply_mission'
+        });
+    }
 };
 
 window.publishRewardMission = function() {

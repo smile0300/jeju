@@ -344,6 +344,15 @@ export function openCctvCard(id) {
         window.pushModalState();
     }
 
+    if (window.dataLayer) {
+        window.dataLayer.push({
+            'event': 'cctv_open',
+            'category': 'interaction',
+            'action': 'open_cctv',
+            'label': cam.nameCn
+        });
+    }
+
     // 이전 스트림 정지
     if (currentHls) {
         currentHls.destroy();
