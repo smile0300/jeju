@@ -142,15 +142,18 @@ export function renderFestivalItems(container, items) {
     const noImg = 'https://images.unsplash.com/photo-1518005020251-582c7edff267?auto=format&fit=crop&w=500&q=80';
 
     container.innerHTML = items.map(item => {
-        const title = item.title || '无标题活动';
+        const rawTitle = item.title || '无标题活动';
+        const displayTitle = FESTIVAL_TRANSLATIONS[rawTitle] || rawTitle;
         const rawImg = item.thumbnail || item.imgpath || item.img || '';
-        const img = getFestivalImage(title, rawImg) || noImg;
-        
-        // Hashtag translation: use title mapping or fallback
-        const tag = FESTIVAL_TRANSLATIONS[title] || '济州活动';
+        const img = getFestivalImage(rawTitle, rawImg) || noImg;
         
         const date = item.period || item.date || '';
-        const link = item.link || '#';
+        
+        // Dynamically calculate link based on the selected month
+        const yearParts = currentFestivalMonth.split('-');
+        const yearStr = yearParts[0] || '2026';
+        const monthStr = yearParts[1] || '04';
+        const link = `https://visitjeju.net/cn/festival/list#p1&year=${yearStr}&month=${monthStr}&state=all`;
         
         let statusText = '进行中';
         let statusClass = 'ing';
@@ -173,9 +176,8 @@ export function renderFestivalItems(container, items) {
                 <div class="festival-info">
                     <div class="festival-header">
                         <span class="tag ${statusClass}">${statusText}</span>
-                        <span class="chinese-title"># ${tag}</span>
                     </div>
-                    <h3 class="festival-title">${title}</h3>
+                    <h3 class="festival-title">${displayTitle}</h3>
                     <div class="festival-date">
                         <span>📅</span> ${date}
                     </div>
