@@ -123,11 +123,11 @@ export function copyWechatId() {
 const LOC_META = {
     jeju:     { title: '济州市 (莲洞)', sub: 'Yeon-dong' },
     aewol:    { title: '涯月 (汉潭)', sub: 'Aewol' },
-    hyeopjae: { title: '挟才海水浴场', sub: 'Hyeopjae' },
+    hyeopjae: { title: '挟才', sub: 'Hyeopjae' },
     seogwipo: { title: '西归浦 (中文)', sub: 'Jungmun' },
     hallasan: { title: '汉拿山 (御里牧)', sub: 'Halla Mountain' },
-    hamdeok:  { title: '咸德海水浴场', sub: 'Hamdeok' },
-    woljeong: { title: '月汀海水浴场', sub: 'Woljeong' },
+    hamdeok:  { title: '咸德', sub: 'Hamdeok' },
+    woljeong: { title: '月汀', sub: 'Woljeong' },
     udo:      { title: '牛岛', sub: 'Udo Island' },
     seongsan: { title: '城山日出峰', sub: 'Seongsan' },
 };
