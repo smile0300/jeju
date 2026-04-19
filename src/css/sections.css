@@ -1873,6 +1873,26 @@
     display: flex; align-items: center; justify-content: center; height: 28px;
 }
 
+/* Sun (Sunrise/Sunset) Special Column */
+.sun-col {
+    background: rgba(255, 169, 77, 0.05); /* Very subtle orange tint */
+}
+.sun-time {
+    color: #fd7e14 !important;
+    font-weight: 800 !important;
+}
+.sun-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    background: #ffa94d;
+    color: #ffffff;
+    border-radius: 10px;
+    font-size: 0.65rem;
+    font-weight: 800;
+    margin: 4px 0 8px;
+    line-height: 1.2;
+}
+
 /* Weekly List Card */
 .weekly-forecast-card .card-title {
     font-size: 1.1rem;

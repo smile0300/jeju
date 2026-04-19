@@ -242,6 +242,36 @@ function getOffsetDate(ymd, offset) {
 }
 
 /**
+ * 위도/경도 기반 일출/일몰 계산 (간소화 알고리즘)
+ */
+function getSunTimes(lat, lng, date) {
+    const radian = Math.PI / 180;
+    const dayOfYear = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
+    
+    // 태양 적위 (solar declination)
+    const decl = 0.409 * Math.sin(2 * Math.PI * (dayOfYear - 81) / 365);
+    
+    // 시간각 (hour angle)
+    const ha = Math.acos(-Math.tan(lat * radian) * Math.tan(decl)) / radian;
+    
+    const sunrise = 12 - (ha / 15) - (lng / 15) + (date.getTimezoneOffset() / 60) + 9; // KST +9
+    const sunset = 12 + (ha / 15) - (lng / 15) + (date.getTimezoneOffset() / 60) + 9;
+    
+    const toTimeStr = (decimalHour) => {
+        const h = Math.floor(decimalHour);
+        const m = Math.round((decimalHour - h) * 60);
+        return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+    };
+    
+    return {
+        sunrise: toTimeStr(sunrise),
+        sunset: toTimeStr(sunset),
+        sunriseHour: Math.floor(sunrise),
+        sunsetHour: Math.floor(sunset)
+    };
+}
+
+/**
  * 특정일의 요약 정보 (아이콘, 강수확률) 추출
  */
 function getDailySummary(grouped, ymd, midData) {
@@ -396,6 +426,9 @@ export function updateHourlyWeather(locKey) {
     const hourlyContainer = document.getElementById(`hourly-table-${locKey}`);
     if (!hourlyContainer) return;
 
+    const loc = CONFIG.WEATHER_LOCATIONS[locKey];
+    const sunTimes = getSunTimes(loc.lat, loc.lng, new Date());
+
     const hourlyKeys = state.sortedKeys.slice(0, 24);
     if (hourlyKeys.length === 0) {
         hourlyContainer.innerHTML = '<div style="padding: 24px; text-align: center; color: #adb5bd;">暂无详细时间预报</div>';
@@ -415,10 +448,39 @@ export function updateHourlyWeather(locKey) {
         </div>
         <div class="hourly-table">`;
 
-    hourlyKeys.forEach(k => {
+    hourlyKeys.forEach((k, idx) => {
         const d = state.items[k];
         const dateStr = k.slice(4, 6) + '/' + k.slice(6, 8);
         const hour = parseInt(k.slice(8, 10));
+        
+        // 일출/일몰 주입 체크 (이전 시간과 현재 시간 사이)
+        if (idx > 0) {
+            const prevHour = parseInt(hourlyKeys[idx-1].slice(8, 10));
+            
+            const checkSun = (sunHour, sunTime, label, icon) => {
+                if (sunHour === prevHour) {
+                    html += `
+                        <div class="hourly-col sun-col">
+                            <div class="h-top-section">
+                                <span class="h-date-sub" style="color:#ffa94d;">${dateStr}</span>
+                                <span class="h-time sun-time">${sunTime}</span>
+                                <span class="sun-badge">${label}${icon}</span>
+                                <span class="h-temp" style="color:#dee2e6;">--</span>
+                                <span class="h-pop" style="color:#dee2e6;">--</span>
+                            </div>
+                            <div class="h-divider" style="opacity:0.3;"></div>
+                            <div class="h-meta-row">
+                                <span class="h-meta-val" style="color:#dee2e6;">-</span>
+                                <span class="h-meta-val" style="color:#dee2e6;">-</span>
+                                <span class="h-meta-val" style="color:#dee2e6;">-</span>
+                            </div>
+                        </div>`;
+                }
+            };
+            checkSun(sunTimes.sunriseHour, sunTimes.sunrise, '日出', '↑');
+            checkSun(sunTimes.sunsetHour, sunTimes.sunset, '日落', '↓');
+        }
+
         const sky = getSkyInfo(d.PTY, d.SKY, hour);
         let precip = formatPrecip(d.PCP);
         if(precip === '없음' || precip === '0mm') precip = '0';
