@@ -372,6 +372,9 @@ export function parseAndRenderWeather(locKey, items, midData, mountainData) {
             `;
         }).join('');
 
+        const hourlyEl = document.getElementById(`hourly-${locKey}`);
+        if (hourlyEl) delete hourlyEl.dataset.renderedAll;
+
         updateHourlyWeather(locKey, todayYmd);
     }
 }
@@ -402,7 +405,8 @@ export function updateHourlyWeather(locKey, targetYmd) {
 
     // Handle Summary Button - Place it below air quality info
     const airQualityEl = document.getElementById(`air-quality-${locKey}`);
-    let btnContainer = hourlyEl.parentElement.querySelector('.weather-summary-btn-container');
+    // Search within the specific location container to prevent duplication
+    let btnContainer = document.querySelector(`#weather-content-${locKey} .weather-summary-btn-container`);
     if (!btnContainer) {
         btnContainer = document.createElement('div');
         btnContainer.className = 'weather-summary-btn-container';
@@ -422,65 +426,131 @@ export function updateHourlyWeather(locKey, targetYmd) {
         btn.textContent = '简略查看';
         btnContainer.appendChild(btn);
     }
-    btn.onclick = () => window.openWeatherSummaryModal(targetYmd);
+    btn.onclick = () => {
+        const activeItem = weeklyEl ? weeklyEl.querySelector('.weekly-item.active') : null;
+        window.openWeatherSummaryModal(activeItem ? activeItem.dataset.date : targetYmd);
+    };
 
-
-
-    const hourlyKeys = state.sortedKeys.filter(k => k.startsWith(targetYmd));
-    if (hourlyKeys.length > 0) {
-        hourlyEl.innerHTML = hourlyKeys.map(k => {
-            const d = state.items[k];
-            const fHour = parseInt(k.slice(8, 10));
-            const s = getSkyInfo(d.PTY, d.SKY, fHour);
-            const time = k.slice(8, 10) + ':00';
-            const precipProb = d.POP !== undefined ? d.POP : '0';
-            const precipAmt = formatPrecip(d.PCP);
-            return `
-                <div class="hourly-item">
-                    <div class="hourly-time">${time}</div>
-                    <div class="hourly-icon">${s.icon}</div>
-                    <div class="hourly-temp">${d.TMP ?? '--'}°</div>
-                    <div class="hourly-wind">🌬️${d.WSD ?? '-'}m/s</div>
-                    <div class="hourly-precip ${d.POP >= 50 ? 'precip-blue' : ''}" style="margin-top:2px;">💧${precipProb}% (${precipAmt})</div>
-                </div>
-            `;
-        }).join('');
-    } else {
-
+    if (!hourlyEl.dataset.renderedAll) {
         const todayDate = new Date();
-        const todayYmd = `${todayDate.getFullYear()}${String(todayDate.getMonth() + 1).padStart(2, '0')}${String(todayDate.getDate()).padStart(2, '0')}`;
-        const d1 = new Date(targetYmd.slice(0, 4), targetYmd.slice(4, 6) - 1, targetYmd.slice(6, 8));
-        const d2 = new Date(todayYmd.slice(0, 4), todayYmd.slice(4, 6) - 1, todayYmd.slice(6, 8));
-        const dayIdx = Math.round((d1 - d2) / (1000 * 60 * 60 * 24));
+        let allItemsHTML = '';
+        
+        for (let i = 0; i < 10; i++) {
+            const targetD = new Date(todayDate);
+            targetD.setDate(todayDate.getDate() + i);
+            const ymd = `${targetD.getFullYear()}${String(targetD.getMonth() + 1).padStart(2, '0')}${String(targetD.getDate()).padStart(2, '0')}`;
 
-        const { landItem, tempItem } = state.midData || {};
-        if ((landItem || tempItem) && dayIdx >= 3 && dayIdx <= 10) {
-            let summaries = [];
-            if (landItem) {
-                if (dayIdx <= 7) {
-                    const amWf = landItem[`wf${dayIdx}Am`] || landItem[`wf${dayIdx}am`] || landItem[`wf${dayIdx}`];
-                    const pmWf = landItem[`wf${dayIdx}Pm`] || landItem[`wf${dayIdx}pm`] || landItem[`wf${dayIdx}`];
-                    const amPr = landItem[`rnSt${dayIdx}Am`] || landItem[`rnst${dayIdx}am`] || landItem[`rnSt${dayIdx}`] || landItem[`rnst${dayIdx}`];
-                    const pmPr = landItem[`rnSt${dayIdx}Pm`] || landItem[`rnst${dayIdx}pm`] || landItem[`rnSt${dayIdx}`] || landItem[`rnst${dayIdx}`];
-                    summaries = [{ time: '上午', wf: amWf, pr: amPr }, { time: '下午', wf: pmWf, pr: pmPr }];
-                } else {
-                    summaries = [{ time: '全天', wf: landItem[`wf${dayIdx}`] || landItem[`wf${dayIdx}`.toLowerCase()], pr: landItem[`rnSt${dayIdx}`] || landItem[`rnst${dayIdx}`] }];
+            const hourlyKeys = state.sortedKeys.filter(k => k.startsWith(ymd));
+            
+            if (hourlyKeys.length > 0) {
+                allItemsHTML += hourlyKeys.map(k => {
+                    const d = state.items[k];
+                    const fHour = parseInt(k.slice(8, 10));
+                    const s = getSkyInfo(d.PTY, d.SKY, fHour);
+                    const time = k.slice(8, 10) + ':00';
+                    const precipProb = d.POP !== undefined ? d.POP : '0';
+                    const precipAmt = formatPrecip(d.PCP);
+                    return `
+                        <div class="hourly-item" data-date="${ymd}">
+                            <div class="hourly-time">${i === 0 ? '' : (targetD.getDate() + '日 ')}${time}</div>
+                            <div class="hourly-icon">${s.icon}</div>
+                            <div class="hourly-temp">${d.TMP ?? '--'}°</div>
+                            <div class="hourly-wind">🌬️${d.WSD ?? '-'}m/s</div>
+                            <div class="hourly-precip ${d.POP >= 50 ? 'precip-blue' : ''}" style="margin-top:2px;">💧${precipProb}% (${precipAmt})</div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                const { landItem, tempItem } = state.midData || {};
+                if ((landItem || tempItem) && i >= 3 && i <= 10) {
+                    let summaries = [];
+                    if (landItem) {
+                        if (i <= 7) {
+                            const amWf = landItem[`wf${i}Am`] || landItem[`wf${i}am`] || landItem[`wf${i}`];
+                            const pmWf = landItem[`wf${i}Pm`] || landItem[`wf${i}pm`] || landItem[`wf${i}`];
+                            const amPr = landItem[`rnSt${i}Am`] || landItem[`rnst${i}am`] || landItem[`rnSt${i}`] || landItem[`rnst${i}`];
+                            const pmPr = landItem[`rnSt${i}Pm`] || landItem[`rnst${i}pm`] || landItem[`rnSt${i}`] || landItem[`rnst${i}`];
+                            summaries = [{ time: '上午', wf: amWf, pr: amPr }, { time: '下午', wf: pmWf, pr: pmPr }];
+                        } else {
+                            summaries = [{ time: '全天', wf: landItem[`wf${i}`] || landItem[`wf${i}`.toLowerCase()], pr: landItem[`rnSt${i}`] || landItem[`rnst${i}`] }];
+                        }
+                    }
+                    allItemsHTML += summaries.map(s => {
+                        const sky = translateMidWf(s.wf || '');
+                        return `
+                            <div class="hourly-item" data-date="${ymd}" style="min-width: 140px;">
+                                <div class="hourly-time">${targetD.getDate()}日 ${s.time}</div>
+                                <div class="hourly-icon" style="font-size: 2.5rem;">${sky.icon}</div>
+                                <div class="hourly-temp">${sky.desc || '暂无数据'}</div>
+                                <div class="hourly-precip ${s.pr >= 50 ? 'precip-blue' : ''}">降水概率: ${s.pr}% (0mm)</div>
+                            </div>
+                        `;
+                    }).join('');
                 }
             }
-            hourlyEl.innerHTML = summaries.map(s => {
-                const sky = translateMidWf(s.wf || '');
-                return `
-                    <div class="hourly-item" style="min-width: 140px;">
-                        <div class="hourly-time">${s.time}</div>
-                        <div class="hourly-icon" style="font-size: 2.5rem;">${sky.icon}</div>
-                        <div class="hourly-temp">${sky.desc || '暂无数据'}</div>
-                        <div class="hourly-precip ${s.pr >= 50 ? 'precip-blue' : ''}">降水概率: ${s.pr}% (0mm)</div>
-                    </div>
-                `;
-            }).join('');
-        } else {
-            hourlyEl.innerHTML = '<div style="padding: 20px; color: var(--text-muted);">暂无详细预报数据</div>';
         }
+
+        if (allItemsHTML === '') {
+            allItemsHTML = '<div style="padding: 20px; color: var(--text-muted);">暂无详细预报数据</div>';
+        }
+
+        hourlyEl.innerHTML = allItemsHTML;
+
+        // Scroll listener for syncing active date in weekly view
+        let scrollTimeout;
+        hourlyEl.addEventListener('scroll', () => {
+            if (hourlyEl.dataset.isScrollingProgrammatically === 'true') return;
+            
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                const containerRect = hourlyEl.getBoundingClientRect();
+                const items = hourlyEl.querySelectorAll('.hourly-item');
+                let activeDate = null;
+
+                for (const item of items) {
+                    const itemRect = item.getBoundingClientRect();
+                    // Item is considered visible if its center is within the left half of the container
+                    const itemCenter = itemRect.left + (itemRect.width / 2);
+                    if (itemCenter >= containerRect.left && itemCenter <= containerRect.left + containerRect.width / 2) {
+                        activeDate = item.dataset.date;
+                        break;
+                    }
+                }
+                
+                if (!activeDate && items.length > 0) {
+                    for (const item of items) {
+                        if (item.getBoundingClientRect().left >= containerRect.left) {
+                            activeDate = item.dataset.date;
+                            break;
+                        }
+                    }
+                }
+
+                if (activeDate) {
+                    if (weeklyEl) {
+                        weeklyEl.querySelectorAll('.weekly-item').forEach(wi => {
+                            wi.classList.toggle('active', wi.dataset.date === activeDate);
+                        });
+                    }
+                }
+            }, 50);
+        });
+
+        hourlyEl.dataset.renderedAll = "true";
+    }
+
+    // Scroll to Target
+    const targetItem = hourlyEl.querySelector(`.hourly-item[data-date="${targetYmd}"]`);
+    if (targetItem) {
+        hourlyEl.dataset.isScrollingProgrammatically = 'true';
+        setTimeout(() => { hourlyEl.dataset.isScrollingProgrammatically = 'false'; }, 600);
+
+        // Smoothly scroll the container to the item's position
+        const containerRect = hourlyEl.getBoundingClientRect();
+        const itemRect = targetItem.getBoundingClientRect();
+        const absoluteTargetLeft = hourlyEl.scrollLeft + (itemRect.left - containerRect.left);
+        
+        hourlyEl.scrollTo({ left: absoluteTargetLeft, behavior: 'smooth' });
     }
 }
 
