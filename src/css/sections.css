@@ -1720,48 +1720,44 @@
     visibility: visible !important;
 }
 
-/* Force hide all weather titles across all locations */
-#weather .subsection-title,
-[id^="hourly-title-"] {
-    display: none !important;
-    visibility: hidden !important;
-    height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: hidden !important;
+/* ==================== Location Weather Container ==================== */
+.location-weather {
+    display: none;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
 }
-.wsm-watermark {
-    position: fixed !important;
-    bottom: 20px !important;
-    right: 25px !important;
-    font-size: 1.2rem !important;
-    font-weight: 900 !important;
-    color: #475569 !important;
-    opacity: 0 !important;
-    letter-spacing: 0.5px !important;
-    text-transform: uppercase !important;
-    pointer-events: none !important;
-    z-index: 9999 !important;
-    font-family: inherit !important;
-    user-select: none !important;
-    white-space: nowrap !important;
-    animation: fadeInWatermarkCorner 1s ease-out forwards;
+.location-weather.active {
+    display: block;
 }
 
-@keyframes fadeInWatermarkCorner {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 0.3; transform: translateY(0); }
+/* Location Selection Tabs */
+.location-tabs {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 10px 0 20px 0;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    box-sizing: border-box;
 }
-
-/* Force hide all weather titles across all locations */
-#weather .subsection-title,
-[id^="hourly-title-"] {
-    display: none !important;
-    visibility: hidden !important;
-    height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: hidden !important;
+.location-tabs::-webkit-scrollbar { display: none; }
+.location-tab {
+    flex: 0 0 auto;
+    width: 70px;
+    height: 70px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    border: 2px solid transparent;
+    border-radius: 18px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 /* ==================== Naver Style Weather Redesign ==================== */
 .naver-card {
@@ -1773,6 +1769,8 @@
     border: 1px solid #f1f3f5;
     position: relative;
     overflow: hidden;
+    width: 100%;
+    box-sizing: border-box; /* Ensure padding doesn't add to width */
 }
 
 /* Header Area */
@@ -1948,9 +1946,12 @@
 }
 .hourly-wrapper {
     display: flex;
-    overflow-x: auto;
-    position: relative;
-    scrollbar-width: none; /* Hide scrollbar for a cleaner look natively */
+    width: 100%;
+    margin-top: 10px;
+    border-radius: 12px;
+    border: 1px solid #f1f3f5;
+    overflow: hidden; /* Contains children within card */
+    box-sizing: border-box;
 }
 .hourly-legend {
     width: 62px;
@@ -1962,12 +1963,18 @@
     color: #212529;
     font-size: 0.85rem;
     background: #ffffff;
-    z-index: 2;
+    z-index: 10;
     border-right: 1px solid #f1f3f5;
+    position: sticky;
+    left: 0;
 }
 .hourly-table {
     display: flex;
-    min-width: max-content;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    flex: 1;
+    scrollbar-width: none;
+    min-width: 0; /* Prevents from expanding parent width */
 }
 .hourly-col {
     display: flex;
@@ -2114,14 +2121,15 @@
     background: #ffffff;
     border: 1px solid #f1f3f5;
     border-radius: 12px;
-    padding: 8px 2px;
+    padding: 8px 1px; /* Minimal side padding to save space */
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 4px;
     transition: all 0.2s;
-    min-width: 0;
+    min-width: 0; /* Important for grid shrinking */
     cursor: pointer;
+    overflow: hidden; /* Prevent text spill */
 }
 .weekly-card:hover { 
     background: #f8f9fa;
