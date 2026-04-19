@@ -475,7 +475,11 @@ export function updateHourlyWeather(locKey, targetYmd) {
 
             const hourlyKeys = state.sortedKeys.filter(k => k.startsWith(ymd));
             
-            if (hourlyKeys.length > 0) {
+            // 만약 4일차(i>=3) 이후인데 데이터가 6개(6시간) 이하로 파편화되어 끝부분(00시 등)만 남아있다면, 
+            // 상세 시간별 데이터 대신 중기예보(오전/오후)로 넘어가게 처리합니다.
+            const useDetailedHourly = hourlyKeys.length > 0 && !(i >= 3 && hourlyKeys.length <= 6);
+
+            if (useDetailedHourly) {
                 if (i > 0) {
                     allItemsHTML += `
                         <div class="hourly-date-divider" data-date="${ymd}" style="display: flex; align-items: center; justify-content: center; min-width: 40px; margin: 0 5px; color: var(--text-muted); font-size: 0.85rem; font-weight: 800; white-space: nowrap;">
