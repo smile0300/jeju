@@ -612,7 +612,7 @@ export function renderWeatherLoading(locKey) {
     if (container) {
         container.innerHTML = `
             <div class="weather-loader">
-                <img src="${loadingImg}" alt="Loading...">
+                <div class="weather-spinner"></div>
                 <div class="weather-loading-text">正在加载中...</div>
             </div>
         `;
