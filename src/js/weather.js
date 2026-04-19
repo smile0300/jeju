@@ -521,30 +521,39 @@ function getAirQualityInfo(val, type) {
 }
 
 export function renderAirQuality(locKey, item) {
-    const topAir = document.querySelector(`#top-air-${locKey} .val`);
-    if (topAir) {
-        const info = getAirQualityInfo(item.pm10Value, 'pm10');
-        let statusClass = 'status-good';
-        if (info.level === 2) statusClass = 'status-fair';
-        if (info.level >= 3) statusClass = 'status-poor';
-        topAir.innerHTML = `<span class="chip-status ${statusClass}">${info.text} (${item.pm10Value || '--'})</span>`;
-    }
     const container = document.getElementById(`air-quality-${locKey}`);
     if (container) {
-        const info = getAirQualityInfo(item.pm10Value, 'pm10');
+        const infoPM10 = getAirQualityInfo(item.pm10Value, 'pm10');
+        const infoPM25 = getAirQualityInfo(item.pm25Value, 'pm10'); // PM2.5 roughly similar thresholds for UI
+        const infoO3 = getAirQualityInfo(item.o3Value, 'o3');
+
         container.innerHTML = `
             <div class="air-quality-item">
                 <div class="air-label">PM10</div>
-                <div class="air-lvv-wrap"><span class="air-lvv">${item.pm10Value || '--'}</span><small class="unit">μg/m³</small></div>
-                <div class="chip-status ${info.level <= 1 ? 'status-good' : (info.level === 2 ? 'status-fair' : 'status-poor')}">${info.text}</div>
+                <div class="air-circle-wrap">
+                    <div class="air-circle ${infoPM10.level <= 1 ? 'status-good' : (infoPM10.level === 2 ? 'status-fair' : 'status-poor')}">
+                        <span class="air-text">${infoPM10.text}</span>
+                    </div>
+                </div>
+                <div class="air-val">${item.pm10Value || '--'}<small>μg/m³</small></div>
             </div>
             <div class="air-quality-item">
                 <div class="air-label">PM2.5</div>
-                <div class="air-lvv-wrap"><span class="air-lvv">${item.pm25Value || '--'}</span><small class="unit">μg/m³</small></div>
+                <div class="air-circle-wrap">
+                    <div class="air-circle ${infoPM25.level <= 1 ? 'status-good' : (infoPM25.level === 2 ? 'status-fair' : 'status-poor')}">
+                        <span class="air-text">${infoPM25.text}</span>
+                    </div>
+                </div>
+                <div class="air-val">${item.pm25Value || '--'}<small>μg/m³</small></div>
             </div>
             <div class="air-quality-item">
                 <div class="air-label">O3</div>
-                <div class="air-lvv-wrap"><span class="air-lvv">${item.o3Value || '--'}</span><small class="unit">ppm</small></div>
+                <div class="air-circle-wrap">
+                    <div class="air-circle ${infoO3.level <= 1 ? 'status-good' : (infoO3.level === 2 ? 'status-fair' : 'status-poor')}">
+                        <span class="air-text">${infoO3.text}</span>
+                    </div>
+                </div>
+                <div class="air-val">${item.o3Value || '--'}<small>ppm</small></div>
             </div>`;
     }
 }
