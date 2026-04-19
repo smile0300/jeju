@@ -1566,16 +1566,213 @@
     height: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
+    scroll-snap-type: x mandatory !important;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 !important;
+    margin: 0 !important;
+    height: 100% !important;
+    width: 100% !important;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+}
+
+.wsm-panel.fullscreen .wsm-loc-block {
+    width: 100% !important;
+    min-width: 100% !important;
+    flex-shrink: 0 !important;
+    scroll-snap-align: start !important;
+    margin: 0 !important;
+    padding: 50px 15px 30px 15px !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    height: 100% !important;
+    overflow-y: hidden !important;
+    justify-content: center;
+}
+
+.wsm-page-indicator {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(4px);
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    color: #475569;
+}
+
+.wsm-page-indicator {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(4px);
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    color: #475569;
+    font-weight: 800;
+    z-index: 10000;
+}
+
+/* ==================== Navigation Tap Zones ==================== */
+.wsm-nav-zone {
+    position: fixed;
+    top: 60px; /* Header 영역 제외 */
+    bottom: 0;
+    width: 30%;
+    z-index: 9998;
+    cursor: pointer;
+}
+
+.wsm-nav-zone.prev { left: 0; }
+.wsm-nav-zone.next { right: 0; }
+
+
+/* Fullscreen Compact Layout Optimization */
+.wsm-panel.fullscreen .wsm-loc-title {
+    font-size: 1.1rem !important;
+    margin-bottom: 15px !important;
+}
+.wsm-panel.fullscreen .wsm-hourly-grid {
+    display: grid !important;
+    grid-template-columns: repeat(6, 1fr) !important;
+    gap: 6px 4px !important;
+    width: 100% !important;
+}
+.wsm-panel.fullscreen .wsm-h-item {
+    padding: 6px 2px !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-radius: 8px !important;
+}
+.wsm-panel.fullscreen .h-time { font-size: 0.65rem !important; opacity: 0.8; }
+.wsm-panel.fullscreen .h-icon { font-size: 1.4rem !important; margin: 2px 0 !important; }
+.wsm-panel.fullscreen .h-temp { font-size: 0.85rem !important; font-weight: 800 !important; }
+.wsm-panel.fullscreen .h-wind { font-size: 0.6rem !important; }
+.wsm-panel.fullscreen .h-precip { font-size: 0.6rem !important; }
+
+@media (max-height: 700px) {
+    .wsm-panel.fullscreen .wsm-loc-block {
+    width: 100% !important;
+    min-width: 100% !important;
+    flex-shrink: 0 !important;
+    scroll-snap-align: start !important;
+    margin: 0 !important;
+    padding: 50px 15px 30px 15px !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    height: 100% !important;
+    overflow-y: hidden !important;
+    justify-content: center;
+}
+    .wsm-panel.fullscreen .wsm-hourly-grid { grid-template-columns: repeat(8, 1fr) !important; gap: 4px 2px !important; }
+    .wsm-panel.fullscreen .h-icon { font-size: 1.1rem !important; }
+    .wsm-panel.fullscreen .wsm-loc-title { font-size: 0.9rem !important; margin-bottom: 8px !important; }
+}
+
+/* Fullscreen Header Elements */
+.wsm-fs-indicator-header {
+    font-size: 0.8rem !important;
+    background: rgba(0, 0, 0, 0.05) !important;
+    padding: 4px 12px !important;
+    border-radius: 20px !important;
+    color: #475569 !important;
+    font-weight: 800 !important;
+    margin-right: 12px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+}
+.wsm-fs-close-btn {
+    background: rgba(0, 0, 0, 0.05) !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 50% !important;
+    color: #475569 !important;
+    font-size: 1.1rem !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.2s !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+    z-index: 10001 !important;
+}
+.wsm-fs-close-btn:hover {
+    background: rgba(0, 0, 0, 0.1) !important;
+    transform: scale(1.1);
+}
+.wsm-header-btns.wsm-fullscreen-hide > button:not(.wsm-fs-close-btn) {
+    display: none !important;
+}
+.wsm-header-btns.wsm-fullscreen-hide {
+    display: flex !important;
+    align-items: center !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Force hide all weather titles across all locations */
+#weather .subsection-title,
+[id^="hourly-title-"] {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+}
+.wsm-watermark {
+    position: fixed !important;
+    bottom: 20px !important;
+    right: 25px !important;
+    font-size: 1.2rem !important;
+    font-weight: 900 !important;
+    color: #475569 !important;
+    opacity: 0 !important;
+    letter-spacing: 0.5px !important;
+    text-transform: uppercase !important;
+    pointer-events: none !important;
+    z-index: 9999 !important;
+    font-family: inherit !important;
+    user-select: none !important;
+    white-space: nowrap !important;
+    animation: fadeInWatermarkCorner 1s ease-out forwards;
+}
+
+@keyframes fadeInWatermarkCorner {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 0.3; transform: translateY(0); }
+}
+
+/* Force hide all weather titles across all locations */
+#weather .subsection-title,
+[id^="hourly-title-"] {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
     overflow: hidden !important;
 }
 /* ==================== Naver Style Weather Redesign ==================== */
 .naver-card {
     background: #ffffff;
-    border-radius: 16px;
-    padding: 16px;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    border-radius: 20px;
+    padding: 18px 12px;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
     border: 1px solid #f1f3f5;
+    position: relative;
+    overflow: hidden;
 }
 
 /* Header Area */
@@ -1756,17 +1953,17 @@
     scrollbar-width: none; /* Hide scrollbar for a cleaner look natively */
 }
 .hourly-legend {
-    position: sticky;
-    left: 0;
-    z-index: 2;
-    background: #ffffff;
+    width: 62px;
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
-    padding: 10px 10px 10px 0;
-    margin: 0;
-    list-style: none;
-    box-shadow: 4px 0 6px -2px rgba(0,0,0,0.05);
-    border-right: 1px solid #f8f9fa;
+    align-items: flex-start;
+    padding: 10px 0;
+    color: #212529;
+    font-size: 0.85rem;
+    background: #ffffff;
+    z-index: 2;
+    border-right: 1px solid #f1f3f5;
 }
 .hourly-table {
     display: flex;
@@ -1909,7 +2106,7 @@
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     grid-template-rows: repeat(2, auto);
-    gap: 5px;
+    gap: 6px 4px; /* Optimized gap for filling space */
     margin-top: 10px;
     width: 100%;
 }
@@ -1934,10 +2131,10 @@
 .weekly-card:active { transform: scale(0.95); }
 .w-date-box { font-size: 0.65rem; font-weight: 700; color: #4dabf7; margin-bottom: -2px; }
 .w-icon { font-size: 1.2rem; }
-.w-temps { font-size: 0.7rem; font-weight: 800; display: flex; align-items: center; gap: 1px; justify-content: center; width: 100%; }
-.w-max { color: #fa5252; font-size: 0.7rem !important; }
-.w-min { color: #228be6; font-size: 0.7rem !important; }
-.w-slash { color: #dee2e6; font-size: 0.55rem; margin: 0 1px; }
+.w-temps { font-size: 0.75rem; font-weight: 800; display: flex; align-items: center; gap: 1px; justify-content: center; width: 100%; letter-spacing: -0.5px; }
+.w-max { color: #fa5252; font-size: 0.75rem !important; }
+.w-min { color: #228be6; font-size: 0.75rem !important; }
+.w-slash { color: #dee2e6; font-size: 0.6rem; margin: 0 1px; }
 .w-meta-info {
     display: flex;
     flex-direction: column;
