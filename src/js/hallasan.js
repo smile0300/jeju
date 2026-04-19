@@ -35,7 +35,7 @@ export async function fetchHallasanStatus() {
     }
 
     const now = new Date().toLocaleString('zh-CN');
-    container.innerHTML = `<span style="font-size: 0.7rem; opacity: 0.6;">正在加载数据...</span>`;
+    container.innerHTML = ``;
 
     try {
         const url = `${CONFIG.PROXY_URL}/api/hallasan-status`;
@@ -87,7 +87,7 @@ export async function fetchHallasanStatus() {
             return { ...t, statusCn: info.cn, statusCls: info.cls };
         });
 
-        container.innerHTML = `汉拿山登山信息更新: ${now}`;
+        container.innerHTML = ``;
         trailsEl.innerHTML = trails.map(t => `
             <div class="trail-card">
                 <div class="trail-header">
