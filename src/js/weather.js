@@ -326,10 +326,8 @@ export function parseAndRenderWeather(locKey, items, midData, mountainData) {
     renderWeeklyList(locKey, grouped, sortedKeys, midData);
 
     // --- 4. 시간별 예보 초기 렌더링 ---
-    updateHourlyWeather(locKey, sortedKeys[0].slice(0, 8));
+    updateHourlyWeather(locKey);
 }
-
-// renderDetailsBar removed
 
 function renderWeeklyList(locKey, grouped, sortedKeys, midData) {
     const container = document.getElementById(`weekly-list-${locKey}`);
@@ -398,12 +396,7 @@ export function updateHourlyWeather(locKey) {
     const hourlyContainer = document.getElementById(`hourly-table-${locKey}`);
     if (!hourlyContainer) return;
 
-    const cardHeader = hourlyContainer.previousElementSibling;
-    if (cardHeader && cardHeader.classList.contains('card-header')) {
-        cardHeader.style.display = 'none';
-    }
-
-    const hourlyKeys = state.sortedKeys;
+    const hourlyKeys = state.sortedKeys.slice(0, 24);
     if (hourlyKeys.length === 0) {
         hourlyContainer.innerHTML = '<div style="padding: 24px; text-align: center; color: #adb5bd;">暂无详细时间预报</div>';
         return;
@@ -435,7 +428,7 @@ export function updateHourlyWeather(locKey) {
             <div class="hourly-col">
                 <div class="h-top-section">
                     <span class="h-date-sub">${dateStr}</span>
-                    <span class="h-time">${hour}时</span>
+                    <span class="h-time">${String(hour).padStart(2, '0')}:00</span>
                     <span class="h-icon">${sky.icon}</span>
                     <span class="h-temp">${d.TMP ?? '--'}°</span>
                     <span class="h-pop">${d.POP ?? 0}%</span>
@@ -451,8 +444,6 @@ export function updateHourlyWeather(locKey) {
     html += '</div></div>';
     hourlyContainer.innerHTML = html;
 }
-
-
 
 export function renderWeatherLoading(locKey) {
     const container = document.getElementById(`current-card-${locKey}`);
