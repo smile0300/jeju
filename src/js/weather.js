@@ -347,96 +347,84 @@ function renderWeeklyList(locKey, grouped, sortedKeys, midData) {
         if (grouped[k].POP) dailyMap[ymd].pops.push(parseInt(grouped[k].POP));
         dailyMap[ymd].icons.push(getSkyInfo(grouped[k].PTY, grouped[k].SKY, parseInt(k.slice(8, 10))).icon);
     });
+
     const { landItem, tempItem } = midData || {};
-    let html = '';
+    let html = '<div class="weekly-grid">';
     for (let i = 0; i < 10; i++) {
         const targetD = new Date(today);
         targetD.setDate(today.getDate() + i);
         const ymd = `${targetD.getFullYear()}${String(targetD.getMonth() + 1).padStart(2, '0')}${String(targetD.getDate()).padStart(2, '0')}`;
-        const dayNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-        const dayLabel = i === 0 ? '今天' : (i === 1 ? '明天' : dayNames[targetD.getDay()]);
-        const dateLabel = `${targetD.getMonth() + 1}.${targetD.getDate()}`;
-        let min = '--', max = '--', amIcon = '🌤️', pmIcon = '🌤️', amPop = '--', pmPop = '--';
+        const dateLabel = `${targetD.getMonth() + 1}/${targetD.getDate()}`;
+        let min = '--', max = '--', icon = '🌤️', pop = '--', pcp = '--';
+        
         const dt = dailyMap[ymd];
         if (dt && dt.max !== -99) {
             min = Math.round(dt.min); max = Math.round(dt.max);
-            amIcon = dt.icons[Math.floor(dt.icons.length * 0.25)] || '🌤️';
-            pmIcon = dt.icons[Math.floor(dt.icons.length * 0.75)] || '🌤️';
-            amPop = dt.pops[Math.floor(dt.pops.length * 0.25)] || 0;
-            pmPop = dt.pops[Math.floor(dt.pops.length * 0.75)] || 0;
+            icon = dt.icons[Math.floor(dt.icons.length * 0.5)] || '🌤️';
+            pop = dt.pops[Math.floor(dt.pops.length * 0.5)] || 0;
+            const keys = sortedKeys.filter(k => k.startsWith(ymd));
+            const pcpVal = grouped[keys[Math.floor(keys.length * 0.5)]]?.PCP || '--';
+            pcp = formatPrecip(pcpVal).replace('없음', '0').replace('mm', '');
         } else if (i >= 3 && (landItem || tempItem)) {
             const tMax = getMidTempVal(tempItem, 'max', i);
             const tMin = getMidTempVal(tempItem, 'min', i);
             min = tMin !== null ? Math.round(tMin) : '--';
             max = tMax !== null ? Math.round(tMax) : '--';
-            const wfAm = landItem[`wf${i}Am`] || landItem[`wf${i}`] || '';
-            const wfPm = landItem[`wf${i}Pm`] || landItem[`wf${i}`] || '';
-            amIcon = translateMidWf(wfAm).icon; pmIcon = translateMidWf(wfPm).icon;
-            amPop = landItem[`rnSt${i}Am`] || landItem[`rnSt${i}`] || 0;
-            pmPop = landItem[`rnSt${i}Pm`] || landItem[`rnSt${i}`] || 0;
+            const wf = landItem[`wf${i}`] || landItem[`wf${i}Am`] || '';
+            const translated = translateMidWf(wf);
+            icon = translated.icon;
+            pop = landItem[`rnSt${i}`] || landItem[`rnSt${i}Am`] || 0;
+            pcp = '0';
         }
+
         html += `
-            <div class="weekly-row" onclick="updateHourlyWeather('${locKey}', '${ymd}')">
-                <div class="w-date"><span class="w-day">${dayLabel}</span><span class="w-month">${dateLabel}</span></div>
-                <div class="w-icons">
-                    <div class="w-icon-box"><span class="w-icon-label">上午</span><span class="w-icon">${amIcon}</span><span class="w-pop">${amPop}%</span></div>
-                    <div class="w-icon-box"><span class="w-icon-label">下午</span><span class="w-icon">${pmIcon}</span><span class="w-pop">${pmPop}%</span></div>
+            <div class="weekly-card">
+                <div class="w-date-box"><span class="w-date">${dateLabel}</span></div>
+                <div class="w-icon">${icon}</div>
+                <div class="w-temps"><span class="w-max">${max}°</span><span class="w-slash">/</span><span class="w-min">${min}°</span></div>
+                <div class="w-meta-info">
+                    <span class="w-pop">💧${pop}%</span>
+                    <span class="w-pcp">${pcp}mm</span>
                 </div>
-                <div class="w-temps"><span class="w-min">${min}°</span><span class="w-slash">/</span><span class="w-max">${max}°</span></div>
             </div>`;
     }
+    html += '</div>';
     container.innerHTML = html;
 }
 
-export function updateHourlyWeather(locKey, targetYmd) {
+export function updateHourlyWeather(locKey) {
     const state = WEATHER_STATE[locKey];
     if (!state) return;
     const hourlyContainer = document.getElementById(`hourly-table-${locKey}`);
     if (!hourlyContainer) return;
 
-    // 요일 라벨 상태 업데이트
     const cardHeader = hourlyContainer.previousElementSibling;
     if (cardHeader && cardHeader.classList.contains('card-header')) {
-        const labels = cardHeader.querySelectorAll('.day-label');
-        const todayYmd = state.sortedKeys[0].slice(0, 8);
-        const tomorrowYmd = getOffsetDate(todayYmd, 1);
-        if (labels[0]) labels[0].classList.toggle('active', targetYmd === todayYmd);
-        if (labels[1]) labels[1].classList.toggle('active', targetYmd === tomorrowYmd);
-        labels[0].onclick = () => updateHourlyWeather(locKey, todayYmd);
-        labels[1].onclick = () => updateHourlyWeather(locKey, tomorrowYmd);
+        cardHeader.style.display = 'none';
     }
 
-    const hourlyKeys = state.sortedKeys.filter(k => k.startsWith(targetYmd));
+    const hourlyKeys = state.sortedKeys;
     if (hourlyKeys.length === 0) {
         hourlyContainer.innerHTML = '<div style="padding: 24px; text-align: center; color: #adb5bd;">暂无详细时间预报</div>';
         return;
     }
-    const todayYmd = state.sortedKeys[0].slice(0, 8);
-    const dayLabelText = targetYmd === todayYmd ? '今天' : '明天';
 
     let html = `
     <div class="hourly-wrapper">
         <div class="hourly-legend">
-            <div class="h-top-section h-legend-top">
-                <strong>${dayLabelText}</strong>
-            </div>
+            <div class="h-top-section h-legend-top"><strong>24H</strong></div>
             <div class="h-divider" style="background:transparent;"></div>
             <div class="h-meta-row h-legend-items">
-                <div class="h-legend-item">
-                    <span class="h-legend-title">降水</span><span class="h-legend-unit">mm</span>
-                </div>
-                <div class="h-legend-item">
-                    <span class="h-legend-title">湿度</span><span class="h-legend-unit">%</span>
-                </div>
-                <div class="h-legend-item">
-                    <span class="h-legend-title">风速</span><span class="h-legend-unit">m/s</span>
-                </div>
+                <div class="h-legend-item"><span class="h-legend-title">降水</span><span class="h-legend-unit">mm</span></div>
+                <div class="h-legend-item"><span class="h-legend-title">湿度</span><span class="h-legend-unit">%</span></div>
+                <div class="h-legend-item"><span class="h-legend-title">风速</span><span class="h-legend-unit">m/s</span></div>
             </div>
         </div>
         <div class="hourly-table">`;
 
     hourlyKeys.forEach(k => {
         const d = state.items[k];
+        const dateStr = k.slice(4, 6) + '/' + k.slice(6, 8);
         const hour = parseInt(k.slice(8, 10));
         const sky = getSkyInfo(d.PTY, d.SKY, hour);
         let precip = formatPrecip(d.PCP);
@@ -446,6 +434,7 @@ export function updateHourlyWeather(locKey, targetYmd) {
         html += `
             <div class="hourly-col">
                 <div class="h-top-section">
+                    <span class="h-date-sub">${dateStr}</span>
                     <span class="h-time">${hour}时</span>
                     <span class="h-icon">${sky.icon}</span>
                     <span class="h-temp">${d.TMP ?? '--'}°</span>
@@ -462,6 +451,8 @@ export function updateHourlyWeather(locKey, targetYmd) {
     html += '</div></div>';
     hourlyContainer.innerHTML = html;
 }
+
+
 
 export function renderWeatherLoading(locKey) {
     const container = document.getElementById(`current-card-${locKey}`);
@@ -527,7 +518,7 @@ export function renderAirQuality(locKey, item) {
         let statusClass = 'status-good';
         if (info.level === 2) statusClass = 'status-fair';
         if (info.level >= 3) statusClass = 'status-poor';
-        topAir.innerHTML = `<span class="chip-status ${statusClass}">${info.text} (${item.pm10Value || '--'})</span>`;
+        topAir.innerHTML = `<span class="chip-status ${statusClass}">${info.text}</span>`;
     }
 
     const container = document.getElementById(`air-quality-${locKey}`);
