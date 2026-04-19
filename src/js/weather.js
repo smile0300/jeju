@@ -287,7 +287,7 @@ export function parseAndRenderWeather(locKey, items, midData, mountainData) {
         }
     }
 
-    // --- 2. 오늘/내일 비교 카드 렌더링 ---
+    // --- 2. 오늘 날씨 요약 (좌측 기온, 우측 디테일) ---
     const currentCard = document.getElementById(`current-card-${locKey}`);
     if (currentCard) {
         const current = grouped[sortedKeys[0]];
@@ -297,64 +297,39 @@ export function parseAndRenderWeather(locKey, items, midData, mountainData) {
         const tomorrowData = getDailySummary(grouped, tomorrowYmd, midData);
         const sky = getSkyInfo(current.PTY, current.SKY, parseInt(current.time.slice(0, 2)));
 
+        const t = parseFloat(current.TMP ?? current.T1H ?? 20);
+        const w = parseFloat(current.WSD || 0);
+        const feelsLike = Math.round(t - (2 * w * 0.1));
+
+        currentCard.className = "naver-card current-weather-main";
+
         currentCard.innerHTML = `
-            <div class="compare-today">
-                <div class="compare-title">今天预报</div>
-                <div class="compare-main">
+            <div class="current-weather-box">
+                <div class="cw-left">
                     <div class="main-icon">${sky.icon}</div>
                     <div class="main-temp">
-                        <span class="current-val">${current.TMP ?? current.T1H ?? '--'}<span class="unit">°</span></span>
-                        <span class="current-desc">${sky.desc}</span>
+                        <span class="current-val">${current.TMP ?? current.T1H ?? '--'}<span class="unit">°c</span></span>
                     </div>
                 </div>
-                <div class="yesterday-diff">
-                    <span class="diff-label">今日气温</span>
-                    <span class="diff-val">${todayHighLow.min}° / ${todayHighLow.max}°</span>
-                </div>
-            </div>
-            <div class="compare-tomorrow">
-                <div class="compare-title">明天预报</div>
-                <div class="tomorrow-summary">
-                    <div class="tmr-item">
-                        <span class="tmr-label">上午</span>
-                        <div class="tmr-info">
-                            <span class="tmr-icon">${tomorrowData.amIcon}</span>
-                            <span class="tmr-pop">${tomorrowData.amPop}%</span>
-                        </div>
-                    </div>
-                    <div class="tmr-item">
-                        <span class="tmr-label">下午</span>
-                        <div class="tmr-info">
-                            <span class="tmr-icon">${tomorrowData.pmIcon}</span>
-                            <span class="tmr-pop">${tomorrowData.pmPop}%</span>
-                        </div>
-                    </div>
+                <div class="cw-right">
+                    <ul class="cw-details-list">
+                        <li><span class="cwi">🍃</span> 风速 ${current.WSD}m/s • ${getWindDesc(current.WSD)}</li>
+                        <li><span class="cwi">💧</span> 湿度 ${current.REH}%</li>
+                        <li><span class="cwi">🌡️</span> 体感 ${feelsLike}°</li>
+                        <li id="top-air-${locKey}"><span class="cwi">😷</span> 空气质量 <span class="val">--</span></li>
+                    </ul>
                 </div>
             </div>`;
     }
 
-    // --- 3. 상세 지표 바 렌더링 ---
-    renderDetailsBar(locKey, grouped[sortedKeys[0]]);
-
-    // --- 4. 주간 예보 리스트 렌더링 ---
+    // --- 3. 주간 예보 리스트 렌더링 ---
     renderWeeklyList(locKey, grouped, sortedKeys, midData);
 
-    // --- 5. 시간별 예보 초기 렌더링 ---
+    // --- 4. 시간별 예보 초기 렌더링 ---
     updateHourlyWeather(locKey, sortedKeys[0].slice(0, 8));
 }
 
-function renderDetailsBar(locKey, current) {
-    const bar = document.getElementById(`details-bar-${locKey}`);
-    if (!bar) return;
-    const t = parseFloat(current.TMP || 20);
-    const w = parseFloat(current.WSD || 0);
-    const feelsLike = Math.round(t - (2 * w * 0.1));
-    bar.innerHTML = `
-        <div class="detail-chip"><span class="chip-label">体感</span><span class="chip-val">${feelsLike}°</span></div>
-        <div class="detail-chip"><span class="chip-label">风速</span><span class="chip-val">${current.WSD}m/s</span><span class="chip-status">${getWindDesc(current.WSD)}</span></div>
-        <div class="detail-chip"><span class="chip-label">湿度</span><span class="chip-val">${current.REH}%</span></div>
-        <div class="detail-chip" id="chip-air-${locKey}"><span class="chip-label">空气质量</span><span class="chip-val">--</span></div>`;
-}
+// renderDetailsBar removed
 
 function renderWeeklyList(locKey, grouped, sortedKeys, midData) {
     const container = document.getElementById(`weekly-list-${locKey}`);
@@ -546,13 +521,13 @@ function getAirQualityInfo(val, type) {
 }
 
 export function renderAirQuality(locKey, item) {
-    const chip = document.querySelector(`#chip-air-${locKey} .chip-val`);
-    if (chip) {
+    const topAir = document.querySelector(`#top-air-${locKey} .val`);
+    if (topAir) {
         const info = getAirQualityInfo(item.pm10Value, 'pm10');
         let statusClass = 'status-good';
         if (info.level === 2) statusClass = 'status-fair';
         if (info.level >= 3) statusClass = 'status-poor';
-        chip.innerHTML = `<span class="chip-status ${statusClass}">${info.text} (${item.pm10Value || '--'})</span>`;
+        topAir.innerHTML = `<span class="chip-status ${statusClass}">${info.text} (${item.pm10Value || '--'})</span>`;
     }
     const container = document.getElementById(`air-quality-${locKey}`);
     if (container) {
