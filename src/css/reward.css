@@ -188,15 +188,23 @@
 
 .copy-btn {
     width: 100%;
-    padding: 14px;
+    padding: 12px 24px;
     background: var(--primary-gradient);
     color: white;
     border: none;
-    border-radius: 12px;
+    border-radius: var(--radius-lg);
     font-size: 0.95rem;
-    font-weight: 700;
+    font-weight: 800; /* unified weight */
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    transition: all var(--transition-normal);
+}
+.copy-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
+}
+.copy-btn:active {
+    transform: scale(0.97);
 }
 
 /* Media Queries */
@@ -222,16 +230,16 @@
 .header-action-btn {
     position: absolute;
     right: 16px;
-    padding: 6px 16px;
+    padding: 8px 16px;
     background: var(--primary-gradient);
     color: white;
     border: none;
-    border-radius: 20px;
-    font-size: 1rem;
-    font-weight: 900;
+    border-radius: var(--radius-lg);
+    font-size: 0.95rem;
+    font-weight: 800; /* unified weight */
     cursor: pointer;
-    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    transition: all var(--transition-normal);
     z-index: 2001;
 }
 
