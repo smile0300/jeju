@@ -313,7 +313,7 @@ export function parseAndRenderWeather(locKey, items, midData, mountainData) {
                 </div>
                 <div class="cw-right">
                     <ul class="cw-details-list">
-                        <li><span class="cwi">🍃</span> 风速 ${current.WSD}m/s • ${getWindDesc(current.WSD)}</li>
+                        <li><span class="cwi">🍃</span> ${getWindDesc(current.WSD)} ${current.WSD}m/s</li>
                         <li><span class="cwi">💧</span> 湿度 ${current.REH}%</li>
                         <li><span class="cwi">🌡️</span> 体感 ${feelsLike}°</li>
                         <li id="top-air-${locKey}"><span class="cwi">😷</span> 空气质量 <span class="val">--</span></li>
@@ -521,6 +521,15 @@ function getAirQualityInfo(val, type) {
 }
 
 export function renderAirQuality(locKey, item) {
+    const topAir = document.querySelector(`#top-air-${locKey} .val`);
+    if (topAir) {
+        const info = getAirQualityInfo(item.pm10Value, 'pm10');
+        let statusClass = 'status-good';
+        if (info.level === 2) statusClass = 'status-fair';
+        if (info.level >= 3) statusClass = 'status-poor';
+        topAir.innerHTML = `<span class="chip-status ${statusClass}">${info.text} (${item.pm10Value || '--'})</span>`;
+    }
+
     const container = document.getElementById(`air-quality-${locKey}`);
     if (container) {
         const infoPM10 = getAirQualityInfo(item.pm10Value, 'pm10');
