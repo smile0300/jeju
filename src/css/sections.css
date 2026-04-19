@@ -1500,31 +1500,25 @@
 }
 .wsm-watermark {
     position: fixed !important;
-    top: 55% !important; /* Slightly lower than exact center for visual balance */
-    left: 50% !important;
-    transform: translate(-50%, -50%) rotate(-15deg) !important;
-    font-size: 12vw !important;
-    font-weight: 1000 !important;
-    color: #0f172a !important;
-    opacity: 0.03 !important;
-    letter-spacing: -2px !important;
+    bottom: 20px !important;
+    right: 25px !important;
+    font-size: 1.2rem !important;
+    font-weight: 900 !important;
+    color: #475569 !important;
+    opacity: 0 !important;
+    letter-spacing: 0.5px !important;
     text-transform: uppercase !important;
     pointer-events: none !important;
     z-index: 9999 !important;
     font-family: inherit !important;
     user-select: none !important;
     white-space: nowrap !important;
-    animation: fadeInWatermarkCentral 1.5s ease-out forwards;
+    animation: fadeInWatermarkCorner 1s ease-out forwards;
 }
 
-@keyframes fadeInWatermarkCentral {
-    from { opacity: 0; transform: translate(-50%, -45%) rotate(-15deg); }
-    to { opacity: 0.04; transform: translate(-50%, -50%) rotate(-15deg); }
-}
-
-@keyframes fadeInWatermark {
+@keyframes fadeInWatermarkCorner {
     from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 0.08; transform: translateY(0); }
+    to { opacity: 0.3; transform: translateY(0); }
 }
 
 /* Force hide all weather titles across all locations */
