@@ -44,6 +44,15 @@ export function showSection(sectionId, pushHistory = true) {
             history.pushState({ section: sectionId }, '', path);
         }
     }
+
+    // Google Tag Manager - Virtual Pageview Tracking
+    if (window.dataLayer) {
+        window.dataLayer.push({
+            'event': 'virtual_pageview',
+            'page_path': sectionId === 'home' ? '/' : `/${sectionId}`,
+            'page_title': document.title + ' - ' + sectionId
+        });
+    }
 }
 
 export function openWechatQR() {
@@ -104,6 +113,15 @@ export async function submitFeatureRequest() {
         if (res.ok) {
             statusEl.textContent = '✅ 提交成功！';
             contentEl.value = '';
+            
+            if (window.dataLayer) {
+                window.dataLayer.push({
+                    'event': 'feature_submit_success',
+                    'category': 'interaction',
+                    'action': 'submit_feature'
+                });
+            }
+
             setTimeout(closeFeatureModal, 2000);
         } else throw new Error('Server Error');
     } catch (e) {
@@ -116,7 +134,17 @@ export async function submitFeatureRequest() {
 export function copyWechatId() {
     const input = document.getElementById('wechat-id-input');
     input?.select();
-    navigator.clipboard.writeText(input?.value || '').then(() => alert('ID已复制'));
+    navigator.clipboard.writeText(input?.value || '').then(() => {
+        alert('ID已复制');
+        if (window.dataLayer) {
+            window.dataLayer.push({
+                'event': 'wechat_id_copy',
+                'category': 'interaction',
+                'action': 'copy',
+                'label': input?.value
+            });
+        }
+    });
 }
 
 // ─── 날씨 요약 모달 ────────────────────────────────────────────
@@ -218,6 +246,15 @@ export function openWeatherSummaryModal(targetYmd) {
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
     if (window.pushModalState) window.pushModalState();
+
+    if (window.dataLayer) {
+        window.dataLayer.push({
+            'event': 'weather_summary_open',
+            'category': 'interaction',
+            'action': 'open_modal',
+            'label': targetYmd || 'today'
+        });
+    }
 }
 
 export function closeWeatherSummaryModal(fromPopState = false) {
@@ -426,5 +463,14 @@ export async function shareToPlatform(platform) {
             document.execCommand('copy');
             document.body.removeChild(textarea);
         }
+    }
+
+    if (window.dataLayer) {
+        window.dataLayer.push({
+            'event': 'share_action',
+            'category': 'interaction',
+            'action': 'share',
+            'label': platform
+        });
     }
 }

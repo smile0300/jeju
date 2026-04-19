@@ -194,6 +194,15 @@ export function openLostDetailModalByIndex(index) {
     document.getElementById('lost-detail-modal').style.display = 'flex';
     document.body.style.overflow = 'hidden';
     if (window.pushModalState) window.pushModalState();
+
+    if (window.dataLayer) {
+        window.dataLayer.push({
+            'event': 'lost_item_detail_open',
+            'category': 'interaction',
+            'action': 'open_detail',
+            'label': item.name
+        });
+    }
 }
 
 export function showWechatQR() {
@@ -294,6 +303,15 @@ export async function submitLostReport() {
                 statusEl.className = 'form-status success';
             } else {
                 alert('提交成功！');
+            }
+
+            if (window.dataLayer) {
+                window.dataLayer.push({
+                    'event': 'lost_report_submit_success',
+                    'category': 'interaction',
+                    'action': 'submit_report',
+                    'label': data.itemName
+                });
             }
             
             setTimeout(() => {
