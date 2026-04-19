@@ -436,26 +436,55 @@ export function updateHourlyWeather(locKey, targetYmd) {
         hourlyContainer.innerHTML = '<div style="padding: 24px; text-align: center; color: #adb5bd;">暂无详细时间预报</div>';
         return;
     }
-    let html = '<div class="hourly-table">';
+    const todayYmd = state.sortedKeys[0].slice(0, 8);
+    const dayLabelText = targetYmd === todayYmd ? '今天' : '明天';
+
+    let html = `
+    <div class="hourly-wrapper">
+        <div class="hourly-legend">
+            <div class="h-top-section h-legend-top">
+                <strong>${dayLabelText}</strong>
+            </div>
+            <div class="h-divider" style="background:transparent;"></div>
+            <div class="h-meta-row h-legend-items">
+                <div class="h-legend-item">
+                    <span class="h-legend-title">降水</span><span class="h-legend-unit">mm</span>
+                </div>
+                <div class="h-legend-item">
+                    <span class="h-legend-title">湿度</span><span class="h-legend-unit">%</span>
+                </div>
+                <div class="h-legend-item">
+                    <span class="h-legend-title">风速</span><span class="h-legend-unit">m/s</span>
+                </div>
+            </div>
+        </div>
+        <div class="hourly-table">`;
+
     hourlyKeys.forEach(k => {
         const d = state.items[k];
         const hour = parseInt(k.slice(8, 10));
         const sky = getSkyInfo(d.PTY, d.SKY, hour);
+        let precip = formatPrecip(d.PCP);
+        if(precip === '없음' || precip === '0mm') precip = '0';
+        else precip = precip.replace(/mm/g, '').trim();
+
         html += `
             <div class="hourly-col">
-                <span class="h-time">${hour}时</span>
-                <span class="h-icon">${sky.icon}</span>
-                <span class="h-temp">${d.TMP ?? '--'}°</span>
-                <span class="h-pop">${d.POP ?? 0}%</span>
+                <div class="h-top-section">
+                    <span class="h-time">${hour}时</span>
+                    <span class="h-icon">${sky.icon}</span>
+                    <span class="h-temp">${d.TMP ?? '--'}°</span>
+                    <span class="h-pop">${d.POP ?? 0}%</span>
+                </div>
                 <div class="h-divider"></div>
                 <div class="h-meta-row">
-                    <div class="h-meta-item"><span class="h-meta-label">降水</span><span class="h-meta-val">${formatPrecip(d.PCP)}</span></div>
-                    <div class="h-meta-item"><span class="h-meta-label">湿度</span><span class="h-meta-val">${d.REH}%</span></div>
-                    <div class="h-meta-item"><span class="h-meta-label">风速</span><span class="h-meta-val">${d.WSD}m/s</span></div>
+                    <span class="h-meta-val">${precip}</span>
+                    <span class="h-meta-val">${d.REH}</span>
+                    <span class="h-meta-val">${d.WSD}</span>
                 </div>
             </div>`;
     });
-    html += '</div>';
+    html += '</div></div>';
     hourlyContainer.innerHTML = html;
 }
 
