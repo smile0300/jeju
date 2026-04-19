@@ -1880,31 +1880,51 @@
     color: #212529;
     margin-bottom: 15px;
 }
-.weekly-list {
+/* Weekly Forecast Grid (2x5) */
+.weekly-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(2, auto);
+    gap: 8px;
+    margin-top: 10px;
+}
+.weekly-card {
+    background: #ffffff;
+    border: 1px solid #f1f3f5;
+    border-radius: 12px;
+    padding: 10px 4px;
     display: flex;
     flex-direction: column;
-}
-.weekly-row {
-    display: flex;
     align-items: center;
-    padding: 14px 0;
-    border-bottom: 1px solid #f8f9fa;
+    gap: 6px;
+    transition: transform 0.2s;
 }
-.w-date {
-    flex: 1;
+.weekly-card:active { transform: scale(0.95); }
+.w-date-box { font-size: 0.75rem; font-weight: 700; color: #4dabf7; }
+.w-icon { font-size: 1.5rem; }
+.w-temps { font-size: 0.8rem; font-weight: 800; display: flex; align-items: center; gap: 2px; }
+.w-max { color: #fa5252; }
+.w-min { color: #228be6; }
+.w-slash { color: #dee2e6; font-size: 0.7rem; }
+.w-meta-info {
     display: flex;
     flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #868e96;
 }
-.w-day { font-size: 0.95rem; font-weight: 800; color: #212529; }
-.w-month { font-size: 0.8rem; color: #868e96; font-weight: 600; }
+.w-pop { color: #228be6; }
 
-.w-icons {
-    flex: 2;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
+/* Hourly Table Refinement (Continuous Scroll) */
+.h-date-sub {
+    font-size: 0.65rem;
+    color: #adb5bd;
+    font-weight: 700;
+    margin-bottom: 2px;
 }
+.w-date { flex: none; display: inline; } /* reset old style */
 .w-icon-box {
     display: flex;
     flex-direction: column;
