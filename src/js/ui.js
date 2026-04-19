@@ -271,7 +271,7 @@ window.enterWeatherFullscreen = function() {
         watermark = document.createElement('div');
         watermark.id = 'wsm-watermark';
         watermark.className = 'wsm-watermark';
-        watermark.innerHTML = 'jeju-live.com';
+        watermark.innerHTML = 'jeju-live';
         document.body.appendChild(watermark);
     }
     
