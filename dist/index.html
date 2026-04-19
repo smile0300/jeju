@@ -77,8 +77,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         }
     </script>
 
-  <script type="module" crossorigin src="/assets/index-2edZvlYh.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-2Cz9DT5i.css">
+  <script type="module" crossorigin src="/assets/index-Dlv1MRl0.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-BbQQ3brv.css">
 </head>
 
 <body>
@@ -167,6 +167,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     <span class="tab-icon">🏙️</span>
                     <span class="tab-name">济州市</span>
                 </button>
+                <button class="location-tab" data-loc="aewol" onclick="switchWeatherLocation('aewol')">
+                    <span class="tab-icon">☕</span>
+                    <span class="tab-name">涯月</span>
+                </button>
+                <button class="location-tab" data-loc="hyeopjae" onclick="switchWeatherLocation('hyeopjae')">
+                    <span class="tab-icon">🏝️</span>
+                    <span class="tab-name">挟才</span>
+                </button>
                 <button class="location-tab" data-loc="seogwipo" onclick="switchWeatherLocation('seogwipo')">
                     <span class="tab-icon">🌺</span>
                     <span class="tab-name">西归浦</span>
@@ -174,6 +182,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 <button class="location-tab" data-loc="hallasan" onclick="switchWeatherLocation('hallasan')">
                     <span class="tab-icon">⛰️</span>
                     <span class="tab-name">汉拿山</span>
+                </button>
+                <button class="location-tab" data-loc="hamdeok" onclick="switchWeatherLocation('hamdeok')">
+                    <span class="tab-icon">🏖️</span>
+                    <span class="tab-name">咸德</span>
+                </button>
+                <button class="location-tab" data-loc="woljeong" onclick="switchWeatherLocation('woljeong')">
+                    <span class="tab-icon">🌊</span>
+                    <span class="tab-name">月汀</span>
                 </button>
                 <button class="location-tab" data-loc="udo" onclick="switchWeatherLocation('udo')">
                     <span class="tab-icon">🐄</span>
@@ -265,6 +281,52 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 <h3 class="cmp-cur-weather-head">空气质量信息</h3>
                 <div id="air-quality-seongsan" class="air-quality-grid"></div>
             </div>
+
+            <!-- New Locations -->
+            <div id="weather-content-aewol" class="location-weather">
+                <div class="current-weather" id="current-weather-aewol">
+                    <div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text">正在加载信息...</div></div>
+                </div>
+                <div class="weekly-grid" id="weekly-aewol"></div>
+                <h3 class="subsection-title" id="hourly-title-aewol">当日分时详细预报</h3>
+                <div class="hourly-weather"><div class="hourly-scroll" id="hourly-aewol"></div></div>
+                <h3 class="cmp-cur-weather-head">空气质量信息</h3>
+                <div id="air-quality-aewol" class="air-quality-grid"></div>
+            </div>
+
+            <div id="weather-content-hyeopjae" class="location-weather">
+                <div class="current-weather" id="current-weather-hyeopjae">
+                    <div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text">正在加载信息...</div></div>
+                </div>
+                <div class="weekly-grid" id="weekly-hyeopjae"></div>
+                <h3 class="subsection-title" id="hourly-title-hyeopjae">当日分时详细预报</h3>
+                <div class="hourly-weather"><div class="hourly-scroll" id="hourly-hyeopjae"></div></div>
+                <h3 class="cmp-cur-weather-head">空气质量信息</h3>
+                <div id="air-quality-hyeopjae" class="air-quality-grid"></div>
+            </div>
+
+            <div id="weather-content-hamdeok" class="location-weather">
+                <div class="current-weather" id="current-weather-hamdeok">
+                    <div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text">正在加载信息...</div></div>
+                </div>
+                <div class="weekly-grid" id="weekly-hamdeok"></div>
+                <h3 class="subsection-title" id="hourly-title-hamdeok">当日分时详细预报</h3>
+                <div class="hourly-weather"><div class="hourly-scroll" id="hourly-hamdeok"></div></div>
+                <h3 class="cmp-cur-weather-head">空气质量信息</h3>
+                <div id="air-quality-hamdeok" class="air-quality-grid"></div>
+            </div>
+
+            <div id="weather-content-woljeong" class="location-weather">
+                <div class="current-weather" id="current-weather-woljeong">
+                    <div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text">正在加载信息...</div></div>
+                </div>
+                <div class="weekly-grid" id="weekly-woljeong"></div>
+                <h3 class="subsection-title" id="hourly-title-woljeong">当日分时详细预报</h3>
+                <div class="hourly-weather"><div class="hourly-scroll" id="hourly-woljeong"></div></div>
+                <h3 class="cmp-cur-weather-head">空气质量信息</h3>
+                <div id="air-quality-woljeong" class="air-quality-grid"></div>
+            </div>
+
         </div>
     </div>
 </section>
@@ -342,24 +404,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </header>
     <div class="section">
         <div class="container">
-            <div style="text-align:center; margin-top: 45px; margin-bottom:20px;">
-                <a href="https://www.trip.com/t/DbXrep5KzT2" target="_blank"
-                    style="display:inline-block; padding:12px 28px; background:linear-gradient(135deg,#ff9800,#f57c00); color:#fff; font-size:0.95rem; font-weight:700; border-radius:50px; text-decoration:none; box-shadow:0 4px 14px rgba(245,124,0,0.25); transition:transform 0.15s, box-shadow 0.15s;"
-                    onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 18px rgba(245,124,0,0.35)'"
-                    onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 14px rgba(245,124,0,0.25)'">🎟️
-                    查看景点门票</a>
-            </div>
+            <!-- Ticket Button moved to bottom -->
             <!-- 월별 축제 필터 (v5.0) -->
             <div class="festival-month-filter" id="month-filter">
                 <!-- script.js에서 동적으로 생성됩니다 -->
             </div>
 
             <!-- Ad Unit: Festival Filter Bottom -->
-            <div class="ad-container festival-ad">
-                <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-7292095769506033"
-                    data-ad-slot="0987654321" data-ad-format="fluid" data-ad-layout-key="-fb+5w+4e-db+86"
-                    data-full-width-responsive="true"></ins>
-                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+            <div style="text-align:center; margin-top: 20px; margin-bottom:25px;">
+                <a href="https://www.trip.com/t/DbXrep5KzT2" target="_blank" style="display:inline-block; padding:12px 28px; background:linear-gradient(135deg,#ff9800,#f57c00); color:#fff; font-size:0.95rem; font-weight:700; border-radius:50px; text-decoration:none; box-shadow:0 4px 14px rgba(245,124,0,0.25); transition:transform 0.15s, box-shadow 0.15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 18px rgba(245,124,0,0.35)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 14px rgba(245,124,0,0.25)'">🎟️
+                    查看景点门票</a>
             </div>
 
             <div id="festival-list" class="festival-list"></div>
@@ -426,7 +480,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
                 <!-- 분실물 신고 버튼 추가 -->
                 <div style="margin-bottom: 25px;">
-                    <button class="lost-report-btn" onclick="openLostReportModal()">
+                    <button class="lost-report-btn btn btn-outline" onclick="openLostReportModal()">
                         <span class="btn-icon">📝</span> 找不到我的物品？在此登记报失
                     </button>
                 </div>
