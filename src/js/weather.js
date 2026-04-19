@@ -443,6 +443,14 @@ export function updateHourlyWeather(locKey, targetYmd) {
             const hourlyKeys = state.sortedKeys.filter(k => k.startsWith(ymd));
             
             if (hourlyKeys.length > 0) {
+                if (i > 0) {
+                    allItemsHTML += `
+                        <div class="hourly-date-divider" data-date="${ymd}" style="display: flex; align-items: center; justify-content: center; min-width: 40px; margin: 0 5px; color: var(--text-muted); font-size: 0.85rem; font-weight: 800; white-space: nowrap;">
+                            ${targetD.getMonth() + 1}/${targetD.getDate()}
+                        </div>
+                    `;
+                }
+
                 allItemsHTML += hourlyKeys.map(k => {
                     const d = state.items[k];
                     const fHour = parseInt(k.slice(8, 10));
@@ -452,7 +460,7 @@ export function updateHourlyWeather(locKey, targetYmd) {
                     const precipAmt = formatPrecip(d.PCP);
                     return `
                         <div class="hourly-item" data-date="${ymd}">
-                            <div class="hourly-time">${i === 0 ? '' : (targetD.getDate() + '日 ')}${time}</div>
+                            <div class="hourly-time">${time}</div>
                             <div class="hourly-icon">${s.icon}</div>
                             <div class="hourly-temp">${d.TMP ?? '--'}°</div>
                             <div class="hourly-wind">🌬️${d.WSD ?? '-'}m/s</div>
@@ -475,11 +483,19 @@ export function updateHourlyWeather(locKey, targetYmd) {
                             summaries = [{ time: '全天', wf: landItem[`wf${i}`] || landItem[`wf${i}`.toLowerCase()], pr: landItem[`rnSt${i}`] || landItem[`rnst${i}`] }];
                         }
                     }
+                    if (i > 0) {
+                        allItemsHTML += `
+                            <div class="hourly-date-divider" data-date="${ymd}" style="display: flex; align-items: center; justify-content: center; min-width: 40px; margin: 0 5px; color: var(--text-muted); font-size: 0.85rem; font-weight: 800; white-space: nowrap;">
+                                ${targetD.getMonth() + 1}/${targetD.getDate()}
+                            </div>
+                        `;
+                    }
+                    
                     allItemsHTML += summaries.map(s => {
                         const sky = translateMidWf(s.wf || '');
                         return `
                             <div class="hourly-item" data-date="${ymd}" style="min-width: 140px;">
-                                <div class="hourly-time">${targetD.getDate()}日 ${s.time}</div>
+                                <div class="hourly-time">${s.time}</div>
                                 <div class="hourly-icon" style="font-size: 2.5rem;">${sky.icon}</div>
                                 <div class="hourly-temp">${sky.desc || '暂无数据'}</div>
                                 <div class="hourly-precip ${s.pr >= 50 ? 'precip-blue' : ''}">降水概率: ${s.pr}% (0mm)</div>
@@ -540,7 +556,7 @@ export function updateHourlyWeather(locKey, targetYmd) {
     }
 
     // Scroll to Target
-    const targetItem = hourlyEl.querySelector(`.hourly-item[data-date="${targetYmd}"]`);
+    const targetItem = hourlyEl.querySelector(`.hourly-date-divider[data-date="${targetYmd}"]`) || hourlyEl.querySelector(`.hourly-item[data-date="${targetYmd}"]`);
     if (targetItem) {
         hourlyEl.dataset.isScrollingProgrammatically = 'true';
         setTimeout(() => { hourlyEl.dataset.isScrollingProgrammatically = 'false'; }, 600);
