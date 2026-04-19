@@ -1813,6 +1813,9 @@
     width: 100%;
     box-sizing: border-box; /* Ensure padding doesn't add to width */
 }
+.hourly-forecast-card {
+    padding-top: 10px !important; /* Reduced top padding */
+}
 
 /* Header Area */
 .weather-header-container {
@@ -2027,7 +2030,7 @@
 .hourly-wrapper {
     display: flex;
     width: 100%;
-    margin-top: 10px;
+    margin-top: 5px; /* Reduced top margin */
     border-radius: 12px;
     border: 1px solid #f1f3f5;
     overflow: hidden; /* Contains children within card */
