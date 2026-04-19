@@ -424,23 +424,15 @@ function renderWeeklyList(locKey, grouped, sortedKeys, midData) {
  * 시간별 예보 목록 내부에 삽입될 날짜 요약 컬럼 렌더링
  */
 function renderDateSummaryCol(locKey, ymd, grouped, midData) {
+    const loc = CONFIG.WEATHER_LOCATIONS[locKey];
     const targetD = new Date(ymd.slice(0, 4), parseInt(ymd.slice(4, 6)) - 1, ymd.slice(6, 8));
-    const dateLabel = `${targetD.getMonth() + 1}/${targetD.getDate()}`;
-    
-    // 주간 데이터에서 해당 날짜 요약 추출 (또는 계산)
-    const hl = getHighLow(grouped, ymd);
-    const summary = getDailySummary(grouped, ymd, midData);
+    const sunTimes = getSunTimes(loc.lat, loc.lng, targetD);
     
     return `
         <div class="hourly-col date-summary-col" id="h-${locKey}-${ymd}">
             <div class="h-top-section">
-                <span class="h-date-sub" style="color:#4dabf7; font-weight:800;">${dateLabel}</span>
-                <span class="h-time" style="font-weight:800; color:#212529;">摘要</span>
-                <span class="h-icon" style="font-size:1.4rem; margin: 2px 0;">${summary.pmIcon}</span>
-                <div class="h-temp" style="font-size:0.85rem; display:flex; flex-direction:column; gap:1px;">
-                    <span style="color:#fa5252;">${hl.max}°</span>
-                    <span style="color:#228be6;">${hl.min}°</span>
-                </div>
+                <span class="h-icon" style="font-size:1.3rem; margin-bottom: 2px;">🌅</span>
+                <span class="h-time" style="font-weight:800; color:#fd7e14; font-size:0.65rem;">${sunTimes.sunrise}</span>
             </div>
             <div class="h-divider" style="background:#e9ecef;"></div>
             <div class="h-meta-row">
@@ -474,7 +466,7 @@ export function updateHourlyWeather(locKey) {
     let html = `
     <div class="hourly-wrapper">
         <div class="hourly-legend">
-            <div class="h-top-section h-legend-top"><strong>24H</strong></div>
+            <div class="h-top-section h-legend-top" style="visibility:hidden;"></div>
             <div class="h-divider" style="background:transparent;"></div>
             <div class="h-meta-row h-legend-items">
                 <div class="h-legend-item"><span class="h-legend-title">降水</span><span class="h-legend-unit">mm</span></div>
