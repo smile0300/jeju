@@ -543,8 +543,8 @@ export function updateHourlyWeather(locKey) {
     let html = `
     <div class="hourly-wrapper">
         <div class="hourly-legend">
-            <div class="h-top-section h-legend-top">
-                <span class="h-date" style="font-size:0.65rem; font-weight:800; color:#adb5bd; margin-bottom: 2px;">日期</span>
+            <div class="h-top-section h-legend-top" style="position: relative;">
+                <span class="h-date" style="position: absolute; top: 6px; left: 50%; transform: translateX(-50%); font-size:0.65rem; font-weight:800; color:#adb5bd; white-space: nowrap;">日期</span>
                 <span class="h-time" style="font-size:0.65rem; font-weight:800; color:#adb5bd;">时间</span>
                 <span class="h-icon" style="visibility:hidden;">-</span>
                 <span class="h-pop" style="visibility:hidden; margin-top: 5px;">-</span>
@@ -556,8 +556,10 @@ export function updateHourlyWeather(locKey) {
                 <div class="h-legend-item"><span class="h-legend-title">风速</span></div>
             </div>
         </div>
-        <div class="hourly-table">
-            <div class="h-sticky-date-bar" id="h-sticky-date-${locKey}">-.- -</div>`;
+        <div class="hourly-table" style="position: relative;">
+            <div class="h-date-sticky-wrap" style="position: sticky; left: 8px; top: 6px; z-index: 151; width: 0; height: 0; overflow: visible;">
+                <div class="h-sticky-date-bar" id="h-sticky-date-${locKey}" style="position: absolute; left: 0; top: 0; width: max-content; background: rgba(255, 255, 255, 0.98); padding: 3px 12px; border-radius: 20px; font-size: 0.68rem; font-weight: 800; color: #1971c2; border: 1px solid #d0ebff; box-shadow: 0 4px 12px rgba(25, 113, 194, 0.15); pointer-events: none; white-space: nowrap;">-.- -</div>
+            </div>`;
 
     let lastYmd = null;
     effectiveHourlyKeys.forEach((k, idx) => {
