@@ -1,7 +1,7 @@
 import { CONFIG } from './config.js';
 import { getSkyInfo, getWindDesc, formatPrecip, formatBaseTime, translateMidWf, getMidTempVal } from './utils.js';
 import { fetchPublicDataJson } from './api.js';
-import loadingImg from '../img/weather-loading.png';
+
 
 // 날씨 데이터 전역 상태 관리 (지역별 데이터 캐싱)
 export const WEATHER_STATE = {};
