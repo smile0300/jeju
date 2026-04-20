@@ -109,7 +109,7 @@ export function renderRewardList() {
     if (!listContainer) return;
 
     if (REWARD_DATA_CACHED.length === 0) {
-        listContainer.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #64748b;">暂无赏금 任务</div>`;
+        listContainer.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #64748b;">暂无赏金任务</div>`;
         return;
     }
 
@@ -126,9 +126,7 @@ export function renderRewardList() {
                          alt="${item.title}" 
                          onerror="handleRewardImageError(this)">
                 </div>
-                <div class="reward-content-side">
-                    <h4 class="reward-item-name">${item.title || '赏금 任务'}</h4>
-                    <div class="reward-footer">
+                    <h4 class="reward-item-name">${item.title || '赏金任务'}</h4>
                         <div class="reward-amount">
                             REWARD : ${item.reward || 0} <small>RMB</small>
                         </div>

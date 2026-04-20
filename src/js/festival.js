@@ -68,7 +68,7 @@ export function renderFestivalNotice(container) {
         <div class="festival-notice-container">
             <div class="festival-notice-card">
                 <div class="notice-icon">🗓️</div>
-                <h3 class="notice-title">✨ 济州节庆 data 正在加载中</h3>
+                <h3 class="notice-title">✨ 济州节庆数据正在加载中</h3>
             </div>
         </div>
     `;
