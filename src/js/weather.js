@@ -682,7 +682,16 @@ export function renderWeatherLoading(locKey) {
 export function renderWeatherError(locKey) {
     const container = document.getElementById(`current-card-${locKey}`);
     if (container) {
-        container.innerHTML = `<div style="padding:40px; text-align:center; color: #fa5252;">⚠️ 天气 data 加载失败</div>`;
+        container.innerHTML = `
+            <div style="padding:40px; text-align:center; color: #fa5252; display: flex; flex-direction: column; align-items: center; gap: 12px;">
+                <div style="font-weight: 800; font-size: 1.1rem;">⚠️ 天气 data 加载失败</div>
+                <button onclick="window.weatherApp.retryFetch('${locKey}')" 
+                        style="padding: 8px 20px; font-size: 0.85rem; font-weight: 700; border: 1.5px solid #fa5252; color: #fa5252; background: white; border-radius: 6px; cursor: pointer; transition: all 0.2s;"
+                        onmouseover="this.style.background='#fff5f5'"
+                        onmouseout="this.style.background='white'">
+                    🔄 重新加载
+                </button>
+            </div>`;
     }
 }
 
@@ -832,6 +841,10 @@ window.closeWeatherAlertModal = function() {
 
 // 외부 호출을 위한 전역 네임스페이스
 window.weatherApp = {
+    retryFetch: (locKey) => {
+        renderWeatherLoading(locKey);
+        fetchWeatherData(locKey);
+    },
     scrollToHourly: (locKey, ymd) => {
         const targetId = `h-${locKey}-${ymd}`;
         const targetEl = document.getElementById(targetId);
