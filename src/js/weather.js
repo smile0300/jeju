@@ -388,7 +388,37 @@ function renderWeeklyList(locKey, grouped, sortedKeys, midData) {
         const dt = dailyMap[ymd];
         if (dt && dt.max !== -99) {
             min = Math.round(dt.min); max = Math.round(dt.max);
-            icon = dt.icons[Math.floor(dt.icons.length * 0.5)] || '🌤️';
+            
+            const dayKeys = sortedKeys.filter(k => k.startsWith(ymd));
+            const coreKeys = dayKeys.filter(k => {
+                const hh = parseInt(k.slice(8, 10));
+                return hh >= 9 && hh <= 21;
+            });
+
+            if (coreKeys.length > 0) {
+                let rainCount = 0;
+                let firstRainKey = null;
+                coreKeys.forEach(ck => {
+                    if (parseInt(grouped[ck].PTY || 0) > 0) {
+                        rainCount++;
+                        if (!firstRainKey) firstRainKey = ck;
+                    }
+                });
+
+                if (rainCount >= 3) {
+                    icon = getSkyInfo(grouped[firstRainKey].PTY, grouped[firstRainKey].SKY, 12).icon;
+                } else {
+                    const counts = {};
+                    coreKeys.forEach(ck => {
+                        const ic = getSkyInfo(grouped[ck].PTY, grouped[ck].SKY, parseInt(ck.slice(8, 10))).icon;
+                        counts[ic] = (counts[ic] || 0) + 1;
+                    });
+                    icon = Object.keys(counts).reduce((a, b) => counts[a] >= counts[b] ? a : b);
+                }
+            } else {
+                icon = dt.icons[Math.floor(dt.icons.length * 0.5)] || '🌤️';
+            }
+
             pop = dt.pops[Math.floor(dt.pops.length * 0.5)] || 0;
             const keys = sortedKeys.filter(k => k.startsWith(ymd));
             const pcpVal = grouped[keys[Math.floor(keys.length * 0.5)]]?.PCP || '--';

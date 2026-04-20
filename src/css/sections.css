@@ -2249,10 +2249,10 @@
 .weekly-card:active { transform: scale(0.95); }
 .w-date-box { font-size: 0.65rem; font-weight: 700; color: #212529; margin-bottom: -2px; }
 .w-icon { font-size: 1.2rem; }
-.w-temps { font-size: 0.75rem; font-weight: 800; display: flex; align-items: center; gap: 0; justify-content: center; width: 100%; letter-spacing: -1px; }
+.w-temps { font-size: 0.75rem; font-weight: 800; display: flex; align-items: center; gap: 2px; justify-content: center; width: 100%; }
 .w-max { color: #fa5252; font-size: 0.75rem !important; }
 .w-min { color: #228be6; font-size: 0.75rem !important; }
-.w-slash { color: #dee2e6; font-size: 0.6rem; margin: 0 -2px; }
+.w-slash { color: #dee2e6; font-size: 0.6rem; margin: 0; }
 .w-meta-info {
     display: flex;
     flex-direction: column;
