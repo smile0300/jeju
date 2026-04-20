@@ -492,7 +492,6 @@ export function updateHourlyWeather(locKey) {
     <div class="hourly-wrapper">
         <div class="hourly-legend">
             <div class="h-top-section h-legend-top" style="align-items: flex-start; padding-left: 5px;">
-                <span class="h-date-sub" style="visibility:hidden;">-</span>
                 <span class="h-time" style="font-size:0.65rem; font-weight:800; color:#adb5bd;">时间</span>
             </div>
             <div class="h-divider" style="background:#f1f3f5;"></div>
@@ -528,7 +527,6 @@ export function updateHourlyWeather(locKey) {
         html += `
             <div class="hourly-col">
                 <div class="h-top-section">
-                    <span class="h-date-sub">${dateStr}</span>
                     <span class="h-time">${String(hour).padStart(2, '0')}:00</span>
                     <span class="h-icon">${sky.icon}</span>
                     <span class="h-pop" style="margin-top: 5px;">${d.POP ?? 0}%</span>
@@ -617,7 +615,6 @@ function renderMidHourlyCol(ymd, label, skyIcon, pop, temp, wind = '-') {
     return `
         <div class="hourly-col">
             <div class="h-top-section">
-                <span class="h-date-sub">${dateStr}</span>
                 <span class="h-time" style="color: #4dabf7; font-weight: 800;">${label}</span>
                 <span class="h-icon">${skyIcon}</span>
                 <span class="h-pop" style="margin-top: 5px;">${pop}%</span>
