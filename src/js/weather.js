@@ -514,13 +514,6 @@ export function updateHourlyWeather(locKey) {
         const dayOffset = k.slice(0, 8) === hourlyKeys[0].slice(0, 8) ? 0 : 1;
         const currentSunTimes = dayOffset === 0 ? sunToday : sunTomorrow;
 
-        // 일출/일몰 주입 체크: 해당 시간에 도달하면 바로 앞에 주입
-        if (hour === currentSunTimes.sunriseHour) {
-            html += renderSunCol(dateStr, currentSunTimes.sunrise, '日出', '↑');
-        } else if (hour === currentSunTimes.sunsetHour) {
-            html += renderSunCol(dateStr, currentSunTimes.sunset, '日落', '↓');
-        }
-
         const sky = getSkyInfo(d.PTY, d.SKY, hour);
         let precip = formatPrecip(d.PCP);
         if(precip === '없음' || precip === '0mm') precip = '0';
@@ -542,18 +535,24 @@ export function updateHourlyWeather(locKey) {
                     <span class="h-meta-val">${d.WSD}</span>
                 </div>
             </div>`;
+
+        // 일출/일몰 주입 체크 (해당 시간 직후에 배치)
+        if (hour === currentSunTimes.sunriseHour) {
+            html += renderSunCol(currentSunTimes.sunrise, '日出');
+        } else if (hour === currentSunTimes.sunsetHour) {
+            html += renderSunCol(currentSunTimes.sunset, '日落');
+        }
     });
     html += '</div></div>';
     hourlyContainer.innerHTML = html;
 }
 
-function renderSunCol(dateStr, sunTime, label, icon) {
+function renderSunCol(sunTime, label) {
     const sunEmoji = label === '日出' ? '🌅' : '🌇';
     return `
         <div class="hourly-col sun-col">
             <div class="h-top-section">
-                <span class="h-date-sub" style="color:#ffa94d;">${dateStr}</span>
-                <span class="h-time" style="font-weight: 800; color: #fd7e14;">${sunEmoji} ${sunTime}</span>
+                <span class="h-time" style="font-weight: 800; color: #fd7e14; margin-top: 15px;">${sunEmoji} ${sunTime}</span>
             </div>
             <div class="h-divider" style="opacity:0;"></div>
             <div class="h-meta-row">
