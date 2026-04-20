@@ -526,6 +526,10 @@ export function updateHourlyWeather(locKey) {
         ymdCounts[y] = (ymdCounts[y] || 0) + 1;
     });
 
+    const kstNow = new Date(Date.now() + 9 * 60 * 60 * 1000);
+    const todayYmd = kstNow.toISOString().slice(0, 10).replace(/-/g, '');
+    const currentDecimal = kstNow.getUTCHours() + kstNow.getUTCMinutes() / 60;
+
     const effectiveHourlyKeys = state.sortedKeys.filter(k => {
         const ymd = k.slice(0, 8);
         return ymdCounts[ymd] >= 8 || ymd === todayYmd;
@@ -535,10 +539,6 @@ export function updateHourlyWeather(locKey) {
         hourlyContainer.innerHTML = '<div style="padding: 24px; text-align: center; color: #adb5bd;">暂无详细时间预报</div>';
         return;
     }
-
-    const kstNow = new Date(Date.now() + 9 * 60 * 60 * 1000);
-    const todayYmd = kstNow.toISOString().slice(0, 10).replace(/-/g, '');
-    const currentDecimal = kstNow.getUTCHours() + kstNow.getUTCMinutes() / 60;
 
     let html = `
     <div class="hourly-wrapper">
