@@ -15,10 +15,20 @@ export function getSkyInfo(pty, sky, hour) {
 
 export function getWindDesc(ws) {
     const v = parseFloat(ws);
+    if (isNaN(v)) return '未知';
     if (v < 4) return '微风';
     if (v < 9) return '和风';
-    if (v < 14) return '疾风';
+    if (v < 14) return '清劲风';
     return '强风';
+}
+
+export function getWindColor(ws) {
+    const v = parseFloat(ws);
+    if (isNaN(v)) return '#adb5bd';
+    if (v < 4) return '#868e96';
+    if (v < 9) return '#4dabf7';
+    if (v < 14) return '#f03e3e'; // Red for 清劲风
+    return '#ae3ec9'; // Purple for 强风
 }
 
 // 강수량 표시 형식 변환 (v17.0 정밀화)

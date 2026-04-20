@@ -1,5 +1,5 @@
 import { CONFIG } from './config.js';
-import { getSkyInfo, getWindDesc, formatPrecip, formatBaseTime, translateMidWf, getMidTempVal } from './utils.js';
+import { getSkyInfo, getWindDesc, getWindColor, formatPrecip, formatBaseTime, translateMidWf, getMidTempVal } from './utils.js';
 import { fetchPublicDataJson } from './api.js';
 
 
@@ -339,7 +339,7 @@ export function parseAndRenderWeather(locKey, items, midData, mountainData) {
                 </div>
                 <div class="cw-right">
                     <ul class="cw-details-list">
-                        <li><span class="cwi">🍃</span> ${getWindDesc(current.WSD)} ${current.WSD}m/s</li>
+                        <li><span class="cwi">🍃</span> <span style="color: ${getWindColor(current.WSD)}; font-weight: 800;">${getWindDesc(current.WSD)}</span> ${current.WSD}m/s</li>
                         <li><span class="cwi">💧</span> 湿度 ${current.REH}%</li>
                         <li><span class="cwi">🌡️</span> 体感 ${feelsLike}°</li>
                         <li id="top-air-${locKey}"><span class="cwi">😷</span> 空气质量 <span class="val">--</span></li>
@@ -544,7 +544,7 @@ export function updateHourlyWeather(locKey) {
     <div class="hourly-wrapper">
         <div class="hourly-legend">
             <div class="h-top-section h-legend-top" style="position: relative;">
-                <span class="h-date" style="position: absolute; top: 6px; left: 50%; transform: translateX(-50%); font-size:0.65rem; font-weight:800; color:#adb5bd; white-space: nowrap;">日期</span>
+                <span class="h-date" style="position: absolute; top: 9px; left: 50%; transform: translateX(-50%); font-size:0.65rem; font-weight:800; color:#adb5bd; white-space: nowrap;">日期</span>
                 <span class="h-time" style="font-size:0.65rem; font-weight:800; color:#adb5bd;">时间</span>
                 <span class="h-icon" style="visibility:hidden;">-</span>
                 <span class="h-pop" style="visibility:hidden; margin-top: 5px;">-</span>
@@ -594,7 +594,7 @@ export function updateHourlyWeather(locKey) {
                 <div class="h-meta-row">
                     <span class="h-meta-val ${precip !== '0' ? 'p-blue' : ''}">${precip}mm</span>
                     <span class="h-meta-val" style="font-weight:800; color:#212529;">${d.TMP}°C</span>
-                    <span class="h-meta-val">${d.WSD}m/s</span>
+                    <span class="h-meta-val" style="color: ${getWindColor(d.WSD)}; font-weight: ${parseFloat(d.WSD) >= 9 ? '800' : 'normal'};">${d.WSD}m/s</span>
                 </div>
             </div>`;
 
@@ -836,10 +836,9 @@ export async function fetchWeatherAlerts() {
                 const translatedTitle = translateWeatherAlert(title).replace(/\(\*\)/g, '').trim();
                 
                 const html = `
-                    <div class="weather-alert-card animate-slide-up" onclick="window.showWeatherSectionWithAlert()">
+                    <div class="weather-alert-card animate-slide-up" onclick="window.showWeatherSectionWithAlert()" style="cursor: pointer;">
                         <div class="alert-type-badge">济州特报 ${items.length > 1 ? `(${idx + 1}/${items.length})` : ''}</div>
                         <div class="alert-msg">🚨 ${translatedTitle}</div>
-                        <div class="alert-more">详情 ></div>
                     </div>`;
                 
                 if (alertsContainer) alertsContainer.innerHTML = html;

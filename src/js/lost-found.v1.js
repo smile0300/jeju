@@ -250,10 +250,11 @@ export async function submitLostReport() {
         specifics: document.getElementById('lost-report-specifics').value.trim(),
         photo: lostReportImageBase64 || '',
         wechatId: document.getElementById('lost-report-wechat').value.trim(),
+        reporterName: document.getElementById('lost-report-name').value.trim(),
         userAgent: navigator.userAgent
     };
 
-    if (!data.location || !data.date || !data.time || !data.itemName || !data.specifics || !data.wechatId) {
+    if (!data.location || !data.date || !data.time || !data.itemName || !data.specifics || !data.wechatId || !data.reporterName) {
         if (statusEl) {
             statusEl.textContent = '请填写完整的信息';
             statusEl.className = 'form-status error';
