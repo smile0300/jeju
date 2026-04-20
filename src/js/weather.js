@@ -406,7 +406,7 @@ function renderWeeklyList(locKey, grouped, sortedKeys, midData) {
         }
 
         html += `
-            <div class="weekly-card" onclick="window.weatherApp.scrollToHourly('${locKey}', '${ymd}')">
+            <div class="weekly-card w-card-${locKey}" id="wcard-${locKey}-${ymd}" onclick="window.weatherApp.scrollToHourly('${locKey}', '${ymd}')">
                 <div class="w-date-box"><span class="w-date">${dateLabel}</span></div>
                 <div class="w-icon">${icon}</div>
                 <div class="w-temps"><span class="w-max">${max}°</span><span class="w-slash">/</span><span class="w-min">${min}°</span></div>
@@ -428,10 +428,39 @@ function renderDateSummaryCol(locKey, ymd, grouped, midData) {
     const dayName = days[targetD.getDay()];
     
     return `
-        <div class="hourly-col date-summary-col" id="h-${locKey}-${ymd}" style="justify-content: center; background: #f8f9fa;">
+        <div class="hourly-col date-summary-col" id="h-${locKey}-${ymd}" data-ymd="${ymd}" style="justify-content: center; background: #f8f9fa;">
             <span style="color:#212529; font-weight:800; font-size:0.8rem; margin-bottom:4px;">${month}.${day}</span>
             <span style="font-weight:800; color:#868e96; font-size:0.7rem;">${dayName}</span>
         </div>`;
+}
+
+function highlightWeeklyCard(locKey, ymd) {
+    document.querySelectorAll(`.w-card-${locKey}`).forEach(c => c.classList.remove('active'));
+    const target = document.getElementById(`wcard-${locKey}-${ymd}`);
+    if (target) target.classList.add('active');
+}
+
+function initHourlyScrollObserver(locKey) {
+    const wrapper = document.getElementById(`hourly-table-${locKey}`);
+    if (!wrapper) return;
+    const scrollContainer = wrapper.querySelector('.hourly-table');
+    if (!scrollContainer) return;
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                highlightWeeklyCard(locKey, entry.target.dataset.ymd);
+            }
+        });
+    }, {
+        root: scrollContainer,
+        threshold: 0.1,
+        rootMargin: '0px -50% 0px 0px' // Detect when column passes left/middle
+    });
+
+    scrollContainer.querySelectorAll('.date-summary-col').forEach(col => {
+        observer.observe(col);
+    });
 }
 
 
@@ -529,6 +558,9 @@ export function updateHourlyWeather(locKey) {
     });
     html += '</div></div>';
     hourlyContainer.innerHTML = html;
+    
+    // 스크롤 옵저버 초기화
+    setTimeout(() => initHourlyScrollObserver(locKey), 100);
 }
 
 function renderSunCol(sunTime, label) {
