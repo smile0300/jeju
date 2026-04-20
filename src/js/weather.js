@@ -57,7 +57,7 @@ function translateWeatherAlert(text) {
     return result;
 }
 
-// 기상특보 순환 노출을 위한 전역 변수 (v20.0: 단일 노출로 변경됨에 따라 참조용 유지 또는 제거 가능)
+// 기상특보 순환 노출을 위한 전역 변수
 let alertRotationInterval = null;
 
 export async function fetchMidTermWeather(loc) {
@@ -86,7 +86,6 @@ export async function fetchMidTermWeather(loc) {
             const landItem = getFirst(landJson);
             const tempItem = getFirst(tempJson);
 
-            // v19.1: 육상 또는 기온 데이터 중 하나라도 없으면 폴백 트리거 (NO_DATA 대응)
             if (!landItem || !tempItem) {
                 const missing = !landItem ? '육상예보' : '기온예보';
                 console.warn(`[Weather] 중기예보 ${missing} 데이터 부재 (Result: ${landJson?.response?.header?.resultCode}/${tempJson?.response?.header?.resultCode})`);
@@ -143,12 +142,6 @@ export async function fetchWeatherData(locKey) {
     };
 
     try {
-        const fetchPromises = [
-            fetchPublicDataJson(endpoint, params),
-            fetchMidTermWeather(loc)
-        ];
-
-        // v20.1: 개별 API 실패가 전체 데이터 로드 중단으로 이어지지 않도록 Promise.all에 catch 추가
         const [shortJson, midData, mountainData] = await Promise.all([
             fetchPublicDataJson(endpoint, params).catch(e => { console.error('[Weather] 단기예보 로드 실패:', e); return null; }),
             fetchMidTermWeather(loc).catch(e => { console.error('[Weather] 중기예보 로드 실패:', e); return null; }),
@@ -171,9 +164,6 @@ export async function fetchWeatherData(locKey) {
     }
 }
 
-/**
- * v4.0: 산림청 산악기상정보 API 호출 (실시간 관측 데이터)
- */
 export async function fetchMountainWeather(obsid) {
     const endpoint = 'https://apis.data.go.kr/1400377/mtweather';
     const params = {
@@ -194,9 +184,6 @@ export async function fetchMountainWeather(obsid) {
 
 import { renderHallasanDashboard } from './hallasan-dashboard.js';
 
-/**
- * 지역별 대표 CCTV 매칭 (네이버 스타일 헤더용)
- */
 function getNearestCCTV(locKey) {
     const mapping = {
         'jeju': 'tapdong_emg',
@@ -213,9 +200,6 @@ function getNearestCCTV(locKey) {
     return CONFIG.CCTV.find(c => c.id === cctvId);
 }
 
-/**
- * 특정일의 최저/최고 기온 추출
- */
 function getHighLow(grouped, ymd) {
     let min = 100, max = -100;
     Object.keys(grouped).filter(k => k.startsWith(ymd)).forEach(k => {
@@ -228,29 +212,18 @@ function getHighLow(grouped, ymd) {
     return { min: min === 100 ? '--' : Math.round(min), max: max === -100 ? '--' : Math.round(max) };
 }
 
-/**
- * 날짜 계산 유틸리티
- */
 function getOffsetDate(ymd, offset) {
     const d = new Date(ymd.slice(0, 4), parseInt(ymd.slice(4, 6)) - 1, ymd.slice(6, 8));
     d.setDate(d.getDate() + offset);
     return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
 }
 
-/**
- * 위도/경도 기반 일출/일몰 계산 (간소화 알고리즘)
- */
 function getSunTimes(lat, lng, date) {
     const radian = Math.PI / 180;
     const dayOfYear = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
-    
-    // 태양 적위 (solar declination)
     const decl = 0.409 * Math.sin(2 * Math.PI * (dayOfYear - 81) / 365);
-    
-    // 시간각 (hour angle)
     const ha = Math.acos(-Math.tan(lat * radian) * Math.tan(decl)) / radian;
-    
-    const sunrise = 12 - (ha / 15) - (lng / 15) + 9; // KST +9
+    const sunrise = 12 - (ha / 15) - (lng / 15) + 9;
     const sunset = 12 + (ha / 15) - (lng / 15) + 9;
     
     const toTimeStr = (decimalHour) => {
@@ -267,9 +240,6 @@ function getSunTimes(lat, lng, date) {
     };
 }
 
-/**
- * 특정일의 요약 정보 (아이콘, 강수확률) 추출
- */
 function getDailySummary(grouped, ymd, midData) {
     const keys = Object.keys(grouped).filter(k => k.startsWith(ymd)).sort();
     let amIcon = '🌤️', pmIcon = '🌤️', amPop = 0, pmPop = 0;
@@ -304,7 +274,6 @@ export function parseAndRenderWeather(locKey, items, midData, mountainData) {
         renderHallasanDashboard();
     }
 
-    // --- 1. 헤더 렌더링 ---
     const cctvBtn = document.getElementById(`cctv-btn-${locKey}`);
     if (cctvBtn) {
         const cctv = getNearestCCTV(locKey);
@@ -313,22 +282,15 @@ export function parseAndRenderWeather(locKey, items, midData, mountainData) {
         }
     }
 
-    // --- 2. 오늘 날씨 요약 (좌측 기온, 우측 디테일) ---
     const currentCard = document.getElementById(`current-card-${locKey}`);
     if (currentCard) {
         const current = grouped[sortedKeys[0]];
-        const todayYmd = sortedKeys[0].slice(0, 8);
-        const todayHighLow = getHighLow(grouped, todayYmd);
-        const tomorrowYmd = getOffsetDate(todayYmd, 1);
-        const tomorrowData = getDailySummary(grouped, tomorrowYmd, midData);
         const sky = getSkyInfo(current.PTY, current.SKY, parseInt(String(current.time || '').slice(0, 2) || 12));
-
         const t = parseFloat(current.TMP ?? current.T1H ?? 20);
         const w = parseFloat(current.WSD || 0);
         const feelsLike = Math.round(t - (2 * w * 0.1));
 
         currentCard.className = "naver-card current-weather-main";
-
         currentCard.innerHTML = `
             <div class="current-weather-box">
                 <div class="cw-left">
@@ -348,10 +310,7 @@ export function parseAndRenderWeather(locKey, items, midData, mountainData) {
             </div>`;
     }
 
-    // --- 3. 주간 예보 리스트 렌더링 ---
     renderWeeklyList(locKey, grouped, sortedKeys, midData);
-
-    // --- 4. 시간별 예보 초기 렌더링 ---
     updateHourlyWeather(locKey);
 }
 
@@ -360,6 +319,7 @@ function renderWeeklyList(locKey, grouped, sortedKeys, midData) {
     if (!container) return;
     const dailyMap = {};
     const today = new Date();
+    today.setHours(0, 0, 0, 0); // 날짜 정규화
     const ymdCounts = {};
     sortedKeys.forEach(k => {
         const ymd = k.slice(0, 8);
@@ -386,8 +346,6 @@ function renderWeeklyList(locKey, grouped, sortedKeys, midData) {
         const dt = dailyMap[ymd];
         const count = ymdCounts[ymd] || 0;
         
-        // --- 중기 예보 인덱스(dayIdx) 계산 ---
-        // 기상청 중기 예보는 발표 시각(tmFc)의 날짜를 기점으로 Day 3, Day 4 등으로 정의됨
         let dayIdx = i; 
         if (tempItem && tempItem.tmFc) {
             const baseStr = String(tempItem.tmFc).slice(0, 8);
@@ -396,10 +354,8 @@ function renderWeeklyList(locKey, grouped, sortedKeys, midData) {
             dayIdx = Math.round(diffMs / (1000 * 60 * 60 * 24));
         }
 
-        // v22.1: 당일(i=0)이거나 데이터가 충분한 경우 단기예보 데이터 노출
         if (dt && dt.max !== -99 && (count >= 5 || i === 0)) {
             min = Math.round(dt.min); max = Math.round(dt.max);
-            
             const dayKeys = sortedKeys.filter(k => k.startsWith(ymd));
             const coreKeys = dayKeys.filter(k => {
                 const hh = parseInt(k.slice(8, 10));
@@ -415,7 +371,6 @@ function renderWeeklyList(locKey, grouped, sortedKeys, midData) {
                         if (!firstRainKey) firstRainKey = ck;
                     }
                 });
-
                 if (rainCount >= 3) {
                     icon = getSkyInfo(grouped[firstRainKey].PTY, grouped[firstRainKey].SKY, 12).icon;
                 } else {
@@ -429,13 +384,11 @@ function renderWeeklyList(locKey, grouped, sortedKeys, midData) {
             } else {
                 icon = dt.icons[Math.floor(dt.icons.length * 0.5)] || '🌤️';
             }
-
             pop = dt.pops[Math.floor(dt.pops.length * 0.5)] || 0;
             const keys = sortedKeys.filter(k => k.startsWith(ymd));
             const pcpVal = grouped[keys[Math.floor(keys.length * 0.5)]]?.PCP || '--';
             pcp = formatPrecip(pcpVal).replace('없음', '0').replace('mm', '');
         } else if (i === 0) {
-            // v22.2: 늦은 밤 등 당일 예보가 부족할 경우 현재 날씨로 폴백
             const cur = grouped[sortedKeys[0]];
             if (cur) {
                 const ct = Math.round(parseFloat(cur.TMP || cur.T1H || 0));
@@ -445,7 +398,6 @@ function renderWeeklyList(locKey, grouped, sortedKeys, midData) {
                 pcp = formatPrecip(cur.PCP || '0').replace('없음', '0').replace('mm','');
             }
         } else if (dayIdx >= 3 && (landItem || tempItem)) {
-            // v22.3: 인덱스 정렬 수정 - 루프 인덱스 i 대신 tmFc 기준 dayIdx 사용
             const tMax = getMidTempVal(tempItem, 'max', dayIdx);
             const tMin = getMidTempVal(tempItem, 'min', dayIdx);
             min = tMin !== null ? Math.round(tMin) : '--';
@@ -491,7 +443,6 @@ function highlightWeeklyCard(locKey, ymd) {
     const target = document.getElementById(`wcard-${locKey}-${ymd}`);
     if (target) {
         target.classList.add('active');
-        // 간략보기 버튼 업데이트: 선택된 날짜에 맞춰 데이터가 나오도록 수정
         const header = document.getElementById(`header-${locKey}`);
         if (header) {
             const sumBtn = header.querySelector('.header-summary-btn');
@@ -513,14 +464,10 @@ function initHourlyScrollObserver(locKey) {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 const { ymd, dateLabel } = entry.target.dataset;
-                
-                // 1. 주간 카드 하이라이트 (날짜가 바뀔 때만)
                 if (ymd && ymd !== lastActiveYmd) {
                     lastActiveYmd = ymd;
                     highlightWeeklyCard(locKey, ymd);
                 }
-
-                // 2. 상단 스티키 날짜바 업데이트 (라벨이 바뀔 때만)
                 const stickyBar = document.getElementById(`h-sticky-date-${locKey}`);
                 if (stickyBar && dateLabel && dateLabel !== lastActiveLabel) {
                     lastActiveLabel = dateLabel;
@@ -531,11 +478,9 @@ function initHourlyScrollObserver(locKey) {
     }, {
         root: scrollContainer,
         threshold: 0,
-        // 왼쪽 끝에서 20% 지점을 예리한 기준선으로 설정 (양방향 스크롤 정밀도 향상)
         rootMargin: '0px -80% 0px 20%' 
     });
 
-    // 모든 시간대 컬럼을 관찰하여 스크롤 지점을 정밀하게 추적
     const allCols = wrapper.querySelectorAll('.hourly-col');
     allCols.forEach(col => observer.observe(col));
 }
@@ -648,19 +593,14 @@ export function updateHourlyWeather(locKey) {
         }
     });
 
-    // --- 3. 중기 예보 (4일차~10일차) 추가 ---
-    const { landItem, tempItem } = state.midData;
+    const { landItem, tempItem } = state.midData || {};
     if (landItem && tempItem) {
         for (let i = 1; i <= 10; i++) {
             const nextD = new Date(today);
             nextD.setDate(today.getDate() + i);
             const ymd = `${nextD.getFullYear()}${String(nextD.getMonth() + 1).padStart(2, '0')}${String(nextD.getDate()).padStart(2, '0')}`;
-            
-            // 해당 날짜에 이미 시간별 데이터가 충분히(8개 이상) 있으면 중급 데이터를 생략
             if ((ymdCounts[ymd] || 0) >= 8) continue;
-
             html += renderDateSummaryCol(locKey, ymd, state.items, state.midData);
-
             if (i >= 3 && i <= 7) {
                 const amWf = landItem[`wf${i}Am`];
                 const amPop = landItem[`rnSt${i}Am`];
@@ -668,8 +608,6 @@ export function updateHourlyWeather(locKey) {
                 const pmPop = landItem[`rnSt${i}Pm`];
                 const tMin = tempItem[`taMin${i}`];
                 const tMax = tempItem[`taMax${i}`];
-                
-                // 시간별 데이타가 9시/15시를 포함하지 않는 경우에만 추가 (또는 중복 느낌 없도록 항상 추가)
                 if (amWf) html += renderMidHourlyCol(locKey, ymd, '上午', translateMidWf(amWf).icon, amPop, Math.round(tMin));
                 if (pmWf) html += renderMidHourlyCol(locKey, ymd, '下午', translateMidWf(pmWf).icon, pmPop, Math.round(tMax));
             } else if (i >= 8) {
@@ -677,7 +615,6 @@ export function updateHourlyWeather(locKey) {
                 const pop = landItem[`rnSt${i}`];
                 const tMin = tempItem[`taMin${i}`];
                 const tMax = tempItem[`taMax${i}`];
-
                 if (wf) html += renderMidHourlyCol(locKey, ymd, '全天', translateMidWf(wf).icon, pop, `${Math.round(tMin)}/${Math.round(tMax)}`);
             }
         }
@@ -685,8 +622,6 @@ export function updateHourlyWeather(locKey) {
 
     html += '</div></div>';
     hourlyContainer.innerHTML = html;
-    
-    // 스크롤 옵저버 초기화
     setTimeout(() => initHourlyScrollObserver(locKey), 100);
 }
 
@@ -737,7 +672,7 @@ export function renderWeatherError(locKey) {
     if (container) {
         container.innerHTML = `
             <div style="padding:40px; text-align:center; color: #fa5252; display: flex; flex-direction: column; align-items: center; gap: 12px;">
-                <div style="font-weight: 800; font-size: 1.1rem;">⚠️ 天气 data 加载失败</div>
+                <div style="font-weight: 800; font-size: 1.1rem;">⚠️ 天气 data 加질 실패</div>
                 <button onclick="window.weatherApp.retryFetch('${locKey}')" 
                         style="padding: 8px 20px; font-size: 0.85rem; font-weight: 700; border: 1.5px solid #fa5252; color: #fa5252; background: white; border-radius: 6px; cursor: pointer; transition: all 0.2s;"
                         onmouseover="this.style.background='#fff5f5'"
@@ -786,7 +721,7 @@ function getAirQualityInfo(val, type) {
         if (v <= 30) { level = 1; text = '优'; }
         else if (v <= 80) { level = 2; text = '良'; }
         else if (v <= 150) { level = 3; text = '轻度'; }
-        else { level = 4; text = '重度'; }
+        else { level = 4; text = '重도'; }
     }
     return { level, text };
 }
@@ -851,10 +786,22 @@ export async function fetchWeatherAlerts() {
         const params = { numOfRows: 10, pageNo: 1, dataType: 'JSON', stnId: 184 };
         const json = await fetchPublicDataJson(endpoint, params);
         const rawItems = json?.response?.body?.items?.item;
-        let items = Array.isArray(rawItems) ? rawItems : (rawItems ? [rawItems] : []);
-        items = items.filter(item => item && item.title);
-        LATEST_ALERTS = items;
-        
+        let allItems = Array.isArray(rawItems) ? rawItems : (rawItems ? [rawItems] : []);
+        allItems = allItems.filter(item => item && item.title);
+
+        const latestByType = {};
+        allItems.forEach(item => {
+            const match = item.title.match(/\[(.*?)\]/);
+            if (match) {
+                const fullType = match[1];
+                const type = fullType.replace(' 해제', '').replace('해제', '').trim();
+                if (!latestByType[type]) latestByType[type] = item;
+            }
+        });
+
+        const activeItems = Object.values(latestByType).filter(item => !item.title.includes('해제'));
+        LATEST_ALERTS = activeItems;
+
         if (alertRotationInterval) {
             clearInterval(alertRotationInterval);
             alertRotationInterval = null;
@@ -862,37 +809,30 @@ export async function fetchWeatherAlerts() {
 
         if (alertsContainer) alertsContainer.style.display = 'flex';
         
-        if (items.length > 0) {
+        if (activeItems.length > 0) {
             if (homeAlertsContainer) homeAlertsContainer.style.display = 'flex';
             let currentIndex = 0;
             const renderAlert = (idx) => {
-                const item = items[idx];
-                if (!item || !item.title || typeof item.title !== 'string') {
-                    console.warn('[Alerts] Invalid item or title at index:', idx);
-                    return;
-                }
+                const item = activeItems[idx];
+                if (!item || !item.title) return;
                 let title = item.title.includes('/') ? item.title.split('/').slice(1).join('/').trim() : item.title;
                 const translatedTitle = translateWeatherAlert(title).replace(/\(\*\)/g, '').trim();
-                
                 let alertType = '特报';
                 if (title.includes('주의보')) alertType = '注意报';
                 else if (title.includes('경보')) alertType = '警报';
 
                 const html = `
                     <div class="weather-alert-card animate-slide-up" onclick="window.showWeatherSectionWithAlert()" style="cursor: pointer;">
-                        <div class="alert-type-badge">济州${alertType} ${items.length > 1 ? `(${idx + 1}/${items.length})` : ''}</div>
+                        <div class="alert-type-badge">济州${alertType} ${activeItems.length > 1 ? `(${idx + 1}/${activeItems.length})` : ''}</div>
                         <div class="alert-msg">🚨 ${translatedTitle}</div>
                     </div>`;
-                
                 if (alertsContainer) alertsContainer.innerHTML = html;
                 if (homeAlertsContainer) homeAlertsContainer.innerHTML = html;
             };
-
             renderAlert(0);
-
-            if (items.length > 1) {
+            if (activeItems.length > 1) {
                 alertRotationInterval = setInterval(() => {
-                    currentIndex = (currentIndex + 1) % items.length;
+                    currentIndex = (currentIndex + 1) % activeItems.length;
                     renderAlert(currentIndex);
                 }, 5000);
             }
@@ -906,7 +846,7 @@ export async function fetchWeatherAlerts() {
                     </div>`;
             }
         }
-    } catch (e) { 
+    } catch (e) {
         console.error('[Alerts] Error:', e);
         if (alertsContainer) alertsContainer.style.display = 'none';
         if (homeAlertsContainer) homeAlertsContainer.style.display = 'none';
@@ -914,9 +854,7 @@ export async function fetchWeatherAlerts() {
 }
 
 window.showWeatherSectionWithAlert = function() {
-    if (window.showSection) {
-        window.showSection('weather');
-    }
+    if (window.showSection) window.showSection('weather');
     window.openWeatherAlertModal();
 };
 
@@ -933,39 +871,21 @@ window.openWeatherAlertModal = function() {
     const formatAlertTime = (tmFc) => {
         const s = String(tmFc || '');
         if (s.length < 12) return s;
-        try {
-            const m = s.slice(4, 6);
-            const d = s.slice(6, 8);
-            const hh = s.slice(8, 10);
-            const mm = s.slice(10, 12);
-            return `${m}.${d} ${hh}:${mm}`;
-        } catch (e) {
-            console.warn('[FormatTime] slice error:', e, s);
-            return s;
-        }
+        return `${s.slice(4, 6)}.${s.slice(6, 8)} ${s.slice(8, 10)}:${s.slice(10, 12)}`;
     };
 
     const itemsHTML = LATEST_ALERTS.map(item => {
         const title = item.title || '';
         let typeBadge = '[특보]';
         let itemClass = '';
-        
-        if (title.includes('주의보')) {
-            typeBadge = '[주의보]';
-            itemClass = 'warning';
-        } else if (title.includes('경보')) {
-            typeBadge = '[경보]';
-            itemClass = 'danger';
-        }
-        
+        if (title.includes('주의보')) { typeBadge = '[주의보]'; itemClass = 'warning'; }
+        else if (title.includes('경보')) { typeBadge = '[경보]'; itemClass = 'danger'; }
         const timeStr = formatAlertTime(item.tmFc);
-        const translatedContent = translateWeatherAlert(title).replace(/\(\*\)/g, '').trim();
-        
         return `
         <div class="alert-history-item ${itemClass}">
             <span class="alert-history-label">${typeBadge}</span>
             <span class="alert-history-time">${timeStr}</span>
-            <span class="alert-history-text">${translatedContent}</span>
+            <span class="alert-history-text">${translateWeatherAlert(title).replace(/\(\*\)/g, '').trim()}</span>
         </div>`;
     }).join('');
     modal.innerHTML = `
@@ -984,31 +904,17 @@ window.closeWeatherAlertModal = function() {
     if (modal) modal.style.display = 'none';
 };
 
-// 외부 호출을 위한 전역 네임스페이스
 window.weatherApp = {
-    retryFetch: (locKey) => {
-        renderWeatherLoading(locKey);
-        fetchWeatherData(locKey);
-    },
+    retryFetch: (locKey) => { renderWeatherLoading(locKey); fetchWeatherData(locKey); },
     scrollToHourly: (locKey, ymd) => {
-        const targetId = `h-${locKey}-${ymd}`;
-        const targetEl = document.getElementById(targetId);
+        const targetEl = document.getElementById(`h-${locKey}-${ymd}`);
         if (targetEl) {
-            targetEl.scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'nearest', 
-                inline: 'start' 
-            });
-            
-            // 시각적 피드백: 잠시 강조
+            targetEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
             targetEl.style.transition = 'background 0.5s';
             targetEl.style.background = 'rgba(77, 187, 247, 0.1)';
             setTimeout(() => targetEl.style.background = 'transparent', 1000);
-        } else {
-            console.warn(`[Weather] Target hour not found for ${ymd} (probably over the forecast range)`);
         }
     }
 };
 
-document.addEventListener('DOMContentLoaded', () => {
-});
+document.addEventListener('DOMContentLoaded', () => {});
