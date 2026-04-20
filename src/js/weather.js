@@ -254,8 +254,8 @@ function getSunTimes(lat, lng, date) {
     // 시간각 (hour angle)
     const ha = Math.acos(-Math.tan(lat * radian) * Math.tan(decl)) / radian;
     
-    const sunrise = 12 - (ha / 15) - (lng / 15) + (date.getTimezoneOffset() / 60) + 9; // KST +9
-    const sunset = 12 + (ha / 15) - (lng / 15) + (date.getTimezoneOffset() / 60) + 9;
+    const sunrise = 12 - (ha / 15) - (lng / 15) + 9; // KST +9
+    const sunset = 12 + (ha / 15) - (lng / 15) + 9;
     
     const toTimeStr = (decimalHour) => {
         const h = Math.floor(decimalHour);
@@ -526,14 +526,12 @@ export function updateHourlyWeather(locKey) {
 }
 
 function renderSunCol(dateStr, sunTime, label, icon) {
+    const sunEmoji = label === '日出' ? '🌅' : '🌇';
     return `
         <div class="hourly-col sun-col">
             <div class="h-top-section">
                 <span class="h-date-sub" style="color:#ffa94d;">${dateStr}</span>
-                <span class="h-time sun-time">${sunTime}</span>
-                <span class="sun-badge">${label}${icon}</span>
-                <span class="h-temp" style="color:#dee2e6; visibility:hidden;">--</span>
-                <span class="h-pop" style="color:#dee2e6; visibility:hidden;">--</span>
+                <span class="h-time" style="font-weight: 800; color: #fd7e14;">${sunEmoji} ${sunTime}</span>
             </div>
             <div class="h-divider" style="opacity:0;"></div>
             <div class="h-meta-row">
