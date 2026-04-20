@@ -249,7 +249,10 @@
 .weather-alerts-container {
     width: 100%;
     margin-top: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: center;
+    min-height: 40px;
 }
 .alert-type-badge.gray { background: #adb5bd; }
 .alert-more { font-size: 0.65rem; color: #fa5252; font-weight: 700; margin-left: auto; } /* v20.0: ?�단 버튼과의 ?�백 ?�보 */
