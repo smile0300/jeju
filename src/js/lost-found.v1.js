@@ -251,6 +251,7 @@ export async function submitLostReport() {
         photo: lostReportImageBase64 || '',
         wechatId: document.getElementById('lost-report-wechat').value.trim(),
         reporterName: document.getElementById('lost-report-name').value.trim(),
+        name: document.getElementById('lost-report-name').value.trim(), // 벡엔드(GAS) 필드명 호환성 보장용 추가
         userAgent: navigator.userAgent
     };
 
