@@ -565,9 +565,14 @@ export function updateHourlyWeather(locKey) {
             nextD.setDate(today.getDate() + i);
             const ymd = `${nextD.getFullYear()}${String(nextD.getMonth() + 1).padStart(2, '0')}${String(nextD.getDate()).padStart(2, '0')}`;
             
-            if (ymd <= lastYmd) continue;
+            // 해당 날짜에 이미 시간별 데이터가 충분히(8개 이상) 있으면 중급 데이터를 생략
+            const dayKeys = hourlyKeys.filter(k => k.startsWith(ymd));
+            if (dayKeys.length >= 8) continue;
 
-            html += renderDateSummaryCol(locKey, ymd, state.items, state.midData);
+            // 시간별 데이터가 아예 없으면 날짜 구분선 렌더링
+            if (dayKeys.length === 0) {
+                html += renderDateSummaryCol(locKey, ymd, state.items, state.midData);
+            }
 
             if (i >= 3 && i <= 7) {
                 const amWf = landItem[`wf${i}Am`];
@@ -577,6 +582,7 @@ export function updateHourlyWeather(locKey) {
                 const tMin = tempItem[`taMin${i}`];
                 const tMax = tempItem[`taMax${i}`];
                 
+                // 시간별 데이타가 9시/15시를 포함하지 않는 경우에만 추가 (또는 중복 느낌 없도록 항상 추가)
                 if (amWf) html += renderMidHourlyCol(ymd, '上午', translateMidWf(amWf).icon, amPop, Math.round(tMin));
                 if (pmWf) html += renderMidHourlyCol(ymd, '下午', translateMidWf(pmWf).icon, pmPop, Math.round(tMax));
             } else if (i >= 8) {
