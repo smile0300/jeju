@@ -475,11 +475,15 @@ export function updateHourlyWeather(locKey) {
     const sunToday = getSunTimes(loc.lat, loc.lng, today);
     const sunTomorrow = getSunTimes(loc.lat, loc.lng, tomorrow);
 
-    const hourlyKeys = state.sortedKeys; // 전체 데이터 (연속 스크롤)
+    const hourlyKeys = state.sortedKeys; 
     if (hourlyKeys.length === 0) {
         hourlyContainer.innerHTML = '<div style="padding: 24px; text-align: center; color: #adb5bd;">暂无详细时间预报</div>';
         return;
     }
+
+    const kstNow = new Date(Date.now() + 9 * 60 * 60 * 1000);
+    const todayYmd = kstNow.toISOString().slice(0, 10).replace(/-/g, '');
+    const currentDecimal = kstNow.getUTCHours() + kstNow.getUTCMinutes() / 60;
 
     let html = `
     <div class="hourly-wrapper">
@@ -505,13 +509,13 @@ export function updateHourlyWeather(locKey) {
         const dateStr = k.slice(4, 6) + '/' + k.slice(6, 8);
         const hour = parseInt(k.slice(8, 10));
         
-        // 날짜가 바뀌는 시점에 날짜 요약 컬럼 주입
         if (ymd !== lastYmd) {
             html += renderDateSummaryCol(locKey, ymd, state.items, state.midData);
             lastYmd = ymd;
         }
 
-        const dayOffset = k.slice(0, 8) === hourlyKeys[0].slice(0, 8) ? 0 : 1;
+        const isToday = ymd === todayYmd;
+        const dayOffset = isToday ? 0 : 1;
         const currentSunTimes = dayOffset === 0 ? sunToday : sunTomorrow;
 
         const sky = getSkyInfo(d.PTY, d.SKY, hour);
@@ -535,11 +539,18 @@ export function updateHourlyWeather(locKey) {
                 </div>
             </div>`;
 
-        // 일출/일몰 주입 체크 (해당 시간 직후에 배치)
         if (hour === currentSunTimes.sunriseHour) {
-            html += renderSunCol(currentSunTimes.sunrise, '日出');
+            const srParts = currentSunTimes.sunrise.split(':');
+            const srDecimal = parseInt(srParts[0]) + (parseInt(srParts[1]) / 60);
+            if (!isToday || currentDecimal < srDecimal) {
+                html += renderSunCol(currentSunTimes.sunrise, '日出');
+            }
         } else if (hour === currentSunTimes.sunsetHour) {
-            html += renderSunCol(currentSunTimes.sunset, '日落');
+            const ssParts = currentSunTimes.sunset.split(':');
+            const ssDecimal = parseInt(ssParts[0]) + (parseInt(ssParts[1]) / 60);
+            if (!isToday || currentDecimal < ssDecimal) {
+                html += renderSunCol(currentSunTimes.sunset, '日落');
+            }
         }
     });
     html += '</div></div>';
