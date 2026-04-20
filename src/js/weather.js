@@ -558,7 +558,7 @@ export function updateHourlyWeather(locKey) {
         </div>
         <div class="hourly-table" style="position: relative;">
             <div class="h-date-sticky-wrap" style="position: sticky; left: 8px; top: 6px; z-index: 151; width: 0; height: 0; overflow: visible;">
-                <div class="h-sticky-date-bar" id="h-sticky-date-${locKey}" style="position: absolute; left: 0; top: 0; width: max-content; background: rgba(255, 255, 255, 0.98); padding: 3px 12px; border-radius: 20px; font-size: 0.68rem; font-weight: 800; color: #1971c2; border: 1px solid #d0ebff; box-shadow: 0 4px 12px rgba(25, 113, 194, 0.15); pointer-events: none; white-space: nowrap;">-.- -</div>
+                <div class="h-sticky-date-bar" id="h-sticky-date-${locKey}" style="position: absolute; left: 0; top: 0; width: max-content; background: transparent; padding: 3px 0; border: none; box-shadow: none; font-size: 0.68rem; font-weight: 800; color: #1971c2; pointer-events: none; white-space: nowrap;">-.- -</div>
             </div>`;
 
     let lastYmd = null;
