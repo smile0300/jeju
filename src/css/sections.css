@@ -2185,10 +2185,13 @@
 }
 
 .h-sticky-date-bar {
-    position: absolute;
-    left: 8px; /* Slightly adjusted */
-    top: 6px; 
+    position: sticky;
+    left: 6px;
+    top: 6px;
     z-index: 150;
+    width: 0;
+    overflow: visible;
+    white-space: nowrap;
     background: rgba(255, 255, 255, 0.98);
     padding: 2px 10px;
     border-radius: 20px;
