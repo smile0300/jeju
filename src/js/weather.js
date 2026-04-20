@@ -582,7 +582,7 @@ export function updateHourlyWeather(locKey) {
         else precip = precip.replace(/mm/g, '').trim();
 
         html += `
-            <div class="hourly-col ${dayFlagClass}" data-ymd="${ymd}" data-date-label="${dateStr} ${getKoreanDay(ymd)}">
+            <div class="hourly-col ${dayFlagClass}" ${dayFlagClass ? `id="h-${locKey}-${ymd}"` : ''} data-ymd="${ymd}" data-date-label="${dateStr} ${getKoreanDay(ymd)}">
                 <div class="h-top-section">
                     <span class="h-time">${String(hour).padStart(2, '0')}:00</span>
                     <span class="h-icon">${sky.icon}</span>
@@ -600,13 +600,13 @@ export function updateHourlyWeather(locKey) {
             const srParts = currentSunTimes.sunrise.split(':');
             const srDecimal = parseInt(srParts[0]) + (parseInt(srParts[1]) / 60);
             if (!isToday || currentDecimal < srDecimal) {
-                html += renderSunCol(currentSunTimes.sunrise, '日出');
+                html += renderSunCol(locKey, ymd, currentSunTimes.sunrise, '日出');
             }
         } else if (hour === currentSunTimes.sunsetHour) {
             const ssParts = currentSunTimes.sunset.split(':');
             const ssDecimal = parseInt(ssParts[0]) + (parseInt(ssParts[1]) / 60);
             if (!isToday || currentDecimal < ssDecimal) {
-                html += renderSunCol(currentSunTimes.sunset, '日落');
+                html += renderSunCol(locKey, ymd, currentSunTimes.sunset, '日落');
             }
         }
     });
@@ -653,10 +653,10 @@ export function updateHourlyWeather(locKey) {
     setTimeout(() => initHourlyScrollObserver(locKey), 100);
 }
 
-function renderSunCol(sunTime, label) {
+function renderSunCol(locKey, ymd, sunTime, label) {
     const sunEmoji = label === '日出' ? '🌅' : '🌇';
     return `
-        <div class="hourly-col sun-col" style="justify-content: center; min-width: 55px;">
+        <div class="hourly-col sun-col" id="h-${locKey}-${ymd}" style="justify-content: center; min-width: 55px; border-right: 1px solid #f1f3f5;">
             <span style="font-weight: 800; color: #fd7e14; font-size: 0.72rem; margin-bottom: 6px;">${sunTime}</span>
             <span style="font-size: 1.6rem; line-height: 1; margin-bottom: 4px;">${sunEmoji}</span>
             <span style="font-weight: 800; color: #fd7e14; font-size: 0.65rem;">${label}</span>
@@ -673,7 +673,7 @@ function renderMidHourlyCol(ymd, label, skyIcon, pop, temp, wind = '-') {
     const dateStr = ymd.slice(4, 6) + '/' + ymd.slice(6, 8);
     const dateLabel = `${dateStr} ${getKoreanDay(ymd)}`;
     return `
-        <div class="hourly-col" data-ymd="${ymd}" data-date-label="${dateLabel}">
+        <div class="hourly-col" id="h-${locKey}-${ymd}" data-ymd="${ymd}" data-date-label="${dateLabel}">
             <div class="h-top-section">
                 <span class="h-time" style="color: #4dabf7; font-weight: 800;">${label}</span>
                 <span class="h-icon">${skyIcon}</span>
