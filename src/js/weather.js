@@ -313,7 +313,7 @@ export function parseAndRenderWeather(locKey, items, midData, mountainData) {
     if (cctvBtn) {
         const cctv = getNearestCCTV(locKey);
         if (cctv) {
-            cctvBtn.innerHTML = `<button class="header-cctv-btn" onclick="openCctvModal('${cctv.id}')">📺 ${cctv.nameCn} CCTV</button>`;
+            cctvBtn.innerHTML = `<button class="header-cctv-btn" onclick="openCctvModal('${cctv.id}')">📺 CCTV</button>`;
         }
     }
 
