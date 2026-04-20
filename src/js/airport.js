@@ -163,12 +163,6 @@ export async function fetchFlights(type) {
 }
 
 export function renderFlightList(container, items, type) {
-    const updateEl = document.getElementById('flight-update-time');
-    if (updateEl) {
-        const now = new Date();
-        const pad = n => String(n).padStart(2, '0');
-        updateEl.textContent = `🕐 更新时间: ${now.getFullYear()}.${pad(now.getMonth() + 1)}.${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
-    }
 
     const headerTitle = (type === 'arrive') ? '出发地' : '目的地';
     let html = `<div class="flight-row flight-header">
