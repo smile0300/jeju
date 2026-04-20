@@ -1841,6 +1841,7 @@
     font-weight: 800;
     color: #212529;
     margin: 0;
+    white-space: nowrap;
 }
 .header-action-btns {
     display: flex;
