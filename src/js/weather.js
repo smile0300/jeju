@@ -466,8 +466,12 @@ export function updateHourlyWeather(locKey) {
     let html = `
     <div class="hourly-wrapper">
         <div class="hourly-legend">
-            <div class="h-top-section h-legend-top" style="visibility:hidden;"></div>
-            <div class="h-divider" style="background:transparent;"></div>
+            <div class="h-top-section h-legend-top" style="align-items: flex-start; padding-left: 5px;">
+                <span class="h-date-sub" style="visibility:hidden;">-</span>
+                <span class="h-time" style="font-size:0.65rem; font-weight:800; color:#adb5bd;">时间</span>
+                <span class="h-icon" style="font-size:0.65rem; font-weight:800; color:#adb5bd; margin-bottom:12px;">天气</span>
+            </div>
+            <div class="h-divider" style="background:#f1f3f5;"></div>
             <div class="h-meta-row h-legend-items">
                 <div class="h-legend-item"><span class="h-legend-title">降水</span><span class="h-legend-unit">mm</span></div>
                 <div class="h-legend-item"><span class="h-legend-title">湿度</span><span class="h-legend-unit">%</span></div>
