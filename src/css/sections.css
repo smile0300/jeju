@@ -2286,12 +2286,13 @@
     display: flex; 
     align-items: center; 
     justify-content: center; 
-    gap: 1px;
+    gap: 3px;
     margin-top: 2px;
     width: 100%;
     letter-spacing: -0.2px; 
     font-family: 'Outfit', sans-serif;
     font-weight: 700; 
+    font-size: 0.85rem;
 }
 .w-max { color: #fa5252; }
 .w-min { color: #228be6; }
