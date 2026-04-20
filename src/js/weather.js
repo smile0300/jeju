@@ -531,8 +531,8 @@ function initHourlyScrollObserver(locKey) {
     }, {
         root: scrollContainer,
         threshold: 0,
-        // 왼쪽 끝에서 약 20% 지점을 기준으로 날짜 전환 (양방향 대응)
-        rootMargin: '0px -80% 0px 0px' 
+        // 왼쪽 끝에서 20% 지점을 예리한 기준선으로 설정 (양방향 스크롤 정밀도 향상)
+        rootMargin: '0px -80% 0px 20%' 
     });
 
     // 모든 시간대 컬럼을 관찰하여 스크롤 지점을 정밀하게 추적
