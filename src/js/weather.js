@@ -321,7 +321,7 @@ export function parseAndRenderWeather(locKey, items, midData, mountainData) {
         const todayHighLow = getHighLow(grouped, todayYmd);
         const tomorrowYmd = getOffsetDate(todayYmd, 1);
         const tomorrowData = getDailySummary(grouped, tomorrowYmd, midData);
-        const sky = getSkyInfo(current.PTY, current.SKY, parseInt(current.time.slice(0, 2)));
+        const sky = getSkyInfo(current.PTY, current.SKY, parseInt(String(current.time || '').slice(0, 2) || 12));
 
         const t = parseFloat(current.TMP ?? current.T1H ?? 20);
         const w = parseFloat(current.WSD || 0);
@@ -429,7 +429,7 @@ function renderWeeklyList(locKey, grouped, sortedKeys, midData) {
             if (cur) {
                 const ct = Math.round(parseFloat(cur.TMP || cur.T1H || 0));
                 min = ct; max = ct;
-                icon = getSkyInfo(cur.PTY, cur.SKY, parseInt(cur.time?.slice(0,2) || 12)).icon;
+                icon = getSkyInfo(cur.PTY, cur.SKY, parseInt(String(cur.time || '').slice(0, 2) || 12)).icon;
                 pop = cur.POP || 0;
                 pcp = formatPrecip(cur.PCP || '0').replace('없음', '0').replace('mm','');
             }
@@ -902,11 +902,12 @@ window.openWeatherAlertModal = function() {
         document.body.appendChild(modal);
     }
     const formatAlertTime = (tmFc) => {
-        if (!tmFc || tmFc.length < 12) return tmFc || '';
-        const m = tmFc.slice(4, 6);
-        const d = tmFc.slice(6, 8);
-        const hh = tmFc.slice(8, 10);
-        const mm = tmFc.slice(10, 12);
+        const s = String(tmFc || '');
+        if (s.length < 12) return s;
+        const m = s.slice(4, 6);
+        const d = s.slice(6, 8);
+        const hh = s.slice(8, 10);
+        const mm = s.slice(10, 12);
         return `${m}.${d} ${hh}:${mm}`;
     };
 

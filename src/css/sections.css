@@ -1833,17 +1833,14 @@
 /* Header Area */
 .weather-header-container {
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
     align-items: center;
-    padding: 15px 4px 15px;
-    gap: 12px;
+    padding: 10px 4px 15px;
 }
 .location-info {
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 8px;
-    width: 100%;
 }
 .location-star {
     color: #ffd43b;
