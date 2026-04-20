@@ -26,7 +26,7 @@ export function getWindColor(ws) {
     const v = parseFloat(ws);
     if (isNaN(v)) return '#adb5bd';
     if (v < 4) return '#868e96';
-    if (v < 9) return '#4dabf7';
+    if (v < 9) return '#f08c00'; // Blue -> Amber (status-fair)
     if (v < 14) return '#f03e3e'; // Red for 清劲风
     return '#ae3ec9'; // Purple for 强风
 }

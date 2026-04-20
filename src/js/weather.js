@@ -385,6 +385,17 @@ function renderWeeklyList(locKey, grouped, sortedKeys, midData) {
         
         const dt = dailyMap[ymd];
         const count = ymdCounts[ymd] || 0;
+        
+        // --- 중기 예보 인덱스(dayIdx) 계산 ---
+        // 기상청 중기 예보는 발표 시각(tmFc)의 날짜를 기점으로 Day 3, Day 4 등으로 정의됨
+        let dayIdx = i; 
+        if (tempItem && tempItem.tmFc) {
+            const baseStr = String(tempItem.tmFc).slice(0, 8);
+            const baseD = new Date(baseStr.slice(0, 4), parseInt(baseStr.slice(4, 6)) - 1, baseStr.slice(6, 8));
+            const diffMs = targetD.getTime() - baseD.getTime();
+            dayIdx = Math.round(diffMs / (1000 * 60 * 60 * 24));
+        }
+
         // v22.1: 당일(i=0)이거나 데이터가 충분한 경우 단기예보 데이터 노출
         if (dt && dt.max !== -99 && (count >= 5 || i === 0)) {
             min = Math.round(dt.min); max = Math.round(dt.max);
@@ -433,15 +444,16 @@ function renderWeeklyList(locKey, grouped, sortedKeys, midData) {
                 pop = cur.POP || 0;
                 pcp = formatPrecip(cur.PCP || '0').replace('없음', '0').replace('mm','');
             }
-        } else if (i >= 3 && (landItem || tempItem)) {
-            const tMax = getMidTempVal(tempItem, 'max', i);
-            const tMin = getMidTempVal(tempItem, 'min', i);
+        } else if (dayIdx >= 3 && (landItem || tempItem)) {
+            // v22.3: 인덱스 정렬 수정 - 루프 인덱스 i 대신 tmFc 기준 dayIdx 사용
+            const tMax = getMidTempVal(tempItem, 'max', dayIdx);
+            const tMin = getMidTempVal(tempItem, 'min', dayIdx);
             min = tMin !== null ? Math.round(tMin) : '--';
             max = tMax !== null ? Math.round(tMax) : '--';
-            const wf = landItem[`wf${i}`] || landItem[`wf${i}Am`] || '';
+            const wf = landItem[`wf${dayIdx}`] || landItem[`wf${dayIdx}Am`] || '';
             const translated = translateMidWf(wf);
             icon = translated.icon;
-            pop = landItem[`rnSt${i}`] || landItem[`rnSt${i}Am`] || 0;
+            pop = landItem[`rnSt${dayIdx}`] || landItem[`rnSt${dayIdx}Am`] || 0;
             pcp = '0';
         }
 
@@ -494,25 +506,38 @@ function initHourlyScrollObserver(locKey) {
     const scrollContainer = wrapper.querySelector('.hourly-table');
     if (!scrollContainer) return;
 
+    let lastActiveYmd = null;
+    let lastActiveLabel = null;
+
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                const ymd = entry.target.dataset.ymd;
-                highlightWeeklyCard(locKey, ymd);
+                const { ymd, dateLabel } = entry.target.dataset;
+                
+                // 1. 주간 카드 하이라이트 (날짜가 바뀔 때만)
+                if (ymd && ymd !== lastActiveYmd) {
+                    lastActiveYmd = ymd;
+                    highlightWeeklyCard(locKey, ymd);
+                }
+
+                // 2. 상단 스티키 날짜바 업데이트 (라벨이 바뀔 때만)
                 const stickyBar = document.getElementById(`h-sticky-date-${locKey}`);
-                if (stickyBar && entry.target.dataset.dateLabel) {
-                    stickyBar.innerText = entry.target.dataset.dateLabel;
+                if (stickyBar && dateLabel && dateLabel !== lastActiveLabel) {
+                    lastActiveLabel = dateLabel;
+                    stickyBar.innerText = dateLabel;
                 }
             }
         });
     }, {
         root: scrollContainer,
-        threshold: 0.1,
-        rootMargin: '0px -50% 0px 0px' // Detect when column passes left/middle
+        threshold: 0,
+        // 왼쪽 끝에서 약 20% 지점을 기준으로 날짜 전환 (양방향 대응)
+        rootMargin: '0px -80% 0px 0px' 
     });
 
-    const summaryCols = wrapper.querySelectorAll('.h-day-flag');
-    summaryCols.forEach(col => observer.observe(col));
+    // 모든 시간대 컬럼을 관찰하여 스크롤 지점을 정밀하게 추적
+    const allCols = wrapper.querySelectorAll('.hourly-col');
+    allCols.forEach(col => observer.observe(col));
 }
 
 
@@ -842,6 +867,10 @@ export async function fetchWeatherAlerts() {
             let currentIndex = 0;
             const renderAlert = (idx) => {
                 const item = items[idx];
+                if (!item || !item.title || typeof item.title !== 'string') {
+                    console.warn('[Alerts] Invalid item or title at index:', idx);
+                    return;
+                }
                 let title = item.title.includes('/') ? item.title.split('/').slice(1).join('/').trim() : item.title;
                 const translatedTitle = translateWeatherAlert(title).replace(/\(\*\)/g, '').trim();
                 
@@ -904,26 +933,49 @@ window.openWeatherAlertModal = function() {
     const formatAlertTime = (tmFc) => {
         const s = String(tmFc || '');
         if (s.length < 12) return s;
-        const m = s.slice(4, 6);
-        const d = s.slice(6, 8);
-        const hh = s.slice(8, 10);
-        const mm = s.slice(10, 12);
-        return `${m}.${d} ${hh}:${mm}`;
+        try {
+            const m = s.slice(4, 6);
+            const d = s.slice(6, 8);
+            const hh = s.slice(8, 10);
+            const mm = s.slice(10, 12);
+            return `${m}.${d} ${hh}:${mm}`;
+        } catch (e) {
+            console.warn('[FormatTime] slice error:', e, s);
+            return s;
+        }
     };
 
     const itemsHTML = LATEST_ALERTS.map(item => {
         const title = item.title || '';
-        let typePrefix = '';
-        if (title.includes('주의보')) typePrefix = '[注意报] ';
-        else if (title.includes('경보')) typePrefix = '[警报] ';
+        let typeBadge = '[특보]';
+        let itemClass = '';
+        
+        if (title.includes('주의보')) {
+            typeBadge = '[주의보]';
+            itemClass = 'warning';
+        } else if (title.includes('경보')) {
+            typeBadge = '[경보]';
+            itemClass = 'danger';
+        }
+        
+        const timeStr = formatAlertTime(item.tmFc);
+        const translatedContent = translateWeatherAlert(title).replace(/\(\*\)/g, '').trim();
         
         return `
-        <div class="alert-history-item">
-            <div class="alert-history-time">⏰ ${formatAlertTime(item.tmFc)}</div>
-            <div class="alert-history-text">${typePrefix}${translateWeatherAlert(title).replace(/\(\*\)/g, '').trim()}</div>
+        <div class="alert-history-item ${itemClass}">
+            <span class="alert-history-label">${typeBadge}</span>
+            <span class="alert-history-time">${timeStr}</span>
+            <span class="alert-history-text">${translatedContent}</span>
         </div>`;
     }).join('');
-    modal.innerHTML = `<div class="alert-modal-panel"><div class="alert-modal-header"><div class="alert-modal-title">特报详情</div><button onclick="window.closeWeatherAlertModal()">✕</button></div><div class="alert-modal-body">${itemsHTML}</div></div>`;
+    modal.innerHTML = `
+        <div class="alert-modal-panel">
+            <div class="alert-modal-header">
+                <div class="alert-modal-title">特报详情</div>
+                <button class="alert-modal-close" onclick="window.closeWeatherAlertModal()">✕</button>
+            </div>
+            <div class="alert-modal-body">${itemsHTML}</div>
+        </div>`;
     modal.style.display = 'flex';
 };
 
