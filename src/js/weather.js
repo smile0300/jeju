@@ -420,9 +420,6 @@ function renderWeeklyList(locKey, grouped, sortedKeys, midData) {
     container.innerHTML = html;
 }
 
-/**
- * 시간별 예보 목록 내부에 삽입될 날짜 요약 컬럼 렌더링
- */
 function renderDateSummaryCol(locKey, ymd, grouped, midData) {
     const days = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
     const targetD = new Date(ymd.slice(0, 4), parseInt(ymd.slice(4, 6)) - 1, ymd.slice(6, 8));
@@ -431,19 +428,12 @@ function renderDateSummaryCol(locKey, ymd, grouped, midData) {
     const dayName = days[targetD.getDay()];
     
     return `
-        <div class="hourly-col date-summary-col" id="h-${locKey}-${ymd}">
-            <div class="h-top-section">
-                <span class="h-date-sub" style="color:#212529; font-weight:800; font-size:0.75rem; margin-bottom:4px;">${month}.${day}</span>
-                <span class="h-time" style="font-weight:800; color:#868e96; font-size:0.65rem;">${dayName}</span>
-            </div>
-            <div class="h-divider" style="background:#e9ecef;"></div>
-            <div class="h-meta-row">
-                <span class="h-meta-val" style="font-size:0.65rem; color:#adb5bd;">-</span>
-                <span class="h-meta-val" style="font-size:0.65rem; color:#adb5bd;">-</span>
-                <span class="h-meta-val" style="font-size:0.65rem; color:#adb5bd;">-</span>
-            </div>
+        <div class="hourly-col date-summary-col" id="h-${locKey}-${ymd}" style="justify-content: center; background: #f8f9fa;">
+            <span style="color:#212529; font-weight:800; font-size:0.8rem; margin-bottom:4px;">${month}.${day}</span>
+            <span style="font-weight:800; color:#868e96; font-size:0.7rem;">${dayName}</span>
         </div>`;
 }
+
 
 export function updateHourlyWeather(locKey) {
     const state = WEATHER_STATE[locKey];
