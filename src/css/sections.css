@@ -1,4 +1,4 @@
-/* ==================== CCTV ==================== */
+﻿/* ==================== CCTV ==================== */
 .cctv-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -33,7 +33,7 @@
     width: 100%;
     height: 100%;
     display: block;
-    object-fit: cover; /* ?�면 ?�림 방�?�??�해 기본?�?cover, ?�요??contain */
+    object-fit: cover; /* ?�면 ?�림 방�?�??�해 기본?�?cover, ?�요??contain */
 }
 
 /* Modal specific CCTV styles */
@@ -49,7 +49,7 @@
 .cctv-modal-video {
     width: 100%;
     height: 100%;
-    object-fit: contain; /* ???�면?�서??가로세�?비율 ?��? 권장 */
+    object-fit: contain; /* ???�면?�서??가로세�?비율 ?��? 권장 */
 }
 
 .cctv-modal-info {
@@ -79,7 +79,7 @@
 }
 
 #festival .ad-container::before {
-    content: '광고 로드 �?..';
+    content: '광고 로드 �?..';
     position: absolute;
     top: 50%;
     left: 50%;
@@ -256,7 +256,7 @@
 }
 .alert-type-badge.gray { background: #adb5bd; }
 .alert-more { font-size: 0.65rem; color: #fa5252; font-weight: 700; margin-left: auto; } /* v20.0: ?�단 버튼과의 ?�백 ?�보 */
-}
+
 
 .weather-alert-card {
     background: rgba(255, 36, 66, 0.08); /* ?�한 빨간??배경 */
@@ -456,7 +456,7 @@
 .air-circle-bar { fill: none; stroke-width: 6; stroke-linecap: round; transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1); }
 
 /* Air Quality Levels (Reference Matching) */
-.air-lv1 { stroke: #10b981; color: #10b981; } /* �?- Green */
+.air-lv1 { stroke: #10b981; color: #10b981; } /* �?- Green */
 .air-lv2 { stroke: #f59e0b; color: #f59e0b; } /* ??- Amber */
 .air-lv3 { stroke: #ef4444; color: #ef4444; } /* 轻度 - Red */
 .air-lv4 { stroke: #9333ea; color: #9333ea; } /* ?�度 - Purple */
@@ -512,15 +512,15 @@
     width: 100%;
     border-top: 1px dashed var(--border-light);
     padding-top: 8px;
-    flex-wrap: nowrap; /* 줄바�?방�? */
-    gap: 5px; /* ?�소 �?최소 간격 */
+    flex-wrap: nowrap; /* 줄바�?방�? */
+    gap: 5px; /* ?�소 �?최소 간격 */
 }
 .trail-info-compact span {
     font-size: 0.65rem;
     font-weight: 700;
     color: var(--text-muted);
-    white-space: nowrap; /* ?�스??줄바�?방�? */
-    flex-shrink: 0; /* ?�소가 줄어?��? ?�도�??�정 */
+    white-space: nowrap; /* ?�스??줄바�?방�? */
+    flex-shrink: 0; /* ?�소가 줄어?��? ?�도�??�정 */
 }
 
 /* ==================== Flights ==================== */
@@ -681,7 +681,7 @@
 .lost-table th { background: var(--bg-card-hover); padding: 14px 10px; text-align: center; border-bottom: 2px solid var(--border-light); font-size: 0.85rem; font-weight: 800; }
 .lost-table td { padding: 12px 10px; border-bottom: 1px solid var(--border-light); font-size: 0.8rem; font-weight: 500; text-align: center; white-space: nowrap; }
 
-/* lost-category-badge: ????분류 �? */
+/* lost-category-badge: ????분류 �? */
 .lost-category-badge {
     display: inline-block;
     padding: 3px 10px;
@@ -692,7 +692,7 @@
     font-weight: 800;
 }
 
-/* lost-table-btn: ?�이???�세 보기 버튼 */
+/* lost-table-btn: ?�이???�세 보기 버튼 */
 .lost-table-btn {
     padding: 8px 16px;
     background: white;
@@ -1450,7 +1450,7 @@
 /* ==================== Navigation Tap Zones ==================== */
 .wsm-nav-zone {
     position: fixed;
-    top: 60px; /* Header ?�역 ?�외 */
+    top: 60px; /* Header ?�역 ?�외 */
     bottom: 0;
     width: 30%;
     z-index: 9998;
@@ -1645,7 +1645,7 @@
 /* ==================== Navigation Tap Zones ==================== */
 .wsm-nav-zone {
     position: fixed;
-    top: 60px; /* Header ?�역 ?�외 */
+    top: 60px; /* Header ?�역 ?�외 */
     bottom: 0;
     width: 30%;
     z-index: 9998;
@@ -2279,7 +2279,7 @@
 .w-date-box { font-size: 0.65rem; font-weight: 700; color: #212529; margin-bottom: -2px; }
 .w-icon { font-size: 1.2rem; }
 .w-temps { 
-    font-size: 0.64rem; 
+    display: flex; align-items: center; justify-content: center; gap: 1px; letter-spacing: -0.2px; font-family: 'Outfit', sans-serif;
     font-weight: 800; 
     display: flex; 
     align-items: center; 
