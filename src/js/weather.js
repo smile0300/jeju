@@ -802,8 +802,8 @@ export async function fetchWeatherAlerts() {
         let items = Array.isArray(rawItems) ? rawItems : (rawItems ? [rawItems] : []);
         items = items.filter(item => item && item.title);
         LATEST_ALERTS = items;
+        alertsContainer.style.display = 'flex';
         if (items.length > 0) {
-            alertsContainer.style.display = 'flex';
             const item = items[0];
             let title = item.title.includes('/') ? item.title.split('/').slice(1).join('/').trim() : item.title;
             const translatedTitle = translateWeatherAlert(title).replace(/\(\*\)/g, '').trim();
@@ -811,9 +811,14 @@ export async function fetchWeatherAlerts() {
                 <div class="weather-alert-card animate-slide-up" onclick="window.openWeatherAlertModal()">
                     <div class="alert-type-badge">济州特报</div>
                     <div class="alert-msg">🚨 ${translatedTitle}</div>
+                    <div class="alert-more">详情 ></div>
                 </div>`;
         } else {
-            alertsContainer.innerHTML = `<div class="weather-alert-card no-alerts"><div class="alert-msg">当前无气象特报</div></div>`;
+            alertsContainer.innerHTML = `
+                <div class="weather-alert-card no-alerts">
+                    <div class="alert-type-badge gray">济州特报</div>
+                    <div class="alert-msg">当前全岛无气象特报</div>
+                </div>`;
         }
     } catch (e) { console.error('[Alerts] Error:', e); }
 }
