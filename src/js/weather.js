@@ -412,7 +412,7 @@ function renderWeeklyList(locKey, grouped, sortedKeys, midData) {
                 <div class="w-temps"><span class="w-max">${max}°</span><span class="w-slash">/</span><span class="w-min">${min}°</span></div>
                 <div class="w-meta-info">
                     <span class="w-pop">💧${pop}%</span>
-                    <span class="w-pcp">${pcp}mm</span>
+                    <span class="w-pcp ${pcp !== '0' && pcp !== '--' ? 'p-blue' : ''}">${pcp}mm</span>
                 </div>
             </div>`;
     }
