@@ -37,6 +37,8 @@ export async function fetchHallasanStatus() {
     const now = new Date().toLocaleString('zh-CN');
     container.innerHTML = ``;
 
+    renderHallasanCCTV();
+    
     try {
         const url = `${CONFIG.PROXY_URL}/api/hallasan-status`;
         let response;
@@ -44,7 +46,8 @@ export async function fetchHallasanStatus() {
 
         while (retryCount >= 0) {
             try {
-                response = await fetch(url, { signal: AbortSignal.timeout(15000) });
+                // 한라산 홈페이지 응답 속도에 맞춰 타임아웃 소폭 상향 및 여유 확보
+                response = await fetch(url, { signal: AbortSignal.timeout(20000) }); 
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 break;
             } catch (err) {
@@ -107,11 +110,10 @@ export async function fetchHallasanStatus() {
             const errorText = isTimeout ? '官方网站响应延迟中 (请稍后再试)' : '暂时無法加载登山路状态';
             trailsEl.innerHTML = `<div class="error-msg" style="grid-column: 1/-1; text-align:center; padding: 20px;">
                 <p style="color: var(--text-muted); font-size: 0.85rem;">${errorText}</p>
-                <button onclick="location.reload()" style="margin-top:10px; padding: 8px 16px; border-radius: 8px; border:none; background:var(--primary-gradient); color:white; font-weight:700;">重新加载</button>
+                <button onclick="window.hallasanApp.fetchStatus()" style="margin-top:10px; padding: 8px 16px; border-radius: 8px; border:none; background:var(--primary-gradient); color:white; font-weight:700;">重新加载</button>
             </div>`;
         }
     }
-    renderHallasanCCTV();
     isFetchingHallasanStatus = false;
 }
 
