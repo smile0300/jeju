@@ -2163,12 +2163,12 @@
     flex-direction: column;
     align-items: center;
     justify-content: flex-end;
-    height: 130px; /* Increased height */
+    height: 100px; /* Reduced height */
     padding: 0 0 5px 0;
     box-sizing: border-box;
 }
 .h-legend-top {
-    height: 130px; /* Matched height */
+    height: 100px; /* Matched height */
     display: flex;
     align-items: flex-end;
     padding-bottom: 5px;

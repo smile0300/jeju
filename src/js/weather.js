@@ -494,7 +494,6 @@ export function updateHourlyWeather(locKey) {
             <div class="h-top-section h-legend-top" style="align-items: flex-start; padding-left: 5px;">
                 <span class="h-date-sub" style="visibility:hidden;">-</span>
                 <span class="h-time" style="font-size:0.65rem; font-weight:800; color:#adb5bd;">时间</span>
-                <span class="h-icon" style="font-size:0.65rem; font-weight:800; color:#adb5bd;">天气</span>
             </div>
             <div class="h-divider" style="background:#f1f3f5;"></div>
             <div class="h-meta-row h-legend-items">
