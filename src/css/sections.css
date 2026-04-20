@@ -1,4 +1,4 @@
-﻿/* ==================== CCTV ==================== */
+/* ==================== CCTV ==================== */
 .cctv-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -2279,15 +2279,15 @@
 .w-date-box { font-size: 0.65rem; font-weight: 700; color: #212529; margin-bottom: -2px; }
 .w-icon { font-size: 1.2rem; }
 .w-temps { 
-    display: flex; align-items: center; justify-content: center; gap: 1px; letter-spacing: -0.2px; font-family: 'Outfit', sans-serif;
-    font-weight: 800; 
     display: flex; 
     align-items: center; 
     justify-content: center; 
     gap: 1px;
     margin-top: 2px;
     width: 100%;
-    letter-spacing: -0.2px;
+    letter-spacing: -0.2px; 
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700; 
 }
 .w-max { color: #fa5252; }
 .w-min { color: #228be6; }
