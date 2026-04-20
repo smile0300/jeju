@@ -579,7 +579,7 @@ export function updateHourlyWeather(locKey) {
     <div class="hourly-wrapper">
         <div class="hourly-legend">
             <div class="h-top-section h-legend-top" style="position: relative;">
-                <span class="h-date" style="position: absolute; top: 7px; left: 50%; transform: translateX(-50%); font-size:0.65rem; font-weight:800; color:#adb5bd; white-space: nowrap;">日期</span>
+                <span class="h-date" style="position: absolute; top: -4px; left: 50%; transform: translateX(-50%); font-size:0.65rem; font-weight:800; color:#adb5bd; white-space: nowrap;">日期</span>
                 <span class="h-time" style="font-size:0.65rem; font-weight:800; color:#adb5bd;">时间</span>
                 <span class="h-icon" style="visibility:hidden;">-</span>
                 <span class="h-pop" style="visibility:hidden; margin-top: 5px;">-</span>
