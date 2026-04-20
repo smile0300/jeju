@@ -437,7 +437,15 @@ function renderDateSummaryCol(locKey, ymd, grouped, midData) {
 function highlightWeeklyCard(locKey, ymd) {
     document.querySelectorAll(`.w-card-${locKey}`).forEach(c => c.classList.remove('active'));
     const target = document.getElementById(`wcard-${locKey}-${ymd}`);
-    if (target) target.classList.add('active');
+    if (target) {
+        target.classList.add('active');
+        // 간략보기 버튼 업데이트: 선택된 날짜에 맞춰 데이터가 나오도록 수정
+        const header = document.getElementById(`header-${locKey}`);
+        if (header) {
+            const sumBtn = header.querySelector('.header-summary-btn');
+            if (sumBtn) sumBtn.setAttribute('onclick', `window.openWeatherSummaryModal('${ymd}')`);
+        }
+    }
 }
 
 function initHourlyScrollObserver(locKey) {
