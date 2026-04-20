@@ -2185,22 +2185,23 @@
 
 .h-sticky-date-bar {
     position: sticky;
-    left: 8px;
-    top: 6px;
-    z-index: 100;
-    background: #f8f9fa;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 0.65rem;
+    left: 4px;
+    top: 4px;
+    z-index: 150;
+    background: rgba(255, 255, 255, 0.98);
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 0.68rem;
     font-weight: 800;
-    color: #495057;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    color: #1971c2;
+    border: 1px solid #d0ebff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     pointer-events: none;
     white-space: nowrap;
-    height: 18px;
+    height: 20px;
     display: flex;
     align-items: center;
-    margin-bottom: -18px; /* Overlay on top of header area */
+    margin-bottom: -20px; /* Overlay */
 }
 .h-date-sub { font-size: 0.6rem; color: #adb5bd; font-weight: 700; margin-bottom: 4px; }
 .h-time { font-size: 0.7rem; color: #868e96; margin-bottom: 8px; font-weight: 600; line-height: 1; }
