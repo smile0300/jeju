@@ -633,15 +633,15 @@ export function updateHourlyWeather(locKey) {
                 const tMax = tempItem[`taMax${i}`];
                 
                 // 시간별 데이타가 9시/15시를 포함하지 않는 경우에만 추가 (또는 중복 느낌 없도록 항상 추가)
-                if (amWf) html += renderMidHourlyCol(ymd, '上午', translateMidWf(amWf).icon, amPop, Math.round(tMin));
-                if (pmWf) html += renderMidHourlyCol(ymd, '下午', translateMidWf(pmWf).icon, pmPop, Math.round(tMax));
+                if (amWf) html += renderMidHourlyCol(locKey, ymd, '上午', translateMidWf(amWf).icon, amPop, Math.round(tMin));
+                if (pmWf) html += renderMidHourlyCol(locKey, ymd, '下午', translateMidWf(pmWf).icon, pmPop, Math.round(tMax));
             } else if (i >= 8) {
                 const wf = landItem[`wf${i}`];
                 const pop = landItem[`rnSt${i}`];
                 const tMin = tempItem[`taMin${i}`];
                 const tMax = tempItem[`taMax${i}`];
 
-                if (wf) html += renderMidHourlyCol(ymd, '全天', translateMidWf(wf).icon, pop, `${Math.round(tMin)}/${Math.round(tMax)}`);
+                if (wf) html += renderMidHourlyCol(locKey, ymd, '全天', translateMidWf(wf).icon, pop, `${Math.round(tMin)}/${Math.round(tMax)}`);
             }
         }
     }
@@ -669,7 +669,7 @@ function getKoreanDay(ymd) {
     return days[d.getDay()];
 }
 
-function renderMidHourlyCol(ymd, label, skyIcon, pop, temp, wind = '-') {
+function renderMidHourlyCol(locKey, ymd, label, skyIcon, pop, temp, wind = '-') {
     const dateStr = ymd.slice(4, 6) + '/' + ymd.slice(6, 8);
     const dateLabel = `${dateStr} ${getKoreanDay(ymd)}`;
     return `
