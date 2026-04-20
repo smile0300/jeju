@@ -389,7 +389,8 @@ function renderWeeklyList(locKey, grouped, sortedKeys, midData) {
         
         const dt = dailyMap[ymd];
         const count = ymdCounts[ymd] || 0;
-        if (dt && dt.max !== -99 && count >= 8) {
+        // v22.1: 당일(i=0)이거나 데이터가 충분한 경우 단기예보 데이터 노출
+        if (dt && dt.max !== -99 && (count >= 5 || i === 0)) {
             min = Math.round(dt.min); max = Math.round(dt.max);
             
             const dayKeys = sortedKeys.filter(k => k.startsWith(ymd));
@@ -529,7 +530,10 @@ export function updateHourlyWeather(locKey) {
         ymdCounts[y] = (ymdCounts[y] || 0) + 1;
     });
 
-    const effectiveHourlyKeys = state.sortedKeys.filter(k => ymdCounts[k.slice(0, 8)] >= 8);
+    const effectiveHourlyKeys = state.sortedKeys.filter(k => {
+        const ymd = k.slice(0, 8);
+        return ymdCounts[ymd] >= 8 || ymd === todayYmd;
+    });
     
     if (effectiveHourlyKeys.length === 0 && state.sortedKeys.length === 0) {
         hourlyContainer.innerHTML = '<div style="padding: 24px; text-align: center; color: #adb5bd;">暂无详细时间预报</div>';
