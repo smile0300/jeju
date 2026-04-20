@@ -2309,3 +2309,13 @@
 #weather .section-alt { background-color: #f1f3f5; }
 .p-blue { color: #228be6 !important; font-weight: 800; }
 
+/* Weekly Card Active State */
+.weekly-card.active {
+    border-color: #339af0 !important;
+    background: #e7f5ff !important;
+    box-shadow: 0 4px 12px rgba(51, 154, 240, 0.15) !important;
+}
+.weekly-card.active .w-date {
+    color: #1971c2 !important;
+    font-weight: 800 !important;
+}
