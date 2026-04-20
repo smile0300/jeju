@@ -2254,17 +2254,18 @@
 .w-date-box { font-size: 0.65rem; font-weight: 700; color: #212529; margin-bottom: -2px; }
 .w-icon { font-size: 1.2rem; }
 .w-temps { 
-    font-size: 0.75rem; 
+    font-size: 0.72rem; 
     font-weight: 800; 
     display: flex; 
     align-items: center; 
     justify-content: center; 
     gap: 0;
     margin-top: 2px;
+    letter-spacing: -0.5px;
 }
-.w-max { color: #fa5252; width: 28px; text-align: right; }
-.w-min { color: #228be6; width: 28px; text-align: left; }
-.w-slash { color: #dee2e6; font-size: 0.6rem; width: 10px; text-align: center; }
+.w-max { color: #fa5252; width: 24px; text-align: right; }
+.w-min { color: #228be6; width: 24px; text-align: left; }
+.w-slash { color: #dee2e6; font-size: 0.55rem; width: 8px; text-align: center; }
 .w-meta-info {
     display: flex;
     flex-direction: column;
