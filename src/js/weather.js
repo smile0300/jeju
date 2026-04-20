@@ -148,21 +148,17 @@ export async function fetchWeatherData(locKey) {
             fetchMidTermWeather(loc)
         ];
 
-        // v4.0: 한라산인 경우 산림청 산악기상 데이터 추가 수집
-        if (locKey === 'hallasan' && loc.obsid) {
-            fetchPromises.push(fetchMountainWeather(loc.obsid));
-        }
-
-        // v20.1: 개별 API 실패가 전체 데이터 로드 중단으로 이어지지 않도록 래핑
-        const results = await Promise.allSettled(fetchPromises);
-        const shortJson = results[0].status === 'fulfilled' ? results[0].value : null;
-        const midData = results[1].status === 'fulfilled' ? results[1].value : null;
-        const mountainData = results[2]?.status === 'fulfilled' ? results[2].value : null;
+        // v20.1: 개별 API 실패가 전체 데이터 로드 중단으로 이어지지 않도록 Promise.all에 catch 추가
+        const [shortJson, midData, mountainData] = await Promise.all([
+            fetchPublicDataJson(endpoint, params).catch(e => { console.error('[Weather] 단기예보 로드 실패:', e); return null; }),
+            fetchMidTermWeather(loc).catch(e => { console.error('[Weather] 중기예보 로드 실패:', e); return null; }),
+            (locKey === 'hallasan' && loc.obsid) ? fetchMountainWeather(loc.obsid).catch(e => { console.error('[Weather] 산악기상 로드 실패:', e); return null; }) : Promise.resolve(null)
+        ]);
 
         const items = shortJson?.response?.body?.items?.item;
         
         if (!items && !mountainData) {
-            console.error(`[Weather] ${locKey} 필수 데이터 누락:`, shortJson);
+            console.error(`[Weather] ${locKey} 필수 데이터(단기예보/산악기상) 모두 누락`);
             throw new Error('Required weather data missing');
         }
 
@@ -873,9 +869,7 @@ export async function fetchWeatherAlerts() {
 }
 
 window.showWeatherSectionWithAlert = function() {
-    if (typeof showSection === 'function') {
-        showSection('weather');
-    } else if (window.showSection) {
+    if (window.showSection) {
         window.showSection('weather');
     }
     window.openWeatherAlertModal();
