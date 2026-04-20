@@ -539,8 +539,10 @@ export function updateHourlyWeather(locKey) {
     let html = `
     <div class="hourly-wrapper">
         <div class="hourly-legend">
-            <div class="h-top-section h-legend-top" style="align-items: flex-start; padding-left: 5px;">
+            <div class="h-top-section h-legend-top" style="padding-left: 5px;">
                 <span class="h-time" style="font-size:0.65rem; font-weight:800; color:#adb5bd;">时间</span>
+                <span class="h-icon" style="visibility:hidden;">-</span>
+                <span class="h-pop" style="visibility:hidden; margin-top: 5px;">-</span>
             </div>
             <div class="h-divider" style="background:#f1f3f5;"></div>
             <div class="h-meta-row h-legend-items">
