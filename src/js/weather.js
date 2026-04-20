@@ -504,9 +504,8 @@ function initHourlyScrollObserver(locKey) {
         rootMargin: '0px -50% 0px 0px' // Detect when column passes left/middle
     });
 
-    scrollContainer.querySelectorAll('.date-summary-col').forEach(col => {
-        observer.observe(col);
-    });
+    const summaryCols = wrapper.querySelectorAll('.h-day-flag');
+    summaryCols.forEach(col => observer.observe(col));
 }
 
 
@@ -566,8 +565,10 @@ export function updateHourlyWeather(locKey) {
         const dateStr = k.slice(4, 6) + '/' + k.slice(6, 8);
         const hour = parseInt(k.slice(8, 10));
         
+        let dayFlagClass = '';
         if (ymd !== lastYmd) {
             lastYmd = ymd;
+            dayFlagClass = 'h-day-flag';
         }
 
         const isToday = ymd === todayYmd;
@@ -580,7 +581,7 @@ export function updateHourlyWeather(locKey) {
         else precip = precip.replace(/mm/g, '').trim();
 
         html += `
-            <div class="hourly-col" data-ymd="${ymd}" data-date-label="${dateStr} ${getKoreanDay(ymd)}">
+            <div class="hourly-col ${dayFlagClass}" data-ymd="${ymd}" data-date-label="${dateStr} ${getKoreanDay(ymd)}">
                 <div class="h-top-section">
                     <span class="h-time">${String(hour).padStart(2, '0')}:00</span>
                     <span class="h-icon">${sky.icon}</span>
