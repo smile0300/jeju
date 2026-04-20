@@ -1764,42 +1764,45 @@
     box-sizing: border-box !important;
 }
 
-/* Location Selection Tabs */
+/* Location Selection Tabs - Updated to 2x5 Grid */
 .location-tabs { 
-    display: flex; 
-    gap: 12px; 
-    margin-bottom: var(--spacing-lg); 
+    display: grid;
+    grid-template-columns: repeat(5, 1fr); /* 5 columns */
+    gap: 6px; 
+    margin-bottom: 15px; 
     width: 100%;
-    overflow-x: auto;
-    white-space: nowrap;
-    -webkit-overflow-scrolling: touch;
-    padding: 5px 2px 12px 2px;
+    padding: 5px 0;
 }
-.location-tabs::-webkit-scrollbar { display: none; }
 .location-tabs::-webkit-scrollbar { display: none; }
 .location-tab {
-    flex: 0 0 auto;
-    background: var(--bg-card); border: 2px solid var(--border-light);
-    padding: 12px 14px; border-radius: var(--radius-md); cursor: pointer;
-    transition: all var(--transition-normal);
-    display: flex; flex-direction: column; align-items: center; gap: 4px;
-    box-shadow: var(--shadow-sm);
-    min-width: 85px;
-}
-.tab-icon { font-size: 1.6rem; line-height: 1; }
-.tab-name { 
-    font-size: 0.75rem; 
-    font-weight: 800; 
-    color: #495057; 
-    white-space: nowrap; 
-    padding: 0 2px;
+    background: #ffffff; 
+    border: 1px solid #f1f3f5;
+    padding: 10px 2px; 
+    border-radius: 10px; 
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+    min-width: 0; /* Important for grid sharing */
+    box-shadow: 0 2px 6px rgba(0,0,0,0.03);
 }
 .location-tab.active {
-    background: #4c6ef5;
-    border-color: #4c6ef5;
+    background: #4dabf7;
+    border-color: #4dabf7;
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(77, 171, 247, 0.2);
 }
-.location-tab.active .tab-name { color: #ffffff; }
-.location-tab.active .tab-icon { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
+.tab-name { 
+    font-size: 0.72rem; 
+    font-weight: 800;
+    color: #495057;
+    white-space: nowrap;
+}
+.location-tab.active .tab-name {
+    color: white;
+}
+
 /* ==================== Naver Style Weather Redesign ==================== */
 .naver-card {
     background: #ffffff;
