@@ -423,6 +423,16 @@ function renderWeeklyList(locKey, grouped, sortedKeys, midData) {
             const keys = sortedKeys.filter(k => k.startsWith(ymd));
             const pcpVal = grouped[keys[Math.floor(keys.length * 0.5)]]?.PCP || '--';
             pcp = formatPrecip(pcpVal).replace('없음', '0').replace('mm', '');
+        } else if (i === 0) {
+            // v22.2: 늦은 밤 등 당일 예보가 부족할 경우 현재 날씨로 폴백
+            const cur = grouped[sortedKeys[0]];
+            if (cur) {
+                const ct = Math.round(parseFloat(cur.TMP || cur.T1H || 0));
+                min = ct; max = ct;
+                icon = getSkyInfo(cur.PTY, cur.SKY, parseInt(cur.time?.slice(0,2) || 12)).icon;
+                pop = cur.POP || 0;
+                pcp = formatPrecip(cur.PCP || '0').replace('없음', '0').replace('mm','');
+            }
         } else if (i >= 3 && (landItem || tempItem)) {
             const tMax = getMidTempVal(tempItem, 'max', i);
             const tMin = getMidTempVal(tempItem, 'min', i);
@@ -544,7 +554,7 @@ export function updateHourlyWeather(locKey) {
     <div class="hourly-wrapper">
         <div class="hourly-legend">
             <div class="h-top-section h-legend-top" style="position: relative;">
-                <span class="h-date" style="position: absolute; top: 9px; left: 50%; transform: translateX(-50%); font-size:0.65rem; font-weight:800; color:#adb5bd; white-space: nowrap;">日期</span>
+                <span class="h-date" style="position: absolute; top: 7px; left: 50%; transform: translateX(-50%); font-size:0.65rem; font-weight:800; color:#adb5bd; white-space: nowrap;">日期</span>
                 <span class="h-time" style="font-size:0.65rem; font-weight:800; color:#adb5bd;">时间</span>
                 <span class="h-icon" style="visibility:hidden;">-</span>
                 <span class="h-pop" style="visibility:hidden; margin-top: 5px;">-</span>
@@ -835,9 +845,13 @@ export async function fetchWeatherAlerts() {
                 let title = item.title.includes('/') ? item.title.split('/').slice(1).join('/').trim() : item.title;
                 const translatedTitle = translateWeatherAlert(title).replace(/\(\*\)/g, '').trim();
                 
+                let alertType = '特报';
+                if (title.includes('주의보')) alertType = '注意报';
+                else if (title.includes('경보')) alertType = '警报';
+
                 const html = `
                     <div class="weather-alert-card animate-slide-up" onclick="window.showWeatherSectionWithAlert()" style="cursor: pointer;">
-                        <div class="alert-type-badge">济州特报 ${items.length > 1 ? `(${idx + 1}/${items.length})` : ''}</div>
+                        <div class="alert-type-badge">济州${alertType} ${items.length > 1 ? `(${idx + 1}/${items.length})` : ''}</div>
                         <div class="alert-msg">🚨 ${translatedTitle}</div>
                     </div>`;
                 
@@ -887,10 +901,27 @@ window.openWeatherAlertModal = function() {
         modal.onclick = (e) => { if (e.target === modal) window.closeWeatherAlertModal(); };
         document.body.appendChild(modal);
     }
-    const itemsHTML = LATEST_ALERTS.map(item => `
+    const formatAlertTime = (tmFc) => {
+        if (!tmFc || tmFc.length < 12) return tmFc || '';
+        const m = tmFc.slice(4, 6);
+        const d = tmFc.slice(6, 8);
+        const hh = tmFc.slice(8, 10);
+        const mm = tmFc.slice(10, 12);
+        return `${m}.${d} ${hh}:${mm}`;
+    };
+
+    const itemsHTML = LATEST_ALERTS.map(item => {
+        const title = item.title || '';
+        let typePrefix = '';
+        if (title.includes('주의보')) typePrefix = '[注意报] ';
+        else if (title.includes('경보')) typePrefix = '[警报] ';
+        
+        return `
         <div class="alert-history-item">
-            <div class="alert-history-text">${translateWeatherAlert(item.title).replace(/\(\*\)/g, '').trim()}</div>
-        </div>`).join('');
+            <div class="alert-history-time">⏰ ${formatAlertTime(item.tmFc)}</div>
+            <div class="alert-history-text">${typePrefix}${translateWeatherAlert(title).replace(/\(\*\)/g, '').trim()}</div>
+        </div>`;
+    }).join('');
     modal.innerHTML = `<div class="alert-modal-panel"><div class="alert-modal-header"><div class="alert-modal-title">特报详情</div><button onclick="window.closeWeatherAlertModal()">✕</button></div><div class="alert-modal-body">${itemsHTML}</div></div>`;
     modal.style.display = 'flex';
 };
