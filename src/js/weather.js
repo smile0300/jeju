@@ -556,6 +556,40 @@ export function updateHourlyWeather(locKey) {
             }
         }
     });
+
+    // --- 3. 중기 예보 (4일차~10일차) 추가 ---
+    const { landItem, tempItem } = state.midData;
+    if (landItem && tempItem) {
+        for (let i = 1; i <= 10; i++) {
+            const nextD = new Date(today);
+            nextD.setDate(today.getDate() + i);
+            const ymd = `${nextD.getFullYear()}${String(nextD.getMonth() + 1).padStart(2, '0')}${String(nextD.getDate()).padStart(2, '0')}`;
+            
+            if (ymd <= lastYmd) continue;
+
+            html += renderDateSummaryCol(locKey, ymd, state.items, state.midData);
+
+            if (i >= 3 && i <= 7) {
+                const amWf = landItem[`wf${i}Am`];
+                const amPop = landItem[`rnSt${i}Am`];
+                const pmWf = landItem[`wf${i}Pm`];
+                const pmPop = landItem[`rnSt${i}Pm`];
+                const tMin = tempItem[`taMin${i}`];
+                const tMax = tempItem[`taMax${i}`];
+                
+                if (amWf) html += renderMidHourlyCol(ymd, '上午', translateMidWf(amWf).icon, amPop, Math.round(tMin));
+                if (pmWf) html += renderMidHourlyCol(ymd, '下午', translateMidWf(pmWf).icon, pmPop, Math.round(tMax));
+            } else if (i >= 8) {
+                const wf = landItem[`wf${i}`];
+                const pop = landItem[`rnSt${i}`];
+                const tMin = tempItem[`taMin${i}`];
+                const tMax = tempItem[`taMax${i}`];
+
+                if (wf) html += renderMidHourlyCol(ymd, '全天', translateMidWf(wf).icon, pop, `${Math.round(tMin)}/${Math.round(tMax)}`);
+            }
+        }
+    }
+
     html += '</div></div>';
     hourlyContainer.innerHTML = html;
     
@@ -570,6 +604,25 @@ function renderSunCol(sunTime, label) {
             <span style="font-weight: 800; color: #fd7e14; font-size: 0.65rem; margin-bottom: 2px;">${label}</span>
             <span style="font-weight: 800; color: #fd7e14; font-size: 0.72rem; margin-bottom: 8px;">${sunTime}</span>
             <span style="font-size: 1.6rem; line-height: 1;">${sunEmoji}</span>
+        </div>`;
+}
+
+function renderMidHourlyCol(ymd, label, skyIcon, pop, temp, wind = '-') {
+    const dateStr = ymd.slice(4, 6) + '/' + ymd.slice(6, 8);
+    return `
+        <div class="hourly-col">
+            <div class="h-top-section">
+                <span class="h-date-sub">${dateStr}</span>
+                <span class="h-time" style="color: #4dabf7; font-weight: 800;">${label}</span>
+                <span class="h-icon">${skyIcon}</span>
+                <span class="h-pop" style="margin-top: 5px;">${pop}%</span>
+            </div>
+            <div class="h-divider"></div>
+            <div class="h-meta-row">
+                <span class="h-meta-val">-</span>
+                <span class="h-meta-val" style="font-weight:800; color:#212529;">${temp}°</span>
+                <span class="h-meta-val">${wind}</span>
+            </div>
         </div>`;
 }
 
