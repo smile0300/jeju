@@ -248,8 +248,11 @@
 /* Weather Alert Rotation */
 .weather-alerts-container {
     width: 100%;
-    margin-top: 45px;
-    margin-bottom: 30px; /* v20.0: ?�단 버튼과의 ?�백 ?�보 */
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+.alert-type-badge.gray { background: #adb5bd; }
+.alert-more { font-size: 0.65rem; color: #fa5252; font-weight: 700; margin-left: auto; } /* v20.0: ?�단 버튼과의 ?�백 ?�보 */
 }
 
 .weather-alert-card {
