@@ -364,8 +364,10 @@ function renderWeeklyList(locKey, grouped, sortedKeys, midData) {
     if (!container) return;
     const dailyMap = {};
     const today = new Date();
+    const ymdCounts = {};
     sortedKeys.forEach(k => {
         const ymd = k.slice(0, 8);
+        ymdCounts[ymd] = (ymdCounts[ymd] || 0) + 1;
         if (!dailyMap[ymd]) dailyMap[ymd] = { max: -99, min: 199, pops: [], icons: [] };
         const tmp = parseFloat(grouped[k].TMP);
         if (!isNaN(tmp)) {
@@ -386,7 +388,8 @@ function renderWeeklyList(locKey, grouped, sortedKeys, midData) {
         let min = '--', max = '--', icon = '🌤️', pop = '--', pcp = '--';
         
         const dt = dailyMap[ymd];
-        if (dt && dt.max !== -99) {
+        const count = ymdCounts[ymd] || 0;
+        if (dt && dt.max !== -99 && count >= 8) {
             min = Math.round(dt.min); max = Math.round(dt.max);
             
             const dayKeys = sortedKeys.filter(k => k.startsWith(ymd));
