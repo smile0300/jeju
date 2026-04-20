@@ -544,9 +544,9 @@ export function updateHourlyWeather(locKey) {
             </div>
             <div class="h-divider" style="background:#f1f3f5;"></div>
             <div class="h-meta-row h-legend-items">
-                <div class="h-legend-item"><span class="h-legend-title">降水</span><span class="h-legend-unit">mm</span></div>
-                <div class="h-legend-item"><span class="h-legend-title">气温</span><span class="h-legend-unit">°C</span></div>
-                <div class="h-legend-item"><span class="h-legend-title">风速</span><span class="h-legend-unit">m/s</span></div>
+                <div class="h-legend-item"><span class="h-legend-title">降水</span></div>
+                <div class="h-legend-item"><span class="h-legend-title">气温</span></div>
+                <div class="h-legend-item"><span class="h-legend-title">风速</span></div>
             </div>
         </div>
         <div class="hourly-table">`;
@@ -581,9 +581,9 @@ export function updateHourlyWeather(locKey) {
                 </div>
                 <div class="h-divider"></div>
                 <div class="h-meta-row">
-                    <span class="h-meta-val ${precip !== '0' ? 'p-blue' : ''}">${precip}</span>
-                    <span class="h-meta-val" style="font-weight:800; color:#212529;">${d.TMP}°</span>
-                    <span class="h-meta-val">${d.WSD}</span>
+                    <span class="h-meta-val ${precip !== '0' ? 'p-blue' : ''}">${precip}mm</span>
+                    <span class="h-meta-val" style="font-weight:800; color:#212529;">${d.TMP}°C</span>
+                    <span class="h-meta-val">${d.WSD}m/s</span>
                 </div>
             </div>`;
 
@@ -666,7 +666,7 @@ function renderMidHourlyCol(ymd, label, skyIcon, pop, temp, wind = '-') {
             <div class="h-divider"></div>
             <div class="h-meta-row">
                 <span class="h-meta-val">-</span>
-                <span class="h-meta-val" style="font-weight:800; color:#212529;">${temp}°</span>
+                <span class="h-meta-val" style="font-weight:800; color:#212529;">${temp}°C</span>
                 <span class="h-meta-val">${wind}</span>
             </div>
         </div>`;
