@@ -490,7 +490,12 @@ function initHourlyScrollObserver(locKey) {
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                highlightWeeklyCard(locKey, entry.target.dataset.ymd);
+                const ymd = entry.target.dataset.ymd;
+                highlightWeeklyCard(locKey, ymd);
+                const stickyBar = document.getElementById(`h-sticky-date-${locKey}`);
+                if (stickyBar && entry.target.dataset.dateLabel) {
+                    stickyBar.innerText = entry.target.dataset.dateLabel;
+                }
             }
         });
     }, {
@@ -551,7 +556,8 @@ export function updateHourlyWeather(locKey) {
                 <div class="h-legend-item"><span class="h-legend-title">风速</span></div>
             </div>
         </div>
-        <div class="hourly-table">`;
+        <div class="hourly-table">
+            <div class="h-sticky-date-bar" id="h-sticky-date-${locKey}">-.- -</div>`;
 
     let lastYmd = null;
     effectiveHourlyKeys.forEach((k, idx) => {
@@ -561,7 +567,6 @@ export function updateHourlyWeather(locKey) {
         const hour = parseInt(k.slice(8, 10));
         
         if (ymd !== lastYmd) {
-            html += renderDateSummaryCol(locKey, ymd, state.items, state.midData);
             lastYmd = ymd;
         }
 
@@ -575,7 +580,7 @@ export function updateHourlyWeather(locKey) {
         else precip = precip.replace(/mm/g, '').trim();
 
         html += `
-            <div class="hourly-col">
+            <div class="hourly-col" data-ymd="${ymd}" data-date-label="${dateStr} ${getKoreanDay(ymd)}">
                 <div class="h-top-section">
                     <span class="h-time">${String(hour).padStart(2, '0')}:00</span>
                     <span class="h-icon">${sky.icon}</span>
@@ -656,10 +661,17 @@ function renderSunCol(sunTime, label) {
         </div>`;
 }
 
+function getKoreanDay(ymd) {
+    const d = new Date(ymd.slice(0, 4), parseInt(ymd.slice(4, 6)) - 1, ymd.slice(6, 8));
+    const days = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+    return days[d.getDay()];
+}
+
 function renderMidHourlyCol(ymd, label, skyIcon, pop, temp, wind = '-') {
     const dateStr = ymd.slice(4, 6) + '/' + ymd.slice(6, 8);
+    const dateLabel = `${dateStr} ${getKoreanDay(ymd)}`;
     return `
-        <div class="hourly-col">
+        <div class="hourly-col" data-ymd="${ymd}" data-date-label="${dateLabel}">
             <div class="h-top-section">
                 <span class="h-time" style="color: #4dabf7; font-weight: 800;">${label}</span>
                 <span class="h-icon">${skyIcon}</span>
