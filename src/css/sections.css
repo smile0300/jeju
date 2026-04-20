@@ -2302,45 +2302,7 @@
 }
 .w-pop { color: #228be6; font-size: 0.6rem !important; }
 
-/* Date Summary Column in Hourly List */
-.date-summary-col {
-    background: rgba(77, 187, 247, 0.04);
-    border-right: 1px solid #e9ecef;
-}
-.date-summary-col .h-top-section {
-    justify-content: center;
-    padding-bottom: 8px;
-}
 
-/* Hourly Table Refinement (Continuous Scroll) */
-.h-date-sub {
-    font-size: 0.65rem;
-    color: #adb5bd;
-    font-weight: 700;
-    margin-bottom: 2px;
-}
-.w-date { flex: none; display: inline; } /* reset old style */
-.w-icon-box {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-width: 50px;
-}
-.w-icon-label { font-size: 0.7rem; color: #adb5bd; font-weight: 700; margin-bottom: 2px; }
-.w-icon { font-size: 1.5rem; }
-.w-pop { font-size: 0.75rem; font-weight: 800; color: #228be6; }
-
-.w-temps {
-    flex: 1.2;
-    text-align: right;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 8px;
-}
-.w-min { color: #228be6; }
-.w-max { color: #fa5252; }
-.w-slash { color: #dee2e6; margin: 0 1px; }
 
 /* Fixes for dark mode if user has it, but Naver is bright */
 #weather .section-alt { background-color: #f1f3f5; }
