@@ -1866,20 +1866,18 @@
     display: flex;
     align-items: center;
     gap: 4px;
-    background: #4dabf7;
-    border: none;
+    background: #ffffff;
+    border: 1px solid #dee2e6;
     padding: 6px 10px;
     border-radius: 20px;
     font-size: 0.78rem;
     font-weight: 800;
-    color: white;
+    color: #495057;
     cursor: pointer;
     transition: all 0.2s;
-    box-shadow: 0 2px 8px rgba(77, 171, 247, 0.2);
     white-space: nowrap;
 }
-.header-cctv-btn:hover { background: #e9ecef; }
-.header-summary-btn:hover { background: #339af0; transform: translateY(-1px); }
+.header-cctv-btn:hover, .header-summary-btn:hover { background: #e9ecef; }
 
 /* Current Weather Box (Right-aligned details) */
 .current-weather-main {

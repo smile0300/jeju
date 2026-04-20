@@ -487,12 +487,12 @@ export function updateHourlyWeather(locKey) {
             <div class="h-top-section h-legend-top" style="align-items: flex-start; padding-left: 5px;">
                 <span class="h-date-sub" style="visibility:hidden;">-</span>
                 <span class="h-time" style="font-size:0.65rem; font-weight:800; color:#adb5bd;">时间</span>
-                <span class="h-icon" style="font-size:0.65rem; font-weight:800; color:#adb5bd; margin-bottom:12px;">天气</span>
+                <span class="h-icon" style="font-size:0.65rem; font-weight:800; color:#adb5bd; margin-bottom:8px;">天气</span>
+                <span class="h-temp" style="font-size:0.65rem; font-weight:800; color:#adb5bd;">温度</span>
             </div>
             <div class="h-divider" style="background:#f1f3f5;"></div>
             <div class="h-meta-row h-legend-items">
                 <div class="h-legend-item"><span class="h-legend-title">降水</span><span class="h-legend-unit">mm</span></div>
-                <div class="h-legend-item"><span class="h-legend-title">湿度</span><span class="h-legend-unit">%</span></div>
                 <div class="h-legend-item"><span class="h-legend-title">风速</span><span class="h-legend-unit">m/s</span></div>
             </div>
         </div>
@@ -531,7 +531,6 @@ export function updateHourlyWeather(locKey) {
                 <div class="h-divider"></div>
                 <div class="h-meta-row">
                     <span class="h-meta-val ${precip !== '0' ? 'p-blue' : ''}">${precip}</span>
-                    <span class="h-meta-val">${d.REH}</span>
                     <span class="h-meta-val">${d.WSD}</span>
                 </div>
             </div>`;
