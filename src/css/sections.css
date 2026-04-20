@@ -2308,3 +2308,5 @@
 
 /* Fixes for dark mode if user has it, but Naver is bright */
 #weather .section-alt { background-color: #f1f3f5; }
+.p-blue { color: #228be6 !important; font-weight: 800; }
+
