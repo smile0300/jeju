@@ -1918,7 +1918,7 @@
         flex: 1.3; /* Increased space */
         padding-left: 8px !important;
         border-left: 1px solid #f1f3f5 !important;
-        align-items: flex-end !important;
+        align-items: flex-start !important; /* Reverted to Left */
     }
     .cw-details-list {
         display: flex;
@@ -1927,7 +1927,7 @@
         gap: 6px;
     }
     .cw-details-list li {
-        justify-content: flex-end;
+        justify-content: flex-start; /* Reverted to Left */
         font-size: 0.75rem;
         white-space: nowrap; /* Avoid line breaks */
     }
@@ -1974,7 +1974,7 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
-    align-items: flex-end; /* Ensure right alignment */
+    align-items: flex-start; /* Ensure left alignment */
 }
 .cw-details-list li {
     font-size: 0.85rem;

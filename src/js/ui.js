@@ -234,6 +234,13 @@ function _buildSummaryHTML(targetYmd) {
 }
 
 export function openWeatherSummaryModal(targetYmd) {
+    // 요약 모달을 열 때 모든 지역의 데이터를 다시 확인하고 누락된 경우 로드 시도
+    Object.keys(CONFIG.WEATHER_LOCATIONS).forEach((loc, index) => {
+        if (!WEATHER_STATE[loc]) {
+            setTimeout(() => fetchWeatherData(loc), index * 100);
+        }
+    });
+
     let modal = document.getElementById('weather-summary-modal');
     if (!modal) {
         modal = document.createElement('div');
