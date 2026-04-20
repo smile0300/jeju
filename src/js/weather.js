@@ -486,8 +486,15 @@ export function updateHourlyWeather(locKey) {
     const sunToday = getSunTimes(loc.lat, loc.lng, today);
     const sunTomorrow = getSunTimes(loc.lat, loc.lng, tomorrow);
 
-    const hourlyKeys = state.sortedKeys; 
-    if (hourlyKeys.length === 0) {
+    const ymdCounts = {};
+    state.sortedKeys.forEach(k => {
+        const y = k.slice(0, 8);
+        ymdCounts[y] = (ymdCounts[y] || 0) + 1;
+    });
+
+    const effectiveHourlyKeys = state.sortedKeys.filter(k => ymdCounts[k.slice(0, 8)] >= 8);
+    
+    if (effectiveHourlyKeys.length === 0 && state.sortedKeys.length === 0) {
         hourlyContainer.innerHTML = '<div style="padding: 24px; text-align: center; color: #adb5bd;">暂无详细时间预报</div>';
         return;
     }
@@ -512,7 +519,7 @@ export function updateHourlyWeather(locKey) {
         <div class="hourly-table">`;
 
     let lastYmd = null;
-    hourlyKeys.forEach((k, idx) => {
+    effectiveHourlyKeys.forEach((k, idx) => {
         const d = state.items[k];
         const ymd = k.slice(0, 8);
         const dateStr = k.slice(4, 6) + '/' + k.slice(6, 8);
@@ -571,13 +578,9 @@ export function updateHourlyWeather(locKey) {
             const ymd = `${nextD.getFullYear()}${String(nextD.getMonth() + 1).padStart(2, '0')}${String(nextD.getDate()).padStart(2, '0')}`;
             
             // 해당 날짜에 이미 시간별 데이터가 충분히(8개 이상) 있으면 중급 데이터를 생략
-            const dayKeys = hourlyKeys.filter(k => k.startsWith(ymd));
-            if (dayKeys.length >= 8) continue;
+            if ((ymdCounts[ymd] || 0) >= 8) continue;
 
-            // 시간별 데이터가 아예 없으면 날짜 구분선 렌더링
-            if (dayKeys.length === 0) {
-                html += renderDateSummaryCol(locKey, ymd, state.items, state.midData);
-            }
+            html += renderDateSummaryCol(locKey, ymd, state.items, state.midData);
 
             if (i >= 3 && i <= 7) {
                 const amWf = landItem[`wf${i}Am`];
