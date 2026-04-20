@@ -424,33 +424,17 @@ function renderWeeklyList(locKey, grouped, sortedKeys, midData) {
  * 시간별 예보 목록 내부에 삽입될 날짜 요약 컬럼 렌더링
  */
 function renderDateSummaryCol(locKey, ymd, grouped, midData) {
-    const loc = CONFIG.WEATHER_LOCATIONS[locKey];
+    const days = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
     const targetD = new Date(ymd.slice(0, 4), parseInt(ymd.slice(4, 6)) - 1, ymd.slice(6, 8));
-    const sunTimes = getSunTimes(loc.lat, loc.lng, targetD);
+    const month = parseInt(ymd.slice(4, 6));
+    const day = parseInt(ymd.slice(6, 8));
+    const dayName = days[targetD.getDay()];
     
-    // 현재 KST 기준 시간 체크
-    const kstNow = new Date(Date.now() + 9 * 60 * 60 * 1000);
-    const todayYmd = kstNow.toISOString().slice(0, 10).replace(/-/g, '');
-    const currentDecimal = kstNow.getUTCHours() + kstNow.getUTCMinutes() / 60;
-
-    let displayEmoji = '🌅';
-    let displayTime = sunTimes.sunrise;
-
-    // 오늘인 경우, 일출이 지났으면 일몰 정보를 표시
-    if (ymd === todayYmd) {
-        const srParts = sunTimes.sunrise.split(':');
-        const srDecimal = parseInt(srParts[0]) + (parseInt(srParts[1]) / 60);
-        if (currentDecimal > srDecimal) {
-            displayEmoji = '🌇';
-            displayTime = sunTimes.sunset;
-        }
-    }
-
     return `
         <div class="hourly-col date-summary-col" id="h-${locKey}-${ymd}">
             <div class="h-top-section">
-                <span class="h-icon" style="font-size:1.3rem; margin-bottom: 2px;">${displayEmoji}</span>
-                <span class="h-time" style="font-weight:800; color:#fd7e14; font-size:0.65rem;">${displayTime}</span>
+                <span class="h-date-sub" style="color:#212529; font-weight:800; font-size:0.75rem; margin-bottom:4px;">${month}.${day}</span>
+                <span class="h-time" style="font-weight:800; color:#868e96; font-size:0.65rem;">${dayName}</span>
             </div>
             <div class="h-divider" style="background:#e9ecef;"></div>
             <div class="h-meta-row">
