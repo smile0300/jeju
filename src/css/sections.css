@@ -160,6 +160,7 @@
     white-space: nowrap;
     -webkit-overflow-scrolling: touch;
     padding: 5px 4px 15px 4px; /* Increased bottom padding for scroll space */
+    margin-top: 20px;
 }
 .location-tabs::-webkit-scrollbar { display: none; }
 
@@ -2185,15 +2186,14 @@
 }
 
 .h-sticky-date-bar {
-    position: sticky;
-    left: 6px;
-    top: 6px;
+    position: absolute;
+    left: 0;
+    top: 0;
     z-index: 150;
-    width: 0;
-    overflow: visible;
+    width: max-content;
     white-space: nowrap;
     background: rgba(255, 255, 255, 0.98);
-    padding: 2px 10px;
+    padding: 3px 12px;
     border-radius: 20px;
     font-size: 0.68rem;
     font-weight: 800;
