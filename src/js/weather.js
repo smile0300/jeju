@@ -29,7 +29,7 @@ const ALERT_TRANSLATIONS = {
     '제주': '济州',
     '산지': '山区',
     '서부': '西部',
-    '동부': '东부',
+    '동부': '东部',
     '남부': '南部',
     '북부': '北部',
     '추자도': '楸子岛',
@@ -721,7 +721,7 @@ function getAirQualityInfo(val, type) {
         if (v <= 30) { level = 1; text = '优'; }
         else if (v <= 80) { level = 2; text = '良'; }
         else if (v <= 150) { level = 3; text = '轻度'; }
-        else { level = 4; text = '重도'; }
+        else { level = 4; text = '重度'; }
     }
     return { level, text };
 }
