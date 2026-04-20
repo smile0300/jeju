@@ -537,7 +537,7 @@ export function updateHourlyWeather(locKey) {
                 </div>
                 <div class="h-divider"></div>
                 <div class="h-meta-row">
-                    <span class="h-meta-val">${precip}</span>
+                    <span class="h-meta-val ${precip !== '0' ? 'p-blue' : ''}">${precip}</span>
                     <span class="h-meta-val">${d.REH}</span>
                     <span class="h-meta-val">${d.WSD}</span>
                 </div>
