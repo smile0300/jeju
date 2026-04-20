@@ -546,11 +546,14 @@ function renderSunCol(sunTime, label) {
     return `
         <div class="hourly-col sun-col">
             <div class="h-top-section">
-                <span class="h-time" style="font-weight: 800; color: #fd7e14; margin-top: 15px;">${sunEmoji} ${sunTime}</span>
+                <span class="h-date-sub" style="visibility:hidden;">-</span>
+                <span class="h-time" style="font-weight: 800; color: #fd7e14;">${sunTime}</span>
+                <span class="h-icon" style="margin-top: 5px;">${sunEmoji}</span>
+                <span class="h-temp" style="visibility:hidden;">-</span>
+                <span class="h-pop" style="visibility:hidden;">-</span>
             </div>
             <div class="h-divider" style="opacity:0;"></div>
             <div class="h-meta-row">
-                <span class="h-meta-val" style="color:transparent;">-</span>
                 <span class="h-meta-val" style="color:transparent;">-</span>
                 <span class="h-meta-val" style="color:transparent;">-</span>
             </div>
