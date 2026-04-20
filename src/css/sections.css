@@ -299,6 +299,9 @@
     font-weight: 800;
     font-size: 1.1rem;
     line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .no-alerts .alert-msg {
@@ -2101,7 +2104,7 @@
     flex-direction: column;
     align-items: center;
     padding: 10px 0;
-    min-width: 46px; /* Reduced width */
+    min-width: 54px; /* Increased from 46px for better readability */
     border-right: 1px solid #f8f9fa;
 }
 /* Air Quality Grid High-End Redesign (Circular Style) */
