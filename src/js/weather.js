@@ -810,7 +810,8 @@ export function renderAirQualityError(locKey) {
 
 export async function fetchWeatherAlerts() {
     const alertsContainer = document.getElementById('weather-alerts-container');
-    if (!alertsContainer) return;
+    const homeAlertsContainer = document.getElementById('home-alerts-container');
+    if (!alertsContainer && !homeAlertsContainer) return;
     try {
         const endpoint = 'https://apis.data.go.kr/1360000/WthrWrnInfoService/getWthrWrnList';
         const params = { numOfRows: 10, pageNo: 1, dataType: 'JSON', stnId: 184 };
@@ -825,21 +826,25 @@ export async function fetchWeatherAlerts() {
             alertRotationInterval = null;
         }
 
-        alertsContainer.style.display = 'flex';
+        if (alertsContainer) alertsContainer.style.display = 'flex';
         
         if (items.length > 0) {
+            if (homeAlertsContainer) homeAlertsContainer.style.display = 'flex';
             let currentIndex = 0;
             const renderAlert = (idx) => {
                 const item = items[idx];
                 let title = item.title.includes('/') ? item.title.split('/').slice(1).join('/').trim() : item.title;
                 const translatedTitle = translateWeatherAlert(title).replace(/\(\*\)/g, '').trim();
                 
-                alertsContainer.innerHTML = `
-                    <div class="weather-alert-card animate-slide-up" onclick="window.openWeatherAlertModal()">
+                const html = `
+                    <div class="weather-alert-card animate-slide-up" onclick="window.showWeatherSectionWithAlert()">
                         <div class="alert-type-badge">济州特报 ${items.length > 1 ? `(${idx + 1}/${items.length})` : ''}</div>
                         <div class="alert-msg">🚨 ${translatedTitle}</div>
                         <div class="alert-more">详情 ></div>
                     </div>`;
+                
+                if (alertsContainer) alertsContainer.innerHTML = html;
+                if (homeAlertsContainer) homeAlertsContainer.innerHTML = html;
             };
 
             renderAlert(0);
@@ -851,17 +856,30 @@ export async function fetchWeatherAlerts() {
                 }, 5000);
             }
         } else {
-            alertsContainer.innerHTML = `
-                <div class="weather-alert-card no-alerts">
-                    <div class="alert-type-badge gray">济州特报</div>
-                    <div class="alert-msg">当前全岛无气象特报</div>
-                </div>`;
+            if (homeAlertsContainer) homeAlertsContainer.style.display = 'none';
+            if (alertsContainer) {
+                alertsContainer.innerHTML = `
+                    <div class="weather-alert-card no-alerts">
+                        <div class="alert-type-badge gray">济州特报</div>
+                        <div class="alert-msg">当前全岛无气象特报</div>
+                    </div>`;
+            }
         }
     } catch (e) { 
         console.error('[Alerts] Error:', e);
-        alertsContainer.style.display = 'none';
+        if (alertsContainer) alertsContainer.style.display = 'none';
+        if (homeAlertsContainer) homeAlertsContainer.style.display = 'none';
     }
 }
+
+window.showWeatherSectionWithAlert = function() {
+    if (typeof showSection === 'function') {
+        showSection('weather');
+    } else if (window.showSection) {
+        window.showSection('weather');
+    }
+    window.openWeatherAlertModal();
+};
 
 window.openWeatherAlertModal = function() {
     if (!LATEST_ALERTS || LATEST_ALERTS.length === 0) return;
