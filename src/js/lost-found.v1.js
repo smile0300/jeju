@@ -54,12 +54,12 @@ export async function fetchFoundGoods() {
                 const items = Array.isArray(rawItems) ? rawItems : [rawItems];
                 return items.map(item => {
                     const rawCategory = item.prdtClNm || '';
-                    const categoryClean = rawCategory.split(' > ')[0] || '기타';
+                    const categoryClean = rawCategory.split(' > ')[0] || '其他';
                     return {
                         id: item.atcId, name: item.fdPrdtNm, place: item.depPlace, date: item.fdYmd,
                         category: LOST_CATEGORY_MAP[categoryClean] || categoryClean,
                         img: item.fdFilePathImg, lct: item.fdFndPlace || item.lctNm || item.depPlace || '暂无信息',
-                        status: item.csteState || '보관중'
+                        status: item.csteState || '保管中'
                     };
                 });
             }
@@ -67,12 +67,12 @@ export async function fetchFoundGoods() {
             return Array.from(xmlDoc.querySelectorAll('item')).map(node => {
                 const getTag = (tag) => node.querySelector(tag)?.textContent || '';
                 const rawCategory = getTag('prdtClNm') || '';
-                const categoryClean = rawCategory.split(' > ')[0] || '기타';
+                const categoryClean = rawCategory.split(' > ')[0] || '其他';
                 return {
                     id: getTag('atcId'), name: getTag('fdPrdtNm'), place: getTag('depPlace'), date: getTag('fdYmd'),
                     category: LOST_CATEGORY_MAP[categoryClean] || categoryClean,
                     img: getTag('fdFilePathImg'), lct: getTag('fdFndPlace') || getTag('lctNm') || getTag('depPlace') || '暂无信息',
-                    status: getTag('csteState') || '보관중'
+                    status: getTag('csteState') || '保管中'
                 };
             });
         };
@@ -154,7 +154,7 @@ export function renderLostGoodsTable(items) {
             <td>${item.img ? `<img src="${item.img}" class="lost-table-img" onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2240%22%20height%3D%2240%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2040%2040%22%3E%3Crect%20width%3D%2240%22%20height%3D%2240%22%20fill%3D%22%23eee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-size%3D%228%22%20text-anchor%3D%22middle%22%20alignment-baseline%3D%22middle%22%20fill%3D%22%23aaa%22%3E%E6%9A%82%E6%97%A0%E5%9B%BE%E7%89%87%3C%2Ftext%3E%3C%2Fsvg%3E'">` : '📦'}</td>
             <td><span class="lost-category-badge">${item.category}</span></td>
             <td style="font-weight:600;">${item.name}</td>
-            <td><span class="lost-status-tag ${item.status === '보관중' ? 'active' : ''}">${item.status}</span></td>
+            <td><span class="lost-status-tag ${item.status === '保管中' ? 'active' : ''}">${item.status}</span></td>
             <td>${item.date}</td>
             <td>${item.place}</td>
             <td style="font-size: 11px; opacity: 0.7;">${item.id}</td>

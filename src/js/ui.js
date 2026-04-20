@@ -6,7 +6,7 @@ import { fetchFlights } from './airport.js';
 import { fetchFoundGoods } from './lost-found.v1.js';
 import { fetchFestivals } from './festival.js';
 import { initReward } from './reward.js';
-import { getSkyInfo } from './utils.js';
+import { getSkyInfo, getWindColor } from './utils.js';
 
 export function showSection(sectionId, pushHistory = true) {
     document.querySelectorAll('.app-section').forEach(s => s.classList.remove('active'));
@@ -201,7 +201,7 @@ function _buildSummaryHTML(targetYmd) {
                     <div class="h-time">${hStr}</div>
                     <div class="h-icon">${sky.icon}</div>
                     <div class="h-temp">${tmp}°</div>
-                    <div class="h-wind">${wsd}m/s</div>
+                    <div class="h-wind" style="color: ${getWindColor(wsd)}; font-weight: ${parseFloat(wsd) >= 9 ? '800' : '700'};">${wsd}m/s</div>
                     <div class="h-precip ${isRain ? 'p-blue' : ''}">${pcp}</div>
                 </div>`;
             }).join('');
@@ -210,6 +210,7 @@ function _buildSummaryHTML(targetYmd) {
 
         content += `
         <div class="wsm-loc-block" data-locname="${meta.title}" data-lockey="${locKey}">
+            <div class="wsm-card-watermark">JEJU-LIVE</div>
             <h3 class="wsm-loc-title">${meta.title} <span class="wsm-loc-sub">${meta.sub}</span></h3>
             <div class="wsm-hourly-grid">${itemsHTML}</div>
         </div>`;

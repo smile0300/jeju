@@ -1023,12 +1023,32 @@
     padding: 20px 12px;
     margin-bottom: 16px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    position: relative;
+    overflow: hidden;
+}
+
+.wsm-card-watermark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-25deg);
+    font-size: 3rem;
+    font-weight: 900;
+    color: rgba(0, 0, 0, 0.04);
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 0;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    user-select: none;
 }
 .wsm-loc-block:last-child {
     margin-bottom: 0;
 }
 
 .wsm-loc-title {
+    position: relative;
+    z-index: 1;
     font-size: 1.25rem;
     font-weight: 900;
     color: #0f172a;
@@ -1044,6 +1064,8 @@
 }
 
 .wsm-hourly-grid {
+    position: relative;
+    z-index: 1;
     display: grid;
     grid-template-columns: repeat(6, 1fr);
     gap: 20px 4px;

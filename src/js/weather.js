@@ -672,7 +672,7 @@ export function renderWeatherError(locKey) {
     if (container) {
         container.innerHTML = `
             <div style="padding:40px; text-align:center; color: #fa5252; display: flex; flex-direction: column; align-items: center; gap: 12px;">
-                <div style="font-weight: 800; font-size: 1.1rem;">⚠️ 天气 data 加질 실패</div>
+                <div style="font-weight: 800; font-size: 1.1rem;">⚠️ 天气数据加载失败</div>
                 <button onclick="window.weatherApp.retryFetch('${locKey}')" 
                         style="padding: 8px 20px; font-size: 0.85rem; font-weight: 700; border: 1.5px solid #fa5252; color: #fa5252; background: white; border-radius: 6px; cursor: pointer; transition: all 0.2s;"
                         onmouseover="this.style.background='#fff5f5'"
