@@ -161,34 +161,34 @@
 .loc-row {
     display: flex !important;
     flex-wrap: nowrap !important;
-    align-items: flex-end !important;
-    justify-content: center !important;
+    align-items: stretch !important;
+    justify-content: space-between !important;
     gap: 4px !important;
     width: 100% !important;
     overflow-x: hidden !important;
-    padding: 16px 4px 2px 4px !important;
+    padding: 16px 2px 2px 2px !important;
     -webkit-overflow-scrolling: touch !important;
 }
 
 /* 2nd Row Specific: Move labels to bottom and shrink top gap */
 .loc-row:nth-child(2) {
     padding-top: 2px !important;
-    padding-bottom: 15px !important;
+    padding-bottom: 12px !important;
 }
 
 .loc-row::-webkit-scrollbar { display: none !important; }
 
 .loc-group-wrapper {
     display: flex !important;
-    align-items: center !important;
-    gap: 6px !important;
+    align-items: stretch !important;
+    gap: 4px !important;
     position: relative !important;
-    padding: 8px 2px 6px 2px !important; 
+    padding: 8px 1px 6px 1px !important; 
     border-radius: var(--radius-lg) !important;
     border-width: 1.5px !important;
     border-style: solid !important;
     background: white !important;
-    flex: 0 1 auto !important;
+    flex: 1 1 auto !important;
     width: auto !important;
 }
 
@@ -201,10 +201,10 @@
 .group-label {
     position: absolute !important;
     top: -12px !important;
-    left: 8px !important;
+    left: 4px !important;
     background: white !important;
-    padding: 1px 6px !important;
-    font-size: 0.68rem !important;
+    padding: 1px 4px !important;
+    font-size: 0.65rem !important;
     font-weight: 900 !important;
     line-height: 1 !important;
     z-index: 20 !important;
@@ -225,9 +225,10 @@
 .group-mountain .group-label { color: #475569 !important; border: 1.2px solid #94a3b8 !important; }
 
 .location-tab {
-    flex: 0 1 auto !important;
-    width: 58px !important;
-    min-width: 58px !important;
+    flex: 1 1 0 !important;
+    width: auto !important;
+    min-width: 50px !important;
+    max-width: 90px !important;
     background: var(--bg-card); border: 1.5px solid var(--border-light);
     padding: 8px 0; border-radius: var(--radius-md); cursor: pointer;
     transition: all var(--transition-normal);
