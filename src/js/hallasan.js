@@ -90,7 +90,23 @@ export async function fetchHallasanStatus() {
             return { ...t, statusCn: info.cn, statusCls: info.cls };
         });
 
-        container.innerHTML = ``;
+        // [NEW] 전체 상태 요약 (Hero Status) 계산
+        const allOpen = trails.every(t => t.statusCls === 'open');
+        const allClosed = trails.every(t => t.statusCls === 'closed');
+        let heroStatus = { cn: '部分管制', cls: 'partial', desc: '部分登山路受天气影响已实施管制。' };
+        if (allOpen) heroStatus = { cn: '正常运营', cls: 'open', desc: '目前全线登山路均可正常通行。' };
+        else if (allClosed) heroStatus = { cn: '全面管制', cls: 'closed', desc: '因极端天气，所有登山路已全面封闭。' };
+
+        container.innerHTML = `
+            <div class="hero-status-card ${heroStatus.cls}">
+                <div class="hero-status-content">
+                    <span class="hero-badge">${heroStatus.cn}</span>
+                    <h3 class="hero-title">汉拿山实时通行状态</h3>
+                    <p class="hero-desc">${heroStatus.desc}</p>
+                </div>
+                <div class="hero-time-tag">更新于: ${new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}</div>
+            </div>`;
+
         trailsEl.innerHTML = trails.map(t => `
             <div class="trail-card">
                 <div class="trail-header">
@@ -129,8 +145,8 @@ export function renderHallasanCCTV() {
     const grid = document.getElementById('hallasan-cctv-grid');
     if (!grid) return;
     if (grid.querySelectorAll('.cctv-card').length === HALLASAN_CCTV.length) return;
-    grid.innerHTML = HALLASAN_CCTV.map(cam => `
-        <div class="cctv-card" onclick="toggleFullscreen('hallasan-video-${cam.id}')" style="cursor: pointer;">
+    grid.innerHTML = HALLASAN_CCTV.map((cam, index) => `
+        <div class="cctv-card ${index === 0 ? 'featured-cctv' : ''}" onclick="toggleFullscreen('hallasan-video-${cam.id}')" style="cursor: pointer;">
             <div class="cctv-video-container">
                 <video id="hallasan-video-${cam.id}" class="cctv-video-el" muted playsinline autoplay></video>
                 <div class="cctv-tag">LIVE</div>

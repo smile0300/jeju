@@ -1,3 +1,77 @@
+/* ==================== Hallasan Hero Status ==================== */
+.hero-status-wrapper {
+    margin-bottom: 30px;
+    width: 100%;
+}
+
+.hero-status-card {
+    position: relative;
+    padding: 24px;
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    transition: transform 0.3s ease;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.hero-status-card.open {
+    border-left: 8px solid #10b981;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(255, 255, 255, 0.8) 100%);
+}
+
+.hero-status-card.partial {
+    border-left: 8px solid #f59e0b;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(255, 255, 255, 0.8) 100%);
+}
+
+.hero-status-card.closed {
+    border-left: 8px solid #ef4444;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, rgba(255, 255, 255, 0.8) 100%);
+}
+
+.hero-badge {
+    align-self: flex-start;
+    padding: 4px 12px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.open .hero-badge { background: #10b981; }
+.partial .hero-badge { background: #f59e0b; }
+.closed .hero-badge { background: #ef4444; }
+
+.hero-title {
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.hero-desc {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin: 0;
+    font-weight: 600;
+}
+
+.hero-time-tag {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 700;
+    opacity: 0.8;
+}
+
 /* ==================== Hallasan Dashboard (Simplified Mini) ==================== */
 #hallasan-dashboard-container {
     margin-bottom: 24px;
@@ -8,11 +82,13 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 12px;
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: var(--radius-xl);
     padding: 16px;
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
 }
 
 .mini-item {
@@ -119,10 +195,22 @@
 }
 
 #cctv-hallasan-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
     padding: 4px;
+}
+
+.featured-cctv {
+    grid-column: 1 / -1 !important;
+}
+
+.featured-cctv .cctv-video-container {
+    aspect-ratio: 16 / 9 !important;
+}
+
+.featured-cctv .cctv-name {
+    font-size: 1.1rem !important;
+    color: var(--accent-blue) !important;
 }
 
 @keyframes fadeIn {
