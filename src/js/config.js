@@ -49,7 +49,8 @@ export const CONFIG = {
         woljeong: { nx: 58, ny: 38, nameKo: '월정', nameCn: '月汀', midLandCode: '11G00000', midTaCode: '11G00201', stationName: '구좌읍', lat: 33.556, lng: 126.795 },
         seogwipo: { nx: 52, ny: 33, nameKo: '서귀포시', nameCn: '西归浦', midLandCode: '11G00000', midTaCode: '11G00401', stationName: '동홍동', lat: 33.242, lng: 126.564 },
         seongsan: { nx: 61, ny: 38, nameKo: '성산일출봉', nameCn: '城山日出峰', midLandCode: '11G00000', midTaCode: '11G00401', stationName: '성산읍', lat: 33.458, lng: 126.942 },
-        udo: { nx: 56, ny: 38, nameKo: '우도', nameCn: '牛岛', midLandCode: '11G00000', midTaCode: '11G00101', stationName: '성산읍', lat: 33.510, lng: 126.943 },
+        udo: { nx: 56, ny: 38, nameKo: '우도', nameCn: '牛岛', midLandCode: '11G00101', midTaCode: '11G00101', stationName: '성산읍', lat: 33.510, lng: 126.943 },
+        sanbangsan: { nx: 51, ny: 33, nameKo: '산방산', nameCn: '山房山', midLandCode: '11G00000', midTaCode: '11G00401', stationName: '안덕면', lat: 33.235, lng: 126.312 },
         hallasan: { nx: 54, ny: 35, nameKo: '한라산(성판악)', nameCn: '汉拿山(城板岳)', midLandCode: '11G00000', midTaCode: '11G00201', stationName: '조천읍', obsid: '1885', lat: 33.385, lng: 126.618 }
     }
 };

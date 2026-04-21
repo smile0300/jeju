@@ -10,11 +10,24 @@
             <!-- Regional Navigation Area -->
             <div class="weather-nav-wrapper">
                 <div class="location-tabs" id="location-tabs">
-                    <!-- Row 1: Jeju City + West Line -->
+                    <!-- Row 1: Bukseon + Namseon -->
                     <div class="loc-row">
-                        <button class="location-tab active" data-loc="jeju" onclick="switchWeatherLocation('jeju')">
-                            <span class="tab-name">济州市</span>
-                        </button>
+                        <div class="loc-group-wrapper group-north">
+                            <span class="group-label">북선</span>
+                            <button class="location-tab active" data-loc="jeju" onclick="switchWeatherLocation('jeju')">
+                                <span class="tab-name">济州市</span>
+                            </button>
+                        </div>
+                        <div class="loc-group-wrapper group-south">
+                            <span class="group-label">남선</span>
+                            <button class="location-tab" data-loc="seogwipo" onclick="switchWeatherLocation('seogwipo')">
+                                <span class="tab-name">西归浦</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Row 2: Seoseon (West) -->
+                    <div class="loc-row">
                         <div class="loc-group-wrapper group-west">
                             <span class="group-label">서선</span>
                             <button class="location-tab" data-loc="aewol" onclick="switchWeatherLocation('aewol')">
@@ -23,21 +36,21 @@
                             <button class="location-tab" data-loc="hyeopjae" onclick="switchWeatherLocation('hyeopjae')">
                                 <span class="tab-name">挟才</span>
                             </button>
+                            <button class="location-tab" data-loc="sanbangsan" onclick="switchWeatherLocation('sanbangsan')">
+                                <span class="tab-name">山房山</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Row 3: Dongseon (East) -->
+                    <div class="loc-row">
+                        <div class="loc-group-wrapper group-east">
+                            <span class="group-label">동선</span>
                             <button class="location-tab" data-loc="hamdeok" onclick="switchWeatherLocation('hamdeok')">
                                 <span class="tab-name">咸德</span>
                             </button>
                             <button class="location-tab" data-loc="woljeong" onclick="switchWeatherLocation('woljeong')">
                                 <span class="tab-name">月汀</span>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- Row 2: East Line + Hallasan -->
-                    <div class="loc-row">
-                        <div class="loc-group-wrapper group-east">
-                            <span class="group-label">동선</span>
-                            <button class="location-tab" data-loc="seogwipo" onclick="switchWeatherLocation('seogwipo')">
-                                <span class="tab-name">西归浦</span>
                             </button>
                             <button class="location-tab" data-loc="seongsan" onclick="switchWeatherLocation('seongsan')">
                                 <span class="tab-name">日出峰</span>
@@ -46,6 +59,10 @@
                                 <span class="tab-name">牛岛</span>
                             </button>
                         </div>
+                    </div>
+
+                    <!-- Row 4: Hallasan -->
+                    <div class="loc-row">
                         <button class="location-tab" data-loc="hallasan" onclick="switchWeatherLocation('hallasan')">
                             <span class="tab-name">汉拿山</span>
                         </button>
