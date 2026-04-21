@@ -43,6 +43,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         window.closeRewardDetailModal = window.closeRewardDetailModal || (() => { });
         window.applyRewardMission = window.applyRewardMission || (() => { });
         window.closeRewardWechatModal = window.closeRewardWechatModal || (() => { });
+        window.hallasanApp = window.hallasanApp || { fetchStatus: () => {} };
+        window.weatherApp = window.weatherApp || { retryFetch: () => {}, scrollToHourly: () => {} };
 
         // Mobile global error handler for debugging
         window.onerror = function(msg, url, lineNo, columnNo, error) {

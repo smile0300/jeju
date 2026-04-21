@@ -119,17 +119,17 @@ export function renderRewardList() {
         
         return `
             <div class="reward-card" onclick="applyRewardMission()">
-                <div class="reward-img-side">
+                <div class="reward-img-top">
                     <img src="${imgData.primary || placeholder}" 
                          data-fallback="${imgData.fallback}"
                          data-retry="0"
                          alt="${item.title}" 
                          onerror="handleRewardImageError(this)">
                 </div>
+                <div class="reward-info">
                     <h4 class="reward-item-name">${item.title || '赏金任务'}</h4>
-                        <div class="reward-amount">
-                            REWARD : ${item.reward || 0} <small>RMB</small>
-                        </div>
+                    <div class="reward-amount">
+                        REWARD : ${item.reward || 0} <small>RMB</small>
                     </div>
                 </div>
             </div>

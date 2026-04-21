@@ -71,23 +71,25 @@
 
 /* Mission List Grid */
 .reward-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    align-items: start;
 }
 
 /* Mission Card */
 .reward-card {
     background: white;
-    border-radius: 20px;
+    border-radius: 16px;
     overflow: hidden;
     display: flex;
+    flex-direction: column;
     box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     border: 1.5px solid var(--border-light);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
     position: relative;
-    min-height: 110px;
+    text-align: center;
 }
 
 .reward-card:hover {
@@ -96,59 +98,54 @@
     border-color: var(--accent-blue);
 }
 
-.reward-img-side {
-    flex: 0 0 45%; /* Slightly less than half to give more room for text */
-    min-height: 140px;
+.reward-img-top {
+    width: 100%;
+    aspect-ratio: 1 / 1;
     background: #f8fafc;
     position: relative;
     overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-right: 1px solid var(--border-light);
+    border-bottom: 1px solid var(--border-light);
 }
 
-.reward-img-side img {
+.reward-img-top img {
     width: 100%;
     height: 100%;
-    object-fit: contain; /* Don't crop, show full image */
-    padding: 10px;
+    object-fit: contain;
+    padding: 12px;
     transition: transform 0.5s ease;
 }
 
-.reward-content-side {
-    flex: 1;
-    padding: 16px;
+.reward-info {
+    padding: 12px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    gap: 8px;
+    gap: 6px;
     background: white;
-}
-
-.reward-item-name {
-    font-size: 1.25rem;
-    font-weight: 900;
-    color: var(--text-primary);
-    line-height: 1.3;
-}
-
-.reward-footer {
-    display: flex;
     align-items: center;
 }
 
+.reward-item-name {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1.3;
+    margin: 0;
+    word-break: break-all;
+}
+
 .reward-amount {
-    font-size: 1.2rem;
+    font-size: 1rem;
     font-weight: 900;
     color: #ef4444;
 }
 
 .reward-amount small {
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     font-weight: 700;
     color: #64748b;
-    margin-right: 4px;
 }
 
 /* Modal Content Styling (WeChat QR) */
@@ -221,9 +218,12 @@
     .trust-title { font-size: 0.95rem; }
     .trust-desc { font-size: 0.75rem; }
     
-    .reward-img-side { flex: 1; }
-    .reward-item-name { font-size: 1rem; }
-    .reward-amount { font-size: 1.1rem; }
+    .reward-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+    .reward-item-name { font-size: 0.85rem; }
+    .reward-amount { font-size: 0.9rem; }
 }
 
 /* Header Action Button */

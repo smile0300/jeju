@@ -150,3 +150,8 @@ export function renderHallasanCCTV() {
         });
     }, 150);
 }
+
+// Global exposure for HTML event handlers
+window.hallasanApp = {
+    fetchStatus: fetchHallasanStatus
+};
