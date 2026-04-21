@@ -10,26 +10,22 @@
             <!-- Regional Navigation Area -->
             <div class="weather-nav-wrapper">
                 <div class="location-tabs" id="location-tabs">
-                    <!-- Row 1: Bukseon + Namseon -->
+                    <!-- Row 1: North + South + West (5 items) -->
                     <div class="loc-row">
                         <div class="loc-group-wrapper group-north">
-                            <span class="group-label">북선</span>
+                            <span class="group-label">北线</span>
                             <button class="location-tab active" data-loc="jeju" onclick="switchWeatherLocation('jeju')">
                                 <span class="tab-name">济州市</span>
                             </button>
                         </div>
                         <div class="loc-group-wrapper group-south">
-                            <span class="group-label">남선</span>
+                            <span class="group-label">南线</span>
                             <button class="location-tab" data-loc="seogwipo" onclick="switchWeatherLocation('seogwipo')">
                                 <span class="tab-name">西归浦</span>
                             </button>
                         </div>
-                    </div>
-
-                    <!-- Row 2: Seoseon (West) -->
-                    <div class="loc-row">
                         <div class="loc-group-wrapper group-west">
-                            <span class="group-label">서선</span>
+                            <span class="group-label">西线</span>
                             <button class="location-tab" data-loc="aewol" onclick="switchWeatherLocation('aewol')">
                                 <span class="tab-name">涯月</span>
                             </button>
@@ -42,10 +38,10 @@
                         </div>
                     </div>
                     
-                    <!-- Row 3: Dongseon (East) -->
+                    <!-- Row 2: East + Hallasan (5 items) -->
                     <div class="loc-row">
                         <div class="loc-group-wrapper group-east">
-                            <span class="group-label">동선</span>
+                            <span class="group-label">东线</span>
                             <button class="location-tab" data-loc="hamdeok" onclick="switchWeatherLocation('hamdeok')">
                                 <span class="tab-name">咸德</span>
                             </button>
@@ -59,10 +55,6 @@
                                 <span class="tab-name">牛岛</span>
                             </button>
                         </div>
-                    </div>
-
-                    <!-- Row 4: Hallasan -->
-                    <div class="loc-row">
                         <button class="location-tab" data-loc="hallasan" onclick="switchWeatherLocation('hallasan')">
                             <span class="tab-name">汉拿山</span>
                         </button>
