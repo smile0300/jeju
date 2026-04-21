@@ -182,6 +182,8 @@
     width: auto !important;
 }
 
+.group-north { border-color: #8b5cf6 !important; background: rgba(139, 92, 246, 0.05) !important; }
+.group-south { border-color: #f59e0b !important; background: rgba(245, 158, 11, 0.05) !important; }
 .group-west { border-color: #4ade80 !important; background: rgba(74, 222, 128, 0.05) !important; }
 .group-east { border-color: #3b82f6 !important; background: rgba(59, 130, 246, 0.05) !important; }
 
@@ -199,13 +201,15 @@
     box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
 }
 
+.group-north .group-label { color: #6d28d9 !important; border: 1.2px solid #8b5cf6 !important; }
+.group-south .group-label { color: #b45309 !important; border: 1.2px solid #f59e0b !important; }
 .group-west .group-label { color: #16a34a !important; border: 1.2px solid #4ade80 !important; }
 .group-east .group-label { color: #1d4ed8 !important; border: 1.2px solid #3b82f6 !important; }
 
 .location-tab {
-    flex: 0 0 auto !important;
-    width: 66px !important;
-    min-width: 66px !important;
+    flex: 0 1 auto !important;
+    width: 65px !important;
+    min-width: 65px !important;
     background: var(--bg-card); border: 2px solid var(--border-light);
     padding: 10px 0; border-radius: var(--radius-md); cursor: pointer;
     transition: all var(--transition-normal);
