@@ -4,25 +4,38 @@
         <button class="back-btn" onclick="showSection('home')">←</button>
         <h2 class="bar-title">⛰️ 汉拿山登山信息</h2>
     </header>
-    <div class="section">
+    <div class="section hallasan-section-wrap">
         <div class="container">
-            <!-- 실시간 탐방 통제 현황 (Status Badge) -->
-            <div id="hallasan-status-container" style="margin-bottom: 20px; text-align: center;"></div>
+            <!-- [NEW] 한라산 히어로 통제 현황 섹션 (Hero Status Section) -->
+            <div id="hallasan-hero-status" class="hero-status-wrapper">
+                <div id="hallasan-status-container">
+                    <!-- JS에서 히어로 카드가 주입됩니다. -->
+                </div>
+            </div>
 
-            <!-- [NEW] 한라산 가시성 & 일출 실시간 리포트 대시보드 -->
-            <div class="dashboard-wrapper" style="margin-bottom: 30px; background: white; border-radius: 24px; padding: 5px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid var(--border-light);">
+            <!-- 한라산 가시성 & 일출 실시간 리포트 대시보드 -->
+            <div class="subsection-title-wrap">
+                <h3 class="subsection-title">⛰️ 实时观测 & 观赏概率</h3>
+            </div>
+            <div class="dashboard-wrapper">
                 <div id="hallasan-dashboard-container"></div>
             </div>
             
-
-            <div id="hallasan-cctv-container" style="margin-bottom: 35px;">
+            <!-- 한라산 실시간 CCTV 섹션 -->
+            <div class="subsection-title-wrap">
+                <h3 class="subsection-title">📺 汉拿산 실시간 CCTV</h3>
+            </div>
+            <div id="hallasan-cctv-container">
                 <div class="cctv-grid" id="hallasan-cctv-grid">
                     <!-- CCTV 카드가 이곳에 동적으로 주입됩니다. -->
                 </div>
             </div>
 
-
-            <div class="trails-grid" id="trails-grid" style="padding-bottom: 30px;"></div>
+            <!-- 등산로별 상세 정보 -->
+            <div class="subsection-title-wrap">
+                <h3 class="subsection-title">🥾 各登山路利用信息</h3>
+            </div>
+            <div class="trails-grid" id="trails-grid"></div>
         </div>
     </div>
 </section>
