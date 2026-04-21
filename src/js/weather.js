@@ -189,6 +189,7 @@ function getNearestCCTV(locKey) {
         'jeju': 'tapdong_emg',
         'aewol': 'gwakji_tour',
         'hyeopjae': 'hyeopjae_tour',
+        'sanbangsan': 'sanbangsan_emg',
         'seogwipo': 'seogwihang_emg',
         'hallasan': 'sanbangsan_emg', 
         'hamdeok': 'hamdeok_tour',
