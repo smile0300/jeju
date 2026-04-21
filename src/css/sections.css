@@ -160,10 +160,11 @@
     display: flex !important;
     flex-wrap: nowrap !important;
     align-items: flex-end !important;
-    gap: 8px !important;
+    justify-content: space-evenly !important;
+    gap: 2px !important;
     width: 100% !important;
-    overflow-x: auto !important;
-    padding: 22px 6px 10px 6px !important;
+    overflow-x: hidden !important;
+    padding: 22px 4px 10px 4px !important;
     -webkit-overflow-scrolling: touch !important;
 }
 .loc-row::-webkit-scrollbar { display: none !important; }
@@ -171,14 +172,14 @@
 .loc-group-wrapper {
     display: flex !important;
     align-items: center !important;
-    gap: 6px !important;
+    gap: 2px !important;
     position: relative !important;
-    padding: 10px 8px 8px 8px !important; 
+    padding: 8px 3px 6px 3px !important; 
     border-radius: var(--radius-lg) !important;
-    border-width: 2px !important;
+    border-width: 1.5px !important;
     border-style: solid !important;
     background: white !important;
-    flex-shrink: 0 !important;
+    flex: 0 1 auto !important;
     width: auto !important;
 }
 
@@ -208,18 +209,18 @@
 
 .location-tab {
     flex: 0 1 auto !important;
-    width: 65px !important;
-    min-width: 65px !important;
-    background: var(--bg-card); border: 2px solid var(--border-light);
-    padding: 10px 0; border-radius: var(--radius-md); cursor: pointer;
+    width: 56px !important;
+    min-width: 56px !important;
+    background: var(--bg-card); border: 1.5px solid var(--border-light);
+    padding: 8px 0; border-radius: var(--radius-md); cursor: pointer;
     transition: all var(--transition-normal);
-    display: flex !important; flex-direction: column !important; align-items: center !important; gap: 4px !important;
+    display: flex !important; flex-direction: column !important; align-items: center !important; gap: 3px !important;
     box-shadow: var(--shadow-sm);
 }
 .location-tab:hover { background: var(--bg-card-hover); border-color: var(--accent-purple); transform: translateY(-2px); }
 .location-tab.active { background: var(--primary-gradient); border-color: transparent !important; box-shadow: 0 3px 8px rgba(67, 56, 202, 0.3); }
-.tab-icon { font-size: 1.16rem; margin-bottom: 2px; }
-.tab-name { font-size: 0.8rem; font-weight: 800; color: var(--text-primary); }
+.tab-icon { font-size: 1.1rem; margin-bottom: 2px; }
+.tab-name { font-size: 0.75rem; font-weight: 800; color: var(--text-primary); }
 .location-tab.active .tab-name { color: white !important; }
 
 .current-weather {
