@@ -172,9 +172,9 @@
 .loc-group-wrapper {
     display: flex !important;
     align-items: center !important;
-    gap: 2px !important;
+    gap: 6px !important;
     position: relative !important;
-    padding: 8px 3px 6px 3px !important; 
+    padding: 8px 2px 6px 2px !important; 
     border-radius: var(--radius-lg) !important;
     border-width: 1.5px !important;
     border-style: solid !important;
@@ -187,6 +187,7 @@
 .group-south { border-color: #f59e0b !important; background: rgba(245, 158, 11, 0.05) !important; }
 .group-west { border-color: #4ade80 !important; background: rgba(74, 222, 128, 0.05) !important; }
 .group-east { border-color: #3b82f6 !important; background: rgba(59, 130, 246, 0.05) !important; }
+.group-mountain { border-color: #94a3b8 !important; background: rgba(148, 163, 184, 0.05) !important; }
 
 .group-label {
     position: absolute !important;
@@ -206,11 +207,12 @@
 .group-south .group-label { color: #b45309 !important; border: 1.2px solid #f59e0b !important; }
 .group-west .group-label { color: #16a34a !important; border: 1.2px solid #4ade80 !important; }
 .group-east .group-label { color: #1d4ed8 !important; border: 1.2px solid #3b82f6 !important; }
+.group-mountain .group-label { color: #475569 !important; border: 1.2px solid #94a3b8 !important; }
 
 .location-tab {
     flex: 0 1 auto !important;
-    width: 56px !important;
-    min-width: 56px !important;
+    width: 60px !important;
+    min-width: 60px !important;
     background: var(--bg-card); border: 1.5px solid var(--border-light);
     padding: 8px 0; border-radius: var(--radius-md); cursor: pointer;
     transition: all var(--transition-normal);
