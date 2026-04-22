@@ -148,3 +148,31 @@
         <div id="share-status" style="margin-top: 15px; font-size: 0.85rem; text-align: center; display: none; color: #07c160; font-weight: 600;"></div>
     </div>
 </div>
+<!-- ===== Customer Service Modal ===== -->
+<div id="cs-modal" class="modal-overlay" style="display:none; z-index: 10001;" onclick="closeCSModal()">
+    <div class="modal-content" style="max-width: 400px; padding: 30px; background: white;" onclick="event.stopPropagation()">
+        <button class="modal-close" style="color: #333;" onclick="closeCSModal()">✕</button>
+        <h3 style="margin-bottom: 12px; font-size: 1.25rem; color: var(--text-primary);">🎧 고객센터 / 联系我们</h3>
+        <p style="font-size: 0.9rem; color: #666; margin-bottom: 20px; line-height: 1.4;">
+            불편사항이나 제안 및 비즈니스 문의를 남겨주세요.<br>
+            请输入您的投诉、建议或业务咨询。
+        </p>
+
+        <div class="form-group" style="margin-bottom: 15px;">
+            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #475569; margin-bottom: 8px;">불편사항 / 投诉建议 *</label>
+            <textarea id="cs-content" placeholder="내용을 입력해주세요... / 请输入内容..."
+                style="width: 100%; min-height: 120px; padding: 12px; border-radius: 8px; border: 1.5px solid #eee; font-family: inherit; font-size: 0.9rem; resize: vertical; outline: none;"></textarea>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 25px;">
+            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #475569; margin-bottom: 8px;">위챗 ID / 微信 ID (선택)</label>
+            <input type="text" id="cs-wechat" placeholder="연락받으실 위챗 ID / 您的微信 ID"
+                style="width: 100%; padding: 12px; border-radius: 8px; border: 1.5px solid #eee; font-size: 0.9rem; outline: none;">
+        </div>
+
+        <button id="cs-submit-btn" onclick="submitCSFeedback()"
+            style="width: 100%; padding: 14px; border-radius: 12px; background: var(--primary-gradient); color: white; border: none; font-size: 1rem; font-weight: 700; cursor: pointer;">제출하기 / 提交</button>
+        
+        <div id="cs-status" style="margin-top: 15px; font-size: 0.85rem; text-align: center; display: none;"></div>
+    </div>
+</div>

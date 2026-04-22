@@ -131,6 +131,88 @@ export async function submitFeatureRequest() {
     }
 }
 
+// ─── 고객센터 (Customer Service) ─────────────────────────────
+export function openCSModal() {
+    const modal = document.getElementById('cs-modal');
+    if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        if (window.pushModalState) window.pushModalState();
+    }
+}
+
+export function closeCSModal(fromPopState = false) {
+    const modal = document.getElementById('cs-modal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+        const statusEl = document.getElementById('cs-status');
+        if (statusEl) statusEl.style.display = 'none';
+        if (!fromPopState && window.location.hash === '#modal') window.history.back();
+    }
+}
+
+export async function submitCSFeedback() {
+    const contentEl = document.getElementById('cs-content');
+    const wechatEl = document.getElementById('cs-wechat');
+    const submitBtn = document.getElementById('cs-submit-btn');
+    const statusEl = document.getElementById('cs-status');
+
+    if (!contentEl || !submitBtn || !statusEl) return;
+
+    const content = contentEl.value.trim();
+    const wechat = wechatEl?.value.trim() || 'N/A';
+
+    if (!content) {
+        alert('내용을 입력해주세요. / 请输入内容。');
+        return;
+    }
+
+    try {
+        submitBtn.disabled = true;
+        statusEl.style.display = 'block';
+        statusEl.style.color = '#3b82f6';
+        statusEl.textContent = '제출 중... / 提交中...';
+
+        // 구글 시트 연동을 위한 POST 요청 (기본 API 엔드포인트 활용)
+        const res = await fetch(`${CONFIG.PROXY_URL}/api/feature-request`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                type: 'customer_service',
+                content: content,
+                wechat: wechat,
+                timestamp: new Date().toISOString(),
+                userAgent: navigator.userAgent
+            })
+        });
+
+        if (res.ok) {
+            statusEl.style.color = '#07c160';
+            statusEl.textContent = '✅ 성공적으로 제출되었습니다! / 提交成功！';
+            contentEl.value = '';
+            if (wechatEl) wechatEl.value = '';
+            
+            if (window.dataLayer) {
+                window.dataLayer.push({
+                    'event': 'cs_submit_success',
+                    'category': 'interaction',
+                    'action': 'submit_cs'
+                });
+            }
+
+            setTimeout(closeCSModal, 2000);
+        } else {
+            throw new Error('서버 오류 / Server Error');
+        }
+    } catch (e) {
+        statusEl.style.color = '#ef4444';
+        statusEl.textContent = `❌ 실패: ${e.message} / 失败`;
+    } finally {
+        submitBtn.disabled = false;
+    }
+}
+
 export function copyWechatId() {
     const input = document.getElementById('wechat-id-input');
     input?.select();
