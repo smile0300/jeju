@@ -614,11 +614,12 @@
 .trail-status-badge.info { background: var(--primary-gradient); }
 
 .prob-value-large {
-    font-size: 1.5rem;
+    font-size: 1.6rem;
     font-weight: 900;
-    color: #3182ce;
-    letter-spacing: -0.04em;
-    text-shadow: 0 2px 4px rgba(49, 130, 206, 0.1);
+    color: #2b6cb0;
+    letter-spacing: -0.05em;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    -webkit-text-stroke: 0.5px #2b6cb0;
 }
 
 .probability-block {
@@ -634,7 +635,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding-top: 12px;
     width: 100%;
 }
 
