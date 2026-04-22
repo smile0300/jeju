@@ -162,8 +162,6 @@ export async function fetchHallasanStatus() {
                         <h4>⛰️ 白鹿潭观赏概率</h4>
                     </div>
                     <div class="t-info-line">
-                        <span>基于实时气象数据</span>
-                        <span>推荐登山时间</span>
                     </div>
                 </div>`;
             
@@ -177,8 +175,6 @@ export async function fetchHallasanStatus() {
                         <h4>🌅 日出观赏概率</h4>
                     </div>
                     <div class="t-info-line">
-                        <span>日出时间 ${sunTimes.sunrise}</span>
-                        <span>早晨气象环境</span>
                     </div>
                 </div>`;
         }
