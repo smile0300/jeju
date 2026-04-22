@@ -222,9 +222,21 @@ export async function onRequest(context) {
     }
   }
 
-  // 2. 한라산 탐방로 상태 JSON 변환 (v2.0: 동적 소스 타겟팅)
+  // 2. 한라산 탐방로 상태 JSON 변환 (v2.1: 30분 캐싱 적용)
   if (pathname === '/api/hallasan-status') {
+    const cacheUrl = new URL(request.url);
+    const cacheKey = new Request(cacheUrl.toString(), request);
+    const cache = caches.default;
+
     try {
+      // 1. 캐시 확인
+      let cachedResponse = await cache.match(cacheKey);
+      if (cachedResponse) {
+        // 캐시 히트 시 즉시 반환
+        return cachedResponse;
+      }
+
+      // 2. 캐시 미스 시 크롤링 수행
       // 메인 페이지(index.htm)는 데이터를 비동기로 가져오므로 실제 데이터 소스인 road-body.jsp를 직접 호출
       const targetUrl = 'https://jeju.go.kr/tool/hallasan/road-body.jsp';
       const response = await fetch(targetUrl, {
@@ -259,10 +271,11 @@ export async function onRequest(context) {
         }
       }
 
+      let finalResponse;
       if (results.length === 0) {
         // 매칭 결과가 없을 경우 디버깅을 위해 HTML 구조 요약 반환
         const htmlSnippet = html.substring(0, 500).replace(/\s+/g, ' ');
-        return new Response(JSON.stringify({ 
+        finalResponse = new Response(JSON.stringify({ 
           error: 'API return empty (Scraper matched 0 items)', 
           debug: { 
             htmlLength: html.length,
@@ -271,17 +284,30 @@ export async function onRequest(context) {
             hasSituation: html.includes('situation')
           }
         }), {
-          status: 200, // 클라이언트에서 에러 객체로 처리하도록 200으로 반환하되 error 필드 포함
-          headers: { 'Access-Control-Allow-Origin': ALLOWED_ORIGIN, 'Content-Type': 'application/json' }
+          status: 200,
+          headers: { 
+            'Access-Control-Allow-Origin': ALLOWED_ORIGIN, 
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache' // 에러 상황은 캐싱하지 않음
+          }
+        });
+      } else {
+        finalResponse = new Response(JSON.stringify(results), {
+          headers: { 
+            'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
+            'Content-Type': 'application/json; charset=utf-8',
+            'Cache-Control': 'public, max-age=1800' // 30분 캐싱 설정
+          }
         });
       }
 
-      return new Response(JSON.stringify(results), {
-        headers: { 
-          'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
-          'Content-Type': 'application/json; charset=utf-8' 
-        }
-      });
+      // 3. 캐시 저장 (백그라운드에서 진행하도록 waitUntil 사용 가능 여부 확인)
+      // Pages Functions에서는 context.waitUntil을 통해 제어 가능
+      if (results.length > 0) {
+        context.waitUntil(cache.put(cacheKey, finalResponse.clone()));
+      }
+      
+      return finalResponse;
     } catch (e) {
       return new Response(JSON.stringify({ error: `Server-side parsing failed: ${e.message}` }), {
         status: 500,
