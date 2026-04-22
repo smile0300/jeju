@@ -646,14 +646,16 @@
     align-items: center;
     justify-content: center;
     border-top: 1px solid #edf2f7;
-    padding: 6px 4px;
+    padding: 2px 0;
 }
 
 .prob-label {
-    font-size: 0.62rem;
+    font-size: 0.78rem;
     font-weight: 800;
     color: var(--text-muted);
     white-space: nowrap;
+    width: 100%;
+    text-align: center;
 }
 
 .trail-info-compact {
