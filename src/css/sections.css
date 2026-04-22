@@ -545,10 +545,16 @@
 .status-card.status-closed { border-color: #ef4444; background: linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, rgba(239, 68, 68, 0.02) 100%); }
 
 .trails-grid { 
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
     padding-bottom: 30px;
+}
+
+@media (max-width: 400px) {
+    .trails-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .trail-block {
