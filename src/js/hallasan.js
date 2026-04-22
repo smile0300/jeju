@@ -157,7 +157,7 @@ export async function fetchHallasanStatus() {
                 <div class="trail-block probability-block">
                     <div class="t-status-line"></div>
                     <div class="t-name-line">
-                        <h4>⛰️ 白鹿潭观赏概率</h4>
+                        <h4>⛰️ 白鹿潭观赏</h4>
                     </div>
                     <div class="t-info-line">
                         <span class="prob-value">${visibility}%</span>
@@ -169,7 +169,7 @@ export async function fetchHallasanStatus() {
                 <div class="trail-block probability-block">
                     <div class="t-status-line"></div>
                     <div class="t-name-line">
-                        <h4>🌅 日出观赏概率</h4>
+                        <h4>🌅 日出观赏</h4>
                     </div>
                     <div class="t-info-line">
                         <span class="prob-value">${sunriseProb}%</span>
