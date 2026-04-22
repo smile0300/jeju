@@ -293,7 +293,7 @@ function _buildSummaryHTML(targetYmd) {
 
         content += `
         <div class="wsm-loc-block" data-locname="${meta.title}" data-lockey="${locKey}">
-            <div class="wsm-card-watermark">JEJU-LIVE</div>
+            <div class="wsm-card-watermark">JEJU-LIVE.COM</div>
             <h3 class="wsm-loc-title">${meta.title} <span class="wsm-loc-sub">${meta.sub}</span></h3>
             <div class="wsm-hourly-grid">${itemsHTML}</div>
         </div>`;
@@ -403,7 +403,7 @@ window.enterWeatherFullscreen = function() {
         watermark = document.createElement('div');
         watermark.id = 'wsm-watermark';
         watermark.className = 'wsm-watermark';
-        watermark.innerHTML = 'jeju-live';
+        watermark.innerHTML = 'JEJU-LIVE.COM';
         document.body.appendChild(watermark);
     }
     
