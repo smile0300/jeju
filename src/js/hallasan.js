@@ -118,14 +118,15 @@ export async function fetchHallasanStatus() {
             </div>`;
 
         trailsEl.innerHTML = trails.map(t => `
-            <div class="trail-card">
-                <div class="trail-header">
-                    <h4>${t.nameCn}</h4>
+            <div class="trail-row">
+                <div class="t-status">
                     <span class="trail-status-badge ${t.statusCls}">${t.statusCn}</span>
                 </div>
-                <div class="trail-info-compact">
-                    <span>📏 ${t.distanceCn}</span>
-                    <span>⏱️ ${t.timeCn}</span>
+                <div class="t-name">
+                    <h4>${t.nameCn}</h4>
+                </div>
+                <div class="t-info">
+                    <span>${t.distanceCn} / ${t.timeCn}</span>
                 </div>
             </div>`).join('');
 

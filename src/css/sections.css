@@ -545,55 +545,72 @@
 .status-card.status-closed { border-color: #ef4444; background: linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, rgba(239, 68, 68, 0.02) 100%); }
 
 .trails-grid { 
-    display: grid; 
-    grid-template-columns: repeat(2, 1fr); 
-    gap: 10px; 
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
     padding-bottom: 30px;
 }
 
-@media (max-width: 480px) {
-    .trails-grid {
-        grid-template-columns: 1fr;
-        gap: 12px;
-    }
-}
-.trail-card {
+.trail-row {
     background: white; 
-    border-radius: 16px;
-    padding: 14px 12px; 
+    border-radius: 12px;
+    padding: 12px 16px; 
     border: 1px solid var(--border-light);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    display: grid;
+    grid-template-columns: 85px 1fr auto;
+    align-items: center;
+    gap: 12px;
+    transition: background 0.2s ease;
 }
 
-.trail-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+.trail-row:hover {
+    background: #f8fafc;
 }
-.trail-header { 
-    display: flex; 
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    flex-wrap: wrap;
-    gap: 8px;
+
+.t-status {
+    flex-shrink: 0;
+    display: flex;
+    justify-content: flex-start;
 }
-.trail-header h4 { 
-    font-size: 0.88rem; 
+
+.t-name {
+    min-width: 0;
+}
+
+.t-name h4 { 
+    font-size: 0.95rem; 
     font-weight: 800; 
     color: var(--text-primary); 
-    margin: 0; 
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
+
+.t-info {
+    flex-shrink: 0;
+    text-align: right;
+}
+
+.t-info span {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
 .trail-status-badge { 
-    padding: 3px 8px; 
+    padding: 4px 10px; 
     border-radius: 6px; 
     font-size: 0.65rem; 
     font-weight: 800; 
-    color: white; 
+    color: white;
+    text-align: center;
+    display: inline-block;
+    min-width: 65px;
 }
+
 .trail-status-badge.open { background: #10b981; }
 .trail-status-badge.partial { background: #f59e0b; }
 .trail-status-badge.closed { background: #ef4444; }
