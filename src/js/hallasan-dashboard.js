@@ -5,82 +5,11 @@ import { getSunTimes } from './utils.js';
 /**
  * 한라산 가시성 및 일출 대시보드 렌더링 (간소화 버전)
  */
-export function renderHallasanDashboard(containerId = 'hallasan-dashboard-container') {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-
-    const weatherData = WEATHER_STATE['hallasan'];
-    
-    // 1. 로딩 상태 UI
-    if (!weatherData) {
-        container.innerHTML = `
-            <div class="dashboard-placeholder">
-                <div class="loader-wrapper">
-                    <div class="loading-spinner"></div>
-                    <div class="loading-text">正在加载中...</div>
-                </div>
-            </div>`;
-        return;
+export function renderHallasanDashboard() {
+    // 기존 대시보드가 제거된 대신, 날씨 데이터가 준비된 시점에 등산로 정보를 새로 고침하여 8, 9번 칸을 활성화합니다.
+    if (window.hallasanApp && typeof window.hallasanApp.fetchStatus === 'function') {
+        window.hallasanApp.fetchStatus();
     }
-
-    let rawData = weatherData.mountainData;
-    let isLive = !!rawData;
-
-    if (!isLive && (!weatherData.items || weatherData.sortedKeys.length === 0)) {
-        container.innerHTML = `
-            <div class="dashboard-error" style="padding: 20px; text-align: center;">
-                <div class="error-msg" style="color: var(--accent-red); margin-bottom: 10px;">⚠️ 暂时无法获取实时观测数据</div>
-                <button class="feature-request-btn" onclick="fetchWeatherData('hallasan')" style="font-size: 0.8rem; padding: 6px 12px;">🔄 刷新</button>
-            </div>`;
-        return;
-    }
-
-    const currentKey = weatherData.sortedKeys?.[0];
-    const shortTermData = currentKey ? weatherData.items[currentKey] : {};
-    
-    // 데이터 매핑 (산악기상 데이터 우선, 없으면 단기예보 활용)
-    const mtData = {
-        hm: parseFloat(rawData?.hm || shortTermData?.REH || 50),
-        ws: parseFloat(rawData?.ws || shortTermData?.WSD || 2),
-        rn: rawData?.rn ? parseFloat(rawData.rn) : (shortTermData?.PCP ? (parseFloat(shortTermData.PCP.replace(/[^0-9.]/g, '')) || 0) : 0),
-        temp: rawData?.tm_val || shortTermData?.TMP || '--'
-    };
-
-    const visibility = calculateVisibilityScore(mtData);
-    
-    const loc = CONFIG.WEATHER_LOCATIONS['hallasan'];
-    const sunTimes = getSunTimes(loc.lat, loc.lng, new Date());
-    
-    const sunriseInfo = {
-        time: sunTimes.sunrise,
-        successProb: Math.max(10, Math.round(100 - (mtData.hm * 0.8) - (mtData.rn > 0 ? 50 : 0)))
-    };
-
-    container.innerHTML = `
-        <div class="hallasan-mini-dashboard">
-            <div class="mini-item">
-                <div class="mini-icon">⛰️</div>
-                <div class="mini-info">
-                    <span class="mini-label">白鹿潭观赏概率</span>
-                    <span class="mini-value">${visibility}%</span>
-                </div>
-            </div>
-            <div class="mini-item">
-                <div class="mini-icon">✨</div>
-                <div class="mini-info">
-                    <span class="mini-label">日出观赏概率</span>
-                    <span class="mini-value">${sunriseInfo.successProb}%</span>
-                </div>
-            </div>
-            <div class="mini-item">
-                <div class="mini-icon">🌅</div>
-                <div class="mini-info">
-                    <span class="mini-label">日出时间</span>
-                    <span class="mini-value">${sunriseInfo.time}</span>
-                </div>
-            </div>
-        </div>
-    `;
 }
 
 /**
