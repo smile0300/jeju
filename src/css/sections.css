@@ -619,13 +619,47 @@
 .trail-status-badge.closed { background: var(--danger-gradient); }
 .trail-status-badge.info { background: var(--primary-gradient); }
 
-.prob-value {
-    font-size: 1.1rem;
+.prob-value-large {
+    font-size: 1.5rem;
     font-weight: 900;
     color: #3182ce;
-    display: block;
-    margin-top: 2px;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.04em;
+    text-shadow: 0 2px 4px rgba(49, 130, 206, 0.1);
+}
+
+.probability-block {
+    padding: 0 !important;
+    overflow: hidden;
+    justify-content: space-between;
+    min-height: 100px;
+    background: white;
+}
+
+.prob-main {
+    flex: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 12px;
+    width: 100%;
+}
+
+.prob-footer {
+    flex: 1;
+    width: 100%;
+    background: #f8fafc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-top: 1px solid #edf2f7;
+    padding: 6px 4px;
+}
+
+.prob-label {
+    font-size: 0.62rem;
+    font-weight: 800;
+    color: var(--text-muted);
+    white-space: nowrap;
 }
 
 .trail-info-compact {
