@@ -52,18 +52,18 @@ function translateWeatherAlert(text) {
     if (!text) return '';
     let result = text;
     
+    // Remove bracketed prefix like [특보], [주의보], [경보] at the start
+    result = result.replace(/^\[.*?\]\s*/, '');
+    
     // Remove management number like "제04-62호" and potential colon
     result = result.replace(/제\d+-\d+호\s*(:?)\s*/g, '');
     
-    // Remove date like "2026.04.22.18:00" but we want to keep the time if possible.
-    // The user wants "[特报] 18:00 风浪注意报 发布"
-    // Usually the format is "YYYY.MM.DD.HH:mm"
+    // Remove date/time like "2026.04.22.18:00"
     result = result.replace(/\d{4}\.\d{2}\.\d{2}\.\d{2}:\d{2}/g, '').trim();
-    // Sometimes it's just "YYYY.MM.DD."
     result = result.replace(/\d{4}\.\d{2}\.\d{2}\./g, '').trim();
 
-    // Clean up leading/trailing slashes and spaces
-    result = result.replace(/^\s*\/\s*/, '').replace(/\s*\/\s*$/, '').trim();
+    // Clean up leading/trailing slashes, colons and spaces
+    result = result.replace(/^[\s\/:：]+/, '').replace(/[\s\/:：]+$/, '').trim();
 
     for (const [ko, cn] of Object.entries(ALERT_TRANSLATIONS)) {
         result = result.replace(new RegExp(ko, 'g'), cn);
