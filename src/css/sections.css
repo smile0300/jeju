@@ -619,6 +619,15 @@
 .trail-status-badge.closed { background: var(--danger-gradient); }
 .trail-status-badge.info { background: var(--primary-gradient); }
 
+.prob-value {
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: #3182ce;
+    display: block;
+    margin-top: 2px;
+    letter-spacing: -0.02em;
+}
+
 .trail-info-compact {
     display: flex;
     justify-content: space-between;
