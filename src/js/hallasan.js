@@ -126,7 +126,8 @@ export async function fetchHallasanStatus() {
                     <h4>${t.nameCn}</h4>
                 </div>
                 <div class="t-info-line">
-                    <span>${t.distanceCn} / ${t.timeCn}</span>
+                    <span>${t.distanceCn}</span>
+                    <span>${t.timeCn}</span>
                 </div>
             </div>`).join('');
 
