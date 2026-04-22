@@ -366,8 +366,8 @@
 .footer-share-top {
     width: 100%;
     border-bottom: 1px solid var(--border-light);
-    padding-bottom: 25px;
-    margin-bottom: 25px;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
 }
 
 .share-circles-row {
@@ -376,7 +376,7 @@
     justify-content: center !important;
     align-items: center !important;
     gap: clamp(10px, 4vw, 35px) !important;
-    padding: 15px 0 !important;
+    padding: 8px 0 !important;
     flex-wrap: nowrap !important;
     width: 100% !important;
     box-sizing: border-box;
