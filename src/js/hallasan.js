@@ -155,26 +155,24 @@ export async function fetchHallasanStatus() {
             // 8번: 백록담 관측 확률
             trailsHtml += `
                 <div class="trail-block probability-block">
-                    <div class="t-status-line">
-                        <span class="trail-status-badge info">${visibility}%</span>
-                    </div>
+                    <div class="t-status-line"></div>
                     <div class="t-name-line">
                         <h4>⛰️ 白鹿潭观赏概率</h4>
                     </div>
                     <div class="t-info-line">
+                        <span class="prob-value">${visibility}%</span>
                     </div>
                 </div>`;
             
             // 9번: 일출 관측 확률
             trailsHtml += `
                 <div class="trail-block probability-block">
-                    <div class="t-status-line">
-                        <span class="trail-status-badge info">${sunriseProb}%</span>
-                    </div>
+                    <div class="t-status-line"></div>
                     <div class="t-name-line">
                         <h4>🌅 日出观赏概率</h4>
                     </div>
                     <div class="t-info-line">
+                        <span class="prob-value">${sunriseProb}%</span>
                     </div>
                 </div>`;
         }
