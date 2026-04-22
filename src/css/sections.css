@@ -617,6 +617,7 @@
 .trail-status-badge.open { background: var(--success-gradient); }
 .trail-status-badge.partial { background: var(--warning-gradient); }
 .trail-status-badge.closed { background: var(--danger-gradient); }
+.trail-status-badge.info { background: var(--primary-gradient); }
 
 .trail-info-compact {
     display: flex;
