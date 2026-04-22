@@ -145,9 +145,10 @@ export async function fetchHallasanStatus() {
 }
 
 const HALLASAN_CCTV = [
+    { id: 'witseoreum', nameKo: '윗세오름', nameCn: '威势岳', url: 'https://hallacctv.kr/live/cctv03.stream_360p/playlist.m3u8' },
+    { id: 'baengnokdam', nameKo: '백록담', nameCn: '白鹿潭', url: 'https://hallacctv.kr/live/cctv01.stream_360p/playlist.m3u8', isRepair: true },
     { id: 'seongpanak', nameKo: '성판악', nameCn: '城板岳', url: 'https://hallacctv.kr/live/cctv06.stream_360p/playlist.m3u8' },
     { id: 'wanggwalleung', nameKo: '왕관릉', nameCn: '王冠陵', url: 'https://hallacctv.kr/live/cctv02.stream_360p/playlist.m3u8' },
-    { id: 'witseoreum', nameKo: '윗세오름', nameCn: '威势岳', url: 'https://hallacctv.kr/live/cctv03.stream_360p/playlist.m3u8' },
     { id: 'eoseungsaengak', nameKo: '어승생악', nameCn: '御乘生岳', url: 'https://hallacctv.kr/live/cctv04.stream_360p/playlist.m3u8' },
     { id: '1100doro', nameKo: '1100고지', nameCn: '1100高地', url: 'https://hallacctv.kr/live/cctv05.stream_360p/playlist.m3u8' }
 ];
@@ -156,11 +157,18 @@ export function renderHallasanCCTV() {
     const grid = document.getElementById('hallasan-cctv-grid');
     if (!grid) return;
     if (grid.querySelectorAll('.cctv-card').length === HALLASAN_CCTV.length) return;
+    
     grid.innerHTML = HALLASAN_CCTV.map((cam, index) => `
-        <div class="cctv-card ${index === 0 ? 'featured-cctv' : ''}" onclick="toggleFullscreen('hallasan-video-${cam.id}')" style="cursor: pointer;">
+        <div class="cctv-card ${index === 0 ? 'featured-cctv' : ''}" ${cam.isRepair ? '' : `onclick="toggleFullscreen('hallasan-video-${cam.id}')"`} style="cursor: ${cam.isRepair ? 'default' : 'pointer'};">
             <div class="cctv-video-container">
-                <video id="hallasan-video-${cam.id}" class="cctv-video-el" muted playsinline autoplay></video>
-                <div class="cctv-tag">LIVE</div>
+                ${cam.isRepair 
+                    ? `<div class="cctv-repair-overlay">
+                         <div class="repair-icon">⚙️</div>
+                         <span>CCTV 수리 중</span>
+                       </div>`
+                    : `<video id="hallasan-video-${cam.id}" class="cctv-video-el" muted playsinline autoplay></video>`
+                }
+                <div class="cctv-tag ${cam.isRepair ? 'offline' : ''}">${cam.isRepair ? 'OFFLINE' : 'LIVE'}</div>
             </div>
             <div class="cctv-info" style="padding: 6px 4px; text-align: center;">
                 <span class="cctv-name" style="font-weight: 800; font-size: 0.85rem;">${cam.nameCn}</span>
@@ -169,6 +177,7 @@ export function renderHallasanCCTV() {
 
     setTimeout(() => {
         HALLASAN_CCTV.forEach((cam, index) => {
+            if (cam.isRepair) return; // 수리 중인 경우 초기화 건너뜀
             setTimeout(() => {
                 if (document.getElementById(`hallasan-video-${cam.id}`)) {
                     initHlsPlayer(cam.url, `hallasan-video-${cam.id}`);
