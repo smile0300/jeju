@@ -8,7 +8,7 @@ import { fetchFlights, switchFlightTab } from './airport.js';
 import { fetchFoundGoods, switchLostView, openLostDetailModalByIndex, openLostReportModal, handleLostImageChange, submitLostReport, showWechatQR } from './lost-found.v1.js';
 import { fetchFestivals, selectFestivalMonth, initMonthFilter } from './festival.js';
 import { initReward } from './reward.js';
-import { showSection, openWechatQR, closeWechatQR, openFeatureModal, closeFeatureModal, submitFeatureRequest, copyWechatId, openWeatherSummaryModal, closeWeatherSummaryModal, openShareModal, closeShareModal, shareToPlatform } from './ui.js';
+import { showSection, openWechatQR, closeWechatQR, openFeatureModal, closeFeatureModal, submitFeatureRequest, openCSModal, closeCSModal, submitCSFeedback, copyWechatId, openWeatherSummaryModal, closeWeatherSummaryModal, openShareModal, closeShareModal, shareToPlatform } from './ui.js';
 
 
 // Global function assignments for HTML event handlers
@@ -52,10 +52,13 @@ window.closeWeatherSummaryModal = closeWeatherSummaryModal;
 window.openShareModal = openShareModal;
 window.closeShareModal = closeShareModal;
 window.shareToPlatform = shareToPlatform;
+window.openCSModal = openCSModal;
+window.closeCSModal = closeCSModal;
+window.submitCSFeedback = submitCSFeedback;
 
 // Modals closing
 const closeAllModals = () => {
-    const modals = document.querySelectorAll('.wsm-overlay, #cctv-detail-card, #cctv-modal, #lost-detail-modal, #lost-report-modal, #feature-request-modal, #wechat-qr-modal, #share-modal');
+    const modals = document.querySelectorAll('.wsm-overlay, #cctv-detail-card, #cctv-modal, #lost-detail-modal, #lost-report-modal, #feature-request-modal, #cs-modal, #wechat-qr-modal, #share-modal');
     let wasOpen = false;
     modals.forEach(m => {
         if (m.style.display === 'block' || m.style.display === 'flex' || m.classList.contains('show')) {
@@ -96,6 +99,14 @@ window.closeLostReportModal = (fromPopState = false) => {
     document.getElementById('lost-report-modal').style.display = 'none'; 
     document.body.style.overflow = ''; 
     if (!fromPopState && window.location.hash === '#modal') window.history.back();
+};
+window.closeCSModal = (fromPopState = false) => { 
+    const modal = document.getElementById('cs-modal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+        if (!fromPopState && window.location.hash === '#modal') window.history.back();
+    }
 };
 
 const ROUTE_MAP = {
