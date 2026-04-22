@@ -849,7 +849,7 @@
 /* ==================== Responsive Sections ==================== */
 @media (max-width: 480px) {
     .cctv-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-    .trails-grid { grid-template-columns: repeat(2, 1fr); gap: 4px; }
+    .trails-grid { grid-template-columns: repeat(3, 1fr); gap: 4px; }
     .weekly-grid { grid-template-columns: repeat(5, 1fr); gap: 4px; }
     .weekly-item { padding: 8px 1px; min-width: 0; }
     .weekly-day { font-size: 0.72rem; }
