@@ -129,8 +129,7 @@ export async function fetchHallasanStatus() {
                     <h4>${t.nameCn}</h4>
                 </div>
                 <div class="t-info-line">
-                    <span>${t.distanceCn}</span>
-                    <span>${t.timeCn}</span>
+                    <span>${t.distanceCn.replace('（单程）', '')} / ${t.timeCn}</span>
                 </div>
             </div>`).join('');
 
