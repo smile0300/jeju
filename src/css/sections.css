@@ -593,14 +593,14 @@
 
 .t-info-line span {
     font-size: 0.62rem;
-    font-weight: 700;
+    font-weight: 800;
     color: var(--text-muted);
     white-space: nowrap;
     display: block;
 }
 
 .trail-status-badge { 
-    padding: 3px 6px; 
+    padding: 3px 12px; 
     border-radius: 6px; 
     font-size: 0.65rem; 
     font-weight: 800; 
