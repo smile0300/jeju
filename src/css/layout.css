@@ -417,7 +417,6 @@
     border: 1px solid #e2e8f0;
     border-radius: clamp(12px, 3vw, 20px);
     padding: clamp(8px, 2vw, 15px) clamp(6px, 1.5vw, 10px);
-    margin-right: clamp(10px, 3vw, 15px);
     position: relative;
     display: flex;
     flex-direction: column;
@@ -435,6 +434,7 @@
 
 .share-icons-container {
     display: flex;
+    justify-content: center;
     gap: clamp(10px, 4vw, 35px) !important;
 }
 
