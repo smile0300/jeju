@@ -547,27 +547,21 @@
 .trails-grid { 
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
+    gap: 6px;
     padding-bottom: 30px;
-}
-
-@media (max-width: 400px) {
-    .trails-grid {
-        grid-template-columns: 1fr;
-    }
 }
 
 .trail-block {
     background: white; 
     border-radius: 12px;
-    padding: 12px 8px; 
+    padding: 8px 4px; 
     border: 1px solid var(--border-light);
     box-shadow: 0 4px 12px rgba(0,0,0,0.03);
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 8px;
+    gap: 4px;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -583,7 +577,7 @@
 }
 
 .t-name-line h4 { 
-    font-size: 0.85rem; 
+    font-size: 0.78rem; 
     font-weight: 800; 
     color: var(--text-primary); 
     margin: 0;
@@ -596,12 +590,12 @@
 
 .t-info-line {
     border-top: 1px dashed #edf2f7;
-    padding-top: 10px;
+    padding-top: 6px;
     width: 100%;
 }
 
 .t-info-line span {
-    font-size: 0.7rem;
+    font-size: 0.62rem;
     font-weight: 700;
     color: var(--text-muted);
     white-space: nowrap;
@@ -609,12 +603,12 @@
 }
 
 .trail-status-badge { 
-    padding: 4px 12px; 
-    border-radius: 8px; 
-    font-size: 0.7rem; 
+    padding: 3px 6px; 
+    border-radius: 6px; 
+    font-size: 0.65rem; 
     font-weight: 800; 
     color: white;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .trail-status-badge.open { background: var(--success-gradient); }
