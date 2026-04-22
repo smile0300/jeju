@@ -1,4 +1,6 @@
 import { WEATHER_STATE } from './weather.js';
+import { CONFIG } from './config.js';
+import { getSunTimes } from './utils.js';
 
 /**
  * 한라산 가시성 및 일출 대시보드 렌더링 (간소화 버전)
@@ -46,8 +48,11 @@ export function renderHallasanDashboard(containerId = 'hallasan-dashboard-contai
 
     const visibility = calculateVisibilityScore(mtData);
     
+    const loc = CONFIG.WEATHER_LOCATIONS['hallasan'];
+    const sunTimes = getSunTimes(loc.lat, loc.lng, new Date());
+    
     const sunriseInfo = {
-        time: "06:12",
+        time: sunTimes.sunrise,
         successProb: Math.max(10, Math.round(100 - (mtData.hm * 0.8) - (mtData.rn > 0 ? 50 : 0)))
     };
 

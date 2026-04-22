@@ -1,5 +1,5 @@
 import { CONFIG } from './config.js';
-import { getSkyInfo, getWindDesc, getWindColor, formatPrecip, formatBaseTime, translateMidWf, getMidTempVal } from './utils.js';
+import { getSkyInfo, getWindDesc, getWindColor, formatPrecip, formatBaseTime, translateMidWf, getMidTempVal, getSunTimes } from './utils.js';
 import { fetchPublicDataJson } from './api.js';
 
 
@@ -233,27 +233,6 @@ function getOffsetDate(ymd, offset) {
     return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
 }
 
-function getSunTimes(lat, lng, date) {
-    const radian = Math.PI / 180;
-    const dayOfYear = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
-    const decl = 0.409 * Math.sin(2 * Math.PI * (dayOfYear - 81) / 365);
-    const ha = Math.acos(-Math.tan(lat * radian) * Math.tan(decl)) / radian;
-    const sunrise = 12 - (ha / 15) - (lng / 15) + 9;
-    const sunset = 12 + (ha / 15) - (lng / 15) + 9;
-    
-    const toTimeStr = (decimalHour) => {
-        const h = Math.floor(decimalHour);
-        const m = Math.round((decimalHour - h) * 60);
-        return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-    };
-    
-    return {
-        sunrise: toTimeStr(sunrise),
-        sunset: toTimeStr(sunset),
-        sunriseHour: Math.floor(sunrise),
-        sunsetHour: Math.floor(sunset)
-    };
-}
 
 function getDailySummary(grouped, ymd, midData) {
     const keys = Object.keys(grouped).filter(k => k.startsWith(ymd)).sort();
