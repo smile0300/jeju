@@ -187,25 +187,28 @@ export async function fetchHallasanStatus(isAutoRetry = false) {
     } catch (e) {
         console.warn('한라산 실시간 로드 실패:', e);
         if (trailsEl) {
-            const isTimeout = e.name === 'TimeoutError' || e.message.includes('timeout') || e.message.includes('signal');
-            let errorText = isTimeout ? '官方网站响应延迟中' : '暂时無法加载登山路状态';
-            
-            // Handle automatic retry UI feedback
-            let retryHtml = '';
+            // 자동 재시도 처리 (UI에 에러를 표시하지 않음)
             if (delayedRetryCount < MAX_DELAYED_RETRIES) {
                 delayedRetryCount++;
                 const nextRetryDelay = 5; // seconds
-                errorText += ` (将在 ${nextRetryDelay} 秒后自动尝试)`;
-                retryHtml = `<p style="color: #3b82f6; font-size: 0.8rem; margin-top: 5px;">正在尝试自动重新加载 (${delayedRetryCount}/${MAX_DELAYED_RETRIES})...</p>`;
                 
+                // 첫 로드 실패 등으로 화면이 비어있는 경우에만 조용히 로딩 상태 유지
+                if (!trailsEl.innerHTML || trailsEl.innerHTML.includes('error-msg')) {
+                    trailsEl.innerHTML = `<div class="loading-lost"><p>正在尝试连接官方数据...</p></div>`;
+                }
+
                 setTimeout(() => {
                     fetchHallasanStatus(true);
                 }, nextRetryDelay * 1000);
+                return;
             }
 
+            // 모든 재시도가 실패한 경우에만 최종 에러 메시지 표시
+            const isTimeout = e.name === 'TimeoutError' || e.message.includes('timeout') || e.message.includes('signal');
+            let errorText = isTimeout ? '官方网站响应延迟中' : '暂时无法加载登山路状态';
+            
             trailsEl.innerHTML = `<div class="error-msg" style="grid-column: 1/-1; text-align:center; padding: 20px;">
                 <p style="color: var(--text-muted); font-size: 0.85rem;">${errorText}</p>
-                ${retryHtml}
                 <button onclick="window.hallasanApp.fetchStatus()" style="margin-top:10px; padding: 8px 16px; border-radius: 8px; border:none; background:var(--primary-gradient); color:white; font-weight:700;">重新加载</button>
             </div>`;
         }
