@@ -554,15 +554,15 @@
 .trail-block {
     background: white; 
     border-radius: 12px;
-    padding: 8px 4px; 
     border: 1px solid var(--border-light);
     box-shadow: 0 4px 12px rgba(0,0,0,0.03);
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 4px;
+    min-height: 100px;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    overflow: hidden;
 }
 
 .trail-block:hover {
@@ -570,8 +570,10 @@
     box-shadow: 0 8px 24px rgba(0,0,0,0.08);
 }
 
-.t-status-line {
+.t-status-line, .t-name-line, .t-info-line {
+    flex: 1;
     display: flex;
+    align-items: center;
     justify-content: center;
     width: 100%;
 }
@@ -582,17 +584,11 @@
     color: var(--text-primary); 
     margin: 0;
     line-height: 1.2;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    width: 100%;
 }
 
 .t-info-line {
     border-top: 1px dashed #edf2f7;
-    padding-top: 6px;
-    width: 100%;
-    text-align: center;
+    background: #fdfdfd;
 }
 
 .t-info-line span {
