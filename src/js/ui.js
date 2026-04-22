@@ -240,6 +240,7 @@ const LOC_META = {
     woljeong: { title: '月汀', sub: 'Woljeong' },
     udo:      { title: '牛岛', sub: 'Udo Island' },
     seongsan: { title: '城山日出峰', sub: 'Seongsan' },
+    sanbangsan: { title: '山房山', sub: 'Sanbangsan' },
 };
 
 function _buildSummaryHTML(targetYmd) {
