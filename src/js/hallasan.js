@@ -147,7 +147,6 @@ export async function fetchHallasanStatus() {
 const HALLASAN_CCTV = [
     { id: 'witseoreum', nameKo: '윗세오름', nameCn: '威势岳', url: 'https://hallacctv.kr/live/cctv03.stream_360p/playlist.m3u8' },
     { id: 'baengnokdam', nameKo: '백록담', nameCn: '白鹿潭', url: 'https://hallacctv.kr/live/cctv01.stream_360p/playlist.m3u8', isRepair: true },
-    { id: 'seongpanak', nameKo: '성판악', nameCn: '城板岳', url: 'https://hallacctv.kr/live/cctv06.stream_360p/playlist.m3u8' },
     { id: 'wanggwalleung', nameKo: '왕관릉', nameCn: '王冠陵', url: 'https://hallacctv.kr/live/cctv02.stream_360p/playlist.m3u8' },
     { id: 'eoseungsaengak', nameKo: '어승생악', nameCn: '御乘生岳', url: 'https://hallacctv.kr/live/cctv04.stream_360p/playlist.m3u8' },
     { id: '1100doro', nameKo: '1100고지', nameCn: '1100高地', url: 'https://hallacctv.kr/live/cctv05.stream_360p/playlist.m3u8' }
@@ -163,8 +162,7 @@ export function renderHallasanCCTV() {
             <div class="cctv-video-container">
                 ${cam.isRepair 
                     ? `<div class="cctv-repair-overlay">
-                         <div class="repair-icon">⚙️</div>
-                         <span>CCTV 수리 중</span>
+                         <span>CCTV 维修中</span>
                        </div>`
                     : `<video id="hallasan-video-${cam.id}" class="cctv-video-el" muted playsinline autoplay></video>`
                 }

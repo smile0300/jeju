@@ -231,12 +231,6 @@
     z-index: 2;
 }
 
-.repair-icon {
-    font-size: 2rem;
-    margin-bottom: 4px;
-    opacity: 0.5;
-}
-
 .cctv-tag.offline {
     background: #64748b !important;
     box-shadow: none;
