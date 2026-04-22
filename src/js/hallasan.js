@@ -152,27 +152,25 @@ export async function fetchHallasanStatus() {
             const sunTimes = getSunTimes(loc.lat, loc.lng, new Date());
             const sunriseProb = Math.max(10, Math.round(100 - (mtData.hm * 0.8) - (mtData.rn > 0 ? 50 : 0)));
 
-            // 8번: 백록담 관측 확률
+            // 8번: 백록담 관측
             trailsHtml += `
                 <div class="trail-block probability-block">
-                    <div class="t-status-line"></div>
-                    <div class="t-name-line">
-                        <h4>⛰️ 白鹿潭观赏</h4>
+                    <div class="prob-main">
+                        <span class="prob-value-large">${visibility}%</span>
                     </div>
-                    <div class="t-info-line">
-                        <span class="prob-value">${visibility}%</span>
+                    <div class="prob-footer">
+                        <span class="prob-label">⛰️ 白鹿潭观赏</span>
                     </div>
                 </div>`;
             
-            // 9번: 일출 관측 확률
+            // 9번: 일출 관측
             trailsHtml += `
                 <div class="trail-block probability-block">
-                    <div class="t-status-line"></div>
-                    <div class="t-name-line">
-                        <h4>🌅 日出观赏</h4>
+                    <div class="prob-main">
+                        <span class="prob-value-large">${sunriseProb}%</span>
                     </div>
-                    <div class="t-info-line">
-                        <span class="prob-value">${sunriseProb}%</span>
+                    <div class="prob-footer">
+                        <span class="prob-label">🌅 日出观赏</span>
                     </div>
                 </div>`;
         }
