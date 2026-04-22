@@ -86,7 +86,7 @@ export function renderHallasanDashboard(containerId = 'hallasan-dashboard-contai
 /**
  * 산림청 관측 데이터 기반 가시성 점수 산출
  */
-function calculateVisibilityScore(data) {
+export function calculateVisibilityScore(data) {
     const hm = data.hm;
     const ws = data.ws;
     const rn = data.rn;

@@ -1,5 +1,8 @@
 import { CONFIG } from './config.js';
 import { initHlsPlayer } from './cctv.js';
+import { WEATHER_STATE } from './weather.js';
+import { calculateVisibilityScore } from './hallasan-dashboard.js';
+import { getSunTimes } from './utils.js';
 
 export const HALLASAN_TRAILS = [
     { nameKo: '어리목탐방로', nameCn: '御里牧登山路', distanceCn: '6.8km（单程）', timeCn: '约3小时' },
@@ -117,7 +120,7 @@ export async function fetchHallasanStatus() {
                 <div class="hero-time-tag">更新于: ${new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}</div>
             </div>`;
 
-        trailsEl.innerHTML = trails.map(t => `
+        let trailsHtml = trails.map(t => `
             <div class="trail-block">
                 <div class="t-status-line">
                     <span class="trail-status-badge ${t.statusCls}">${t.statusCn}</span>
@@ -130,6 +133,57 @@ export async function fetchHallasanStatus() {
                     <span>${t.timeCn}</span>
                 </div>
             </div>`).join('');
+
+        // [NEW] 가시성 및 일출 정보 블록 추가 (8, 9번째 칸)
+        const weatherData = WEATHER_STATE['hallasan'];
+        if (weatherData) {
+            const rawData = weatherData.mountainData;
+            const currentKey = weatherData.sortedKeys?.[0];
+            const shortTermData = currentKey ? weatherData.items[currentKey] : {};
+            
+            const mtData = {
+                hm: parseFloat(rawData?.hm || shortTermData?.REH || 50),
+                ws: parseFloat(rawData?.ws || shortTermData?.WSD || 2),
+                rn: rawData?.rn ? parseFloat(rawData.rn) : (shortTermData?.PCP ? (parseFloat(shortTermData.PCP.replace(/[^0-9.]/g, '')) || 0) : 0)
+            };
+
+            const visibility = calculateVisibilityScore(mtData);
+            const loc = CONFIG.WEATHER_LOCATIONS['hallasan'];
+            const sunTimes = getSunTimes(loc.lat, loc.lng, new Date());
+            const sunriseProb = Math.max(10, Math.round(100 - (mtData.hm * 0.8) - (mtData.rn > 0 ? 50 : 0)));
+
+            // 8번: 백록담 관측 확률
+            trailsHtml += `
+                <div class="trail-block probability-block">
+                    <div class="t-status-line">
+                        <span class="trail-status-badge info">${visibility}%</span>
+                    </div>
+                    <div class="t-name-line">
+                        <h4>⛰️ 白鹿潭观赏概率</h4>
+                    </div>
+                    <div class="t-info-line">
+                        <span>基于实时气象数据</span>
+                        <span>推荐登山时间</span>
+                    </div>
+                </div>`;
+            
+            // 9번: 일출 관측 확률
+            trailsHtml += `
+                <div class="trail-block probability-block">
+                    <div class="t-status-line">
+                        <span class="trail-status-badge info">${sunriseProb}%</span>
+                    </div>
+                    <div class="t-name-line">
+                        <h4>🌅 日出观赏概率</h4>
+                    </div>
+                    <div class="t-info-line">
+                        <span>日出时间 ${sunTimes.sunrise}</span>
+                        <span>早晨气象环境</span>
+                    </div>
+                </div>`;
+        }
+
+        trailsEl.innerHTML = trailsHtml;
 
     } catch (e) {
         console.warn('한라산 실시간 로드 실패:', e);
