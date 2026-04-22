@@ -102,3 +102,28 @@ export function getMidTempVal(item, type, dayIdx) {
     }
     return null;
 }
+
+/**
+ * 위도, 경도, 날짜를 기반으로 일출/일몰 시간을 계산 (천문 산출식)
+ */
+export function getSunTimes(lat, lng, date) {
+    const radian = Math.PI / 180;
+    const dayOfYear = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
+    const decl = 0.409 * Math.sin(2 * Math.PI * (dayOfYear - 81) / 365);
+    const ha = Math.acos(-Math.tan(lat * radian) * Math.tan(decl)) / radian;
+    const sunrise = 12 - (ha / 15) - (lng / 15) + 9;
+    const sunset = 12 + (ha / 15) - (lng / 15) + 9;
+    
+    const toTimeStr = (decimalHour) => {
+        const h = Math.floor(decimalHour);
+        const m = Math.round((decimalHour - h) * 60);
+        return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+    };
+    
+    return {
+        sunrise: toTimeStr(sunrise),
+        sunset: toTimeStr(sunset),
+        sunriseHour: Math.floor(sunrise),
+        sunsetHour: Math.floor(sunset)
+    };
+}
