@@ -410,6 +410,28 @@
 .url-circle { background: #f1f5f9; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); }
 .cs-circle { background: #3b82f6; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25); }
 
+/* Share Group Box Styling */
+.share-group {
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 15px 10px;
+    margin-right: 15px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.share-group-title {
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #64748b;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
 .share-circle-item span {
     font-size: 0.75rem;
     font-weight: 700;
