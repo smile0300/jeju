@@ -164,7 +164,7 @@ export async function submitCSFeedback() {
     const wechat = wechatEl?.value.trim() || 'N/A';
 
     if (!content) {
-        alert('내용을 입력해주세요. / 请输入内容。');
+        alert('请输入内容。');
         return;
     }
 
@@ -172,7 +172,7 @@ export async function submitCSFeedback() {
         submitBtn.disabled = true;
         statusEl.style.display = 'block';
         statusEl.style.color = '#3b82f6';
-        statusEl.textContent = '제출 중... / 提交中...';
+        statusEl.textContent = '提交中...';
 
         // 구글 시트 연동을 위한 POST 요청 (기본 API 엔드포인트 활용)
         const res = await fetch(`${CONFIG.PROXY_URL}/api/feature-request`, {
@@ -189,7 +189,7 @@ export async function submitCSFeedback() {
 
         if (res.ok) {
             statusEl.style.color = '#07c160';
-            statusEl.textContent = '✅ 성공적으로 제출되었습니다! / 提交成功！';
+            statusEl.textContent = '✅ 提交成功！';
             contentEl.value = '';
             if (wechatEl) wechatEl.value = '';
             
@@ -203,11 +203,11 @@ export async function submitCSFeedback() {
 
             setTimeout(closeCSModal, 2000);
         } else {
-            throw new Error('서버 오류 / Server Error');
+            throw new Error('服务器错误');
         }
     } catch (e) {
         statusEl.style.color = '#ef4444';
-        statusEl.textContent = `❌ 실패: ${e.message} / 失败`;
+        statusEl.textContent = `❌ 失败: ${e.message}`;
     } finally {
         submitBtn.disabled = false;
     }
