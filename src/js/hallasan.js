@@ -25,10 +25,15 @@ const TRAIL_STATUS_MAP = {
 };
 
 let isFetchingHallasanStatus = false;
+let delayedRetryCount = 0; // Track automatic delayed retries
+const MAX_DELAYED_RETRIES = 2; // Maximum number of automatic delayed retries
 
-export async function fetchHallasanStatus() {
+export async function fetchHallasanStatus(isAutoRetry = false) {
     if (isFetchingHallasanStatus) return;
     isFetchingHallasanStatus = true;
+
+    // Reset auto-retry count if it's a manual request
+    if (!isAutoRetry) delayedRetryCount = 0;
 
     const container = document.getElementById('hallasan-status-container');
     const trailsEl = document.getElementById('trails-grid');
@@ -37,15 +42,17 @@ export async function fetchHallasanStatus() {
         return;
     }
 
-    const now = new Date().toLocaleString('zh-CN');
-    container.innerHTML = ``;
-
+    // Only clear and show loading if it's not a background retry
+    if (!isAutoRetry) {
+        container.innerHTML = ``;
+    }
+    
     renderHallasanCCTV();
     
     try {
         const url = `${CONFIG.PROXY_URL}/api/hallasan-status`;
         let response;
-        let retryCount = 1;
+        let retryCount = 2; // Total 3 attempts (initial + 2 retries)
 
         while (retryCount >= 0) {
             try {
@@ -57,7 +64,7 @@ export async function fetchHallasanStatus() {
                 if (retryCount === 0) throw err;
                 console.warn('[Hallasan] Fetch failed, retrying...', err);
                 retryCount--;
-                await new Promise(r => setTimeout(r, 1000));
+                await new Promise(r => setTimeout(r, 2000));
             }
         }
         
@@ -175,14 +182,30 @@ export async function fetchHallasanStatus() {
         }
 
         trailsEl.innerHTML = trailsHtml;
+        delayedRetryCount = 0; // Success! Reset auto-retry count
 
     } catch (e) {
         console.warn('한라산 실시간 로드 실패:', e);
         if (trailsEl) {
             const isTimeout = e.name === 'TimeoutError' || e.message.includes('timeout') || e.message.includes('signal');
-            const errorText = isTimeout ? '官方网站响应延迟中 (请稍后再试)' : '暂时無法加载登山路状态';
+            let errorText = isTimeout ? '官方网站响应延迟中' : '暂时無法加载登山路状态';
+            
+            // Handle automatic retry UI feedback
+            let retryHtml = '';
+            if (delayedRetryCount < MAX_DELAYED_RETRIES) {
+                delayedRetryCount++;
+                const nextRetryDelay = 5; // seconds
+                errorText += ` (将在 ${nextRetryDelay} 秒后自动尝试)`;
+                retryHtml = `<p style="color: #3b82f6; font-size: 0.8rem; margin-top: 5px;">正在尝试自动重新加载 (${delayedRetryCount}/${MAX_DELAYED_RETRIES})...</p>`;
+                
+                setTimeout(() => {
+                    fetchHallasanStatus(true);
+                }, nextRetryDelay * 1000);
+            }
+
             trailsEl.innerHTML = `<div class="error-msg" style="grid-column: 1/-1; text-align:center; padding: 20px;">
                 <p style="color: var(--text-muted); font-size: 0.85rem;">${errorText}</p>
+                ${retryHtml}
                 <button onclick="window.hallasanApp.fetchStatus()" style="margin-top:10px; padding: 8px 16px; border-radius: 8px; border:none; background:var(--primary-gradient); color:white; font-weight:700;">重新加载</button>
             </div>`;
         }

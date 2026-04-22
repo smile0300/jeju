@@ -551,6 +551,14 @@
     padding-bottom: 30px;
 }
 
+/* PC/Tablet View: Ensure 3 columns for balanced 3x3 layout */
+@media (min-width: 768px) {
+    .trails-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px; /* Slightly larger gap for PC */
+    }
+}
+
 .trail-block {
     background: white; 
     border-radius: 12px;
