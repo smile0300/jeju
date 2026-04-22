@@ -550,6 +550,13 @@
     gap: 10px; 
     padding-bottom: 30px;
 }
+
+@media (max-width: 480px) {
+    .trails-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+}
 .trail-card {
     background: white; 
     border-radius: 16px;
@@ -571,6 +578,8 @@
     justify-content: space-between;
     align-items: center;
     width: 100%;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 .trail-header h4 { 
     font-size: 0.88rem; 
