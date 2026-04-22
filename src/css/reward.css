@@ -60,6 +60,9 @@
     font-weight: 900;
     margin-bottom: 4px;
     letter-spacing: -0.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .trust-desc {
@@ -67,6 +70,9 @@
     font-size: 1rem;
     line-height: 1.5;
     font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Mission List Grid */
