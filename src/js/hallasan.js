@@ -145,6 +145,7 @@ export async function fetchHallasanStatus() {
 }
 
 const HALLASAN_CCTV = [
+    { id: 'seongpanak', nameKo: '성판악', nameCn: '城板岳', url: 'https://hallacctv.kr/live/cctv06.stream_360p/playlist.m3u8' },
     { id: 'wanggwalleung', nameKo: '왕관릉', nameCn: '王冠陵', url: 'https://hallacctv.kr/live/cctv02.stream_360p/playlist.m3u8' },
     { id: 'witseoreum', nameKo: '윗세오름', nameCn: '威势岳', url: 'https://hallacctv.kr/live/cctv03.stream_360p/playlist.m3u8' },
     { id: 'eoseungsaengak', nameKo: '어승생악', nameCn: '御乘生岳', url: 'https://hallacctv.kr/live/cctv04.stream_360p/playlist.m3u8' },
