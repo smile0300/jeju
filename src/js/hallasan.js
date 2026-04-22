@@ -60,11 +60,21 @@ export async function fetchHallasanStatus() {
         
         const statusMapList = await response.json();
         const statusMap = {};
-        if (Array.isArray(statusMapList)) {
-            statusMapList.forEach(item => { statusMap[item.name] = item.status; });
+
+        // 서버에서 에러 객체를 반환한 경우 처리
+        if (statusMapList.error) {
+            throw new Error(statusMapList.error);
         }
 
-        if (Object.keys(statusMap).length === 0) throw new Error('API return empty');
+        if (Array.isArray(statusMapList)) {
+            statusMapList.forEach(item => { statusMap[item.name] = item.status; });
+        } else {
+            throw new Error('Invalid API response format');
+        }
+
+        if (Object.keys(statusMap).length === 0) {
+            throw new Error('API return empty (No matching trail status found)');
+        }
 
         const trails = HALLASAN_TRAILS.map(t => {
             const koStatus = statusMap[t.nameKo];

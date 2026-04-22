@@ -238,11 +238,11 @@ export async function onRequest(context) {
       // 분석된 RAW HTML 구조에 최적화된 정규표현식
       const blockPattern = /<dl[^>]*>[\s\S]*?<\/dl>/g;
       const namePattern = /<dt[^>]*>([\s\S]*?)<\/dt>/;
-      // 상태값은 dd.situation 클래스에 위치함
+      // 상태값은 dd에 위치하며 situation 클래스를 포함함 (순서나 추가 클래스에 유연하게 대응)
       const statusPattern = /<dd[^>]*class="[^"]*situation[^"]*"[^>]*>([\s\S]*?)<\/dd>/;
       
       const decodeHtmlEntities = (str) => str.replace(/&#(\d+);/g, (match, dec) => String.fromCharCode(dec));
-      const stripTags = (str) => decodeHtmlEntities((str || '').replace(/<[^>]*>?/gm, '').replace(/&nbsp;/g, '').trim());
+      const stripTags = (str) => decodeHtmlEntities((str || '').replace(/<[^>]*>?/gm, '').replace(/&nbsp;/g, '').replace(/\s+/g, ' ').trim());
 
       const results = [];
       let match;
@@ -257,6 +257,23 @@ export async function onRequest(context) {
             status: stripTags(statusMatch[1])
           });
         }
+      }
+
+      if (results.length === 0) {
+        // 매칭 결과가 없을 경우 디버깅을 위해 HTML 구조 요약 반환
+        const htmlSnippet = html.substring(0, 500).replace(/\s+/g, ' ');
+        return new Response(JSON.stringify({ 
+          error: 'API return empty (Scraper matched 0 items)', 
+          debug: { 
+            htmlLength: html.length,
+            snippet: htmlSnippet,
+            hasDl: html.includes('<dl'),
+            hasSituation: html.includes('situation')
+          }
+        }), {
+          status: 200, // 클라이언트에서 에러 객체로 처리하도록 200으로 반환하되 error 필드 포함
+          headers: { 'Access-Control-Allow-Origin': ALLOWED_ORIGIN, 'Content-Type': 'application/json' }
+        });
       }
 
       return new Response(JSON.stringify(results), {
