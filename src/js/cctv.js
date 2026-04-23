@@ -313,7 +313,7 @@ function animateZoom(region) {
 }
 
 /**
- * CCTV 상세 카드 열기 (영상 재생)
+ * CCTV 상세 카드 열기 (영상 재생 또는 외부 링크)
  */
 export function openCctvCard(id) {
     console.log('[CCTV] --- openCctvCard Init --- ID:', id);
@@ -324,6 +324,55 @@ export function openCctvCard(id) {
         return;
     }
 
+    // player 타입: 새 탭으로 trendworld.kr 플레이어 열기
+    if (cam.type === 'player' && cam.player_url) {
+        console.log('[CCTV] Player type → opening external player:', cam.player_url);
+
+        const card = document.getElementById('cctv-detail-card');
+        const nameEl = document.getElementById('cctv-target-name');
+        const videoEl = document.getElementById('cctv-live-video');
+
+        if (!card || !nameEl || !videoEl) return;
+
+        nameEl.textContent = cam.nameCn;
+        card.classList.add('show');
+        card.style.display = 'flex';
+        videoEl.style.display = 'none';
+
+        if (window.pushModalState) window.pushModalState();
+
+        // 기존 미지원 메시지/외부링크 카드 제거
+        let existing = card.querySelector('.no-stream-msg');
+        if (existing) existing.remove();
+
+        // 외부 플레이어 링크 카드 표시
+        const msg = document.createElement('div');
+        msg.className = 'no-stream-msg';
+        msg.innerHTML = `
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;gap:16px;padding:20px;">
+                <span style="font-size:2.5rem;">📹</span>
+                <div style="text-align:center;">
+                    <div style="font-size:1rem;font-weight:700;color:#fff;margin-bottom:6px;">${cam.nameCn}</div>
+                    <div style="font-size:0.8rem;color:#aaa;margin-bottom:16px;">点击下方按钮在新窗口观看实时视频</div>
+                </div>
+                <a href="${cam.player_url}" target="_blank" rel="noopener noreferrer"
+                   style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;
+                          background:linear-gradient(135deg,#00c6ff,#0072ff);color:#fff;
+                          border-radius:50px;font-size:0.9rem;font-weight:700;text-decoration:none;
+                          box-shadow:0 4px 15px rgba(0,114,255,0.4);transition:transform 0.2s,box-shadow 0.2s;"
+                   onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 20px rgba(0,114,255,0.6)'"
+                   onmouseout="this.style.transform='';this.style.boxShadow='0 4px 15px rgba(0,114,255,0.4)'">
+                    ▶ 观看实时直播
+                </a>
+                <div style="font-size:0.72rem;color:#666;text-align:center;">
+                    将在新标签页中打开 · cctv.trendworld.kr
+                </div>
+            </div>`;
+        videoEl.parentElement.appendChild(msg);
+        return;
+    }
+
+    // HLS 타입: 기존 영상 재생 로직
     console.log('[CCTV] Target CCTV:', cam.nameCn, 'URL Type:', cam.type, 'Port:', cam.port);
     const card = document.getElementById('cctv-detail-card');
     const nameEl = document.getElementById('cctv-target-name');
