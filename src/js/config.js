@@ -1,43 +1,45 @@
 export const CONFIG = {
-    // Cloudflare Worker 보안 프록시 URL
+    // Cloudflare 기본 프록시 URL
     PROXY_URL: window.location.origin,
 
-    // 외부 프록시 URL (1935 포트 등 Cloudflare 제한 우회용)
-    // 사용자가 Vercel 등에 tools/proxy/vercel-proxy.js를 배포한 후 그 주소를 여기에 입력해야 합니다.
+    // CCTV HLS 전용 프록시 URL (functions/api/cctv-proxy.js)
+    CCTV_PROXY_URL: `${window.location.origin}/api/cctv-proxy?url=`,
+
+    // 외부 프록시 URL (1935/8080 포트 등 Cloudflare 제한 우회용 - 현재 미사용)
     EXTERNAL_PROXY_URL: 'https://proxy-server-mu-sandy.vercel.app/api/proxy?url=', 
 
-    // CCTV 스트림 소스 (방재 시스템 최적화 버전)
+    // CCTV 스트림 소스
+    // [★] = Port 80 소스, Cloudflare 프록시 직접 재생 가능
+    // [✗] = Port 1935/8080 소스, Cloudflare에서 차단됨 → 재생 불가 (영상 미지원 표시)
     CCTV: [
         // --- 북부 / 제주시 권역 ---
-        { id: 'tapdong_emg', category: 'jeju', nameKo: '탑동', nameCn: '塔洞', type: 'hls', url: 'http://59.8.86.94:8080/media/api/v1/hls/vurix/192871/100001/0/0', lat: 33.5186, lon: 126.5262 },
-        { id: 'samyang_tour', category: 'jeju', nameKo: '삼양 해수욕장', nameCn: '三阳海水浴场', type: 'hls', url: 'http://211.114.96.121:1935/jejusi6/11-14.stream/playlist.m3u8', lat: 33.5255, lon: 126.5866 },
-        { id: 'iho_tour', category: 'jeju', nameKo: '이호 해수욕장', nameCn: '梨湖海水浴场', type: 'hls', url: 'http://211.114.96.121:1935/jejusi7/11-30T.stream/playlist.m3u8', lat: 33.4984, lon: 126.4529 },
+        { id: 'jeju_airport', category: 'jeju', nameKo: '제주공항', nameCn: '济州机场', type: 'hls', url: 'http://123.140.197.51/stream/33/play.m3u8', lat: 33.5113, lon: 126.4930 },           // [★] Port 80
+        { id: 'tapdong_emg', category: 'jeju', nameKo: '탑동', nameCn: '塔洞', type: 'hls', url: 'http://59.8.86.94:8080/media/api/v1/hls/vurix/192871/100001/0/0', lat: 33.5186, lon: 126.5262 }, // [✗] Port 8080
+        { id: 'samyang_tour', category: 'jeju', nameKo: '삼양 해수욕장', nameCn: '三阳海水浴场', type: 'hls', url: 'http://211.114.96.121:1935/jejusi6/11-14.stream/playlist.m3u8', lat: 33.5255, lon: 126.5866 }, // [✗] Port 1935
+        { id: 'iho_tour', category: 'jeju', nameKo: '이호 해수욕장', nameCn: '梨湖海水浴场', type: 'hls', url: 'http://211.114.96.121:1935/jejusi7/11-30T.stream/playlist.m3u8', lat: 33.4984, lon: 126.4529 }, // [✗] Port 1935
 
         // --- 남부 / 서귀포 권역 ---
-        { id: 'seogwihang_emg', category: 'seogwipo', nameKo: '서귀항', nameCn: '西归浦港', type: 'hls', url: 'http://59.8.86.94:8080/media/api/v1/hls/vurix/192871/100009/0/0', lat: 33.2425, lon: 126.5645 },
-        { id: 'beophwan_p_emg', category: 'seogwipo', nameKo: '법환포구', nameCn: '法桓浦口', type: 'hls', url: 'http://59.8.86.94:8080/media/api/v1/hls/vurix/192871/100007/0/0', lat: 33.2384, lon: 126.5173 },
-        { id: 'beophwan_v_emg', category: 'seogwipo', nameKo: '법환어촌계', nameCn: '法桓渔村', type: 'hls', url: 'http://59.8.86.94:8080/media/api/v1/hls/vurix/192871/100008/0/0', lat: 33.2365, lon: 126.5160 },
-        { id: 'jungmun_emg', category: 'seogwipo', nameKo: '중문해수욕장', nameCn: '中文海水浴场', type: 'hls', url: 'http://59.8.86.94:8080/media/api/v1/hls/vurix/192871/100010/0/0', lat: 33.2464, lon: 126.4137 },
+        { id: 'saeyeongyo', category: 'seogwipo', nameKo: '새연교', nameCn: '新缘桥', type: 'hls', url: 'http://123.140.197.51/stream/35/play.m3u8', lat: 33.2375, lon: 126.5601 },              // [★] Port 80
+        { id: 'seogwihang_emg', category: 'seogwipo', nameKo: '서귀항', nameCn: '西归浦港', type: 'hls', url: 'http://59.8.86.94:8080/media/api/v1/hls/vurix/192871/100009/0/0', lat: 33.2425, lon: 126.5645 }, // [✗] Port 8080
+        { id: 'beophwan_p_emg', category: 'seogwipo', nameKo: '법환포구', nameCn: '法桓浦口', type: 'hls', url: 'http://59.8.86.94:8080/media/api/v1/hls/vurix/192871/100007/0/0', lat: 33.2384, lon: 126.5173 }, // [✗] Port 8080
+        { id: 'jungmun_emg', category: 'seogwipo', nameKo: '중문해수욕장', nameCn: '中文海水浴场', type: 'hls', url: 'http://59.8.86.94:8080/media/api/v1/hls/vurix/192871/100010/0/0', lat: 33.2464, lon: 126.4137 }, // [✗] Port 8080
 
         // --- 동부 권역 ---
-        { id: 'seongsan_tour', category: 'east', nameKo: '성산 일출봉', nameCn: '城山日出峰', type: 'hls', url: 'http://123.140.197.51/stream/34/play.m3u8', lat: 33.4586, lon: 126.9421 },
-        { id: 'sanhang_tour', category: 'east', nameKo: '성산항', nameCn: '城山港', type: 'hls', url: 'http://211.34.191.215:1935/live/1-140.stream/playlist.m3u8', lat: 33.4735, lon: 126.9332 },
-        { id: 'cheonjin_udo', category: 'udo', nameKo: '우도 천진항', nameCn: '牛岛天津港', type: 'hls', url: 'http://211.114.96.121:1935/jejusi7/11-24.stream/playlist.m3u8', lat: 33.4965, lon: 126.9535 },
-        { id: 'haumok_udo', category: 'udo', nameKo: '우도 하우목동항', nameCn: '牛岛下牛木洞港', type: 'hls', url: 'http://211.114.96.121:1935/jejusi7/11-23.stream/playlist.m3u8', lat: 33.5105, lon: 126.9432 },
-        { id: 'hamdeok_tour', category: 'east', nameKo: '함덕 해수욕장', nameCn: '咸德海水浴场', type: 'hls', url: 'http://211.114.96.121:1935/jejusi6/11-19.stream/playlist.m3u8', lat: 33.5434, lon: 126.6692 },
-        { id: 'woljeong_tour', category: 'east', nameKo: '월정리 해수욕장', nameCn: '月汀里海水浴场', type: 'hls', url: 'http://211.114.96.121:1935/jejusi7/11-21.stream/playlist.m3u8', lat: 33.5562, lon: 126.7958 },
-        { id: 'onpyeong_emg', category: 'east', nameKo: '온평어촌계', nameCn: '温平渔村', type: 'hls', url: 'http://59.8.86.94:8080/media/api/v1/hls/vurix/192871/100011/0/0', lat: 33.4079, lon: 126.9085 },
-        { id: 'gujwa_emg', category: 'east', nameKo: '구좌읍사무소', nameCn: '旧左邑事务所', type: 'hls', url: 'http://59.8.86.94:8080/media/api/v1/hls/vurix/192871/100002/0/0', lat: 33.5152, lon: 126.8530 },
-        { id: 'pyeonghwagyo_emg', category: 'east', nameKo: '평화교', nameCn: '平和桥', type: 'hls', url: 'http://59.8.86.94:8080/media/api/v1/hls/vurix/192871/100013/0/0', lat: 33.3283, lon: 126.8158 },
-        { id: 'namwon_emg', category: 'east', nameKo: '남원어촌계', nameCn: '南元渔村', type: 'hls', url: 'http://59.8.86.94:8080/media/api/v1/hls/vurix/192871/100006/0/0', lat: 33.2754, lon: 126.7118 },
+        { id: 'seongsan_tour', category: 'east', nameKo: '성산 일출봉', nameCn: '城山日出峰', type: 'hls', url: 'http://123.140.197.51/stream/34/play.m3u8', lat: 33.4586, lon: 126.9421 },     // [★] Port 80
+        { id: 'sanhang_tour', category: 'east', nameKo: '성산항', nameCn: '城山港', type: 'hls', url: 'http://211.34.191.215:1935/live/1-140.stream/playlist.m3u8', lat: 33.4735, lon: 126.9332 }, // [✗] Port 1935
+        { id: 'cheonjin_udo', category: 'udo', nameKo: '우도 천진항', nameCn: '牛岛天津港', type: 'hls', url: 'http://211.114.96.121:1935/jejusi7/11-24.stream/playlist.m3u8', lat: 33.4965, lon: 126.9535 }, // [✗] Port 1935
+        { id: 'haumok_udo', category: 'udo', nameKo: '우도 하우목동항', nameCn: '牛岛下牛木洞港', type: 'hls', url: 'http://211.114.96.121:1935/jejusi7/11-23.stream/playlist.m3u8', lat: 33.5105, lon: 126.9432 }, // [✗] Port 1935
+        { id: 'hamdeok_tour', category: 'east', nameKo: '함덕 해수욕장', nameCn: '咸德海水浴场', type: 'hls', url: 'http://211.114.96.121:1935/jejusi6/11-19.stream/playlist.m3u8', lat: 33.5434, lon: 126.6692 }, // [✗] Port 1935
+        { id: 'woljeong_tour', category: 'east', nameKo: '월정리 해수욕장', nameCn: '月汀里海水浴场', type: 'hls', url: 'http://211.114.96.121:1935/jejusi7/11-21.stream/playlist.m3u8', lat: 33.5562, lon: 126.7958 }, // [✗] Port 1935
+        { id: 'onpyeong_emg', category: 'east', nameKo: '온평어촌계', nameCn: '温平渔村', type: 'hls', url: 'http://59.8.86.94:8080/media/api/v1/hls/vurix/192871/100011/0/0', lat: 33.4079, lon: 126.9085 }, // [✗] Port 8080
+        { id: 'namwon_emg', category: 'east', nameKo: '남원어촌계', nameCn: '南元渔村', type: 'hls', url: 'http://59.8.86.94:8080/media/api/v1/hls/vurix/192871/100006/0/0', lat: 33.2754, lon: 126.7118 }, // [✗] Port 8080
 
         // --- 서부 권역 ---
-        { id: 'hyeopjae_tour', category: 'west', nameKo: '협재 해수욕장', nameCn: '挟才海水浴场', type: 'hls', url: 'http://211.114.96.121:1935/jejusi6/11-17.stream/playlist.m3u8', lat: 33.3934, lon: 126.2392 },
-        { id: 'gwakji_tour', category: 'west', nameKo: '곽지 해수욕장', nameCn: '郭支海水浴场', type: 'hls', url: 'http://211.114.96.121:1935/jejusi6/11-16.stream/playlist.m3u8', lat: 33.4515, lon: 126.3105 },
-        { id: 'panpo_tour', category: 'west', nameKo: '판포포구', nameCn: '板浦浦口', type: 'hls', url: 'http://211.114.96.121:1935/jejusi6/11-18.stream/playlist.m3u8', lat: 33.3615, lon: 126.2005 },
-        { id: 'ongpo_emg', category: 'west', nameKo: '옹포항', nameCn: '瓮浦港', type: 'hls', url: 'http://59.8.86.94:8080/media/api/v1/hls/vurix/192871/100005/0/0', lat: 33.3965, lon: 126.2415 },
-        { id: 'sanbangsan_emg', category: 'west', nameKo: '산방산', nameCn: '山房山', type: 'hls', url: 'http://59.8.86.94:8080/media/api/v1/hls/vurix/192871/100012/0/0', lat: 33.2355, lon: 126.3129 },
-        { id: 'sinchang_emg', category: 'west', nameKo: '신창리포구', nameCn: '新昌里浦口', type: 'hls', url: 'http://59.8.86.94:8080/media/api/v1/hls/vurix/192871/100004/0/0', lat: 33.3524, lon: 126.1774 }
+        { id: 'hyeopjae_tour', category: 'west', nameKo: '협재 해수욕장', nameCn: '挟才海水浴场', type: 'hls', url: 'http://211.114.96.121:1935/jejusi6/11-17.stream/playlist.m3u8', lat: 33.3934, lon: 126.2392 }, // [✗] Port 1935
+        { id: 'gwakji_tour', category: 'west', nameKo: '곽지 해수욕장', nameCn: '郭支海水浴场', type: 'hls', url: 'http://211.114.96.121:1935/jejusi6/11-16.stream/playlist.m3u8', lat: 33.4515, lon: 126.3105 }, // [✗] Port 1935
+        { id: 'panpo_tour', category: 'west', nameKo: '판포포구', nameCn: '板浦浦口', type: 'hls', url: 'http://211.114.96.121:1935/jejusi6/11-18.stream/playlist.m3u8', lat: 33.3615, lon: 126.2005 }, // [✗] Port 1935
+        { id: 'sanbangsan_emg', category: 'west', nameKo: '산방산', nameCn: '山房山', type: 'hls', url: 'http://59.8.86.94:8080/media/api/v1/hls/vurix/192871/100012/0/0', lat: 33.2355, lon: 126.3129 }, // [✗] Port 8080
+        { id: 'sinchang_emg', category: 'west', nameKo: '신창리포구', nameCn: '新昌里浦口', type: 'hls', url: 'http://59.8.86.94:8080/media/api/v1/hls/vurix/192871/100004/0/0', lat: 33.3524, lon: 126.1774 } // [✗] Port 8080
     ],
 
     // 날씨 좌표 (기상청 격자 nx,ny)

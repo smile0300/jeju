@@ -394,6 +394,11 @@ export function openCctvCard(id) {
 async function resolveStreamUrl(cam) {
     if (cam.type === 'hls') {
         if (!cam.url || cam.url.includes('placeholder')) return null;
+        // 비표준 포트(1935, 8080)는 Cloudflare에서 차단 → 재생 불가
+        if (isNonStandardPort(cam.url)) {
+            console.warn('[CCTV] 비표준 포트 소스 → 재생 불가:', cam.url);
+            return null;
+        }
         return cam.url;
     }
     if (cam.type === 'its') return null;
@@ -439,21 +444,21 @@ function isNonStandardPort(url) {
 /**
  * 스트림 URL에 맞는 프록시 URL 반환
  * - hallacctv.kr: CORS 지원 → 직접 요청
- * - 1935/8080 포트: Cloudflare 차단 → Vercel 외부 프록시 사용
- * - 그 외 HTTP 외부 URL: Cloudflare 프록시 사용
+ * - Port 80: CCTV 전용 프록시(/api/cctv-proxy)로 처리
+ * - Port 1935/8080: Cloudflare에서 차단됨 → null 반환 (미지원 표시)
  */
 function getProxiedUrl(streamUrl) {
     if (streamUrl.includes('hallacctv.kr')) return streamUrl;  // CORS 지원, 직접 요청
-    if (streamUrl.includes(CONFIG.PROXY_URL)) return streamUrl; // 이미 프록시 적용됨
+    if (streamUrl.includes(CONFIG.CCTV_PROXY_URL)) return streamUrl; // 이미 프록시 적용됨
 
     if (isNonStandardPort(streamUrl)) {
-        // 1935/8080 포트 → Cloudflare가 차단하므로 Vercel 외부 프록시로 우회
-        console.log('[CCTV] 비표준 포트 감지 → Vercel 외부 프록시 사용:', streamUrl);
-        return `${CONFIG.EXTERNAL_PROXY_URL}${encodeURIComponent(streamUrl)}`;
+        // 1935/8080 포트 → Cloudflare에서 아웃바운드 차단 → 재생 불가
+        console.warn('[CCTV] 비표준 포트 감지 → Cloudflare 차단 대상, 재생 불가:', streamUrl);
+        return null;
     }
 
-    // 일반 HTTP 외부 URL → Cloudflare 프록시
-    return `${CONFIG.PROXY_URL}/api/public-data?url=${encodeURIComponent(streamUrl)}`;
+    // 일반 HTTP 외부 URL → CCTV 전용 프록시
+    return `${CONFIG.CCTV_PROXY_URL}${encodeURIComponent(streamUrl)}`;
 }
 
 /**
