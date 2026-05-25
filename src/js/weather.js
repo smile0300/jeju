@@ -268,13 +268,13 @@ export function parseAndRenderWeather(locKey, items, midData, mountainData) {
         renderHallasanDashboard();
     }
 
-    const cctvBtn = document.getElementById(`cctv-btn-${locKey}`);
-    if (cctvBtn) {
-        const cctv = getNearestCCTV(locKey);
-        if (cctv) {
-            cctvBtn.innerHTML = `<button class="header-cctv-btn" onclick="openCctvModal('${cctv.id}')">📺 CCTV</button>`;
-        }
-    }
+    // const cctvBtn = document.getElementById(`cctv-btn-${locKey}`);
+    // if (cctvBtn) {
+    //     const cctv = getNearestCCTV(locKey);
+    //     if (cctv) {
+    //         cctvBtn.innerHTML = `<button class="header-cctv-btn" onclick="openCctvModal('${cctv.id}')">📺 CCTV</button>`;
+    //     }
+    // }
 
     const currentCard = document.getElementById(`current-card-${locKey}`);
     if (currentCard) {

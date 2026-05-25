@@ -67,20 +67,25 @@
 - **JSON 경로 대응**: API 응답 구조 변화에 따라 `response.body.items` 배열을 직접 참조하도록 파싱 안정화 (2026-03-23).
 
 ## 6. 축제 및 행사 (Festivals)
-- **데이터 소스**: 비짓제주 공식 API (`api.visitjeju.net/api/contents/list`)
-- **수집 방식**: 매주 월요일 GitHub Actions를 통해 자동 업데이트 (`execution/update_festivals.js`)
+- **데이터 소스**: 비짓제주 공식 웹사이트 (`visitjeju.net/kr/festival/list`) Puppeteer 크롤링
+- **수집 방식**: 매주 금요일 09:00 KST GitHub Actions를 통해 자동 업데이트 (`execution/fetch_festivals.js`)
+- **수집 메커니즘 (v4, 2026-05-25)**:
+    - Puppeteer 헤드리스 브라우저로 비짓제주 축제 페이지 접속
+    - 각 월마다 페이지를 새로 로드한 뒤 `ElementHandle.click()`으로 월 탭을 네이티브 클릭
+    - `waitForNetworkIdle`로 AJAX 콘텐츠 로딩 완료 감지 후 데이터 수집
+    - 선택자: `a[href*="/festival/view"]` 내부의 `strong`(제목), `span`(기간), `i`(상태), `img`(썸네일)
+- **저장 경로**: `public/assets/curated_festivals.js` (window.FESTIVAL_DATA 전역 객체)
 - **UI 요구사항**:
     - 모든 카드는 중앙 정렬 (`text-align: center`)
     - 상단에 중국어 간체 번역 태그 표시 (FESTIVAL_TRANSLATIONS 맵 활용)
     - 진행중(빨강) / 예정(파랑) 라벨은 카드 이미지 왼쪽 상단에 위치
-    - 데이터가 없는 경우 "(每周一自动更新)" 안내 문구 파란색으로 표시
-- **유지보수**: 새로운 축제 번역이 필요한 경우 `execution/update_festivals.js`의 `FESTIVAL_TRANSLATIONS` 객체에 추가
+    - 데이터가 없는 경우 안내 문구 파란색으로 표시
+- **유지보수**: 새로운 축제 번역이 필요한 경우 `src/js/festival.js`의 `FESTIVAL_TRANSLATIONS` 객체에 추가
 - **클라이언트 사이드 렌더링 (`src/js/festival.js`)**:
-  - **정적 캐싱**: 수집된 데이터를 `assets/curated_festivals.js`에 저장하여 속도 및 접근성 보장.
+  - **정적 캐싱**: 수집된 데이터를 `public/assets/curated_festivals.js`에 저장하여 속도 및 접근성 보장.
   - **UI 최적화 (v7.0)**: 
     - **가운데 정렬**: 모든 축제 정보(태그, 제목, 날짜)를 카드 중앙에 배치.
     - **상태 라벨**: '진행중'(ing)과 '예정'(upcoming) 라벨을 상단 동일 위치에 표시 (색상으로 구분).
-    - **자동 업데이트 안내**: 데이터 부재 시 "(每周一自动更新)" 안내 문구를 파란색 강조로 노출.
   - **최종 필터링**: 현재 날짜 기준으로 종료 여부 최종 판별.
 
 ## 10. 보안 및 환경설정 (Security & Config)
