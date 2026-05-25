@@ -44,6 +44,8 @@ const ALERT_TRANSLATIONS = {
 
 // 최신 특보 데이터를 모달에서 참조하기 위한 전역 변수
 let LATEST_ALERTS = [];
+let TODAY_ALERTS_HISTORY = [];
+let IS_HISTORY_FALLBACK = false;
 
 /**
  * 기상 특보 한글 메시지를 중국어 간체로 번역
@@ -777,11 +779,30 @@ export async function fetchWeatherAlerts() {
     if (!alertsContainer && !homeAlertsContainer) return;
     try {
         const endpoint = 'https://apis.data.go.kr/1360000/WthrWrnInfoService/getWthrWrnList';
-        const params = { numOfRows: 10, pageNo: 1, dataType: 'JSON', stnId: 184 };
+        const params = { numOfRows: 40, pageNo: 1, dataType: 'JSON', stnId: 184 };
         const json = await fetchPublicDataJson(endpoint, params);
         const rawItems = json?.response?.body?.items?.item;
         let allItems = Array.isArray(rawItems) ? rawItems : (rawItems ? [rawItems] : []);
         allItems = allItems.filter(item => item && item.title);
+
+        // KST 기준 오늘 날짜 계산 (YYYYMMDD)
+        const kstDate = new Date(Date.now() + 9 * 60 * 60 * 1000);
+        const todayYmd = kstDate.toISOString().slice(0, 10).replace(/-/g, '');
+
+        // 오늘 발생한 발효/해제 이력 필터링
+        const todayHistory = allItems.filter(item => {
+            const tm = String(item.tmFc || '');
+            return tm.startsWith(todayYmd);
+        });
+
+        if (todayHistory.length > 0) {
+            TODAY_ALERTS_HISTORY = todayHistory;
+            IS_HISTORY_FALLBACK = false;
+        } else {
+            // 오늘 이력이 전혀 없을 시 최근 이력 10개를 Fallback으로 노출
+            TODAY_ALERTS_HISTORY = allItems.slice(0, 10);
+            IS_HISTORY_FALLBACK = true;
+        }
 
         const latestByType = {};
         allItems.forEach(item => {
@@ -834,9 +855,9 @@ export async function fetchWeatherAlerts() {
             if (homeAlertsContainer) homeAlertsContainer.style.display = 'none';
             if (alertsContainer) {
                 alertsContainer.innerHTML = `
-                    <div class="weather-alert-card no-alerts">
+                    <div class="weather-alert-card no-alerts" onclick="window.showWeatherSectionWithAlert()" style="cursor: pointer;">
                         <div class="alert-type-badge gray">济州特报</div>
-                        <div class="alert-msg">当前全岛无气象特报</div>
+                        <div class="alert-msg">当前全岛无气象特报 (点击查看历史)</div>
                     </div>`;
             }
         }
@@ -853,7 +874,11 @@ window.showWeatherSectionWithAlert = function() {
 };
 
 window.openWeatherAlertModal = function() {
-    if (!LATEST_ALERTS || LATEST_ALERTS.length === 0) return;
+    const hasActive = LATEST_ALERTS && LATEST_ALERTS.length > 0;
+    const hasHistory = TODAY_ALERTS_HISTORY && TODAY_ALERTS_HISTORY.length > 0;
+    
+    if (!hasActive && !hasHistory) return;
+    
     let modal = document.getElementById('weather-alert-modal');
     if (!modal) {
         modal = document.createElement('div');
@@ -862,40 +887,126 @@ window.openWeatherAlertModal = function() {
         modal.onclick = (e) => { if (e.target === modal) window.closeWeatherAlertModal(); };
         document.body.appendChild(modal);
     }
+    
     const formatAlertTime = (tmFc) => {
         const s = String(tmFc || '');
         if (s.length < 12) return s;
         return `${s.slice(4, 6)}.${s.slice(6, 8)} ${s.slice(8, 10)}:${s.slice(10, 12)}`;
     };
 
-    const itemsHTML = LATEST_ALERTS.map(item => {
-        const title = item.title || '';
-        let typeBadge = '[特报]';
-        let itemClass = '';
-        if (title.includes('주의보')) { typeBadge = '[注意报]'; itemClass = 'warning'; }
-        else if (title.includes('경보')) { typeBadge = '[警报]'; itemClass = 'danger'; }
-        
-        const tm = String(item.tmFc || '');
-        const timeOnly = tm.length >= 12 ? `${tm.slice(8, 10)}:${tm.slice(10, 12)}` : '';
-        
-        const refinedMsg = translateWeatherAlert(title).replace(/\(\*\)/g, '').trim();
+    // 1. 현재 활성 특보 렌더링
+    let activeHTML = '';
+    if (hasActive) {
+        activeHTML = LATEST_ALERTS.map(item => {
+            const title = item.title || '';
+            let typeBadge = '[特报]';
+            let itemClass = '';
+            if (title.includes('주의보')) { typeBadge = '[注意报]'; itemClass = 'warning'; }
+            else if (title.includes('경보')) { typeBadge = '[警报]'; itemClass = 'danger'; }
+            
+            const tm = String(item.tmFc || '');
+            const timeOnly = tm.length >= 12 ? `${tm.slice(8, 10)}:${tm.slice(10, 12)}` : '';
+            const refinedMsg = translateWeatherAlert(title).replace(/\(\*\)/g, '').trim();
 
-        return `
-        <div class="alert-history-item ${itemClass}">
-            <span class="alert-history-label">${typeBadge}</span>
-            <span class="alert-history-time">${timeOnly}</span>
-            <span class="alert-history-text">${refinedMsg}</span>
+            return `
+            <div class="alert-history-item ${itemClass}">
+                <span class="alert-history-label">${typeBadge}</span>
+                <span class="alert-history-time">${timeOnly}</span>
+                <span class="alert-history-text">${refinedMsg}</span>
+            </div>`;
+        }).join('');
+    } else {
+        activeHTML = `
+        <div style="padding: 30px 20px; text-align: center; color: #64748b; font-weight: 700; font-size: 0.9rem; width:100%; box-sizing:border-box;">
+            🍃 当前济州岛无生效中的气象特报
         </div>`;
-    }).join('');
+    }
+
+    // 2. 특보 이력(오늘/최근) 렌더링
+    let historyHTML = '';
+    if (hasHistory) {
+        historyHTML = TODAY_ALERTS_HISTORY.map(item => {
+            const title = item.title || '';
+            let typeBadge = '[特报]';
+            let itemClass = '';
+            
+            if (title.includes('해제')) {
+                typeBadge = '[已解除]';
+                itemClass = 'clear';
+            } else if (title.includes('주의보')) {
+                typeBadge = '[注意报]';
+                itemClass = 'warning';
+            } else if (title.includes('경보')) {
+                typeBadge = '[警报]';
+                itemClass = 'danger';
+            } else {
+                typeBadge = '[特报]';
+                itemClass = 'info';
+            }
+            
+            const tm = String(item.tmFc || '');
+            const timeOnly = tm.length >= 12 ? `${tm.slice(4, 6)}.${tm.slice(6, 8)} ${tm.slice(8, 10)}:${tm.slice(10, 12)}` : '';
+            const refinedMsg = translateWeatherAlert(title).replace(/\(\*\)/g, '').trim();
+
+            return `
+            <div class="alert-history-item ${itemClass}">
+                <span class="alert-history-label">${typeBadge}</span>
+                <span class="alert-history-time">${timeOnly}</span>
+                <span class="alert-history-text">${refinedMsg}</span>
+            </div>`;
+        }).join('');
+    } else {
+        historyHTML = `
+        <div style="padding: 30px 20px; text-align: center; color: #64748b; font-weight: 700; font-size: 0.9rem; width:100%; box-sizing:border-box;">
+            📭 今日无气象特报发布或解除历史
+        </div>`;
+    }
+
+    // 기본 노출 탭 설정 (활성 특보가 있으면 active, 없으면 history)
+    const defaultTab = hasActive ? 'active' : 'history';
+    const historyTabTitle = IS_HISTORY_FALLBACK ? '最近历史' : '今日历史';
+
     modal.innerHTML = `
         <div class="alert-modal-panel">
             <div class="alert-modal-header">
-                <div class="alert-modal-title">特报详情</div>
+                <div class="alert-modal-title">济州气象特报</div>
                 <button class="alert-modal-close" onclick="window.closeWeatherAlertModal()">✕</button>
+                <div class="alert-modal-tabs">
+                    <button class="alert-modal-tab ${defaultTab === 'active' ? 'active' : ''}" onclick="window.switchWeatherAlertTab('active')">
+                        当前生效 (${LATEST_ALERTS.length})
+                    </button>
+                    <button class="alert-modal-tab ${defaultTab === 'history' ? 'active' : ''}" onclick="window.switchWeatherAlertTab('history')">
+                        ${historyTabTitle} (${TODAY_ALERTS_HISTORY.length})
+                    </button>
+                </div>
             </div>
-            <div class="alert-modal-body">${itemsHTML}</div>
+            <div class="alert-modal-body">
+                <div id="alert-tab-active" class="alert-tab-content" style="display: ${defaultTab === 'active' ? 'flex' : 'none'};">
+                    ${activeHTML}
+                </div>
+                <div id="alert-tab-history" class="alert-tab-content" style="display: ${defaultTab === 'history' ? 'flex' : 'none'};">
+                    ${historyHTML}
+                </div>
+            </div>
         </div>`;
     modal.style.display = 'flex';
+};
+
+window.switchWeatherAlertTab = function(tabName) {
+    const tabs = document.querySelectorAll('.alert-modal-tab');
+    const contents = document.querySelectorAll('.alert-tab-content');
+    if (tabs.length < 2 || contents.length < 2) return;
+    
+    tabs.forEach(tab => tab.classList.remove('active'));
+    contents.forEach(content => content.style.display = 'none');
+    
+    if (tabName === 'active') {
+        tabs[0].classList.add('active');
+        document.getElementById('alert-tab-active').style.display = 'flex';
+    } else {
+        tabs[1].classList.add('active');
+        document.getElementById('alert-tab-history').style.display = 'flex';
+    }
 };
 
 window.closeWeatherAlertModal = function() {

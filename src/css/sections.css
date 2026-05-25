@@ -1340,7 +1340,7 @@
     border-radius: 24px;
     width: 100%;
     max-width: 480px;
-    max-height: 80vh;
+    max-height: 85vh;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -1348,26 +1348,56 @@
 }
 
 .alert-modal-header {
-    padding: 20px 24px;
+    padding: 20px 24px 12px;
     border-bottom: 1px solid #f1f5f9;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
     position: relative;
+    gap: 12px;
 }
 
 .alert-modal-title {
-    font-size: 1.1rem;
+    font-size: 1.15rem;
     font-weight: 800;
     color: #0f172a;
     text-align: center;
 }
 
+.alert-modal-tabs {
+    display: flex;
+    background: #f1f5f9;
+    border-radius: 12px;
+    padding: 4px;
+    width: 100%;
+    box-sizing: border-box;
+    gap: 4px;
+}
+
+.alert-modal-tab {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: #64748b;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.alert-modal-tab.active {
+    background: #ffffff;
+    color: #0f172a;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
 .alert-modal-close {
     position: absolute;
     right: 16px;
-    top: 50%;
-    transform: translateY(-50%);
+    top: 20px;
     background: #f1f5f9;
     border: none;
     width: 32px; height: 32px;
@@ -1377,12 +1407,13 @@
     font-size: 1.1rem;
     transition: all 0.2s;
     box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    z-index: 10;
 }
 
 .alert-modal-close:hover {
     background: #e2e8f0;
     color: #0f172a;
-    transform: translateY(-50%) rotate(90deg);
+    transform: rotate(90deg);
 }
 
 .alert-modal-body {
@@ -1391,6 +1422,13 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
+}
+
+.alert-tab-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
 }
 
 .alert-history-item {
@@ -1419,6 +1457,16 @@
     border-color: #fecaca;
 }
 
+.alert-history-item.clear {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+}
+
+.alert-history-item.info {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+}
+
 .alert-history-label {
     font-weight: 800;
     color: #64748b;
@@ -1427,6 +1475,8 @@
 
 .alert-history-item.warning .alert-history-label { color: #d97706; }
 .alert-history-item.danger .alert-history-label { color: #dc2626; }
+.alert-history-item.clear .alert-history-label { color: #16a34a; }
+.alert-history-item.info .alert-history-label { color: #2563eb; }
 
 .alert-history-time {
     font-weight: 700;
