@@ -5,13 +5,13 @@ import { calculateVisibilityScore } from './hallasan-dashboard.js';
 import { getSunTimes } from './utils.js';
 
 export const HALLASAN_TRAILS = [
-    { nameKo: '어리목탐방로', nameCn: '御里牧登山路', distanceCn: '6.8km（单程）', timeCn: '约3小时' },
-    { nameKo: '영실탐방로', nameCn: '灵室登山路', distanceCn: '5.8km（单程）', timeCn: '约2.5小时' },
-    { nameKo: '어승생악탐방로', nameCn: '御乘生岳登山路', distanceCn: '1.3km（单程）', timeCn: '约30分钟' },
-    { nameKo: '돈내코탐방로', nameCn: '顿乃科登山路', distanceCn: '9.1km（单程）', timeCn: '约4.5小时' },
-    { nameKo: '석굴암탐방로', nameCn: '石窟庵登山路', distanceCn: '1.5km（单程）', timeCn: '约50分钟' },
-    { nameKo: '관음사탐방로', nameCn: '观音寺登山路', distanceCn: '8.7km（单程）', timeCn: '约5小时' },
-    { nameKo: '성판악탐방로', nameCn: '城板岳登山路', distanceCn: '9.6km（单程）', timeCn: '约4.5小时' }
+    { nameKo: '어리목탐방로', nameCn: '御里牧登山路', distanceCn: '6.8km（单程）', timeCn: '约3小时', url: 'https://www.jeju.go.kr/hallasan/info/info/realtime/course01.htm' },
+    { nameKo: '영실탐방로', nameCn: '灵室登山路', distanceCn: '5.8km（单程）', timeCn: '约2.5小时', url: 'https://www.jeju.go.kr/hallasan/info/info/realtime/course02.htm' },
+    { nameKo: '어승생악탐방로', nameCn: '御乘生岳登山路', distanceCn: '1.3km（单程）', timeCn: '约30分钟', url: 'https://www.jeju.go.kr/hallasan/info/info/realtime/course05.htm' },
+    { nameKo: '돈내코탐방로', nameCn: '顿乃科登山路', distanceCn: '9.1km（单程）', timeCn: '约4.5小时', url: 'https://www.jeju.go.kr/hallasan/info/info/realtime/course06.htm' },
+    { nameKo: '석굴암탐방로', nameCn: '石窟庵登山路', distanceCn: '1.5km（单程）', timeCn: '约50分钟', url: 'https://www.jeju.go.kr/hallasan/info/info/realtime/course07.htm' },
+    { nameKo: '관음사탐방로', nameCn: '观音寺登山路', distanceCn: '8.7km（单程）', timeCn: '约5小时', url: 'https://www.jeju.go.kr/hallasan/info/info/realtime/course04.htm' },
+    { nameKo: '성판악탐방로', nameCn: '城板岳登山路', distanceCn: '9.6km（单程）', timeCn: '约4.5小时', url: 'https://www.jeju.go.kr/hallasan/info/info/realtime/course03.htm' }
 ];
 
 const TRAIL_STATUS_MAP = {
@@ -128,7 +128,7 @@ export async function fetchHallasanStatus(isAutoRetry = false) {
             </div>`;
 
         let trailsHtml = trails.map(t => `
-            <div class="trail-block">
+            <div class="trail-block" onclick="window.open('${t.url}', '_blank')" style="cursor: pointer;">
                 <div class="t-status-line">
                     <span class="trail-status-badge ${t.statusCls}">${t.statusCn}</span>
                 </div>
@@ -218,7 +218,7 @@ export async function fetchHallasanStatus(isAutoRetry = false) {
 
 const HALLASAN_CCTV = [
     { id: 'witseoreum', nameKo: '윗세오름', nameCn: '威势岳', url: 'https://hallacctv.kr/live/cctv03.stream_360p/playlist.m3u8' },
-    { id: 'baengnokdam', nameKo: '백록담', nameCn: '白鹿潭', url: 'https://hallacctv.kr/live/cctv01.stream_360p/playlist.m3u8', isRepair: true },
+    { id: 'baengnokdam', nameKo: '백록담', nameCn: '白鹿潭', url: 'https://hallacctv.kr/live/cctv01.stream_360p/playlist.m3u8' },
     { id: 'wanggwalleung', nameKo: '왕관릉', nameCn: '王冠陵', url: 'https://hallacctv.kr/live/cctv02.stream_360p/playlist.m3u8' },
     { id: 'eoseungsaengak', nameKo: '어승생악', nameCn: '御乘生岳', url: 'https://hallacctv.kr/live/cctv04.stream_360p/playlist.m3u8' },
     { id: '1100doro', nameKo: '1100고지', nameCn: '1100高地', url: 'https://hallacctv.kr/live/cctv05.stream_360p/playlist.m3u8' }

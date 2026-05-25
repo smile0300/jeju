@@ -544,6 +544,42 @@
 .status-card.status-open { border-color: #10b981; background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0.02) 100%); }
 .status-card.status-closed { border-color: #ef4444; background: linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, rgba(239, 68, 68, 0.02) 100%); }
 
+.hallasan-reserve-container {
+    margin: 8px 0 24px 0;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.hallasan-reserve-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    max-width: 360px;
+    padding: 14px 24px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 800;
+    border: none;
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.25);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.hallasan-reserve-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+    background: linear-gradient(135deg, #34d399 0%, #059669 100%);
+}
+
+.hallasan-reserve-btn:active {
+    transform: translateY(1px);
+}
+
 .trails-grid { 
     display: grid;
     grid-template-columns: repeat(2, 1fr);
