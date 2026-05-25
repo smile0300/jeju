@@ -1,4 +1,4 @@
-import { CONFIG } from './config.js';
+﻿import { CONFIG } from './config.js';
 
 let currentFestivalMonth = '';
 
@@ -113,7 +113,28 @@ const FESTIVAL_TRANSLATIONS = {
     '이호 필터 페스티벌': '梨湖 Filter 庆典',
     '카멜리아힐 수국 축제': 'Camellia Hill 绣球花节',
     '컬러풀 산지 페스티벌': '多姿多彩山地川庆典',
-    '서귀포 오페라 페스티벌': '西归浦歌剧节'
+    '서귀포 오페라 페스티벌': '西归浦歌剧节',
+
+    // === 2026-05-25 신규 수집된 축제 번역 추가 ===
+    '휴애리 수국축제': '休哎里绣球花节',
+    '2026 제주 국가유산 방문의 해': '2026 济州国家遗产参观年',
+    '제주날씨 순간포착! 제주에 이런 날씨가': '济州天气瞬间捕捉！济州竟有这样的天气',
+    '제주김녕미로공원 2026 김녕고양이왕국 체험경제 SEASON2 고양이기사단 대모험': '济州金宁迷宫公园 2026猫咪王国体验 SEASON2',
+    '안전 인증 농어촌민박 이용 다자녀가구 제주여행 환영 캠페인': '安全认证农渔村民宿多子女家庭济州旅行欢迎活动',
+    '2026년 새연교 음악분수': '2026年새연桥音乐喷泉',
+    '2026 도전! J-스타트업 참가자 모집': '2026 挑战！J-创业参赛募集',
+    '탐나오 더-제주 포시즌 The blooming Jeju': '探那奥 The-济州四季 花开济州',
+    '2026 세계명곡과 함께하는 음악여행': '2026 与世界名曲同行的音乐之旅',
+    '2026 제주 수공예 놀이터': '2026 济州手工艺游乐场',
+    'THETIS 8인 작가 초대전': 'THETIS 8位作家邀请展',
+    '더더플리마켓': '더더跳蚤市场',
+    '마을미식 페스티벌 7인의 셰프, 7개의 마을식당': '村庄美食节 7位主厨·7家村庄餐厅',
+    '제 7회 평화의마을 소시지축제': '第7届和平之村香肠节',
+    '제2회 함께달리개 : 기부런': '第2届一起跑吧：爱心跑',
+    '제주 김녕 빵빵런': '济州金宁面包跑',
+    '제주신화월드 [블랙홀 엑시트] 제1회 코인 사냥 대회': '济州神话世界 第1届硬币寻宝大赛',
+    '칠십리, 예술의 바람 속으로': '七十里，走入艺术之风',
+    '화산암반수 원정대': '火山岩盘水探险队'
 };
 
 const FESTIVAL_IMAGE_MAP = {
@@ -149,11 +170,12 @@ export function renderFestivalItems(container, items) {
         
         const date = item.period || item.date || '';
         
-        // Dynamically calculate link based on the selected month
+        // 개별 축제 링크 우선 사용, 없으면 월별 목록 링크
         const yearParts = currentFestivalMonth.split('-');
         const yearStr = yearParts[0] || '2026';
-        const monthStr = yearParts[1] || '04';
-        const link = `https://visitjeju.net/cn/festival/list#p1&year=${yearStr}&month=${monthStr}&state=all`;
+        const monthStr = yearParts[1] || '05';
+        const fallbackLink = `https://visitjeju.net/cn/festival/list#p1&year=${yearStr}&month=${monthStr}&state=all`;
+        const link = item.link ? item.link.replace('/kr/festival/', '/cn/festival/') : fallbackLink;
         
         let statusText = '进行中';
         let statusClass = 'ing';
