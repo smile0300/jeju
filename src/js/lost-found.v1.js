@@ -59,7 +59,9 @@ export async function fetchFoundGoods() {
                         id: item.atcId, name: item.fdPrdtNm, place: item.depPlace, date: item.fdYmd,
                         category: LOST_CATEGORY_MAP[categoryClean] || categoryClean,
                         img: item.fdFilePathImg, lct: item.fdFndPlace || item.lctNm || item.depPlace || '暂无信息',
-                        status: item.csteState || '保管中'
+                        status: item.csteState || '保管中',
+                        desc: item.uniqNm || '',
+                        tel: item.tel || ''
                     };
                 });
             }
@@ -72,7 +74,9 @@ export async function fetchFoundGoods() {
                     id: getTag('atcId'), name: getTag('fdPrdtNm'), place: getTag('depPlace'), date: getTag('fdYmd'),
                     category: LOST_CATEGORY_MAP[categoryClean] || categoryClean,
                     img: getTag('fdFilePathImg'), lct: getTag('fdFndPlace') || getTag('lctNm') || getTag('depPlace') || '暂无信息',
-                    status: getTag('csteState') || '保管中'
+                    status: getTag('csteState') || '保管中',
+                    desc: getTag('uniqNm') || '',
+                    tel: getTag('tel') || ''
                 };
             });
         };
@@ -132,7 +136,7 @@ export function renderLostGoods(grid, items) {
         return `
         <div class="lost-card gallery-item" onclick="openLostDetailModalByIndex(${realIndex})" style="padding: 0; overflow: hidden; aspect-ratio: 1 / 1;">
             <div class="lost-img-box" style="width: 100%; height: 100%; margin: 0;">
-                <img src="${item.img || noImgSvg}" alt="${item.name}" onerror="this.src='${noImgSvg}'" style="width: 100%; height: 100%; object-fit: cover;">
+                <img src="${item.img || noImgSvg}" alt="${item.name}" onerror="this.src='${noImgSvg}'" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;">
                 <div class="lost-category-badge-overlay">${item.category}</div>
             </div>
         </div>`;
@@ -151,7 +155,7 @@ export function renderLostGoodsTable(items) {
         const realIndex = cachedLostItems.indexOf(item);
         return `
         <tr>
-            <td>${item.img ? `<img src="${item.img}" class="lost-table-img" onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2240%22%20height%3D%2240%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2040%2040%22%3E%3Crect%20width%3D%2240%22%20height%3D%2240%22%20fill%3D%22%23eee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-size%3D%228%22%20text-anchor%3D%22middle%22%20alignment-baseline%3D%22middle%22%20fill%3D%22%23aaa%22%3E%E6%9A%82%E6%97%A0%E5%9B%BE%E7%89%87%3C%2Ftext%3E%3C%2Fsvg%3E'">` : '📦'}</td>
+            <td>${item.img ? `<img src="${item.img}" class="lost-table-img" loading="lazy" onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2240%22%20height%3D%2240%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2040%2040%22%3E%3Crect%20width%3D%2240%22%20height%3D%2240%22%20fill%3D%22%23eee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-size%3D%228%22%20text-anchor%3D%22middle%22%20alignment-baseline%3D%22middle%22%20fill%3D%22%23aaa%22%3E%E6%9A%82%E6%97%A0%E5%9B%BE%E7%89%87%3C%2Ftext%3E%3C%2Fsvg%3E'">` : '📦'}</td>
             <td><span class="lost-category-badge">${item.category}</span></td>
             <td style="font-weight:600;">${item.name}</td>
             <td><span class="lost-status-tag ${item.status === '保管中' ? 'active' : ''}">${item.status}</span></td>
@@ -181,6 +185,8 @@ export function openLostDetailModalByIndex(index) {
                 <div class="lost-modal-field"><span class="lost-modal-label">物品状态</span><span class="lost-modal-value">${item.status}</span></div>
                 <div class="lost-modal-field"><span class="lost-modal-label">拾获日期</span><span class="lost-modal-value">${item.date}</span></div>
                 <div class="lost-modal-field"><span class="lost-modal-label">保管地点</span><span class="lost-modal-value">${item.place}</span></div>
+                ${item.tel ? `<div class="lost-modal-field"><span class="lost-modal-label">联系电话</span><span class="lost-modal-value"><a href="tel:${item.tel}" style="color: var(--primary-color, #0076ff); text-decoration: underline; font-weight: 500;">${item.tel}</a></span></div>` : ''}
+                ${item.desc ? `<div class="lost-modal-field" style="flex-direction: column; align-items: flex-start; gap: 6px; margin-top: 8px; border-top: 1px dashed #eee; padding-top: 8px;"><span class="lost-modal-label" style="margin-bottom: 2px;">特征描述</span><span class="lost-modal-value" style="width: 100%; white-space: pre-wrap; line-height: 1.5; color: #444; background: #f8f9fa; padding: 10px 12px; border-radius: 6px; font-size: 13px; box-sizing: border-box;">${item.desc}</span></div>` : ''}
             </div>
             <div class="lost-modal-footer">
                 <button class="lost-modal-btn secondary" onclick="closeLostDetailModal()">关闭</button>
