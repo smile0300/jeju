@@ -2,8 +2,8 @@
 <section id="reward" class="app-section">
     <header class="app-bar">
         <button class="back-btn" onclick="showSection('home')">←</button>
-        <h2 class="bar-title">💰 赏金任务</h2>
-        <button class="header-action-btn" onclick="publishRewardMission()">发布咨询</button>
+        <h2 class="bar-title" data-i18n="reward.title">💰 赏金任务</h2>
+        <button class="header-action-btn" onclick="publishRewardMission()" data-i18n="reward.publish">发布咨询</button>
     </header>
 
     <div class="section">
@@ -12,15 +12,14 @@
             <div class="reward-trust-banner" style="margin-bottom: 20px; padding: 15px;">
                 <div class="trust-badge-icon" style="width: 40px; height: 40px; font-size: 1.2rem;">📢</div>
                 <div class="trust-info">
-                    <div class="trust-title" style="font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">寻找帮忙带失物到中国机场的朋友！</div>
-                    <div class="trust-desc" style="font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">回国途中顺便赚点零用钱吧</div>
+                    <div class="trust-title" style="font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" data-i18n="reward.banner.title">寻找帮忙带失物到中国机场的朋友！</div>
+                    <div class="trust-desc" style="font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" data-i18n="reward.banner.desc">回国途中顺便赚点零用钱吧</div>
                 </div>
             </div>
             <!-- Mission List Container -->
             <div id="reward-list" class="reward-grid">
-                <!-- Cards will be injected by JS -->
                 <div class="loading-lost">
-                    <p>正在加载任务列表...</p>
+                    <p data-i18n="reward.loading">正在加载任务列表...</p>
                 </div>
             </div>
         </div>

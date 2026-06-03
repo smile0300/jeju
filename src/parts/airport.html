@@ -2,7 +2,7 @@
 <section id="airport" class="app-section">
     <header class="app-bar">
         <button class="back-btn" onclick="showSection('home')">←</button>
-        <h2 class="bar-title">✈️ 济州国际机场</h2>
+        <h2 class="bar-title" data-i18n="airport.title">✈️ 济州国际机场</h2>
     </header>
     <div class="section section-alt">
         <div class="container">
@@ -10,13 +10,13 @@
                 <a href="https://www.trip.com/t/epPtOVtJzT2" target="_blank"
                     style="width: 250px; padding:12px 28px; background:linear-gradient(135deg,#003580,#0055b8); color:#fff; font-size:0.95rem; font-weight:700; border-radius:50px; text-decoration:none; box-shadow:0 4px 14px rgba(0,53,128,0.25); transition:transform 0.15s, box-shadow 0.15s;"
                     onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 18px rgba(0,53,128,0.35)'"
-                    onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 14px rgba(0,53,128,0.25)'">✈️
-                    中国 ↔ 济州 机票查询</a>
+                    onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 14px rgba(0,53,128,0.25)'"
+                    data-i18n="airport.ticket">✈️ 中国 ↔ 济州 机票查询</a>
             </div>
 
             <div class="flight-tabs">
-                <button class="flight-tab active" id="tab-arrive" onclick="switchFlightTab('arrive')">到达航班</button>
-                <button class="flight-tab" id="tab-depart" onclick="switchFlightTab('depart')">出发航班</button>
+                <button class="flight-tab active" id="tab-arrive" onclick="switchFlightTab('arrive')" data-i18n="airport.arrive">到达航班</button>
+                <button class="flight-tab" id="tab-depart" onclick="switchFlightTab('depart')" data-i18n="airport.depart">出发航班</button>
             </div>
             <div id="flight-content-arrive" class="flight-content active">
                 <div class="flight-table">

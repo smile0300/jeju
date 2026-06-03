@@ -468,3 +468,75 @@
         letter-spacing: -2px;
     }
 }
+
+/* ==================== 언어 선택기 ==================== */
+.lang-selector {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 999px;
+    padding: 4px 6px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    z-index: 100;
+    animation: fadeInDown 0.5s ease-out 0.3s both;
+}
+
+.lang-btn {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    padding: 5px 9px;
+    border: none;
+    background: transparent;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    line-height: 1;
+    font-family: inherit;
+}
+
+.lang-btn .lang-flag {
+    font-size: 0.9rem;
+    line-height: 1;
+}
+
+.lang-btn:hover {
+    background: rgba(37, 99, 235, 0.08);
+    color: #2563eb;
+}
+
+.lang-btn.active {
+    background: linear-gradient(135deg, #2563eb, #60a5fa);
+    color: white;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+}
+
+.lang-btn.active:hover {
+    background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+}
+
+/* 홈 섹션 내 위치 기준점 */
+#home .home-screen {
+    position: relative;
+}
+
+@media (max-width: 360px) {
+    .lang-btn {
+        padding: 4px 6px;
+        font-size: 0.65rem;
+    }
+    .lang-btn .lang-flag {
+        font-size: 0.75rem;
+    }
+}

@@ -2,7 +2,7 @@
 <section id="lost-found" class="app-section">
     <header class="app-bar">
         <button class="back-btn" onclick="showSection('home')">←</button>
-        <h2 class="bar-title">🔍 济州失物招领</h2>
+        <h2 class="bar-title" data-i18n="lost.title">🔍 济州失物招领</h2>
     </header>
     <div class="section">
         <div class="container">
@@ -10,26 +10,26 @@
                 <div class="lost-filter-container search-filter-box">
                     <div class="filter-row">
                         <select id="pkupCmdtyLclsfCd" class="filter-select" onchange="fetchFoundGoodsManual()">
-                            <option value="">选择物品分类</option>
-                            <option value="PRA000">包类</option>
-                            <option value="PRO000">首饰</option>
-                            <option value="PRB000">书籍用品</option>
-                            <option value="PRC000">文件</option>
-                            <option value="PRD000">产业用品</option>
-                            <option value="PRQ000">购物袋</option>
-                            <option value="PRE000">体育用品</option>
-                            <option value="PRR000">乐器</option>
-                            <option value="PRM000">有价证券</option>
-                            <option value="PRK000">衣物</option>
-                            <option value="PRF000">汽车</option>
-                            <option value="PRG000">电子设备</option>
-                            <option value="PRH000">钱包</option>
-                            <option value="PRN000">证件</option>
-                            <option value="PRI000">电脑</option>
-                            <option value="PRP000">卡类</option>
-                            <option value="PRL000">现金</option>
-                            <option value="PRJ000">手机</option>
-                            <option value="PRZ000">其他物品</option>
+                            <option value="" data-i18n="lost.category">选择物品分类</option>
+                            <option value="PRA000" data-i18n="cat.bag">包类</option>
+                            <option value="PRO000" data-i18n="cat.jewelry">首饰</option>
+                            <option value="PRB000" data-i18n="cat.book">书籍用品</option>
+                            <option value="PRC000" data-i18n="cat.doc">文件</option>
+                            <option value="PRD000" data-i18n="cat.industry">产业用品</option>
+                            <option value="PRQ000" data-i18n="cat.shopping">购物袋</option>
+                            <option value="PRE000" data-i18n="cat.sports">体育用品</option>
+                            <option value="PRR000" data-i18n="cat.music">乐器</option>
+                            <option value="PRM000" data-i18n="cat.security">有价证券</option>
+                            <option value="PRK000" data-i18n="cat.cloth">衣物</option>
+                            <option value="PRF000" data-i18n="cat.car">汽车</option>
+                            <option value="PRG000" data-i18n="cat.electronic">电子设备</option>
+                            <option value="PRH000" data-i18n="cat.wallet">钱包</option>
+                            <option value="PRN000" data-i18n="cat.id">证件</option>
+                            <option value="PRI000" data-i18n="cat.pc">电脑</option>
+                            <option value="PRP000" data-i18n="cat.card">卡类</option>
+                            <option value="PRL000" data-i18n="cat.cash">现金</option>
+                            <option value="PRJ000" data-i18n="cat.phone">手机</option>
+                            <option value="PRZ000" data-i18n="cat.other">其他物品</option>
                         </select>
                     </div>
                     <div class="filter-row" style="display:flex;gap:10px;">
@@ -55,18 +55,16 @@
                     </div>
                 </div>
 
-                <!-- 분실물 신고 버튼 추가 -->
+                <!-- 분실물 신고 버튼 -->
                 <div style="margin-bottom: 25px;">
-                    <button class="lost-report-btn btn btn-outline" onclick="openLostReportModal()">
-                        <span class="btn-icon">📝</span> 找不到我的物品？在此登记报失
+                    <button class="lost-report-btn btn btn-outline" onclick="openLostReportModal()" data-i18n="lost.report.btn">
+                        📝 找不到我的物品？在此登记报失
                     </button>
                 </div>
-                <div id="lost-result-count" class="lost-result-count">正在查询...</div>
+                <div id="lost-result-count" class="lost-result-count" data-i18n="lost.searching">正在查询...</div>
                 <div class="view-toggle-container">
-                    <button id="btn-view-card" class="view-toggle-btn active"
-                        onclick="switchLostView('card')">卡片模式</button>
-                    <button id="btn-view-table" class="view-toggle-btn"
-                        onclick="switchLostView('table')">表格模式</button>
+                    <button id="btn-view-card" class="view-toggle-btn active" onclick="switchLostView('card')" data-i18n="lost.view.card">卡片模式</button>
+                    <button id="btn-view-table" class="view-toggle-btn" onclick="switchLostView('table')" data-i18n="lost.view.table">表格模式</button>
                 </div>
             </div>
 
@@ -76,14 +74,14 @@
                 <table class="lost-table">
                     <thead>
                         <tr>
-                            <th>照片</th>
-                            <th>分类</th>
-                            <th>物品名</th>
-                            <th>状态</th>
-                            <th>拾获日期</th>
-                            <th>保管地点</th>
-                            <th>管理编号</th>
-                            <th>查看详情</th>
+                            <th data-i18n="lost.th.photo">照片</th>
+                            <th data-i18n="lost.th.category">分类</th>
+                            <th data-i18n="lost.th.name">物品名</th>
+                            <th data-i18n="lost.th.status">状态</th>
+                            <th data-i18n="lost.th.date">拾获日期</th>
+                            <th data-i18n="lost.th.location">保管地点</th>
+                            <th data-i18n="lost.th.number">管理编号</th>
+                            <th data-i18n="lost.th.detail">查看详情</th>
                         </tr>
                     </thead>
                     <tbody id="lost-table-body"></tbody>

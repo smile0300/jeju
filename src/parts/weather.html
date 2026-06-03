@@ -2,7 +2,7 @@
 <section id="weather" class="app-section">
     <header class="app-bar">
         <button class="back-btn" onclick="showSection('home')">←</button>
-        <h2 class="bar-title">🌤️ 天气预报</h2>
+        <h2 class="bar-title" data-i18n="weather.title">🌤️ 天气预报</h2>
     </header>
     <div class="section section-alt">
         <div class="container">
@@ -13,27 +13,27 @@
                     <!-- Row 1: North + South + West (5 items) -->
                     <div class="loc-row">
                         <div class="loc-group-wrapper group-north">
-                            <span class="group-label">北线</span>
+                            <span class="group-label" data-i18n="weather.group.north">北线</span>
                             <button class="location-tab active" data-loc="jeju" onclick="switchWeatherLocation('jeju')">
-                                <span class="tab-name">济州市</span>
+                                <span class="tab-name" data-i18n="weather.loc.jeju">济州市</span>
                             </button>
                         </div>
                         <div class="loc-group-wrapper group-south">
-                            <span class="group-label">南线</span>
+                            <span class="group-label" data-i18n="weather.group.south">南线</span>
                             <button class="location-tab" data-loc="seogwipo" onclick="switchWeatherLocation('seogwipo')">
-                                <span class="tab-name">西归浦</span>
+                                <span class="tab-name" data-i18n="weather.loc.seogwipo">西归浦</span>
                             </button>
                         </div>
                         <div class="loc-group-wrapper group-west">
-                            <span class="group-label">西线</span>
+                            <span class="group-label" data-i18n="weather.group.west">西线</span>
                             <button class="location-tab" data-loc="aewol" onclick="switchWeatherLocation('aewol')">
-                                <span class="tab-name">涯月</span>
+                                <span class="tab-name" data-i18n="weather.loc.aewol">涯月</span>
                             </button>
                             <button class="location-tab" data-loc="hyeopjae" onclick="switchWeatherLocation('hyeopjae')">
-                                <span class="tab-name">挟才</span>
+                                <span class="tab-name" data-i18n="weather.loc.hyeopjae">挟才</span>
                             </button>
                             <button class="location-tab" data-loc="sanbangsan" onclick="switchWeatherLocation('sanbangsan')">
-                                <span class="tab-name">山房山</span>
+                                <span class="tab-name" data-i18n="weather.loc.sanbangsan">山房山</span>
                             </button>
                         </div>
                     </div>
@@ -41,24 +41,24 @@
                     <!-- Row 2: East + Hallasan (5 items) -->
                     <div class="loc-row">
                         <div class="loc-group-wrapper group-east">
-                            <span class="group-label">东线</span>
+                            <span class="group-label" data-i18n="weather.group.east">东线</span>
                             <button class="location-tab" data-loc="hamdeok" onclick="switchWeatherLocation('hamdeok')">
-                                <span class="tab-name">咸德</span>
+                                <span class="tab-name" data-i18n="weather.loc.hamdeok">咸德</span>
                             </button>
                             <button class="location-tab" data-loc="woljeong" onclick="switchWeatherLocation('woljeong')">
-                                <span class="tab-name">月汀</span>
+                                <span class="tab-name" data-i18n="weather.loc.woljeong">月汀</span>
                             </button>
                             <button class="location-tab" data-loc="seongsan" onclick="switchWeatherLocation('seongsan')">
-                                <span class="tab-name">日出峰</span>
+                                <span class="tab-name" data-i18n="weather.loc.seongsan">日出峰</span>
                             </button>
                             <button class="location-tab" data-loc="udo" onclick="switchWeatherLocation('udo')">
-                                <span class="tab-name">牛岛</span>
+                                <span class="tab-name" data-i18n="weather.loc.udo">牛岛</span>
                             </button>
                         </div>
                         <div class="loc-group-wrapper group-mountain">
-                            <span class="group-label">山岳</span>
+                            <span class="group-label" data-i18n="weather.group.mountain">山岳</span>
                             <button class="location-tab" data-loc="hallasan" onclick="switchWeatherLocation('hallasan')">
-                                <span class="tab-name">汉拿山</span>
+                                <span class="tab-name" data-i18n="weather.loc.hallasan">汉拿山</span>
                             </button>
                         </div>
                     </div>
@@ -67,7 +67,7 @@
 
             <div id="weather-alerts-container" class="weather-alerts-container" style="display: flex;">
                 <div class="weather-alert-card no-alerts">
-                    <div class="alert-msg">正在检查气象特报...</div>
+                    <div class="alert-msg" data-i18n="weather.alert.checking">正在检查气象特报...</div>
                 </div>
             </div>
 
@@ -77,15 +77,14 @@
                 <div id="weather-content-jeju" class="location-weather active">
                     <div class="weather-header-container" id="header-jeju">
                         <div class="location-info">
-                            <h3 class="location-name">济州市(莲洞)</h3>
+                            <h3 class="location-name" data-i18n="weather.hname.jeju">济州市(莲洞)</h3>
                         </div>
                         <div class="header-action-btns">
-                            <button class="header-summary-btn" onclick="window.openWeatherSummaryModal()">📊 简略查看</button>
-                            <!-- <div class="header-cctv" id="cctv-btn-jeju"><button class="header-cctv-btn" onclick="openCctvModal('tapdong_emg')">📺 CCTV</button></div> -->
+                            <button class="header-summary-btn" onclick="window.openWeatherSummaryModal()" data-i18n="weather.summary">📊 简略查看</button>
                         </div>
                     </div>
                     <div class="naver-card current-compare-card" id="current-card-jeju">
-                        <div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text">正在加载...</div></div>
+                        <div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text" data-i18n="weather.loading">正在加载...</div></div>
                     </div>
                     <div class="weather-details-bar" id="details-bar-jeju"></div>
                     <div class="naver-card hourly-forecast-card">
@@ -101,15 +100,14 @@
                 <div id="weather-content-aewol" class="location-weather">
                     <div class="weather-header-container" id="header-aewol">
                         <div class="location-info">
-                            <h3 class="location-name">涯月</h3>
+                            <h3 class="location-name" data-i18n="weather.hname.aewol">涯月</h3>
                         </div>
                         <div class="header-action-btns">
-                            <button class="header-summary-btn" onclick="window.openWeatherSummaryModal()">📊 简略查看</button>
-                            <!-- <div class="header-cctv" id="cctv-btn-aewol"><button class="header-cctv-btn" onclick="openCctvModal('hantam_beach')">📺 CCTV</button></div> -->
+                            <button class="header-summary-btn" onclick="window.openWeatherSummaryModal()" data-i18n="weather.summary">📊 简略查看</button>
                         </div>
                     </div>
                     <div class="naver-card current-compare-card" id="current-card-aewol">
-                        <div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text">正在加载...</div></div>
+                        <div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text" data-i18n="weather.loading">正在加载...</div></div>
                     </div>
                     <div class="weather-details-bar" id="details-bar-aewol"></div>
                     <div class="naver-card hourly-forecast-card">
@@ -125,15 +123,14 @@
                 <div id="weather-content-hyeopjae" class="location-weather">
                     <div class="weather-header-container" id="header-hyeopjae">
                         <div class="location-info">
-                            <h3 class="location-name">挟才</h3>
+                            <h3 class="location-name" data-i18n="weather.hname.hyeopjae">挟才</h3>
                         </div>
                         <div class="header-action-btns">
-                            <button class="header-summary-btn" onclick="window.openWeatherSummaryModal()">📊 简略查看</button>
-                            <!-- <div class="header-cctv" id="cctv-btn-hyeopjae"><button class="header-cctv-btn" onclick="openCctvModal('hyeopjae_tour')">📺 CCTV</button></div> -->
+                            <button class="header-summary-btn" onclick="window.openWeatherSummaryModal()" data-i18n="weather.summary">📊 简略查看</button>
                         </div>
                     </div>
                     <div class="naver-card current-compare-card" id="current-card-hyeopjae">
-                        <div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text">正在加载...</div></div>
+                        <div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text" data-i18n="weather.loading">正在加载...</div></div>
                     </div>
                     <div class="weather-details-bar" id="details-bar-hyeopjae"></div>
                     <div class="naver-card hourly-forecast-card">
@@ -149,15 +146,14 @@
                 <div id="weather-content-sanbangsan" class="location-weather">
                     <div class="weather-header-container" id="header-sanbangsan">
                         <div class="location-info">
-                            <h3 class="location-name">山房山</h3>
+                            <h3 class="location-name" data-i18n="weather.hname.sanbangsan">山房山</h3>
                         </div>
                         <div class="header-action-btns">
-                            <button class="header-summary-btn" onclick="window.openWeatherSummaryModal()">📊 简略查看</button>
-                            <!-- <div class="header-cctv" id="cctv-btn-sanbangsan"><button class="header-cctv-btn" onclick="openCctvModal('sanbangsan_emg')">📺 CCTV</button></div> -->
+                            <button class="header-summary-btn" onclick="window.openWeatherSummaryModal()" data-i18n="weather.summary">📊 简略查看</button>
                         </div>
                     </div>
                     <div class="naver-card current-compare-card" id="current-card-sanbangsan">
-                        <div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text">正在加载...</div></div>
+                        <div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text" data-i18n="weather.loading">正在加载...</div></div>
                     </div>
                     <div class="weather-details-bar" id="details-bar-sanbangsan"></div>
                     <div class="naver-card hourly-forecast-card">
@@ -173,15 +169,14 @@
                 <div id="weather-content-hamdeok" class="location-weather">
                     <div class="weather-header-container" id="header-hamdeok">
                         <div class="location-info">
-                            <h3 class="location-name">咸德</h3>
+                            <h3 class="location-name" data-i18n="weather.hname.hamdeok">咸德</h3>
                         </div>
                         <div class="header-action-btns">
-                            <button class="header-summary-btn" onclick="window.openWeatherSummaryModal()">📊 简略查看</button>
-                            <!-- <div class="header-cctv" id="cctv-btn-hamdeok"><button class="header-cctv-btn" onclick="openCctvModal('hamdeok_tour')">📺 CCTV</button></div> -->
+                            <button class="header-summary-btn" onclick="window.openWeatherSummaryModal()" data-i18n="weather.summary">📊 简略查看</button>
                         </div>
                     </div>
                     <div class="naver-card current-compare-card" id="current-card-hamdeok">
-                        <div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text">正在加载...</div></div>
+                        <div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text" data-i18n="weather.loading">正在加载...</div></div>
                     </div>
                     <div class="weather-details-bar" id="details-bar-hamdeok"></div>
                     <div class="naver-card hourly-forecast-card">
@@ -197,15 +192,14 @@
                 <div id="weather-content-woljeong" class="location-weather">
                     <div class="weather-header-container" id="header-woljeong">
                         <div class="location-info">
-                            <h3 class="location-name">月汀</h3>
+                            <h3 class="location-name" data-i18n="weather.hname.woljeong">月汀</h3>
                         </div>
                         <div class="header-action-btns">
-                            <button class="header-summary-btn" onclick="window.openWeatherSummaryModal()">📊 简略查看</button>
-                            <!-- <div class="header-cctv" id="cctv-btn-woljeong"><button class="header-cctv-btn" onclick="openCctvModal('woljeong_tour')">📺 CCTV</button></div> -->
+                            <button class="header-summary-btn" onclick="window.openWeatherSummaryModal()" data-i18n="weather.summary">📊 简略查看</button>
                         </div>
                     </div>
                     <div class="naver-card current-compare-card" id="current-card-woljeong">
-                        <div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text">正在加载...</div></div>
+                        <div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text" data-i18n="weather.loading">正在加载...</div></div>
                     </div>
                     <div class="weather-details-bar" id="details-bar-woljeong"></div>
                     <div class="naver-card hourly-forecast-card">
@@ -221,15 +215,14 @@
                 <div id="weather-content-seogwipo" class="location-weather">
                     <div class="weather-header-container" id="header-seogwipo">
                         <div class="location-info">
-                            <h3 class="location-name">西归浦</h3>
+                            <h3 class="location-name" data-i18n="weather.hname.seogwipo">西归浦</h3>
                         </div>
                         <div class="header-action-btns">
-                            <button class="header-summary-btn" onclick="window.openWeatherSummaryModal()">📊 简略查看</button>
-                            <!-- <div class="header-cctv" id="cctv-btn-seogwipo"><button class="header-cctv-btn" onclick="openCctvModal('jungmun_emg')">📺 CCTV</button></div> -->
+                            <button class="header-summary-btn" onclick="window.openWeatherSummaryModal()" data-i18n="weather.summary">📊 简略查看</button>
                         </div>
                     </div>
                     <div class="naver-card current-compare-card" id="current-card-seogwipo">
-                        <div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text">正在加载...</div></div>
+                        <div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text" data-i18n="weather.loading">正在加载...</div></div>
                     </div>
                     <div class="weather-details-bar" id="details-bar-seogwipo"></div>
                     <div class="naver-card hourly-forecast-card">
@@ -245,15 +238,14 @@
                 <div id="weather-content-seongsan" class="location-weather">
                     <div class="weather-header-container" id="header-seongsan">
                         <div class="location-info">
-                            <h3 class="location-name">城山日出峰</h3>
+                            <h3 class="location-name" data-i18n="weather.hname.seongsan">城山日出峰</h3>
                         </div>
                         <div class="header-action-btns">
-                            <button class="header-summary-btn" onclick="window.openWeatherSummaryModal()">📊 简略查看</button>
-                            <!-- <div class="header-cctv" id="cctv-btn-seongsan"><button class="header-cctv-btn" onclick="openCctvModal('seongsan_tour')">📺 CCTV</button></div> -->
+                            <button class="header-summary-btn" onclick="window.openWeatherSummaryModal()" data-i18n="weather.summary">📊 简略查看</button>
                         </div>
                     </div>
                     <div class="naver-card current-compare-card" id="current-card-seongsan">
-                        <div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text">正在加载...</div></div>
+                        <div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text" data-i18n="weather.loading">正在加载...</div></div>
                     </div>
                     <div class="weather-details-bar" id="details-bar-seongsan"></div>
                     <div class="naver-card hourly-forecast-card">
@@ -269,15 +261,14 @@
                 <div id="weather-content-udo" class="location-weather">
                     <div class="weather-header-container" id="header-udo">
                         <div class="location-info">
-                            <h3 class="location-name">牛岛</h3>
+                            <h3 class="location-name" data-i18n="weather.hname.udo">牛岛</h3>
                         </div>
                         <div class="header-action-btns">
-                            <button class="header-summary-btn" onclick="window.openWeatherSummaryModal()">📊 简略查看</button>
-                            <!-- <div class="header-cctv" id="cctv-btn-udo"><button class="header-cctv-btn" onclick="openCctvModal('haumok_udo')">📺 CCTV</button></div> -->
+                            <button class="header-summary-btn" onclick="window.openWeatherSummaryModal()" data-i18n="weather.summary">📊 简略查看</button>
                         </div>
                     </div>
                     <div class="naver-card current-compare-card" id="current-card-udo">
-                        <div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text">正在加载...</div></div>
+                        <div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text" data-i18n="weather.loading">正在加载...</div></div>
                     </div>
                     <div class="weather-details-bar" id="details-bar-udo"></div>
                     <div class="naver-card hourly-forecast-card">
@@ -293,15 +284,14 @@
                 <div id="weather-content-hallasan" class="location-weather">
                     <div class="weather-header-container" id="header-hallasan">
                         <div class="location-info">
-                            <h3 class="location-name">汉拿山(城板岳)</h3>
+                            <h3 class="location-name" data-i18n="weather.hname.hallasan">汉拿山(城板岳)</h3>
                         </div>
                         <div class="header-action-btns">
-                            <button class="header-summary-btn" onclick="window.openWeatherSummaryModal()">📊 简略查看</button>
-                            <!-- <div class="header-cctv" id="cctv-btn-hallasan"><button class="header-cctv-btn" onclick="openCctvModal('sanbangsan_emg')">📺 CCTV</button></div> -->
+                            <button class="header-summary-btn" onclick="window.openWeatherSummaryModal()" data-i18n="weather.summary">📊 简略查看</button>
                         </div>
                     </div>
                     <div class="naver-card current-compare-card" id="current-card-hallasan">
-                        <div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text">正在加载...</div></div>
+                        <div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text" data-i18n="weather.loading">正在加载...</div></div>
                     </div>
                     <div class="weather-details-bar" id="details-bar-hallasan"></div>
                     <div class="naver-card hourly-forecast-card">

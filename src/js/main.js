@@ -1,5 +1,7 @@
 
 import { CONFIG } from './config.js';
+import { initI18n } from './i18n.js';
+
 import { initCCTV, openCctvModalById, openCctvModal, initHlsPlayer } from './cctv.js';
 import { fetchWeatherData, switchWeatherLocation, updateHourlyWeather, fetchWeatherAlerts } from './weather.js';
 import { fetchHallasanStatus } from './hallasan.js';
@@ -160,6 +162,7 @@ window.addEventListener('popstate', (event) => {
 });
 
 window.addEventListener('load', () => {
+    initI18n(); // 다국어 초기화 (저장된 언어 적용)
     initCCTV();
     Object.keys(CONFIG.WEATHER_LOCATIONS).forEach(loc => fetchWeatherData(loc));
     fetchWeatherAlerts(); // 기상특보 초기 호출 추가

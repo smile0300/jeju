@@ -1,4 +1,5 @@
 import { CONFIG } from './config.js';
+import { t } from './i18n.js';
 import { initCCTV } from './cctv.js';
 import { fetchWeatherData, WEATHER_STATE } from './weather.js';
 import { fetchHallasanStatus } from './hallasan.js';
@@ -93,12 +94,12 @@ export async function submitFeatureRequest() {
     const escapeHTML = (str) => str?.replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
     const content = escapeHTML(contentEl?.value.trim());
 
-    if (!content) { alert('请输入内容。'); return; }
+    if (!content) { alert(t('alert.empty')); return; }
 
     try {
         submitBtn.disabled = true;
         statusEl.style.display = 'block';
-        statusEl.textContent = '提交中...';
+        statusEl.textContent = t('alert.submitting');
 
         const res = await fetch(`${CONFIG.PROXY_URL}/api/feature-request`, {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -111,7 +112,7 @@ export async function submitFeatureRequest() {
         });
 
         if (res.ok) {
-            statusEl.textContent = '✅ 提交成功！';
+            statusEl.textContent = t('alert.success');
             contentEl.value = '';
             
             if (window.dataLayer) {
@@ -125,7 +126,7 @@ export async function submitFeatureRequest() {
             setTimeout(closeFeatureModal, 2000);
         } else throw new Error('Server Error');
     } catch (e) {
-        statusEl.textContent = `❌ 失败: ${e.message}`;
+        statusEl.textContent = `${t('alert.fail')}${e.message}`;
     } finally {
         submitBtn.disabled = false;
     }
@@ -164,7 +165,7 @@ export async function submitCSFeedback() {
     const wechat = wechatEl?.value.trim() || 'N/A';
 
     if (!content) {
-        alert('请输入内容。');
+        alert(t('alert.empty'));
         return;
     }
 
@@ -172,7 +173,7 @@ export async function submitCSFeedback() {
         submitBtn.disabled = true;
         statusEl.style.display = 'block';
         statusEl.style.color = '#3b82f6';
-        statusEl.textContent = '提交中...';
+        statusEl.textContent = t('alert.submitting');
 
         // 구글 시트 연동을 위한 POST 요청 (기본 API 엔드포인트 활용)
         const res = await fetch(`${CONFIG.PROXY_URL}/api/feature-request`, {
@@ -189,7 +190,7 @@ export async function submitCSFeedback() {
 
         if (res.ok) {
             statusEl.style.color = '#07c160';
-            statusEl.textContent = '✅ 提交成功！';
+            statusEl.textContent = t('alert.success');
             contentEl.value = '';
             if (wechatEl) wechatEl.value = '';
             
@@ -203,11 +204,11 @@ export async function submitCSFeedback() {
 
             setTimeout(closeCSModal, 2000);
         } else {
-            throw new Error('服务器错误');
+            throw new Error(t('alert.server.err'));
         }
     } catch (e) {
         statusEl.style.color = '#ef4444';
-        statusEl.textContent = `❌ 失败: ${e.message}`;
+        statusEl.textContent = `${t('alert.fail')}${e.message}`;
     } finally {
         submitBtn.disabled = false;
     }
@@ -217,7 +218,7 @@ export function copyWechatId() {
     const input = document.getElementById('wechat-id-input');
     input?.select();
     navigator.clipboard.writeText(input?.value || '').then(() => {
-        alert('ID已复制');
+        alert(t('alert.copied'));
         if (window.dataLayer) {
             window.dataLayer.push({
                 'event': 'wechat_id_copy',

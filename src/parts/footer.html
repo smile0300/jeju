@@ -5,7 +5,7 @@
         <div class="footer-share-top" style="padding-top: 10px; margin-bottom: 5px; border-bottom: 0px;">
             <div class="share-circles-row">
                 <div class="share-group">
-                    <div class="share-group-title">链接分享</div>
+                    <div class="share-group-title" data-i18n="footer.share">链接分享</div>
                     <div class="share-icons-container">
                         <!-- Xiaohongshu Share -->
                         <div class="share-circle-item" onclick="shareToPlatform('xhs')">
@@ -19,7 +19,6 @@
                         <!-- WeChat Share -->
                         <div class="share-circle-item" onclick="shareToPlatform('wechat')">
                             <div class="share-circle wechat-circle">
-                                <!-- Official WeChat bubbles SVG -->
                                 <svg viewBox="0 0 24 24" fill="white" style="width: 32px; height: 32px;">
                                     <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213c0 .163.13.295.295.295a.33.33 0 0 0 .167-.054l1.903-1.114a.86.86 0 0 1 .717-.098a10.2 10.2 0 0 0 2.837.403c.276 0 .543-.027.811-.05c-.857-2.578.157-4.972 1.932-6.446c1.703-1.415 3.882-1.98 5.853-1.838c-.576-3.583-4.196-6.348-8.596-6.348M5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178a1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18m5.34 2.867c-1.797-.052-3.746.512-5.28 1.786c-1.72 1.428-2.687 3.72-1.78 6.22c.942 2.453 3.666 4.229 6.884 4.229c.826 0 1.622-.12 2.361-.336a.72.72 0 0 1 .598.082l1.584.926a.3.3 0 0 0 .14.047c.134 0 .24-.111.24-.247c0-.06-.023-.12-.038-.177l-.327-1.233a.6.6 0 0 1-.023-.156a.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983a.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983a.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982" />
                                 </svg>
@@ -28,7 +27,6 @@
                         <!-- Link Copy -->
                         <div class="share-circle-item" onclick="shareToPlatform('copy')">
                             <div class="share-circle url-circle">
-                                <!-- Modern chain link SVG -->
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 26px; height: 26px; color: #475569;">
                                     <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
                                 </svg>
@@ -38,11 +36,10 @@
                 </div>
                 <!-- Customer Service -->
                 <div class="share-group">
-                    <div class="share-group-title">客服中心</div>
+                    <div class="share-group-title" data-i18n="footer.cs">客服中心</div>
                     <div class="share-icons-container">
                         <div class="share-circle-item" onclick="openCSModal()">
                             <div class="share-circle cs-circle">
-                                <!-- Headset / Customer Service SVG -->
                                 <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 28px; height: 28px;">
                                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                                 </svg>
@@ -74,14 +71,14 @@
             </div>
             <div class="footer-section source-compact" style="text-align: center; margin-top: 10px;">
                 <p class="source-text"
-                    style="font-size: 0.7rem; color: var(--text-muted); opacity: 0.8; margin-bottom: 4px;">
-                    数据为实时观测资料，根据数据接收情况可能会出现未接收的情况。</p>
+                    style="font-size: 0.7rem; color: var(--text-muted); opacity: 0.8; margin-bottom: 4px;"
+                    data-i18n="footer.data.notice">数据为实时观测资料，根据数据接收情况可能会出现未接收的情况。</p>
                 <p class="source-text" style="font-size: 0.7rem; color: var(--text-muted); opacity: 0.8;">Data
                     Sources: KMA, KAC, KECO, Jeju Province, Visit Jeju, LOST112</p>
             </div>
         </div>
         <div class="footer-bottom">
-            <p>© 2026 济州旅行秘书 · 保留所有权利</p>
+            <p data-i18n="footer.copyright">© 2026 济州旅行秘书 · 保留所有权利</p>
         </div>
     </div>
 </footer>
