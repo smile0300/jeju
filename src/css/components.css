@@ -204,7 +204,20 @@ i.ph-duotone {
     justify-content: center;
     vertical-align: middle;
     transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    filter: drop-shadow(0 3px 4px rgba(0,0,0,0.1));
 }
+
+/* Liveliness Color Utility Classes */
+.color-gnb { color: var(--primary-orange); }
+.color-airport { color: #8B5CF6; } /* Purple */
+.color-cctv { color: #EF4444; } /* Red */
+.color-sun { color: #F59E0B; } /* Amber */
+.color-moon { color: #6366F1; } /* Indigo */
+.color-cloud-sun { color: #0EA5E9; } /* Sky Blue */
+.color-cloud-moon { color: #4F46E5; } /* Dark Indigo */
+.color-cloud { color: #9CA3AF; } /* Gray */
+.color-rain { color: #3B82F6; } /* Blue */
+.color-snow { color: #93C5FD; } /* Light Blue */
 
 i.ph-duotone.hover-scale:hover {
     transform: scale(1.15);

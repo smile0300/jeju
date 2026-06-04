@@ -11,7 +11,7 @@ export function initMonthFilter() {
     for (let i = 0; i < 6; i++) {
         const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
         const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-        months.push({ ym, label: `${d.getMonth() + 1}月` });
+        months.push({ ym, label: `${d.getMonth() + 1}${window.t('festival.month_suffix')}` });
     }
 
     if (!currentFestivalMonth) currentFestivalMonth = months[0].ym;
@@ -51,12 +51,12 @@ export async function fetchFestivals() {
     });
 
     if (activeItems.length === 0) {
+        const monthNum = currentFestivalMonth.split('-')[1];
+        const monthSuffix = window.t('festival.month_suffix');
+        const monthStr = `${parseInt(monthNum)}${monthSuffix}`;
         listContainer.innerHTML = `
             <div style="text-align:center;padding:40px;color:var(--text-muted)">
-                该月目前暂无进行中的活动<br>
-                <span style="font-size:1.1rem; color:var(--accent-blue); font-weight:800; display:block; margin-top:10px;">
-                    我们将持续为您更新 ${currentFestivalMonth.split('-')[1]}月的精彩活动
-                </span>
+                ${window.t('festival.empty.list').replace('{month}', monthStr)}
             </div>`;
     } else {
         renderFestivalItems(listContainer, activeItems);
@@ -68,7 +68,7 @@ export function renderFestivalNotice(container) {
         <div class="festival-notice-container">
             <div class="festival-notice-card">
                 <div class="notice-icon">🗓️</div>
-                <h3 class="notice-title">✨ 济州节庆数据正在加载中</h3>
+                <h3 class="notice-title">${window.t('festival.loading.notice')}</h3>
             </div>
         </div>
     `;
@@ -159,6 +159,87 @@ const FESTIVAL_TRANSLATIONS = {
     '[탐나는 마켓 \u00D7 슬로우 빌리지] 5월의 베리 슬로우': '「耽罗市集 x 慢村庄」5月的Very Slow'
 };
 
+const FESTIVAL_TRANSLATIONS_EN = {
+    '한라수목원과 함께하는 주말 자연생태체험 프로그램': 'Weekend Ecology Program in Halla Arboretum',
+    '2026년 기상기후 사진 전시회': '2026 Weather & Climate Photo Exhibition',
+    '2026 블키의 모찌공방': '2026 Blki\'s Mochi Atelier',
+    '2026 봄줍 : 봄을 줍는 여행길': '2026 Spring Gathering Travel',
+    '2026년 제주교육박물관 「문화가 있는 날」': '2026 Jeju Education Museum "Culture Day"',
+    '한림공원 튤립축제': 'Hallim Park Tulip Festival',
+    '제주 유채꽃 축제': 'Jeju Canola Flower Festival',
+    '가파도 청보리 축제': 'Gapado Green Barley Festival',
+    '제78주년 4.3 예술축전 창작극': '78th 4.3 Art Festival Creative Play',
+    '2026 제주경향하우징페어': '2026 Jeju Kyunghyang Housing Fair',
+    '제30회 한라산 청정 고사리축제': '30th Hallasan Clean Bracken Festival',
+    '제19회 전농로왕벚꽃축제': '19th Jeonnong-ro King Cherry Blossom Festival',
+    '제28회 서귀포 유채꽃 국제걷기대회': '28th Seogwipo Canola Flower Int\'l Walking Contest',
+    '제주북페어 2026': 'Jeju Book Fair 2026',
+    '2026 작가의 산책길 이야기 탐방': '2026 Author\'s Trail Story Tour',
+    '작가의 산책길 2026! 봄을 여는 서귀포 생활문화예술 축제': 'Author\'s Trail 2026! Seogwipo Spring Culture & Art Festival',
+    '보롬왓 튤립 축제': 'Boromwat Tulip Festival',
+    '소노 런트립 180K in JEJU': 'Sono Run Trip 180K in JEJU',
+    '제3회 신풍벚꽃터널축제': '3rd Sinpung Cherry Blossom Tunnel Festival',
+    '제43회 서귀포 유채꽃 축제': '43rd Seogwipo Canola Flower Festival',
+    '제15회 서귀포 봄맞이축제': '15th Seogwipo Spring Welcome Festival',
+    '제15회 가파도 청보리 축제': '15th Gapado Green Barley Festival',
+    '제주마 입목문화축제': 'Jeju Horse Pasture Culture Festival',
+    '네 번째, 오물교에 봄이 왔서홍!': 'Spring at Omulgyo Bridge!',
+    '서귀포 원도심 문화페스티벌': 'Seogwipo Downtown Culture Festival',
+    '제1회 반려견과 함께하는 조수리 \'좋아요런\'': '1st Josu-ri Running with Dogs',
+    '2026 제주 빵빵런': '2026 Jeju Bread Run',
+    '2026 펠롱펠롱 제주올레 글로벌 어린이걷기축제': '2026 Jeju Olle Global Children\'s Walking Festival',
+    '2026 JFWF 제주푸드앤와인페스티벌': '2026 Jeju Food & Wine Festival',
+    '에코랜드 좀비 트레인:제주행 리부트': 'Ecoland Zombie Train',
+    '판타지 포레스트 With Friends': 'Fantasy Forest With Friends',
+    '제주국제관광마라톤축제': 'Jeju Int\'l Tourism Marathon Festival',
+    '제주세계청소년합창축제': 'Jeju World Youth Choral Festival',
+    '이호 필터 페스티벌': 'Iho Filter Festival',
+    '카멜리아힐 수국 축제': 'Camellia Hill Hydrangea Festival',
+    '컬러풀 산지 페스티벌': 'Colorful Sanji Festival',
+    '서귀포 오페라 페스티벌': 'Seogwipo Opera Festival',
+    '2026 제주 국가유산 방문의 해': '2026 Visit Jeju National Heritage Year',
+    '제주날씨 순간포착! 제주에 이런 날씨가': 'Jeju Weather Photo Exhibition',
+    '「계절이 들리는 원도심」 (2026 버스킹 있는 날 in 제주시)': 'Busking Day in Jeju City',
+    '제주김녕미로공원 2026 김녕고양이왕국 체험경제 SEASON2 고양이기사단 대모험': 'Gimnyeong Maze Park Cat Kingdom 2026',
+    '휴애리 수국축제': 'Hueree Hydrangea Festival',
+    '안전 인증 농어촌민박 이용 다자녀가구 제주여행 환영 캠페인': 'Safety-certified Guest House Welcome Campaign',
+    '2026년 새연교 음악분수': '2026 Saeyeongyo Musical Fountain',
+    '2026 새연교 주말 문화공연 『금토금토 새연쇼』': 'Saeyeongyo Weekend Performance "Saeyeo Show"',
+    '감귤박물관 특별 웹툰 기획전 "기후위기감귤:제주감귤이야기"': 'Citrus Museum Webtoon Exhibition',
+    '2026 도전! J-스타트업 참가자 모집': '2026 Challenge! J-Startup Recruitment',
+    '탐나오 더-제주 포시즌 The blooming Jeju': 'Tamnao Blooming Jeju Four Seasons',
+    '화산암반수 원정대': 'Volcanic Bedrock Water Expedition',
+    '2026 제주 수공예 놀이터': '2026 Jeju Handicraft Playground',
+    'THETIS 8인 작가 초대전': 'THETIS 8 Artists Exhibition',
+    '칠십리, 예술의 바람 속으로': 'Chilsimni, Into the Wind of Art',
+    '더더플리마켓': 'The The Flea Market',
+    '제6회 여름꽃&능소화축제': '6th Summer Flower & Trumpet Creeper Festival',
+    '고광민 사진\xB7도구기획전 <물질, 제주 해녀의 갯곳 생활>': 'Go Gwang-min Photo Exhibition of Jeju Haenyeo',
+    '카메라, 멩두 전시연계 프로그램': 'Camera, Mengdu Exhibition Program',
+    '제주 김녕 빵빵런': 'Jeju Gimnyeong Bread Run',
+    '제주신화월드 [블랙홀 엑시트] 제1회 코인 사냥 대회': 'Jeju Shinhwa World Coin Hunting Contest',
+    '제 7회 평화의마을 소시지축제': '7th Peace Village Sausage Festival',
+    '마을미식 페스티벌 7인의 셰프, 7개의 마을식당': 'Village Gastronomy Festival',
+    '2026 세계명곡과 함께하는 음악여행': '2026 Music Journey with World Famous Classics',
+    '제주 해설 & 드로잉 여행 <서귀포를 그리는 시간>': 'Jeju Drawing Tour <Drawing Seogwipo>',
+    '제2회 함께달리개 : 기부런': '2nd Run Together Charity Run',
+    '2026 러닝위크 인 제주 (RUNNING WEEK IN JEJU)': '2026 Running Week in Jeju',
+    '제주주간': 'Jeju Week',
+    '제30회 제주국제관광마라톤축제': '30th Jeju Int\'l Tourism Marathon Festival',
+    '청수곶자왈 반딧불이 축제': 'Cheongsu Gotjawal Firefly Festival',
+    '2026 제주 글로벌 푸드테크 엑스포': '2026 Jeju Global Foodtech Expo',
+    '2026 제주잇수다': '2026 Jeju It-Suda',
+    '2026 제주예술문화축전': '2026 Jeju Art & Culture Festival',
+    'K-Dream Dance Festa in JEJU': 'K-Dream Dance Festa in JEJU',
+    '수산리 사탕옥수수 대잔치 : 옥수수처럼 달콤한 여름날의 마을잔치': 'Susan-ri Sweet Corn Festival',
+    '제13회 세계인 제주 외국인 커뮤니티 제전': '13th Jeju Foreign Community Festival',
+    '2026 산호학교 \'제주바다를 기록해요\'': '2026 Coral School "Record the Jeju Sea"',
+    '에코랜드 곶자왈 도르라 트레일런': 'Ecoland Gotjawal Dorra Trail Run',
+    '[한라산아래첫마을영농조합법인] 2026제주메밀축제 "제주메밀의 모든 것"': '2026 Jeju Buckwheat Festival',
+    '제주 고향사랑기부제 5월 종소세 신고기간 애플망고 추가 증정 이벤트': 'Jeju Hometown Love Donation Event',
+    '[탐나는 마켓 \u00D7 슬로우 빌리지] 5월의 베리 슬로우': 'Tamnana Market x Slow Village Event'
+};
+
 const FESTIVAL_IMAGE_MAP = {
     "한라수목원": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202603/20/480650a6-a6f0-4bff-b310-6491cb1fecab.webp",
     "기상기후": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202603/25/de292028-ac2f-4d9b-bdf8-e56c1298acf7.webp",
@@ -183,10 +264,18 @@ function getFestivalImage(title, originalImg) {
 export function renderFestivalItems(container, items) {
     const today = new Date().toISOString().split('T')[0];
     const noImg = 'https://images.unsplash.com/photo-1518005020251-582c7edff267?auto=format&fit=crop&w=500&q=80';
+    const lang = window.getLang ? window.getLang() : 'zh';
 
     container.innerHTML = items.map(item => {
-        const rawTitle = item.title || '无标题活动';
-        const displayTitle = FESTIVAL_TRANSLATIONS[rawTitle] || rawTitle;
+        const rawTitle = item.title || window.t('festival.no_title');
+        let displayTitle = rawTitle;
+        if (lang === 'ko') {
+            displayTitle = rawTitle;
+        } else if (lang === 'en') {
+            displayTitle = FESTIVAL_TRANSLATIONS_EN[rawTitle] || rawTitle;
+        } else { // 'zh'
+            displayTitle = FESTIVAL_TRANSLATIONS[rawTitle] || rawTitle;
+        }
         const rawImg = item.thumbnail || item.imgpath || item.img || '';
         const img = getFestivalImage(rawTitle, rawImg) || noImg;
         
@@ -198,18 +287,18 @@ export function renderFestivalItems(container, items) {
         const monthStr = yearParts[1] || '04';
         const link = `https://visitjeju.net/cn/festival/list#p1&year=${yearStr}&month=${monthStr}&state=all`;
         
-        let statusText = '进行中';
+        let statusText = window.t('festival.status.ing');
         let statusClass = 'ing';
         
         // Priority status from data
         if (item.status === 'upcoming') {
-            statusText = '即将开始';
+            statusText = window.t('festival.status.upcoming');
             statusClass = 'upcoming';
         } else if (date.includes('~')) {
             const startPart = date.split('~')[0].trim();
             const startDate = startPart.replace(/\./g, '-');
             if (startDate > today) {
-                statusText = '即将开始';
+                statusText = window.t('festival.status.upcoming');
                 statusClass = 'upcoming';
             }
         }
@@ -228,3 +317,8 @@ export function renderFestivalItems(container, items) {
             </div>`;
     }).join('');
 }
+
+window.festivalApp = {
+    initMonthFilter: initMonthFilter,
+    fetchFestivals: fetchFestivals
+};

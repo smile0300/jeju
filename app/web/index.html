@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>제주라이브</title>
+  <style>
+    /* 로딩 화면 — jeju-live.com 로드 전 잠깐 표시됨 */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0a192f;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+      color: #ffffff;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .logo { font-size: 2rem; font-weight: 700; }
+    .subtitle { font-size: 0.9rem; color: #64ffda; }
+  </style>
+</head>
+<body>
+  <!-- capacitor.config.ts의 server.url 설정으로 인해 -->
+  <!-- 실제로는 이 화면 대신 jeju-live.com이 바로 로드됩니다. -->
+  <!-- 이 파일은 Capacitor가 webDir를 요구하기 때문에 최소 구성으로만 존재합니다. -->
+  <div class="logo">🌊 제주라이브</div>
+  <div class="subtitle">로딩 중...</div>
+</body>
+</html>

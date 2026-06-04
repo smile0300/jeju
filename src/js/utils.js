@@ -1,13 +1,13 @@
 // 날씨 코드 → 이모지 & 중국어 설명
 export function getSkyInfo(pty, sky, hour) {
     const isNight = hour !== undefined && (hour >= 19 || hour < 6);
-    if (pty === '1') return { icon: '🌧️', desc: window.t ? window.t('weather.sky.rain') : '雨' };
-    if (pty === '2') return { icon: '🌨️', desc: window.t ? window.t('weather.sky.sleet') : '雨夹雪' };
-    if (pty === '3') return { icon: '🌨️', desc: window.t ? window.t('weather.sky.snow') : '雪' };
-    if (sky === '1') return { icon: isNight ? '🌙' : '☀️', desc: window.t ? window.t('weather.sky.clear') : '晴' };
-    if (sky === '3') return { icon: isNight ? '☁️' : '⛅', desc: window.t ? window.t('weather.sky.cloudy') : '多云' };
-    if (sky === '4') return { icon: '☁️', desc: window.t ? window.t('weather.sky.overcast') : '阴' };
-    return { icon: isNight ? '🌙' : '🌤️', desc: window.t ? window.t('weather.sky.clear') : '晴' };
+    if (pty === '1') return { icon: '<i class="ph-duotone ph-cloud-rain color-rain"></i>', desc: window.t ? window.t('weather.sky.rain') : '비' };
+    if (pty === '2') return { icon: '<i class="ph-duotone ph-cloud-snow color-snow"></i>', desc: window.t ? window.t('weather.sky.sleet') : '눈/비' };
+    if (pty === '3') return { icon: '<i class="ph-duotone ph-snowflake color-snow"></i>', desc: window.t ? window.t('weather.sky.snow') : '눈' };
+    if (sky === '1') return { icon: isNight ? '<i class="ph-duotone ph-moon color-moon"></i>' : '<i class="ph-duotone ph-sun color-sun"></i>', desc: window.t ? window.t('weather.sky.clear') : '맑음' };
+    if (sky === '3') return { icon: isNight ? '<i class="ph-duotone ph-cloud-moon color-cloud-moon"></i>' : '<i class="ph-duotone ph-cloud-sun color-cloud-sun"></i>', desc: window.t ? window.t('weather.sky.cloudy') : '구름많음' };
+    if (sky === '4') return { icon: '<i class="ph-duotone ph-cloud color-cloud"></i>', desc: window.t ? window.t('weather.sky.overcast') : '흐림' };
+    return { icon: isNight ? '<i class="ph-duotone ph-moon color-moon"></i>' : '<i class="ph-duotone ph-sun color-sun"></i>', desc: window.t ? window.t('weather.sky.clear') : '맑음' };
 }
 
 
@@ -79,14 +79,14 @@ export function formatBaseTime(date) {
 
 // 중기예보 날씨 상태(wf) → 이모지/중국어 변환
 export function translateMidWf(wf) {
-    if (wf.includes('맑음')) return { icon: '☀️', desc: window.t ? window.t('weather.sky.clear') : '晴' };
-    if (wf.includes('구름많고 비') || wf.includes('흐리고 비')) return { icon: '🌧️', desc: window.t ? window.t('weather.sky.rain') : '雨' };
-    if (wf.includes('구름많고 눈') || wf.includes('흐리고 눈')) return { icon: '🌨️', desc: window.t ? window.t('weather.sky.snow') : '雪' };
-    if (wf.includes('구름많고 비/눈') || wf.includes('흐리고 비/눈')) return { icon: '🌨️', desc: window.t ? window.t('weather.sky.sleet') : '雨夹雪' };
-    if (wf.includes('구름많음')) return { icon: '⛅', desc: window.t ? window.t('weather.sky.cloudy') : '多云' };
-    if (wf.includes('흐림')) return { icon: '☁️', desc: window.t ? window.t('weather.sky.overcast') : '阴' };
-    if (wf.includes('소나기')) return { icon: '🚿', desc: window.t ? window.t('weather.sky.shower') : '阵雨' };
-    return { icon: '🌤️', desc: window.t ? window.t('weather.sky.clear') : '晴' };
+    if (wf.includes('맑음')) return { icon: '<i class="ph-duotone ph-sun color-sun"></i>', desc: window.t ? window.t('weather.sky.clear') : '맑음' };
+    if (wf.includes('구름많고 비') || wf.includes('흐리고 비')) return { icon: '<i class="ph-duotone ph-cloud-rain color-rain"></i>', desc: window.t ? window.t('weather.sky.rain') : '비' };
+    if (wf.includes('구름많고 눈') || wf.includes('흐리고 눈')) return { icon: '<i class="ph-duotone ph-snowflake color-snow"></i>', desc: window.t ? window.t('weather.sky.snow') : '눈' };
+    if (wf.includes('구름많고 비/눈') || wf.includes('흐리고 비/눈')) return { icon: '<i class="ph-duotone ph-cloud-snow color-snow"></i>', desc: window.t ? window.t('weather.sky.sleet') : '비/눈' };
+    if (wf.includes('구름많음')) return { icon: '<i class="ph-duotone ph-cloud-sun color-cloud-sun"></i>', desc: window.t ? window.t('weather.sky.cloudy') : '구름많음' };
+    if (wf.includes('흐림')) return { icon: '<i class="ph-duotone ph-cloud color-cloud"></i>', desc: window.t ? window.t('weather.sky.overcast') : '흐림' };
+    if (wf.includes('소나기')) return { icon: '<i class="ph-duotone ph-cloud-rain color-rain"></i>', desc: window.t ? window.t('weather.sky.shower') : '소나기' };
+    return { icon: '<i class="ph-duotone ph-sun color-sun"></i>', desc: window.t ? window.t('weather.sky.clear') : '맑음' };
 }
 // 중기예보 기온 데이터 안전 추출 (v18.0: 대소문자 및 속성명 변수 대응)
 export function getMidTempVal(item, type, dayIdx) {

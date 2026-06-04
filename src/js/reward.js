@@ -99,7 +99,7 @@ export function renderRewardLoading() {
     if (!listContainer) return;
     listContainer.innerHTML = `
         <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #64748b;">
-            <p>正在加载任务列表...</p>
+            <p>${window.t('reward.loading.list')}</p>
         </div>
     `;
 }
@@ -109,13 +109,14 @@ export function renderRewardList() {
     if (!listContainer) return;
 
     if (REWARD_DATA_CACHED.length === 0) {
-        listContainer.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #64748b;">暂无赏金任务</div>`;
+        listContainer.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #64748b;">${window.t('reward.empty.list')}</div>`;
         return;
     }
 
     listContainer.innerHTML = REWARD_DATA_CACHED.map((item) => {
         const imgData = resolveImageUrl(item);
-        const placeholder = `data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22100%22%20height%3D%22130%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20130%22%3E%3Crect%20width%3D%22100%22%20height%3D%22130%22%20fill%3D%22%23f3f4f6%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-size%3D%2214%22%20text-anchor%3D%22middle%22%20alignment-baseline%3D%22middle%22%20fill%3D%22%239ca3af%22%3ENo%20Image%3C%2Ftext%3E%3C%2Fsvg%3E`;
+        const placeholderText = encodeURIComponent(window.t('lost.no_image'));
+        const placeholder = `data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22100%22%20height%3D%22130%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20130%22%3E%3Crect%20width%3D%22100%22%20height%3D%22130%22%20fill%3D%22%23f3f4f6%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-size%3D%2214%22%20text-anchor%3D%22middle%22%20alignment-baseline%3D%22middle%22%20fill%3D%22%239ca3af%22%3E${placeholderText}%3C%2Ftext%3E%3C%2Fsvg%3E`;
         
         return `
             <div class="reward-card" onclick="applyRewardMission()">
@@ -127,7 +128,7 @@ export function renderRewardList() {
                          onerror="handleRewardImageError(this)">
                 </div>
                 <div class="reward-info">
-                    <h4 class="reward-item-name">${item.title || '赏金任务'}</h4>
+                    <h4 class="reward-item-name">${item.title || window.t('reward.default.title')}</h4>
                     <div class="reward-amount">
                         REWARD : ${item.reward || 0} <small>RMB</small>
                     </div>
@@ -139,7 +140,8 @@ export function renderRewardList() {
 
 window.handleRewardImageError = function(img) {
     const fallback = img.getAttribute('data-fallback');
-    const placeholder = `data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22100%22%20height%3D%22130%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20130%22%3E%3Crect%20width%3D%22100%22%20height%3D%22130%22%20fill%3D%22%23f3f4f6%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-size%3D%2214%22%20text-anchor%3D%22middle%22%20alignment-baseline%3D%22middle%22%20fill%3D%22%239ca3af%22%3ENo%20Image%3C%2Ftext%3E%3C%2Fsvg%3E`;
+    const placeholderText = encodeURIComponent(window.t('lost.no_image'));
+    const placeholder = `data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22100%22%20height%3D%22130%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20130%22%3E%3Crect%20width%3D%22100%22%20height%3D%22130%22%20fill%3D%22%23f3f4f6%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-size%3D%2214%22%20text-anchor%3D%22middle%22%20alignment-baseline%3D%22middle%22%20fill%3D%22%239ca3af%22%3E${placeholderText}%3C%2Ftext%3E%3C%2Fsvg%3E`;
     
     // 1단계: 명시된 fallback이 있으면 시도
     if (fallback && img.getAttribute('data-fallback-tried') !== 'true') {
@@ -238,4 +240,9 @@ window.applyRewardMission = function() {
 
 window.publishRewardMission = function() {
     if (window.openWechatQR) window.openWechatQR();
+};
+
+window.rewardApp = {
+    init: initReward,
+    renderList: renderRewardList
 };
