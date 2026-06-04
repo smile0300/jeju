@@ -160,7 +160,7 @@
 
 .loc-row {
     display: flex !important;
-    flex-wrap: nowrap !important;
+    flex-wrap: wrap !important;
     align-items: stretch !important;
     justify-content: space-between !important;
     gap: 4px !important;
@@ -180,6 +180,7 @@
 
 .loc-group-wrapper {
     display: flex !important;
+    flex-wrap: wrap !important;
     align-items: stretch !important;
     gap: 4px !important;
     position: relative !important;
@@ -2155,6 +2156,8 @@
 /* Header Area */
 .weather-header-container {
     display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
     justify-content: space-between;
     align-items: center;
     padding: 10px 4px 15px;
@@ -2173,7 +2176,7 @@
     font-weight: 800;
     color: #212529;
     margin: 0;
-    white-space: nowrap;
+    word-break: keep-all;
 }
 .header-action-btns {
     display: flex;
@@ -2260,7 +2263,7 @@
     .cw-details-list li {
         justify-content: flex-start; /* Reverted to Left */
         font-size: 0.75rem;
-        white-space: nowrap; /* Avoid line breaks */
+        word-break: keep-all; /* Allow line breaks if necessary */
     }
 }
 .cw-left {
