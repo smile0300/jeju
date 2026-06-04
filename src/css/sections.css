@@ -228,7 +228,6 @@
     flex: 1 1 0 !important;
     width: auto !important;
     min-width: 50px !important;
-    max-width: 90px !important;
     background: var(--bg-card); border: 1.5px solid var(--border-light);
     padding: 8px 0; border-radius: var(--radius-md); cursor: pointer;
     transition: all var(--transition-normal);
@@ -238,7 +237,7 @@
 .location-tab:hover { background: var(--bg-card-hover); border-color: var(--accent-purple); transform: translateY(-2px); }
 .location-tab.active { background: var(--primary-gradient); border-color: transparent !important; box-shadow: 0 3px 8px rgba(67, 56, 202, 0.3); }
 .tab-icon { font-size: 1.1rem; margin-bottom: 2px; }
-.tab-name { font-size: 0.75rem; font-weight: 800; color: var(--text-primary); }
+.tab-name { font-size: 0.75rem; font-weight: 800; color: var(--text-primary); white-space: normal; word-break: keep-all; text-align: center; line-height: 1.15; }
 .location-tab.active .tab-name { color: white !important; }
 
 .current-weather {
@@ -292,7 +291,7 @@
 }
 .weather-detail-item { 
     display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--text-secondary); 
-    font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    font-weight: 600; white-space: normal; word-break: keep-all; line-height: 1.25;
 }
 
 .hourly-scroll { 
@@ -965,7 +964,7 @@
     .weather-icon { font-size: 2.2rem; }
     .temp-value { font-size: 2.2rem; }
     .weather-details { padding-left: 12px; gap: 4px; }
-    .weather-detail-item { font-size: 0.72rem; white-space: nowrap; }
+    .weather-detail-item { font-size: 0.72rem; white-space: normal; word-break: keep-all; line-height: 1.25; }
 
     .hourly-item { min-width: 72px; padding: 10px 4px; }
     .hourly-precip { font-size: 0.7rem; }
