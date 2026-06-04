@@ -47,7 +47,131 @@ const TRANSLATIONS = {
         'nav.course':     '推荐路线',
         'badge.maintenance': '维护中',
 
+        // ── 공항 동적 텍스트 ──
+        'airport.badge.register_close': '登记截止',
+        'airport.badge.departed': '已出发',
+        'airport.badge.arrived': '已到达',
+        'airport.badge.delayed': '延误',
+        'airport.badge.canceled': '取消',
+        'airport.badge.boarding': '正在登机',
+        'airport.badge.processing': '正在办理',
+        'airport.badge.diverted': '备降/返航',
+        'airport.badge.landed': '已着陆',
+        'airport.header.flight_id': '航班号',
+        'airport.header.airline': '航空公司',
+        'airport.header.origin': '出发地',
+        'airport.header.dest': '目的地',
+        'airport.header.time': '预定/实际',
+        'airport.header.status': '状态',
+        'airport.loading': '正在加载信息...',
+        'airport.empty': '暂无相关航班信息',
+
+        // ── 날씨 동적 텍스트 ──
+        'weather.humidity': '湿度',
+        'weather.feelslike': '体感',
+        'weather.aq': '空气质量',
+        'weather.hourly.date': '日期',
+        'weather.hourly.time': '时间',
+        'weather.hourly.precip': '降水',
+        'weather.hourly.temp': '气温',
+        'weather.hourly.wind': '风速',
+        'weather.sky.rain': '雨',
+        'weather.sky.sleet': '雨夹雪',
+        'weather.sky.snow': '雪',
+        'weather.sky.clear': '晴',
+        'weather.sky.cloudy': '多云',
+        'weather.sky.overcast': '阴',
+        'weather.sky.shower': '阵雨',
+        'weather.wind.unknown': '未知',
+        'weather.wind.light': '微风',
+        'weather.wind.moderate': '和风',
+        'weather.wind.fresh': '清劲风',
+        'weather.wind.strong': '强风',
+        'weather.sunrise': '日出',
+        'weather.sunset': '日落',
+        'weather.am': '上午',
+        'weather.pm': '下午',
+        'weather.allday': '全天',
+        'weather.err.load': '⚠️ 天气数据加载失败',
+        'weather.err.retry': '🔄 重新加载',
+        'weather.aq.good': '优',
+        'weather.aq.fair': '良',
+        'weather.aq.poor': '轻度',
+        'weather.aq.severe': '重度',
+        'weather.alert.badge': '济州特报',
+        'weather.alert.badge.warn': '济州注意报',
+        'weather.alert.badge.danger': '济州警报',
+        'weather.alert.no': '当前全岛无气象特报 (点击查看历史)',
+        'weather.alert.modal.active': '当前生效',
+        'weather.alert.modal.history': '今日历史',
+        'weather.alert.modal.recent': '最近历史',
+        'weather.alert.modal.title': '济州气象特报',
+        'weather.alert.modal.empty': '🍃 当前济州岛无生效中的气象特报',
+        'weather.alert.modal.empty_history': '📭 今日无气象特报发布或解除历史',
+        'weather.alert.badge.active': '[特报]',
+        'weather.alert.badge.warn.bracket': '[注意报]',
+        'weather.alert.badge.danger.bracket': '[警报]',
+        'weather.alert.badge.clear.bracket': '[已解除]',
+
+        // ── 한라산 동적 텍스트 ──
+        'hallasan.status.open': '正常运营',
+        'hallasan.status.partial': '部分管制',
+        'hallasan.status.closed': '全面管制',
+        'hallasan.status.hero.open': '目前全线登山路均可正常通行。',
+        'hallasan.status.hero.partial': '部分登山路受天气影响已实施管制。',
+        'hallasan.status.hero.closed': '因极端天气，所有登山路已全面封闭。',
+        'hallasan.status.hero.title': '汉拿山实时通行状态',
+        'hallasan.status.hero.update': '更新于: ',
+        'hallasan.visibility': '⛰️ 白鹿潭观赏',
+        'hallasan.sunrise_prob': '🌅 日出观赏',
+        'hallasan.cctv.repair': 'CCTV 维修中',
+        'hallasan.loading.official': '正在尝试连接官方数据...',
+        'hallasan.err.delay': '官方网站响应延迟中',
+        'hallasan.err.failed': '暂时无法加载登山路状态',
+        'hallasan.err.reload': '重新加载',
+
+        // ── 분실물 동적 텍스트 ──
+        'lost.searching.status': '正在查询...',
+        'lost.loading': '正在加载信息...',
+        'lost.no_info': '暂无信息',
+        'lost.storing': '保管中',
+        'lost.summary': '共查询到 <strong>{count}</strong> 件物品 (含图片 {imgCount} 件)。',
+        'lost.err.search': '查询出错',
+        'lost.err.load': '无法加载实时数据，请稍后再试',
+        'lost.no_records': '该期间内暂无相关记录',
+        'lost.no_image': '暂无图片',
+        'lost.btn.detail': '详细',
+        'lost.detail.id': '管理编号',
+        'lost.detail.status': '物品状态',
+        'lost.detail.date': '拾获日期',
+        'lost.detail.place': '保管地点',
+        'lost.detail.tel': '联系电话',
+        'lost.detail.desc': '特征描述',
+        'lost.detail.close': '关闭',
+        'lost.detail.cs': '咨询客服',
+        'lost.detail.wechat_guide': '请扫描二维码通过微信联系我们',
+        'lost.report.size_err': '照片大小不能超过2MB。',
+        'lost.report.fill_err': '请填写完整的信息',
+        'lost.report.photo_err': '请上传物品照片 (必填)',
+        'lost.report.submitting': '正在提交...',
+        'lost.report.success': '提交成功！',
+        'lost.report.failed': '提交失败: ',
+
+        // ── 현상금 동적 텍스트 ──
+        'reward.loading.list': '正在加载任务列表...',
+        'reward.empty.list': '暂无赏金任务',
+        'reward.default.title': '赏金任务',
+
+        // ── 축제 동적 텍스트 ──
+        'festival.month_suffix': '月',
+        'festival.empty.list': '该月目前暂无进行中的活动<br><span style="font-size:1.1rem; color:var(--accent-blue); font-weight:800; display:block; margin-top:10px;">我们将持续为您更新 {month}月的精彩活动</span>',
+        'festival.loading.notice': '✨ 济州节庆数据正在加载中',
+        'festival.no_title': '无标题活动',
+        'festival.status.ing': '进行中',
+        'festival.status.upcoming': '即将开始',
+
         // ── 공항 ──
+        'airport.err.failed': 'Error: API Request Failed (API请求失败)',
         'airport.title':    '✈️ 济州国际机场',
         'airport.ticket':   '✈️ 中国 ↔ 济州 机票查询',
         'airport.arrive':   '到达航班',
@@ -99,6 +223,8 @@ const TRANSLATIONS = {
         'footer.cs':        '客服中心',
         'footer.data.notice': '数据为实时观测资料，根据数据接收情况可能会出现未接收的情况。',
         'footer.copyright': '© 2026 济州旅行秘书 · 保留所有权利',
+        'footer.social.xiaohongshu': '小红书',
+        'footer.social.wechat': '微信',
 
         // ── 모달: WeChat QR ──
         'modal.wechat.title': '联系我们 (WeChat)',
@@ -192,11 +318,135 @@ const TRANSLATIONS = {
         'nav.airport':    '공항정보',
         'nav.lost':       '분실물',
         'nav.festival':   '축제/행사',
-        'nav.reward':     '현상금',
-        'nav.food':       '제주맛집',
-        'nav.course':     '추천코스',
+        'nav.reward':     '현상금 임무',
+        'nav.food':       '제주 맛집',
+        'nav.course':     '추천 코스',
         'badge.maintenance': '점검중',
 
+        // ── 공항 동적 텍스트 ──
+        'airport.badge.register_close': '수속마감',
+        'airport.badge.departed': '출발',
+        'airport.badge.arrived': '도착',
+        'airport.badge.delayed': '지연',
+        'airport.badge.canceled': '결항',
+        'airport.badge.boarding': '탑승중',
+        'airport.badge.processing': '수속중',
+        'airport.badge.diverted': '회항',
+        'airport.badge.landed': '착륙',
+        'airport.header.flight_id': '편명',
+        'airport.header.airline': '항공사',
+        'airport.header.origin': '출발지',
+        'airport.header.dest': '도착지',
+        'airport.header.time': '예정/실제',
+        'airport.header.status': '상태',
+        'airport.loading': '정보를 불러오는 중...',
+        'airport.empty': '운항 정보가 없습니다',
+
+        // ── 날씨 동적 텍스트 ──
+        'weather.humidity': '습도',
+        'weather.feelslike': '체감온도',
+        'weather.aq': '대기질',
+        'weather.hourly.date': '날짜',
+        'weather.hourly.time': '시간',
+        'weather.hourly.precip': '강수량',
+        'weather.hourly.temp': '기온',
+        'weather.hourly.wind': '풍속',
+        'weather.sky.rain': '비',
+        'weather.sky.sleet': '진눈깨비',
+        'weather.sky.snow': '눈',
+        'weather.sky.clear': '맑음',
+        'weather.sky.cloudy': '구름많음',
+        'weather.sky.overcast': '흐림',
+        'weather.sky.shower': '소나기',
+        'weather.wind.unknown': '알수없음',
+        'weather.wind.light': '미풍',
+        'weather.wind.moderate': '약풍',
+        'weather.wind.fresh': '강풍',
+        'weather.wind.strong': '매우강풍',
+        'weather.sunrise': '일출',
+        'weather.sunset': '일몰',
+        'weather.am': '오전',
+        'weather.pm': '오후',
+        'weather.allday': '하루종일',
+        'weather.err.load': '⚠️ 날씨 데이터 로드 실패',
+        'weather.err.retry': '🔄 다시 읽기',
+        'weather.aq.good': '좋음',
+        'weather.aq.fair': '보통',
+        'weather.aq.poor': '나쁨',
+        'weather.aq.severe': '매우나쁨',
+        'weather.alert.badge': '제주 특보',
+        'weather.alert.badge.warn': '제주 주의보',
+        'weather.alert.badge.danger': '제주 경보',
+        'weather.alert.no': '현재 발효 중인 기상특보가 없습니다 (이력 확인)',
+        'weather.alert.modal.active': '현재 발효',
+        'weather.alert.modal.history': '오늘 이력',
+        'weather.alert.modal.recent': '최근 이력',
+        'weather.alert.modal.title': '제주 기상특보',
+        'weather.alert.modal.empty': '🍃 현재 제주도에 발효 중인 기상특보가 없습니다',
+        'weather.alert.modal.empty_history': '📭 오늘 발표되거나 해제된 특보 이력이 없습니다',
+        'weather.alert.badge.active': '[특보]',
+        'weather.alert.badge.warn.bracket': '[주의보]',
+        'weather.alert.badge.danger.bracket': '[경보]',
+        'weather.alert.badge.clear.bracket': '[해제]',
+
+        // ── 한라산 동적 텍스트 ──
+        'hallasan.status.open': '정상운영',
+        'hallasan.status.partial': '부분통제',
+        'hallasan.status.closed': '전면통제',
+        'hallasan.status.hero.open': '현재 모든 탐방로를 정상적으로 이용하실 수 있습니다.',
+        'hallasan.status.hero.partial': '일부 탐방로가 기상 상황으로 인해 통제되었습니다.',
+        'hallasan.status.hero.closed': '기상 악화로 인해 모든 탐방로의 통행이 제한되었습니다.',
+        'hallasan.status.hero.title': '한라산 실시간 통제 현황',
+        'hallasan.status.hero.update': '업데이트: ',
+        'hallasan.visibility': '⛰️ 백록담 조망',
+        'hallasan.sunrise_prob': '🌅 일출 조망',
+        'hallasan.cctv.repair': 'CCTV 점검 중',
+        'hallasan.loading.official': '공식 데이터에 연결하는 중...',
+        'hallasan.err.delay': '공식 홈페이지 응답이 지연되고 있습니다.',
+        'hallasan.err.failed': '탐방로 상태를 불러올 수 없습니다.',
+        'hallasan.err.reload': '다시 읽기',
+
+        // ── 분실물 동적 텍스트 ──
+        'lost.searching.status': '조회 중...',
+        'lost.loading': '정보를 불러오는 중...',
+        'lost.no_info': '정보 없음',
+        'lost.storing': '보관중',
+        'lost.summary': '총 <strong>{count}</strong>건의 물품이 조회되었습니다. (이미지 {imgCount}건)',
+        'lost.err.search': '조회 실패',
+        'lost.err.load': '실시간 데이터를 불러올 수 없습니다. 잠시 후 다시 시도해 주세요.',
+        'lost.no_records': '해당 기간 내에 등록된 기록이 없습니다.',
+        'lost.no_image': '이미지 없음',
+        'lost.btn.detail': '상세',
+        'lost.detail.id': '관리번호',
+        'lost.detail.status': '물품상태',
+        'lost.detail.date': '습득일자',
+        'lost.detail.place': '보관장소',
+        'lost.detail.tel': '연락처',
+        'lost.detail.desc': '특징 및 설명',
+        'lost.detail.close': '닫기',
+        'lost.detail.cs': '고객 상담',
+        'lost.detail.wechat_guide': 'QR 코드를 스캔하여 위챗으로 문의해 주세요',
+        'lost.report.size_err': '사진 크기는 2MB를 초과할 수 없습니다.',
+        'lost.report.fill_err': '모든 필수 정보를 입력해 주세요.',
+        'lost.report.photo_err': '물품 사진을 업로드해 주세요 (필수).',
+        'lost.report.submitting': '제출 중...',
+        'lost.report.success': '제출이 완료되었습니다!',
+        'lost.report.failed': '제출 실패: ',
+
+        // ── 현상금 동적 텍스트 ──
+        'reward.loading.list': '임무 목록을 불러오는 중...',
+        'reward.empty.list': '진행 중인 현상금 임무가 없습니다',
+        'reward.default.title': '현상금 임무',
+
+        // ── 축제 동적 텍스트 ──
+        'festival.month_suffix': '월',
+        'festival.empty.list': '해당 월에 진행 중인 행사가 없습니다.<br><span style="font-size:1.1rem; color:var(--accent-blue); font-weight:800; display:block; margin-top:10px;">{month}월의 다채로운 행사를 지속적으로 업데이트해 드리겠습니다.</span>',
+        'festival.loading.notice': '✨ 축제 데이터를 불러오는 중입니다...',
+        'festival.no_title': '제목 없음',
+        'festival.status.ing': '진행중',
+        'festival.status.upcoming': '예정',
+
+        'airport.err.failed': '공항 API 호출에 실패했습니다.',
         'airport.title':    '✈️ 제주국제공항',
         'airport.ticket':   '✈️ 중국 ↔ 제주 항공권 조회',
         'airport.arrive':   '도착편',
@@ -207,6 +457,7 @@ const TRANSLATIONS = {
         'hallasan.cctv':    '📺 한라산 실시간 CCTV',
         'hallasan.reserve': '⛰️ 한라산 예약',
         'hallasan.notice':  '📢 한라산 공지사항',
+        'hallasan.loading.official': '공식 실시간 데이터를 가져오는 중입니다...',
 
         'festival.title':   '🎉 제주 축제/행사',
         'festival.ticket':  '🎟️ 관광지 티켓 보기',
@@ -243,6 +494,8 @@ const TRANSLATIONS = {
         'footer.cs':        '고객센터',
         'footer.data.notice': '데이터는 실시간 관측 자료로, 수신 상황에 따라 미수신될 수 있습니다.',
         'footer.copyright': '© 2026 제주 여행 비서 · All Rights Reserved',
+        'footer.social.xiaohongshu': '샤오홍슈',
+        'footer.social.wechat': '위챗',
 
         'modal.wechat.title': '문의하기 (WeChat)',
         'modal.wechat.desc':  '아래 QR코드를 스캔하거나\nID를 복사하여 위챗을 추가하세요',
@@ -331,10 +584,134 @@ const TRANSLATIONS = {
         'nav.lost':       'Lost & Found',
         'nav.festival':   'Festivals',
         'nav.reward':     'Bounty',
-        'nav.food':       'Jeju Food',
-        'nav.course':     'Travel Routes',
+        'nav.food':       'Food Map',
+        'nav.course':     'Course',
         'badge.maintenance': 'Maintenance',
 
+        // ── 공항 동적 텍스트 ──
+        'airport.badge.register_close': 'Gate Closed',
+        'airport.badge.departed': 'Departed',
+        'airport.badge.arrived': 'Arrived',
+        'airport.badge.delayed': 'Delayed',
+        'airport.badge.canceled': 'Canceled',
+        'airport.badge.boarding': 'Boarding',
+        'airport.badge.processing': 'Check-in',
+        'airport.badge.diverted': 'Diverted',
+        'airport.badge.landed': 'Landed',
+        'airport.header.flight_id': 'Flight No.',
+        'airport.header.airline': 'Airline',
+        'airport.header.origin': 'Origin',
+        'airport.header.dest': 'Destination',
+        'airport.header.time': 'Sched/Est',
+        'airport.header.status': 'Status',
+        'airport.loading': 'Loading flight info...',
+        'airport.empty': 'No flight info available',
+
+        // ── 날씨 동적 텍스트 ──
+        'weather.humidity': 'Humidity',
+        'weather.feelslike': 'Feels like',
+        'weather.aq': 'Air Quality',
+        'weather.hourly.date': 'Date',
+        'weather.hourly.time': 'Time',
+        'weather.hourly.precip': 'Precip',
+        'weather.hourly.temp': 'Temp',
+        'weather.hourly.wind': 'Wind',
+        'weather.sky.rain': 'Rain',
+        'weather.sky.sleet': 'Sleet',
+        'weather.sky.snow': 'Snow',
+        'weather.sky.clear': 'Clear',
+        'weather.sky.cloudy': 'Cloudy',
+        'weather.sky.overcast': 'Overcast',
+        'weather.sky.shower': 'Shower',
+        'weather.wind.unknown': 'Unknown',
+        'weather.wind.light': 'Light Wind',
+        'weather.wind.moderate': 'Moderate',
+        'weather.wind.fresh': 'Fresh',
+        'weather.wind.strong': 'Strong',
+        'weather.sunrise': 'Sunrise',
+        'weather.sunset': 'Sunset',
+        'weather.am': 'AM',
+        'weather.pm': 'PM',
+        'weather.allday': 'All Day',
+        'weather.err.load': '⚠️ Failed to load weather data',
+        'weather.err.retry': '🔄 Reload',
+        'weather.aq.good': 'Good',
+        'weather.aq.fair': 'Fair',
+        'weather.aq.poor': 'Poor',
+        'weather.aq.severe': 'Severe',
+        'weather.alert.badge': 'Jeju Alert',
+        'weather.alert.badge.warn': 'Jeju Advisory',
+        'weather.alert.badge.danger': 'Jeju Warning',
+        'weather.alert.no': 'No active weather alerts (Click for history)',
+        'weather.alert.modal.active': 'Active Alerts',
+        'weather.alert.modal.history': 'Today\'s History',
+        'weather.alert.modal.recent': 'Recent History',
+        'weather.alert.modal.title': 'Jeju Weather Alerts',
+        'weather.alert.modal.empty': '🍃 No active weather alerts in Jeju',
+        'weather.alert.modal.empty_history': '📭 No alert history for today',
+        'weather.alert.badge.active': '[Alert]',
+        'weather.alert.badge.warn.bracket': '[Advisory]',
+        'weather.alert.badge.danger.bracket': '[Warning]',
+        'weather.alert.badge.clear.bracket': '[Cleared]',
+
+        // ── 한라산 동적 텍스트 ──
+        'hallasan.status.open': 'Open',
+        'hallasan.status.partial': 'Partial',
+        'hallasan.status.closed': 'Closed',
+        'hallasan.status.hero.open': 'All trails are currently open.',
+        'hallasan.status.hero.partial': 'Some trails are closed due to weather.',
+        'hallasan.status.hero.closed': 'All trails are closed due to severe weather.',
+        'hallasan.status.hero.title': 'Hallasan Trail Status',
+        'hallasan.status.hero.update': 'Updated: ',
+        'hallasan.visibility': '⛰️ Baengnokdam View',
+        'hallasan.sunrise_prob': '🌅 Sunrise View',
+        'hallasan.cctv.repair': 'CCTV Under Maintenance',
+        'hallasan.loading.official': 'Connecting to official database...',
+        'hallasan.err.delay': 'Official website connection delayed.',
+        'hallasan.err.failed': 'Failed to load trail status.',
+        'hallasan.err.reload': 'Reload',
+
+        // ── 분실물 동적 텍스트 ──
+        'lost.searching.status': 'Searching...',
+        'lost.loading': 'Loading information...',
+        'lost.no_info': 'No Info',
+        'lost.storing': 'Stored',
+        'lost.summary': 'Found <strong>{count}</strong> items ({imgCount} with images).',
+        'lost.err.search': 'Search failed',
+        'lost.err.load': 'Failed to load real-time data. Please try again.',
+        'lost.no_records': 'No records found for this period.',
+        'lost.no_image': 'No Image',
+        'lost.btn.detail': 'Detail',
+        'lost.detail.id': 'Mgmt No.',
+        'lost.detail.status': 'Status',
+        'lost.detail.date': 'Found Date',
+        'lost.detail.place': 'Stored Place',
+        'lost.detail.tel': 'Phone',
+        'lost.detail.desc': 'Description',
+        'lost.detail.close': 'Close',
+        'lost.detail.cs': 'Support',
+        'lost.detail.wechat_guide': 'Scan the QR code to contact us on WeChat',
+        'lost.report.size_err': 'Photo size cannot exceed 2MB.',
+        'lost.report.fill_err': 'Please fill in all details.',
+        'lost.report.photo_err': 'Please upload item photo (Required).',
+        'lost.report.submitting': 'Submitting...',
+        'lost.report.success': 'Submitted successfully!',
+        'lost.report.failed': 'Submission failed: ',
+
+        // ── 현상금 동적 텍스트 ──
+        'reward.loading.list': 'Loading mission list...',
+        'reward.empty.list': 'No bounty missions available',
+        'reward.default.title': 'Bounty Mission',
+
+        // ── 축제 동적 텍스트 ──
+        'festival.month_suffix': '',
+        'festival.empty.list': 'No events scheduled for this month.<br><span style="font-size:1.1rem; color:var(--accent-blue); font-weight:800; display:block; margin-top:10px;">We will keep updating exciting events for {month}.</span>',
+        'festival.loading.notice': '✨ Loading festival data...',
+        'festival.no_title': 'Untitled Event',
+        'festival.status.ing': 'Ongoing',
+        'festival.status.upcoming': 'Upcoming',
+
+        'airport.err.failed': 'Error: API Request Failed',
         'airport.title':    '✈️ Jeju Int\'l Airport',
         'airport.ticket':   '✈️ China ↔ Jeju Flight Search',
         'airport.arrive':   'Arrivals',
@@ -345,6 +722,7 @@ const TRANSLATIONS = {
         'hallasan.cctv':    '📺 Hallasan Live CCTV',
         'hallasan.reserve': '⛰️ Reserve Hallasan',
         'hallasan.notice':  '📢 Hallasan Notices',
+        'hallasan.loading.official': 'Loading official data...',
 
         'festival.title':   '🎉 Jeju Festivals & Events',
         'festival.ticket':  '🎟️ View Attraction Tickets',
@@ -381,6 +759,8 @@ const TRANSLATIONS = {
         'footer.cs':        'Customer Service',
         'footer.data.notice': 'Data is real-time. Some data may be unavailable depending on reception status.',
         'footer.copyright': '© 2026 Jeju Travel Assistant · All Rights Reserved',
+        'footer.social.xiaohongshu': 'Xiaohongshu',
+        'footer.social.wechat': 'WeChat',
 
         'modal.wechat.title': 'Contact Us (WeChat)',
         'modal.wechat.desc':  'Scan the QR code below\nor copy the ID to add WeChat',
@@ -448,15 +828,46 @@ export function getLang() {
     return currentLang;
 }
 
-/**
- * 언어 변경 및 DOM 업데이트
- */
 export function setLanguage(lang) {
     if (!TRANSLATIONS[lang]) return;
     currentLang = lang;
     localStorage.setItem('jeju_lang', lang);
     applyTranslations();
     updateLangSelector();
+
+    // 동적으로 생성되는 다국어 영역들을 재렌더링
+    try {
+        // 날씨 탭 재렌더링
+        const activeLocTab = document.querySelector('.location-tab.active');
+        if (activeLocTab && window.weatherApp && window.weatherApp.fetchWeatherData) {
+            window.weatherApp.fetchWeatherData(activeLocTab.dataset.loc);
+        }
+        // 한라산 탭 재렌더링
+        if (window.hallasanApp && window.hallasanApp.fetchStatus) {
+            window.hallasanApp.fetchStatus(false, true);
+        }
+        // 현상금 탭 재렌더링
+        if (window.rewardApp && window.rewardApp.renderList) {
+            window.rewardApp.renderList();
+        }
+        // 축제 탭 재렌더링
+        if (window.festivalApp && window.festivalApp.initMonthFilter) {
+            window.festivalApp.initMonthFilter();
+            window.festivalApp.fetchFestivals();
+        }
+        // 공항 탭 재렌더링
+        if (window.airportApp && window.airportApp.fetchFlights) {
+            const activeTab = document.querySelector('.flight-tab.active');
+            const type = activeTab && activeTab.id === 'tab-depart' ? 'depart' : 'arrive';
+            window.airportApp.fetchFlights(type);
+        }
+        // 분실물 탭 재렌더링
+        if (window.lostFoundApp && window.lostFoundApp.fetchFoundGoods) {
+            window.lostFoundApp.fetchFoundGoods();
+        }
+    } catch (e) {
+        console.error('Error during language change re-render:', e);
+    }
 
     if (window.dataLayer) {
         window.dataLayer.push({ event: 'language_change', lang });
@@ -512,3 +923,4 @@ export function initI18n() {
 // 전역 노출 (HTML onclick 등에서 사용)
 window.setLanguage = setLanguage;
 window.t = t;
+window.getLang = getLang;
