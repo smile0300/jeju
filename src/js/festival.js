@@ -67,7 +67,7 @@ export function renderFestivalNotice(container) {
     container.innerHTML = `
         <div class="festival-notice-container">
             <div class="festival-notice-card">
-                <div class="notice-icon">🗓️</div>
+                <div class="notice-icon"><i class="ph-duotone ph-calendar color-festival"></i></div>
                 <h3 class="notice-title">${window.t('festival.loading.notice')}</h3>
             </div>
         </div>

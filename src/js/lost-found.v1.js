@@ -167,7 +167,7 @@ export function renderLostGoodsTable(items) {
         const displayStatus = isStoring ? window.t('lost.storing') : item.status;
         return `
         <tr>
-            <td>${item.img ? `<img src="${item.img}" class="lost-table-img" loading="lazy" onerror="this.src='${noImgSvg}'">` : '📦'}</td>
+            <td>${item.img ? `<img src="${item.img}" class="lost-table-img" loading="lazy" onerror="this.src='${noImgSvg}'">` : '<i class="ph-duotone ph-package color-cloud"></i>'}</td>
             <td><span class="lost-category-badge">${item.category}</span></td>
             <td style="font-weight:600;">${item.name}</td>
             <td><span class="lost-status-tag ${isStoring ? 'active' : ''}">${displayStatus}</span></td>
@@ -190,7 +190,7 @@ export function openLostDetailModalByIndex(index) {
 
     body.innerHTML = `
         <div class="lost-modal-img-container">
-            ${item.img ? `<img src="${item.img}" class="lost-modal-img" onerror="this.src='${noImgSvg}'">` : `<div class="lost-modal-no-img">📦</div>`}
+            ${item.img ? `<img src="${item.img}" class="lost-modal-img" onerror="this.src='${noImgSvg}'">` : `<div class="lost-modal-no-img"><i class="ph-duotone ph-package color-cloud"></i></div>`}
         </div>
         <div class="lost-modal-info">
             <div class="lost-modal-header">

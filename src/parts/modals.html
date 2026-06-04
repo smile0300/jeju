@@ -56,7 +56,7 @@
     <div class="modal-content lost-report-form-content" onclick="event.stopPropagation()">
         <button class="modal-close" onclick="closeLostReportModal()">✕</button>
         <div class="lost-report-header">
-            <h3 data-i18n="modal.lost.title">📝 登记报失物品</h3>
+            <h3 data-i18n="modal.lost.title"><i class="ph-duotone ph-pencil-simple color-course"></i> 登记报失物品</h3>
             <p data-i18n="modal.lost.desc">请填写以下信息，我们将协助您在 LOST112 登记。 (填写越详细找回概率越高)</p>
         </div>
         <div class="lost-report-body">
@@ -108,7 +108,7 @@
 <div id="feature-request-modal" class="modal-overlay" style="display:none; z-index: 10001;" onclick="closeFeatureModal()">
     <div class="modal-content" style="max-width: 400px; padding: 30px; background: white;" onclick="event.stopPropagation()">
         <button class="modal-close" style="color: #333;" onclick="closeFeatureModal()">✕</button>
-        <h3 style="margin-bottom: 12px; font-size: 1.25rem; color: var(--text-primary);" data-i18n="modal.feature.title">💡 提交建议或功能请求</h3>
+        <h3 style="margin-bottom: 12px; font-size: 1.25rem; color: var(--text-primary);" data-i18n="modal.feature.title"><i class="ph-duotone ph-lightbulb color-sun"></i> 提交建议或功能请求</h3>
         <textarea id="feature-content" data-i18n="modal.feature.ph" placeholder="在此输入您的建议或发现的漏洞..."
             style="width: 100%; min-height: 120px; padding: 15px; border-radius: 12px; border: 1.5px solid #eee; font-family: inherit; font-size: 0.95rem; resize: vertical; margin-bottom: 20px; outline: none; transition: border-color 0.2s;"></textarea>
         <button id="feature-submit-btn" onclick="submitFeatureRequest()"
@@ -122,20 +122,20 @@
     <div class="modal-content share-modal-content" onclick="event.stopPropagation()">
         <button class="modal-close" onclick="closeShareModal()">✕</button>
         <div class="share-header">
-            <h3 style="margin-bottom: 12px; font-size: 1.25rem; color: var(--text-primary); text-align: center;" data-i18n="modal.share.title">📤 分享到 SNS</h3>
+            <h3 style="margin-bottom: 12px; font-size: 1.25rem; color: var(--text-primary); text-align: center;" data-i18n="modal.share.title"><i class="ph-duotone ph-export color-hallasan"></i> 分享到 SNS</h3>
             <p style="font-size: 0.9rem; color: #666; text-align: center; margin-bottom: 20px;" data-i18n="modal.share.desc">分享济州岛实时旅行信息</p>
         </div>
         <div class="share-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px;">
             <button class="share-option-btn wechat-btn" onclick="copyCurrentUrl('wechat')" style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 15px; border-radius: 16px; border: 1px solid #eee; background: white; cursor: pointer;">
-                <div class="share-icon" style="font-size: 1.8rem;">💬</div>
+                <div class="share-icon" style="font-size: 1.8rem;"><i class="ph-duotone ph-chat-circle-text color-reward"></i></div>
                 <span style="font-size: 0.8rem; font-weight: 600;" data-i18n="modal.share.wechat">微信分享</span>
             </button>
             <button class="share-option-btn xhs-btn" onclick="copyCurrentUrl('xhs')" style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 15px; border-radius: 16px; border: 1px solid #eee; background: white; cursor: pointer;">
-                <div class="share-icon" style="font-size: 1.8rem;">📕</div>
+                <div class="share-icon" style="font-size: 1.8rem;"><i class="ph-duotone ph-book-bookmark color-cctv"></i></div>
                 <span style="font-size: 0.8rem; font-weight: 600;" data-i18n="modal.share.xhs">小红书分享</span>
             </button>
             <button class="share-option-btn universal-btn" onclick="handleWebShare()" style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 15px; border-radius: 16px; border: 1px solid #eee; background: white; cursor: pointer;">
-                <div class="share-icon" style="font-size: 1.8rem;">🔗</div>
+                <div class="share-icon" style="font-size: 1.8rem;"><i class="ph-duotone ph-link color-airport"></i></div>
                 <span style="font-size: 0.8rem; font-weight: 600;" data-i18n="modal.share.system">系统分享</span>
             </button>
         </div>
@@ -153,7 +153,7 @@
 <div id="cs-modal" class="modal-overlay" style="display:none; z-index: 10001;" onclick="closeCSModal()">
     <div class="modal-content" style="max-width: 400px; padding: 30px; background: white;" onclick="event.stopPropagation()">
         <button class="modal-close" style="color: #333;" onclick="closeCSModal()">✕</button>
-        <h3 style="margin-bottom: 12px; font-size: 1.25rem; color: var(--text-primary);" data-i18n="modal.cs.title">🎧 联系客服</h3>
+        <h3 style="margin-bottom: 12px; font-size: 1.25rem; color: var(--text-primary);" data-i18n="modal.cs.title"><i class="ph-duotone ph-headphones color-weather"></i> 联系客服</h3>
         <p style="font-size: 0.9rem; color: #666; margin-bottom: 20px; line-height: 1.4;" data-i18n="modal.cs.desc">
             请输入您的投诉、建议或业务咨询。
         </p>
