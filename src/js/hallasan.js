@@ -5,30 +5,33 @@ import { calculateVisibilityScore } from './hallasan-dashboard.js';
 import { getSunTimes } from './utils.js';
 
 export const HALLASAN_TRAILS = [
-    { nameKo: '어리목탐방로', nameCn: '御里牧登山路', distanceCn: '6.8km（单程）', timeCn: '约3小时', url: 'https://www.jeju.go.kr/hallasan/info/info/realtime/course01.htm' },
-    { nameKo: '영실탐방로', nameCn: '灵室登山路', distanceCn: '5.8km（单程）', timeCn: '约2.5小时', url: 'https://www.jeju.go.kr/hallasan/info/info/realtime/course02.htm' },
-    { nameKo: '어승생악탐방로', nameCn: '御乘生岳登山路', distanceCn: '1.3km（单程）', timeCn: '约30分钟', url: 'https://www.jeju.go.kr/hallasan/info/info/realtime/course05.htm' },
-    { nameKo: '돈내코탐방로', nameCn: '顿乃科登山路', distanceCn: '9.1km（单程）', timeCn: '约4.5小时', url: 'https://www.jeju.go.kr/hallasan/info/info/realtime/course06.htm' },
-    { nameKo: '석굴암탐방로', nameCn: '石窟庵登山路', distanceCn: '1.5km（单程）', timeCn: '约50分钟', url: 'https://www.jeju.go.kr/hallasan/info/info/realtime/course07.htm' },
-    { nameKo: '관음사탐방로', nameCn: '观音寺登山路', distanceCn: '8.7km（单程）', timeCn: '约5小时', url: 'https://www.jeju.go.kr/hallasan/info/info/realtime/course04.htm' },
-    { nameKo: '성판악탐방로', nameCn: '城板岳登山路', distanceCn: '9.6km（单程）', timeCn: '约4.5小时', url: 'https://www.jeju.go.kr/hallasan/info/info/realtime/course03.htm' }
+    { nameKo: '어리목탐방로', nameCn: '御里牧登山路', nameEn: 'Eorimok Trail', distanceKo: '6.8km', distanceCn: '6.8km', distanceEn: '6.8km', timeKo: '약 3시간', timeCn: '约3小时', timeEn: 'Approx. 3h', url: 'https://www.jeju.go.kr/hallasan/info/info/realtime/course01.htm' },
+    { nameKo: '영실탐방로', nameCn: '灵室登山路', nameEn: 'Yeongsil Trail', distanceKo: '5.8km', distanceCn: '5.8km', distanceEn: '5.8km', timeKo: '약 2.5시간', timeCn: '约2.5小时', timeEn: 'Approx. 2.5h', url: 'https://www.jeju.go.kr/hallasan/info/info/realtime/course02.htm' },
+    { nameKo: '어승생악탐방로', nameCn: '御乘生岳登山路', nameEn: 'Eoseungsaengak Trail', distanceKo: '1.3km', distanceCn: '1.3km', distanceEn: '1.3km', timeKo: '약 30분', timeCn: '约30分钟', timeEn: 'Approx. 30m', url: 'https://www.jeju.go.kr/hallasan/info/info/realtime/course05.htm' },
+    { nameKo: '돈내코탐방로', nameCn: '顿乃科登山路', nameEn: 'Donnaeko Trail', distanceKo: '9.1km', distanceCn: '9.1km', distanceEn: '9.1km', timeKo: '약 4.5시간', timeCn: '约4.5小时', timeEn: 'Approx. 4.5h', url: 'https://www.jeju.go.kr/hallasan/info/info/realtime/course06.htm' },
+    { nameKo: '석굴암탐방로', nameCn: '石窟庵登山路', nameEn: 'Seokgulam Trail', distanceKo: '1.5km', distanceCn: '1.5km', distanceEn: '1.5km', timeKo: '약 50분', timeCn: '约50分钟', timeEn: 'Approx. 50m', url: 'https://www.jeju.go.kr/hallasan/info/info/realtime/course07.htm' },
+    { nameKo: '관음사탐방로', nameCn: '观音寺登山路', nameEn: 'Gwaneumsa Trail', distanceKo: '8.7km', distanceCn: '8.7km', distanceEn: '8.7km', timeKo: '약 5시간', timeCn: '约5小时', timeEn: 'Approx. 5h', url: 'https://www.jeju.go.kr/hallasan/info/info/realtime/course04.htm' },
+    { nameKo: '성판악탐방로', nameCn: '城板岳登山路', nameEn: 'Seongpanak Trail', distanceKo: '9.6km', distanceCn: '9.6km', distanceEn: '9.6km', timeKo: '약 4.5시간', timeCn: '约4.5小时', timeEn: 'Approx. 4.5h', url: 'https://www.jeju.go.kr/hallasan/info/info/realtime/course03.htm' }
 ];
 
 const TRAIL_STATUS_MAP = {
-    '정상운영': { cn: '正常运营', cls: 'open' },
-    '부분통제': { cn: '部分管制', cls: 'partial' },
-    '전면통제': { cn: '全面管制', cls: 'closed' },
-    '통제': { cn: '全面管制', cls: 'closed' },
-    '일부통제': { cn: '部分管制', cls: 'partial' },
-    '입산제한': { cn: '全面管制', cls: 'closed' },
-    '탐방불가': { cn: '全面管制', cls: 'closed' }
+    '정상운영': { key: 'hallasan.status.open', cls: 'open' },
+    '부분통제': { key: 'hallasan.status.partial', cls: 'partial' },
+    '전면통제': { key: 'hallasan.status.closed', cls: 'closed' },
+    '통제': { key: 'hallasan.status.closed', cls: 'closed' },
+    '일부통제': { key: 'hallasan.status.partial', cls: 'partial' },
+    '입산제한': { key: 'hallasan.status.closed', cls: 'closed' },
+    '탐방불가': { key: 'hallasan.status.closed', cls: 'closed' }
 };
 
 let isFetchingHallasanStatus = false;
 let delayedRetryCount = 0; // Track automatic delayed retries
 const MAX_DELAYED_RETRIES = 2; // Maximum number of automatic delayed retries
 
-export async function fetchHallasanStatus(isAutoRetry = false) {
+export async function fetchHallasanStatus(isAutoRetry = false, forceRefresh = false) {
+    if (forceRefresh) {
+        isFetchingHallasanStatus = false;
+    }
     if (isFetchingHallasanStatus) return;
     isFetchingHallasanStatus = true;
 
@@ -45,6 +48,7 @@ export async function fetchHallasanStatus(isAutoRetry = false) {
     // Only clear and show loading if it's not a background retry
     if (!isAutoRetry) {
         container.innerHTML = ``;
+        trailsEl.innerHTML = `<div class="loading-lost"><p>${window.t('hallasan.loading.official')}</p></div>`;
     }
     
     renderHallasanCCTV();
@@ -90,7 +94,7 @@ export async function fetchHallasanStatus(isAutoRetry = false) {
             const koStatus = statusMap[t.nameKo];
             let info;
             if (!koStatus) {
-                info = { cn: '--', cls: 'partial' };
+                info = { key: 'hallasan.status.partial', cls: 'partial' };
             } else {
                 info = TRAIL_STATUS_MAP[koStatus];
                 if (!info) {
@@ -101,44 +105,53 @@ export async function fetchHallasanStatus(isAutoRetry = false) {
                     } else if (koStatus.includes('정상')) {
                         info = TRAIL_STATUS_MAP['정상운영'];
                     } else if (koStatus.length > 0) {
-                        info = { cn: '部分管制', cls: 'partial' };
+                        info = { key: 'hallasan.status.partial', cls: 'partial' };
                     } else {
-                        info = { cn: '--', cls: 'partial' };
+                        info = { key: 'hallasan.status.partial', cls: 'partial' };
                     }
                 }
             }
-            return { ...t, statusCn: info.cn, statusCls: info.cls };
+            const statusText = info.key ? window.t(info.key) : '--';
+            return { ...t, statusCn: statusText, statusCls: info.cls };
         });
 
         // [NEW] 전체 상태 요약 (Hero Status) 계산
         const allOpen = trails.every(t => t.statusCls === 'open');
         const allClosed = trails.every(t => t.statusCls === 'closed');
-        let heroStatus = { cn: '部分管制', cls: 'partial', desc: '部分登山路受天气影响已实施管制。' };
-        if (allOpen) heroStatus = { cn: '正常运营', cls: 'open', desc: '目前全线登山路均可正常通行。' };
-        else if (allClosed) heroStatus = { cn: '全面管制', cls: 'closed', desc: '因极端天气，所有登山路已全面封闭。' };
+        let heroStatus = { key: 'hallasan.status.partial', cls: 'partial', descKey: 'hallasan.status.hero.partial' };
+        if (allOpen) heroStatus = { key: 'hallasan.status.open', cls: 'open', descKey: 'hallasan.status.hero.open' };
+        else if (allClosed) heroStatus = { key: 'hallasan.status.closed', cls: 'closed', descKey: 'hallasan.status.hero.closed' };
+
+        const lang = window.getLang ? window.getLang() : 'zh';
 
         container.innerHTML = `
             <div class="hero-status-card ${heroStatus.cls}">
                 <div class="hero-status-content">
-                    <span class="hero-badge">${heroStatus.cn}</span>
-                    <h3 class="hero-title">汉拿山实时通行状态</h3>
-                    <p class="hero-desc">${heroStatus.desc}</p>
+                    <span class="hero-badge">${window.t(heroStatus.key)}</span>
+                    <h3 class="hero-title">${window.t('hallasan.status.hero.title')}</h3>
+                    <p class="hero-desc">${window.t(heroStatus.descKey)}</p>
                 </div>
-                <div class="hero-time-tag">更新于: ${new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}</div>
+                <div class="hero-time-tag">${window.t('hallasan.status.hero.update')}${new Date().toLocaleTimeString(lang === 'ko' ? 'ko-KR' : (lang === 'en' ? 'en-US' : 'zh-CN'), { hour: '2-digit', minute: '2-digit' })}</div>
             </div>`;
 
-        let trailsHtml = trails.map(t => `
+        let trailsHtml = trails.map(t => {
+            const name = (lang === 'ko' ? t.nameKo : (lang === 'en' ? t.nameEn : t.nameCn));
+            const distance = (lang === 'ko' ? t.distanceKo : (lang === 'en' ? t.distanceEn : t.distanceCn));
+            const time = (lang === 'ko' ? t.timeKo : (lang === 'en' ? t.timeEn : t.timeCn));
+            
+            return `
             <div class="trail-block" onclick="window.open('${t.url}', '_blank')" style="cursor: pointer;">
                 <div class="t-status-line">
                     <span class="trail-status-badge ${t.statusCls}">${t.statusCn}</span>
                 </div>
                 <div class="t-name-line">
-                    <h4>${t.nameCn}</h4>
+                    <h4>${name}</h4>
                 </div>
                 <div class="t-info-line">
-                    <span>${t.distanceCn.replace('（单程）', '')} / ${t.timeCn}</span>
+                    <span>${distance} / ${time}</span>
                 </div>
-            </div>`).join('');
+            </div>`;
+        }).join('');
 
         // [NEW] 가시성 및 일출 정보 블록 추가 (8, 9번째 칸)
         const weatherData = WEATHER_STATE['hallasan'];
@@ -165,7 +178,7 @@ export async function fetchHallasanStatus(isAutoRetry = false) {
                         <span class="prob-value-large">${visibility}%</span>
                     </div>
                     <div class="prob-footer">
-                        <span class="prob-label">⛰️ 白鹿潭观赏</span>
+                        <span class="prob-label">${window.t('hallasan.visibility')}</span>
                     </div>
                 </div>`;
             
@@ -176,7 +189,7 @@ export async function fetchHallasanStatus(isAutoRetry = false) {
                         <span class="prob-value-large">${sunriseProb}%</span>
                     </div>
                     <div class="prob-footer">
-                        <span class="prob-label">🌅 日出观赏</span>
+                        <span class="prob-label">${window.t('hallasan.sunrise_prob')}</span>
                     </div>
                 </div>`;
         }
@@ -194,7 +207,7 @@ export async function fetchHallasanStatus(isAutoRetry = false) {
                 
                 // 첫 로드 실패 등으로 화면이 비어있는 경우에만 조용히 로딩 상태 유지
                 if (!trailsEl.innerHTML || trailsEl.innerHTML.includes('error-msg')) {
-                    trailsEl.innerHTML = `<div class="loading-lost"><p>正在尝试连接官方数据...</p></div>`;
+                    trailsEl.innerHTML = `<div class="loading-lost"><p>${window.t('hallasan.loading.official')}</p></div>`;
                 }
 
                 setTimeout(() => {
@@ -205,11 +218,11 @@ export async function fetchHallasanStatus(isAutoRetry = false) {
 
             // 모든 재시도가 실패한 경우에만 최종 에러 메시지 표시
             const isTimeout = e.name === 'TimeoutError' || e.message.includes('timeout') || e.message.includes('signal');
-            let errorText = isTimeout ? '官方网站响应延迟中' : '暂时无法加载登山路状态';
+            let errorText = isTimeout ? window.t('hallasan.err.delay') : window.t('hallasan.err.failed');
             
             trailsEl.innerHTML = `<div class="error-msg" style="grid-column: 1/-1; text-align:center; padding: 20px;">
                 <p style="color: var(--text-muted); font-size: 0.85rem;">${errorText}</p>
-                <button onclick="window.hallasanApp.fetchStatus()" style="margin-top:10px; padding: 8px 16px; border-radius: 8px; border:none; background:var(--primary-gradient); color:white; font-weight:700;">重新加载</button>
+                <button onclick="window.hallasanApp.fetchStatus()" style="margin-top:10px; padding: 8px 16px; border-radius: 8px; border:none; background:var(--primary-gradient); color:white; font-weight:700;">${window.t('hallasan.err.reload')}</button>
             </div>`;
         }
     }
@@ -227,23 +240,38 @@ const HALLASAN_CCTV = [
 export function renderHallasanCCTV() {
     const grid = document.getElementById('hallasan-cctv-grid');
     if (!grid) return;
-    if (grid.querySelectorAll('.cctv-card').length === HALLASAN_CCTV.length) return;
     
-    grid.innerHTML = HALLASAN_CCTV.map((cam, index) => `
+    // 이미 렌더링되어 있으면 텍스트만 갱신
+    if (grid.querySelectorAll('.cctv-card').length === HALLASAN_CCTV.length) {
+        const lang = window.getLang ? window.getLang() : 'zh';
+        grid.querySelectorAll('.cctv-name').forEach((el, index) => {
+            const cam = HALLASAN_CCTV[index];
+            if (cam) {
+                el.textContent = lang === 'ko' ? cam.nameKo : (lang === 'en' ? cam.id.toUpperCase() : cam.nameCn);
+            }
+        });
+        return;
+    }
+    
+    grid.innerHTML = HALLASAN_CCTV.map((cam, index) => {
+        const lang = window.getLang ? window.getLang() : 'zh';
+        const camName = lang === 'ko' ? cam.nameKo : (lang === 'en' ? cam.id.toUpperCase() : cam.nameCn);
+        return `
         <div class="cctv-card ${index === 0 ? 'featured-cctv' : ''}" ${cam.isRepair ? '' : `onclick="toggleFullscreen('hallasan-video-${cam.id}')"`} style="cursor: ${cam.isRepair ? 'default' : 'pointer'};">
             <div class="cctv-video-container">
                 ${cam.isRepair 
                     ? `<div class="cctv-repair-overlay">
-                         <span>CCTV 维修中</span>
+                         <span>${window.t('hallasan.cctv.repair')}</span>
                        </div>`
                     : `<video id="hallasan-video-${cam.id}" class="cctv-video-el" muted playsinline autoplay></video>`
                 }
                 <div class="cctv-tag ${cam.isRepair ? 'offline' : ''}">${cam.isRepair ? 'OFFLINE' : 'LIVE'}</div>
             </div>
             <div class="cctv-info" style="padding: 6px 4px; text-align: center;">
-                <span class="cctv-name" style="font-weight: 800; font-size: 0.85rem;">${cam.nameCn}</span>
+                <span class="cctv-name" style="font-weight: 800; font-size: 0.85rem;">${camName}</span>
             </div>
-        </div>`).join('');
+        </div>`;
+    }).join('');
 
     setTimeout(() => {
         HALLASAN_CCTV.forEach((cam, index) => {

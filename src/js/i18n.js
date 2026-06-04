@@ -180,7 +180,7 @@ const TRANSLATIONS = {
         // ── 한라산 ──
         'hallasan.title':   '⛰️ 汉拿山登山信息',
         'hallasan.trails':  '🥾 各登山路利用信息',
-        'hallasan.cctv':    '📺 汉拿山 실시간 CCTV',
+        'hallasan.cctv':    '📺 汉拿山 实时 CCTV',
         'hallasan.reserve': '⛰️ 预约汉拿山',
         'hallasan.notice':  '📢 汉拿山公告',
 
@@ -849,6 +849,10 @@ export function setLanguage(lang) {
         // 현상금 탭 재렌더링
         if (window.rewardApp && window.rewardApp.renderList) {
             window.rewardApp.renderList();
+        }
+        // 한라산 탭 재렌더링
+        if (window.hallasanApp && window.hallasanApp.fetchStatus) {
+            window.hallasanApp.fetchStatus(false, true);
         }
         // 축제 탭 재렌더링
         if (window.festivalApp && window.festivalApp.initMonthFilter) {
