@@ -95,6 +95,7 @@
     min-width: 65px;
     text-align: center;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    white-space: nowrap;
 }
 
 .badge-success { background-color: #059669; }
@@ -194,4 +195,17 @@
 #wechat-qr-modal .modal-close {
     color: var(--text-primary);
     background: rgba(0,0,0,0.05);
+}
+
+/* ==================== Phosphor Icons (Cute Style) ==================== */
+i.ph-duotone {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+i.ph-duotone.hover-scale:hover {
+    transform: scale(1.15);
 }

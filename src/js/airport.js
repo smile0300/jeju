@@ -216,6 +216,7 @@ export async function fetchFlights(type) {
         if (text.trim().startsWith('{')) {
             const json = JSON.parse(text);
             const rawItems = json.response?.body?.items?.item || json.response?.body?.items || json.body?.items?.item || json.body?.items || [];
+            const typeIcon = type === 'arrive' ? '<i class="ph-duotone ph-airplane-landing"></i>' : '<i class="ph-duotone ph-airplane-takeoff"></i>';
             const items = Array.isArray(rawItems) ? rawItems : [rawItems];
             itemsArray = items.map(mapItem);
         } else {

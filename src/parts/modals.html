@@ -61,36 +61,36 @@
         </div>
         <div class="lost-report-body">
             <div class="form-group">
-                <label data-i18n="modal.lost.loc.label">📍 丢失地点 (尽量详细)</label>
+                <label ><i class="ph-duotone ph-map-pin"></i> <span data-i18n="modal.lost.loc.label">丢失地点</span> (尽量详细)</label>
                 <textarea id="lost-report-location" data-i18n="modal.lost.loc.ph" placeholder="例如：西归浦每日奥来市场, 红色出租车内, GD咖啡厅2层靠窗位..."></textarea>
             </div>
             <div class="form-row">
                 <div class="form-group">
-                    <label data-i18n="modal.lost.date.label">📅 丢失日期</label>
+                    <label ><i class="ph-duotone ph-calendar"></i> <span data-i18n="modal.lost.date.label">丢失日期</span></label>
                     <input type="date" id="lost-report-date">
                 </div>
                 <div class="form-group">
-                    <label data-i18n="modal.lost.time.label">⏰ 大概时间</label>
+                    <label ><i class="ph-duotone ph-clock"></i> <span data-i18n="modal.lost.time.label">大概时间</span></label>
                     <input type="time" id="lost-report-time">
                 </div>
             </div>
             <div class="form-group">
-                <label data-i18n="modal.lost.item.label">📦 物品名称</label>
+                <label ><i class="ph-duotone ph-package"></i> <span data-i18n="modal.lost.item.label">物品名称</span></label>
                 <input type="text" id="lost-report-item" data-i18n="modal.lost.item.ph" placeholder="例如：黑色iPhone 15, 棕色古驰钱包, 蓝色背包...">
             </div>
             <div class="form-group">
-                <label data-i18n="modal.lost.spec.label">🔍 物品特征 (颜色,品牌,内部物品等)</label>
+                <label ><i class="ph-duotone ph-magnifying-glass-plus"></i> <span data-i18n="modal.lost.spec.label">物品特征</span> (颜色,品牌,内部物品等)</label>
                 <textarea id="lost-report-specifics" data-i18n="modal.lost.spec.ph" placeholder="请详细描述物品特征, 帮助我们精准匹配..."></textarea>
             </div>
             <div class="form-row">
                 <div class="form-group">
-                    <label data-i18n="modal.lost.photo.label">📸 选择文件 (必选)</label>
+                    <label ><i class="ph-duotone ph-camera"></i> <span data-i18n="modal.lost.photo.label">选择文件</span> (必选)</label>
                     <input type="file" id="lost-report-photo" accept="image/*"
                         onchange="handleLostImageChange(event)">
                     <div id="lost-report-photo-preview" class="photo-preview" style="display: none;"></div>
                 </div>
                 <div class="form-group">
-                    <label data-i18n="modal.lost.wechat.label">💬 您的微信 ID (必填)</label>
+                    <label ><i class="ph-duotone ph-chat-circle"></i> <span data-i18n="modal.lost.wechat.label">您的微信 ID</span> (必填)</label>
                     <input type="text" id="lost-report-name" data-i18n="modal.lost.name.ph" placeholder="请输入您的姓名" style="margin-bottom: 8px;">
                     <input type="text" id="lost-report-wechat" data-i18n="modal.lost.wechat.ph" placeholder="方便找到后及时联系您 (微信ID/联系方式)">
                 </div>

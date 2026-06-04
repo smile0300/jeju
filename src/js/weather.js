@@ -42,13 +42,48 @@ const ALERT_TRANSLATIONS = {
     '호': '号'
 };
 
+const ALERT_ENGLISH_MAP = {
+    '강풍': 'Strong Wind',
+    '풍랑': 'Gale Warning',
+    '호우': 'Heavy Rain',
+    '대설': 'Heavy Snow',
+    '한파': 'Cold Wave',
+    '건조': 'Dry',
+    '폭염': 'Heat Wave',
+    '안개': 'Fog',
+    '태풍': 'Typhoon',
+    '주의보': ' Advisory',
+    '경보': ' Warning',
+    '발표': ' Issued',
+    '해제': ' Cleared',
+    '발효': ' Effective',
+    '변경': ' Changed',
+    '기상': 'Weather',
+    '특보': ' Alert',
+    '제주도': 'Jeju Island',
+    '제주': 'Jeju',
+    '산지': 'Mountain Area',
+    '서부': 'West Coast',
+    '동부': 'East Coast',
+    '남부': 'South Coast',
+    '북부': 'North Coast',
+    '추자도': 'Chujado',
+    '앞바다': 'Nearshore Waters',
+    '먼바다': 'Offshore Waters',
+    '황사': 'Yellow Dust',
+    '폭풍해일': 'Storm Surge',
+    '지진해일': 'Tsunami',
+    '제': 'No. ',
+    '호': ''
+};
+
 // 최신 특보 데이터를 모달에서 참조하기 위한 전역 변수
 let LATEST_ALERTS = [];
 let TODAY_ALERTS_HISTORY = [];
 let IS_HISTORY_FALLBACK = false;
 
 /**
- * 기상 특보 한글 메시지를 중국어 간체로 번역
+ * 기상 특보 한글 메시지를 선택한 언어로 번역
  */
 function translateWeatherAlert(text) {
     if (!text) return '';
@@ -66,6 +101,17 @@ function translateWeatherAlert(text) {
 
     // Clean up leading/trailing slashes, colons and spaces
     result = result.replace(/^[\s\/:：]+/, '').replace(/[\s\/:：]+$/, '').trim();
+
+    const lang = window.getLang ? window.getLang() : 'zh';
+    if (lang === 'ko') {
+        return result;
+    }
+    if (lang === 'en') {
+        for (const [ko, en] of Object.entries(ALERT_ENGLISH_MAP)) {
+            result = result.replace(new RegExp(ko, 'g'), en);
+        }
+        return result;
+    }
 
     for (const [ko, cn] of Object.entries(ALERT_TRANSLATIONS)) {
         result = result.replace(new RegExp(ko, 'g'), cn);
@@ -238,7 +284,7 @@ function getOffsetDate(ymd, offset) {
 
 function getDailySummary(grouped, ymd, midData) {
     const keys = Object.keys(grouped).filter(k => k.startsWith(ymd)).sort();
-    let amIcon = '🌤️', pmIcon = '🌤️', amPop = 0, pmPop = 0;
+    let amIcon = '<i class="ph-duotone ph-cloud-sun"></i>', pmIcon = '<i class="ph-duotone ph-cloud-sun"></i>', amPop = 0, pmPop = 0;
 
     if (keys.length > 0) {
         const amKey = keys.find(k => k.endsWith('0900')) || keys[0];
@@ -298,9 +344,9 @@ export function parseAndRenderWeather(locKey, items, midData, mountainData) {
                 <div class="cw-right">
                     <ul class="cw-details-list">
                         <li><span class="cwi">🍃</span> <span style="color: ${getWindColor(current.WSD)}; font-weight: 800;">${getWindDesc(current.WSD)}</span> ${current.WSD}m/s</li>
-                        <li><span class="cwi">💧</span> 湿度 ${current.REH}%</li>
-                        <li><span class="cwi">🌡️</span> 体感 ${feelsLike}°</li>
-                        <li id="top-air-${locKey}"><span class="cwi">😷</span> 空气质量 <span class="val">--</span></li>
+                        <li><span class="cwi">💧</span> ${window.t('weather.humidity')} ${current.REH}%</li>
+                        <li><span class="cwi">🌡️</span> ${window.t('weather.feelslike')} ${feelsLike}°</li>
+                        <li id="top-air-${locKey}"><span class="cwi">😷</span> ${window.t('weather.aq')} <span class="val">--</span></li>
                     </ul>
                 </div>
             </div>`;
@@ -337,7 +383,7 @@ function renderWeeklyList(locKey, grouped, sortedKeys, midData) {
         targetD.setDate(today.getDate() + i);
         const ymd = `${targetD.getFullYear()}${String(targetD.getMonth() + 1).padStart(2, '0')}${String(targetD.getDate()).padStart(2, '0')}`;
         const dateLabel = `${targetD.getMonth() + 1}/${targetD.getDate()}`;
-        let min = '--', max = '--', icon = '🌤️', pop = '--', pcp = '--';
+        let min = '--', max = '--', icon = '<i class="ph-duotone ph-cloud-sun"></i>', pop = '--', pcp = '--';
         
         const dt = dailyMap[ymd];
         const count = ymdCounts[ymd] || 0;
@@ -378,7 +424,7 @@ function renderWeeklyList(locKey, grouped, sortedKeys, midData) {
                     icon = Object.keys(counts).reduce((a, b) => counts[a] >= counts[b] ? a : b);
                 }
             } else {
-                icon = dt.icons[Math.floor(dt.icons.length * 0.5)] || '🌤️';
+                icon = dt.icons[Math.floor(dt.icons.length * 0.5)] || '<i class="ph-duotone ph-cloud-sun"></i>';
             }
             pop = dt.pops[Math.floor(dt.pops.length * 0.5)] || 0;
             const keys = sortedKeys.filter(k => k.startsWith(ymd));
@@ -421,7 +467,13 @@ function renderWeeklyList(locKey, grouped, sortedKeys, midData) {
 }
 
 function renderDateSummaryCol(locKey, ymd, grouped, midData) {
-    const days = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+    const lang = window.getLang ? window.getLang() : 'zh';
+    let days = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+    if (lang === 'ko') {
+        days = ['일', '월', '화', '수', '목', '금', '토'];
+    } else if (lang === 'en') {
+        days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    }
     const targetD = new Date(ymd.slice(0, 4), parseInt(ymd.slice(4, 6)) - 1, ymd.slice(6, 8));
     const month = parseInt(ymd.slice(4, 6));
     const day = parseInt(ymd.slice(6, 8));
@@ -433,6 +485,7 @@ function renderDateSummaryCol(locKey, ymd, grouped, midData) {
             <span style="font-weight:800; color:#868e96; font-size:0.7rem;">${dayName}</span>
         </div>`;
 }
+
 
 function highlightWeeklyCard(locKey, ymd) {
     document.querySelectorAll(`.w-card-${locKey}`).forEach(c => c.classList.remove('active'));
@@ -512,7 +565,7 @@ export function updateHourlyWeather(locKey) {
     });
     
     if (effectiveHourlyKeys.length === 0 && state.sortedKeys.length === 0) {
-        hourlyContainer.innerHTML = '<div style="padding: 24px; text-align: center; color: #adb5bd;">暂无详细时间预报</div>';
+        hourlyContainer.innerHTML = `<div style="padding: 24px; text-align: center; color: #adb5bd;">${window.t('weather.loading')}</div>`;
         return;
     }
 
@@ -520,16 +573,16 @@ export function updateHourlyWeather(locKey) {
     <div class="hourly-wrapper">
         <div class="hourly-legend">
             <div class="h-top-section h-legend-top" style="position: relative;">
-                <span class="h-date" style="position: absolute; top: -4px; left: 50%; transform: translateX(-50%); font-size:0.65rem; font-weight:800; color:#adb5bd; white-space: nowrap;">日期</span>
-                <span class="h-time" style="font-size:0.65rem; font-weight:800; color:#adb5bd;">时间</span>
+                <span class="h-date" style="position: absolute; top: -4px; left: 50%; transform: translateX(-50%); font-size:0.65rem; font-weight:800; color:#adb5bd; white-space: nowrap;">${window.t('weather.hourly.date')}</span>
+                <span class="h-time" style="font-size:0.65rem; font-weight:800; color:#adb5bd;">${window.t('weather.hourly.time')}</span>
                 <span class="h-icon" style="visibility:hidden;">-</span>
                 <span class="h-pop" style="visibility:hidden; margin-top: 5px;">-</span>
             </div>
             <div class="h-divider" style="background:#f1f3f5;"></div>
             <div class="h-meta-row h-legend-items">
-                <div class="h-legend-item"><span class="h-legend-title">降水</span></div>
-                <div class="h-legend-item"><span class="h-legend-title">气温</span></div>
-                <div class="h-legend-item"><span class="h-legend-title">风速</span></div>
+                <div class="h-legend-item"><span class="h-legend-title">${window.t('weather.hourly.precip')}</span></div>
+                <div class="h-legend-item"><span class="h-legend-title">${window.t('weather.hourly.temp')}</span></div>
+                <div class="h-legend-item"><span class="h-legend-title">${window.t('weather.hourly.wind')}</span></div>
             </div>
         </div>
         <div class="hourly-table" style="position: relative;">
@@ -578,13 +631,13 @@ export function updateHourlyWeather(locKey) {
             const srParts = currentSunTimes.sunrise.split(':');
             const srDecimal = parseInt(srParts[0]) + (parseInt(srParts[1]) / 60);
             if (!isToday || currentDecimal < srDecimal) {
-                html += renderSunCol(locKey, ymd, currentSunTimes.sunrise, '日出');
+                html += renderSunCol(locKey, ymd, currentSunTimes.sunrise, 'weather.sunrise');
             }
         } else if (hour === currentSunTimes.sunsetHour) {
             const ssParts = currentSunTimes.sunset.split(':');
             const ssDecimal = parseInt(ssParts[0]) + (parseInt(ssParts[1]) / 60);
             if (!isToday || currentDecimal < ssDecimal) {
-                html += renderSunCol(locKey, ymd, currentSunTimes.sunset, '日落');
+                html += renderSunCol(locKey, ymd, currentSunTimes.sunset, 'weather.sunset');
             }
         }
     });
@@ -604,14 +657,14 @@ export function updateHourlyWeather(locKey) {
                 const pmPop = landItem[`rnSt${i}Pm`];
                 const tMin = tempItem[`taMin${i}`];
                 const tMax = tempItem[`taMax${i}`];
-                if (amWf) html += renderMidHourlyCol(locKey, ymd, '上午', translateMidWf(amWf).icon, amPop, Math.round(tMin));
-                if (pmWf) html += renderMidHourlyCol(locKey, ymd, '下午', translateMidWf(pmWf).icon, pmPop, Math.round(tMax));
+                if (amWf) html += renderMidHourlyCol(locKey, ymd, window.t('weather.am'), translateMidWf(amWf).icon, amPop, Math.round(tMin));
+                if (pmWf) html += renderMidHourlyCol(locKey, ymd, window.t('weather.pm'), translateMidWf(pmWf).icon, pmPop, Math.round(tMax));
             } else if (i >= 8) {
                 const wf = landItem[`wf${i}`];
                 const pop = landItem[`rnSt${i}`];
                 const tMin = tempItem[`taMin${i}`];
                 const tMax = tempItem[`taMax${i}`];
-                if (wf) html += renderMidHourlyCol(locKey, ymd, '全天', translateMidWf(wf).icon, pop, `${Math.round(tMin)}/${Math.round(tMax)}`);
+                if (wf) html += renderMidHourlyCol(locKey, ymd, window.t('weather.allday'), translateMidWf(wf).icon, pop, `${Math.round(tMin)}/${Math.round(tMax)}`);
             }
         }
     }
@@ -621,8 +674,9 @@ export function updateHourlyWeather(locKey) {
     setTimeout(() => initHourlyScrollObserver(locKey), 100);
 }
 
-function renderSunCol(locKey, ymd, sunTime, label) {
-    const sunEmoji = label === '日出' ? '🌅' : '🌇';
+function renderSunCol(locKey, ymd, sunTime, labelKey) {
+    const label = window.t(labelKey);
+    const sunEmoji = labelKey === 'weather.sunrise' ? '<i class="ph-duotone ph-sun-horizon"></i>' : '<i class="ph-duotone ph-moon-stars"></i>';
     return `
         <div class="hourly-col sun-col" id="h-${locKey}-${ymd}" style="justify-content: center; min-width: 55px; border-right: 1px solid #f1f3f5;">
             <span style="font-weight: 800; color: #fd7e14; font-size: 0.72rem; margin-bottom: 6px;">${sunTime}</span>
@@ -633,7 +687,13 @@ function renderSunCol(locKey, ymd, sunTime, label) {
 
 function getKoreanDay(ymd) {
     const d = new Date(ymd.slice(0, 4), parseInt(ymd.slice(4, 6)) - 1, ymd.slice(6, 8));
-    const days = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+    const lang = window.getLang ? window.getLang() : 'zh';
+    let days = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+    if (lang === 'ko') {
+        days = ['일', '월', '화', '수', '목', '금', '토'];
+    } else if (lang === 'en') {
+        days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    }
     return days[d.getDay()];
 }
 
@@ -659,7 +719,7 @@ function renderMidHourlyCol(locKey, ymd, label, skyIcon, pop, temp, wind = '-') 
 export function renderWeatherLoading(locKey) {
     const container = document.getElementById(`current-card-${locKey}`);
     if (container) {
-        container.innerHTML = `<div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text">正在加载...</div></div>`;
+        container.innerHTML = `<div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text">${window.t('weather.loading')}</div></div>`;
     }
 }
 
@@ -668,12 +728,12 @@ export function renderWeatherError(locKey) {
     if (container) {
         container.innerHTML = `
             <div style="padding:40px; text-align:center; color: #fa5252; display: flex; flex-direction: column; align-items: center; gap: 12px;">
-                <div style="font-weight: 800; font-size: 1.1rem;">⚠️ 天气数据加载失败</div>
+                <div style="font-weight: 800; font-size: 1.1rem;">${window.t('weather.err.load')}</div>
                 <button onclick="window.weatherApp.retryFetch('${locKey}')" 
                         style="padding: 8px 20px; font-size: 0.85rem; font-weight: 700; border: 1.5px solid #fa5252; color: #fa5252; background: white; border-radius: 6px; cursor: pointer; transition: all 0.2s;"
                         onmouseover="this.style.background='#fff5f5'"
                         onmouseout="this.style.background='white'">
-                    🔄 重新加载
+                    ${window.t('weather.err.retry')}
                 </button>
             </div>`;
     }
@@ -712,12 +772,17 @@ export async function fetchAirQuality(locKey) {
 function getAirQualityInfo(val, type) {
     const v = parseFloat(val);
     if (isNaN(v)) return { level: 0, text: '--' };
-    let level = 2, text = '良';
+    let level = 2, text = window.t('weather.aq.fair');
     if (type === 'pm10') {
-        if (v <= 30) { level = 1; text = '优'; }
-        else if (v <= 80) { level = 2; text = '良'; }
-        else if (v <= 150) { level = 3; text = '轻度'; }
-        else { level = 4; text = '重度'; }
+        if (v <= 30) { level = 1; text = window.t('weather.aq.good'); }
+        else if (v <= 80) { level = 2; text = window.t('weather.aq.fair'); }
+        else if (v <= 150) { level = 3; text = window.t('weather.aq.poor'); }
+        else { level = 4; text = window.t('weather.aq.severe'); }
+    } else {
+        if (v <= 0.03) { level = 1; text = window.t('weather.aq.good'); }
+        else if (v <= 0.09) { level = 2; text = window.t('weather.aq.fair'); }
+        else if (v <= 0.15) { level = 3; text = window.t('weather.aq.poor'); }
+        else { level = 4; text = window.t('weather.aq.severe'); }
     }
     return { level, text };
 }
@@ -832,14 +897,16 @@ export async function fetchWeatherAlerts() {
                 if (!item || !item.title) return;
                 let title = item.title.includes('/') ? item.title.split('/').slice(1).join('/').trim() : item.title;
                 const translatedTitle = translateWeatherAlert(title).replace(/\(\*\)/g, '').trim();
-                let alertType = '特报';
-                if (title.includes('주의보')) alertType = '注意报';
-                else if (title.includes('경보')) alertType = '警报';
+                let alertTypeKey = 'weather.alert.badge';
+                if (title.includes('주의보')) alertTypeKey = 'weather.alert.badge.warn';
+                else if (title.includes('경보')) alertTypeKey = 'weather.alert.badge.danger';
+
+                const alertType = window.t(alertTypeKey);
 
                 const html = `
                     <div class="weather-alert-card animate-slide-up" onclick="window.showWeatherSectionWithAlert()" style="cursor: pointer;">
-                        <div class="alert-type-badge">济州${alertType} ${activeItems.length > 1 ? `(${idx + 1}/${activeItems.length})` : ''}</div>
-                        <div class="alert-msg">🚨 ${translatedTitle}</div>
+                        <div class="alert-type-badge">${alertType} ${activeItems.length > 1 ? `(${idx + 1}/${activeItems.length})` : ''}</div>
+                        <div class="alert-msg"><i class="ph-duotone ph-warning-circle"></i> ${translatedTitle}</div>
                     </div>`;
                 if (alertsContainer) alertsContainer.innerHTML = html;
                 if (homeAlertsContainer) homeAlertsContainer.innerHTML = html;
@@ -856,8 +923,8 @@ export async function fetchWeatherAlerts() {
             if (alertsContainer) {
                 alertsContainer.innerHTML = `
                     <div class="weather-alert-card no-alerts" onclick="window.showWeatherSectionWithAlert()" style="cursor: pointer;">
-                        <div class="alert-type-badge gray">济州特报</div>
-                        <div class="alert-msg">当前全岛无气象特报 (点击查看历史)</div>
+                        <div class="alert-type-badge gray">${window.t('weather.alert.badge')}</div>
+                        <div class="alert-msg">${window.t('weather.alert.no')}</div>
                     </div>`;
             }
         }
@@ -899,11 +966,12 @@ window.openWeatherAlertModal = function() {
     if (hasActive) {
         activeHTML = LATEST_ALERTS.map(item => {
             const title = item.title || '';
-            let typeBadge = '[特报]';
+            let typeBadgeKey = 'weather.alert.badge.active';
             let itemClass = '';
-            if (title.includes('주의보')) { typeBadge = '[注意报]'; itemClass = 'warning'; }
-            else if (title.includes('경보')) { typeBadge = '[警报]'; itemClass = 'danger'; }
+            if (title.includes('주의보')) { typeBadgeKey = 'weather.alert.badge.warn.bracket'; itemClass = 'warning'; }
+            else if (title.includes('경보')) { typeBadgeKey = 'weather.alert.badge.danger.bracket'; itemClass = 'danger'; }
             
+            const typeBadge = window.t(typeBadgeKey);
             const tm = String(item.tmFc || '');
             const timeOnly = tm.length >= 12 ? `${tm.slice(8, 10)}:${tm.slice(10, 12)}` : '';
             const refinedMsg = translateWeatherAlert(title).replace(/\(\*\)/g, '').trim();
@@ -918,7 +986,7 @@ window.openWeatherAlertModal = function() {
     } else {
         activeHTML = `
         <div style="padding: 30px 20px; text-align: center; color: #64748b; font-weight: 700; font-size: 0.9rem; width:100%; box-sizing:border-box;">
-            🍃 当前济州岛无生效中的气象特报
+            ${window.t('weather.alert.modal.empty')}
         </div>`;
     }
 
@@ -927,23 +995,24 @@ window.openWeatherAlertModal = function() {
     if (hasHistory) {
         historyHTML = TODAY_ALERTS_HISTORY.map(item => {
             const title = item.title || '';
-            let typeBadge = '[特报]';
+            let typeBadgeKey = 'weather.alert.badge.active';
             let itemClass = '';
             
             if (title.includes('해제')) {
-                typeBadge = '[已解除]';
+                typeBadgeKey = 'weather.alert.badge.clear';
                 itemClass = 'clear';
             } else if (title.includes('주의보')) {
-                typeBadge = '[注意报]';
+                typeBadgeKey = 'weather.alert.badge.warn.bracket';
                 itemClass = 'warning';
             } else if (title.includes('경보')) {
-                typeBadge = '[警报]';
+                typeBadgeKey = 'weather.alert.badge.danger.bracket';
                 itemClass = 'danger';
             } else {
-                typeBadge = '[特报]';
+                typeBadgeKey = 'weather.alert.badge.active';
                 itemClass = 'info';
             }
             
+            const typeBadge = window.t(typeBadgeKey);
             const tm = String(item.tmFc || '');
             const timeOnly = tm.length >= 12 ? `${tm.slice(4, 6)}.${tm.slice(6, 8)} ${tm.slice(8, 10)}:${tm.slice(10, 12)}` : '';
             const refinedMsg = translateWeatherAlert(title).replace(/\(\*\)/g, '').trim();
@@ -958,22 +1027,22 @@ window.openWeatherAlertModal = function() {
     } else {
         historyHTML = `
         <div style="padding: 30px 20px; text-align: center; color: #64748b; font-weight: 700; font-size: 0.9rem; width:100%; box-sizing:border-box;">
-            📭 今日无气象特报发布或解除历史
+            ${window.t('weather.alert.modal.empty_history')}
         </div>`;
     }
 
     // 기본 노출 탭 설정 (활성 특보가 있으면 active, 없으면 history)
     const defaultTab = hasActive ? 'active' : 'history';
-    const historyTabTitle = IS_HISTORY_FALLBACK ? '最近历史' : '今日历史';
+    const historyTabTitle = IS_HISTORY_FALLBACK ? window.t('weather.alert.modal.recent') : window.t('weather.alert.modal.history');
 
     modal.innerHTML = `
         <div class="alert-modal-panel">
             <div class="alert-modal-header">
-                <div class="alert-modal-title">济州气象特报</div>
+                <div class="alert-modal-title">${window.t('weather.alert.modal.title')}</div>
                 <button class="alert-modal-close" onclick="window.closeWeatherAlertModal()">✕</button>
                 <div class="alert-modal-tabs">
                     <button class="alert-modal-tab ${defaultTab === 'active' ? 'active' : ''}" onclick="window.switchWeatherAlertTab('active')">
-                        当前生效 (${LATEST_ALERTS.length})
+                        ${window.t('weather.alert.modal.active')} (${LATEST_ALERTS.length})
                     </button>
                     <button class="alert-modal-tab ${defaultTab === 'history' ? 'active' : ''}" onclick="window.switchWeatherAlertTab('history')">
                         ${historyTabTitle} (${TODAY_ALERTS_HISTORY.length})
@@ -1015,6 +1084,7 @@ window.closeWeatherAlertModal = function() {
 };
 
 window.weatherApp = {
+    fetchWeatherData: fetchWeatherData,
     retryFetch: (locKey) => { renderWeatherLoading(locKey); fetchWeatherData(locKey); },
     scrollToHourly: (locKey, ymd) => {
         const targetEl = document.getElementById(`h-${locKey}-${ymd}`);

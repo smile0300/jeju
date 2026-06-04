@@ -2,7 +2,7 @@
 <section id="hallasan" class="app-section">
     <header class="app-bar">
         <button class="back-btn" onclick="showSection('home')">←</button>
-        <h2 class="bar-title" data-i18n="hallasan.title">⛰️ 汉拿山登山信息</h2>
+        <h2 class="bar-title"><i class="ph-duotone ph-mountains"></i> <span data-i18n="hallasan.title">汉拿山登山信息</span></h2>
     </header>
     <div class="section hallasan-section-wrap">
         <div class="container">
@@ -15,7 +15,7 @@
 
             <!-- 등산로별 상세 정보 -->
             <div class="subsection-title-wrap">
-                <h3 class="subsection-title" data-i18n="hallasan.trails">🥾 各登山路利用信息</h3>
+                <h3 class="subsection-title"><i class="ph-duotone ph-footprints"></i> <span data-i18n="hallasan.trails">各登山路利用信息</span></h3>
             </div>
             <div class="trails-grid" id="trails-grid"></div>
 
@@ -26,11 +26,11 @@
 
             <!-- 한라산 예약 및 공지사항 버튼 -->
             <div class="hallasan-reserve-container">
-                <button class="hallasan-reserve-btn" onclick="window.open('https://visithalla.jeju.go.kr/main/main.do?language=zh_CN', '_blank')" data-i18n="hallasan.reserve">
-                    ⛰️ 预约汉拿山
+                <button class="hallasan-reserve-btn" onclick="window.open('https://visithalla.jeju.go.kr/main/main.do?language=zh_CN', '_blank')" >
+                    <i class="ph-duotone ph-calendar-check"></i> <span data-i18n="hallasan.reserve">预约汉拿山</span>
                 </button>
-                <button class="hallasan-reserve-btn notice-btn" onclick="window.open('https://www.jeju.go.kr/hallasan/notice/notice.htm', '_blank')" data-i18n="hallasan.notice">
-                    📢 汉拿山公告
+                <button class="hallasan-reserve-btn notice-btn" onclick="window.open('https://www.jeju.go.kr/hallasan/notice/notice.htm', '_blank')" >
+                    <i class="ph-duotone ph-megaphone"></i> <span data-i18n="hallasan.notice">汉拿山公告</span>
                 </button>
             </div>
 

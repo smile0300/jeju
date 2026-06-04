@@ -94,7 +94,7 @@ export async function fetchHallasanStatus(isAutoRetry = false, forceRefresh = fa
             const koStatus = statusMap[t.nameKo];
             let info;
             if (!koStatus) {
-                info = { key: 'hallasan.status.partial', cls: 'partial' };
+                info = { key: 'hallasan.status.partial', cls: 'partial', icon: '<i class="ph-duotone ph-warning-circle"></i>' };
             } else {
                 info = TRAIL_STATUS_MAP[koStatus];
                 if (!info) {
@@ -105,29 +105,29 @@ export async function fetchHallasanStatus(isAutoRetry = false, forceRefresh = fa
                     } else if (koStatus.includes('정상')) {
                         info = TRAIL_STATUS_MAP['정상운영'];
                     } else if (koStatus.length > 0) {
-                        info = { key: 'hallasan.status.partial', cls: 'partial' };
+                        info = { key: 'hallasan.status.partial', cls: 'partial', icon: '<i class="ph-duotone ph-warning-circle"></i>' };
                     } else {
-                        info = { key: 'hallasan.status.partial', cls: 'partial' };
+                        info = { key: 'hallasan.status.partial', cls: 'partial', icon: '<i class="ph-duotone ph-warning-circle"></i>' };
                     }
                 }
             }
             const statusText = info.key ? window.t(info.key) : '--';
-            return { ...t, statusCn: statusText, statusCls: info.cls };
+            return { ...t, statusCn: statusText, statusCls: info.cls, statusIcon: info.icon };
         });
 
         // [NEW] 전체 상태 요약 (Hero Status) 계산
         const allOpen = trails.every(t => t.statusCls === 'open');
         const allClosed = trails.every(t => t.statusCls === 'closed');
-        let heroStatus = { key: 'hallasan.status.partial', cls: 'partial', descKey: 'hallasan.status.hero.partial' };
-        if (allOpen) heroStatus = { key: 'hallasan.status.open', cls: 'open', descKey: 'hallasan.status.hero.open' };
-        else if (allClosed) heroStatus = { key: 'hallasan.status.closed', cls: 'closed', descKey: 'hallasan.status.hero.closed' };
+        let heroStatus = { key: 'hallasan.status.partial', cls: 'partial', descKey: 'hallasan.status.hero.partial', icon: '<i class="ph-duotone ph-warning-circle"></i>' };
+        if (allOpen) heroStatus = { key: 'hallasan.status.open', cls: 'open', descKey: 'hallasan.status.hero.open', icon: '<i class="ph-duotone ph-check-circle"></i>' };
+        else if (allClosed) heroStatus = { key: 'hallasan.status.closed', cls: 'closed', descKey: 'hallasan.status.hero.closed', icon: '<i class="ph-duotone ph-x-circle"></i>' };
 
         const lang = window.getLang ? window.getLang() : 'zh';
 
         container.innerHTML = `
             <div class="hero-status-card ${heroStatus.cls}">
                 <div class="hero-status-content">
-                    <span class="hero-badge">${window.t(heroStatus.key)}</span>
+                    <span class="hero-badge">${heroStatus.icon} ${window.t(heroStatus.key)}</span>
                     <h3 class="hero-title">${window.t('hallasan.status.hero.title')}</h3>
                     <p class="hero-desc">${window.t(heroStatus.descKey)}</p>
                 </div>
@@ -142,13 +142,13 @@ export async function fetchHallasanStatus(isAutoRetry = false, forceRefresh = fa
             return `
             <div class="trail-block" onclick="window.open('${t.url}', '_blank')" style="cursor: pointer;">
                 <div class="t-status-line">
-                    <span class="trail-status-badge ${t.statusCls}">${t.statusCn}</span>
+                    <span class="trail-status-badge ${t.statusCls}">${t.statusIcon} ${t.statusCn}</span>
                 </div>
                 <div class="t-name-line">
                     <h4>${name}</h4>
                 </div>
                 <div class="t-info-line">
-                    <span>${distance} / ${time}</span>
+                    <span><i class="ph-duotone ph-map-pin"></i> ${distance} / <i class="ph-duotone ph-timer"></i> ${time}</span>
                 </div>
             </div>`;
         }).join('');
@@ -178,7 +178,7 @@ export async function fetchHallasanStatus(isAutoRetry = false, forceRefresh = fa
                         <span class="prob-value-large">${visibility}%</span>
                     </div>
                     <div class="prob-footer">
-                        <span class="prob-label">${window.t('hallasan.visibility')}</span>
+                        <span class="prob-label"><i class="ph-duotone ph-eye"></i> ${window.t('hallasan.visibility')}</span>
                     </div>
                 </div>`;
             
@@ -189,7 +189,7 @@ export async function fetchHallasanStatus(isAutoRetry = false, forceRefresh = fa
                         <span class="prob-value-large">${sunriseProb}%</span>
                     </div>
                     <div class="prob-footer">
-                        <span class="prob-label">${window.t('hallasan.sunrise_prob')}</span>
+                        <span class="prob-label"><i class="ph-duotone ph-sun"></i> ${window.t('hallasan.sunrise_prob')}</span>
                     </div>
                 </div>`;
         }

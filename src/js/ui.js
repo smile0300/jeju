@@ -301,7 +301,7 @@ function _buildSummaryHTML(targetYmd) {
     }
 
     const currentHour = new Date().getHours();
-    const summaryIcon = (currentHour >= 19 || currentHour < 6) ? '🌙' : '☀️';
+    const summaryIcon = (currentHour >= 19 || currentHour < 6) ? '<i class="ph-duotone ph-moon"></i>' : '<i class="ph-duotone ph-sun"></i>';
 
     return `
     <div class="wsm-header2">
@@ -309,7 +309,7 @@ function _buildSummaryHTML(targetYmd) {
             <span>${titleText}</span>
         </div>
         <div class="wsm-header-btns">
-            <button class="wsm-capture-btn" onclick="window.enterWeatherFullscreen()" title="Full Screen View">📱</button>
+            <button class="wsm-capture-btn" onclick="window.enterWeatherFullscreen()" title="Full Screen View"><i class="ph-duotone ph-corners-out"></i></button>
             <button class="wsm-close-btn2" onclick="window.closeWeatherSummaryModal()">✕</button>
         </div>
     </div>
@@ -394,7 +394,7 @@ window.enterWeatherFullscreen = function() {
         hint = document.createElement('div');
         hint.id = 'wsm-fs-hint';
         hint.className = 'wsm-exit-hint';
-        hint.innerHTML = '📸 좌우로 밀어서 지역을 변경하세요';
+        hint.innerHTML = '<i class="ph-duotone ph-arrows-left-right"></i> 좌우로 밀어서 지역을 변경하세요';
         document.body.appendChild(hint);
     }
     

@@ -4,12 +4,12 @@ let cachedLostItems = [];
 let currentLostView = 'card';
 let lostReportImageBase64 = null;
 
-const LOST_CATEGORY_MAP = {
-    '휴대폰': '手机', '지갑': '钱包', '가방': '包类', '서류': '文件', '현금': '现金',
-    '귀금속': '首饰', '도서용품': '书籍用品', '증명서': '证件', '쇼핑백': '购物袋',
-    '카드': '卡类', '의류': '衣物', '자동차': '汽车', '전자기기': '电子设备',
-    '컴퓨터': '电脑', '악기': '乐器', '스포츠용품': '体育用品', '산업용품': '产业用品',
-    '유가증권': '有价证券', '기타': '其他', '기타물품': '其他物品'
+const LOST_CATEGORY_KEY_MAP = {
+    '휴대폰': 'cat.phone', '지갑': 'cat.wallet', '가방': 'cat.bag', '서류': 'cat.doc', '현금': 'cat.cash',
+    '귀금속': 'cat.jewelry', '도서용품': 'cat.book', '증명서': 'cat.id', '쇼핑백': 'cat.shopping',
+    '카드': 'cat.card', '의류': 'cat.cloth', '자동차': 'cat.car', '전자기기': 'cat.electronic',
+    '컴퓨터': 'cat.pc', '악기': 'cat.music', '스포츠용품': 'cat.sports', '산업용품': 'cat.industry',
+    '유가증권': 'cat.security', '기타': 'cat.other', '기타물품': 'cat.other'
 };
 
 export async function fetchFoundGoods() {
@@ -32,8 +32,8 @@ export async function fetchFoundGoods() {
         const category = categoryInput?.value || '';
 
         const countDisplay = document.getElementById('lost-result-count');
-        if (countDisplay) countDisplay.innerHTML = `正在查询...`;
-        grid.innerHTML = '<div class="loading-lost"><p>正在加载信息...</p></div>';
+        if (countDisplay) countDisplay.innerHTML = window.t('lost.searching.status');
+        grid.innerHTML = `<div class="loading-lost"><p>${window.t('lost.loading')}</p></div>`;
 
         const commonParams = [`numOfRows=500`, `pageNo=1`, `N_FD_LCT_CD=LCP000`, `START_YMD=${selectedDate}`, `END_YMD=${selectedDate}`];
         if (category) commonParams.push(`PRDT_CL_CD_01=${category}`);
@@ -54,12 +54,13 @@ export async function fetchFoundGoods() {
                 const items = Array.isArray(rawItems) ? rawItems : [rawItems];
                 return items.map(item => {
                     const rawCategory = item.prdtClNm || '';
-                    const categoryClean = rawCategory.split(' > ')[0] || '其他';
+                    const categoryClean = rawCategory.split(' > ')[0] || '기타';
+                    const catKey = LOST_CATEGORY_KEY_MAP[categoryClean] || 'cat.other';
                     return {
                         id: item.atcId, name: item.fdPrdtNm, place: item.depPlace, date: item.fdYmd,
-                        category: LOST_CATEGORY_MAP[categoryClean] || categoryClean,
-                        img: item.fdFilePathImg, lct: item.fdFndPlace || item.lctNm || item.depPlace || '暂无信息',
-                        status: item.csteState || '保管中',
+                        category: window.t(catKey),
+                        img: item.fdFilePathImg, lct: item.fdFndPlace || item.lctNm || item.depPlace || window.t('lost.no_info'),
+                        status: item.csteState || '보관',
                         desc: item.uniqNm || '',
                         tel: item.tel || ''
                     };
@@ -69,12 +70,13 @@ export async function fetchFoundGoods() {
             return Array.from(xmlDoc.querySelectorAll('item')).map(node => {
                 const getTag = (tag) => node.querySelector(tag)?.textContent || '';
                 const rawCategory = getTag('prdtClNm') || '';
-                const categoryClean = rawCategory.split(' > ')[0] || '其他';
+                const categoryClean = rawCategory.split(' > ')[0] || '기타';
+                const catKey = LOST_CATEGORY_KEY_MAP[categoryClean] || 'cat.other';
                 return {
                     id: getTag('atcId'), name: getTag('fdPrdtNm'), place: getTag('depPlace'), date: getTag('fdYmd'),
-                    category: LOST_CATEGORY_MAP[categoryClean] || categoryClean,
-                    img: getTag('fdFilePathImg'), lct: getTag('fdFndPlace') || getTag('lctNm') || getTag('depPlace') || '暂无信息',
-                    status: getTag('csteState') || '保管中',
+                    category: window.t(catKey),
+                    img: getTag('fdFilePathImg'), lct: getTag('fdFndPlace') || getTag('lctNm') || getTag('depPlace') || window.t('lost.no_info'),
+                    status: getTag('csteState') || '보관',
                     desc: getTag('uniqNm') || '',
                     tel: getTag('tel') || ''
                 };
@@ -86,7 +88,11 @@ export async function fetchFoundGoods() {
             .sort((a, b) => b.date.localeCompare(a.date));
         cachedLostItems = allItems;
         const hasImgCount = allItems.filter(item => item.img && item.img.trim() !== '' && !item.img.includes('img02_no_img.gif')).length;
-        if (countDisplay) countDisplay.innerHTML = `共查询到 <strong>${allItems.length}</strong> 件物品 (含图片 ${hasImgCount} 件)。`;
+        if (countDisplay) {
+            countDisplay.innerHTML = window.t('lost.summary')
+                .replace('{count}', allItems.length)
+                .replace('{imgCount}', hasImgCount);
+        }
 
         if (currentLostView === 'card') {
             const cardItems = allItems.filter(item => item.img && item.img.trim() !== '' && !item.img.includes('img02_no_img.gif'));
@@ -97,8 +103,8 @@ export async function fetchFoundGoods() {
     } catch (e) {
         console.error('Lost & Found API Error:', e);
         const countDisplay = document.getElementById('lost-result-count');
-        if (countDisplay) countDisplay.innerHTML = `查询出错`;
-        grid.innerHTML = '<div class="loading-lost">无法加载实时数据，请稍后再试</div>';
+        if (countDisplay) countDisplay.innerHTML = window.t('lost.err.search');
+        grid.innerHTML = `<div class="loading-lost">${window.t('lost.err.load')}</div>`;
     }
 }
 
@@ -125,10 +131,11 @@ export function switchLostView(mode) {
 export function renderLostGoods(grid, items) {
     if (!grid) return;
     if (!items || items.length === 0) {
-        grid.innerHTML = '<div class="loading-lost">该期间内暂无相关记录</div>';
+        grid.innerHTML = `<div class="loading-lost">${window.t('lost.no_records')}</div>`;
         return;
     }
-    const noImgSvg = `data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22300%22%20height%3D%22300%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20300%20300%22%3E%3Crect%20width%3D%22300%22%20height%3D%22300%22%20fill%3D%22%23eee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-size%3D%2220%22%20text-anchor%3D%22middle%22%20alignment-baseline%3D%22middle%22%20fill%3D%22%23aaa%22%3E%E6%9A%82%E6%97%A0%E5%9B%BE%E7%89%87%3C%2Ftext%3E%3C%2Fsvg%3E`;
+    const noImgText = window.t('lost.no_image');
+    const noImgSvg = `data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22300%22%20height%3D%22300%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20300%20300%22%3E%3Crect%20width%3D%22300%22%20height%3D%22300%22%20fill%3D%22%23eee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-size%3D%2220%22%20text-anchor%3D%22middle%22%20alignment-baseline%3D%22middle%22%20fill%3D%22%23aaa%22%3E${encodeURIComponent(noImgText)}%3C%2Ftext%3E%3C%2Fsvg%3E`;
 
     // cachedLostItems 기준 실제 인덱스를 전달해야 올바른 상세정보가 열림
     grid.innerHTML = items.map((item) => {
@@ -147,22 +154,27 @@ export function renderLostGoodsTable(items) {
     const tableBody = document.getElementById('lost-table-body');
     if (!tableBody) return;
     if (!items || items.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;">该期间内暂无相关记录</td></tr>';
+        tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;">${window.t('lost.no_records')}</td></tr>`;
         return;
     }
+    const noImgText = window.t('lost.no_image');
+    const noImgSvg = `data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2240%22%20height%3D%2240%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2040%2040%22%3E%3Crect%20width%3D%2240%22%20height%3D%2240%22%20fill%3D%22%23eee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-size%3D%228%22%20text-anchor%3D%22middle%22%20alignment-baseline%3D%22middle%22%20fill%3D%22%23aaa%22%3E${encodeURIComponent(noImgText)}%3C%2Ftext%3E%3C%2Fsvg%3E`;
+
     // cachedLostItems 기준 실제 인덱스를 전달해야 올바른 상세정보가 열림
     tableBody.innerHTML = items.map((item) => {
         const realIndex = cachedLostItems.indexOf(item);
+        const isStoring = item.status.includes('보관') || item.status.includes('保管');
+        const displayStatus = isStoring ? window.t('lost.storing') : item.status;
         return `
         <tr>
-            <td>${item.img ? `<img src="${item.img}" class="lost-table-img" loading="lazy" onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2240%22%20height%3D%2240%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2040%2040%22%3E%3Crect%20width%3D%2240%22%20height%3D%2240%22%20fill%3D%22%23eee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-size%3D%228%22%20text-anchor%3D%22middle%22%20alignment-baseline%3D%22middle%22%20fill%3D%22%23aaa%22%3E%E6%9A%82%E6%97%A0%E5%9B%BE%E7%89%87%3C%2Ftext%3E%3C%2Fsvg%3E'">` : '📦'}</td>
+            <td>${item.img ? `<img src="${item.img}" class="lost-table-img" loading="lazy" onerror="this.src='${noImgSvg}'">` : '📦'}</td>
             <td><span class="lost-category-badge">${item.category}</span></td>
             <td style="font-weight:600;">${item.name}</td>
-            <td><span class="lost-status-tag ${item.status === '保管中' ? 'active' : ''}">${item.status}</span></td>
+            <td><span class="lost-status-tag ${isStoring ? 'active' : ''}">${displayStatus}</span></td>
             <td>${item.date}</td>
             <td>${item.place}</td>
             <td style="font-size: 11px; opacity: 0.7;">${item.id}</td>
-            <td><button onclick="openLostDetailModalByIndex(${realIndex})" class="lost-table-btn">详细</button></td>
+            <td><button onclick="openLostDetailModalByIndex(${realIndex})" class="lost-table-btn">${window.t('lost.btn.detail')}</button></td>
         </tr>`;
     }).join('');
 }
@@ -171,9 +183,14 @@ export function openLostDetailModalByIndex(index) {
     const item = cachedLostItems[index];
     if (!item) return;
     const body = document.getElementById('lost-modal-body');
+    const isStoring = item.status.includes('보관') || item.status.includes('保管');
+    const displayStatus = isStoring ? window.t('lost.storing') : item.status;
+    const noImgText = window.t('lost.no_image');
+    const noImgSvg = `data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22500%22%20height%3D%22500%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20500%20500%22%3E%3Crect%20width%3D%22500%22%20height%3D%22500%22%20fill%3D%22%23eee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-size%3D%2230%22%20text-anchor%3D%22middle%22%20alignment-baseline%3D%22middle%22%20fill%3D%22%23aaa%22%3E${encodeURIComponent(noImgText)}%3C%2Ftext%3E%3C%2Fsvg%3E`;
+
     body.innerHTML = `
         <div class="lost-modal-img-container">
-            ${item.img ? `<img src="${item.img}" class="lost-modal-img" onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22500%22%20height%3D%22500%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%220%200%20500%20500%22%3E%3Crect%20width%3D%22500%22%20height%3D%22500%22%20fill%3D%22%23eee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-size%3D%2230%22%20text-anchor%3D%22middle%22%20alignment-baseline%3D%22middle%22%20fill%3D%22%23aaa%22%3E%E6%9A%82%E6%97%A0%E5%9B%BE%E7%89%87%3C%2Ftext%3E%3C%2Fsvg%3E'">` : '<div class="lost-modal-no-img">📦</div>'}
+            ${item.img ? `<img src="${item.img}" class="lost-modal-img" onerror="this.src='${noImgSvg}'">` : `<div class="lost-modal-no-img">📦</div>`}
         </div>
         <div class="lost-modal-info">
             <div class="lost-modal-header">
@@ -181,19 +198,19 @@ export function openLostDetailModalByIndex(index) {
                 <h2 class="lost-modal-title">${item.name}</h2>
             </div>
             <div class="lost-modal-details">
-                <div class="lost-modal-field"><span class="lost-modal-label">管理编号</span><span class="lost-modal-value" style="font-family: monospace;">${item.id}</span></div>
-                <div class="lost-modal-field"><span class="lost-modal-label">物品状态</span><span class="lost-modal-value">${item.status}</span></div>
-                <div class="lost-modal-field"><span class="lost-modal-label">拾获日期</span><span class="lost-modal-value">${item.date}</span></div>
-                <div class="lost-modal-field"><span class="lost-modal-label">保管地点</span><span class="lost-modal-value">${item.place}</span></div>
-                ${item.tel ? `<div class="lost-modal-field"><span class="lost-modal-label">联系电话</span><span class="lost-modal-value"><a href="tel:${item.tel}" style="color: var(--primary-color, #0076ff); text-decoration: underline; font-weight: 500;">${item.tel}</a></span></div>` : ''}
-                ${item.desc ? `<div class="lost-modal-field" style="flex-direction: column; align-items: flex-start; gap: 6px; margin-top: 8px; border-top: 1px dashed #eee; padding-top: 8px;"><span class="lost-modal-label" style="margin-bottom: 2px;">特征描述</span><span class="lost-modal-value" style="width: 100%; white-space: pre-wrap; line-height: 1.5; color: #444; background: #f8f9fa; padding: 10px 12px; border-radius: 6px; font-size: 13px; box-sizing: border-box;">${item.desc}</span></div>` : ''}
+                <div class="lost-modal-field"><span class="lost-modal-label">${window.t('lost.detail.id')}</span><span class="lost-modal-value" style="font-family: monospace;">${item.id}</span></div>
+                <div class="lost-modal-field"><span class="lost-modal-label">${window.t('lost.detail.status')}</span><span class="lost-modal-value">${displayStatus}</span></div>
+                <div class="lost-modal-field"><span class="lost-modal-label">${window.t('lost.detail.date')}</span><span class="lost-modal-value">${item.date}</span></div>
+                <div class="lost-modal-field"><span class="lost-modal-label">${window.t('lost.detail.place')}</span><span class="lost-modal-value">${item.place}</span></div>
+                ${item.tel ? `<div class="lost-modal-field"><span class="lost-modal-label">${window.t('lost.detail.tel')}</span><span class="lost-modal-value"><a href="tel:${item.tel}" style="color: var(--primary-color, #0076ff); text-decoration: underline; font-weight: 500;">${item.tel}</a></span></div>` : ''}
+                ${item.desc ? `<div class="lost-modal-field" style="flex-direction: column; align-items: flex-start; gap: 6px; margin-top: 8px; border-top: 1px dashed #eee; padding-top: 8px;"><span class="lost-modal-label" style="margin-bottom: 2px;">${window.t('lost.detail.desc')}</span><span class="lost-modal-value" style="width: 100%; white-space: pre-wrap; line-height: 1.5; color: #444; background: #f8f9fa; padding: 10px 12px; border-radius: 6px; font-size: 13px; box-sizing: border-box;">${item.desc}</span></div>` : ''}
             </div>
             <div class="lost-modal-footer">
-                <button class="lost-modal-btn secondary" onclick="closeLostDetailModal()">关闭</button>
-                <button class="lost-modal-btn primary" onclick="showWechatQR()">咨询客服</button>
+                <button class="lost-modal-btn secondary" onclick="closeLostDetailModal()">${window.t('lost.detail.close')}</button>
+                <button class="lost-modal-btn primary" onclick="showWechatQR()">${window.t('lost.detail.cs')}</button>
             </div>
             <div id="wechat-qr-container" style="display:none; text-align:center; padding: 15px; border-top: 1px solid #eee;">
-                <p style="font-size: 14px; color: #666; margin-bottom: 10px;">请扫描二维码通过微信联系我们</p>
+                <p style="font-size: 14px; color: #666; margin-bottom: 10px;">${window.t('lost.detail.wechat_guide')}</p>
                 <img src="/assets/wechat_qr.png" style="width: 200px; height: 200px;">
             </div>
         </div>`;
@@ -232,7 +249,7 @@ export function openLostReportModal() {
 export function handleLostImageChange(event) {
     const file = event.target.files[0];
     if (!file) return;
-    if (file.size > 2 * 1024 * 1024) { alert('照片大小不能超过2MB。'); return; }
+    if (file.size > 2 * 1024 * 1024) { alert(window.t('lost.report.size_err')); return; }
     const reader = new FileReader();
     reader.onload = (e) => {
         lostReportImageBase64 = e.target.result;
@@ -263,29 +280,29 @@ export async function submitLostReport() {
 
     if (!data.location || !data.date || !data.time || !data.itemName || !data.specifics || !data.wechatId || !data.reporterName) {
         if (statusEl) {
-            statusEl.textContent = '请填写完整的信息';
+            statusEl.textContent = window.t('lost.report.fill_err');
             statusEl.className = 'form-status error';
             statusEl.style.display = 'block';
         } else {
-            alert('请填写完整的信息');
+            alert(window.t('lost.report.fill_err'));
         }
         return;
     }
 
     if (!data.photo) {
         if (statusEl) {
-            statusEl.textContent = '请上传物品照片 (必填)';
+            statusEl.textContent = window.t('lost.report.photo_err');
             statusEl.className = 'form-status error';
             statusEl.style.display = 'block';
         } else {
-            alert('请上传物品照片 (必填)');
+            alert(window.t('lost.report.photo_err'));
         }
         return;
     }
 
     try {
         if (statusEl) {
-            statusEl.textContent = '正在提交...';
+            statusEl.textContent = window.t('lost.report.submitting');
             statusEl.className = 'form-status';
             statusEl.style.display = 'block';
         }
@@ -302,15 +319,15 @@ export async function submitLostReport() {
         } catch (je) {
             const rawText = await res.text();
             console.error('API Response Parse error:', je, rawText);
-            throw new Error('服务器响应格式错误');
+            throw new Error('Server format error');
         }
 
         if (result.result === 'success' || result.status === 'success') {
             if (statusEl) {
-                statusEl.textContent = '提交成功！';
+                statusEl.textContent = window.t('lost.report.success');
                 statusEl.className = 'form-status success';
             } else {
-                alert('提交成功！');
+                alert(window.t('lost.report.success'));
             }
 
             if (window.dataLayer) {
@@ -341,10 +358,10 @@ export async function submitLostReport() {
         }
     } catch (e) {
         if (statusEl) {
-            statusEl.textContent = `提交失败: ${e.message}`;
+            statusEl.textContent = `${window.t('lost.report.failed')}${e.message}`;
             statusEl.className = 'form-status error';
         } else {
-            alert(`提交失败: ${e.message}`);
+            alert(`${window.t('lost.report.failed')}${e.message}`);
         }
     } finally {
         if (submitBtn) submitBtn.disabled = false;
