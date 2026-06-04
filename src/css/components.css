@@ -209,8 +209,19 @@ i.ph-duotone {
 
 /* Liveliness Color Utility Classes */
 .color-gnb { color: var(--primary-orange); }
-.color-airport { color: #8B5CF6; } /* Purple */
+
+/* GNB Menu Specific Colors (Non-overlapping) */
 .color-cctv { color: #EF4444; } /* Red */
+.color-weather { color: #0EA5E9; } /* Sky Blue */
+.color-hallasan { color: #10B981; } /* Emerald Green */
+.color-airport { color: #8B5CF6; } /* Purple */
+.color-lost { color: #0D9488; } /* Teal */
+.color-festival { color: #EC4899; } /* Pink */
+.color-reward { color: #F59E0B; } /* Amber/Gold */
+.color-food { color: #F97316; } /* Orange */
+.color-course { color: #3B82F6; } /* Blue */
+
+/* Weather Forecast Specific Colors */
 .color-sun { color: #F59E0B; } /* Amber */
 .color-moon { color: #6366F1; } /* Indigo */
 .color-cloud-sun { color: #0EA5E9; } /* Sky Blue */
