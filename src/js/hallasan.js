@@ -15,13 +15,13 @@ export const HALLASAN_TRAILS = [
 ];
 
 const TRAIL_STATUS_MAP = {
-    '정상운영': { key: 'hallasan.status.open', cls: 'open' },
-    '부분통제': { key: 'hallasan.status.partial', cls: 'partial' },
-    '전면통제': { key: 'hallasan.status.closed', cls: 'closed' },
-    '통제': { key: 'hallasan.status.closed', cls: 'closed' },
-    '일부통제': { key: 'hallasan.status.partial', cls: 'partial' },
-    '입산제한': { key: 'hallasan.status.closed', cls: 'closed' },
-    '탐방불가': { key: 'hallasan.status.closed', cls: 'closed' }
+    '정상운영': { key: 'hallasan.status.open', cls: 'open', icon: '<i class="ph-duotone ph-check-circle"></i>' },
+    '부분통제': { key: 'hallasan.status.partial', cls: 'partial', icon: '<i class="ph-duotone ph-warning-circle"></i>' },
+    '전면통제': { key: 'hallasan.status.closed', cls: 'closed', icon: '<i class="ph-duotone ph-x-circle"></i>' },
+    '통제': { key: 'hallasan.status.closed', cls: 'closed', icon: '<i class="ph-duotone ph-x-circle"></i>' },
+    '일부통제': { key: 'hallasan.status.partial', cls: 'partial', icon: '<i class="ph-duotone ph-warning-circle"></i>' },
+    '입산제한': { key: 'hallasan.status.closed', cls: 'closed', icon: '<i class="ph-duotone ph-x-circle"></i>' },
+    '탐방불가': { key: 'hallasan.status.closed', cls: 'closed', icon: '<i class="ph-duotone ph-x-circle"></i>' }
 };
 
 let isFetchingHallasanStatus = false;

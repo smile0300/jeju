@@ -182,7 +182,7 @@ const TRANSLATIONS = {
         'hallasan.trails':  '各登山路利用信息',
         'hallasan.cctv':    '汉拿山 实时 CCTV',
         'hallasan.reserve': '预约汉拿山',
-        'hallasan.notice':  '📢 汉拿山公告',
+        'hallasan.notice':  '汉拿山公告',
 
         // ── 축제 ──
         'festival.title':   '济州精彩活动',
@@ -456,7 +456,7 @@ const TRANSLATIONS = {
         'hallasan.trails':  '등산로별 이용 정보',
         'hallasan.cctv':    '한라산 실시간 CCTV',
         'hallasan.reserve': '한라산 예약',
-        'hallasan.notice':  '📢 한라산 공지사항',
+        'hallasan.notice':  '한라산 공지사항',
         'hallasan.loading.official': '공식 실시간 데이터를 가져오는 중입니다...',
 
         'festival.title':   '제주 축제/행사',
@@ -721,7 +721,7 @@ const TRANSLATIONS = {
         'hallasan.trails':  'Trail Information',
         'hallasan.cctv':    'Hallasan Live CCTV',
         'hallasan.reserve': 'Reserve Hallasan',
-        'hallasan.notice':  '📢 Hallasan Notices',
+        'hallasan.notice':  'Hallasan Notices',
         'hallasan.loading.official': 'Loading official data...',
 
         'festival.title':   'Jeju Festivals & Events',
