@@ -343,10 +343,10 @@ export function parseAndRenderWeather(locKey, items, midData, mountainData) {
                 </div>
                 <div class="cw-right">
                     <ul class="cw-details-list">
-                        <li><span class="cwi">🍃</span> <span style="color: ${getWindColor(current.WSD)}; font-weight: 800;">${getWindDesc(current.WSD)}</span> ${current.WSD}m/s</li>
-                        <li><span class="cwi">💧</span> ${window.t('weather.humidity')} ${current.REH}%</li>
-                        <li><span class="cwi">🌡️</span> ${window.t('weather.feelslike')} ${feelsLike}°</li>
-                        <li id="top-air-${locKey}"><span class="cwi">😷</span> ${window.t('weather.aq')} <span class="val">--</span></li>
+                        <li><span class="cwi"><i class="ph-duotone ph-wind color-cloud"></i></span> <span style="color: ${getWindColor(current.WSD)}; font-weight: 800;">${getWindDesc(current.WSD)}</span> ${current.WSD}m/s</li>
+                        <li><span class="cwi"><i class="ph-duotone ph-drop color-rain"></i></span> ${window.t('weather.humidity')} ${current.REH}%</li>
+                        <li><span class="cwi"><i class="ph-duotone ph-thermometer color-cctv"></i></span> ${window.t('weather.feelslike')} ${feelsLike}°</li>
+                        <li id="top-air-${locKey}"><span class="cwi"><i class="ph-duotone ph-face-mask color-lost"></i></span> ${window.t('weather.aq')} <span class="val">--</span></li>
                     </ul>
                 </div>
             </div>`;
@@ -457,7 +457,7 @@ function renderWeeklyList(locKey, grouped, sortedKeys, midData) {
                 <div class="w-icon">${icon}</div>
                 <div class="w-temps"><span class="w-max">${max}°</span><span class="w-slash">/</span><span class="w-min">${min}°</span></div>
                 <div class="w-meta-info">
-                    <span class="w-pop">💧${pop}%</span>
+                    <span class="w-pop"><i class="ph-duotone ph-drop color-rain"></i>${pop}%</span>
                     <span class="w-pcp ${pcp !== '0' && pcp !== '--' ? 'p-blue' : ''}">${pcp}mm</span>
                 </div>
             </div>`;
