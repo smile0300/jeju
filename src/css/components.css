@@ -223,7 +223,8 @@ i.ph-duotone {
 
 /* Weather Forecast Specific Colors */
 .color-sun { color: #F59E0B; } /* Amber */
-.color-moon { color: #6366F1; } /* Indigo */
+.color-moon { color: #FBBF24; } /* Yellow */
+.color-sun-horizon { color: #EF4444; } /* Red */
 .color-cloud-sun { color: #0EA5E9; } /* Sky Blue */
 .color-cloud-moon { color: #4F46E5; } /* Dark Indigo */
 .color-cloud { color: #9CA3AF; } /* Gray */
