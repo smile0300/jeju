@@ -753,7 +753,12 @@
 .flight-row.selected { background-color: #eff6ff; border-left-color: var(--accent-blue); color: var(--accent-blue); }
 .flight-row.selected .flight-col { font-weight: 800; }
 .flight-row.flight-header { background: var(--bg-card-hover); font-weight: 800; color: var(--text-primary); border-bottom: 2px solid var(--border-light); cursor: default; }
-.flight-col { flex: 1; text-align: center; min-width: 0; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+.flight-col { text-align: center; min-width: 0; display: flex; align-items: center; justify-content: center; font-weight: 600; padding: 0 2px; }
+.flight-col:nth-child(1) { flex: 0 0 16%; white-space: nowrap; } /* 航班号 */
+.flight-col:nth-child(2) { flex: 0 0 29%; word-break: keep-all; white-space: nowrap; } /* 航空公司 */
+.flight-col:nth-child(3) { flex: 0 0 15%; word-break: keep-all; } /* 目的地/出发地 */
+.flight-col:nth-child(4) { flex: 0 0 20%; white-space: nowrap; } /* 预定/实际 */
+.flight-col:nth-child(5) { flex: 0 0 20%; word-break: keep-all; } /* 状态 */
 
 /* ==================== Festival ==================== */
 .festival-month-filter {
@@ -988,6 +993,7 @@
 .lost-goods-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
     .flight-row { font-size: 0.72rem; padding: 12px 4px; }
     .flight-col { font-size: 0.72rem; }
+    .flight-col .badge { min-width: auto; padding: 3px 6px; font-size: 0.68rem; }
 }
 
 /* Lost & Found Additional Styles */

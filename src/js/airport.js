@@ -2,34 +2,84 @@ import { CONFIG } from './config.js';
 import { fetchPublicDataText } from './api.js';
 
 const AIRLINE_NAMES = {
-    'KE': '大韩航空', 'OZ': '韩亚航空', '7C': '济州航空',
-    'LJ': '真航空', 'TW': '德威航空', 'ZE': '易斯达航空',
-    'BX': '釜山航空', 'RS': '首尔航空', 'RF': '江原航空',
-    'CA': '中国国际航空', 'MU': '中国东方航空', 'CZ': '中国南方航空',
-    'MF': '厦门航空', 'ZH': '深圳航空', 'HO': '吉祥航空',
-    '9C': '春秋航空', 'HU': '海南航空', 'SC': '山东航空',
-    'GJ': '长龙航空', 'QW': '青岛航空', 'JD': '首都航空',
-    'CI': '中华航空', 'BR': '长荣航空', 'IT': '台湾虎航',
-    'CX': '国泰航空', 'UO': '香港快运', 'HB': '大湾区航空',
-    'NX': '澳门航空', 'TR': '酷航'
+    'KE': { zh: '大韩航空', ko: '대한항공', en: 'Korean Air' },
+    'OZ': { zh: '韩亚航空', ko: '아시아나항공', en: 'Asiana Airlines' },
+    '7C': { zh: '济州航空', ko: '제주항공', en: 'Jeju Air' },
+    'LJ': { zh: '真航空', ko: '진에어', en: 'Jin Air' },
+    'TW': { zh: '德威航空', ko: '티웨이항공', en: 'T\'way Air' },
+    'ZE': { zh: '易斯达航空', ko: '이스타항공', en: 'Eastar Jet' },
+    'BX': { zh: '釜山航空', ko: '에어부산', en: 'Air Busan' },
+    'RS': { zh: '首尔航空', ko: '에어서울', en: 'Air Seoul' },
+    'RF': { zh: '江原航空', ko: '플라이강원', en: 'Fly Gangwon' },
+    'CA': { zh: '中国国际航空', ko: '중국국제항공', en: 'Air China' },
+    'MU': { zh: '中国东方航空', ko: '중국동방항공', en: 'China Eastern' },
+    'CZ': { zh: '中国南方航空', ko: '중국남방항공', en: 'China Southern' },
+    'MF': { zh: '厦门航空', ko: '샤먼항공', en: 'Xiamen Air' },
+    'ZH': { zh: '深圳航空', ko: '심천항공', en: 'Shenzhen Airlines' },
+    'HO': { zh: '吉祥航空', ko: '길상항공', en: 'Juneyao Air' },
+    '9C': { zh: '春秋航空', ko: '춘추항공', en: 'Spring Airlines' },
+    'HU': { zh: '海南航空', ko: '해남항공', en: 'Hainan Airlines' },
+    'SC': { zh: '山东航空', ko: '산동항공', en: 'Shandong Airlines' },
+    'GJ': { zh: '长龙航空', ko: '로옹항공', en: 'Loong Air' },
+    'QW': { zh: '青岛航空', ko: '청도항공', en: 'Qingdao Airlines' },
+    'JD': { zh: '首都航空', ko: '수도항공', en: 'Capital Airlines' },
+    'CI': { zh: '中华航空', ko: '중화항공', en: 'China Airlines' },
+    'BR': { zh: '长荣航空', ko: '에바항공', en: 'EVA Air' },
+    'IT': { zh: '台湾虎航', ko: '타이거에어 타이완', en: 'Tigerair Taiwan' },
+    'CX': { zh: '国泰航空', ko: '캐세이퍼시픽항공', en: 'Cathay Pacific' },
+    'UO': { zh: '香港快运', ko: '홍콩익스프레스', en: 'HK Express' },
+    'HB': { zh: '大湾区航空', ko: '그레이터 베이 항공', en: 'Greater Bay Airlines' },
+    'NX': { zh: '澳门航空', ko: '마카오항공', en: 'Air Macau' },
+    'TR': { zh: '酷航', ko: '스쿠트항공', en: 'Scoot' }
 };
 
 const CITY_NAMES = {
-    '인천': '仁川', '김포': '金浦', '김해': '金海', '제주': '济州',
-    '타이페이': '台北', '타오위안': '桃园', '상하이': '上海', '푸동': '浦东', '홍공': '香港', '홍콩': '香港',
-    '북경': '北京', '베이징': '北京', '대싱': '大兴', '다싱': '大兴',
-    '광저우': '广州', '선전': '深圳', '항저우': '杭州', '난징': '南京',
-    '칭다오': '青岛', '시안': '西安', '청두': '成都', '충칭': '重庆',
-    '쿤밍': '昆明', '톈진': '天津', '다롄': '大连', '선양': '沈阳',
-    '하얼빈': '哈尔滨', '무석': '无锡', '닝보': '宁波', '복주': '福州',
-    '샤먼': '厦门', '싼야': '三亚', '하이커우': '海口', '제난': '济南',
-    '창춘': '长春', '정저우': '郑州', '원저우': '温州', '산터우': '汕头',
-    '계림': '桂林', '난닝': '南宁', '허페이': '合肥', '타이위안': '太原',
-    '난창': '南昌', '란저우': '兰州', '시닝': '西宁', '후허하오터': '呼和浩特',
-    '우루무치': '乌鲁木齐', '창사': '长沙', '장가계': '张家界', '옌타이': '烟台',
-    '웨이하이': '威海', '이우': '义乌', '낙양': '洛阳', '진저우': '锦州',
-    '린이': '临沂', '은스': '恩施', '인촨': '银川', '화이안': '淮安',
-    '가오슝': '高雄', '타이중': '台中', '타이난': '台南', '마카오': '澳门'
+    '인천': { zh: '仁川', ko: '인천', en: 'Incheon' },
+    '김포': { zh: '金浦', ko: '김포', en: 'Gimpo' },
+    '김해': { zh: '金海', ko: '김해(부산)', en: 'Gimhae' },
+    '부산': { zh: '釜山', ko: '부산', en: 'Busan' },
+    '제주': { zh: '济州', ko: '제주', en: 'Jeju' },
+    '타이페이': { zh: '台北', ko: '타이베이', en: 'Taipei' },
+    '타이베이': { zh: '台北', ko: '타이베이', en: 'Taipei' },
+    '타오위안': { zh: '桃园', ko: '타오위안', en: 'Taoyuan' },
+    '상하이': { zh: '上海', ko: '상하이', en: 'Shanghai' },
+    '푸동': { zh: '浦东', ko: '푸동', en: 'Pudong' },
+    '푸둥': { zh: '浦东', ko: '푸동', en: 'Pudong' },
+    '홍공': { zh: '香港', ko: '홍콩', en: 'Hong Kong' },
+    '홍콩': { zh: '香港', ko: '홍콩', en: 'Hong Kong' },
+    '북경': { zh: '北京', ko: '베이징', en: 'Beijing' },
+    '베이징': { zh: '北京', ko: '베이징', en: 'Beijing' },
+    '대싱': { zh: '大兴', ko: '다싱', en: 'Daxing' },
+    '다싱': { zh: '大兴', ko: '다싱', en: 'Daxing' },
+    '광저우': { zh: '广州', ko: '광저우', en: 'Guangzhou' },
+    '선전': { zh: '深圳', ko: '선전', en: 'Shenzhen' },
+    '심천': { zh: '深圳', ko: '선전', en: 'Shenzhen' },
+    '항저우': { zh: '杭州', ko: '항저우', en: 'Hangzhou' },
+    '난징': { zh: '南京', ko: '난징', en: 'Nanjing' },
+    '칭다오': { zh: '青岛', ko: '칭다오', en: 'Qingdao' },
+    '청도': { zh: '青岛', ko: '칭다오', en: 'Qingdao' },
+    '시안': { zh: '西安', ko: '시안', en: 'Xi\'an' },
+    '청두': { zh: '成都', ko: '청두', en: 'Chengdu' },
+    '충칭': { zh: '重庆', ko: '충칭', en: 'Chongqing' },
+    '무석': { zh: '无锡', ko: '우시', en: 'Wuxi' },
+    '우시': { zh: '无锡', ko: '우시', en: 'Wuxi' },
+    '닝보': { zh: '宁波', ko: '닝보', en: 'Ningbo' },
+    '푸저우': { zh: '福州', ko: '푸저우', en: 'Fuzhou' },
+    '샤먼': { zh: '厦门', ko: '샤먼', en: 'Xiamen' },
+    '하문': { zh: '厦门', ko: '샤먼', en: 'Xiamen' },
+    '싼야': { zh: '三亚', ko: '산야', en: 'Sanya' },
+    '산야': { zh: '三亚', ko: '산야', en: 'Sanya' },
+    '하이커우': { zh: '海口', ko: '하이커우', en: 'Haikou' },
+    '해구': { zh: '海口', ko: '하이커우', en: 'Haikou' },
+    '진안': { zh: '济南', ko: '진안', en: 'Jinan' },
+    '제남': { zh: '济南', ko: '진안', en: 'Jinan' },
+    '창춘': { zh: '长春', ko: '창춘', en: 'Changchun' },
+    '장춘': { zh: '长春', ko: '창춘', en: 'Changchun' },
+    '정저우': { zh: '郑州', ko: '정저우', en: 'Zhengzhou' },
+    '원저우': { zh: '温州', ko: '원저우', en: 'Wenzhou' },
+    '온주': { zh: '温州', ko: '원저우', en: 'Wenzhou' },
+    '마카오': { zh: '澳门', ko: '마카오', en: 'Macau' },
+    '가오슝': { zh: '高雄', ko: '가오슝', en: 'Kaohsiung' }
 };
 
 const DOMESTIC_AIRPORTS = new Set(['CJU', 'GMP', 'PUS', 'CJJ', 'TAE', 'KWJ', 'USN', 'KUV', 'WJU', 'HIN', 'RSU', 'KPO', 'MWX', 'YNY']);
@@ -44,28 +94,56 @@ const REGION_AIRPORTS = new Set([
 export function getStatusBadge(status) {
     if (!status || status.trim() === '-') return '-';
     const s = status.trim();
-    if (s.includes('무각') || s.includes('\uB9C8\uAC10')) return `<span class="badge badge-danger">登记截止</span>`;
-    if (s.includes('출발') || s.includes('\uCD9C\uBC1C')) return `<span class="badge badge-success">已出发</span>`;
-    if (s.includes('도착') || s.includes('\uB3C4\uCC29')) return `<span class="badge badge-success">已到达</span>`;
-    if (s.includes('지연') || s.includes('\uC9C0\uC5F0')) return `<span class="badge badge-warning">延误</span>`;
-    if (s.includes('결항') || s.includes('\uACB0\uD56D')) return `<span class="badge badge-danger">取消</span>`;
-    if (s.includes('탑승') || s.includes('\uD0D1\uC2B9')) return `<span class="badge badge-info">正在登机</span>`;
-    if (s.includes('수속') || s.includes('\uC218\uC10D')) return `<span class="badge badge-info">正在办理</span>`;
-    if (s.includes('회항') || s.includes('\uD68C\uD56D')) return `<span class="badge badge-danger">备降/返航</span>`;
-    if (s.includes('착륙') || s.includes('\uCC29\uB959')) return `<span class="badge badge-success">已着陆</span>`;
+    if (s.includes('무각') || s.includes('\uB9C8\uAC10') || s.includes('Closed')) {
+        return `<span class="badge badge-danger">${window.t('airport.badge.register_close')}</span>`;
+    }
+    if (s.includes('출발') || s.includes('\uCD9C\uBC1C') || s.includes('Departed')) {
+        return `<span class="badge badge-success">${window.t('airport.badge.departed')}</span>`;
+    }
+    if (s.includes('도착') || s.includes('\uB3C4\uCC29') || s.includes('Arrived')) {
+        return `<span class="badge badge-success">${window.t('airport.badge.arrived')}</span>`;
+    }
+    if (s.includes('지연') || s.includes('\uC9C0\uC5F0') || s.includes('Delayed')) {
+        return `<span class="badge badge-warning">${window.t('airport.badge.delayed')}</span>`;
+    }
+    if (s.includes('결항') || s.includes('\uACB0\uD56D') || s.includes('Canceled')) {
+        return `<span class="badge badge-danger">${window.t('airport.badge.canceled')}</span>`;
+    }
+    if (s.includes('탑승') || s.includes('\uD0D1\uC2B9') || s.includes('Boarding')) {
+        return `<span class="badge badge-info">${window.t('airport.badge.boarding')}</span>`;
+    }
+    if (s.includes('수속') || s.includes('\uC218\uC10D') || s.includes('Check')) {
+        return `<span class="badge badge-info">${window.t('airport.badge.processing')}</span>`;
+    }
+    if (s.includes('회항') || s.includes('\uD68C\uD56D') || s.includes('Diverted')) {
+        return `<span class="badge badge-danger">${window.t('airport.badge.diverted')}</span>`;
+    }
+    if (s.includes('착륙') || s.includes('\uCC29\uB959') || s.includes('Landed')) {
+        return `<span class="badge badge-success">${window.t('airport.badge.landed')}</span>`;
+    }
     return `<span class="badge badge-info">${s}</span>`;
 }
 
 export function getAirlineName(flightId, rawAirline) {
     const code = (flightId || '').slice(0, 2).toUpperCase();
-    return AIRLINE_NAMES[code] || rawAirline || code;
+    const airline = AIRLINE_NAMES[code];
+    if (airline) {
+        const lang = window.getLang ? window.getLang() : 'zh';
+        return airline[lang] || airline['zh'];
+    }
+    return rawAirline || code;
 }
 
 export function getCityName(rawCity) {
     if (!rawCity) return '-';
-    const s = Object.keys(CITY_NAMES).find(k => rawCity.includes(k));
-    return s ? CITY_NAMES[s] : rawCity;
+    const matchKey = Object.keys(CITY_NAMES).find(k => rawCity.includes(k));
+    if (matchKey) {
+        const lang = window.getLang ? window.getLang() : 'zh';
+        return CITY_NAMES[matchKey][lang] || CITY_NAMES[matchKey]['zh'];
+    }
+    return rawCity;
 }
+
 
 export async function fetchFlights(type) {
     const container = document.getElementById(`${type}-data`);
@@ -87,7 +165,7 @@ export async function fetchFlights(type) {
         if (type === 'arrive') params.arr_airport_code = 'CJU';
         else params.airport_code = 'CJU';
 
-        container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">正在加载信息...</div>';
+        container.innerHTML = `<div style="text-align:center;padding:20px;color:var(--text-muted)">${window.t('airport.loading')}</div>`;
 
         const text = await fetchPublicDataText(apiEndpoint, params);
         let itemsArray = [];
@@ -154,27 +232,27 @@ export async function fetchFlights(type) {
             });
             renderFlightList(container, filteredFlights, type);
         } else {
-             container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">暂无相关航班信息</div>';
+             container.innerHTML = `<div style="text-align:center;padding:20px;color:var(--text-muted)">${window.t('airport.empty')}</div>`;
         }
     } catch (e) {
         console.error('Airport API Error:', e);
-        container.innerHTML = `<div style="text-align:center;padding:32px 16px;">Error: ${e.message}</div>`;
+        container.innerHTML = `<div style="text-align:center;padding:32px 16px;color:var(--text-muted);">${window.t('airport.err.failed')}</div>`;
     }
 }
 
 export function renderFlightList(container, items, type) {
 
-    const headerTitle = (type === 'arrive') ? '出发地' : '目的地';
+    const headerTitle = (type === 'arrive') ? window.t('airport.header.origin') : window.t('airport.header.dest');
     let html = `<div class="flight-row flight-header">
-        <div class="flight-col">航班号</div>
-        <div class="flight-col">航空公司</div>
+        <div class="flight-col">${window.t('airport.header.flight_id')}</div>
+        <div class="flight-col">${window.t('airport.header.airline')}</div>
         <div class="flight-col">${headerTitle}</div>
-        <div class="flight-col">预定/实际</div>
-        <div class="flight-col">状态</div>
+        <div class="flight-col">${window.t('airport.header.time')}</div>
+        <div class="flight-col">${window.t('airport.header.status')}</div>
     </div>`;
 
     if (!items.length) {
-        container.innerHTML = html + '<div style="text-align:center;padding:20px;color:var(--text-muted)">暂无相关航班信息</div>';
+        container.innerHTML = html + `<div style="text-align:center;padding:20px;color:var(--text-muted)">${window.t('airport.empty')}</div>`;
         return;
     }
 
@@ -221,3 +299,8 @@ export function switchFlightTab(type) {
     document.getElementById(`flight-content-${type}`)?.classList.add('active');
     fetchFlights(type);
 }
+
+window.airportApp = {
+    fetchFlights: fetchFlights,
+    switchFlightTab: switchFlightTab
+};
