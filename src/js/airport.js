@@ -79,7 +79,28 @@ const CITY_NAMES = {
     '원저우': { zh: '温州', ko: '원저우', en: 'Wenzhou' },
     '온주': { zh: '温州', ko: '원저우', en: 'Wenzhou' },
     '마카오': { zh: '澳门', ko: '마카오', en: 'Macau' },
-    '가오슝': { zh: '高雄', ko: '가오슝', en: 'Kaohsiung' }
+    '가오슝': { zh: '高雄', ko: '가오슝', en: 'Kaohsiung' },
+    '선양': { zh: '沈阳', ko: '선양', en: 'Shenyang' },
+    '심양': { zh: '沈阳', ko: '선양', en: 'Shenyang' },
+    '다롄': { zh: '大连', ko: '다롄', en: 'Dalian' },
+    '대련': { zh: '大连', ko: '다롄', en: 'Dalian' },
+    '옌지': { zh: '延吉', ko: '옌지', en: 'Yanji' },
+    '연길': { zh: '延吉', ko: '옌지', en: 'Yanji' },
+    '하얼빈': { zh: '哈尔滨', ko: '하얼빈', en: 'Harbin' },
+    '무단장': { zh: '牡丹江', ko: '무단장', en: 'Mudanjiang' },
+    '목단강': { zh: '牡丹江', ko: '무단장', en: 'Mudanjiang' },
+    '창사': { zh: '长沙', ko: '창사', en: 'Changsha' },
+    '장사': { zh: '长沙', ko: '창사', en: 'Changsha' },
+    '난창': { zh: '南昌', ko: '난창', en: 'Nanchang' },
+    '남창': { zh: '南昌', ko: '난창', en: 'Nanchang' },
+    '스자좡': { zh: '石家庄', ko: '스자좡', en: 'Shijiazhuang' },
+    '석가장': { zh: '石家庄', ko: '스자좡', en: 'Shijiazhuang' },
+    '양저우': { zh: '扬州', ko: '양저우', en: 'Yangzhou' },
+    '양주': { zh: '扬州', ko: '양저우', en: 'Yangzhou' },
+    '옌타이': { zh: '烟台', ko: '옌타이', en: 'Yantai' },
+    '연태': { zh: '烟台', ko: '옌타이', en: 'Yantai' },
+    '웨이하이': { zh: '威海', ko: '웨이하이', en: 'Weihai' },
+    '위해': { zh: '威海', ko: '웨이하이', en: 'Weihai' }
 };
 
 const DOMESTIC_AIRPORTS = new Set(['CJU', 'GMP', 'PUS', 'CJJ', 'TAE', 'KWJ', 'USN', 'KUV', 'WJU', 'HIN', 'RSU', 'KPO', 'MWX', 'YNY']);

@@ -69,35 +69,19 @@
     width: fit-content;
     margin: 0 auto;
     text-align: center;
-    font-size: 5.8rem;
-    font-weight: 1000;
-    letter-spacing: -4px;
+    font-size: 4.5rem;
+    font-weight: 900;
+    letter-spacing: -1px;
+    transform: translateX(-4px); /* 시각적 중앙 정렬 (오른쪽 쏠림 보정) */
     text-transform: uppercase;
     white-space: nowrap;
     line-height: 1;
-    /* 생동감 넘치는 물결 그라데이션 */
-    background: linear-gradient(
-        120deg, 
-        #0f172a 0%, 
-        #1e293b 20%, 
-        #2563eb 40%, 
-        #60a5fa 60%, 
-        #2563eb 80%, 
-        #0f172a 100%
-    );
-    background-size: 300% auto;
+    /* 더 부드럽고 자연스러운 파스텔 블루 그라데이션 */
+    background: linear-gradient(135deg, #7b9ee3 0%, #a7c1f2 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     color: transparent;
-    animation: wavy-motion 6s ease-in-out infinite;
-}
-
-
-@keyframes wavy-motion {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
 }
 
 
@@ -460,19 +444,16 @@
         font-size: 0.9rem;
     }
     .main-logo {
-        font-size: 4.2rem; /* 모바일 크기 추가 상향 (3.8rem -> 4.2rem) */
+        font-size: 4.2rem;
         letter-spacing: -2px;
-    }
-    .main-logo {
-        font-size: 4.2rem; /* 모바일 크기 추가 상향 (3.8rem -> 4.2rem) */
-        letter-spacing: -2px;
+        transform: translateX(-3px); /* 모바일 시각적 중앙 정렬 */
     }
 }
 
 /* ==================== 언어 선택기 ==================== */
 .lang-selector {
     position: absolute;
-    top: 14px;
+    top: 2px;
     right: 14px;
     display: flex;
     align-items: center;
@@ -512,18 +493,18 @@
 }
 
 .lang-btn:hover {
-    background: rgba(37, 99, 235, 0.08);
-    color: #2563eb;
+    background: rgba(132, 182, 244, 0.15);
+    color: #5c8dd4;
 }
 
 .lang-btn.active {
-    background: linear-gradient(135deg, #2563eb, #60a5fa);
+    background: linear-gradient(135deg, #84b6f4, #b0d0ff); /* 부드러운 파스텔 블루 */
     color: white;
-    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+    box-shadow: 0 2px 8px rgba(132, 182, 244, 0.3);
 }
 
 .lang-btn.active:hover {
-    background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+    background: linear-gradient(135deg, #74a6e4, #a0c0ef);
 }
 
 /* 홈 섹션 내 위치 기준점 */
