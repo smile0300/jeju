@@ -100,7 +100,12 @@ const CITY_NAMES = {
     '옌타이': { zh: '烟台', ko: '옌타이', en: 'Yantai' },
     '연태': { zh: '烟台', ko: '옌타이', en: 'Yantai' },
     '웨이하이': { zh: '威海', ko: '웨이하이', en: 'Weihai' },
-    '위해': { zh: '威海', ko: '웨이하이', en: 'Weihai' }
+    '위해': { zh: '威海', ko: '웨이하이', en: 'Weihai' },
+    '타이중': { zh: '台中', ko: '타이중', en: 'Taichung' },
+    '대중': { zh: '台中', ko: '타이중', en: 'Taichung' },
+    '칭취안강': { zh: '清泉岗', ko: '칭취안강', en: 'CCK' },
+    '셴양': { zh: '沈阳', ko: '선양', en: 'Shenyang' },
+    '센양': { zh: '沈阳', ko: '선양', en: 'Shenyang' }
 };
 
 const DOMESTIC_AIRPORTS = new Set(['CJU', 'GMP', 'PUS', 'CJJ', 'TAE', 'KWJ', 'USN', 'KUV', 'WJU', 'HIN', 'RSU', 'KPO', 'MWX', 'YNY']);
