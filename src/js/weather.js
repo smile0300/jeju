@@ -191,33 +191,65 @@ export async function fetchWeatherData(locKey) {
 
     renderWeatherLoading(locKey);
 
-    const { baseDate, baseTime } = formatBaseTime(new Date());
+    const { baseDate, baseTime, ultraNcstDate, ultraNcstTime, ultraFcstDate, ultraFcstTime } = formatBaseTime(new Date());
     const endpoint = 'https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst';
-    const params = {
-        pageNo: 1,
-        numOfRows: 1000,
-        dataType: 'JSON',
-        base_date: baseDate,
-        base_time: baseTime,
-        nx: loc.nx,
-        ny: loc.ny
-    };
+    const ufcstEndpoint = 'https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtFcst';
+    const ncstEndpoint = 'https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst';
+
+    const params = { pageNo: 1, numOfRows: 1000, dataType: 'JSON', base_date: baseDate, base_time: baseTime, nx: loc.nx, ny: loc.ny };
+    const ufcstParams = { pageNo: 1, numOfRows: 60, dataType: 'JSON', base_date: ultraFcstDate, base_time: ultraFcstTime, nx: loc.nx, ny: loc.ny };
+    const ncstParams = { pageNo: 1, numOfRows: 20, dataType: 'JSON', base_date: ultraNcstDate, base_time: ultraNcstTime, nx: loc.nx, ny: loc.ny };
 
     try {
-        const [shortJson, midData, mountainData] = await Promise.all([
+        const [vilageJson, ufcstJson, ncstJson, midData, mountainData] = await Promise.all([
             fetchPublicDataJson(endpoint, params).catch(e => { console.error('[Weather] 단기예보 로드 실패:', e); return null; }),
+            fetchPublicDataJson(ufcstEndpoint, ufcstParams).catch(e => { console.error('[Weather] 초단기예보 로드 실패:', e); return null; }),
+            fetchPublicDataJson(ncstEndpoint, ncstParams).catch(e => { console.error('[Weather] 초단기실황 로드 실패:', e); return null; }),
             fetchMidTermWeather(loc).catch(e => { console.error('[Weather] 중기예보 로드 실패:', e); return null; }),
             (locKey === 'hallasan' && loc.obsid) ? fetchMountainWeather(loc.obsid).catch(e => { console.error('[Weather] 산악기상 로드 실패:', e); return null; }) : Promise.resolve(null)
         ]);
 
-        const items = shortJson?.response?.body?.items?.item;
-        
-        if (!items && !mountainData) {
+        let items = [];
+        const mergedMap = {};
+
+        // 1. 단기예보 처리 (가장 낮은 우선순위)
+        const vilageItems = vilageJson?.response?.body?.items?.item || [];
+        vilageItems.forEach(it => {
+            const key = `${it.fcstDate}${it.fcstTime}_${it.category}`;
+            mergedMap[key] = { ...it, priority: 1 };
+        });
+
+        // 2. 초단기예보 처리 (중간 우선순위)
+        const ufcstItems = ufcstJson?.response?.body?.items?.item || [];
+        ufcstItems.forEach(it => {
+            let cat = it.category;
+            if (cat === 'T1H') cat = 'TMP';
+            if (cat === 'RN1') cat = 'PCP';
+            const key = `${it.fcstDate}${it.fcstTime}_${cat}`;
+            if (!mergedMap[key] || mergedMap[key].priority < 2) {
+                mergedMap[key] = { fcstDate: it.fcstDate, fcstTime: it.fcstTime, category: cat, fcstValue: it.fcstValue, priority: 2 };
+            }
+        });
+
+        // 3. 초단기실황 처리 (가장 높은 우선순위)
+        const ncstItems = ncstJson?.response?.body?.items?.item || [];
+        ncstItems.forEach(it => {
+            let cat = it.category;
+            if (cat === 'T1H') cat = 'TMP';
+            if (cat === 'RN1') cat = 'PCP';
+            // 초단기실황은 fcstDate/fcstTime이 없고 baseDate/baseTime과 obsrValue가 있음
+            const key = `${it.baseDate}${it.baseTime}_${cat}`;
+            mergedMap[key] = { fcstDate: it.baseDate, fcstTime: it.baseTime, category: cat, fcstValue: it.obsrValue, priority: 3 };
+        });
+
+        items = Object.values(mergedMap);
+
+        if (items.length === 0 && !mountainData) {
             console.error(`[Weather] ${locKey} 필수 데이터(단기예보/산악기상) 모두 누락`);
             throw new Error('Required weather data missing');
         }
 
-        parseAndRenderWeather(locKey, items || [], midData, mountainData);
+        parseAndRenderWeather(locKey, items, midData, mountainData);
         fetchAirQuality(locKey).catch(err => console.error(`[AirQuality] ${locKey} 로드 실패:`, err));
 
     } catch (e) {

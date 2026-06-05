@@ -74,7 +74,19 @@ export function formatBaseTime(date) {
 
     const tmFc = `${targetDateForMid.getFullYear()}${String(targetDateForMid.getMonth() + 1).padStart(2, '0')}${String(targetDateForMid.getDate()).padStart(2, '0')}${String(midBase).padStart(2, '0')}00`;
 
-    return { baseDate, baseTime, tmFc };
+    // 3. 초단기실황 (getUltraSrtNcst) 기준 시간 (매시간 40분 발표, 기준시간: 정시)
+    const ncstDateObj = new Date(date);
+    if (kstMin < 40) ncstDateObj.setHours(ncstDateObj.getHours() - 1);
+    const ultraNcstDate = `${ncstDateObj.getFullYear()}${String(ncstDateObj.getMonth() + 1).padStart(2, '0')}${String(ncstDateObj.getDate()).padStart(2, '0')}`;
+    const ultraNcstTime = `${String(ncstDateObj.getHours()).padStart(2, '0')}00`;
+
+    // 4. 초단기예보 (getUltraSrtFcst) 기준 시간 (매시간 45분 발표, 기준시간: 30분)
+    const ufcstDateObj = new Date(date);
+    if (kstMin < 45) ufcstDateObj.setHours(ufcstDateObj.getHours() - 1);
+    const ultraFcstDate = `${ufcstDateObj.getFullYear()}${String(ufcstDateObj.getMonth() + 1).padStart(2, '0')}${String(ufcstDateObj.getDate()).padStart(2, '0')}`;
+    const ultraFcstTime = `${String(ufcstDateObj.getHours()).padStart(2, '0')}30`;
+
+    return { baseDate, baseTime, tmFc, ultraNcstDate, ultraNcstTime, ultraFcstDate, ultraFcstTime };
 }
 
 // 중기예보 날씨 상태(wf) → 이모지/중국어 변환
