@@ -25,8 +25,11 @@ const TRAIL_STATUS_MAP = {
 };
 
 let isFetchingHallasanStatus = false;
-let delayedRetryCount = 0; // Track automatic delayed retries
-const MAX_DELAYED_RETRIES = 2; // Maximum number of automatic delayed retries
+let delayedRetryCount = 0;
+const MAX_DELAYED_RETRIES = 0;
+const CACHE_KEY = 'hallasan_status_cache';
+const CACHE_TTL_MS = 30 * 60 * 1000; // 30분
+let autoRefreshTimer = null;
 
 export async function fetchHallasanStatus(isAutoRetry = false, forceRefresh = false) {
     if (forceRefresh) {
@@ -45,23 +48,46 @@ export async function fetchHallasanStatus(isAutoRetry = false, forceRefresh = fa
         return;
     }
 
-    // Only clear and show loading if it's not a background retry
-    if (!isAutoRetry) {
+    renderHallasanCCTV();
+
+    let cachedData = null;
+    let cacheTime = 0;
+    if (!forceRefresh) {
+        try {
+            const cacheStr = localStorage.getItem(CACHE_KEY);
+            if (cacheStr) {
+                const parsed = JSON.parse(cacheStr);
+                cachedData = parsed.data;
+                cacheTime = parsed.time;
+            }
+        } catch(e) {}
+    }
+
+    const now = Date.now();
+    const isCacheFresh = cachedData && (now - cacheTime < CACHE_TTL_MS);
+
+    if (cachedData) {
+        renderHallasanTrails(cachedData, container, trailsEl);
+    } else if (!isAutoRetry) {
         container.innerHTML = ``;
         trailsEl.innerHTML = `<div class="loading-lost"><p>${window.t('hallasan.loading.official')}</p></div>`;
     }
-    
-    renderHallasanCCTV();
+
+    if (isCacheFresh && !forceRefresh) {
+        isFetchingHallasanStatus = false;
+        setupAutoRefresh();
+        return;
+    }
     
     try {
         const url = `${CONFIG.PROXY_URL}/api/hallasan-status`;
         let response;
-        let retryCount = 2; // Total 3 attempts (initial + 2 retries)
+        let retryCount = 1; // UX 개선: 총 2회 시도 (초기 1회 + 재시도 1회)
 
         while (retryCount >= 0) {
             try {
                 // 한라산 홈페이지 응답 속도에 맞춰 타임아웃 소폭 상향 및 여유 확보
-                response = await fetch(url, { signal: AbortSignal.timeout(20000) }); 
+                response = await fetch(url, { signal: AbortSignal.timeout(10000) }); 
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 break;
             } catch (err) {
@@ -73,6 +99,64 @@ export async function fetchHallasanStatus(isAutoRetry = false, forceRefresh = fa
         }
         
         const statusMapList = await response.json();
+        if (statusMapList.error) throw new Error(statusMapList.error);
+        if (!Array.isArray(statusMapList) || statusMapList.length === 0) throw new Error('Invalid API response format');
+
+        renderHallasanTrails(statusMapList, container, trailsEl);
+        localStorage.setItem(CACHE_KEY, JSON.stringify({ data: statusMapList, time: Date.now() }));
+        delayedRetryCount = 0;
+        setupAutoRefresh();
+
+    } catch (e) {
+        console.warn('한라산 실시간 로드 실패:', e);
+        if (trailsEl) {
+            // 자동 재시도 처리 (UI에 에러를 표시하지 않음)
+            if (delayedRetryCount < MAX_DELAYED_RETRIES) {
+                delayedRetryCount++;
+                const nextRetryDelay = 5; // seconds
+                
+                // 첫 로드 실패 등으로 화면이 비어있는 경우에만 조용히 로딩 상태 유지
+                if (!trailsEl.innerHTML || trailsEl.innerHTML.includes('error-msg')) {
+                    trailsEl.innerHTML = `<div class="loading-lost"><p>${window.t('hallasan.loading.official')}</p></div>`;
+                }
+
+                setTimeout(() => {
+                    fetchHallasanStatus(true);
+                }, nextRetryDelay * 1000);
+                return;
+            }
+
+            // 에러가 났어도 기존 캐시 데이터가 화면에 표시된 상태라면 에러 메시지로 덮어씌우지 않음
+            if (!trailsEl.innerHTML.includes('trail-block')) {
+                const isTimeout = e.name === 'TimeoutError' || e.message.includes('timeout') || e.message.includes('signal');
+                let errorText = isTimeout ? window.t('hallasan.err.delay') : window.t('hallasan.err.failed');
+                
+                trailsEl.innerHTML = `<div class="error-msg" style="grid-column: 1/-1; text-align:center; padding: 20px;">
+                    <p style="color: var(--text-muted); font-size: 0.85rem;">${errorText}</p>
+                    <button onclick="window.hallasanApp.fetchStatus()" style="margin-top:10px; padding: 8px 16px; border-radius: 8px; border:none; background:var(--primary-gradient); color:white; font-weight:700;">${window.t('hallasan.err.reload')}</button>
+                </div>`;
+            }
+        }
+    }
+    isFetchingHallasanStatus = false;
+}
+
+
+
+function setupAutoRefresh() {
+    if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+    autoRefreshTimer = setInterval(() => {
+        const trailsEl = document.getElementById('trails-grid');
+        if (trailsEl) {
+            fetchHallasanStatus(true, true); 
+        } else {
+            clearInterval(autoRefreshTimer);
+            autoRefreshTimer = null;
+        }
+    }, 15 * 60 * 1000); // 15분마다 조용히 새로고침
+}
+
+function renderHallasanTrails(statusMapList, container, trailsEl) {
         const statusMap = {};
 
         // 서버에서 에러 객체를 반환한 경우 처리
@@ -196,40 +280,8 @@ export async function fetchHallasanStatus(isAutoRetry = false, forceRefresh = fa
 
         trailsEl.innerHTML = trailsHtml;
         delayedRetryCount = 0; // Success! Reset auto-retry count
-
-    } catch (e) {
-        console.warn('한라산 실시간 로드 실패:', e);
-        if (trailsEl) {
-            // 자동 재시도 처리 (UI에 에러를 표시하지 않음)
-            if (delayedRetryCount < MAX_DELAYED_RETRIES) {
-                delayedRetryCount++;
-                const nextRetryDelay = 5; // seconds
-                
-                // 첫 로드 실패 등으로 화면이 비어있는 경우에만 조용히 로딩 상태 유지
-                if (!trailsEl.innerHTML || trailsEl.innerHTML.includes('error-msg')) {
-                    trailsEl.innerHTML = `<div class="loading-lost"><p>${window.t('hallasan.loading.official')}</p></div>`;
-                }
-
-                setTimeout(() => {
-                    fetchHallasanStatus(true);
-                }, nextRetryDelay * 1000);
-                return;
-            }
-
-            // 모든 재시도가 실패한 경우에만 최종 에러 메시지 표시
-            const isTimeout = e.name === 'TimeoutError' || e.message.includes('timeout') || e.message.includes('signal');
-            let errorText = isTimeout ? window.t('hallasan.err.delay') : window.t('hallasan.err.failed');
-            
-            trailsEl.innerHTML = `<div class="error-msg" style="grid-column: 1/-1; text-align:center; padding: 20px;">
-                <p style="color: var(--text-muted); font-size: 0.85rem;">${errorText}</p>
-                <button onclick="window.hallasanApp.fetchStatus()" style="margin-top:10px; padding: 8px 16px; border-radius: 8px; border:none; background:var(--primary-gradient); color:white; font-weight:700;">${window.t('hallasan.err.reload')}</button>
-            </div>`;
-        }
-    }
-    isFetchingHallasanStatus = false;
 }
-
-const HALLASAN_CCTV = [
+\nconst HALLASAN_CCTV = [
     { id: 'witseoreum', nameKo: '윗세오름', nameCn: '威势岳', url: 'https://hallacctv.kr/live/cctv03.stream_360p/playlist.m3u8' },
     { id: 'baengnokdam', nameKo: '백록담', nameCn: '白鹿潭', url: 'https://hallacctv.kr/live/cctv01.stream_360p/playlist.m3u8' },
     { id: 'wanggwalleung', nameKo: '왕관릉', nameCn: '王冠陵', url: 'https://hallacctv.kr/live/cctv02.stream_360p/playlist.m3u8' },
