@@ -754,10 +754,10 @@
 .flight-row.selected .flight-col { font-weight: 800; }
 .flight-row.flight-header { background: var(--bg-card-hover); font-weight: 800; color: var(--text-primary); border-bottom: 2px solid var(--border-light); cursor: default; }
 .flight-col { text-align: center; min-width: 0; display: flex; align-items: center; justify-content: center; font-weight: 600; padding: 0 2px; }
-.flight-col:nth-child(1) { flex: 0 0 16%; white-space: nowrap; } /* 航班号 */
-.flight-col:nth-child(2) { flex: 0 0 29%; word-break: break-word; white-space: normal; line-height: 1.1; } /* 航空公司 */
-.flight-col:nth-child(3) { flex: 0 0 15%; word-break: break-word; white-space: normal; line-height: 1.1; } /* 目的地/出发地 */
-.flight-col:nth-child(4) { flex: 0 0 20%; white-space: nowrap; } /* 预定/实际 */
+.flight-col:nth-child(1) { flex: 0 0 14%; white-space: nowrap; } /* 航班号 */
+.flight-col:nth-child(2) { flex: 0 0 26%; word-break: break-word; white-space: normal; line-height: 1.1; } /* 航空公司 */
+.flight-col:nth-child(3) { flex: 0 0 18%; word-break: break-word; white-space: normal; line-height: 1.1; } /* 目的地/出发地 */
+.flight-col:nth-child(4) { flex: 0 0 22%; white-space: nowrap; } /* 预定/实际 */
 .flight-col:nth-child(5) { flex: 0 0 20%; word-break: keep-all; } /* 状态 */
 
 /* ==================== Festival ==================== */
