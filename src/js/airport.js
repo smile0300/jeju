@@ -288,7 +288,7 @@ export function renderFlightList(container, items, type) {
         const estTimeRaw = (f.est_time || '').toString();
         const schedStr = schedTimeRaw.length >= 4 ? `${schedTimeRaw.slice(0, 2)}:${schedTimeRaw.slice(2, 4)}` : '-';
         const estStr = estTimeRaw.length >= 4 && estTimeRaw !== schedTimeRaw
-            ? `<br><small style="color:#f59e0b">→ ${estTimeRaw.slice(0, 2)}:${estTimeRaw.slice(2, 4)}</small>` : '';
+            ? `<span style="color:#f59e0b; font-size:0.7rem; font-weight:700;">→ ${estTimeRaw.slice(0, 2)}:${estTimeRaw.slice(2, 4)}</span>` : '';
 
         let rawCity = type === 'arrive' ? (f.dep_airport || '-') : (f.arr_airport || '-');
         let city = getCityName(rawCity).replace(/\//g, '/<br>');
@@ -299,7 +299,10 @@ export function renderFlightList(container, items, type) {
             <div class="flight-col">${f.flight_id}</div>
             <div class="flight-col">${airlineName}</div>
             <div class="flight-col" style="text-align:center;">${city}</div>
-            <div class="flight-col">${schedStr}${estStr}</div>
+            <div class="flight-col" style="flex-direction: column; line-height: 1.2;">
+                <span>${schedStr}</span>
+                ${estStr}
+            </div>
             <div class="flight-col">${statusSpan}</div>
         </div>`;
     }).join('');
