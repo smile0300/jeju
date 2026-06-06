@@ -546,7 +546,7 @@ window.handleImageSearch = async function(event) {
                 cachedLostItems = matchedItems;
 
                 if (countDisplay) {
-                    countDisplay.innerHTML = `AI 검색 완료: 추출된 키워드 [${labels.join(', ')}] 기반으로 ${matchedItems.length}개의 유사 항목을 찾았습니다.`;
+                    countDisplay.innerHTML = `AI 검색 완료: ${matchedItems.length}개의 유사 항목을 찾았습니다.`;
                 }
                 
                 if (matchedItems.length === 0) {
