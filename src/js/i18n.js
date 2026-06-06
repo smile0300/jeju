@@ -172,7 +172,7 @@ const TRANSLATIONS = {
 
         // ── 공항 ──
         'airport.err.failed': 'Error: API Request Failed (API请求失败)',
-        'airport.title':    '济州国际机场',
+        'airport.title':    '济州航班',
         'airport.ticket':   '中国 ↔ 济州 机票查询',
         'airport.arrive':   '到达航班',
         'airport.depart':   '出发航班',
@@ -447,7 +447,7 @@ const TRANSLATIONS = {
         'festival.status.upcoming': '예정',
 
         'airport.err.failed': '공항 API 호출에 실패했습니다.',
-        'airport.title':    '제주국제공항',
+        'airport.title':    '제주 항공편',
         'airport.ticket':   '중국 ↔ 제주 항공권 조회',
         'airport.arrive':   '도착편',
         'airport.depart':   '출발편',
@@ -712,7 +712,7 @@ const TRANSLATIONS = {
         'festival.status.upcoming': 'Upcoming',
 
         'airport.err.failed': 'Error: API Request Failed',
-        'airport.title':    'Jeju Int\'l Airport',
+        'airport.title':    'Jeju Flights',
         'airport.ticket':   'China ↔ Jeju Flight Search',
         'airport.arrive':   'Arrivals',
         'airport.depart':   'Departures',
