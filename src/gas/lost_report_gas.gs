@@ -14,54 +14,16 @@ function doPost(e) {
   try {
     var data = JSON.parse(e.postData.contents);
     
-    // -- [NEW] 이미지 검색 엔드포인트 처리 --
+    // -- [NEW] 이미지 검색 엔드포인트 처리 (프론트엔드 키워드 매칭용) --
     if (data.type === 'search_by_image') {
-      var ss = SpreadsheetApp.openById(SHEET_ID);
-      var sheet = ss.getSheetByName('LostReport');
-      if (!sheet) {
-        return ContentService.createTextOutput(JSON.stringify({ "result": "error", "message": "No data found" })).setMimeType(ContentService.MimeType.JSON);
-      }
-      
       if (!data.photo || !data.photo.includes('base64,')) {
         return ContentService.createTextOutput(JSON.stringify({ "result": "error", "message": "No photo provided" })).setMimeType(ContentService.MimeType.JSON);
       }
 
+      // Vision API로 한글 태그 추출
       var searchLabels = extractImageLabels(data.photo);
-      var rows = sheet.getDataRange().getValues();
-      var headers = rows[0];
-      var labelColIndex = headers.indexOf('Labels');
       
-      if (labelColIndex === -1 || searchLabels.length === 0) {
-        return ContentService.createTextOutput(JSON.stringify({ "result": "success", "matches": [] })).setMimeType(ContentService.MimeType.JSON);
-      }
-      
-      var matches = [];
-      for (var i = 1; i < rows.length; i++) {
-        var row = rows[i];
-        var itemLabelsStr = row[labelColIndex];
-        if (itemLabelsStr) {
-          var itemLabels = itemLabelsStr.split(',');
-          var matchCount = 0;
-          for (var j = 0; j < searchLabels.length; j++) {
-            if (itemLabels.includes(searchLabels[j])) {
-              matchCount++;
-            }
-          }
-          if (matchCount > 0) {
-            matches.push({
-              timestamp: row[0],
-              location: row[1],
-              itemName: row[4],
-              photoUrl: row[6],
-              matchScore: matchCount,
-              labels: itemLabelsStr
-            });
-          }
-        }
-      }
-      
-      matches.sort(function(a, b) { return b.matchScore - a.matchScore; });
-      return ContentService.createTextOutput(JSON.stringify({ "result": "success", "matches": matches.slice(0, 10) })).setMimeType(ContentService.MimeType.JSON);
+      return ContentService.createTextOutput(JSON.stringify({ "result": "success", "labels": searchLabels })).setMimeType(ContentService.MimeType.JSON);
     }
     // -- [END] 이미지 검색 엔드포인트 처리 --
 
@@ -173,7 +135,10 @@ function extractImageLabels(base64Data) {
               "type": "LABEL_DETECTION",
               "maxResults": 10
             }
-          ]
+          ],
+          "imageContext": {
+            "languageHints": ["ko"]
+          }
         }
       ]
     };

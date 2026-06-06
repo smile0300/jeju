@@ -368,7 +368,6 @@ export async function submitLostReport() {
     }
 }
 
-// AI 이미지 검색 핸들러 추가
 window.handleImageSearch = async function(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -388,7 +387,7 @@ window.handleImageSearch = async function(event) {
     if (tableContainer) tableContainer.classList.remove('active');
     if (grid) grid.classList.add('active');
     
-    if (countDisplay) countDisplay.innerHTML = "AI가 비슷한 물건을 찾고 있습니다...";
+    if (countDisplay) countDisplay.innerHTML = "AI가 이미지를 분석하고 경찰청 데이터를 검색하고 있습니다... (약 5~10초 소요)";
     if (grid) grid.innerHTML = `<div class="loading-lost"><p>이미지 분석 및 검색 중...</p></div>`;
 
     try {
@@ -401,6 +400,7 @@ window.handleImageSearch = async function(event) {
                 photo: base64Data
             };
 
+            // 1. AI 태그 추출 (GAS)
             const res = await fetch(`${CONFIG.PROXY_URL}/api/lost-report`, {
                 method: 'POST', 
                 headers: { 'Content-Type': 'application/json' },
@@ -411,29 +411,135 @@ window.handleImageSearch = async function(event) {
             const result = await res.json();
 
             if (result.result === 'success') {
-                const matches = result.matches || [];
+                const labels = result.labels || [];
+                if (labels.length === 0) {
+                     if (grid) grid.innerHTML = `<div class="loading-lost" style="padding:40px; text-align:center;">이미지에서 특징을 찾지 못했습니다. 다른 사진으로 시도해주세요.</div>`;
+                     return;
+                }
+
+                // 2. 경찰청 데이터 최근 3일치 가져오기
+                const daysToFetch = 3;
+                const allItems = [];
+                const now = new Date();
+                const kstTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
+                
+                for (let i = 0; i < daysToFetch; i++) {
+                    const d = new Date(kstTime);
+                    d.setDate(d.getDate() - i);
+                    const yyyymmdd = d.toISOString().split('T')[0].replace(/-/g, '');
+                    
+                    const commonParams = [`numOfRows=500`, `pageNo=1`, `N_FD_LCT_CD=LCP000`, `START_YMD=${yyyymmdd}`, `END_YMD=${yyyymmdd}`];
+                    const polEndpoint = `http://apis.data.go.kr/1320000/LosfundInfoInqireService/getLosfundInfoAccToClAreaPd`;
+                    const portalEndpoint = `http://apis.data.go.kr/1320000/LosPtfundInfoInqireService/getPtLosfundInfoAccToClAreaPd`;
+
+                    const polUrl = `${CONFIG.PROXY_URL}/api/public-data?endpoint=${encodeURIComponent(polEndpoint)}&${commonParams.join('&')}`;
+                    const portalUrl = `${CONFIG.PROXY_URL}/api/public-data?endpoint=${encodeURIComponent(portalEndpoint)}&${commonParams.join('&')}`;
+                    
+                    const fetchResults = async (apiUrl) => {
+                        try {
+                            const resAPI = await fetch(apiUrl);
+                            if (!resAPI.ok) return [];
+                            const text = await resAPI.text();
+                            if (text.trim().startsWith('{')) {
+                                const json = JSON.parse(text);
+                                const rawItems = json.response?.body?.items?.item || json.response?.body?.items || json.body?.items?.item || json.body?.items || json.items?.item || json.items || [];
+                                const items = Array.isArray(rawItems) ? rawItems : [rawItems];
+                                return items.map(item => {
+                                    const rawCategory = item.prdtClNm || '';
+                                    const categoryClean = rawCategory.split(' > ')[0] || '기타';
+                                    const catKey = LOST_CATEGORY_KEY_MAP[categoryClean] || 'cat.other';
+                                    return {
+                                        id: item.atcId, name: item.fdPrdtNm, place: item.depPlace, date: item.fdYmd,
+                                        category: window.t ? window.t(catKey) : categoryClean,
+                                        img: item.fdFilePathImg, lct: item.fdFndPlace || item.lctNm || item.depPlace || '정보 없음',
+                                        status: item.csteState || '보관',
+                                        desc: item.uniqNm || '',
+                                        tel: item.tel || ''
+                                    };
+                                });
+                            }
+                            const xmlDoc = new DOMParser().parseFromString(text, "text/xml");
+                            return Array.from(xmlDoc.querySelectorAll('item')).map(node => {
+                                const getTag = (tag) => node.querySelector(tag)?.textContent || '';
+                                const rawCategory = getTag('prdtClNm') || '';
+                                const categoryClean = rawCategory.split(' > ')[0] || '기타';
+                                const catKey = LOST_CATEGORY_KEY_MAP[categoryClean] || 'cat.other';
+                                return {
+                                    id: getTag('atcId'), name: getTag('fdPrdtNm'), place: getTag('depPlace'), date: getTag('fdYmd'),
+                                    category: window.t ? window.t(catKey) : categoryClean,
+                                    img: getTag('fdFilePathImg'), lct: getTag('fdFndPlace') || getTag('lctNm') || getTag('depPlace') || '정보 없음',
+                                    status: getTag('csteState') || '보관',
+                                    desc: getTag('uniqNm') || '',
+                                    tel: getTag('tel') || ''
+                                };
+                            });
+                        } catch(e) { return []; }
+                    };
+
+                    const [polItems, portalItems] = await Promise.all([fetchResults(polUrl), fetchResults(portalUrl)]);
+                    allItems.push(...polItems, ...portalItems);
+                }
+
+                // 중복 제거 (id 기준)
+                const uniqueItemsMap = new Map();
+                allItems.forEach(item => { if (item.id) uniqueItemsMap.set(item.id, item); });
+                const uniqueItems = Array.from(uniqueItemsMap.values());
+
+                // 3. 태그 기반 스코어링
+                const matchedItems = [];
+                const searchKeywords = labels.map(l => l.toLowerCase());
+                
+                uniqueItems.forEach(item => {
+                    let matchScore = 0;
+                    const targetText = `${item.name} ${item.category} ${item.desc} ${item.lct}`.toLowerCase();
+                    
+                    searchKeywords.forEach(keyword => {
+                        if (targetText.includes(keyword)) {
+                            matchScore++;
+                        }
+                    });
+
+                    if (matchScore > 0) {
+                        item.matchScore = matchScore;
+                        matchedItems.push(item);
+                    }
+                });
+
+                // 점수 내림차순 정렬
+                matchedItems.sort((a, b) => b.matchScore - a.matchScore);
+                
+                // 글로벌 캐시 업데이트 (상세 모달용)
+                cachedLostItems = matchedItems;
+
                 if (countDisplay) {
-                    countDisplay.innerHTML = `AI 검색 완료: 비슷한 물건 ${matches.length}개를 찾았습니다. (등록된 데이터 기준)`;
+                    countDisplay.innerHTML = `AI 검색 완료: 추출된 키워드 [${labels.join(', ')}] 기반으로 ${matchedItems.length}개의 유사 항목을 찾았습니다.`;
                 }
                 
-                if (matches.length === 0) {
-                     if (grid) grid.innerHTML = `<div class="loading-lost" style="padding:40px; text-align:center;">비슷한 물건을 찾지 못했습니다.<br>참고: 시스템에 등록된 사진과 태그 데이터가 있어야 검색이 가능합니다.</div>`;
+                if (matchedItems.length === 0) {
+                     if (grid) grid.innerHTML = `<div class="loading-lost" style="padding:40px; text-align:center;">최근 3일간 접수된 내역 중 비슷한 물건을 찾지 못했습니다.</div>`;
                      return;
                 }
                 
+                // 렌더링
+                const noImgText = window.t ? window.t('lost.no_image') : 'No Image';
+                const noImgSvg = `data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22300%22%20height%3D%22300%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20300%20300%22%3E%3Crect%20width%3D%22300%22%20height%3D%22300%22%20fill%3D%22%23eee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-size%3D%2220%22%20text-anchor%3D%22middle%22%20alignment-baseline%3D%22middle%22%20fill%3D%22%23aaa%22%3E${encodeURIComponent(noImgText)}%3C%2Ftext%3E%3C%2Fsvg%3E`;
+
                 if (grid) {
-                    grid.innerHTML = matches.map((item) => `
-                    <div class="lost-card gallery-item" style="padding: 10px; border: 2px solid var(--color-orange); border-radius: 12px; cursor: default;">
-                        <div class="lost-img-box" style="width: 100%; height: 180px; margin: 0; position: relative;">
-                            <img src="${item.photoUrl}" alt="${item.itemName}" loading="lazy" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
-                            <div class="lost-category-badge-overlay" style="background: var(--color-orange); top: 8px; left: 8px; border-radius: 4px; padding: 4px 8px; font-weight: bold;">매칭 태그 ${item.matchScore}개</div>
-                        </div>
-                        <div style="margin-top: 12px; padding: 0 4px;">
-                            <h4 style="margin:0 0 6px 0; font-size: 15px; color: #333;">${item.itemName}</h4>
-                            <p style="margin:0 0 4px 0; font-size: 13px; color: #666;"><i class="ph-duotone ph-map-pin"></i> ${item.location}</p>
-                            <p style="margin:0; font-size: 12px; color: #999;"><i class="ph-duotone ph-calendar"></i> ${new Date(item.timestamp).toLocaleDateString()}</p>
-                        </div>
-                    </div>`).join('');
+                    grid.innerHTML = matchedItems.map((item, index) => {
+                        const imgSrc = (item.img && !item.img.includes('img02_no_img.gif')) ? item.img : noImgSvg;
+                        return `
+                        <div class="lost-card gallery-item" onclick="openLostDetailModalByIndex(${index})" style="padding: 10px; border: 2px solid var(--color-orange); border-radius: 12px; cursor: pointer;">
+                            <div class="lost-img-box" style="width: 100%; height: 180px; margin: 0; position: relative;">
+                                <img src="${imgSrc}" alt="${item.name}" loading="lazy" onerror="this.src='${noImgSvg}'" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                                <div class="lost-category-badge-overlay" style="background: var(--color-orange); top: 8px; left: 8px; border-radius: 4px; padding: 4px 8px; font-weight: bold;">매칭점수 ${item.matchScore}</div>
+                            </div>
+                            <div style="margin-top: 12px; padding: 0 4px;">
+                                <h4 style="margin:0 0 6px 0; font-size: 15px; color: #333;">${item.name}</h4>
+                                <p style="margin:0 0 4px 0; font-size: 13px; color: #666;"><i class="ph-duotone ph-map-pin"></i> ${item.lct || item.place}</p>
+                                <p style="margin:0; font-size: 12px; color: #999;"><i class="ph-duotone ph-calendar"></i> ${item.date}</p>
+                            </div>
+                        </div>`
+                    }).join('');
                 }
             } else {
                 throw new Error(result.message || 'Server error');

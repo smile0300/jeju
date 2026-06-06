@@ -60,8 +60,8 @@
                     <button class="lost-report-btn btn btn-outline" onclick="openLostReportModal()" data-i18n="lost.report.btn" style="flex: 1;">
                         <i class="ph-duotone ph-pencil-simple color-course"></i> 找不到我的物品？在此登记报失
                     </button>
-                    <button class="btn btn-outline" disabled style="flex: 1; border-color: #ccc; color: #999; cursor: not-allowed; background: #f9f9f9;" title="API 연동 준비 중입니다.">
-                        <i class="ph-duotone ph-camera" style="color: #999;"></i> <span data-i18n="lost.search.image">사진으로 물건찾기</span> <span style="font-size: 0.8em; margin-left: 4px;">(준비중)</span>
+                    <button class="btn btn-outline" onclick="document.getElementById('imageSearchInput').click()" style="flex: 1; border-color: var(--color-orange); color: var(--color-orange);">
+                        <i class="ph-duotone ph-camera color-orange"></i> <span data-i18n="lost.search.image">사진으로 물건찾기</span>
                     </button>
                     <input type="file" id="imageSearchInput" accept="image/*" style="display: none;" onchange="handleImageSearch(event)">
                 </div>
