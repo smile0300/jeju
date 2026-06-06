@@ -281,7 +281,7 @@ function renderHallasanTrails(statusMapList, container, trailsEl) {
         trailsEl.innerHTML = trailsHtml;
         delayedRetryCount = 0; // Success! Reset auto-retry count
 }
-\nconst HALLASAN_CCTV = [
+const HALLASAN_CCTV = [
     { id: 'witseoreum', nameKo: '윗세오름', nameCn: '威势岳', url: 'https://hallacctv.kr/live/cctv03.stream_360p/playlist.m3u8' },
     { id: 'baengnokdam', nameKo: '백록담', nameCn: '白鹿潭', url: 'https://hallacctv.kr/live/cctv01.stream_360p/playlist.m3u8' },
     { id: 'wanggwalleung', nameKo: '왕관릉', nameCn: '王冠陵', url: 'https://hallacctv.kr/live/cctv02.stream_360p/playlist.m3u8' },
