@@ -298,11 +298,19 @@ export function renderFestivalItems(container, items) {
             }
         }
         const date = rawDate; // Keep original for logic
-        // Dynamically calculate link based on the selected month
-        const yearParts = currentFestivalMonth.split('-');
-        const yearStr = yearParts[0] || '2026';
-        const monthStr = yearParts[1] || '04';
-        const link = `https://visitjeju.net/cn/festival/list#p1&year=${yearStr}&month=${monthStr}&state=all`;
+        let link = item.link;
+        if (link) {
+            let langPath = 'kr';
+            if (lang === 'zh') langPath = 'cn';
+            else if (lang === 'en') langPath = 'en';
+            link = link.replace('/kr/', `/${langPath}/`);
+        } else {
+            const yearParts = currentFestivalMonth.split('-');
+            const yearStr = yearParts[0] || '2026';
+            const monthStr = yearParts[1] || '04';
+            const langPath = lang === 'zh' ? 'cn' : (lang === 'en' ? 'en' : 'kr');
+            link = `https://visitjeju.net/${langPath}/festival/list#p1&year=${yearStr}&month=${monthStr}&state=all`;
+        }
         
         let statusText = window.t('festival.status.ing');
         let statusClass = 'ing';
