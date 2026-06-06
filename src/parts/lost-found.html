@@ -55,11 +55,15 @@
                     </div>
                 </div>
 
-                <!-- 분실물 신고 버튼 -->
-                <div style="margin-bottom: 25px;">
-                    <button class="lost-report-btn btn btn-outline" onclick="openLostReportModal()" data-i18n="lost.report.btn">
+                <!-- 분실물 신고 및 이미지 검색 버튼 -->
+                <div style="margin-bottom: 25px; display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="lost-report-btn btn btn-outline" onclick="openLostReportModal()" data-i18n="lost.report.btn" style="flex: 1;">
                         <i class="ph-duotone ph-pencil-simple color-course"></i> 找不到我的物品？在此登记报失
                     </button>
+                    <button class="btn btn-outline" onclick="document.getElementById('imageSearchInput').click()" style="flex: 1; border-color: var(--color-orange); color: var(--color-orange);">
+                        <i class="ph-duotone ph-camera color-orange"></i> <span data-i18n="lost.search.image">사진으로 물건찾기</span>
+                    </button>
+                    <input type="file" id="imageSearchInput" accept="image/*" style="display: none;" onchange="handleImageSearch(event)">
                 </div>
                 <div id="lost-result-count" class="lost-result-count" data-i18n="lost.searching">正在查询...</div>
                 <div class="view-toggle-container">

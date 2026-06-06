@@ -8,11 +8,63 @@
 
 var SHEET_ID = '1M5dzVG2_iWtVkL-hlYSWaS-Sjw_3z0PwAkmBn_G1XAA';
 var FOLDER_NAME = 'Jeju_Lost_Photos'; // 이미지가 저장될 드라이브 폴더 이름
+var VISION_API_KEY = 'YOUR_API_KEY_HERE'; // TODO: 구글 클라우드 콘솔에서 발급받은 Vision API 키를 여기에 붙여넣으세요.
 
 function doPost(e) {
   try {
     var data = JSON.parse(e.postData.contents);
     
+    // -- [NEW] 이미지 검색 엔드포인트 처리 --
+    if (data.type === 'search_by_image') {
+      var ss = SpreadsheetApp.openById(SHEET_ID);
+      var sheet = ss.getSheetByName('LostReport');
+      if (!sheet) {
+        return ContentService.createTextOutput(JSON.stringify({ "result": "error", "message": "No data found" })).setMimeType(ContentService.MimeType.JSON);
+      }
+      
+      if (!data.photo || !data.photo.includes('base64,')) {
+        return ContentService.createTextOutput(JSON.stringify({ "result": "error", "message": "No photo provided" })).setMimeType(ContentService.MimeType.JSON);
+      }
+
+      var searchLabels = extractImageLabels(data.photo);
+      var rows = sheet.getDataRange().getValues();
+      var headers = rows[0];
+      var labelColIndex = headers.indexOf('Labels');
+      
+      if (labelColIndex === -1 || searchLabels.length === 0) {
+        return ContentService.createTextOutput(JSON.stringify({ "result": "success", "matches": [] })).setMimeType(ContentService.MimeType.JSON);
+      }
+      
+      var matches = [];
+      for (var i = 1; i < rows.length; i++) {
+        var row = rows[i];
+        var itemLabelsStr = row[labelColIndex];
+        if (itemLabelsStr) {
+          var itemLabels = itemLabelsStr.split(',');
+          var matchCount = 0;
+          for (var j = 0; j < searchLabels.length; j++) {
+            if (itemLabels.includes(searchLabels[j])) {
+              matchCount++;
+            }
+          }
+          if (matchCount > 0) {
+            matches.push({
+              timestamp: row[0],
+              location: row[1],
+              itemName: row[4],
+              photoUrl: row[6],
+              matchScore: matchCount,
+              labels: itemLabelsStr
+            });
+          }
+        }
+      }
+      
+      matches.sort(function(a, b) { return b.matchScore - a.matchScore; });
+      return ContentService.createTextOutput(JSON.stringify({ "result": "success", "matches": matches.slice(0, 10) })).setMimeType(ContentService.MimeType.JSON);
+    }
+    // -- [END] 이미지 검색 엔드포인트 처리 --
+
     if (data.type === 'lost_report' || data.type === 'feature') {
       var ss = SpreadsheetApp.openById(SHEET_ID);
       var sheetName = (data.type === 'lost_report') ? 'LostReport' : 'FeatureRequest';
@@ -21,7 +73,7 @@ function doPost(e) {
       if (!sheet) {
         sheet = ss.insertSheet(sheetName);
         if (data.type === 'lost_report') {
-          sheet.appendRow(['Timestamp', 'Location', 'Date', 'Time', 'ItemName', 'Specifics', 'PhotoURL', 'WechatId', 'UserAgent']);
+          sheet.appendRow(['Timestamp', 'Location', 'Date', 'Time', 'ItemName', 'Specifics', 'PhotoURL', 'WechatId', 'UserAgent', 'Labels']);
         } else {
           sheet.appendRow(['Timestamp', 'Feature', 'Contact', 'UserAgent']);
         }
@@ -33,8 +85,12 @@ function doPost(e) {
       if (data.type === 'lost_report') {
         // 1. 이미지 처리 (Base64 -> Google Drive File)
         var photoUrl = "No Photo";
+        var labelsStr = "";
         if (data.photo && data.photo.includes('base64,')) {
           photoUrl = saveBase64ImageToDrive(data.photo, data.itemName + "_" + data.wechatId);
+          // Vision API로 이미지 특징 추출
+          var labels = extractImageLabels(data.photo);
+          labelsStr = labels.join(',');
         }
         
         resultRow = [
@@ -46,7 +102,8 @@ function doPost(e) {
           data.specifics,
           photoUrl,
           data.wechatId,
-          data.userAgent
+          data.userAgent,
+          labelsStr
         ];
       } else if (data.type === 'feature') {
          resultRow = [
@@ -92,5 +149,53 @@ function saveBase64ImageToDrive(base64Data, fileNamePrefix) {
     return file.getUrl();
   } catch (e) {
     return "Error saving photo: " + e.toString();
+  }
+}
+
+/**
+ * Google Cloud Vision API를 호출하여 이미지의 Label을 추출함
+ */
+function extractImageLabels(base64Data) {
+  if (VISION_API_KEY === 'YOUR_API_KEY_HERE' || !VISION_API_KEY) return [];
+  
+  try {
+    var rawData = base64Data.split('base64,')[1];
+    var url = 'https://vision.googleapis.com/v1/images:annotate?key=' + VISION_API_KEY;
+    
+    var payload = {
+      "requests": [
+        {
+          "image": {
+            "content": rawData
+          },
+          "features": [
+            {
+              "type": "LABEL_DETECTION",
+              "maxResults": 10
+            }
+          ]
+        }
+      ]
+    };
+    
+    var options = {
+      "method": "post",
+      "contentType": "application/json",
+      "payload": JSON.stringify(payload),
+      "muteHttpExceptions": true
+    };
+    
+    var response = UrlFetchApp.fetch(url, options);
+    var json = JSON.parse(response.getContentText());
+    
+    var labels = [];
+    if (json.responses && json.responses[0] && json.responses[0].labelAnnotations) {
+      for (var i = 0; i < json.responses[0].labelAnnotations.length; i++) {
+        labels.push(json.responses[0].labelAnnotations[i].description);
+      }
+    }
+    return labels;
+  } catch (e) {
+    return [];
   }
 }

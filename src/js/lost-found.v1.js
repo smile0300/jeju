@@ -367,3 +367,82 @@ export async function submitLostReport() {
         if (submitBtn) submitBtn.disabled = false;
     }
 }
+
+// AI 이미지 검색 핸들러 추가
+window.handleImageSearch = async function(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    event.target.value = ''; // Reset input
+
+    if (file.size > 5 * 1024 * 1024) {
+        alert(window.t('lost.report.size_err') || "이미지 크기는 5MB 이하여야 합니다.");
+        return;
+    }
+
+    const grid = document.getElementById('lost-goods-grid');
+    const tableContainer = document.getElementById('lost-goods-table-container');
+    const countDisplay = document.getElementById('lost-result-count');
+    
+    // 테이블 뷰 숨기고 그리드 뷰 활성화
+    if (tableContainer) tableContainer.classList.remove('active');
+    if (grid) grid.classList.add('active');
+    
+    if (countDisplay) countDisplay.innerHTML = "AI가 비슷한 물건을 찾고 있습니다...";
+    if (grid) grid.innerHTML = `<div class="loading-lost"><p>이미지 분석 및 검색 중...</p></div>`;
+
+    try {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const base64Data = e.target.result;
+            
+            const data = {
+                type: 'search_by_image',
+                photo: base64Data
+            };
+
+            const res = await fetch(`${CONFIG.PROXY_URL}/api/lost-report`, {
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (!res.ok) throw new Error('Network error');
+            const result = await res.json();
+
+            if (result.result === 'success') {
+                const matches = result.matches || [];
+                if (countDisplay) {
+                    countDisplay.innerHTML = `AI 검색 완료: 비슷한 물건 ${matches.length}개를 찾았습니다. (등록된 데이터 기준)`;
+                }
+                
+                if (matches.length === 0) {
+                     if (grid) grid.innerHTML = `<div class="loading-lost" style="padding:40px; text-align:center;">비슷한 물건을 찾지 못했습니다.<br>참고: 시스템에 등록된 사진과 태그 데이터가 있어야 검색이 가능합니다.</div>`;
+                     return;
+                }
+                
+                if (grid) {
+                    grid.innerHTML = matches.map((item) => `
+                    <div class="lost-card gallery-item" style="padding: 10px; border: 2px solid var(--color-orange); border-radius: 12px; cursor: default;">
+                        <div class="lost-img-box" style="width: 100%; height: 180px; margin: 0; position: relative;">
+                            <img src="${item.photoUrl}" alt="${item.itemName}" loading="lazy" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                            <div class="lost-category-badge-overlay" style="background: var(--color-orange); top: 8px; left: 8px; border-radius: 4px; padding: 4px 8px; font-weight: bold;">매칭 태그 ${item.matchScore}개</div>
+                        </div>
+                        <div style="margin-top: 12px; padding: 0 4px;">
+                            <h4 style="margin:0 0 6px 0; font-size: 15px; color: #333;">${item.itemName}</h4>
+                            <p style="margin:0 0 4px 0; font-size: 13px; color: #666;"><i class="ph-duotone ph-map-pin"></i> ${item.location}</p>
+                            <p style="margin:0; font-size: 12px; color: #999;"><i class="ph-duotone ph-calendar"></i> ${new Date(item.timestamp).toLocaleDateString()}</p>
+                        </div>
+                    </div>`).join('');
+                }
+            } else {
+                throw new Error(result.message || 'Server error');
+            }
+        };
+        reader.readAsDataURL(file);
+    } catch (e) {
+        console.error('Image Search Error:', e);
+        if (countDisplay) countDisplay.innerHTML = "검색 중 오류가 발생했습니다.";
+        if (grid) grid.innerHTML = `<div class="loading-lost">오류 발생: ${e.message}</div>`;
+    }
+};
