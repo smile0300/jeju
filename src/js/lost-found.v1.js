@@ -378,6 +378,13 @@ window.handleImageSearch = async function(event) {
         alert(window.t('lost.report.size_err') || "이미지 크기는 5MB 이하여야 합니다.");
         return;
     }
+    
+    // 아이폰 HEIC/HEIF 포맷 차단 (Vision API 미지원)
+    const fileExt = file.name.toLowerCase().split('.').pop();
+    if (file.type === 'image/heic' || file.type === 'image/heif' || fileExt === 'heic' || fileExt === 'heif') {
+        alert("아이폰 고효율(HEIC) 사진은 지원하지 않습니다.\n갤러리에서 화면을 캡처한 뒤, 캡처본(JPEG/PNG)으로 올려주세요!");
+        return;
+    }
 
     const grid = document.getElementById('lost-goods-grid');
     const tableContainer = document.getElementById('lost-goods-table-container');
@@ -485,9 +492,36 @@ window.handleImageSearch = async function(event) {
                 allItems.forEach(item => { if (item.id) uniqueItemsMap.set(item.id, item); });
                 const uniqueItems = Array.from(uniqueItemsMap.values());
 
+                // 영문 AI 태그 -> 한글 매칭용 사전
+                const VISION_LABEL_MAP = {
+                    "electronic device": "전자기기 스마트폰", "gadget": "전자기기", "mobile phone": "스마트폰 핸드폰 휴대폰",
+                    "smartphone": "스마트폰 핸드폰 휴대폰", "iphone": "스마트폰 아이폰", "telephone": "전화기 스마트폰",
+                    "wallet": "지갑", "purse": "지갑 가방", "bag": "가방", "luggage": "가방 캐리어", "backpack": "가방 백팩",
+                    "glasses": "안경", "sunglasses": "선글라스 안경", "clothing": "옷 의류", "apparel": "옷 의류",
+                    "shoe": "신발", "footwear": "신발", "watch": "시계", "smartwatch": "스마트워치 시계",
+                    "camera": "카메라", "headphones": "이어폰 헤드폰", "earphones": "이어폰 헤드폰",
+                    "laptop": "노트북 컴퓨터", "computer": "컴퓨터 노트북", "tablet": "태블릿 아이패드", "ipad": "태블릿 아이패드",
+                    "keys": "열쇠 차키", "umbrella": "우산", "book": "책 도서", "card": "카드 신용카드 신분증",
+                    "id card": "신분증", "credit card": "신용카드", "cash": "현금 돈", "jewelry": "귀금속 반지 목걸이",
+                    "ring": "반지", "necklace": "목걸이", "earrings": "귀걸이", "bracelet": "팔찌",
+                    "cosmetics": "화장품", "bottle": "물병 텀블러", "tumbler": "텀블러",
+                    "black": "검은색 블랙", "white": "흰색 화이트", "red": "빨간색 레드", "blue": "파란색 블루",
+                    "green": "초록색 그린", "yellow": "노란색 옐로우", "leather": "가죽", "plastic": "플라스틱", "metal": "금속 철"
+                };
+
                 // 3. 태그 기반 스코어링
                 const matchedItems = [];
-                const searchKeywords = labels.map(l => l.toLowerCase());
+                let translatedKeywords = [];
+                labels.forEach(l => {
+                    const lower = l.toLowerCase();
+                    translatedKeywords.push(lower);
+                    Object.keys(VISION_LABEL_MAP).forEach(engKey => {
+                        if (lower.includes(engKey)) {
+                            translatedKeywords.push(...VISION_LABEL_MAP[engKey].split(' '));
+                        }
+                    });
+                });
+                const searchKeywords = [...new Set(translatedKeywords)];
                 
                 uniqueItems.forEach(item => {
                     let matchScore = 0;
