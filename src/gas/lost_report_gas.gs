@@ -21,8 +21,13 @@ function doPost(e) {
       }
 
       // Vision API로 한글 태그 추출
-      var searchLabels = extractImageLabels(data.photo);
+      var extractResult = extractImageLabels(data.photo);
       
+      if (!extractResult.success) {
+        return ContentService.createTextOutput(JSON.stringify({ "result": "error", "message": "Vision API Error: " + extractResult.error })).setMimeType(ContentService.MimeType.JSON);
+      }
+      
+      var searchLabels = extractResult.labels;
       return ContentService.createTextOutput(JSON.stringify({ "result": "success", "labels": searchLabels })).setMimeType(ContentService.MimeType.JSON);
     }
     // -- [END] 이미지 검색 엔드포인트 처리 --
@@ -51,7 +56,8 @@ function doPost(e) {
         if (data.photo && data.photo.includes('base64,')) {
           photoUrl = saveBase64ImageToDrive(data.photo, data.itemName + "_" + data.wechatId);
           // Vision API로 이미지 특징 추출
-          var labels = extractImageLabels(data.photo);
+          var extractResult = extractImageLabels(data.photo);
+          var labels = extractResult.success ? extractResult.labels : [];
           labelsStr = labels.join(',');
         }
         
@@ -114,11 +120,10 @@ function saveBase64ImageToDrive(base64Data, fileNamePrefix) {
   }
 }
 
-/**
- * Google Cloud Vision API를 호출하여 이미지의 Label을 추출함
- */
 function extractImageLabels(base64Data) {
-  if (VISION_API_KEY === 'YOUR_API_KEY_HERE' || !VISION_API_KEY) return [];
+  if (VISION_API_KEY === 'YOUR_API_KEY_HERE' || !VISION_API_KEY) {
+    return { success: false, error: "API 키가 입력되지 않았습니다." };
+  }
   
   try {
     var rawData = base64Data.split('base64,')[1];
@@ -151,7 +156,12 @@ function extractImageLabels(base64Data) {
     };
     
     var response = UrlFetchApp.fetch(url, options);
-    var json = JSON.parse(response.getContentText());
+    var responseText = response.getContentText();
+    var json = JSON.parse(responseText);
+    
+    if (json.error) {
+      return { success: false, error: json.error.message || responseText };
+    }
     
     var labels = [];
     if (json.responses && json.responses[0] && json.responses[0].labelAnnotations) {
@@ -159,8 +169,8 @@ function extractImageLabels(base64Data) {
         labels.push(json.responses[0].labelAnnotations[i].description);
       }
     }
-    return labels;
+    return { success: true, labels: labels };
   } catch (e) {
-    return [];
+    return { success: false, error: e.toString() };
   }
 }
