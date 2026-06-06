@@ -54,6 +54,15 @@ export function showSection(sectionId, pushHistory = true) {
             'page_title': document.title + ' - ' + sectionId
         });
     }
+
+    // Google Analytics 4 (gtag.js) - Virtual Pageview Tracking
+    if (typeof gtag === 'function') {
+        gtag('event', 'page_view', {
+            page_title: document.title + ' - ' + sectionId,
+            page_location: window.location.href,
+            page_path: sectionId === 'home' ? '/' : `/${sectionId}`
+        });
+    }
 }
 
 export function openWechatQR() {

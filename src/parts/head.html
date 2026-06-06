@@ -5,6 +5,18 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
 })(window,document,'script','dataLayer','GTM-PH989GKL');</script>
 <!-- End Google Tag Manager -->
+
+    <!-- Google Analytics (GA4) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z9BZ11GZQ1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      // 페이지 뷰 수동 전송을 위해 send_page_view: false 설정 (SPA 라우터에서 수동 전송)
+      gtag('config', 'G-Z9BZ11GZQ1', { 'send_page_view': false });
+    </script>
+    <!-- End Google Analytics -->
     <!-- Google AdSense Manual Ads Loader -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7292095769506033"
         crossorigin="anonymous"></script>
