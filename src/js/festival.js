@@ -255,10 +255,11 @@ const FESTIVAL_IMAGE_MAP = {
 };
 
 function getFestivalImage(title, originalImg) {
+    if (originalImg && originalImg.trim() !== '') return originalImg;
     for (const key in FESTIVAL_IMAGE_MAP) {
         if (title.includes(key)) return FESTIVAL_IMAGE_MAP[key];
     }
-    return originalImg;
+    return '';
 }
 
 export function renderFestivalItems(container, items) {
@@ -279,8 +280,24 @@ export function renderFestivalItems(container, items) {
         const rawImg = item.thumbnail || item.imgpath || item.img || '';
         const img = getFestivalImage(rawTitle, rawImg) || noImg;
         
-        const date = item.period || item.date || '';
-        
+        const rawDate = item.period || item.date || '';
+        let displayDate = rawDate;
+        if (displayDate.includes('~')) {
+            const parts = displayDate.split('~');
+            const start = parts[0].trim();
+            let end = parts[1].trim();
+            if (start === end) {
+                displayDate = start;
+            } else {
+                const startYearMatch = start.match(/^(\d{4})\./);
+                const endYearMatch = end.match(/^(\d{4})\./);
+                if (startYearMatch && endYearMatch && startYearMatch[1] === endYearMatch[1]) {
+                    end = end.substring(5);
+                }
+                displayDate = `${start} ~ ${end}`;
+            }
+        }
+        const date = rawDate; // Keep original for logic
         // Dynamically calculate link based on the selected month
         const yearParts = currentFestivalMonth.split('-');
         const yearStr = yearParts[0] || '2026';
@@ -304,14 +321,15 @@ export function renderFestivalItems(container, items) {
         }
         
         return `
-            <div class="festival-card text-only" onclick="window.open('${link}', '_blank')">
+            <div class="festival-card" onclick="window.open('${link}', '_blank')">
+                <div class="festival-img">
+                    <img src="${img}" alt="${displayTitle}" loading="lazy" onerror="this.onerror=null; this.src='${noImg}';" />
+                    <span class="tag ${statusClass}">${statusText}</span>
+                </div>
                 <div class="festival-info">
-                    <div class="festival-header">
-                        <span class="tag ${statusClass}">${statusText}</span>
-                    </div>
                     <h3 class="festival-title">${displayTitle}</h3>
                     <div class="festival-date">
-                        <span>\u{1F4C5}</span> ${date}
+                        ${displayDate}
                     </div>
                 </div>
             </div>`;

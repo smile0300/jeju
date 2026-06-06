@@ -773,70 +773,104 @@
 
 .festival-list { 
     display: grid; 
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); 
-    gap: 24px; 
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 12px; 
     padding-bottom: 30px;
 }
-.festival-card.text-only {
-    min-height: 140px;
-    background: white;
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-lg); /* unified rounding 16px */
-    box-shadow: var(--shadow-sm);
-    transition: all 0.3s ease;
-    overflow: hidden;
+
+@media (min-width: 768px) {
+    .festival-list {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
 }
 
-.festival-card.text-only:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-md);
-    border-color: var(--accent-blue);
-}
-.festival-card.text-only .festival-info {
-    padding: 20px;
+.festival-card {
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
-    gap: 12px;
+    cursor: pointer;
+    background: transparent;
+    transition: transform 0.2s ease;
+    min-width: 0;
 }
-.festival-header {
+
+.festival-card:hover {
+    transform: translateY(-4px);
+}
+
+.festival-img {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    position: relative;
+    overflow: hidden;
+    background: #f1f5f9;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.festival-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.festival-card:hover .festival-img img {
+    transform: scale(1.05);
+}
+
+.festival-img .tag {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 5px 12px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: white;
+    border-radius: 12px 0 12px 0;
+    z-index: 2;
+    background: #222 !important;
+}
+
+.festival-info {
+    padding: 12px 0;
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: center;
+    gap: 8px;
     width: 100%;
 }
-.festival-card.text-only .tag {
-    position: static;
-    padding: 4px 10px;
-    font-size: 0.7rem;
-    box-shadow: none;
-    backdrop-filter: none;
-}
-.chinese-title {
-    font-size: 0.95rem;
-    color: var(--accent-blue);
-    font-weight: 800;
-}
+
 .festival-title {
-    font-size: 1.25rem;
+    font-size: 0.95rem;
     font-weight: 900;
     color: var(--text-primary);
-    line-height: 1.4;
+    line-height: 1.3;
     margin: 0;
+    word-break: break-word;
+    text-align: center;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
 }
+
 .festival-date {
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     color: var(--text-muted);
     font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-top: auto;
-    padding-top: 8px;
-    border-top: 1px dashed #e2e8f0;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: -0.3px;
+    width: 100%;
 }
-.tag.ing { background: #ef4444; }
-.tag.upcoming { background: #3b82f6; }
+
+.tag.ing { background: var(--danger-gradient); }
+.tag.upcoming { background: var(--primary-gradient); }
 
 /* ==================== Lost & Found ==================== */
 .search-filter-box {
