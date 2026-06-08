@@ -169,7 +169,7 @@ window.addEventListener('load', () => {
     fetchHallasanStatus();
     renderHallasanDashboard();
     fetchFlights('arrive');
-    fetchFoundGoods();
+    // fetchFoundGoods(); // 첫 로딩 시 자동 조회 제거
     initMonthFilter();
     fetchFestivals();
     initReward();
@@ -187,5 +187,5 @@ window.addEventListener('load', () => {
         fetchWeatherAlerts();
         renderHallasanDashboard(); 
     }, 10 * 60 * 1000); // 10분 간격 (v4.0 반영)
-    setInterval(fetchFoundGoods, 30 * 60 * 1000);
+    // setInterval(fetchFoundGoods, 30 * 60 * 1000); // 자동 조회 제거
 });

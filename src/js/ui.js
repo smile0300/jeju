@@ -35,7 +35,7 @@ export function showSection(sectionId, pushHistory = true) {
         const arriveData = document.getElementById('arrive-data');
         if (arriveData && !arriveData.innerHTML.includes('flight-row')) fetchFlights('arrive');
     }
-    if (sectionId === 'lost-found') fetchFoundGoods();
+    // if (sectionId === 'lost-found') fetchFoundGoods(); // 사용자가 검색 버튼을 누를 때만 조회하도록 자동 실행 제거
     if (sectionId === 'festival') fetchFestivals();
     if (sectionId === 'reward') initReward();
 

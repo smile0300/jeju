@@ -189,6 +189,11 @@ const TRANSLATIONS = {
         'festival.ticket':  '查看景点门票',
 
         // ── 분실물 ──
+        'lost.notice.title': '失物招领中心使用指南',
+        'lost.notice.1': '请选择上方的<b>分类</b>和<b>日期</b>，然后点击搜索按钮查询当天的拾获物品列表。',
+        'lost.notice.2': '仅可查询最近3天内韩国警察厅综合失物招领中心接收的物品。',
+        'lost.notice.3': '如果未找到您需要的物品，请使用<b>“以图搜物”</b>或<b>“登记报失”</b>功能。',
+        'lost.notice.4': '在保管处领取物品时可能需要出示身份证。',
         'lost.title':       '济州失物招领',
         'lost.searching':   '正在查询...',
         'lost.searching_ai': '正在分析图像并搜索...',
@@ -464,6 +469,11 @@ const TRANSLATIONS = {
         'festival.title':   '제주 축제/행사',
         'festival.ticket':  '관광지 티켓 보기',
 
+        'lost.notice.title': '분실물 센터 이용 안내',
+        'lost.notice.1': '위의 <b>분류</b>와 <b>날짜</b>를 선택한 후 검색 버튼을 누르시면 해당 일자의 습득물 목록이 조회됩니다.',
+        'lost.notice.2': '최근 3일 이내에 경찰청 통합 유실물 센터에 접수된 물품만 조회 가능합니다.',
+        'lost.notice.3': '원하시는 물품을 찾지 못하셨다면 <b>\'사진으로 물건찾기\'</b> 또는 <b>\'분실물 등록\'</b>을 이용해 주세요.',
+        'lost.notice.4': '보관소에서 수령 시 신분증을 지참해야 할 수 있습니다.',
         'lost.title':       '제주 분실물 찾기',
         'lost.searching':   '조회 중...',
         'lost.searching_ai': '이미지 분석 및 검색 중...',
@@ -731,6 +741,11 @@ const TRANSLATIONS = {
         'festival.title':   'Jeju Festivals & Events',
         'festival.ticket':  'View Attraction Tickets',
 
+        'lost.notice.title': 'Lost & Found Center Guide',
+        'lost.notice.1': 'Select a <b>category</b> and <b>date</b> above, then press the search button to view items found on that day.',
+        'lost.notice.2': 'You can only search for items registered at the National Police Agency Integrated Lost & Found Center within the last 3 days.',
+        'lost.notice.3': 'If you cannot find your item, please use <b>\'Search by Image\'</b> or <b>\'Register Lost Item\'</b>.',
+        'lost.notice.4': 'You may need to present an ID when claiming items at the storage location.',
         'lost.title':       'Jeju Lost & Found',
         'lost.searching':   'Searching...',
         'lost.searching_ai': 'Analyzing image & searching...',
