@@ -191,6 +191,7 @@ const TRANSLATIONS = {
         // ── 분실물 ──
         'lost.title':       '济州失物招领',
         'lost.searching':   '正在查询...',
+        'lost.searching_ai': '正在分析图像并搜索...',
         'lost.category':    '选择物品分类',
         'lost.report.btn':  '找不到我的物品？在此登记报失',
         'lost.search.image': '以图搜物 (AI)',
@@ -465,6 +466,7 @@ const TRANSLATIONS = {
 
         'lost.title':       '제주 분실물 찾기',
         'lost.searching':   '조회 중...',
+        'lost.searching_ai': '이미지 분석 및 검색 중...',
         'lost.category':    '물품 분류 선택',
         'lost.report.btn':  '내 물건을 못 찾겠어요? 분실물 등록하기',
         'lost.search.image': '사진으로 물건찾기',
@@ -731,6 +733,7 @@ const TRANSLATIONS = {
 
         'lost.title':       'Jeju Lost & Found',
         'lost.searching':   'Searching...',
+        'lost.searching_ai': 'Analyzing image & searching...',
         'lost.category':    'Select Category',
         'lost.report.btn':  'Can\'t find your item? Register here',
         'lost.search.image': 'Search by Image',

@@ -394,8 +394,10 @@ window.handleImageSearch = async function(event) {
     if (tableContainer) tableContainer.classList.remove('active');
     if (grid) grid.classList.add('active');
     
-    if (countDisplay) countDisplay.innerHTML = "AI가 이미지를 분석하고 경찰청 데이터를 검색하고 있습니다... (약 5~10초 소요)";
-    if (grid) grid.innerHTML = `<div class="loading-lost"><p>이미지 분석 및 검색 중...</p></div>`;
+    if (countDisplay) countDisplay.innerHTML = "";
+    
+    const loadingText = window.t ? window.t('lost.searching_ai') : '이미지 분석 및 검색 중...';
+    if (grid) grid.innerHTML = `<div class="loading-lost"><p>${loadingText}</p></div>`;
 
     try {
         const reader = new FileReader();
