@@ -322,11 +322,11 @@
 }
 
 /* 라벨 텍스트 색상 지역별 맞춤 변경 */
-.group-north .group-label { color: #3b82f6 !important; }
-.group-south .group-label { color: #f59e0b !important; }
-.group-west .group-label { color: #f43f5e !important; }
-.group-east .group-label { color: #10b981 !important; }
-.group-mountain .group-label { color: #059669 !important; }
+.group-north .group-label { color: #2563EB !important; }
+.group-south .group-label { color: #EA580C !important; }
+.group-west .group-label { color: #E11D48 !important; }
+.group-east .group-label { color: #059669 !important; }
+.group-mountain .group-label { color: #8B5A2B !important; }
 
 .location-tab {
     flex: 1 1 0 !important;
@@ -342,11 +342,11 @@
 .location-tab:hover { background: var(--fill-tertiary); transform: scale(0.97); }
 
 /* 지역별 탭 기본 테두리 (미선택 상태) - 은은한 틴트 */
-.group-north .location-tab { border: 1px solid rgba(59, 130, 246, 0.25) !important; }
-.group-south .location-tab { border: 1px solid rgba(245, 158, 11, 0.3) !important; }
-.group-east .location-tab { border: 1px solid rgba(16, 185, 129, 0.3) !important; }
-.group-west .location-tab { border: 1px solid rgba(244, 63, 94, 0.25) !important; }
-.group-mountain .location-tab { border: 1px solid rgba(5, 150, 105, 0.25) !important; }
+.group-north .location-tab { border: 1px solid rgba(37, 99, 235, 0.25) !important; }
+.group-south .location-tab { border: 1px solid rgba(234, 88, 12, 0.25) !important; }
+.group-east .location-tab { border: 1px solid rgba(5, 150, 105, 0.25) !important; }
+.group-west .location-tab { border: 1px solid rgba(225, 29, 72, 0.25) !important; }
+.group-mountain .location-tab { border: 1px solid rgba(139, 90, 43, 0.25) !important; }
 
 /* 지역별 활성(Active) 탭 테마 컬러 */
 .location-tab.active { box-shadow: none; border-color: transparent !important; }
@@ -354,11 +354,11 @@
 .tab-name { font-size: 12px; font-weight: 600; color: #4E5968; white-space: normal; word-break: keep-all; text-align: center; line-height: 1.15; }
 .location-tab.active .tab-icon, .location-tab.active .tab-name { color: white !important; }
 
-.group-north .location-tab.active { background: #3b82f6 !important; }
-.group-south .location-tab.active { background: #f59e0b !important; }
-.group-east .location-tab.active { background: #10b981 !important; }
-.group-west .location-tab.active { background: #f43f5e !important; }
-.group-mountain .location-tab.active { background: #059669 !important; }
+.group-north .location-tab.active { background: #2563EB !important; }
+.group-south .location-tab.active { background: #EA580C !important; }
+.group-east .location-tab.active { background: #059669 !important; }
+.group-west .location-tab.active { background: #E11D48 !important; }
+.group-mountain .location-tab.active { background: #8B5A2B !important; }
 
 .current-weather {
     background: var(--bg-tertiary);
@@ -772,8 +772,9 @@
 .t-info-line span {
     font-size: 0.62rem;
     font-weight: 800;
-    color: var(--text-muted);
-    /* white-space: nowrap 제거하여 카드 밖으로 나가지 않도록 함 */
+    color: #4E5968;
+    white-space: nowrap;
+    letter-spacing: -0.2px;
     word-break: keep-all; 
     text-align: center;
     display: block;
