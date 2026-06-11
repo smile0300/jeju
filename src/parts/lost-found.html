@@ -68,8 +68,12 @@
                 </div>
                 <div id="lost-result-count" class="lost-result-count"></div>
                 <div class="view-toggle-container">
-                    <button id="btn-view-card" class="view-toggle-btn active" onclick="switchLostView('card')" data-i18n="lost.view.card">卡片模式</button>
-                    <button id="btn-view-table" class="view-toggle-btn" onclick="switchLostView('table')" data-i18n="lost.view.table">表格模式</button>
+                    <button id="btn-view-card" class="view-toggle-btn active" onclick="switchLostView('card')">
+                        <i class="ph-duotone ph-squares-four" style="font-size: 1.15rem;"></i><span data-i18n="lost.view.card">卡片模式</span>
+                    </button>
+                    <button id="btn-view-table" class="view-toggle-btn" onclick="switchLostView('table')">
+                        <i class="ph-duotone ph-list-dashes" style="font-size: 1.15rem;"></i><span data-i18n="lost.view.table">表格模式</span>
+                    </button>
                 </div>
             </div>
             <div id="lost-goods-grid" class="lost-goods-grid active">
