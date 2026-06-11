@@ -1285,10 +1285,15 @@
     transition: all var(--transition-normal);
     box-shadow: 0 4px 12px rgba(37, 99, 235, 0.05);
 }
+.lost-report-btn.btn-sm {
+    padding: 10px;
+    font-size: 0.85rem;
+    gap: 6px;
+}
 .lost-report-btn:hover { 
     background: var(--primary-gradient); 
-    color: white;
-    border-color: transparent;
+    color: white !important; /* Ensure inline text color changes on hover */
+    border-color: transparent !important;
     transform: translateY(-2px); 
     box-shadow: 0 6px 16px rgba(37, 99, 235, 0.2); 
 }

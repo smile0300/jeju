@@ -2,8 +2,8 @@
 <section id="reward" class="app-section">
     <header class="app-bar">
         <button class="back-btn" onclick="showSection('home')">←</button>
-        <h2 class="bar-title"><i class="ph-duotone ph-gift"></i> <span data-i18n="reward.title">回国红包</span></h2>
-        <button class="header-action-btn" onclick="publishRewardMission()" data-i18n="reward.publish">发布咨询</button>
+        <h2 class="bar-title"><i class="ph-duotone ph-money"></i> <span data-i18n="reward.title">回国红包</span></h2>
+        <button class="header-action-btn" onclick="publishRewardMission()" data-i18n="reward.publish">물건등록</button>
     </header>
 
     <div class="section">
@@ -17,27 +17,36 @@
                 </div>
             </div>
 
-            <!-- Reward Features Grid -->
-            <div class="reward-features" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
-                <div class="feature-item" style="background: var(--bg-primary); padding: 12px; border-radius: 12px; border: 1px solid var(--separator); box-shadow: var(--shadow-sm); min-width: 0;">
-                    <i class="ph-duotone ph-scooter color-course" style="font-size: 1.5rem; margin-bottom: 5px; display: block;"></i>
-                    <div style="font-size: 0.85rem; font-weight: 700; margin-bottom: 3px; color: var(--label-primary);" data-i18n="reward.feat1.title">호텔 로비 픽업</div>
-                    <div style="font-size: 0.75rem; color: var(--label-secondary); line-height: 1.3; word-break: break-word;" data-i18n="reward.feat1.desc">고객님이 계신 숙소로 직접 가져다 드립니다.</div>
+            <!-- Reward Features Flow -->
+            <div class="reward-features" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
+                <!-- Step 1 -->
+                <div class="feature-item" style="background: var(--bg-primary); padding: 16px; border-radius: 16px; border: 1px solid var(--separator); box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 15px;">
+                    <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--bg-secondary); display: flex; align-items: center; justify-content: center; font-weight: 800; color: var(--label-primary); font-size: 0.9rem; flex-shrink: 0;">1</div>
+                    <div style="flex-grow: 1;">
+                        <div style="font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; color: var(--label-primary);" data-i18n="reward.feat1.title">호텔 로비 픽업</div>
+                        <div style="font-size: 0.8rem; color: var(--label-secondary); line-height: 1.4; word-break: break-word;" data-i18n="reward.feat1.desc">고객님이 계신 숙소로 직접 가져다 드립니다.</div>
+                    </div>
+                    <i class="ph-duotone ph-scooter color-course" style="font-size: 1.8rem; flex-shrink: 0; opacity: 0.8;"></i>
                 </div>
-                <div class="feature-item" style="background: var(--bg-primary); padding: 12px; border-radius: 12px; border: 1px solid var(--separator); box-shadow: var(--shadow-sm); min-width: 0;">
-                    <i class="ph-duotone ph-shield-check color-hallasan" style="font-size: 1.5rem; margin-bottom: 5px; display: block;"></i>
-                    <div style="font-size: 0.85rem; font-weight: 700; margin-bottom: 3px; color: var(--label-primary);" data-i18n="reward.feat2.title">100% 안전 보장</div>
-                    <div style="font-size: 0.75rem; color: var(--label-secondary); line-height: 1.3; word-break: break-word;" data-i18n="reward.feat2.desc">검수 완료된 소형 전자기기 위주라 세관 문제 없습니다.</div>
+                
+                <!-- Step 2 (originally feat3) -->
+                <div class="feature-item" style="background: var(--bg-primary); padding: 16px; border-radius: 16px; border: 1px solid var(--separator); box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 15px;">
+                    <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--bg-secondary); display: flex; align-items: center; justify-content: center; font-weight: 800; color: var(--label-primary); font-size: 0.9rem; flex-shrink: 0;">2</div>
+                    <div style="flex-grow: 1;">
+                        <div style="font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; color: var(--label-primary);" data-i18n="reward.feat3.title">공항에서 택배 발송</div>
+                        <div style="font-size: 0.8rem; color: var(--label-secondary); line-height: 1.4; word-break: break-word;" data-i18n="reward.feat3.desc">중국 도착 후 공항에서 택배로 부치면 끝!</div>
+                    </div>
+                    <i class="ph-duotone ph-airplane-landing color-airport" style="font-size: 1.8rem; flex-shrink: 0; opacity: 0.8;"></i>
                 </div>
-                <div class="feature-item" style="background: var(--bg-primary); padding: 12px; border-radius: 12px; border: 1px solid var(--separator); box-shadow: var(--shadow-sm); min-width: 0;">
-                    <i class="ph-duotone ph-airplane-landing color-airport" style="font-size: 1.5rem; margin-bottom: 5px; display: block;"></i>
-                    <div style="font-size: 0.85rem; font-weight: 700; margin-bottom: 3px; color: var(--label-primary);" data-i18n="reward.feat3.title">공항에서 택배 발송</div>
-                    <div style="font-size: 0.75rem; color: var(--label-secondary); line-height: 1.3; word-break: break-word;" data-i18n="reward.feat3.desc">중국 도착 후 공항에서 택배로 부치면 끝!</div>
-                </div>
-                <div class="feature-item" style="background: var(--bg-primary); padding: 12px; border-radius: 12px; border: 1px solid var(--separator); box-shadow: var(--shadow-sm); min-width: 0;">
-                    <i class="ph-duotone ph-money color-reward" style="font-size: 1.5rem; margin-bottom: 5px; display: block;"></i>
-                    <div style="font-size: 0.85rem; font-weight: 700; margin-bottom: 3px; color: var(--label-primary);" data-i18n="reward.feat4.title">수고비 즉시 입금</div>
-                    <div style="font-size: 0.75rem; color: var(--label-secondary); line-height: 1.3; word-break: break-word;" data-i18n="reward.feat4.desc">택배 접수 확인 즉시 위챗페이로 송금해 드립니다.</div>
+
+                <!-- Step 3 (originally feat4) -->
+                <div class="feature-item" style="background: var(--bg-primary); padding: 16px; border-radius: 16px; border: 1px solid var(--separator); box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 15px;">
+                    <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--bg-secondary); display: flex; align-items: center; justify-content: center; font-weight: 800; color: var(--label-primary); font-size: 0.9rem; flex-shrink: 0;">3</div>
+                    <div style="flex-grow: 1;">
+                        <div style="font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; color: var(--label-primary);" data-i18n="reward.feat4.title">수고비 즉시 입금</div>
+                        <div style="font-size: 0.8rem; color: var(--label-secondary); line-height: 1.4; word-break: break-word;" data-i18n="reward.feat4.desc">택배 접수 확인 즉시 위챗페이로 송금해 드립니다.</div>
+                    </div>
+                    <i class="ph-duotone ph-money color-reward" style="font-size: 1.8rem; flex-shrink: 0; opacity: 0.8;"></i>
                 </div>
             </div>
             <!-- Mission List Container -->

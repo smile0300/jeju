@@ -308,16 +308,16 @@ i.ph-duotone {
 /* Liveliness Color Utility Classes */
 .color-gnb { color: var(--primary-orange); }
 
-/* GNB Menu Specific Colors (Non-overlapping) */
-.color-cctv { color: #EF4444; } /* Red */
-.color-weather { color: #0EA5E9; } /* Sky Blue */
-.color-hallasan { color: #10B981; } /* Emerald Green */
-.color-airport { color: #8B5CF6; } /* Purple */
-.color-lost { color: #F97316 !important; } /* Orange - Unified for Lost&Found */
-.color-festival { color: #EC4899; } /* Pink */
-.color-reward { color: #FF3B30; } /* Hongbao Red */
-.color-food { color: #E28743; } /* Hamburger Color */
-.color-course { color: #3B82F6; } /* Blue */
+/* GNB Menu Specific Colors (Comfortable Saturation & Brightness) */
+.color-cctv { color: #FF6B6B; } /* Soft Red */
+.color-weather { color: #48B4F8; } /* Soft Sky Blue */
+.color-hallasan { color: #38C98E; } /* Soft Emerald */
+.color-airport { color: #A67CFF; } /* Soft Purple */
+.color-lost { color: #FF8C42 !important; } /* Soft Orange */
+.color-festival { color: #FF75A8; } /* Soft Pink */
+.color-reward { color: #FF5A5A; } /* Soft Hongbao Red */
+.color-food { color: #FFB347; } /* Soft Amber */
+.color-course { color: #5E9FFF; } /* Soft Blue */
 
 /* Weather Forecast Specific Colors */
 .color-sun { color: #F59E0B; } /* Amber */
