@@ -116,7 +116,7 @@ export function renderRewardList() {
     listContainer.innerHTML = REWARD_DATA_CACHED.map((item) => {
         const imgData = resolveImageUrl(item);
         const placeholderText = encodeURIComponent(window.t('lost.no_image'));
-        const placeholder = `data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22100%22%20height%3D%22130%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20130%22%3E%3Crect%20width%3D%22100%22%20height%3D%22130%22%20fill%3D%22%23f3f4f6%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-size%3D%2214%22%20text-anchor%3D%22middle%22%20alignment-baseline%3D%22middle%22%20fill%3D%22%239ca3af%22%3E${placeholderText}%3C%2Ftext%3E%3C%2Fsvg%3E`;
+        const placeholder = `data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22100%25%22%20height%3D%22100%25%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20fill%3D%22%23f8fafc%22%2F%3E%3Cg%20stroke%3D%22%23cbd5e1%22%20stroke-width%3D%222%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M25%2040%20h50%20v30%20h-50%20z%20M40%2040%20l5%20-10%20h10%20l5%2010%22%2F%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2255%22%20r%3D%228%22%2F%3E%3Cline%20x1%3D%2220%22%20y1%3D%2225%22%20x2%3D%2280%22%20y2%3D%2285%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E`;
         
         return `
             <div class="reward-card" onclick="applyRewardMission()">
@@ -141,7 +141,7 @@ export function renderRewardList() {
 window.handleRewardImageError = function(img) {
     const fallback = img.getAttribute('data-fallback');
     const placeholderText = encodeURIComponent(window.t('lost.no_image'));
-    const placeholder = `data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22100%22%20height%3D%22130%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20130%22%3E%3Crect%20width%3D%22100%22%20height%3D%22130%22%20fill%3D%22%23f3f4f6%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-size%3D%2214%22%20text-anchor%3D%22middle%22%20alignment-baseline%3D%22middle%22%20fill%3D%22%239ca3af%22%3E${placeholderText}%3C%2Ftext%3E%3C%2Fsvg%3E`;
+    const placeholder = `data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22100%25%22%20height%3D%22100%25%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20fill%3D%22%23f8fafc%22%2F%3E%3Cg%20stroke%3D%22%23cbd5e1%22%20stroke-width%3D%222%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M25%2040%20h50%20v30%20h-50%20z%20M40%2040%20l5%20-10%20h10%20l5%2010%22%2F%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2255%22%20r%3D%228%22%2F%3E%3Cline%20x1%3D%2220%22%20y1%3D%2225%22%20x2%3D%2280%22%20y2%3D%2285%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E`;
     
     // 1단계: 명시된 fallback이 있으면 시도
     if (fallback && img.getAttribute('data-fallback-tried') !== 'true') {

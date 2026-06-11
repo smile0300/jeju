@@ -1277,7 +1277,7 @@
     color: var(--text-secondary);
 }
 
-.lost-report-btn {
+.lost-report-btn, .hallasan-action-btn {
     width: 100%; padding: 16px; border-radius: var(--radius-lg); border: 1.5px solid var(--accent-blue); /* Solid as requested */
     background: white; color: var(--accent-blue);
     font-weight: 800; font-size: 1.05rem; cursor: pointer;
@@ -1285,12 +1285,14 @@
     transition: all var(--transition-normal);
     box-shadow: 0 4px 12px rgba(37, 99, 235, 0.05);
 }
-.lost-report-btn.btn-sm {
-    padding: 10px;
-    font-size: 0.85rem;
-    gap: 6px;
+.lost-report-btn.btn-sm, .hallasan-action-btn.btn-sm {
+    padding: 10px 6px;
+    font-size: 0.8rem;
+    gap: 4px;
+    white-space: nowrap;
+    word-break: keep-all;
 }
-.lost-report-btn:hover { 
+.lost-report-btn:hover, .hallasan-action-btn:hover { 
     background: var(--primary-gradient); 
     color: white !important; /* Ensure inline text color changes on hover */
     border-color: transparent !important;
@@ -2843,4 +2845,11 @@
 .weekly-card.active .w-date {
     color: #1971c2 !important;
     font-weight: 800 !important;
+}
+
+@keyframes spin {
+    100% { transform: rotate(360deg); }
+}
+.spin {
+    animation: spin 1s linear infinite;
 }

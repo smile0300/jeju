@@ -70,7 +70,7 @@ export async function fetchHallasanStatus(isAutoRetry = false, forceRefresh = fa
         renderHallasanTrails(cachedData, container, trailsEl);
     } else if (!isAutoRetry) {
         container.innerHTML = ``;
-        trailsEl.innerHTML = `<div class="loading-lost"><p>${window.t('hallasan.loading.official')}</p></div>`;
+        trailsEl.innerHTML = `<div style="grid-column: 1/-1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 50px 20px; color: var(--text-muted);"><i class="ph-duotone ph-spinner spin" style="font-size: 2.5rem; color: var(--accent-blue); margin-bottom: 15px;"></i><p style="font-weight: 600;">${window.t('hallasan.loading.official')}</p></div>`;
     }
 
     if (isCacheFresh && !forceRefresh) {
@@ -117,7 +117,7 @@ export async function fetchHallasanStatus(isAutoRetry = false, forceRefresh = fa
                 
                 // 첫 로드 실패 등으로 화면이 비어있는 경우에만 조용히 로딩 상태 유지
                 if (!trailsEl.innerHTML || trailsEl.innerHTML.includes('error-msg')) {
-                    trailsEl.innerHTML = `<div class="loading-lost"><p>${window.t('hallasan.loading.official')}</p></div>`;
+                    trailsEl.innerHTML = `<div style="grid-column: 1/-1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 50px 20px; color: var(--text-muted);"><i class="ph-duotone ph-spinner spin" style="font-size: 2.5rem; color: var(--accent-blue); margin-bottom: 15px;"></i><p style="font-weight: 600;">${window.t('hallasan.loading.official')}</p></div>`;
                 }
 
                 setTimeout(() => {

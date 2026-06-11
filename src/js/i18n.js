@@ -541,8 +541,8 @@ const TRANSLATIONS = {
 
         'reward.title':     '용돈벌기',
         'reward.publish':   '물건등록',
-        'reward.banner.title': '제주에서 중국 공항까지 분실물 전달해 줄 분 구합니다!',
-        'reward.banner.desc':  '귀국길에 부수입 챙겨가세요',
+        'reward.banner.title': '중국으로 분실물 전달해주실 분!',
+        'reward.banner.desc':  '귀국길에 짭짤한 부수입 챙겨가세요',
         'reward.feat1.title': '호텔 로비 픽업',
         'reward.feat1.desc': '고객님이 계신 숙소로 직접 가져다 드립니다.',
         'reward.feat2.title': '100% 안전 보장',
@@ -838,7 +838,7 @@ const TRANSLATIONS = {
 
         'reward.title':     'Bounty Missions',
         'reward.publish':   'Post Request',
-        'reward.banner.title': 'Looking for someone to deliver lost items to China!',
+        'reward.banner.title': 'Deliver lost items to China!',
         'reward.banner.desc':  'Earn extra money on your way home',
         'reward.feat1.title': 'Hotel Lobby Pickup',
         'reward.feat1.desc': 'We deliver directly to your accommodation.',

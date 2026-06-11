@@ -139,7 +139,7 @@
 
 .home-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
     gap: var(--space-4); /* 16px */
     max-width: 600px;
     margin: 0 auto;
@@ -199,6 +199,7 @@
     text-align: center;
     line-height: 1.3;
     word-break: keep-all;
+    overflow-wrap: anywhere;
 }
 
 .home-item.item-empty, .home-item.item-disabled {
@@ -338,7 +339,7 @@
 /* ==================== Responsive ==================== */
 @media (max-width: 480px) {
     .home-grid {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
         gap: var(--space-3); /* 12px */
     }
     .item-icon {
