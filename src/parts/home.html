@@ -3,9 +3,14 @@
     <div class="home-screen">
         <!-- 언어 선택기 (우측 상단) -->
         <div class="lang-selector">
-            <button class="lang-btn active" data-lang="zh" onclick="setLanguage('zh')">CN</button>
-            <button class="lang-btn" data-lang="ko" onclick="setLanguage('ko')">KR</button>
-            <button class="lang-btn" data-lang="en" onclick="setLanguage('en')">EN</button>
+            <button class="lang-icon-btn" onclick="document.querySelector('.lang-selector').classList.toggle('show')">
+                <i class="ph-duotone ph-globe"></i>
+            </button>
+            <div class="lang-dropdown">
+                <button class="lang-btn active" data-lang="zh" onclick="setLanguage('zh')">CN</button>
+                <button class="lang-btn" data-lang="ko" onclick="setLanguage('ko')">KR</button>
+                <button class="lang-btn" data-lang="en" onclick="setLanguage('en')">EN</button>
+            </div>
         </div>
 
         <div class="home-welcome">
@@ -16,9 +21,9 @@
 
         <div class="home-grid">
             <button class="home-item item-disabled" disabled type="button">
-                <span class="item-icon"><i class="ph-duotone ph-webcam color-cctv"></i></span>
+                <span class="item-icon"><i class="ph-duotone ph-video-camera color-cctv"></i></span>
                 <span class="item-label" data-i18n="nav.cctv">实时监控</span>
-                <span class="coming-soon-badge" style="background-color: #f59e0b; color: white;" data-i18n="badge.maintenance">维护中</span>
+                <span class="coming-soon-badge" style="background-color: #f59e0b; color: white;">VIP</span>
             </button>
             <button class="home-item item-weather" onclick="showSection('weather')" type="button">
                 <span class="item-icon"><i class="ph-duotone ph-cloud-sun color-weather"></i></span>
@@ -41,8 +46,8 @@
                 <span class="item-label" data-i18n="nav.festival">节日活动</span>
             </button>
             <button class="home-item item-reward" onclick="showSection('reward')" type="button">
-                <span class="item-icon"><i class="ph-duotone ph-piggy-bank color-reward"></i></span>
-                <span class="item-label" data-i18n="nav.reward">赏金任务</span>
+                <span class="item-icon"><i class="ph-duotone ph-gift color-reward"></i></span>
+                <span class="item-label" data-i18n="nav.reward">回国红包</span>
             </button>
             <!-- 맛집 & 여행 코스 준비 중 -->
             <button class="home-item item-disabled" disabled type="button">
@@ -58,3 +63,16 @@
         </div>
     </div>
 </section>
+
+<script>
+    // 언어 드롭다운 외부 클릭 시 닫기
+    document.addEventListener('click', function(event) {
+        const langSelector = document.querySelector('.lang-selector');
+        if (langSelector && langSelector.classList.contains('show')) {
+            // 클릭된 요소가 lang-selector 내부가 아니면 닫기
+            if (!langSelector.contains(event.target)) {
+                langSelector.classList.remove('show');
+            }
+        }
+    });
+</script>

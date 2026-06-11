@@ -47,7 +47,7 @@ export async function fetchFestivals() {
         if (!item.period || !item.period.includes('~')) return true;
         const endPart = item.period.split('~')[1].trim();
         const endDate = endPart.replace(/\./g, '-');
-        return endDate >= today;
+        return new Date(endDate) >= new Date(today);
     });
 
     if (activeItems.length === 0) {
@@ -322,7 +322,7 @@ export function renderFestivalItems(container, items) {
         } else if (date.includes('~')) {
             const startPart = date.split('~')[0].trim();
             const startDate = startPart.replace(/\./g, '-');
-            if (startDate > today) {
+            if (new Date(startDate) > new Date(today)) {
                 statusText = window.t('festival.status.upcoming');
                 statusClass = 'upcoming';
             }

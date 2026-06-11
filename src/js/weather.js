@@ -751,7 +751,12 @@ function renderMidHourlyCol(locKey, ymd, label, skyIcon, pop, temp, wind = '-') 
 export function renderWeatherLoading(locKey) {
     const container = document.getElementById(`current-card-${locKey}`);
     if (container) {
-        container.innerHTML = `<div class="weather-loader"><div class="weather-spinner"></div><div class="weather-loading-text">${window.t('weather.loading')}</div></div>`;
+        container.innerHTML = `
+            <div style="padding: 16px; background: var(--bg-primary); border-radius: var(--radius-xl); border: 1px solid var(--separator);">
+                <div class="skeleton skeleton-card" style="margin-bottom: 12px; height: 100px;"></div>
+                <div class="skeleton skeleton-text short"></div>
+                <div class="skeleton skeleton-text" style="width: 80%;"></div>
+            </div>`;
     }
 }
 
@@ -759,13 +764,13 @@ export function renderWeatherError(locKey) {
     const container = document.getElementById(`current-card-${locKey}`);
     if (container) {
         container.innerHTML = `
-            <div style="padding:40px; text-align:center; color: #fa5252; display: flex; flex-direction: column; align-items: center; gap: 12px;">
-                <div style="font-weight: 800; font-size: 1.1rem;">${window.t('weather.err.load')}</div>
-                <button onclick="window.weatherApp.retryFetch('${locKey}')" 
-                        style="padding: 8px 20px; font-size: 0.85rem; font-weight: 700; border: 1.5px solid #fa5252; color: #fa5252; background: white; border-radius: 6px; cursor: pointer; transition: all 0.2s;"
-                        onmouseover="this.style.background='#fff5f5'"
-                        onmouseout="this.style.background='white'">
-                    ${window.t('weather.err.retry')}
+            <div class="empty-state-card">
+                <i class="ph-duotone ph-cloud-slash empty-state-icon"></i>
+                <div class="empty-state-title">${window.t('weather.error.title')}</div>
+                <div class="empty-state-desc">${window.t('weather.error.desc')}</div>
+                <button class="empty-state-btn" onclick="window.weatherApp.retryFetch('${locKey}')" 
+                        style="border: 1.5px solid var(--label-tertiary); color: var(--label-secondary); background: transparent; cursor: pointer;">
+                    ${window.t('common.retry')}
                 </button>
             </div>`;
     }

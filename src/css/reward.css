@@ -1,7 +1,7 @@
 /* ==================== Reward Program (赏金任务) ==================== */
 
 .reward-container {
-    padding-top: 10px;
+    padding-top: var(--section-top); /* 셈션 상부여백 토큰 통일 */
     padding-bottom: 40px;
 }
 
@@ -52,6 +52,7 @@
 
 .trust-info {
     flex: 1;
+    min-width: 0;
 }
 
 .trust-title {
@@ -99,9 +100,9 @@
 }
 
 .reward-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 24px rgba(0,0,0,0.1);
-    border-color: var(--accent-blue);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-sm);
+    border-color: var(--accent);
 }
 
 .reward-img-top {
@@ -192,22 +193,24 @@
 .copy-btn {
     width: 100%;
     padding: 12px 24px;
-    background: var(--primary-gradient);
-    color: white;
+    background: var(--accent);
+    color: var(--accent-on);
     border: none;
-    border-radius: var(--radius-lg);
-    font-size: 0.95rem;
-    font-weight: 800; /* unified weight */
+    border-radius: var(--radius-md);
+    font-size: var(--text-body);
+    font-weight: 600;
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    box-shadow: none;
     transition: all var(--transition-normal);
+    min-height: var(--touch-target);
 }
 .copy-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
+    background: var(--accent-hover);
+    transform: translateY(-1px);
 }
 .copy-btn:active {
     transform: scale(0.97);
+    background: var(--accent-active);
 }
 
 /* Media Queries */
@@ -236,25 +239,27 @@
 .header-action-btn {
     position: absolute;
     right: 16px;
-    padding: 8px 16px;
-    background: var(--primary-gradient);
-    color: white;
+    padding: 6px 14px;
+    background: var(--accent);
+    color: var(--accent-on);
     border: none;
-    border-radius: var(--radius-lg);
-    font-size: 0.95rem;
-    font-weight: 800; /* unified weight */
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    box-shadow: none;
     transition: all var(--transition-normal);
     z-index: 2001;
+    display: flex;
+    align-items: center;
 }
 
 .header-action-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(37, 99, 235, 0.3);
+    background: var(--accent-hover);
+    transform: translateY(-1px);
 }
 
 .header-action-btn:active {
-    transform: scale(0.95);
-    opacity: 0.9;
+    background: var(--accent-active);
+    transform: scale(0.96);
 }

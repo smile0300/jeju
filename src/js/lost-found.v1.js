@@ -272,7 +272,7 @@ export async function submitLostReport() {
         itemName: document.getElementById('lost-report-item').value.trim(),
         specifics: document.getElementById('lost-report-specifics').value.trim(),
         photo: lostReportImageBase64 || '',
-        wechatId: document.getElementById('lost-report-wechat').value.trim(),
+        wechatId: document.getElementById('lost-report-wechat') ? document.getElementById('lost-report-wechat').value.trim() : document.getElementById('lost-report-name').value.trim(),
         reporterName: document.getElementById('lost-report-name').value.trim(),
         name: document.getElementById('lost-report-name').value.trim(), // 벡엔드(GAS) 필드명 호환성 보장용 추가
         userAgent: navigator.userAgent
@@ -389,15 +389,22 @@ window.handleImageSearch = async function(event) {
     const grid = document.getElementById('lost-goods-grid');
     const tableContainer = document.getElementById('lost-goods-table-container');
     const countDisplay = document.getElementById('lost-result-count');
+    const imageBtn = document.querySelector('.btn.btn-primary[onclick*="imageSearchInput"]');
     
     // 테이블 뷰 숨기고 그리드 뷰 활성화
     if (tableContainer) tableContainer.classList.remove('active');
     if (grid) grid.classList.add('active');
     
-    if (countDisplay) countDisplay.innerHTML = "";
-    
+    // ✅ 파일 선택 즉시 로딩 UI 표시 (FileReader 완료 전에도 피드백 제공)
+    if (countDisplay) countDisplay.innerHTML = '';
     const loadingText = window.t ? window.t('lost.searching_ai') : '이미지 분석 및 검색 중...';
-    if (grid) grid.innerHTML = `<div class="loading-lost"><p>${loadingText}</p></div>`;
+    if (grid) grid.innerHTML = `
+        <div class="loading-lost" style="grid-column: 1/-1; padding: 40px; text-align: center;">
+            <div class="weather-spinner" style="margin: 0 auto 16px;"></div>
+            <p style="color: var(--label-secondary); font-size: 0.95rem; font-weight: 600;">${loadingText}</p>
+        </div>`;
+    if (imageBtn) imageBtn.disabled = true;
+    
 
     try {
         const reader = new FileReader();
@@ -586,5 +593,8 @@ window.handleImageSearch = async function(event) {
         console.error('Image Search Error:', e);
         if (countDisplay) countDisplay.innerHTML = "검색 중 오류가 발생했습니다.";
         if (grid) grid.innerHTML = `<div class="loading-lost">오류 발생: ${e.message}</div>`;
+    } finally {
+        // ✅ 검색 완료 후 이미지 검색 버튼 재활성화
+        if (imageBtn) imageBtn.disabled = false;
     }
 };

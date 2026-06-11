@@ -1,38 +1,222 @@
+/* ============================================================
+   Jeju Live — Design System (Toss Design System 기반)
+   - Toss Design System(TDS) 핵심 원칙 준수
+   - 무채색 베이스 + Toss Blue 단일 포인트 컬러
+   - 면(面) 분리 방식, 보더 최소화
+   - Pretendard 폰트 기반 타이포 위계
+   ============================================================ */
+
 :root {
-    --primary-gradient: linear-gradient(135deg, #4338ca 0%, #1e40af 100%);
-    --secondary-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    --accent-gradient: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-    --success-gradient: linear-gradient(135deg, #059669 0%, #10b981 100%);
-    --warning-gradient: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
-    --danger-gradient: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+    /* ─────────────────────────────────────────
+       Accent Color (Toss Blue)
+       토스 핵심 포인트 컬러 — CTA, 활성화 요소에만 단독 사용
+    ───────────────────────────────────────── */
+    --accent:          #3182F6;   /* Toss Blue */
+    --accent-hover:    #1B6EE4;   /* 약간 어둡게 */
+    --accent-active:   #1560CC;   /* 눌림 상태 */
+    --accent-subtle:   rgba(49, 130, 246, 0.10);  /* 배경 틴트 */
+    --accent-on:       #FFFFFF;   /* accent 위 텍스트 */
 
-    --bg-page: #f0f4f8;
-    --bg-card: #ffffff;
-    --bg-card-hover: #f1f5f9;
-    --text-primary: #0f172a;
-    --text-secondary: #334155;
-    --text-muted: #64748b;
-    --border-light: rgba(226, 232, 240, 0.8);
+    /* ─────────────────────────────────────────
+       배경 3단계 계층 (토스 배경 시스템)
+       페이지: #F8F9FA / 구분 배경: #F2F4F6 / 카드: #FFFFFF
+    ───────────────────────────────────────── */
+    --bg-primary:    #FFFFFF;   /* 카드, 흰 배경 */
+    --bg-secondary:  #F2F4F6;  /* 구분 배경, 회색 버튼 배경 */
+    --bg-tertiary:   #FFFFFF;  /* 카드 내부 흰 배경 */
+    --bg-grouped:    #F8F9FA;  /* 페이지 기본 배경 (토스 회색) */
 
-    --accent-blue: #2563eb;
-    --accent-indigo: #4f46e5;
-    --accent-green: #10b981;
-    --accent-orange: #f59e0b;
-    --accent-red: #ef4444;
-    --accent-purple: #8b5cf6;
+    /* ─────────────────────────────────────────
+       채우기 (Fill) — 배지, 토글, 회색 버튼 배경
+       토스: 단색 기반으로 투명도 최소화
+    ───────────────────────────────────────── */
+    --fill-primary:    #E5E8EB;  /* 진한 회색 채우기 */
+    --fill-secondary:  #F2F4F6;  /* 중간 회색 채우기 */
+    --fill-tertiary:   #F8F9FA;  /* 밝은 회색 채우기 */
+    --fill-quaternary: #FAFAFA;  /* 최소 채우기 */
 
-    --spacing-xs: 0.5rem; --spacing-sm: 1rem; --spacing-md: 1.5rem;
-    --spacing-lg: 2rem; --spacing-xl: 3rem; --spacing-xxl: 4rem;
+    /* ─────────────────────────────────────────
+       텍스트 4단계 계층 (토스 텍스트 시스템)
+       헤드라인: 크고 굵게 / 보조: 회색으로 낮게
+    ───────────────────────────────────────── */
+    --label-primary:     #191F28;  /* 토스 딥 다크 — 메인 텍스트 */
+    --label-secondary:   #8B95A1;  /* 토스 미드 그레이 — 보조 텍스트 */
+    --label-tertiary:    #B0B8C1;  /* 토스 라이트 그레이 — 힌트 */
+    --label-quaternary:  #D1D6DB;  /* 비활성 텍스트 */
 
-    --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px; --radius-xl: 24px;
+    /* ─────────────────────────────────────────
+       구분선 (토스: 단색, 최소화)
+       보더보다 배경 면 분리 방식 우선
+    ───────────────────────────────────────── */
+    --separator:         #E5E8EB;  /* 토스 단색 구분선 */
+    --separator-opaque:  #E5E8EB;  /* 동일 — 반투명 미사용 */
 
-    --shadow-sm: 0 2px 4px rgba(0,0,0,0.04);
-    --shadow-md: 0 4px 20px -5px rgba(0,0,0,0.07), 0 2px 10px -2px rgba(0,0,0,0.04);
-    --shadow-lg: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.05);
+    /* ─────────────────────────────────────────
+       시맨틱 컬러 (토스 기준)
+       상태 표시에만 제한적 사용
+    ───────────────────────────────────────── */
+    --color-red:     #FA5252;  /* 토스 레드 (위험/에러) */
+    --color-orange:  #FFA94D;  /* 토스 오렌지 (경고) */
+    --color-yellow:  #FFD43B;  /* 노랑 (알림) */
+    --color-green:   #12B886;  /* 토스 그린 (성공) */
+    --color-teal:    #20C997;  /* 틸 */
+    --color-blue:    #3182F6;  /* Toss Blue */
+    --color-indigo:  #4263EB;  /* 인디고 */
+    --color-purple:  #7950F2;  /* 퍼플 */
+    --color-pink:    #F06595;  /* 핑크 */
+    --color-mint:    #20C997;  /* 민트 */
 
-    --transition-fast: 0.2s ease; --transition-normal: 0.3s ease; --transition-slow: 0.5s ease;
+    /* 의미 색상 (토스 시맨틱) */
+    --color-success: #12B886;  /* 토스 그린 */
+    --color-warning: #FFA94D;  /* 토스 오렌지 */
+    --color-danger:  #FA5252;  /* 토스 레드 */
+    --color-info:    #3182F6;  /* Toss Blue */
+
+    /* ─────────────────────────────────────────
+       그라데이션 (토스: 단색 버튼 우선, 그라데이션 최소화)
+    ───────────────────────────────────────── */
+    --gradient-accent:  linear-gradient(135deg, #3182F6 0%, #1B6EE4 100%);
+    --gradient-subtle:  linear-gradient(180deg, #FFFFFF 0%, #F8F9FA 100%);
+
+    /* 레거시 호환성 */
+    --primary-gradient:   var(--gradient-accent);
+    --secondary-gradient: var(--gradient-accent);
+    --accent-gradient:    var(--gradient-accent);
+    --success-gradient:   linear-gradient(135deg, #34C759 0%, #2AAE4B 100%);
+    --warning-gradient:   linear-gradient(135deg, #FF9500 0%, #E68500 100%);
+    --danger-gradient:    linear-gradient(135deg, #FF3B30 0%, #D62E24 100%);
+
+    /* 레거시 컬러 직접 참조 */
+    --accent-blue:    var(--accent);
+    --accent-indigo:  var(--color-indigo);
+    --accent-green:   var(--color-green);
+    --accent-orange:  var(--color-orange);
+    --accent-red:     var(--color-red);
+    --accent-purple:  var(--color-purple);
+
+    /* 레거시 텍스트 색상 */
+    --text-primary:   var(--label-primary);
+    --text-secondary: var(--label-secondary);
+    --text-muted:     var(--label-tertiary);
+
+    /* 레거시 배경 */
+    --bg-card:        var(--bg-tertiary);
+    --bg-card-hover:  var(--fill-tertiary);
+    --bg-page:        var(--bg-grouped);
+    --border-light:   var(--separator);
+
+    /* ─────────────────────────────────────────
+       섹션 상부여백 통일 토큰
+       모든 앱 섹션(.app-section)의 상단 패딩 기준
+    ───────────────────────────────────────── */
+    --section-top: var(--space-10);  /* 40px — 섹션 공통 상부여백 넓게 확보 */
+    --section-h-pad: var(--space-5); /* 20px — 섹션 좌우 패딩도 조금 넓게 */
+
+    /* ─────────────────────────────────────────
+       8pt 그리드 여백 시스템
+       Apple HIG Rule 1.5: 8pt Grid
+       4 / 8 / 12 / 16 / 20 / 24 / 32 / 40 / 48 / 64
+    ───────────────────────────────────────── */
+    --space-1:  4px;   /* 아주 작은 간격 (아이콘-텍스트) */
+    --space-2:  8px;   /* 컴팩트 간격 */
+    --space-3:  12px;  /* 소간격 */
+    --space-4:  16px;  /* 기본 패딩 */
+    --space-5:  20px;  /* 중간 패딩 */
+    --space-6:  24px;  /* 그룹 간격 */
+    --space-8:  32px;  /* 섹션 패딩 */
+    --space-10: 40px;  /* 섹션 간격 */
+    --space-12: 48px;  /* 대형 간격 */
+    --space-16: 64px;  /* 최대 간격 */
+
+    /* 레거시 호환성 */
+    --spacing-xs:  var(--space-2);   /* 8px */
+    --spacing-sm:  var(--space-4);   /* 16px */
+    --spacing-md:  var(--space-6);   /* 24px */
+    --spacing-lg:  var(--space-8);   /* 32px */
+    --spacing-xl:  var(--space-10);  /* 40px */
+    --spacing-xxl: var(--space-12);  /* 48px */
+
+    /* ─────────────────────────────────────────
+       타이포그래피 스케일
+       Apple iOS Text Style → rem 변환 (base: 16px)
+       Apple HIG: SF Pro → Web: -apple-system
+    ───────────────────────────────────────── */
+    /* Large Title  34pt */ --text-large-title:    2.125rem;
+    /* Title 1      28pt */ --text-title-1:        1.75rem;
+    /* Title 2      22pt */ --text-title-2:        1.375rem;
+    /* Title 3      20pt */ --text-title-3:        1.25rem;
+    /* Headline     17pt */ --text-headline:       1.0625rem;
+    /* Body         17pt */ --text-body:           1.0625rem;
+    /* Callout      16pt */ --text-callout:        1rem;
+    /* Subheadline  15pt */ --text-subheadline:    0.9375rem;
+    /* Footnote     13pt */ --text-footnote:       0.8125rem;
+    /* Caption 1    12pt */ --text-caption-1:      0.75rem;
+    /* Caption 2    11pt */ --text-caption-2:      0.6875rem;
+
+    /* ─────────────────────────────────────────
+       Border Radius
+       Apple UI 라운드 코너 기준
+    ───────────────────────────────────────── */
+    --radius-xs:  6px;   /* 작은 배지, 태그 */
+    --radius-sm:  10px;  /* 소형 카드, 입력필드 */
+    --radius-md:  12px;  /* 버튼 */
+    --radius-lg:  20px;  /* 커드, 모달 (토스 라운드) */
+    --radius-xl:  24px;  /* 홈 커드, 대형 커드 */
+    --radius-full: 999px; /* 배지 pill */
+
+    /* ─────────────────────────────────────────
+       그림자 (토스 기준: 최소화)
+       도형 테두리와 배경 면 분리로 구분
+    ───────────────────────────────────────── */
+    --shadow-none: none;
+    --shadow-xs: 0 1px 4px rgba(0, 0, 0, 0.04);
+    --shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.10);
+
+    /* ─────────────────────────────────────────
+       애니메이션 (Apple 기준 — 절제된 모션)
+       빠르고 자연스럽게 (iOS 기준 200-300ms)
+    ───────────────────────────────────────── */
+    --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.075);
+    --ease-out:    cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --ease-in-out: cubic-bezier(0.45, 0, 0.55, 1);
+
+    --duration-fast:   150ms;
+    --duration-normal: 250ms;
+    --duration-slow:   400ms;
+
+    /* 레거시 호환성 */
+    --transition-fast:   var(--duration-fast) var(--ease-out);
+    --transition-normal: var(--duration-normal) var(--ease-out);
+    --transition-slow:   var(--duration-slow) var(--ease-out);
+
+    /* ─────────────────────────────────────────
+       글래스모피즘 (App Bar, Lang Selector)
+       Apple HIG: vibrancy / blur background
+    ───────────────────────────────────────── */
+    --glass-bg:     rgba(255, 255, 255, 0.85);
+    --glass-blur:   saturate(180%) blur(20px);
+    --glass-border: rgba(60, 60, 67, 0.12);
+
+    /* ─────────────────────────────────────────
+       터치 타겟 최소값
+       Apple HIG Rule 1.1: 44pt minimum
+    ───────────────────────────────────────── */
+    --touch-target: 44px;
+
+    /* ─────────────────────────────────────────
+       Safe Area (iPhone Notch, Dynamic Island)
+    ───────────────────────────────────────── */
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
 }
 
+/* ─────────────────────────────────────────
+   Reset & Base
+───────────────────────────────────────── */
 *, *::before, *::after {
     margin: 0;
     padding: 0;
@@ -44,55 +228,136 @@ html {
     overflow-x: hidden;
     scroll-behavior: smooth;
     width: 100%;
+    /* 사용자 폰트 크기 설정 존중 */
+    font-size: 100%;
+    color-scheme: light;
 }
 
 body {
-    font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC', 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: #f0f4f8;
-    color: var(--text-primary);
-    line-height: 1.6;
-    font-weight: 500;
+    /* 토스 폰트 스택 — Pretendard (한국어 최적화) 우선 */
+    font-family:
+        "Pretendard",
+        -apple-system,
+        BlinkMacSystemFont,
+        "PingFang SC",
+        "Hiragino Sans GB",
+        "Noto Sans KR",
+        "Noto Sans SC",
+        system-ui,
+        sans-serif;
+    background: var(--bg-grouped);
+    color: var(--label-primary);
+    line-height: 1.5;   /* Apple HIG: body line-height 1.5 */
+    font-weight: 400;   /* Apple 기본: Regular */
+    font-size: var(--text-body);  /* 17pt = 1.0625rem */
     overflow-x: hidden;
     min-height: 100vh;
     width: 100%;
     position: relative;
+    /* 텍스트 렌더링 최적화 */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+
+    /* 앱 같은 터치 경험 (드래그 및 텍스트 선택 방지) */
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
 }
 
+/* 텍스트 입력이 필요한 요소는 선택 및 포커스 허용 */
+input, textarea, [contenteditable="true"] {
+    -webkit-user-select: auto;
+    user-select: auto;
+}
+
+/* ─────────────────────────────────────────
+   컨테이너
+───────────────────────────────────────── */
 .container {
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 var(--spacing-lg); /* 32px or 2rem */
+    padding: 0 var(--space-8); /* 32px */
 }
 
 @media (max-width: 480px) {
     .container {
-        padding: 0 16px; /* unified left-right margin */
+        padding: 0 var(--space-4); /* 16px — 모바일 */
     }
 }
 
-/* Animations */
+/* ─────────────────────────────────────────
+   포커스 스타일 (접근성)
+   Apple HIG Rule 접근성: 명확한 포커스 표시
+───────────────────────────────────────── */
+:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: var(--radius-xs);
+}
+
+:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* ─────────────────────────────────────────
+   Animations
+   Apple HIG: transform/opacity만 사용 (GPU compositor)
+───────────────────────────────────────── */
 @keyframes fadeIn {
     from { opacity: 0; }
-    to { opacity: 1; }
+    to   { opacity: 1; }
 }
 
 @keyframes slideIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fadeInDown {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translateY(-12px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes flash {
     0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
+    50%       { opacity: 0.3; }
 }
 
 @keyframes pulse-badge {
     0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
+    50%       { opacity: 0.6; }
+}
+
+/* ─────────────────────────────────────────
+   Reduced Motion
+   Apple HIG Rule 5.4: 모션 감소 지원
+───────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ─────────────────────────────────────────
+   텍스트 간소화 유틸리티 (말줄임표)
+───────────────────────────────────────── */
+.clamp-text-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.clamp-text-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }

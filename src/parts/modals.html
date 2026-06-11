@@ -34,71 +34,73 @@
 
 <!-- ===== WeChat QR Modal ===== -->
 <div id="wechat-qr-modal" class="modal-overlay" style="display:none; z-index: 10001;" onclick="closeWechatQR()">
-    <div class="modal-content" style="max-width: 320px; text-align: center; padding: 30px;"
-        onclick="event.stopPropagation()">
+    <div class="modal-content modal-wechat" onclick="event.stopPropagation()">
         <button class="modal-close" onclick="closeWechatQR()">✕</button>
-        <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: #3b82f6;" data-i18n="modal.wechat.title">联系我们 (WeChat)</h3>
-        <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px; line-height: 1.4;" data-i18n-html="modal.wechat.desc">通过扫描下方二维码<br>或复制ID添加我的微信</p>
-        <img src="/assets/wechat_qr.png"
-            style="width: 100%; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px;">
-        <div class="wechat-copy-box" style="display:flex; gap:8px;">
-            <input type="text" id="wechat-id-input" value="jeju_jk" readonly
-                style="flex:1; padding:10px; border-radius:8px; border:1px solid #ddd; font-size:0.9rem; text-align:center;">
-            <button onclick="copyWechatId()"
-                style="padding:10px 15px; background:var(--primary-gradient); color:white; border:none; border-radius:8px; font-weight:700; cursor:pointer;" data-i18n="modal.wechat.copy">复制</button>
+        <h3 class="modal-wechat-title" data-i18n="modal.wechat.title">联系我们 (WeChat)</h3>
+        <p class="modal-wechat-desc" data-i18n-html="modal.wechat.desc">通过扫描下方二维码<br>或复制ID添加我的微信</p>
+        <img src="/assets/wechat_qr.png" class="modal-wechat-qr">
+        <div class="modal-copy-row">
+            <input type="text" id="wechat-id-input" class="modal-copy-input" value="jeju_jk" readonly>
+            <button onclick="copyWechatId()" class="btn btn-primary" data-i18n="modal.wechat.copy">复制</button>
         </div>
     </div>
 </div>
 
 <!-- ===== Lost Report Form Modal ===== -->
-<div id="lost-report-modal" class="modal-overlay" style="display:none; z-index: 10001;"
-    onclick="closeLostReportModal()">
-    <div class="modal-content lost-report-form-content" onclick="event.stopPropagation()">
+
+<div id="lost-report-modal" class="modal-overlay" style="display:none; z-index: 10001; justify-content: flex-start; align-items: center;" onclick="closeLostReportModal()">
+    <div class="modal-content lost-report-form-content" style="margin-top: auto; max-height: 85vh; overflow-y: auto; box-sizing: border-box;" onclick="event.stopPropagation()">
         <button class="modal-close" onclick="closeLostReportModal()">✕</button>
         <div class="lost-report-header">
-            <h3 data-i18n="modal.lost.title"><i class="ph-duotone ph-pencil-simple color-course"></i> 登记报失物品</h3>
+            <h3 data-i18n="modal.lost.title"><i class="ph-duotone ph-pencil-simple"></i> 登记报失物品</h3>
             <p data-i18n="modal.lost.desc">请填写以下信息，我们将协助您在 LOST112 登记。 (填写越详细找回概率越高)</p>
         </div>
         <div class="lost-report-body">
-            <div class="form-group">
-                <label ><i class="ph-duotone ph-map-pin"></i> <span data-i18n="modal.lost.loc.label">丢失地点</span> (尽量详细)</label>
-                <textarea id="lost-report-location" data-i18n="modal.lost.loc.ph" placeholder="例如：西归浦每日奥来市场, 红色出租车内, GD咖啡厅2层靠窗位..."></textarea>
+            <div class="lost-form-group">
+                <label class="lost-form-label"><i class="ph-duotone ph-map-pin"></i> <span data-i18n="modal.lost.loc.label">丢失地点</span></label>
+                <textarea id="lost-report-location" class="lost-form-textarea" data-i18n="modal.lost.loc.ph" placeholder="例如：西归浦每日奥来市场, 红色出租车内, GD咖啡厅2层靠窗位..."></textarea>
             </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label ><i class="ph-duotone ph-calendar"></i> <span data-i18n="modal.lost.date.label">丢失日期</span></label>
-                    <input type="date" id="lost-report-date">
+            
+            <div class="lost-form-row">
+                <div class="lost-form-group">
+                    <label class="lost-form-label"><i class="ph-duotone ph-calendar"></i> <span data-i18n="modal.lost.date.label">丢失日期</span></label>
+                    <input type="date" id="lost-report-date" class="lost-form-input">
                 </div>
-                <div class="form-group">
-                    <label ><i class="ph-duotone ph-clock"></i> <span data-i18n="modal.lost.time.label">大概时间</span></label>
-                    <input type="time" id="lost-report-time">
-                </div>
-            </div>
-            <div class="form-group">
-                <label ><i class="ph-duotone ph-package"></i> <span data-i18n="modal.lost.item.label">物品名称</span></label>
-                <input type="text" id="lost-report-item" data-i18n="modal.lost.item.ph" placeholder="例如：黑色iPhone 15, 棕色古驰钱包, 蓝色背包...">
-            </div>
-            <div class="form-group">
-                <label ><i class="ph-duotone ph-magnifying-glass-plus"></i> <span data-i18n="modal.lost.spec.label">物品特征</span> (颜色,品牌,内部物品等)</label>
-                <textarea id="lost-report-specifics" data-i18n="modal.lost.spec.ph" placeholder="请详细描述物品特征, 帮助我们精准匹配..."></textarea>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label ><i class="ph-duotone ph-camera"></i> <span data-i18n="modal.lost.photo.label">选择文件</span> (必选)</label>
-                    <input type="file" id="lost-report-photo" accept="image/*"
-                        onchange="handleLostImageChange(event)">
-                    <div id="lost-report-photo-preview" class="photo-preview" style="display: none;"></div>
-                </div>
-                <div class="form-group">
-                    <label ><i class="ph-duotone ph-chat-circle"></i> <span data-i18n="modal.lost.wechat.label">您的微信 ID</span> (必填)</label>
-                    <input type="text" id="lost-report-name" data-i18n="modal.lost.name.ph" placeholder="请输入您的姓名" style="margin-bottom: 8px;">
-                    <input type="text" id="lost-report-wechat" data-i18n="modal.lost.wechat.ph" placeholder="方便找到后及时联系您 (微信ID/联系方式)">
+                <div class="lost-form-group">
+                    <label class="lost-form-label"><i class="ph-duotone ph-clock"></i> <span data-i18n="modal.lost.time.label">大概时间</span></label>
+                    <input type="time" id="lost-report-time" class="lost-form-input">
                 </div>
             </div>
+
+            <div class="lost-form-group">
+                <label class="lost-form-label"><i class="ph-duotone ph-package"></i> <span data-i18n="modal.lost.item.label">物品名称</span></label>
+                <input type="text" id="lost-report-item" class="lost-form-input" data-i18n="modal.lost.item.ph" placeholder="例如：黑色iPhone 15, 棕色古驰钱包, 蓝色背包...">
+            </div>
+
+            <div class="lost-form-group">
+                <label class="lost-form-label"><i class="ph-duotone ph-magnifying-glass-plus"></i> <span data-i18n="modal.lost.spec.label">物品特征</span></label>
+                <textarea id="lost-report-specifics" class="lost-form-textarea" data-i18n="modal.lost.spec.ph" placeholder="请详细描述物品特征, 帮助我们精准匹配..."></textarea>
+            </div>
+
+            <div class="lost-form-row" style="align-items: flex-start;">
+                <div class="lost-form-group">
+                    <label class="lost-form-label"><i class="ph-duotone ph-camera"></i> <span data-i18n="modal.lost.photo.label">选择文件</span> <span style="font-weight:700; font-size:0.75rem; color:var(--accent);">*</span></label>
+                    <div class="lost-form-file-wrap">
+                        <input type="file" id="lost-report-photo" class="lost-form-file-input" accept="image/*" onchange="handleLostImageChange(event)">
+                    </div>
+                    <div id="lost-report-photo-preview" class="photo-preview" style="display: none; margin-top: 10px; border-radius: 8px; overflow: hidden; border: 1px solid var(--separator);"></div>
+                </div>
+                <div class="lost-form-group">
+                    <label class="lost-form-label"><i class="ph-duotone ph-chat-circle"></i> <span data-i18n="modal.lost.wechat.label">您的微信 ID</span> <span style="font-weight:700; font-size:0.75rem; color:var(--accent);">*</span></label>
+                    <input type="text" id="lost-report-name" class="lost-form-input" data-i18n="modal.lost.name.ph" placeholder="您的姓名">
+                </div>
+            </div>
+
             <div id="lost-report-status" class="form-status"></div>
-            <div class="form-row" style="margin-top: 15px; gap: 10px;">
-                <button type="button" class="form-submit-btn secondary" style="flex: 1; margin-top: 0; background: #f1f5f9; color: #475569; box-shadow: none;" onclick="closeLostReportModal()" data-i18n="modal.lost.cancel">取消</button>
-                <button id="lost-report-submit-btn" class="form-submit-btn" style="flex: 2; margin-top: 0;" onclick="submitLostReport()" data-i18n="modal.lost.submit">提交报失登记</button>
+            
+            <div class="lost-form-actions" style="justify-content: center; width: 100%;">
+                <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="closeLostReportModal()" data-i18n="modal.lost.cancel">취소</button>
+                <button id="lost-report-submit-btn" class="btn btn-primary" style="flex: 1;" onclick="submitLostReport()" data-i18n="modal.lost.submit">분실물 등록하기</button>
             </div>
         </div>
     </div>
@@ -106,14 +108,12 @@
 
 <!-- ===== Feature Request Modal ===== -->
 <div id="feature-request-modal" class="modal-overlay" style="display:none; z-index: 10001;" onclick="closeFeatureModal()">
-    <div class="modal-content" style="max-width: 400px; padding: 30px; background: white;" onclick="event.stopPropagation()">
-        <button class="modal-close" style="color: #333;" onclick="closeFeatureModal()">✕</button>
-        <h3 style="margin-bottom: 12px; font-size: 1.25rem; color: var(--text-primary);" data-i18n="modal.feature.title"><i class="ph-duotone ph-lightbulb color-sun"></i> 提交建议或功能请求</h3>
-        <textarea id="feature-content" data-i18n="modal.feature.ph" placeholder="在此输入您的建议或发现的漏洞..."
-            style="width: 100%; min-height: 120px; padding: 15px; border-radius: 12px; border: 1.5px solid #eee; font-family: inherit; font-size: 0.95rem; resize: vertical; margin-bottom: 20px; outline: none; transition: border-color 0.2s;"></textarea>
-        <button id="feature-submit-btn" onclick="submitFeatureRequest()"
-            style="width: 100%; padding: 14px; border-radius: 12px; background: var(--primary-gradient); color: white; border: none; font-size: 1rem; font-weight: 700; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;" data-i18n="modal.feature.submit">提交反馈</button>
-        <div id="feature-status" style="margin-top: 15px; font-size: 0.85rem; text-align: center; display: none;"></div>
+    <div class="modal-content modal-sm" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeFeatureModal()">✕</button>
+        <h3 class="modal-title" data-i18n="modal.feature.title"><i class="ph-duotone ph-lightbulb color-sun"></i> 提交建议或功能请求</h3>
+        <textarea id="feature-content" class="modal-textarea" data-i18n="modal.feature.ph" placeholder="在此输入您的建议或发现的漏洞..."></textarea>
+        <button id="feature-submit-btn" class="btn btn-primary" onclick="submitFeatureRequest()" style="width: 100%;" data-i18n="modal.feature.submit">提交反馈</button>
+        <div id="feature-status" class="modal-status" style="display: none;"></div>
     </div>
 </div>
 
@@ -122,57 +122,49 @@
     <div class="modal-content share-modal-content" onclick="event.stopPropagation()">
         <button class="modal-close" onclick="closeShareModal()">✕</button>
         <div class="share-header">
-            <h3 style="margin-bottom: 12px; font-size: 1.25rem; color: var(--text-primary); text-align: center;" data-i18n="modal.share.title"><i class="ph-duotone ph-export color-hallasan"></i> 分享到 SNS</h3>
-            <p style="font-size: 0.9rem; color: #666; text-align: center; margin-bottom: 20px;" data-i18n="modal.share.desc">分享济州岛实时旅行信息</p>
+            <h3 class="modal-title" style="text-align: center;" data-i18n="modal.share.title"><i class="ph-duotone ph-export color-hallasan"></i> 分享到 SNS</h3>
+            <p class="modal-desc" style="text-align: center;" data-i18n="modal.share.desc">分享济州岛实时旅行信息</p>
         </div>
-        <div class="share-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px;">
-            <button class="share-option-btn wechat-btn" onclick="copyCurrentUrl('wechat')" style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 15px; border-radius: 16px; border: 1px solid #eee; background: white; cursor: pointer;">
-                <div class="share-icon" style="font-size: 1.8rem;"><i class="ph-duotone ph-chat-circle-text color-reward"></i></div>
-                <span style="font-size: 0.8rem; font-weight: 600;" data-i18n="modal.share.wechat">微信分享</span>
+        <div class="share-grid">
+            <button class="share-option-btn" onclick="copyCurrentUrl('wechat')">
+                <div class="share-icon"><i class="ph-duotone ph-chat-circle-text"></i></div>
+                <span data-i18n="modal.share.wechat">微信分享</span>
             </button>
-            <button class="share-option-btn xhs-btn" onclick="copyCurrentUrl('xhs')" style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 15px; border-radius: 16px; border: 1px solid #eee; background: white; cursor: pointer;">
-                <div class="share-icon" style="font-size: 1.8rem;"><i class="ph-duotone ph-book-bookmark color-cctv"></i></div>
-                <span style="font-size: 0.8rem; font-weight: 600;" data-i18n="modal.share.xhs">小红书分享</span>
+            <button class="share-option-btn" onclick="copyCurrentUrl('xhs')">
+                <div class="share-icon"><i class="ph-duotone ph-book-bookmark"></i></div>
+                <span data-i18n="modal.share.xhs">小红书分享</span>
             </button>
-            <button class="share-option-btn universal-btn" onclick="handleWebShare()" style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 15px; border-radius: 16px; border: 1px solid #eee; background: white; cursor: pointer;">
-                <div class="share-icon" style="font-size: 1.8rem;"><i class="ph-duotone ph-link color-airport"></i></div>
-                <span style="font-size: 0.8rem; font-weight: 600;" data-i18n="modal.share.system">系统分享</span>
+            <button class="share-option-btn" onclick="handleWebShare()">
+                <div class="share-icon"><i class="ph-duotone ph-link"></i></div>
+                <span data-i18n="modal.share.system">系统分享</span>
             </button>
         </div>
-        <div class="share-copy-box" style="display:flex; gap:8px;">
-            <input type="text" id="share-url-input" value="https://jeju-live.com" readonly
-                style="flex:1; padding:10px; border-radius:8px; border:1px solid #ddd; font-size:0.9rem; text-align:center;">
-            <button onclick="copyCurrentUrl()"
-                style="padding:10px 15px; background:var(--primary-gradient); color:white; border:none; border-radius:8px; font-weight:700; cursor:pointer;" data-i18n="modal.share.copy">复制</button>
+        <div class="share-copy-row">
+            <input type="text" id="share-url-input" class="share-url-input" value="https://jeju-live.com" readonly>
+            <button onclick="copyCurrentUrl()" class="btn btn-primary" data-i18n="modal.share.copy">复制</button>
         </div>
-        <div id="share-status" style="margin-top: 15px; font-size: 0.85rem; text-align: center; display: none; color: #07c160; font-weight: 600;"></div>
+        <div id="share-status" class="share-status" style="display: none;"></div>
     </div>
 </div>
 
 <!-- ===== Customer Service Modal ===== -->
 <div id="cs-modal" class="modal-overlay" style="display:none; z-index: 10001;" onclick="closeCSModal()">
-    <div class="modal-content" style="max-width: 400px; padding: 30px; background: white;" onclick="event.stopPropagation()">
-        <button class="modal-close" style="color: #333;" onclick="closeCSModal()">✕</button>
-        <h3 style="margin-bottom: 12px; font-size: 1.25rem; color: var(--text-primary);" data-i18n="modal.cs.title"><i class="ph-duotone ph-headphones color-weather"></i> 联系客服</h3>
-        <p style="font-size: 0.9rem; color: #666; margin-bottom: 20px; line-height: 1.4;" data-i18n="modal.cs.desc">
-            请输入您的投诉、建议或业务咨询。
-        </p>
+    <div class="modal-content modal-sm" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeCSModal()">✕</button>
+        <h3 class="modal-title" data-i18n="modal.cs.title"><i class="ph-duotone ph-headphones color-weather"></i> 联系客服</h3>
+        <p class="modal-desc" data-i18n="modal.cs.desc">请输入您的投诉、建议或业务咨询。</p>
 
         <div class="form-group" style="margin-bottom: 15px;">
-            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #475569; margin-bottom: 8px;" data-i18n="modal.cs.content.label">投诉建议 *</label>
-            <textarea id="cs-content" data-i18n="modal.cs.content.ph" placeholder="请输入内容..."
-                style="width: 100%; min-height: 120px; padding: 12px; border-radius: 8px; border: 1.5px solid #eee; font-family: inherit; font-size: 0.9rem; resize: vertical; outline: none;"></textarea>
+            <label class="modal-label" data-i18n="modal.cs.content.label">投诉建议 *</label>
+            <textarea id="cs-content" class="modal-textarea" data-i18n="modal.cs.content.ph" placeholder="请输入内容..."></textarea>
         </div>
 
         <div class="form-group" style="margin-bottom: 25px;">
-            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #475569; margin-bottom: 8px;" data-i18n="modal.cs.wechat.label">微信 ID (选填)</label>
-            <input type="text" id="cs-wechat" data-i18n="modal.cs.wechat.ph" placeholder="您的微信 ID"
-                style="width: 100%; padding: 12px; border-radius: 8px; border: 1.5px solid #eee; font-size: 0.9rem; outline: none;">
+            <label class="modal-label" data-i18n="modal.cs.wechat.label">微信 ID (选填)</label>
+            <input type="text" id="cs-wechat" class="modal-input" data-i18n="modal.cs.wechat.ph" placeholder="您的微信 ID">
         </div>
 
-        <button id="cs-submit-btn" onclick="submitCSFeedback()"
-            style="width: 100%; padding: 14px; border-radius: 12px; background: var(--primary-gradient); color: white; border: none; font-size: 1rem; font-weight: 700; cursor: pointer;" data-i18n="modal.cs.submit">提交</button>
-        
-        <div id="cs-status" style="margin-top: 15px; font-size: 0.85rem; text-align: center; display: none;"></div>
+        <button id="cs-submit-btn" class="btn btn-primary" onclick="submitCSFeedback()" style="width: 100%;" data-i18n="modal.cs.submit">提交</button>
+        <div id="cs-status" class="modal-status" style="display: none;"></div>
     </div>
 </div>

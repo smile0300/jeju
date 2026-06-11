@@ -161,6 +161,14 @@ window.addEventListener('popstate', (event) => {
     }
 });
 
+// Close lang selector when clicking outside
+document.addEventListener('click', function(e) {
+    const langSelector = document.querySelector('.lang-selector');
+    if (langSelector && !e.target.closest('.lang-selector')) {
+        langSelector.classList.remove('show');
+    }
+});
+
 window.addEventListener('load', () => {
     initI18n(); // 다국어 초기화 (저장된 언어 적용)
     initCCTV();

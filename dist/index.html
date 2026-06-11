@@ -9,6 +9,18 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
 })(window,document,'script','dataLayer','GTM-PH989GKL');</script>
 <!-- End Google Tag Manager -->
+
+    <!-- Google Analytics (GA4) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z9BZ11GZQ1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      // 페이지 뷰 수동 전송을 위해 send_page_view: false 설정 (SPA 라우터에서 수동 전송)
+      gtag('config', 'G-Z9BZ11GZQ1', { 'send_page_view': false });
+    </script>
+    <!-- End Google Analytics -->
     <!-- Google AdSense Manual Ads Loader -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7292095769506033"
         crossorigin="anonymous"></script>
@@ -81,8 +93,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         }
     </script>
 
-  <script type="module" crossorigin src="/assets/index-DuKg6HfI.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-yEZkKNT3.css">
+  <script type="module" crossorigin src="/assets/index-DowUCrzG.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-ugVFwjXS.css">
 </head>
 
 <body>
@@ -97,9 +109,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="home-screen">
         <!-- 언어 선택기 (우측 상단) -->
         <div class="lang-selector">
-            <button class="lang-btn active" data-lang="zh" onclick="setLanguage('zh')">CN</button>
-            <button class="lang-btn" data-lang="ko" onclick="setLanguage('ko')">KR</button>
-            <button class="lang-btn" data-lang="en" onclick="setLanguage('en')">EN</button>
+            <button class="lang-icon-btn" onclick="document.querySelector('.lang-selector').classList.toggle('show')">
+                <i class="ph-duotone ph-globe"></i>
+            </button>
+            <div class="lang-dropdown">
+                <button class="lang-btn active" data-lang="zh" onclick="setLanguage('zh')">CN</button>
+                <button class="lang-btn" data-lang="ko" onclick="setLanguage('ko')">KR</button>
+                <button class="lang-btn" data-lang="en" onclick="setLanguage('en')">EN</button>
+            </div>
         </div>
 
         <div class="home-welcome">
@@ -110,9 +127,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
         <div class="home-grid">
             <button class="home-item item-disabled" disabled type="button">
-                <span class="item-icon"><i class="ph-duotone ph-webcam color-cctv"></i></span>
+                <span class="item-icon"><i class="ph-duotone ph-video-camera color-cctv"></i></span>
                 <span class="item-label" data-i18n="nav.cctv">实时监控</span>
-                <span class="coming-soon-badge" style="background-color: #f59e0b; color: white;" data-i18n="badge.maintenance">维护中</span>
+                <span class="coming-soon-badge" style="background-color: #f59e0b; color: white;">VIP</span>
             </button>
             <button class="home-item item-weather" onclick="showSection('weather')" type="button">
                 <span class="item-icon"><i class="ph-duotone ph-cloud-sun color-weather"></i></span>
@@ -152,6 +169,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
     </div>
 </section>
+
+<script>
+    // 언어 드롭다운 외부 클릭 시 닫기
+    document.addEventListener('click', function(event) {
+        const langSelector = document.querySelector('.lang-selector');
+        if (langSelector && langSelector.classList.contains('show')) {
+            // 클릭된 요소가 lang-selector 내부가 아니면 닫기
+            if (!langSelector.contains(event.target)) {
+                langSelector.classList.remove('show');
+            }
+        }
+    });
+</script>
 
     <!-- ===== CCTV Section ===== --><section id="cctv" class="app-section"><header class="app-bar"><button class="back-btn" onclick="showSection('home')">←</button><h2 class="bar-title"><i class="ph-duotone ph-webcam color-cctv"></i> 实时监控 (CCTV)</h2></header><div class="cctv-container"><!-- 필터 탭 --><div class="cctv-tabs"><button class="tab-btn active" data-region="all" onclick="filterByRegion('all')">全部</button><button class="tab-btn" data-region="jeju" onclick="filterByRegion('jeju')">济州市</button><button class="tab-btn" data-region="seogwipo" onclick="filterByRegion('seogwipo')">西归浦市</button><button class="tab-btn" data-region="east" onclick="filterByRegion('east')">东部</button><button class="tab-btn" data-region="west" onclick="filterByRegion('west')">西部</button><button class="tab-btn" data-region="udo" onclick="filterByRegion('udo')">牛岛</button></div><div id="cctv-map-wrapper"><svg class="jeju-svg-map" viewBox="0 0 3507 2480" xmlns="http://www.w3.org/2000/svg">
             <defs>
@@ -504,12 +534,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             </div>
 
             <!-- 한라산 예약 및 공지사항 버튼 -->
-            <div class="hallasan-reserve-container">
-                <button class="hallasan-reserve-btn" onclick="window.open('https://visithalla.jeju.go.kr/main/main.do?language=zh_CN', '_blank')" >
+            <div class="action-row">
+                <button class="btn btn-primary" onclick="window.open('https://visithalla.jeju.go.kr/main/main.do?language=zh_CN', '_blank')">
                     <i class="ph-duotone ph-calendar-check"></i> <span data-i18n="hallasan.reserve">预约汉拿山</span>
                 </button>
-                <button class="hallasan-reserve-btn notice-btn" onclick="window.open('https://www.jeju.go.kr/hallasan/notice/notice.htm', '_blank')" >
-                    <i class="ph-duotone ph-megaphone"></i> <span data-i18n="hallasan.notice">汉拿山公告</span>
+                <button class="btn btn-secondary" onclick="window.open('https://www.jeju.go.kr/hallasan/notice/notice.htm', '_blank')">
+                    <i class="ph-duotone ph-megaphone" style="color: var(--label-secondary);"></i> <span data-i18n="hallasan.notice">汉拿山公告</span>
                 </button>
             </div>
 
@@ -530,13 +560,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </header>
     <div class="section section-alt">
         <div class="container">
-            <div style="text-align:center; margin-top: 45px; margin-bottom:16px; display: flex; flex-direction: column; gap: 10px; align-items: center;">
-                <a href="https://www.trip.com/t/epPtOVtJzT2" target="_blank"
-                    style="width: 250px; padding:12px 28px; background:linear-gradient(135deg,#003580,#0055b8); color:#fff; font-size:0.95rem; font-weight:700; border-radius:50px; text-decoration:none; box-shadow:0 4px 14px rgba(0,53,128,0.25); transition:transform 0.15s, box-shadow 0.15s;"
-                    onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 18px rgba(0,53,128,0.35)'"
-                    onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 14px rgba(0,53,128,0.25)'"
-                    data-i18n="airport.ticket"><i class="ph-duotone ph-ticket color-airport"></i> 中国 ↔ 济州 机票查询</a>
-            </div>
 
             <div class="flight-tabs">
                 <button class="flight-tab active" id="tab-arrive" onclick="switchFlightTab('arrive')" data-i18n="airport.arrive">到达航班</button>
@@ -569,10 +592,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 <!-- script.js에서 동적으로 생성됩니다 -->
             </div>
 
-            <!-- Ad Unit: Festival Filter Bottom -->
-            <div style="text-align:center; margin-top: 20px; margin-bottom:25px;">
-                <a href="https://www.trip.com/t/DbXrep5KzT2" target="_blank" style="display:inline-block; padding:12px 28px; background:linear-gradient(135deg,#ff9800,#f57c00); color:#fff; font-size:0.95rem; font-weight:700; border-radius:50px; text-decoration:none; box-shadow:0 4px 14px rgba(245,124,0,0.25); transition:transform 0.15s, box-shadow 0.15s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 18px rgba(245,124,0,0.35)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 14px rgba(245,124,0,0.25)'" ><i class="ph-duotone ph-ticket"></i> <span data-i18n="festival.ticket">查看景点门票</span></a>
-            </div>
 
             <div id="festival-list" class="festival-list"></div>
         </div>
@@ -587,7 +606,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </header>
     <div class="section">
         <div class="container">
-            <div class="lost-header-row" style="margin-top: 45px;">
+            <div class="lost-header-row" style="margin-top: var(--section-top);">
                 <div class="lost-filter-container search-filter-box">
                     <div class="filter-row">
                         <select id="pkupCmdtyLclsfCd" class="filter-select" onchange="fetchFoundGoodsManual()">
@@ -636,21 +655,51 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     </div>
                 </div>
 
-                <!-- 분실물 신고 버튼 -->
-                <div style="margin-bottom: 25px;">
-                    <button class="lost-report-btn btn btn-outline" onclick="openLostReportModal()" data-i18n="lost.report.btn">
-                        <i class="ph-duotone ph-pencil-simple color-course"></i> 找不到我的物品？在此登记报失
+                <!-- 분실물 신고 및 이미지 검색 버튼 -->
+                <div class="action-row">
+                    <button class="lost-report-btn btn btn-secondary" onclick="openLostReportModal()" data-i18n="lost.report.btn">
+                        <i class="ph-duotone ph-pencil-simple" style="color: var(--label-secondary);"></i>
                     </button>
+                    <button class="btn btn-primary" onclick="document.getElementById('imageSearchInput').click()" style="position: relative;">
+                        <i class="ph-duotone ph-camera"></i> <span data-i18n="lost.search.image">사진으로 물건찾기</span>
+                        <span class="badge-beta">BETA</span>
+                    </button>
+                    <input type="file" id="imageSearchInput" accept="image/*" style="display: none;" onchange="handleImageSearch(event)">
                 </div>
-                <div id="lost-result-count" class="lost-result-count" data-i18n="lost.searching">正在查询...</div>
+                <div id="lost-result-count" class="lost-result-count"></div>
                 <div class="view-toggle-container">
                     <button id="btn-view-card" class="view-toggle-btn active" onclick="switchLostView('card')" data-i18n="lost.view.card">卡片模式</button>
                     <button id="btn-view-table" class="view-toggle-btn" onclick="switchLostView('table')" data-i18n="lost.view.table">表格模式</button>
                 </div>
             </div>
+            <div id="lost-goods-grid" class="lost-goods-grid active">
+                <div class="lost-notice-board" style="grid-column: 1 / -1; padding: 24px 20px; background: var(--color-bg-card); border-radius: 12px; margin-top: 10px; text-align: left; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-left: 4px solid #D1D5DB;">
+                    <h3 style="margin-top: 0; color: var(--label-primary); font-size: 18px; display: flex; align-items: center; gap: 8px; margin-bottom: 20px;">
+                        <i class="ph-fill ph-info" style="color: #3182f6;"></i> <span data-i18n="lost.notice.title">분실물 센터 이용 안내</span>
+                    </h3>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 16px;">
+                        <!-- 사용방법 -->
+                        <div>
+                            <h4 style="margin: 0 0 8px 0; color: var(--label-primary); font-size: 15px; display: flex; align-items: center; gap: 6px;"><i class="ph-fill ph-book-open" style="color: #3182f6;"></i> <span data-i18n="lost.notice.howto">사용 방법</span></h4>
+                            <ul style="padding-left: 20px; color: var(--color-text-sub); line-height: 1.6; font-size: 13.5px; margin: 0;">
+                                <li style="margin-bottom: 6px;" data-i18n-html="lost.notice.how1">원하는 <b>날짜</b>와 <b>분류</b>를 선택 후 검색 버튼을 누르면 조회됩니다.</li>
+                                <li style="margin-bottom: 6px;" data-i18n-html="lost.notice.how2"><b>카드 모드</b>: 사진이 등록된 습득물만 빠르게 훑어볼 수 있습니다.</li>
+                                <li style="margin-bottom: 0;" data-i18n-html="lost.notice.how3"><b>표 모드</b>: 사진이 없는 물품을 포함한 모든 상세 정보를 확인할 수 있습니다.</li>
+                            </ul>
+                        </div>
 
-            <div id="lost-goods-grid" class="lost-goods-grid active"></div>
-
+                        <!-- 공지사항 -->
+                        <div>
+                            <h4 style="margin: 0 0 8px 0; color: var(--label-primary); font-size: 15px; display: flex; align-items: center; gap: 6px;"><i class="ph-fill ph-warning-circle" style="color: #3182f6;"></i> <span data-i18n="lost.notice.alert">알아두세요 (공지)</span></h4>
+                            <ul style="padding-left: 20px; color: var(--color-text-sub); line-height: 1.6; font-size: 13.5px; margin: 0;">
+                                <li style="margin-bottom: 6px;" data-i18n-html="lost.notice.alert1">습득물이 시스템에 등록되기까지 <b>1~3일 정도 소요</b>될 수 있으니 주기적인 확인을 권장합니다.</li>
+                                <li style="margin-bottom: 0;" data-i18n-html="lost.notice.alert2">보관소에서 물품 수령 시 본인 확인을 위한 <b>신분증</b>을 지참해 주세요.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div id="lost-goods-table-container" class="lost-table-container">
                 <table class="lost-table">
                     <thead>
@@ -684,10 +733,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="container reward-container">
             <!-- Notice Banner -->
             <div class="reward-trust-banner" style="margin-bottom: 20px; padding: 15px;">
-                <div class="trust-badge-icon" style="width: 40px; height: 40px; font-size: 1.2rem;"><i class="ph-duotone ph-megaphone color-gnb"></i></div>
+                <div class="trust-badge-icon"><i class="ph-duotone ph-megaphone color-gnb"></i></div>
                 <div class="trust-info">
-                    <div class="trust-title" style="font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" data-i18n="reward.banner.title">寻找帮忙带失物到中国机场的朋友！</div>
-                    <div class="trust-desc" style="font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" data-i18n="reward.banner.desc">回国途中顺便赚点零用钱吧</div>
+                    <div class="trust-title text-ellipsis" data-i18n="reward.banner.title">寻找帮忙带失物到中国机场的朋友！</div>
+                    <div class="trust-desc text-ellipsis" data-i18n="reward.banner.desc">回国途中顺便赚点零用钱吧</div>
                 </div>
             </div>
             <!-- Mission List Container -->
@@ -703,84 +752,40 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- ===== Footer ===== -->
 <footer class="app-footer">
     <div class="container" style="padding: 0 15px;">
-        <!-- ===== Top Share Section (Circular Icons) ===== -->
-        <div class="footer-share-top" style="padding-top: 10px; margin-bottom: 5px; border-bottom: 0px;">
-            <div class="share-circles-row">
-                <div class="share-group">
-                    <div class="share-group-title" data-i18n="footer.share">链接分享</div>
-                    <div class="share-icons-container">
-                        <!-- Xiaohongshu Share -->
-                        <div class="share-circle-item" onclick="shareToPlatform('xhs')">
-                            <div class="share-circle xhs-circle">
-                                <!-- Official Xiaohongshu brand mark from Simple Icons -->
-                                <svg viewBox="0 0 24 24" fill="white" style="width: 30px; height: 30px;">
-                                    <path d="M22.405 9.879c.002.016.01.02.07.019h.725a.797.797 0 0 0 .78-.972.794.794 0 0 0-.884-.618a.795.795 0 0 0-.692.794c0 .101-.002.666.001.777zm-11.509 4.808c-.203.001-1.353.004-1.685.003a2.528 2.528 0 0 1-.766-.126.025.025 0 0 0-.03.014L7.7 16.127a.025.025 0 0 0 .01.032c.111.06.336.124.495.124.66.01 1.32.002 1.981 0 .01 0 .02-.006.023-.015l.712-1.545a.025.025 0 0 0-.024-.036zM.477 9.91c-.071 0-.076.002-.076.01a.834.834 0 0 0-.01.08c-.027.397-.038.495-.234 3.06-.012.24-.034.389-.135.607-.026.057-.033.042.003.112.046.092.681 1.523.787 1.74.008.015.011.02.017.02.008 0 .033-.026.047-.044.147-.187.268-.391.371-.606.306-.635.44-1.325.486-1.706.014-.11.021-.22.03-.33l.204-2.616.022-.293c.003-.029 0-.033-.03-.034zm7.203 3.757a1.427 1.427 0 0 1-.135-.607c-.004-.084-.031-.39-.235-3.06a.443.443 0 0 0-.01-.082c-.004-.011-.052-.008-.076-.008h-1.48c-.03.001-.034.005-.03.034l.021.293c.076.982.153 1.964.233 2.946.05.4.186 1.085.487 1.706.103.215.223.419.37.606.015.018.037.051.048.049c.02-.003.742-1.642.804-1.765c.036-.07.03-.055.003-.112zm3.861-.913h-.872a.126.126 0 0 1-.116-.178l1.178-2.625a.025.025 0 0 0-.023-.035l-1.318-.003a.148.148 0 0 1-.135-.21l.876-1.954a.025.025 0 0 0-.023-.035h-1.56c-.01 0-.02.006-.024.015l-.926 2.068c-.085.169-.314.634-.399.938a.534.534 0 0 0-.02.191.46.46 0 0 0 .23.378.981.981 0 0 0 .46.119h.59c.041 0-.688 1.482-.834 1.972a.53.53 0 0 0-.023.172.465.465 0 0 0 .23.398c.15.092.342.12.475.12l1.66-.001c.01 0 .02-.006.023-.015l.575-1.28a.025.025 0 0 0-.024-.035zm-6.93-4.937H3.1a.032.032 0 0 0-.034.033c0 1.048-.01 2.795-.01 6.829 0 .288-.269.262-.28.262h-.74c-.04.001-.044.004-.04.047c.001.037.465 1.064.555 1.263.01.02.03.033.051.033c.157.003.767.009.938-.014.153-.02.3-.06.438-.132.3-.156.49-.419.595-.765.052-.172.075-.353.075-.533.002-2.33 0-4.66-.007-6.991a.032.032 0 0 0-.032-.032zm11.784 6.896c0-.014-.01-.021-.024-.022h-1.465c-.048-.001-.049-.002-.05-.049v-4.66c0-.072-.005-.07.07-.07h.863c.08 0 .075.004.075-.074V8.393c0-.082.006-.076-.08-.076h-3.5c-.064 0-.075-.006-.075.073v1.445c0 .083-.006.077.08.077h.854c.075 0 .07-.004.07.07v4.624c0 .095.008.084-.085.084-.37 0-1.11-.002-1.304 0-.048.001-.06.03-.06.03l-.697 1.519s-.014.025-.008.036c.006.01.013.008.058.008 1.748.003 3.495.002 5.243.002.03-.001.034-.006.035-.033v-1.539zm4.177-3.43c0 .013-.007.023-.02.024-.346.006-.692.004-1.037.004-.014-.002-.022-.01-.022-.024-.005-.434-.007-.869-.01-1.303 0-.072-.006-.071.07-.07l.733-.003c.041 0 .081.002.12.015.093.025.16.107.165.204.006.431.002 1.153.001 1.153zm2.67.244a1.953 1.953 0 0 0-.883-.222h-.18c-.04-.001-.04-.003-.042-.04V10.21c0-.132-.007-.263-.025-.394a1.823 1.823 0 0 0-.153-.53 1.533 1.533 0 0 0-.677-.71 2.167 2.167 0 0 0-1-.258c-.153-.003-.567 0-.72 0-.07 0-.068.004-.068-.065V7.76c0-.031-.01-.41-.046-.039H17.93s-.016 0-.023.007c-.006.006-.008.012-.008.023v.546c-.008.036-.057.015-.082.022h-.95c-.022.002-.028.008-.03.032v1.481c0 .09-.004.082.082.082h.913c.082 0 .072.128.072.128V11.19s.003.117-.06.117h-1.482c-.068 0-.06.082-.06.082v1.445s-.01.068.064.068h1.457c.082 0 .076-.006.076.079v3.225c0 .088-.007.081.082.081h1.43c.09 0 .082.007.082-.08v-3.27c0-.029.006-.035.033-.035l2.323-.003c.098 0 .191.02.28.061a.46.46 0 0 1 .274.407c.008.395.003.79.003 1.185 0 .259-.107.367-.33.367h-1.218c-.023.002-.029.008-.028.033.184.437.374.871.57 1.303a.045.045 0 0 0 .04.026c.17.005.34.002.51.003.15-.002.517.004.666-.01a2.03 2.03 0 0 0 .408-.075c.59-.18.975-.698.976-1.313v-1.981c0-.128-.01-.254-.034-.38 0 .078-.029-.641-.724-.998z"/>
-                                </svg>
-                            </div>
-                        </div>
-                        <!-- WeChat Share -->
-                        <div class="share-circle-item" onclick="shareToPlatform('wechat')">
-                            <div class="share-circle wechat-circle">
-                                <svg viewBox="0 0 24 24" fill="white" style="width: 32px; height: 32px;">
-                                    <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213c0 .163.13.295.295.295a.33.33 0 0 0 .167-.054l1.903-1.114a.86.86 0 0 1 .717-.098a10.2 10.2 0 0 0 2.837.403c.276 0 .543-.027.811-.05c-.857-2.578.157-4.972 1.932-6.446c1.703-1.415 3.882-1.98 5.853-1.838c-.576-3.583-4.196-6.348-8.596-6.348M5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178a1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18m5.34 2.867c-1.797-.052-3.746.512-5.28 1.786c-1.72 1.428-2.687 3.72-1.78 6.22c.942 2.453 3.666 4.229 6.884 4.229c.826 0 1.622-.12 2.361-.336a.72.72 0 0 1 .598.082l1.584.926a.3.3 0 0 0 .14.047c.134 0 .24-.111.24-.247c0-.06-.023-.12-.038-.177l-.327-1.233a.6.6 0 0 1-.023-.156a.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983a.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983a.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982" />
-                                </svg>
-                            </div>
-                        </div>
-                        <!-- Link Copy -->
-                        <div class="share-circle-item" onclick="shareToPlatform('copy')">
-                            <div class="share-circle url-circle">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 26px; height: 26px; color: #475569;">
-                                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <!-- ===== Top Share Section (Text Buttons Row) ===== -->
+        <div class="footer-share-top">
+            <div class="footer-action-row">
+                
+                <!-- Xiaohongshu (Link to Profile) -->
+                <button class="footer-text-btn bg-xiaohongshu" onclick="window.open('https://www.xiaohongshu.com/user/profile/671324ca000000001d0207f6?xhsshare=userQrCode', '_blank')" aria-label="Xiaohongshu" data-i18n="footer.social.xiaohongshu">
+                    XHS
+                </button>
+
+                <!-- WeChat (Open QR Modal) -->
+                <button class="footer-text-btn bg-wechat" onclick="openWechatQR()" aria-label="WeChat" data-i18n="footer.social.wechat">
+                    WECHAT
+                </button>
+
+                <!-- Link Copy -->
+                <button class="footer-text-btn bg-copy" onclick="shareToPlatform('copy')" aria-label="Copy Link" data-i18n="footer.share">
+                    LINK
+                </button>
+
                 <!-- Customer Service -->
-                <div class="share-group">
-                    <div class="share-group-title" data-i18n="footer.cs">客服中心</div>
-                    <div class="share-icons-container">
-                        <div class="share-circle-item" onclick="openCSModal()">
-                            <div class="share-circle cs-circle">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 28px; height: 28px;">
-                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <button class="footer-text-btn bg-cs" onclick="openCSModal()" aria-label="Customer Service" data-i18n="footer.cs">
+                    CS
+                </button>
+                
             </div>
         </div>
 
-        <div class="footer-grid">
-            <div class="footer-section">
-                <div class="footer-qr-container">
-                    <div class="qr-item">
-                        <!-- 소홍서 프로필 직접 연동 -->
-                        <a href="https://www.xiaohongshu.com/user/profile/671324ca000000001d0207f6?xhsshare=userQrCode"
-                            target="_blank">
-                            <img src="/assets/qr.jpg" alt="Xiaohongshu QR" class="qr-img">
-                        </a>
-                        <p class="qr-label" data-i18n="footer.social.xiaohongshu">小红书</p>
-                    </div>
-                    <div class="qr-item">
-                        <a href="javascript:void(0)" onclick="openWechatQR()">
-                            <img src="/assets/wechat_qr.png" alt="WeChat QR" class="qr-img">
-                        </a>
-                        <p class="qr-label" data-i18n="footer.social.wechat">微信</p>
-                    </div>
-                </div>
+        <div class="footer-bottom" style="text-align: center; padding-bottom: 20px;">
+            <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 12px;">
+                <a href="/terms" class="footer-legal-link">이용약관</a>
+                <a href="/privacy" class="footer-legal-link primary">개인정보처리방침</a>
             </div>
-            <div class="footer-section source-compact" style="text-align: center; margin-top: 10px;">
-                <p class="source-text"
-                    style="font-size: 0.7rem; color: var(--text-muted); opacity: 0.8; margin-bottom: 4px;"
-                    data-i18n="footer.data.notice">数据为实时观测资料，根据数据接收情况可能会出现未接收的情况。</p>
-                <p class="source-text" style="font-size: 0.7rem; color: var(--text-muted); opacity: 0.8;">Data
-                    Sources: KMA, KAC, KECO, Jeju Province, Visit Jeju, LOST112</p>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p data-i18n="footer.copyright">© 2026 济州旅行秘书 · 保留所有权利</p>
+            <p class="source-text" style="font-size: 0.75rem; color: var(--label-tertiary); margin-bottom: 6px;">Data Sources: KMA, KAC, KECO, Visit Jeju, LOST112</p>
+            <p style="font-size: 0.8rem; color: var(--label-secondary);">© 2026 JEJU-LIVE · All Rights Reserved</p>
         </div>
     </div>
 </footer>
@@ -821,71 +826,73 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <!-- ===== WeChat QR Modal ===== -->
 <div id="wechat-qr-modal" class="modal-overlay" style="display:none; z-index: 10001;" onclick="closeWechatQR()">
-    <div class="modal-content" style="max-width: 320px; text-align: center; padding: 30px;"
-        onclick="event.stopPropagation()">
+    <div class="modal-content modal-wechat" onclick="event.stopPropagation()">
         <button class="modal-close" onclick="closeWechatQR()">✕</button>
-        <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: #3b82f6;" data-i18n="modal.wechat.title">联系我们 (WeChat)</h3>
-        <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px; line-height: 1.4;" data-i18n-html="modal.wechat.desc">通过扫描下方二维码<br>或复制ID添加我的微信</p>
-        <img src="/assets/wechat_qr.png"
-            style="width: 100%; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px;">
-        <div class="wechat-copy-box" style="display:flex; gap:8px;">
-            <input type="text" id="wechat-id-input" value="jeju_jk" readonly
-                style="flex:1; padding:10px; border-radius:8px; border:1px solid #ddd; font-size:0.9rem; text-align:center;">
-            <button onclick="copyWechatId()"
-                style="padding:10px 15px; background:var(--primary-gradient); color:white; border:none; border-radius:8px; font-weight:700; cursor:pointer;" data-i18n="modal.wechat.copy">复制</button>
+        <h3 class="modal-wechat-title" data-i18n="modal.wechat.title">联系我们 (WeChat)</h3>
+        <p class="modal-wechat-desc" data-i18n-html="modal.wechat.desc">通过扫描下方二维码<br>或复制ID添加我的微信</p>
+        <img src="/assets/wechat_qr.png" class="modal-wechat-qr">
+        <div class="modal-copy-row">
+            <input type="text" id="wechat-id-input" class="modal-copy-input" value="jeju_jk" readonly>
+            <button onclick="copyWechatId()" class="btn btn-primary" data-i18n="modal.wechat.copy">复制</button>
         </div>
     </div>
 </div>
 
 <!-- ===== Lost Report Form Modal ===== -->
-<div id="lost-report-modal" class="modal-overlay" style="display:none; z-index: 10001;"
-    onclick="closeLostReportModal()">
-    <div class="modal-content lost-report-form-content" onclick="event.stopPropagation()">
+
+<div id="lost-report-modal" class="modal-overlay" style="display:none; z-index: 10001; justify-content: flex-start; align-items: center;" onclick="closeLostReportModal()">
+    <div class="modal-content lost-report-form-content" style="margin-top: auto; max-height: 85vh; overflow-y: auto; box-sizing: border-box;" onclick="event.stopPropagation()">
         <button class="modal-close" onclick="closeLostReportModal()">✕</button>
         <div class="lost-report-header">
-            <h3 data-i18n="modal.lost.title"><i class="ph-duotone ph-pencil-simple color-course"></i> 登记报失物品</h3>
+            <h3 data-i18n="modal.lost.title"><i class="ph-duotone ph-pencil-simple"></i> 登记报失物品</h3>
             <p data-i18n="modal.lost.desc">请填写以下信息，我们将协助您在 LOST112 登记。 (填写越详细找回概率越高)</p>
         </div>
         <div class="lost-report-body">
-            <div class="form-group">
-                <label ><i class="ph-duotone ph-map-pin"></i> <span data-i18n="modal.lost.loc.label">丢失地点</span> (尽量详细)</label>
-                <textarea id="lost-report-location" data-i18n="modal.lost.loc.ph" placeholder="例如：西归浦每日奥来市场, 红色出租车内, GD咖啡厅2层靠窗位..."></textarea>
+            <div class="lost-form-group">
+                <label class="lost-form-label"><i class="ph-duotone ph-map-pin"></i> <span data-i18n="modal.lost.loc.label">丢失地点</span></label>
+                <textarea id="lost-report-location" class="lost-form-textarea" data-i18n="modal.lost.loc.ph" placeholder="例如：西归浦每日奥来市场, 红色出租车内, GD咖啡厅2层靠窗位..."></textarea>
             </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label ><i class="ph-duotone ph-calendar"></i> <span data-i18n="modal.lost.date.label">丢失日期</span></label>
-                    <input type="date" id="lost-report-date">
+            
+            <div class="lost-form-row">
+                <div class="lost-form-group">
+                    <label class="lost-form-label"><i class="ph-duotone ph-calendar"></i> <span data-i18n="modal.lost.date.label">丢失日期</span></label>
+                    <input type="date" id="lost-report-date" class="lost-form-input">
                 </div>
-                <div class="form-group">
-                    <label ><i class="ph-duotone ph-clock"></i> <span data-i18n="modal.lost.time.label">大概时间</span></label>
-                    <input type="time" id="lost-report-time">
-                </div>
-            </div>
-            <div class="form-group">
-                <label ><i class="ph-duotone ph-package"></i> <span data-i18n="modal.lost.item.label">物品名称</span></label>
-                <input type="text" id="lost-report-item" data-i18n="modal.lost.item.ph" placeholder="例如：黑色iPhone 15, 棕色古驰钱包, 蓝色背包...">
-            </div>
-            <div class="form-group">
-                <label ><i class="ph-duotone ph-magnifying-glass-plus"></i> <span data-i18n="modal.lost.spec.label">物品特征</span> (颜色,品牌,内部物品等)</label>
-                <textarea id="lost-report-specifics" data-i18n="modal.lost.spec.ph" placeholder="请详细描述物品特征, 帮助我们精准匹配..."></textarea>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label ><i class="ph-duotone ph-camera"></i> <span data-i18n="modal.lost.photo.label">选择文件</span> (必选)</label>
-                    <input type="file" id="lost-report-photo" accept="image/*"
-                        onchange="handleLostImageChange(event)">
-                    <div id="lost-report-photo-preview" class="photo-preview" style="display: none;"></div>
-                </div>
-                <div class="form-group">
-                    <label ><i class="ph-duotone ph-chat-circle"></i> <span data-i18n="modal.lost.wechat.label">您的微信 ID</span> (必填)</label>
-                    <input type="text" id="lost-report-name" data-i18n="modal.lost.name.ph" placeholder="请输入您的姓名" style="margin-bottom: 8px;">
-                    <input type="text" id="lost-report-wechat" data-i18n="modal.lost.wechat.ph" placeholder="方便找到后及时联系您 (微信ID/联系方式)">
+                <div class="lost-form-group">
+                    <label class="lost-form-label"><i class="ph-duotone ph-clock"></i> <span data-i18n="modal.lost.time.label">大概时间</span></label>
+                    <input type="time" id="lost-report-time" class="lost-form-input">
                 </div>
             </div>
+
+            <div class="lost-form-group">
+                <label class="lost-form-label"><i class="ph-duotone ph-package"></i> <span data-i18n="modal.lost.item.label">物品名称</span></label>
+                <input type="text" id="lost-report-item" class="lost-form-input" data-i18n="modal.lost.item.ph" placeholder="例如：黑色iPhone 15, 棕色古驰钱包, 蓝色背包...">
+            </div>
+
+            <div class="lost-form-group">
+                <label class="lost-form-label"><i class="ph-duotone ph-magnifying-glass-plus"></i> <span data-i18n="modal.lost.spec.label">物品特征</span></label>
+                <textarea id="lost-report-specifics" class="lost-form-textarea" data-i18n="modal.lost.spec.ph" placeholder="请详细描述物品特征, 帮助我们精准匹配..."></textarea>
+            </div>
+
+            <div class="lost-form-row" style="align-items: flex-start;">
+                <div class="lost-form-group">
+                    <label class="lost-form-label"><i class="ph-duotone ph-camera"></i> <span data-i18n="modal.lost.photo.label">选择文件</span> <span style="font-weight:700; font-size:0.75rem; color:var(--accent);">*</span></label>
+                    <div class="lost-form-file-wrap">
+                        <input type="file" id="lost-report-photo" class="lost-form-file-input" accept="image/*" onchange="handleLostImageChange(event)">
+                    </div>
+                    <div id="lost-report-photo-preview" class="photo-preview" style="display: none; margin-top: 10px; border-radius: 8px; overflow: hidden; border: 1px solid var(--separator);"></div>
+                </div>
+                <div class="lost-form-group">
+                    <label class="lost-form-label"><i class="ph-duotone ph-chat-circle"></i> <span data-i18n="modal.lost.wechat.label">您的微信 ID</span> <span style="font-weight:700; font-size:0.75rem; color:var(--accent);">*</span></label>
+                    <input type="text" id="lost-report-name" class="lost-form-input" data-i18n="modal.lost.name.ph" placeholder="您的姓名">
+                </div>
+            </div>
+
             <div id="lost-report-status" class="form-status"></div>
-            <div class="form-row" style="margin-top: 15px; gap: 10px;">
-                <button type="button" class="form-submit-btn secondary" style="flex: 1; margin-top: 0; background: #f1f5f9; color: #475569; box-shadow: none;" onclick="closeLostReportModal()" data-i18n="modal.lost.cancel">取消</button>
-                <button id="lost-report-submit-btn" class="form-submit-btn" style="flex: 2; margin-top: 0;" onclick="submitLostReport()" data-i18n="modal.lost.submit">提交报失登记</button>
+            
+            <div class="lost-form-actions" style="justify-content: center; width: 100%;">
+                <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="closeLostReportModal()" data-i18n="modal.lost.cancel">취소</button>
+                <button id="lost-report-submit-btn" class="btn btn-primary" style="flex: 1;" onclick="submitLostReport()" data-i18n="modal.lost.submit">분실물 등록하기</button>
             </div>
         </div>
     </div>
@@ -893,14 +900,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <!-- ===== Feature Request Modal ===== -->
 <div id="feature-request-modal" class="modal-overlay" style="display:none; z-index: 10001;" onclick="closeFeatureModal()">
-    <div class="modal-content" style="max-width: 400px; padding: 30px; background: white;" onclick="event.stopPropagation()">
-        <button class="modal-close" style="color: #333;" onclick="closeFeatureModal()">✕</button>
-        <h3 style="margin-bottom: 12px; font-size: 1.25rem; color: var(--text-primary);" data-i18n="modal.feature.title"><i class="ph-duotone ph-lightbulb color-sun"></i> 提交建议或功能请求</h3>
-        <textarea id="feature-content" data-i18n="modal.feature.ph" placeholder="在此输入您的建议或发现的漏洞..."
-            style="width: 100%; min-height: 120px; padding: 15px; border-radius: 12px; border: 1.5px solid #eee; font-family: inherit; font-size: 0.95rem; resize: vertical; margin-bottom: 20px; outline: none; transition: border-color 0.2s;"></textarea>
-        <button id="feature-submit-btn" onclick="submitFeatureRequest()"
-            style="width: 100%; padding: 14px; border-radius: 12px; background: var(--primary-gradient); color: white; border: none; font-size: 1rem; font-weight: 700; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;" data-i18n="modal.feature.submit">提交反馈</button>
-        <div id="feature-status" style="margin-top: 15px; font-size: 0.85rem; text-align: center; display: none;"></div>
+    <div class="modal-content modal-sm" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeFeatureModal()">✕</button>
+        <h3 class="modal-title" data-i18n="modal.feature.title"><i class="ph-duotone ph-lightbulb color-sun"></i> 提交建议或功能请求</h3>
+        <textarea id="feature-content" class="modal-textarea" data-i18n="modal.feature.ph" placeholder="在此输入您的建议或发现的漏洞..."></textarea>
+        <button id="feature-submit-btn" class="btn btn-primary" onclick="submitFeatureRequest()" style="width: 100%;" data-i18n="modal.feature.submit">提交反馈</button>
+        <div id="feature-status" class="modal-status" style="display: none;"></div>
     </div>
 </div>
 
@@ -909,60 +914,53 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="modal-content share-modal-content" onclick="event.stopPropagation()">
         <button class="modal-close" onclick="closeShareModal()">✕</button>
         <div class="share-header">
-            <h3 style="margin-bottom: 12px; font-size: 1.25rem; color: var(--text-primary); text-align: center;" data-i18n="modal.share.title"><i class="ph-duotone ph-export color-hallasan"></i> 分享到 SNS</h3>
-            <p style="font-size: 0.9rem; color: #666; text-align: center; margin-bottom: 20px;" data-i18n="modal.share.desc">分享济州岛实时旅行信息</p>
+            <h3 class="modal-title" style="text-align: center;" data-i18n="modal.share.title"><i class="ph-duotone ph-export color-hallasan"></i> 分享到 SNS</h3>
+            <p class="modal-desc" style="text-align: center;" data-i18n="modal.share.desc">分享济州岛实时旅行信息</p>
         </div>
-        <div class="share-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px;">
-            <button class="share-option-btn wechat-btn" onclick="copyCurrentUrl('wechat')" style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 15px; border-radius: 16px; border: 1px solid #eee; background: white; cursor: pointer;">
-                <div class="share-icon" style="font-size: 1.8rem;"><i class="ph-duotone ph-chat-circle-text color-reward"></i></div>
-                <span style="font-size: 0.8rem; font-weight: 600;" data-i18n="modal.share.wechat">微信分享</span>
+        <div class="share-grid">
+            <button class="share-option-btn" onclick="copyCurrentUrl('wechat')">
+                <div class="share-icon"><i class="ph-duotone ph-chat-circle-text"></i></div>
+                <span data-i18n="modal.share.wechat">微信分享</span>
             </button>
-            <button class="share-option-btn xhs-btn" onclick="copyCurrentUrl('xhs')" style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 15px; border-radius: 16px; border: 1px solid #eee; background: white; cursor: pointer;">
-                <div class="share-icon" style="font-size: 1.8rem;"><i class="ph-duotone ph-book-bookmark color-cctv"></i></div>
-                <span style="font-size: 0.8rem; font-weight: 600;" data-i18n="modal.share.xhs">小红书分享</span>
+            <button class="share-option-btn" onclick="copyCurrentUrl('xhs')">
+                <div class="share-icon"><i class="ph-duotone ph-book-bookmark"></i></div>
+                <span data-i18n="modal.share.xhs">小红书分享</span>
             </button>
-            <button class="share-option-btn universal-btn" onclick="handleWebShare()" style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 15px; border-radius: 16px; border: 1px solid #eee; background: white; cursor: pointer;">
-                <div class="share-icon" style="font-size: 1.8rem;"><i class="ph-duotone ph-link color-airport"></i></div>
-                <span style="font-size: 0.8rem; font-weight: 600;" data-i18n="modal.share.system">系统分享</span>
+            <button class="share-option-btn" onclick="handleWebShare()">
+                <div class="share-icon"><i class="ph-duotone ph-link"></i></div>
+                <span data-i18n="modal.share.system">系统分享</span>
             </button>
         </div>
-        <div class="share-copy-box" style="display:flex; gap:8px;">
-            <input type="text" id="share-url-input" value="https://jeju-live.com" readonly
-                style="flex:1; padding:10px; border-radius:8px; border:1px solid #ddd; font-size:0.9rem; text-align:center;">
-            <button onclick="copyCurrentUrl()"
-                style="padding:10px 15px; background:var(--primary-gradient); color:white; border:none; border-radius:8px; font-weight:700; cursor:pointer;" data-i18n="modal.share.copy">复制</button>
+        <div class="share-copy-row">
+            <input type="text" id="share-url-input" class="share-url-input" value="https://jeju-live.com" readonly>
+            <button onclick="copyCurrentUrl()" class="btn btn-primary" data-i18n="modal.share.copy">复制</button>
         </div>
-        <div id="share-status" style="margin-top: 15px; font-size: 0.85rem; text-align: center; display: none; color: #07c160; font-weight: 600;"></div>
+        <div id="share-status" class="share-status" style="display: none;"></div>
     </div>
 </div>
 
 <!-- ===== Customer Service Modal ===== -->
 <div id="cs-modal" class="modal-overlay" style="display:none; z-index: 10001;" onclick="closeCSModal()">
-    <div class="modal-content" style="max-width: 400px; padding: 30px; background: white;" onclick="event.stopPropagation()">
-        <button class="modal-close" style="color: #333;" onclick="closeCSModal()">✕</button>
-        <h3 style="margin-bottom: 12px; font-size: 1.25rem; color: var(--text-primary);" data-i18n="modal.cs.title"><i class="ph-duotone ph-headphones color-weather"></i> 联系客服</h3>
-        <p style="font-size: 0.9rem; color: #666; margin-bottom: 20px; line-height: 1.4;" data-i18n="modal.cs.desc">
-            请输入您的投诉、建议或业务咨询。
-        </p>
+    <div class="modal-content modal-sm" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeCSModal()">✕</button>
+        <h3 class="modal-title" data-i18n="modal.cs.title"><i class="ph-duotone ph-headphones color-weather"></i> 联系客服</h3>
+        <p class="modal-desc" data-i18n="modal.cs.desc">请输入您的投诉、建议或业务咨询。</p>
 
         <div class="form-group" style="margin-bottom: 15px;">
-            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #475569; margin-bottom: 8px;" data-i18n="modal.cs.content.label">投诉建议 *</label>
-            <textarea id="cs-content" data-i18n="modal.cs.content.ph" placeholder="请输入内容..."
-                style="width: 100%; min-height: 120px; padding: 12px; border-radius: 8px; border: 1.5px solid #eee; font-family: inherit; font-size: 0.9rem; resize: vertical; outline: none;"></textarea>
+            <label class="modal-label" data-i18n="modal.cs.content.label">投诉建议 *</label>
+            <textarea id="cs-content" class="modal-textarea" data-i18n="modal.cs.content.ph" placeholder="请输入内容..."></textarea>
         </div>
 
         <div class="form-group" style="margin-bottom: 25px;">
-            <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #475569; margin-bottom: 8px;" data-i18n="modal.cs.wechat.label">微信 ID (选填)</label>
-            <input type="text" id="cs-wechat" data-i18n="modal.cs.wechat.ph" placeholder="您的微信 ID"
-                style="width: 100%; padding: 12px; border-radius: 8px; border: 1.5px solid #eee; font-size: 0.9rem; outline: none;">
+            <label class="modal-label" data-i18n="modal.cs.wechat.label">微信 ID (选填)</label>
+            <input type="text" id="cs-wechat" class="modal-input" data-i18n="modal.cs.wechat.ph" placeholder="您的微信 ID">
         </div>
 
-        <button id="cs-submit-btn" onclick="submitCSFeedback()"
-            style="width: 100%; padding: 14px; border-radius: 12px; background: var(--primary-gradient); color: white; border: none; font-size: 1rem; font-weight: 700; cursor: pointer;" data-i18n="modal.cs.submit">提交</button>
-        
-        <div id="cs-status" style="margin-top: 15px; font-size: 0.85rem; text-align: center; display: none;"></div>
+        <button id="cs-submit-btn" class="btn btn-primary" onclick="submitCSFeedback()" style="width: 100%;" data-i18n="modal.cs.submit">提交</button>
+        <div id="cs-status" class="modal-status" style="display: none;"></div>
     </div>
 </div>
+
 
 
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>

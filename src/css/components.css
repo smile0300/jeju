@@ -1,191 +1,287 @@
+/* ============================================================
+   Components — Apple HIG 기반 공통 컴포넌트
+   - 44px 최소 터치 타겟 보장
+   - 단일 Accent 컬러 (제주 티얼 #0891B2)
+   - weight 600 (Semibold) 통일
+   - 그림자 최소화
+   ============================================================ */
+
 /* ==================== Shared Buttons ==================== */
+/* Apple HIG Rule 1.1 + 7.1: 44pt 최소 터치, 표준 버튼 스타일 */
 .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 12px 24px;
-    border-radius: var(--radius-lg); /* 16px radius for buttons */
-    font-size: 0.95rem;
-    font-weight: 800; /* Unified font weight for buttons */
+    /* 토스 표준 버튼 높이: 52px */
+    min-height: 52px;
+    padding: 0 var(--space-5); /* 0 20px */
+    border-radius: var(--radius-md); /* 12px */
+    /* 토스: 16px Body, Semibold */
+    font-size: 1rem; /* 16px */
+    font-weight: 600;
     cursor: pointer;
-    transition: all var(--transition-normal);
+    transition:
+        transform var(--duration-fast) var(--ease-out),
+        opacity var(--duration-fast) var(--ease-out),
+        background var(--duration-fast) var(--ease-out);
     border: none;
     outline: none;
     font-family: inherit;
-    gap: 8px;
+    gap: var(--space-2);
     white-space: nowrap;
+    letter-spacing: -0.2px;
+    /* 토스: 그림자 없음 */
+    box-shadow: none;
 }
 
+/* 토스: Filled 버튼 = Primary CTA */
 .btn-primary {
-    background: var(--primary-gradient);
-    color: white;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    background: var(--accent); /* Toss Blue */
+    color: var(--accent-on);
+    /* 토스: 버튼 그림자 없음 */
+    box-shadow: none;
 }
 
 .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
+    background: var(--accent-hover);
 }
 
 .btn-primary:active {
     transform: scale(0.97);
+    background: var(--accent-active);
 }
 
+/* 토스: 회색 배경 버튼 = Secondary (Outline 대신) */
 .btn-outline {
-    background: white;
-    color: var(--accent-blue);
-    border: 1.5px solid var(--accent-blue);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+    background: var(--fill-secondary); /* #F2F4F6 토스 회색 */
+    color: var(--accent);              /* Toss Blue 텍스트 */
+    border: none;                      /* 토스: 아웃라인 없음 */
+    box-shadow: none;
 }
 
 .btn-outline:hover {
-    background: var(--primary-gradient);
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
-    border-color: transparent;
+    background: var(--fill-primary); /* 약간 진한 회색 */
+    color: var(--accent);
 }
 
 .btn-outline:active {
     transform: scale(0.97);
+    background: var(--fill-secondary);
+}
+
+/* 토스: 회색 배경 일반 보조 버튼 (Apple HIG 스타일) */
+.btn-secondary {
+    background: var(--fill-secondary); /* #F2F4F6 */
+    color: var(--label-primary);       /* 어두운 회색 텍스트 */
+    border: none;
+    box-shadow: none;
+}
+
+.btn-secondary:hover {
+    background: var(--fill-primary);   /* 조금 더 진한 회색 */
+    color: var(--label-primary);
+}
+
+.btn-secondary:active {
+    transform: scale(0.97);
+    background: var(--fill-secondary);
 }
 
 /* ==================== Tabs & Toggle ==================== */
+/* Apple HIG: iOS Segmented Control 스타일 */
 .view-toggle-container {
     display: flex;
-    gap: 8px;
-    background: #f1f5f9;
-    padding: 6px;
-    border-radius: 14px;
+    gap: var(--space-1); /* 4px */
+    background: var(--fill-tertiary); /* rgba(118,118,128,0.12) — iOS 표준 */
+    padding: var(--space-1); /* 4px */
+    border-radius: var(--radius-sm); /* 8px — Segmented Control */
     width: 100%;
-    margin-top: 10px;
+    margin-top: var(--space-3); /* 12px */
 }
 
 .view-toggle-btn {
     flex: 1;
     border: none;
     background: transparent;
-    padding: 10px;
-    border-radius: 10px;
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: var(--text-secondary);
+    /* 44px 최소 높이 */
+    min-height: var(--touch-target); /* 44px */
+    padding: 0 var(--space-3); /* 0 12px */
+    border-radius: var(--radius-xs); /* 4px — 내부 pill */
+    font-size: var(--text-subheadline); /* 15pt */
+    font-weight: 500;
+    color: var(--label-secondary);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition:
+        background var(--duration-fast) var(--ease-out),
+        color var(--duration-fast) var(--ease-out),
+        box-shadow var(--duration-fast) var(--ease-out);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: var(--space-2); /* 8px */
 }
 
+/* Apple HIG: 활성 탭 — 흰 배경 + 섀도우 (iOS Segmented 표준) */
 .view-toggle-btn.active {
-    background: white;
-    color: var(--accent-blue);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+    background: var(--bg-primary); /* white */
+    color: var(--label-primary);
+    font-weight: 600;
+    box-shadow: var(--shadow-xs);
 }
 
 /* ==================== Badges ==================== */
+/* Apple HIG: 배지 — 원형 pill, 단색 */
 .badge {
-    padding: 4px 10px;
-    border-radius: 8px; /* unified radius */
-    font-size: 0.75rem;
-    font-weight: 800; /* unified weight */
+    padding: 2px var(--space-3); /* 2px 12px */
+    border-radius: var(--radius-full); /* pill 형태 — Apple 표준 */
+    font-size: var(--text-caption-1); /* 12pt */
+    font-weight: 700;
     color: white;
     display: inline-block;
-    min-width: 65px;
+    min-width: 56px;
     text-align: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    /* Apple: 배지 그림자 없음 */
+    box-shadow: none;
     white-space: nowrap;
+    letter-spacing: 0.1px;
 }
 
-.badge-success { background-color: #059669; }
-.badge-warning { background-color: #f59e0b; }
-.badge-danger  { background-color: #dc2626; }
-.badge-info    { background-color: #2563eb; }
+/* 단색 — 그라데이션 제거 (Apple HIG) */
+.badge-success { background: var(--color-success); }  /* #34C759 */
+.badge-warning { background: var(--color-warning); }  /* #FF9500 */
+.badge-danger  { background: var(--color-danger);  }  /* #FF3B30 */
+.badge-info    { background: var(--color-info);    }  /* #007AFF — 사용 시 변경 불필 */
 
+/* 상태 배지 — 단색 적용 */
 .status-badge {
-    padding: 4px 8px;
-    border-radius: var(--radius-sm);
-    font-size: 0.72rem;
+    padding: 3px var(--space-3); /* 3px 12px */
+    border-radius: var(--radius-full); /* pill */
+    font-size: var(--text-caption-2); /* 11pt */
     font-weight: 600;
     white-space: nowrap;
+    letter-spacing: 0.1px;
 }
-.status-badge.status-ontime { background: var(--success-gradient); color: white; }
-.status-badge.status-delayed { background: var(--warning-gradient); color: white; }
-.status-badge.status-cancelled { background: var(--danger-gradient); color: white; }
-.status-badge.status-landed, .status-badge.status-departed { background: var(--accent-gradient); color: white; }
-.status-badge.status-boarding { background: var(--primary-gradient); color: white; }
+/* 토스 시맨틱 상태 배지 */
+.status-badge.status-ontime    { background: rgba(18, 184, 134, 0.12); color: #0A9E72; }
+.status-badge.status-delayed   { background: rgba(255, 169, 77, 0.12);  color: #E08C3A; }
+.status-badge.status-cancelled { background: rgba(250, 82, 82, 0.12);   color: #E02D2D; }
+.status-badge.status-landed,
+.status-badge.status-departed  { background: rgba(66, 99, 235, 0.10);   color: #3057C5; }
+.status-badge.status-boarding  { background: rgba(49, 130, 246, 0.12);  color: var(--accent); }
 
 /* ==================== Modals ==================== */
-.modal-overlay { 
-    position: fixed; 
-    inset: 0; 
-    background: rgba(0,0,0,0.6); 
+/* Apple HIG: iOS 시트 — 강한 블러 + 부드러운 진입 */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4); /* Apple: 더 투명한 오버레이 */
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    z-index: 9999; 
-    display: flex; 
-    align-items: flex-start; /* Tall content starts from top */
-    justify-content: center; 
-    padding: 40px 10px; /* Space for scroll on small screens */
-    overflow-y: auto; /* Enable scrolling */
-    animation: fadeIn 0.3s ease;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* 가로 중앙 */
+    justify-content: flex-start; /* 세로 위 (margin-top:auto로 하단 밀기) */
+    padding: 0; /* 시트는 패딩 없음 */
+    overflow-y: auto;
+    animation: fadeIn var(--duration-fast) var(--ease-out);
 }
 
-.modal-content { 
-    background: #000; 
-    border-radius: var(--radius-xl); 
-    width: 95%; 
-    max-width: 1000px; 
-    position: relative; 
-    padding: 2px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-    animation: modalScaleUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    /* Remove overflow: hidden to allow internal scroll if needed, 
-       but keeping it might be okay if overlay scrolls. 
-       However, the form might need its own scroll if it's very complex. 
-       For now, let's keep it but ensure the overlay handles it. */
-    border: 1px solid rgba(255,255,255,0.1);
-    margin: auto 0; /* Keeps it centered if content is smaller than viewport */
+/* 데스크탑에서는 중앙 정렬 */
+@media (min-width: 640px) {
+    .modal-overlay {
+        align-items: center;
+        padding: var(--space-10) var(--space-3); /* 40px 12px */
+    }
 }
 
-@keyframes modalScaleUp {
-    from { opacity: 0; transform: scale(0.9); }
-    to { opacity: 1; transform: scale(1); }
+.modal-content {
+    background: var(--bg-primary);
+    /* iOS Sheet: 상단 모서리 라운드 강화 */
+    border-radius: 24px 24px 0 0;
+    width: 100%;
+    max-width: 100%;
+    position: relative;
+    padding: 0 0 20px 0; /* padding 조정 */
+    box-shadow: var(--shadow-lg);
+    /* Apple HIG: 아래에서 위로 슬라이드 */
+    animation: sheetSlideUp var(--duration-normal) var(--ease-out);
+    border: none;
+    margin-top: auto; /* 상단 여백을 auto로 주어 flex-start 상태에서도 하단에 정렬됨. 초과 시 윗부분이 잘리지 않고 스크롤됨 */
+    margin-bottom: 0;
 }
 
-.modal-close { 
-    position: absolute; 
-    top: 15px; 
-    right: 15px; 
-    background: rgba(255,255,255,0.2); 
-    backdrop-filter: blur(4px);
-    border: none; 
-    color: white; 
+/* iOS Bottom Sheet 드래그 핸들 (시각적 효과) */
+.modal-content::before {
+    content: '';
+    display: block;
     width: 36px;
-    height: 36px;
+    height: 5px;
+    background: var(--separator);
+    border-radius: 2.5px;
+    margin: 8px auto 16px auto;
+}
+
+/* 데스크탑 — 전통적인 다이얼로그 */
+@media (min-width: 640px) {
+    .modal-content {
+        border-radius: var(--radius-lg); /* 모든 모서리 라운드 */
+        width: 95%;
+        max-width: 600px;
+        animation: modalFadeScale var(--duration-normal) var(--ease-out);
+    }
+}
+
+@keyframes sheetSlideUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes modalFadeScale {
+    from { opacity: 0; transform: translateY(16px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* 레거시 호환 */
+@keyframes modalScaleUp {
+    from { opacity: 0; transform: scale(0.97); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+.modal-close {
+    position: absolute;
+    top: var(--space-4);  /* 16px */
+    right: var(--space-4);
+    /* 44px 터치 타겟 */
+    width: var(--touch-target);
+    height: var(--touch-target);
+    background: var(--fill-tertiary);
+    border: none;
+    color: var(--label-secondary);
     border-radius: 50%;
-    font-size: 1.2rem; 
-    cursor: pointer; 
+    font-size: 1.1rem;
+    cursor: pointer;
     z-index: 10;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s;
+    transition:
+        background var(--duration-fast) var(--ease-out),
+        transform var(--duration-fast) var(--ease-out);
 }
 
 .modal-close:hover {
-    background: rgba(255,255,255,0.3);
+    background: var(--fill-secondary);
     transform: rotate(90deg);
 }
 
-/* ==================== Special Feature Modals (White Background) ==================== */
+/* ==================== Special Feature Modals ==================== */
 #feature-request-modal .modal-content,
 #lost-report-modal .modal-content,
 #lost-detail-modal .modal-content,
 #wechat-qr-modal .modal-content {
-    background: white;
-    color: var(--text-primary);
+    background: var(--bg-primary);
+    color: var(--label-primary);
     max-width: 500px;
 }
 
@@ -193,18 +289,20 @@
 #lost-report-modal .modal-close,
 #lost-detail-modal .modal-close,
 #wechat-qr-modal .modal-close {
-    color: var(--text-primary);
-    background: rgba(0,0,0,0.05);
+    color: var(--label-secondary);
+    background: var(--fill-tertiary);
 }
 
-/* ==================== Phosphor Icons (Cute Style) ==================== */
+/* ==================== Phosphor Icons ==================== */
+/* Apple HIG: 아이콘은 텍스트와 동일한 weight */
 i.ph-duotone {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     vertical-align: middle;
-    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-    filter: drop-shadow(0 3px 4px rgba(0,0,0,0.1));
+    transition: transform var(--duration-fast) var(--ease-spring);
+    /* Apple: 아이콘 drop-shadow 절제 */
+    filter: none;
 }
 
 /* Liveliness Color Utility Classes */
@@ -215,10 +313,10 @@ i.ph-duotone {
 .color-weather { color: #0EA5E9; } /* Sky Blue */
 .color-hallasan { color: #10B981; } /* Emerald Green */
 .color-airport { color: #8B5CF6; } /* Purple */
-.color-lost { color: #0D9488; } /* Teal */
+.color-lost { color: #F97316 !important; } /* Orange - Unified for Lost&Found */
 .color-festival { color: #EC4899; } /* Pink */
-.color-reward { color: #F59E0B; } /* Amber/Gold */
-.color-food { color: #F97316; } /* Orange */
+.color-reward { color: #FF3B30; } /* Hongbao Red */
+.color-food { color: #E28743; } /* Hamburger Color */
 .color-course { color: #3B82F6; } /* Blue */
 
 /* Weather Forecast Specific Colors */
@@ -231,6 +329,347 @@ i.ph-duotone {
 .color-rain { color: #3B82F6; } /* Blue */
 .color-snow { color: #93C5FD; } /* Light Blue */
 
+/* hover 시 scale — 절제된 버전 */
 i.ph-duotone.hover-scale:hover {
-    transform: scale(1.15);
+    transform: scale(1.12);
+}
+
+/* ==================== Skeleton Loading UI ==================== */
+.skeleton {
+    background: #E5E8EB;
+    background: linear-gradient(90deg, #F2F4F6 25%, #E5E8EB 50%, #F2F4F6 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite linear;
+    border-radius: var(--radius-sm);
+}
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* 스켈레톤 기본 형태 (텍스트/박스) */
+.skeleton-text { height: 16px; margin-bottom: 8px; width: 100%; }
+.skeleton-text.short { width: 50%; }
+.skeleton-card { height: 80px; width: 100%; border-radius: var(--radius-md); }
+
+/* ==================== Empty & Error State UI ==================== */
+.empty-state-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    background: var(--bg-primary);
+    border-radius: var(--radius-xl);
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+    margin: 20px 0;
+}
+
+.empty-state-icon {
+    font-size: 48px;
+    color: var(--label-tertiary);
+    margin-bottom: 16px;
+}
+
+.empty-state-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--label-primary);
+    margin-bottom: 8px;
+}
+
+.empty-state-desc {
+    font-size: 0.9rem;
+    color: var(--label-secondary);
+    margin-bottom: 24px;
+    line-height: 1.4;
+}
+
+.empty-state-btn {
+    padding: 10px 24px;
+    border-radius: var(--radius-full);
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: transform var(--duration-fast);
+}
+.empty-state-btn:active {
+    transform: scale(0.95);
+}
+
+/* ==================== Footer Utilities ==================== */
+.footer-text-btn {
+    flex: 1 1 0;
+    position: relative; /* 구분선 배치를 위한 기준 */
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    background: transparent; /* 안을 투명하게 (Ghost Button) */
+    border: none; /* 알록달록한 테두리 제거 */
+    border-radius: 6px;
+    cursor: pointer;
+    transition: transform var(--duration-fast) ease, background-color var(--duration-fast) ease;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--label-secondary); /* 모든 텍스트를 무채색으로 통일 */
+    letter-spacing: 0.2px;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+/* 첫 번째 버튼을 제외한 버튼들 사이에 세로 구분선(Divider) 추가 */
+.footer-text-btn + .footer-text-btn::before {
+    content: "";
+    position: absolute;
+    left: -8px; /* gap 16px의 중앙 */
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1px;
+    height: 12px;
+    background-color: var(--separator); /* 연한 선 */
+    pointer-events: none; /* 클릭 방해 방지 */
+}
+
+.footer-text-btn:hover {
+    background-color: var(--fill-tertiary); /* 호버 시 연한 회색 배경 */
+}
+
+.footer-text-btn:active {
+    transform: scale(0.95);
+    background-color: var(--fill-secondary);
+}
+
+/* ==================== Utility Classes ==================== */
+
+/* 텍스트 줄임표 */
+.text-ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* BETA 배지 — 분실물 이미지 검색 버튼용 */
+.badge-beta {
+    position: absolute;
+    top: -8px;
+    right: -4px;
+    font-size: 0.65rem;
+    background-color: #EF4444;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 8px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    pointer-events: none;
+}
+
+/* 푸터 액션 버튼 행 */
+.footer-action-row {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 16px; /* 간격을 기존 8px에서 16px로 넓힘 */
+    justify-content: center;
+    width: 100%;
+    padding: 0 5vw; /* 좌우 여백을 줄여 공간을 넓게 씀 */
+    max-width: 500px; /* 전체 컨테이너 너비 확장 */
+    margin: 0 auto;
+}
+
+/* 푸터 법적 링크 */
+.footer-legal-link {
+    color: var(--label-secondary);
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+.footer-legal-link.primary {
+    color: var(--label-primary);
+    font-weight: 700;
+}
+
+/* 모달 공통 textarea */
+.modal-textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 15px;
+    border-radius: 12px;
+    border: 1.5px solid var(--separator);
+    font-family: inherit;
+    font-size: 0.95rem;
+    resize: vertical;
+    margin-bottom: 20px;
+    outline: none;
+    transition: border-color var(--duration-fast);
+    background: var(--bg-primary);
+    color: var(--label-primary);
+}
+.modal-textarea:focus {
+    border-color: var(--accent);
+}
+
+/* 모달 공통 input */
+.modal-input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1.5px solid var(--separator);
+    font-size: 0.9rem;
+    outline: none;
+    background: var(--bg-primary);
+    color: var(--label-primary);
+    transition: border-color var(--duration-fast);
+}
+.modal-input:focus {
+    border-color: var(--accent);
+}
+
+/* 수직 액션 행 (분실물, 한라산 등 CTA 버튼 묶음) */
+.action-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: var(--space-6); /* 24px */
+}
+.action-row .btn {
+    flex: 1;
+}
+
+/* ==================== Modal Specific Styles ==================== */
+
+/* 모달 공통 소형 (WeChat QR, Feature, CS) */
+.modal-sm {
+    max-width: 400px;
+    padding: 30px;
+    background: var(--bg-primary);
+}
+
+/* WeChat QR 모달 */
+.modal-wechat {
+    max-width: 320px;
+    text-align: center;
+    padding: 30px;
+}
+.modal-wechat-title {
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+    color: var(--accent);
+}
+.modal-wechat-desc {
+    font-size: 0.85rem;
+    color: var(--label-secondary);
+    margin-bottom: 15px;
+    line-height: 1.4;
+}
+.modal-wechat-qr {
+    width: 100%;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+.modal-copy-row {
+    display: flex;
+    gap: 8px;
+}
+.modal-copy-input {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--separator);
+    font-size: 0.9rem;
+    text-align: center;
+    background: var(--bg-primary);
+    color: var(--label-primary);
+    outline: none;
+}
+
+/* Feature / CS 모달 */
+.modal-title {
+    margin-bottom: 12px;
+    font-size: 1.25rem;
+    color: var(--label-primary);
+}
+.modal-desc {
+    font-size: 0.9rem;
+    color: var(--label-secondary);
+    margin-bottom: 20px;
+    line-height: 1.4;
+}
+.modal-label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 8px;
+}
+.modal-status {
+    margin-top: 15px;
+    font-size: 0.85rem;
+    text-align: center;
+}
+.modal-status-success {
+    color: var(--color-green);
+    font-weight: 600;
+}
+
+/* 공유 모달 — 3열 그리드 버튼 */
+.share-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 25px;
+}
+.share-option-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 15px;
+    border-radius: 16px;
+    border: 1px solid var(--separator);
+    background: var(--bg-primary);
+    cursor: pointer;
+    transition: background var(--duration-fast) var(--ease-out),
+                transform var(--duration-fast) var(--ease-out);
+}
+.share-option-btn:hover {
+    background: var(--fill-tertiary);
+    transform: translateY(-2px);
+}
+.share-option-btn:active {
+    transform: scale(0.96);
+}
+.share-icon {
+    font-size: 1.8rem;
+    color: var(--accent);
+}
+.share-option-btn span {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--label-primary);
+}
+.share-copy-row {
+    display: flex;
+    gap: 8px;
+}
+.share-url-input {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--separator);
+    font-size: 0.9rem;
+    text-align: center;
+    background: var(--bg-primary);
+    color: var(--label-primary);
+    outline: none;
+}
+.share-status {
+    margin-top: 15px;
+    font-size: 0.85rem;
+    text-align: center;
+    color: var(--color-green);
+    font-weight: 600;
 }

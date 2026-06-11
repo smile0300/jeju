@@ -191,7 +191,13 @@ export async function fetchFlights(type) {
         if (type === 'arrive') params.arr_airport_code = 'CJU';
         else params.airport_code = 'CJU';
 
-        container.innerHTML = `<div style="text-align:center;padding:20px;color:var(--text-muted)">${window.t('airport.loading')}</div>`;
+        container.innerHTML = `
+            <div style="padding: 16px;">
+                <div class="skeleton skeleton-card" style="margin-bottom: 12px; height: 60px;"></div>
+                <div class="skeleton skeleton-card" style="margin-bottom: 12px; height: 60px;"></div>
+                <div class="skeleton skeleton-card" style="margin-bottom: 12px; height: 60px;"></div>
+                <div class="skeleton skeleton-card" style="height: 60px;"></div>
+            </div>`;
 
         const text = await fetchPublicDataText(apiEndpoint, params);
         let itemsArray = [];
@@ -263,7 +269,16 @@ export async function fetchFlights(type) {
         }
     } catch (e) {
         console.error('Airport API Error:', e);
-        container.innerHTML = `<div style="text-align:center;padding:32px 16px;color:var(--text-muted);">${window.t('airport.err.failed')}</div>`;
+        container.innerHTML = `
+            <div class="empty-state-card" style="margin: 32px 16px;">
+                <i class="ph-duotone ph-airplane-tilt empty-state-icon"></i>
+                <div class="empty-state-title">${window.t('airport.error.title')}</div>
+                <div class="empty-state-desc">${window.t('airport.error.desc')}</div>
+                <button class="empty-state-btn" onclick="window.airportApp.fetchFlights('${type}')" 
+                        style="border: 1.5px solid var(--label-tertiary); color: var(--label-secondary); background: transparent; cursor: pointer;">
+                    ${window.t('common.retry')}
+                </button>
+            </div>`;
     }
 }
 

@@ -174,3 +174,45 @@ function extractImageLabels(base64Data) {
     return { success: false, error: e.toString() };
   }
 }
+
+/**
+ * GET 요청 시 RewardList 시트의 데이터를 JSON으로 반환합니다.
+ * 프론트엔드에서 /api/reward-list 호출 시 동작합니다.
+ */
+function doGet(e) {
+  try {
+    var ss = SpreadsheetApp.openById(SHEET_ID);
+    var sheet = ss.getSheetByName('RewardList');
+    
+    if (!sheet) {
+      return ContentService.createTextOutput(JSON.stringify([])).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    var data = sheet.getDataRange().getValues();
+    if (data.length <= 1) {
+      return ContentService.createTextOutput(JSON.stringify([])).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    var headers = data[0];
+    var result = [];
+    
+    for (var i = 1; i < data.length; i++) {
+      var row = data[i];
+      var obj = {};
+      for (var j = 0; j < headers.length; j++) {
+        var header = headers[j] ? headers[j].toString().trim() : '';
+        // 빈 헤더는 건너뜀
+        if (!header) continue;
+        
+        // 프론트엔드에서 사용하는 키 (id, title, reward, imageUrl 등)로 맞춰주거나 그대로 사용
+        // 대소문자를 맞춰주기 위해 프론트엔드 (reward.js)가 처리하도록 그대로 둠
+        obj[header] = row[j];
+      }
+      result.push(obj);
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ "error": err.toString() })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
