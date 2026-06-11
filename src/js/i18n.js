@@ -353,7 +353,7 @@ const TRANSLATIONS = {
         'nav.airport':    '공항정보',
         'nav.lost':       '분실물',
         'nav.festival':   '축제/행사',
-        'nav.reward':     '귀국 홍바오',
+        'nav.reward':     '용돈벌기',
         'nav.food':       '제주 맛집',
         'nav.course':     '추천 코스',
         'badge.maintenance': '점검중',
@@ -484,7 +484,7 @@ const TRANSLATIONS = {
         // ── 현상금 동적 텍스트 ──
         'reward.loading.list': '임무 목록을 불러오는 중...',
         'reward.empty.list': '진행 중인 현상금 임무가 없습니다',
-        'reward.default.title': '귀국 홍바오',
+        'reward.default.title': '용돈벌기',
 
         // ── 축제 동적 텍스트 ──
         'festival.month_suffix': '월',
@@ -539,7 +539,7 @@ const TRANSLATIONS = {
         'cat.card':   '카드류', 'cat.cash':'현금','cat.phone':'휴대폰',
         'cat.other':  '기타물품',
 
-        'reward.title':     '귀국 홍바오',
+        'reward.title':     '용돈벌기',
         'reward.publish':   '의뢰 등록',
         'reward.banner.title': '제주에서 중국 공항까지 분실물 전달해 줄 분 구합니다!',
         'reward.banner.desc':  '귀국길에 부수입 챙겨가세요',

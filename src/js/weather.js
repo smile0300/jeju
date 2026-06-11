@@ -751,11 +751,12 @@ function renderMidHourlyCol(locKey, ymd, label, skyIcon, pop, temp, wind = '-') 
 export function renderWeatherLoading(locKey) {
     const container = document.getElementById(`current-card-${locKey}`);
     if (container) {
+        container.className = "naver-card current-weather-main";
         container.innerHTML = `
-            <div style="padding: 16px; background: var(--bg-primary); border-radius: var(--radius-xl); border: 1px solid var(--separator);">
-                <div class="skeleton skeleton-card" style="margin-bottom: 12px; height: 100px;"></div>
-                <div class="skeleton skeleton-text short"></div>
-                <div class="skeleton skeleton-text" style="width: 80%;"></div>
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 140px; text-align: center;">
+                <style>@keyframes weather-spin { 100% { transform: rotate(360deg); } }</style>
+                <i class="ph-duotone ph-spinner-gap" style="font-size: 2.5rem; color: var(--accent-blue); margin-bottom: 12px; animation: weather-spin 1.2s linear infinite;"></i>
+                <div style="font-size: 0.9rem; font-weight: 800; color: var(--text-muted);">${window.t('weather.loading')}</div>
             </div>`;
     }
 }
