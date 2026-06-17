@@ -658,8 +658,10 @@ function renderSuccessMarquee(data) {
     const maskId = (id) => {
         if (!id) return '***';
         id = id.toString().trim();
-        if (id.length <= 2) return id.charAt(0) + '*';
-        return id.substring(0, 2) + '***';
+        const len = id.length;
+        if (len <= 2) return id.charAt(0) + '*'.repeat(Math.max(0, len - 1));
+        if (len <= 4) return id.charAt(0) + '*'.repeat(len - 2) + id.charAt(len - 1);
+        return id.substring(0, 2) + '*'.repeat(len - 4) + id.substring(len - 2);
     };
 
     const formatDateStr = (dateStr) => {
