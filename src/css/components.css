@@ -309,15 +309,15 @@ i.ph-duotone {
 .color-gnb { color: var(--primary-orange); }
 
 /* GNB Menu Specific Colors (Comfortable Saturation & Brightness) */
-.color-cctv { color: #FF6B6B; } /* Soft Red */
-.color-weather { color: #48B4F8; } /* Soft Sky Blue */
-.color-hallasan { color: #38C98E; } /* Soft Emerald */
-.color-airport { color: #A67CFF; } /* Soft Purple */
-.color-lost { color: #FF8C42 !important; } /* Soft Orange */
-.color-festival { color: #FF75A8; } /* Soft Pink */
-.color-reward { color: #FF5A5A; } /* Soft Hongbao Red */
-.color-food { color: #FFB347; } /* Soft Amber */
-.color-course { color: #5E9FFF; } /* Soft Blue */
+.color-cctv { color: #E02D2D; } /* Toss Deep Red */
+.color-weather { color: var(--accent); } /* Toss Blue */
+.color-hallasan { color: #0A9E72; } /* Toss Deep Green */
+.color-airport { color: #6741D9; } /* Toss Deep Purple */
+.color-lost { color: #E08C3A !important; } /* Toss Deep Orange */
+.color-festival { color: #D81B60; } /* Toss Deep Pink */
+.color-reward { color: #E02D2D; } /* Toss Deep Hongbao Red */
+.color-food { color: #E67700; } /* Toss Deep Amber */
+.color-course { color: #3057C5; } /* Toss Deep Indigo */
 
 /* Weather Forecast Specific Colors */
 .color-sun { color: #F59E0B; } /* Amber */
