@@ -674,13 +674,19 @@ function renderSuccessMarquee(data) {
     const itemsHtml = data.map(item => {
         let text = window.t ? window.t('lost.success.marquee') : '📢 [{date}] {region} {id}님, {item} 수령 완료';
         const lang = window.currentLanguage || 'zh';
+        
         let itemName = item.Item;
         if (lang === 'zh' && item.Item_zh) itemName = item.Item_zh;
         if (lang === 'en' && item.Item_en) itemName = item.Item_en;
         if (lang === 'ko' && item.Item_ko) itemName = item.Item_ko;
 
+        let regionName = item.Region;
+        if (lang === 'zh' && item.Region_zh) regionName = item.Region_zh;
+        if (lang === 'en' && item.Region_en) regionName = item.Region_en;
+        if (lang === 'ko' && item.Region_ko) regionName = item.Region_ko;
+
         text = text.replace('{date}', formatDateStr(item.Date))
-                   .replace('{region}', item.Region)
+                   .replace('{region}', regionName)
                    .replace('{id}', maskId(item.WeChatId))
                    .replace('{item}', itemName);
         return `<span class="marquee-item">${text}</span>`;
@@ -689,13 +695,19 @@ function renderSuccessMarquee(data) {
     // Clone the first item for seamless scrolling
     let firstText = window.t ? window.t('lost.success.marquee') : '📢 [{date}] {region} {id}님, {item} 수령 완료';
     const lang = window.currentLanguage || 'zh';
+    
     let firstItemName = data[0].Item;
     if (lang === 'zh' && data[0].Item_zh) firstItemName = data[0].Item_zh;
     if (lang === 'en' && data[0].Item_en) firstItemName = data[0].Item_en;
     if (lang === 'ko' && data[0].Item_ko) firstItemName = data[0].Item_ko;
 
+    let firstRegionName = data[0].Region;
+    if (lang === 'zh' && data[0].Region_zh) firstRegionName = data[0].Region_zh;
+    if (lang === 'en' && data[0].Region_en) firstRegionName = data[0].Region_en;
+    if (lang === 'ko' && data[0].Region_ko) firstRegionName = data[0].Region_ko;
+
     firstText = firstText.replace('{date}', formatDateStr(data[0].Date))
-                         .replace('{region}', data[0].Region)
+                         .replace('{region}', firstRegionName)
                          .replace('{id}', maskId(data[0].WeChatId))
                          .replace('{item}', firstItemName);
     const firstClone = `<span class="marquee-item">${firstText}</span>`;
