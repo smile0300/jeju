@@ -713,6 +713,28 @@ function renderSuccessMarquee(data) {
     const firstClone = `<span class="marquee-item">${firstText}</span>`;
 
     marqueeContainer.innerHTML = itemsHtml + firstClone;
+
+    // Dynamic Animation based on data length
+    const totalItems = data.length;
+    let styleEl = document.getElementById('dynamic-marquee-style');
+    if (!styleEl) {
+        styleEl = document.createElement('style');
+        styleEl.id = 'dynamic-marquee-style';
+        document.head.appendChild(styleEl);
+    }
+    
+    const animationDuration = totalItems * 3; // 3 seconds per item
+    let keyframes = `@keyframes dynamic-vertical-ticker {\n`;
+    for (let i = 0; i < totalItems; i++) {
+        const startPercent = (i / totalItems) * 100;
+        // Pause for about 85% of its time slot
+        const pauseEndPercent = ((i + 0.85) / totalItems) * 100; 
+        keyframes += `  ${startPercent}%, ${pauseEndPercent}% { transform: translateY(-${i * 36}px); }\n`;
+    }
+    keyframes += `  100% { transform: translateY(-${totalItems * 36}px); }\n}`;
+    styleEl.innerHTML = keyframes;
+    
+    marqueeContainer.style.animation = `dynamic-vertical-ticker ${animationDuration}s infinite`;
 }
 
 function renderSuccessModal(data) {
