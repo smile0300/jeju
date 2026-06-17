@@ -598,3 +598,122 @@ window.handleImageSearch = async function(event) {
         if (imageBtn) imageBtn.disabled = false;
     }
 };
+
+export async function fetchSuccessStories() {
+    const defaultData = [
+        {
+            Date: "2026-06-17",
+            WeChatId: "wang***",
+            Region: "上海",
+            Item: "iPhone 15",
+            Quote: "刚开始还半信半疑，没想到顺路就能赚点奶茶钱，失主拿到手机也非常激动！",
+            Reward: 200,
+            Timeline: "2시간",
+            Delivery: "上海浦东机场顺丰快递",
+            Place: "济州神话世界大堂",
+            Icon: "ph-device-mobile"
+        },
+        {
+            Date: "2026-06-16",
+            WeChatId: "li***",
+            Region: "北京",
+            Item: "Gucci 钱包",
+            Quote: "钱包里面有重要的证件，多亏了济州实时平台的旅客帮忙，太感谢了！",
+            Reward: 300,
+            Timeline: "반나절",
+            Delivery: "北京首都机场面交",
+            Place: "济州市内咖啡馆",
+            Icon: "ph-wallet"
+        }
+    ];
+
+    let data = defaultData;
+
+    try {
+        const response = await fetch('/api/success-list');
+        if (response.ok) {
+            const result = await response.json();
+            // Validate the result is an array and has the required fields
+            if (Array.isArray(result) && result.length > 0 && result[0].Date) {
+                data = result;
+            }
+        }
+    } catch (e) {
+        console.warn('Failed to fetch success stories from Google Sheets. Using fallback data.', e);
+    }
+
+    renderSuccessMarquee(data);
+    renderSuccessModal(data);
+}
+
+function renderSuccessMarquee(data) {
+    const marqueeContainer = document.getElementById('success-marquee-content');
+    if (!marqueeContainer) return;
+
+    if (!data || data.length === 0) {
+        marqueeContainer.innerHTML = '';
+        return;
+    }
+
+    const itemsHtml = data.map(item => {
+        let text = window.t ? window.t('lost.success.marquee') : '📢 {region}의 {id}님이 {item}을(를) 무사히 돌려받으셨습니다!';
+        text = text.replace('{region}', item.Region).replace('{id}', item.WeChatId).replace('{item}', item.Item);
+        return `<span class="marquee-item">${text}</span>`;
+    }).join('');
+
+    // Clone the first item for seamless scrolling
+    let firstText = window.t ? window.t('lost.success.marquee') : '📢 {region}의 {id}님이 {item}을(를) 무사히 돌려받으셨습니다!';
+    firstText = firstText.replace('{region}', data[0].Region).replace('{id}', data[0].WeChatId).replace('{item}', data[0].Item);
+    const firstClone = `<span class="marquee-item">${firstText}</span>`;
+
+    marqueeContainer.innerHTML = itemsHtml + firstClone;
+}
+
+function renderSuccessModal(data) {
+    const modalBody = document.getElementById('success-modal-body');
+    if (!modalBody) return;
+
+    if (!data || data.length === 0) {
+        modalBody.innerHTML = '<p style="text-align:center; color: #64748b; padding: 20px;">등록된 성공 사례가 없습니다.</p>';
+        return;
+    }
+
+    modalBody.innerHTML = data.map(item => {
+        const icon = item.Icon || 'ph-package';
+        const reward = item.Reward || 0;
+        const timeline = item.Timeline || 'N/A';
+        const place = item.Place || '제주 시내';
+        const delivery = item.Delivery || '우편발송';
+        const quote = item.Quote ? `"${item.Quote}"` : '"물건을 찾아주셔서 정말 감사합니다!"';
+
+        return `
+        <div class="success-card">
+            <div class="success-card-header">
+                <span class="success-card-title">${item.Item} 返回${item.Region}</span>
+                <span class="success-badge">✅ 已送达</span>
+            </div>
+            <div class="success-img-placeholder" style="background: linear-gradient(45deg, #e2e8f0, #cbd5e1);">
+                <i class="ph-duotone ${icon}" style="font-size: 3rem; color: #64748b;"></i>
+            </div>
+            <div class="success-card-timeline">
+                ⏱️ <b>匹配耗时：</b> ${timeline}<br>
+                🏨 <b>交接地点：</b> ${place}<br>
+                📦 <b>发货方式：</b> ${delivery}
+            </div>
+            <div class="success-card-reward">💰 跑腿费：${reward} RMB</div>
+            <div class="success-card-quote">
+                ${quote} - ${item.WeChatId} (${item.Region})
+            </div>
+        </div>`;
+    }).join('');
+}
+
+window.lostApp = {
+    fetchFoundGoods,
+    switchLostView,
+    renderLostGoods,
+    renderLostGoodsTable,
+    openLostDetailModalByIndex,
+    handleImageSearch,
+    fetchSuccessStories
+};

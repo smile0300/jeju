@@ -673,3 +673,115 @@ i.ph-duotone.hover-scale:hover {
     color: var(--color-green);
     font-weight: 600;
 }
+
+/* ==================== Success Marquee (Vertical Ticker) ==================== */
+.marquee-container {
+    width: 100%;
+    height: 36px;
+    overflow: hidden;
+    background: rgba(255, 140, 66, 0.1);
+    color: var(--color-lost);
+    font-size: 0.85rem;
+    font-weight: 600;
+    position: relative;
+    cursor: pointer;
+}
+
+.marquee-content {
+    display: flex;
+    flex-direction: column;
+    animation: vertical-ticker 9s infinite;
+}
+
+.marquee-item {
+    height: 36px;
+    line-height: 36px;
+    text-align: center;
+    padding: 0 16px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+    box-sizing: border-box;
+    display: block;
+}
+
+.marquee-container:hover .marquee-content {
+    animation-play-state: paused;
+}
+
+@keyframes vertical-ticker {
+    0%, 25% { transform: translateY(0); }          /* Item 1 */
+    33%, 58% { transform: translateY(-36px); }     /* Item 2 */
+    66%, 91% { transform: translateY(-72px); }     /* Item 3 */
+    100% { transform: translateY(-108px); }        /* Smooth transition to clone of Item 1 */
+}
+
+/* Success Card in Modal */
+.success-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--separator);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-xs);
+}
+.success-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+.success-card-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--label-primary);
+}
+.success-badge {
+    background: rgba(22, 163, 74, 0.1);
+    color: #16a34a;
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+.success-img-placeholder {
+    width: 100%;
+    height: 150px;
+    background: var(--fill-secondary);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--label-tertiary);
+    font-size: 2rem;
+    margin-bottom: 12px;
+    overflow: hidden;
+}
+.success-img-placeholder img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.success-card-timeline {
+    font-size: 0.8rem;
+    color: var(--label-secondary);
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+.success-card-reward {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--color-reward);
+    margin-bottom: 8px;
+}
+.success-card-quote {
+    font-size: 0.85rem;
+    font-style: italic;
+    color: var(--label-primary);
+    background: var(--fill-tertiary);
+    padding: 8px 12px;
+    border-radius: 8px;
+    border-left: 3px solid var(--accent);
+}
+

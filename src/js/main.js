@@ -7,7 +7,7 @@ import { fetchWeatherData, switchWeatherLocation, updateHourlyWeather, fetchWeat
 import { fetchHallasanStatus } from './hallasan.js';
 import { renderHallasanDashboard } from './hallasan-dashboard.js';
 import { fetchFlights, switchFlightTab } from './airport.js';
-import { fetchFoundGoods, switchLostView, openLostDetailModalByIndex, openLostReportModal, handleLostImageChange, submitLostReport, showWechatQR } from './lost-found.v1.js';
+import { fetchFoundGoods, switchLostView, openLostDetailModalByIndex, openLostReportModal, handleLostImageChange, submitLostReport, showWechatQR, fetchSuccessStories } from './lost-found.v1.js';
 import { fetchFestivals, selectFestivalMonth, initMonthFilter } from './festival.js';
 import { initReward } from './reward.js';
 import { showSection, openWechatQR, closeWechatQR, openFeatureModal, closeFeatureModal, submitFeatureRequest, openCSModal, closeCSModal, submitCSFeedback, copyWechatId, openWeatherSummaryModal, closeWeatherSummaryModal, openShareModal, closeShareModal, shareToPlatform } from './ui.js';
@@ -181,6 +181,7 @@ window.addEventListener('load', () => {
     initMonthFilter();
     fetchFestivals();
     initReward();
+    fetchSuccessStories();
     
     // 초기 로딩 시 URL에 맞는 페이지 열기
     handleRouting();
