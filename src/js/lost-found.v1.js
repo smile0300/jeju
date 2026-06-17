@@ -655,15 +655,35 @@ function renderSuccessMarquee(data) {
         return;
     }
 
+    const maskId = (id) => {
+        if (!id) return '***';
+        id = id.toString().trim();
+        if (id.length <= 2) return id.charAt(0) + '*';
+        return id.substring(0, 2) + '***';
+    };
+
+    const formatDateStr = (dateStr) => {
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return dateStr;
+        return `${d.getMonth() + 1}/${d.getDate()}`;
+    };
+
     const itemsHtml = data.map(item => {
-        let text = window.t ? window.t('lost.success.marquee') : '📢 {region}의 {id}님이 {item}을(를) 무사히 돌려받으셨습니다!';
-        text = text.replace('{region}', item.Region).replace('{id}', item.WeChatId).replace('{item}', item.Item);
+        let text = window.t ? window.t('lost.success.marquee') : '📢 [{date}] {region}의 {id}님이 {item}을(를) 무사히 돌려받으셨습니다!';
+        text = text.replace('{date}', formatDateStr(item.Date))
+                   .replace('{region}', item.Region)
+                   .replace('{id}', maskId(item.WeChatId))
+                   .replace('{item}', item.Item);
         return `<span class="marquee-item">${text}</span>`;
     }).join('');
 
     // Clone the first item for seamless scrolling
-    let firstText = window.t ? window.t('lost.success.marquee') : '📢 {region}의 {id}님이 {item}을(를) 무사히 돌려받으셨습니다!';
-    firstText = firstText.replace('{region}', data[0].Region).replace('{id}', data[0].WeChatId).replace('{item}', data[0].Item);
+    let firstText = window.t ? window.t('lost.success.marquee') : '📢 [{date}] {region}의 {id}님이 {item}을(를) 무사히 돌려받으셨습니다!';
+    firstText = firstText.replace('{date}', formatDateStr(data[0].Date))
+                         .replace('{region}', data[0].Region)
+                         .replace('{id}', maskId(data[0].WeChatId))
+                         .replace('{item}', data[0].Item);
     const firstClone = `<span class="marquee-item">${firstText}</span>`;
 
     marqueeContainer.innerHTML = itemsHtml + firstClone;
