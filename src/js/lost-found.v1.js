@@ -672,20 +672,32 @@ function renderSuccessMarquee(data) {
     };
 
     const itemsHtml = data.map(item => {
-        let text = window.t ? window.t('lost.success.marquee') : '📢 [{date}] {region}의 {id}님이 {item}을(를) 무사히 돌려받으셨습니다!';
+        let text = window.t ? window.t('lost.success.marquee') : '📢 [{date}] {region} {id}님, {item} 수령 완료';
+        const lang = window.currentLanguage || 'zh';
+        let itemName = item.Item;
+        if (lang === 'zh' && item.Item_zh) itemName = item.Item_zh;
+        if (lang === 'en' && item.Item_en) itemName = item.Item_en;
+        if (lang === 'ko' && item.Item_ko) itemName = item.Item_ko;
+
         text = text.replace('{date}', formatDateStr(item.Date))
                    .replace('{region}', item.Region)
                    .replace('{id}', maskId(item.WeChatId))
-                   .replace('{item}', item.Item);
+                   .replace('{item}', itemName);
         return `<span class="marquee-item">${text}</span>`;
     }).join('');
 
     // Clone the first item for seamless scrolling
-    let firstText = window.t ? window.t('lost.success.marquee') : '📢 [{date}] {region}의 {id}님이 {item}을(를) 무사히 돌려받으셨습니다!';
+    let firstText = window.t ? window.t('lost.success.marquee') : '📢 [{date}] {region} {id}님, {item} 수령 완료';
+    const lang = window.currentLanguage || 'zh';
+    let firstItemName = data[0].Item;
+    if (lang === 'zh' && data[0].Item_zh) firstItemName = data[0].Item_zh;
+    if (lang === 'en' && data[0].Item_en) firstItemName = data[0].Item_en;
+    if (lang === 'ko' && data[0].Item_ko) firstItemName = data[0].Item_ko;
+
     firstText = firstText.replace('{date}', formatDateStr(data[0].Date))
                          .replace('{region}', data[0].Region)
                          .replace('{id}', maskId(data[0].WeChatId))
-                         .replace('{item}', data[0].Item);
+                         .replace('{item}', firstItemName);
     const firstClone = `<span class="marquee-item">${firstText}</span>`;
 
     marqueeContainer.innerHTML = itemsHtml + firstClone;
