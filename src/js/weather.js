@@ -1037,7 +1037,7 @@ window.openWeatherAlertModal = function() {
             let itemClass = '';
             
             if (title.includes('해제')) {
-                typeBadgeKey = 'weather.alert.badge.clear';
+                typeBadgeKey = 'weather.alert.badge.clear.bracket';
                 itemClass = 'clear';
             } else if (title.includes('주의보')) {
                 typeBadgeKey = 'weather.alert.badge.warn.bracket';
