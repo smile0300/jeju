@@ -633,9 +633,12 @@ export async function fetchSuccessStories() {
         const response = await fetch('/api/success-list');
         if (response.ok) {
             const result = await response.json();
-            // Validate the result is an array and has the required fields
-            if (Array.isArray(result) && result.length > 0 && result[0].Date) {
-                data = result;
+            // Validate the result is an array and filter out rows without Date
+            if (Array.isArray(result) && result.length > 0) {
+                const validData = result.filter(item => item.Date && item.Date.toString().trim() !== '');
+                if (validData.length > 0) {
+                    data = validData;
+                }
             }
         }
     } catch (e) {
