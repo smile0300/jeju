@@ -14,8 +14,12 @@ export async function onRequest(context) {
   }
 
   try {
-    // Hardcode the specific new GAS URL provided by the user
-    const gasUrl = "https://script.google.com/macros/s/AKfycbyg_7wPmQwOtHrPXSHOaSm4Erwo7Z_Os5jgmNg-d32mxb6CCFNja9MbpvWFLEg7CDPk/exec";
+    const gasUrl = env.GAS_URL || env.SECRET_GAS_URL;
+    if (!gasUrl) {
+      return new Response(JSON.stringify([]), {
+        headers: { 'Access-Control-Allow-Origin': ALLOWED_ORIGIN, 'Content-Type': 'application/json' }
+      });
+    }
 
     // Append ?action=success to query the SuccessStories tab
     const fetchUrl = new URL(gasUrl);
