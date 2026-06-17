@@ -836,7 +836,7 @@
 .prob-label {
     font-size: 0.75rem;
     font-weight: 800;
-    color: var(--text-muted);
+    color: var(--label-primary);
     /* white-space: nowrap 제거 */
     word-break: keep-all; 
     text-align: center;
