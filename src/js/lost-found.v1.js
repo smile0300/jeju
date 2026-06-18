@@ -400,7 +400,7 @@ window.handleImageSearch = async function(event) {
     const loadingText = window.t ? window.t('lost.searching_ai') : '이미지 분석 및 검색 중...';
     if (grid) grid.innerHTML = `
         <div class="loading-lost" style="grid-column: 1/-1; padding: 40px; text-align: center;">
-            <i class="ph-duotone ph-spinner spin" style="font-size: 3rem; color: var(--accent-blue); margin-bottom: 15px; display: inline-block;"></i>
+            <i class="ph-duotone ph-circle-notch spin" style="font-size: 3rem; color: var(--accent-blue); margin-bottom: 15px; display: inline-block;"></i>
             <p style="color: var(--label-secondary); font-size: 0.95rem; font-weight: 600;">${loadingText}</p>
         </div>`;
     if (imageBtn) imageBtn.disabled = true;

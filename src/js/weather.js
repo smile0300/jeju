@@ -755,7 +755,7 @@ export function renderWeatherLoading(locKey) {
         container.innerHTML = `
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 140px; text-align: center;">
                 <style>@keyframes weather-spin { 100% { transform: rotate(360deg); } }</style>
-                <i class="ph-duotone ph-spinner-gap" style="font-size: 2.5rem; color: var(--accent-blue); margin-bottom: 12px; animation: weather-spin 1.2s linear infinite;"></i>
+                <i class="ph-duotone ph-circle-notch" style="font-size: 2.5rem; color: var(--accent-blue); margin-bottom: 12px; animation: weather-spin 1.2s linear infinite;"></i>
                 <div style="font-size: 0.9rem; font-weight: 800; color: var(--text-muted);">${window.t('weather.loading')}</div>
             </div>`;
     }
