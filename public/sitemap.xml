@@ -1,9 +1,52 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Main Home -->
   <url>
     <loc>https://jeju-live.com/</loc>
     <lastmod>2024-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
+  </url>
+  <!-- Weather -->
+  <url>
+    <loc>https://jeju-live.com/weather</loc>
+    <lastmod>2024-06-18</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <!-- Lost and Found -->
+  <url>
+    <loc>https://jeju-live.com/lost-found</loc>
+    <lastmod>2024-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <!-- Hallasan -->
+  <url>
+    <loc>https://jeju-live.com/hallasan</loc>
+    <lastmod>2024-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <!-- Airport -->
+  <url>
+    <loc>https://jeju-live.com/airport</loc>
+    <lastmod>2024-06-18</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <!-- Festival -->
+  <url>
+    <loc>https://jeju-live.com/festival</loc>
+    <lastmod>2024-06-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <!-- CCTV -->
+  <url>
+    <loc>https://jeju-live.com/cctv</loc>
+    <lastmod>2024-06-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
   </url>
 </urlset>

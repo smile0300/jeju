@@ -9,6 +9,41 @@ import { fetchFestivals } from './festival.js';
 import { initReward } from './reward.js';
 import { getSkyInfo, getWindColor } from './utils.js';
 
+const SEO_META = {
+    'home': {
+        title: 'Jeju Live - Real-time Jeju Travel Info (Hallasan, Weather, Flights, Lost & Found, Festivals)',
+        desc: 'Your ultimate Jeju Island guide for foreigners: Real-time weather, live CCTV, airport flight status, festivals, and professional lost & found services.'
+    },
+    'weather': {
+        title: 'Jeju Island Weather & Live CCTV - Jeju Live',
+        desc: 'Check real-time Jeju island weather, hourly forecasts, and live CCTV across Jeju including Yeon-dong, Aewol, Hyeopjae, and Seongsan.'
+    },
+    'hallasan': {
+        title: 'Hallasan Mountain Trail Status - Jeju Live',
+        desc: 'Live updates on Hallasan Mountain trail access, weather conditions, and hiking restrictions for foreign tourists.'
+    },
+    'airport': {
+        title: 'Jeju Airport Flight Status & Delays - Jeju Live',
+        desc: 'Real-time Jeju airport (CJU) flight arrivals, departures, and delay/cancellation information.'
+    },
+    'lost-found': {
+        title: 'Jeju Lost and Found / Korea Lost and Found Center',
+        desc: 'Lost your phone or wallet? We are a professional Korea lost and found service helping foreigners find lost items in Jeju taxis, buses, and the airport.'
+    },
+    'festival': {
+        title: 'Jeju Festivals & Events - Jeju Live',
+        desc: 'Discover current and upcoming festivals, events, and cultural experiences in Jeju Island.'
+    },
+    'cctv': {
+        title: 'Jeju Live CCTV Cameras - Jeju Live',
+        desc: 'Watch live CCTV cameras from various tourist spots around Jeju Island.'
+    },
+    'reward': {
+        title: 'Jeju Live Mission & Rewards',
+        desc: 'Participate in Jeju Live missions and earn rewards.'
+    }
+};
+
 export function showSection(sectionId, pushHistory = true) {
     document.querySelectorAll('.app-section').forEach(s => s.classList.remove('active'));
     const target = document.getElementById(sectionId);
@@ -18,6 +53,14 @@ export function showSection(sectionId, pushHistory = true) {
     }
     const mainAppBar = document.getElementById('main-app-bar');
     if (mainAppBar) mainAppBar.style.display = (sectionId === 'home' ? 'flex' : 'none');
+
+    // SEO: 동적 Title & Description 업데이트
+    const metaInfo = SEO_META[sectionId] || SEO_META['home'];
+    document.title = metaInfo.title;
+    const descTag = document.querySelector('meta[name="description"]');
+    if (descTag) {
+        descTag.setAttribute('content', metaInfo.desc);
+    }
 
     if (sectionId === 'cctv') initCCTV();
     if (sectionId === 'weather') {
@@ -51,14 +94,14 @@ export function showSection(sectionId, pushHistory = true) {
         window.dataLayer.push({
             'event': 'virtual_pageview',
             'page_path': sectionId === 'home' ? '/' : `/${sectionId}`,
-            'page_title': document.title + ' - ' + sectionId
+            'page_title': document.title
         });
     }
 
     // Google Analytics 4 (gtag.js) - Virtual Pageview Tracking
     if (typeof gtag === 'function') {
         gtag('event', 'page_view', {
-            page_title: document.title + ' - ' + sectionId,
+            page_title: document.title,
             page_location: window.location.href,
             page_path: sectionId === 'home' ? '/' : `/${sectionId}`
         });
