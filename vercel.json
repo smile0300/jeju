@@ -1,0 +1,32 @@
+{
+  "rewrites": [
+    {
+      "source": "/weather",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/lost-found",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/hallasan",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/airport",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/festival",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/reward",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/cctv",
+      "destination": "/index.html"
+    }
+  ]
+}
