@@ -11,36 +11,44 @@ import { getSkyInfo, getWindColor } from './utils.js';
 
 const SEO_META = {
     'home': {
-        title: 'Jeju Live - Real-time Jeju Travel Info (Hallasan, Weather, Flights, Lost & Found, Festivals)',
-        desc: 'Your ultimate Jeju Island guide for foreigners: Real-time weather, live CCTV, airport flight status, festivals, and professional lost & found services.'
+        title: 'Jeju Live - Real-time Jeju Island Travel Info | 济州岛实时旅行信息',
+        desc: 'Jeju Island real-time travel guide for tourists: live weather, airport flights (CJU), Hallasan trail status, lost & found, and festivals. 济州岛实时天气·航班·失物招领·汉拿山·节庆活动。',
+        keywords: 'Jeju travel guide, 济州岛旅行, jeju-live.com, Jeju Island tourists, 제주도 여행'
     },
     'weather': {
-        title: 'Jeju Island Weather & Live CCTV - Jeju Live',
-        desc: 'Check real-time Jeju island weather, hourly forecasts, and live CCTV across Jeju including Yeon-dong, Aewol, Hyeopjae, and Seongsan.'
+        title: 'Jeju Island Weather Forecast Today - Jeju Live | 济州天气预报',
+        desc: 'Live Jeju Island weather forecasts for all regions: Jeju City, Seogwipo, Hallasan, Aewol, Hyeopjae, Seongsan, Udo and more. Hourly & weekly forecasts. 济州岛实时天气预报。',
+        keywords: 'Jeju weather today, 济州岛天气, Jeju Island forecast, 제주 날씨, Jeju rain wind temperature'
     },
     'hallasan': {
-        title: 'Hallasan Mountain Trail Status - Jeju Live',
-        desc: 'Live updates on Hallasan Mountain trail access, weather conditions, and hiking restrictions for foreign tourists.'
+        title: 'Hallasan Mountain Trail Open/Closed Status - Jeju Live | 汉拿山登山信息',
+        desc: 'Real-time Hallasan Mountain trail status — open, closed, or restricted. Check Seongpanak, Gwaneumsa, Eorimok, and Yeongsil trail conditions before hiking. 汉拿山登山路实时通行状态。',
+        keywords: 'Hallasan trail open closed, Hallasan hiking today, 汉拿山登山条件, Hallasan weather, 한라산 등산 통제'
     },
     'airport': {
-        title: 'Jeju Airport Flight Status & Delays - Jeju Live',
-        desc: 'Real-time Jeju airport (CJU) flight arrivals, departures, and delay/cancellation information.'
+        title: 'Jeju Airport (CJU) Live Flight Status - Jeju Live | 济州机场实时航班',
+        desc: 'Real-time Jeju International Airport (CJU) arrivals and departures. Check flight delays, cancellations, and gate information. 济州岛机场实时到达·出发航班查询。',
+        keywords: 'Jeju airport CJU flights, 济州机场航班, Jeju flight arrivals departures, 제주공항 실시간, Jeju airport delay cancel'
     },
     'lost-found': {
-        title: 'Jeju Lost and Found / Korea Lost and Found Center',
-        desc: 'Lost your phone or wallet? We are a professional Korea lost and found service helping foreigners find lost items in Jeju taxis, buses, and the airport.'
+        title: 'Jeju Island Lost & Found Service - Jeju Live | 济州失物招领',
+        desc: 'Lost something in Jeju? Our professional lost & found service helps foreigners recover items from taxis, buses, airports, and tourist sites. 在济州岛丢失物品？联系我们帮您找回。',
+        keywords: 'Jeju lost and found, 济州岛失物招领, lost item Jeju taxi bus, 제주 분실물, Korea LOST112 English, Jeju lost phone wallet passport'
     },
     'festival': {
-        title: 'Jeju Festivals & Events - Jeju Live',
-        desc: 'Discover current and upcoming festivals, events, and cultural experiences in Jeju Island.'
+        title: 'Jeju Island Festivals & Events - Jeju Live | 济州节庆活动',
+        desc: 'Discover current and upcoming festivals, cultural events, and seasonal highlights in Jeju Island. Updated monthly. 济州岛精彩节庆活动一览。',
+        keywords: 'Jeju festivals 2026, 济州岛节日活动, Jeju Island events, 제주 축제, Jeju seasonal events'
     },
     'cctv': {
-        title: 'Jeju Live CCTV Cameras - Jeju Live',
-        desc: 'Watch live CCTV cameras from various tourist spots around Jeju Island.'
+        title: 'Jeju Live CCTV - Real-time Traffic & Beach Cameras | 济州实时监控',
+        desc: 'Watch live CCTV cameras from Jeju tourist spots, beaches, and roads. Real-time conditions for planning your trip. 济州岛景区实时监控画面。',
+        keywords: 'Jeju live camera, 济州实时摄像头, Jeju beach CCTV, 제주 실시간 CCTV'
     },
     'reward': {
-        title: 'Jeju Live Mission & Rewards',
-        desc: 'Participate in Jeju Live missions and earn rewards.'
+        title: 'Jeju Live Bounty Missions & Rewards | 济州红包任务',
+        desc: 'Earn rewards by helping deliver lost items to China. Jeju Live bounty missions connect travelers returning to China with lost item owners. 顺路赚零花钱，帮忙带失物回中国。',
+        keywords: 'Jeju reward mission, 济州红包, 回国带物品, Jeju bounty traveler'
     }
 };
 
@@ -54,13 +62,36 @@ export function showSection(sectionId, pushHistory = true) {
     const mainAppBar = document.getElementById('main-app-bar');
     if (mainAppBar) mainAppBar.style.display = (sectionId === 'home' ? 'flex' : 'none');
 
-    // SEO: 동적 Title & Description 업데이트
+    // SEO: 동적 Title / Description / Keywords 업데이트
     const metaInfo = SEO_META[sectionId] || SEO_META['home'];
     document.title = metaInfo.title;
+
     const descTag = document.querySelector('meta[name="description"]');
-    if (descTag) {
-        descTag.setAttribute('content', metaInfo.desc);
-    }
+    if (descTag) descTag.setAttribute('content', metaInfo.desc);
+
+    const kwTag = document.querySelector('meta[name="keywords"]');
+    if (kwTag && metaInfo.keywords) kwTag.setAttribute('content', metaInfo.keywords);
+
+    // SEO: Canonical URL 동적 업데이트
+    const canonicalPath = sectionId === 'home' ? '/' : `/${sectionId}`;
+    const canonicalUrl = `https://jeju-live.com${canonicalPath}`;
+    const canonicalTag = document.getElementById('canonical-tag');
+    if (canonicalTag) canonicalTag.setAttribute('href', canonicalUrl);
+
+    // SEO: og:url 동적 업데이트 (SNS 공유 시 정확한 URL 전달)
+    const ogUrlTag = document.querySelector('meta[property="og:url"]');
+    if (ogUrlTag) ogUrlTag.setAttribute('content', canonicalUrl);
+
+    // SEO: og:title / og:description 동적 업데이트
+    const ogTitleTag = document.querySelector('meta[property="og:title"]');
+    if (ogTitleTag) ogTitleTag.setAttribute('content', metaInfo.title);
+    const ogDescTag = document.querySelector('meta[property="og:description"]');
+    if (ogDescTag) ogDescTag.setAttribute('content', metaInfo.desc);
+
+    // SEO: html[lang] 동적 업데이트 (현재 선택된 언어 반영)
+    const currentLang = localStorage.getItem('lang') || 'en';
+    const langMap = { zh: 'zh-CN', ko: 'ko', en: 'en' };
+    document.documentElement.lang = langMap[currentLang] || 'en';
 
     if (sectionId === 'cctv') initCCTV();
     if (sectionId === 'weather') {

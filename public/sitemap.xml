@@ -1,52 +1,84 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <!-- Main Home -->
   <url>
     <loc>https://jeju-live.com/</loc>
-    <lastmod>2024-06-18</lastmod>
+    <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en"    href="https://jeju-live.com/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://jeju-live.com/"/>
+    <xhtml:link rel="alternate" hreflang="ko"    href="https://jeju-live.com/"/>
+  </url>
+  <!-- Lost and Found (최우선 서비스 페이지) -->
+  <url>
+    <loc>https://jeju-live.com/lost-found</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.95</priority>
+    <xhtml:link rel="alternate" hreflang="en"    href="https://jeju-live.com/lost-found"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://jeju-live.com/lost-found"/>
+    <xhtml:link rel="alternate" hreflang="ko"    href="https://jeju-live.com/lost-found"/>
   </url>
   <!-- Weather -->
   <url>
     <loc>https://jeju-live.com/weather</loc>
-    <lastmod>2024-06-18</lastmod>
+    <lastmod>2026-06-18</lastmod>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
-  </url>
-  <!-- Lost and Found -->
-  <url>
-    <loc>https://jeju-live.com/lost-found</loc>
-    <lastmod>2024-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <!-- Hallasan -->
-  <url>
-    <loc>https://jeju-live.com/hallasan</loc>
-    <lastmod>2024-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en"    href="https://jeju-live.com/weather"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://jeju-live.com/weather"/>
+    <xhtml:link rel="alternate" hreflang="ko"    href="https://jeju-live.com/weather"/>
   </url>
   <!-- Airport -->
   <url>
     <loc>https://jeju-live.com/airport</loc>
-    <lastmod>2024-06-18</lastmod>
+    <lastmod>2026-06-18</lastmod>
     <changefreq>hourly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en"    href="https://jeju-live.com/airport"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://jeju-live.com/airport"/>
+    <xhtml:link rel="alternate" hreflang="ko"    href="https://jeju-live.com/airport"/>
+  </url>
+  <!-- Hallasan -->
+  <url>
+    <loc>https://jeju-live.com/hallasan</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en"    href="https://jeju-live.com/hallasan"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://jeju-live.com/hallasan"/>
+    <xhtml:link rel="alternate" hreflang="ko"    href="https://jeju-live.com/hallasan"/>
   </url>
   <!-- Festival -->
   <url>
     <loc>https://jeju-live.com/festival</loc>
-    <lastmod>2024-06-18</lastmod>
+    <lastmod>2026-06-18</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.75</priority>
+    <xhtml:link rel="alternate" hreflang="en"    href="https://jeju-live.com/festival"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://jeju-live.com/festival"/>
+    <xhtml:link rel="alternate" hreflang="ko"    href="https://jeju-live.com/festival"/>
+  </url>
+  <!-- Reward -->
+  <url>
+    <loc>https://jeju-live.com/reward</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.65</priority>
+    <xhtml:link rel="alternate" hreflang="en"    href="https://jeju-live.com/reward"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://jeju-live.com/reward"/>
+    <xhtml:link rel="alternate" hreflang="ko"    href="https://jeju-live.com/reward"/>
   </url>
   <!-- CCTV -->
   <url>
     <loc>https://jeju-live.com/cctv</loc>
-    <lastmod>2024-06-18</lastmod>
+    <lastmod>2026-06-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en"    href="https://jeju-live.com/cctv"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://jeju-live.com/cctv"/>
+    <xhtml:link rel="alternate" hreflang="ko"    href="https://jeju-live.com/cctv"/>
   </url>
 </urlset>

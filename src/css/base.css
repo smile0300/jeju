@@ -361,3 +361,19 @@ input, textarea, [contenteditable="true"] {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+/* ─────────────────────────────────────────
+   SEO / 접근성 유틸리티
+   화면에는 보이지 않지만 구글봇·스크린리더가 읽음
+───────────────────────────────────────── */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}

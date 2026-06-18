@@ -935,6 +935,10 @@ export function setLanguage(lang) {
     applyTranslations();
     updateLangSelector();
 
+    // SEO: html[lang] 속성을 선택된 언어에 맞게 업데이트
+    const langMap = { zh: 'zh-CN', ko: 'ko', en: 'en' };
+    document.documentElement.lang = langMap[lang] || 'en';
+
     // 동적으로 생성되는 다국어 영역들을 재렌더링
     try {
         // 날씨 탭 재렌더링
@@ -1012,6 +1016,11 @@ function updateLangSelector() {
  * 초기화: 저장된 언어 적용
  */
 export function initI18n() {
+    // SEO: 초기 로딩 시 저장된 언어로 html[lang] 즉시 설정
+    const savedLang = localStorage.getItem('jeju_lang') || currentLang;
+    const langMap = { zh: 'zh-CN', ko: 'ko', en: 'en' };
+    document.documentElement.lang = langMap[savedLang] || 'en';
+
     // DOM이 준비된 후 번역 적용
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {

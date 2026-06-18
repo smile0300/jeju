@@ -25,11 +25,108 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <title>Jeju Live - Real-time Jeju Travel Info (Hallasan, Weather, Flights, Lost & Found, Festivals)</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Your ultimate Jeju Island guide for foreigners: Real-time weather, live CCTV, airport flight status, festivals, and professional lost & found services.">
-    <meta name="keywords" content="Jeju travel info, Jeju weather, Jeju flight status, Jeju lost and found, Jeju festivals, Jeju CCTV, Jeju live">
-    <meta property="og:title" content="Jeju Live - Real-time Jeju Travel Info (Hallasan, Weather, Flights, Lost & Found, Festivals)">
-    <meta property="og:description" content="Check real-time Jeju weather, flight status, festivals, and professional lost & found services for foreigners.">
-    <meta property="og:type" content="website">
+
+    <!-- ═══ SEO: Primary Meta ═══ -->
+    <meta name="description" content="Jeju Island real-time travel guide for foreign tourists. Check live weather forecasts, airport flight status (CJU), Hallasan trail conditions, lost & found service, and festivals. 济州岛实时旅行信息。">
+    <meta name="keywords" content="Jeju travel, Jeju weather today, Jeju airport CJU flights, Jeju lost and found, Hallasan trail open closed, Jeju festivals, 济州岛天气, 济州岛失物, 汉拿山登山, 济州机场航班, jeju-live.com">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="Jeju Live">
+
+    <!-- ═══ SEO: Canonical URL (JS로 페이지 전환 시 동적 업데이트) ═══ -->
+    <link rel="canonical" href="https://jeju-live.com/" id="canonical-tag">
+
+    <!-- ═══ SEO: hreflang (다국어 SEO — 구글에게 언어별 대상 독자 알림) ═══ -->
+    <link rel="alternate" hreflang="en"    href="https://jeju-live.com/">
+    <link rel="alternate" hreflang="zh-CN" href="https://jeju-live.com/">
+    <link rel="alternate" hreflang="ko"    href="https://jeju-live.com/">
+    <link rel="alternate" hreflang="x-default" href="https://jeju-live.com/">
+
+    <!-- ═══ SEO: Open Graph (SNS 공유 — WeChat, Line, 카카오 등) ═══ -->
+    <meta property="og:type"               content="website">
+    <meta property="og:site_name"          content="Jeju Live">
+    <meta property="og:title"              content="Jeju Live - Real-time Jeju Island Travel Info">
+    <meta property="og:description"        content="Real-time Jeju weather, airport flights, Hallasan trail status, lost & found, and festivals — all in one place for foreign tourists.">
+    <meta property="og:url"                content="https://jeju-live.com/" id="og-url">
+    <meta property="og:image"              content="https://jeju-live.com/img/og-image.png">
+    <meta property="og:image:width"        content="1200">
+    <meta property="og:image:height"       content="630">
+    <meta property="og:image:alt"          content="Jeju Live - Real-time Jeju Island Travel Information Platform">
+    <meta property="og:locale"             content="en_US">
+    <meta property="og:locale:alternate"   content="zh_CN">
+    <meta property="og:locale:alternate"   content="ko_KR">
+
+    <!-- ═══ SEO: Twitter Card ═══ -->
+    <meta name="twitter:card"        content="summary_large_image">
+    <meta name="twitter:title"       content="Jeju Live - Real-time Jeju Island Travel Info">
+    <meta name="twitter:description" content="Real-time Jeju weather, airport flights, Hallasan trail status, lost & found, and festivals for foreign tourists.">
+    <meta name="twitter:image"       content="https://jeju-live.com/img/og-image.png">
+    <meta name="twitter:image:alt"   content="Jeju Live - Jeju Island Real-Time Travel Information">
+
+    <!-- ═══ SEO: Schema.org JSON-LD 구조화 데이터 ═══ -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://jeju-live.com/#website",
+          "url": "https://jeju-live.com/",
+          "name": "Jeju Live",
+          "description": "Real-time Jeju Island travel information for foreign tourists — weather, flights, Hallasan, lost & found, festivals.",
+          "inLanguage": ["en", "zh-CN", "ko"],
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": "https://jeju-live.com/lost-found"
+            },
+            "query-input": "required name=search_term_string"
+          }
+        },
+        {
+          "@type": "TouristInformationCenter",
+          "@id": "https://jeju-live.com/#organization",
+          "name": "Jeju Live",
+          "url": "https://jeju-live.com/",
+          "logo": "https://jeju-live.com/img/og-image.png",
+          "description": "Online travel information platform providing real-time data for Jeju Island tourists including weather, flights, hiking trail status, and lost & found services.",
+          "areaServed": {
+            "@type": "Place",
+            "name": "Jeju Island",
+            "alternateName": ["済州島", "제주도", "Jeju-do"],
+            "geo": {
+              "@type": "GeoCoordinates",
+              "latitude": "33.4996",
+              "longitude": "126.5312"
+            }
+          },
+          "availableLanguage": ["English", "Chinese", "Korean"],
+          "serviceType": [
+            "Weather Forecast",
+            "Airport Flight Status",
+            "Lost and Found",
+            "Hiking Trail Status",
+            "Festival Information"
+          ]
+        },
+        {
+          "@type": "LocalBusiness",
+          "@id": "https://jeju-live.com/lost-found#business",
+          "name": "Jeju Live Lost & Found Service",
+          "url": "https://jeju-live.com/lost-found",
+          "description": "Professional lost and found retrieval service for foreign tourists in Jeju Island. We help find lost items in taxis, buses, airports, and tourist spots.",
+          "areaServed": "Jeju Island, South Korea",
+          "availableLanguage": ["English", "Chinese"],
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "contactType": "customer service",
+            "availableLanguage": ["English", "Chinese"]
+          }
+        }
+      ]
+    }
+    </script>
+
     <link rel="stylesheet" href="src/css/base.css">
     <link rel="stylesheet" href="src/css/layout.css">
     <link rel="stylesheet" href="src/css/components.css">

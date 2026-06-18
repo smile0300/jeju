@@ -14,7 +14,11 @@
         </div>
 
         <div class="home-welcome">
-            <h1 class="main-logo">JEJU LIVE</h1>
+            <!-- SEO: h1은 구글봇을 위해 완전한 설명 포함, 시각적 로고는 aria-hidden -->
+            <h1 class="main-logo">
+                <span aria-hidden="true">JEJU LIVE</span>
+                <span class="visually-hidden">Jeju Live — Real-time Jeju Island Travel Information for Foreign Tourists: Weather, Flights, Hallasan, Lost &amp; Found, Festivals | 济州岛实时旅行信息</span>
+            </h1>
         </div>
         <!-- Home Weather Alert Banner -->
         <div id="home-alerts-container" class="weather-alerts-container" style="display: none; padding: 0 20px; margin-bottom: 20px;"></div>
