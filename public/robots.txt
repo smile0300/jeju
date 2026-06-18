@@ -1,4 +1,20 @@
+# ======================================================
+# jeju-live.com robots.txt
+# 크롤러 지침 — 업데이트: 2026-06-18
+# ======================================================
+
+# 모든 봇: 기본 허용
 User-agent: *
 Allow: /
 
+# 크롤링 불필요 경로 제외
+Disallow: /.tmp/
+Disallow: /node_modules/
+Disallow: /.git/
+Disallow: /.venv/
+Disallow: /execution/
+Disallow: /directives/
+Disallow: /tmp/
+
+# Sitemap 위치 명시
 Sitemap: https://jeju-live.com/sitemap.xml
