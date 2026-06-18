@@ -162,6 +162,8 @@
     min-height: unset;
     outline: none;
     font-family: inherit;
+    text-decoration: none; /* a 태그 변환 대응 */
+    color: inherit;
     transition:
         transform var(--duration-fast) var(--ease-out),
         box-shadow var(--duration-fast) var(--ease-out);

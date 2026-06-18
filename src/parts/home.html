@@ -29,30 +29,30 @@
                 <span class="item-label" data-i18n="nav.cctv">实时监控</span>
                 <span class="coming-soon-badge" style="background-color: #f59e0b; color: white;">VIP</span>
             </button>
-            <button class="home-item item-weather" onclick="showSection('weather')" type="button">
+            <a href="/weather" class="home-item item-weather" onclick="event.preventDefault(); showSection('weather')">
                 <span class="item-icon"><i class="ph-duotone ph-cloud-sun color-weather"></i></span>
                 <span class="item-label" data-i18n="nav.weather">天气预报</span>
-            </button>
-            <button class="home-item item-hallasan" onclick="showSection('hallasan')" type="button">
+            </a>
+            <a href="/hallasan" class="home-item item-hallasan" onclick="event.preventDefault(); showSection('hallasan')">
                 <span class="item-icon"><i class="ph-duotone ph-mountains color-hallasan"></i></span>
                 <span class="item-label" data-i18n="nav.hallasan">汉拿山</span>
-            </button>
-            <button class="home-item item-airport" onclick="showSection('airport')" type="button">
+            </a>
+            <a href="/airport" class="home-item item-airport" onclick="event.preventDefault(); showSection('airport')">
                 <span class="item-icon"><i class="ph-duotone ph-airplane-tilt color-airport"></i></span>
                 <span class="item-label" data-i18n="nav.airport">机场信息</span>
-            </button>
-            <button class="home-item item-lost" onclick="showSection('lost-found')" type="button">
+            </a>
+            <a href="/lost-found" class="home-item item-lost" onclick="event.preventDefault(); showSection('lost-found')">
                 <span class="item-icon"><i class="ph-duotone ph-magnifying-glass color-lost"></i></span>
                 <span class="item-label" data-i18n="nav.lost">失物招领</span>
-            </button>
-            <button class="home-item item-festival" onclick="showSection('festival')" type="button">
+            </a>
+            <a href="/festival" class="home-item item-festival" onclick="event.preventDefault(); showSection('festival')">
                 <span class="item-icon"><i class="ph-duotone ph-confetti color-festival"></i></span>
                 <span class="item-label" data-i18n="nav.festival">节日活动</span>
-            </button>
-            <button class="home-item item-reward" onclick="showSection('reward')" type="button">
+            </a>
+            <a href="/reward" class="home-item item-reward" onclick="event.preventDefault(); showSection('reward')">
                 <span class="item-icon"><i class="ph-duotone ph-money color-reward"></i></span>
                 <span class="item-label" data-i18n="nav.reward">红　包</span>
-            </button>
+            </a>
             <!-- 맛집 & 여행 코스 준비 중 -->
             <button class="home-item item-disabled" disabled type="button">
                 <span class="item-icon"><i class="ph-duotone ph-hamburger color-food"></i></span>

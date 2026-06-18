@@ -312,6 +312,13 @@ const TRANSLATIONS = {
         'alert.fail':        '❌ 失败: ',
         'alert.copied':      'ID已复制',
         'alert.server.err':  '服务器错误',
+
+        // ── SEO ──
+        'seo.desc.weather': '济州岛实时天气预报和每小时预报',
+        'seo.desc.lost': '济州岛出租车、公交车、机场失物招领服务',
+        'seo.desc.hallasan': '汉拿山登山路线实时通行状态及管制信息',
+        'seo.desc.airport': '济州机场(CJU)实时航班起降信息',
+        'seo.desc.festival': '济州岛近期节庆活动日历',
     },
 
     ko: {
@@ -610,6 +617,13 @@ const TRANSLATIONS = {
         'alert.fail':        '❌ 실패: ',
         'alert.copied':      'ID가 복사되었습니다',
         'alert.server.err':  '서버 오류',
+
+        // ── SEO ──
+        'seo.desc.weather': '제주도 실시간 날씨 및 시간별 예보',
+        'seo.desc.lost': '제주도 택시, 버스, 공항 분실물 찾기 서비스',
+        'seo.desc.hallasan': '한라산 등산로 실시간 통제 및 개방 정보',
+        'seo.desc.airport': '제주공항 실시간 운항 및 지연 정보',
+        'seo.desc.festival': '제주도 다가오는 축제 및 행사 일정',
     },
 
     en: {
@@ -908,6 +922,13 @@ const TRANSLATIONS = {
         'alert.fail':        '❌ Failed: ',
         'alert.copied':      'ID copied!',
         'alert.server.err':  'Server Error',
+
+        // ── SEO ──
+        'seo.desc.weather': 'Jeju Island real-time weather and hourly forecast',
+        'seo.desc.lost': 'Jeju Island lost and found service for taxis, buses, and airport',
+        'seo.desc.hallasan': 'Hallasan Mountain trail live status and closure information',
+        'seo.desc.airport': 'Jeju Airport (CJU) live flight arrivals and departures',
+        'seo.desc.festival': 'Jeju Island upcoming festivals and events calendar',
     }
 };
 
