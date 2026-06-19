@@ -859,7 +859,7 @@ i.ph-duotone.hover-scale:hover {
 }
 .pws-stats-row-bottom {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 12px;
     margin-bottom: 16px;
 }
@@ -973,4 +973,9 @@ i.ph-duotone.hover-scale:hover {
 .pwc-pcp.p-blue {
     color: #3B82F6;
     font-weight: 600;
+}
+.pwc-wind {
+    font-size: 0.65rem;
+    color: var(--label-tertiary);
+    margin-top: 2px;
 }

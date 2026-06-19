@@ -1209,6 +1209,7 @@ function renderPastWeather(items, year, month) {
     const titleText = document.getElementById('pws-title-text');
     const avgTempEl = document.getElementById('pws-avg-temp');
     const rainDaysEl = document.getElementById('pws-rain-days');
+    const snowDaysEl = document.getElementById('pws-snow-days');
     const clearDaysEl = document.getElementById('pws-clear-days');
     const tipTextEl = document.getElementById('pws-tip-text');
 
@@ -1235,6 +1236,7 @@ function renderPastWeather(items, year, month) {
     let totalTemp = 0;
     let tempCount = 0;
     let rainDays = 0;
+    let snowDays = 0;
     let cloudyDays = 0;
     let clearDays = 0;
 
@@ -1264,11 +1266,15 @@ function renderPastWeather(items, year, month) {
             const maxTa = parseFloat(item.maxTa);
             const sumRn = parseFloat(item.sumRn);
             const avgTca = parseFloat(item.avgTca);
+            const ddMefs = parseFloat(item.ddMefs);
+            const avgWs = parseFloat(item.avgWs);
 
             const safeAvg = isNaN(avgTa) ? 0 : avgTa;
             const safeMin = isNaN(minTa) ? '-' : minTa;
             const safeMax = isNaN(maxTa) ? '-' : maxTa;
             const safeRn = isNaN(sumRn) ? 0 : sumRn;
+            const safeSnow = isNaN(ddMefs) ? 0 : ddMefs;
+            const safeWs = isNaN(avgWs) ? '-' : avgWs.toFixed(1);
 
             if(!isNaN(avgTa)) {
                 totalTemp += avgTa;
@@ -1278,7 +1284,11 @@ function renderPastWeather(items, year, month) {
             let iconHtml = '';
             let pcpHtml = '-';
             
-            if (safeRn > 0) {
+            if (safeSnow > 0) {
+                snowDays++;
+                iconHtml = `<i class="ph-duotone ph-snowflake color-snow"></i>`;
+                pcpHtml = `<span class="p-blue">${safeSnow}cm</span>`;
+            } else if (safeRn > 0) {
                 rainDays++;
                 iconHtml = `<i class="ph-duotone ph-cloud-rain color-rain"></i>`;
                 pcpHtml = `<span class="p-blue">${safeRn}mm</span>`;
@@ -1296,6 +1306,7 @@ function renderPastWeather(items, year, month) {
                     <div class="pwc-icon">${iconHtml}</div>
                     <div class="pwc-temps"><span class="pwc-high">${safeMax}°</span><span class="pwc-low">${safeMin}°</span></div>
                     <div class="pwc-pcp">${pcpHtml}</div>
+                    <div class="pwc-wind">${safeWs}m/s</div>
                 </div>
             `;
         } else {
@@ -1305,6 +1316,7 @@ function renderPastWeather(items, year, month) {
                     <div class="pwc-icon"><i class="ph-duotone ph-minus"></i></div>
                     <div class="pwc-temps"><span class="pwc-high">-</span><span class="pwc-low">-</span></div>
                     <div class="pwc-pcp">-</div>
+                    <div class="pwc-wind">-</div>
                 </div>
             `;
         }
@@ -1314,15 +1326,17 @@ function renderPastWeather(items, year, month) {
     if(avgTempEl) avgTempEl.textContent = `${avgT}°C`;
     const daysSuffix = window.t('weather.past.days_suffix');
     if(rainDaysEl) rainDaysEl.textContent = `${rainDays} ${daysSuffix}`;
+    if(snowDaysEl) snowDaysEl.textContent = `${snowDays} ${daysSuffix}`;
     const cloudyDaysEl = document.getElementById('pws-cloudy-days');
     if(cloudyDaysEl) cloudyDaysEl.textContent = `${cloudyDays} ${daysSuffix}`;
     if(clearDaysEl) clearDaysEl.textContent = `${clearDays} ${daysSuffix}`;
 
     const scoreEl = document.getElementById('pws-weather-score');
     if (scoreEl) {
-        const totalDays = clearDays + cloudyDays + rainDays;
+        const totalDays = clearDays + cloudyDays + rainDays + snowDays;
         if (totalDays > 0) {
-            const rawScore = (clearDays * 1 + cloudyDays * 0.5 + rainDays * 0) / totalDays;
+            // 완화된 계산법: 맑음 1.0, 구름 0.7, 눈 0.8, 비 0.2 (제주도의 특성을 반영하여 비가 와도 0점은 아님)
+            const rawScore = (clearDays * 1.0 + cloudyDays * 0.7 + snowDays * 0.8 + rainDays * 0.2) / totalDays;
             const rating = Math.round(rawScore * 5 * 2) / 2; // Round to nearest 0.5
             
             const fullStars = Math.floor(rating);
