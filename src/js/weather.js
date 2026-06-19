@@ -1339,9 +1339,14 @@ function renderPastWeather(items, year, month) {
     if (scoreEl) {
         const totalDays = clearDays + cloudyDays + rainDays + snowDays;
         if (totalDays > 0) {
-            // 다시 완화된 점수 계산법으로 원복 (맑음: 1.0, 구름: 0.7, 눈: 0.8, 비: 0.2)
-            const rawScore = (clearDays * 1.0 + cloudyDays * 0.7 + snowDays * 0.8 + rainDays * 0.2) / totalDays;
-            const rating = Math.round(rawScore * 5 * 2) / 2; // Round to nearest 0.5
+            // 사용자 요청 기반 가파른 점수 계산식 (맑음 20/흐림 5/비 5 -> 4.5점, 맑음 5 -> 약 1점)
+            const goodRatio = (clearDays * 1.0 + cloudyDays * 0.5 + snowDays * 0.5) / totalDays;
+            let calcScore = (8.4 * goodRatio) - 1.8;
+            
+            // 0 ~ 5점 사이로 제한
+            calcScore = Math.max(0, Math.min(5, calcScore));
+            
+            const rating = Math.round(calcScore * 2) / 2; // 0.5 단위 반올림
             
             const fullStars = Math.floor(rating);
             const hasHalfStar = rating % 1 !== 0;
