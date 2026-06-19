@@ -849,9 +849,15 @@ i.ph-duotone.hover-scale:hover {
 }
 .pws-stats-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 12px;
     margin-bottom: 16px;
+}
+@media (max-width: 480px) {
+    .pws-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
 }
 .pws-stat-item {
     background: var(--fill-secondary);
@@ -875,6 +881,7 @@ i.ph-duotone.hover-scale:hover {
 .p-blue { color: #3B82F6; }
 .p-orange { color: #F59E0B; }
 .p-red { color: #EF4444; }
+.p-gray { color: #64748B; }
 
 .pws-tip-box {
     background: rgba(8, 145, 178, 0.1);

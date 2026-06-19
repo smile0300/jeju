@@ -1235,6 +1235,7 @@ function renderPastWeather(items, year, month) {
     let totalTemp = 0;
     let tempCount = 0;
     let rainDays = 0;
+    let cloudyDays = 0;
     let clearDays = 0;
 
     for (let i = 0; i < firstDay; i++) {
@@ -1262,6 +1263,7 @@ function renderPastWeather(items, year, month) {
             const minTa = parseFloat(item.minTa);
             const maxTa = parseFloat(item.maxTa);
             const sumRn = parseFloat(item.sumRn);
+            const avgTca = parseFloat(item.avgTca);
 
             const safeAvg = isNaN(avgTa) ? 0 : avgTa;
             const safeMin = isNaN(minTa) ? '-' : minTa;
@@ -1280,6 +1282,9 @@ function renderPastWeather(items, year, month) {
                 rainDays++;
                 iconHtml = `<i class="ph-duotone ph-cloud-rain color-rain"></i>`;
                 pcpHtml = `<span class="p-blue">${safeRn}mm</span>`;
+            } else if (!isNaN(avgTca) && avgTca >= 6.0) {
+                cloudyDays++;
+                iconHtml = `<i class="ph-duotone ph-cloud color-cloud" style="color: #64748B;"></i>`;
             } else {
                 clearDays++;
                 iconHtml = `<i class="ph-duotone ph-sun color-sun"></i>`;
@@ -1309,6 +1314,8 @@ function renderPastWeather(items, year, month) {
     if(avgTempEl) avgTempEl.textContent = `${avgT}°C`;
     const daysSuffix = window.t('weather.past.days_suffix');
     if(rainDaysEl) rainDaysEl.textContent = `${rainDays} ${daysSuffix}`;
+    const cloudyDaysEl = document.getElementById('pws-cloudy-days');
+    if(cloudyDaysEl) cloudyDaysEl.textContent = `${cloudyDays} ${daysSuffix}`;
     if(clearDaysEl) clearDaysEl.textContent = `${clearDays} ${daysSuffix}`;
 
     if(tipTextEl) {
