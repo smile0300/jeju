@@ -3,7 +3,7 @@ import { CONFIG } from './config.js';
 import { initI18n } from './i18n.js';
 
 import { initCCTV, openCctvModalById, openCctvModal, initHlsPlayer } from './cctv.js';
-import { fetchWeatherData, switchWeatherLocation, updateHourlyWeather, fetchWeatherAlerts } from './weather.js';
+import { fetchWeatherData, switchWeatherLocation, updateHourlyWeather, fetchWeatherAlerts, fetchPastWeather } from './weather.js';
 import { fetchHallasanStatus } from './hallasan.js';
 import { renderHallasanDashboard } from './hallasan-dashboard.js';
 import { fetchFlights, switchFlightTab } from './airport.js';
@@ -32,6 +32,81 @@ window.toggleFullscreen = function(videoId) {
     }
 };
 window.switchWeatherLocation = switchWeatherLocation;
+
+window.switchWeatherView = function(viewType) {
+    // 탭 UI 업데이트
+    document.querySelectorAll('.weather-view-tabs .view-tab').forEach(tab => {
+        if(tab.dataset.view === viewType) {
+            tab.classList.add('active');
+        } else {
+            tab.classList.remove('active');
+        }
+    });
+
+    // 컨텐츠 영역 토글
+    const currentView = document.getElementById('weather-current-view');
+    const pastView = document.getElementById('weather-past-view');
+    
+    if(viewType === 'current') {
+        currentView.style.display = 'block';
+        pastView.style.display = 'none';
+        // 강제로 리플로우 방지 및 애니메이션 적용 가능성 열어두기
+        setTimeout(() => {
+            currentView.classList.add('active');
+            pastView.classList.remove('active');
+        }, 10);
+    } else {
+        currentView.style.display = 'none';
+        pastView.style.display = 'block';
+        setTimeout(() => {
+            pastView.classList.add('active');
+            currentView.classList.remove('active');
+        }, 10);
+        
+        // 과거 날씨 연동
+        const activeTab = document.querySelector('.location-tab.active');
+        const locKey = activeTab ? activeTab.dataset.loc : 'jeju';
+        const year = parseInt(document.getElementById('pws-year-select').value, 10);
+        const month = parseInt(document.getElementById('pws-month-select').value, 10);
+        fetchPastWeather(locKey, year, month);
+    }
+};
+
+function initPastWeatherSelects() {
+    const yearSelect = document.getElementById('pws-year-select');
+    const monthSelect = document.getElementById('pws-month-select');
+    if(!yearSelect || !monthSelect) return;
+
+    const currentYear = new Date().getFullYear();
+    const currentMonth = new Date().getMonth() + 1; // 1~12
+
+    // 기본적으로 전년도 동일 월을 보여줌
+    const targetYear = currentYear - 1;
+    const targetMonth = currentMonth;
+
+    yearSelect.innerHTML = '';
+    monthSelect.innerHTML = '';
+
+    for (let y = currentYear; y >= currentYear - 5; y--) {
+        yearSelect.innerHTML += `<option value="${y}" ${y === targetYear ? 'selected' : ''}>${y}년</option>`;
+    }
+    for (let m = 1; m <= 12; m++) {
+        const mm = m.toString().padStart(2, '0');
+        monthSelect.innerHTML += `<option value="${m}" ${m === targetMonth ? 'selected' : ''}>${mm}월</option>`;
+    }
+
+    const onChange = () => {
+        const activeTab = document.querySelector('.location-tab.active');
+        const locKey = activeTab ? activeTab.dataset.loc : 'jeju';
+        const y = parseInt(yearSelect.value, 10);
+        const m = parseInt(monthSelect.value, 10);
+        fetchPastWeather(locKey, y, m);
+    };
+
+    yearSelect.addEventListener('change', onChange);
+    monthSelect.addEventListener('change', onChange);
+}
+
 window.fetchWeatherData = fetchWeatherData;
 window.updateHourlyWeather = updateHourlyWeather;
 window.switchFlightTab = switchFlightTab;
@@ -182,6 +257,7 @@ window.addEventListener('load', () => {
     fetchFestivals();
     initReward();
     fetchSuccessStories();
+    initPastWeatherSelects();
     
     // 초기 로딩 시 URL에 맞는 페이지 열기
     handleRouting();

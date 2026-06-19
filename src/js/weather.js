@@ -781,6 +781,18 @@ export function switchWeatherLocation(locKey) {
     document.querySelectorAll('.location-tab').forEach(t => t.classList.toggle('active', t.dataset.loc === locKey));
     document.querySelectorAll('.location-weather').forEach(c => c.classList.toggle('active', c.id === `weather-content-${locKey}`));
     if (!WEATHER_STATE[locKey]) fetchWeatherData(locKey);
+
+    const pastView = document.getElementById('weather-past-view');
+    if (pastView && pastView.classList.contains('active')) {
+        const yearSelect = document.getElementById('pws-year-select');
+        const monthSelect = document.getElementById('pws-month-select');
+        if(yearSelect && monthSelect) {
+            const y = parseInt(yearSelect.value, 10);
+            const m = parseInt(monthSelect.value, 10);
+            // window.weatherApp && fetchPastWeather might be needed but fetchPastWeather is in scope
+            fetchPastWeather(locKey, y, m);
+        }
+    }
 }
 
 const AIR_QUALITY_CACHE = {};
@@ -1123,6 +1135,7 @@ window.closeWeatherAlertModal = function() {
 
 window.weatherApp = {
     fetchWeatherData: fetchWeatherData,
+    fetchPastWeather: fetchPastWeather,
     retryFetch: (locKey) => { renderWeatherLoading(locKey); fetchWeatherData(locKey); },
     scrollToHourly: (locKey, ymd) => {
         const targetEl = document.getElementById(`h-${locKey}-${ymd}`);
@@ -1135,4 +1148,183 @@ window.weatherApp = {
     }
 };
 
+// --- 과거 날씨 (ASOS) 기능 ---
+function getAsosStationId(locKey) {
+    const map = {
+        'jeju': '184', 'aewol': '184', 'hamdeok': '184',
+        'seogwipo': '189', 'sanbangsan': '189',
+        'seongsan': '188', 'udo': '188', 'woljeong': '188',
+        'hyeopjae': '185',
+        'hallasan': '184'
+    };
+    return map[locKey] || '184';
+}
+
+export async function fetchPastWeather(locKey, year, month) {
+    try {
+        const gridContainer = document.getElementById('pwc-grid-container');
+        if(gridContainer) gridContainer.innerHTML = '<div style="grid-column: 1 / -1; padding: 40px; text-align: center;"><i class="ph-duotone ph-circle-notch spin" style="font-size: 2rem; color: var(--accent);"></i><div style="margin-top: 10px; color: var(--label-secondary); font-size: 0.9rem;">' + window.t('weather.loading') + '</div></div>';
+        
+        const tipTextEl = document.getElementById('pws-tip-text');
+        if(tipTextEl) tipTextEl.innerHTML = window.t('weather.past.tip.loading');
+
+        const stnId = getAsosStationId(locKey);
+        const paddedMonth = month.toString().padStart(2, '0');
+        const lastDay = new Date(year, month, 0).getDate();
+        const startDt = `${year}${paddedMonth}01`;
+        const endDt = `${year}${paddedMonth}${lastDay}`;
+
+        const params = {
+            pageNo: 1,
+            numOfRows: 31,
+            dataType: 'JSON',
+            dataCd: 'ASOS',
+            dateCd: 'DAY',
+            startDt: startDt,
+            endDt: endDt,
+            stnIds: stnId
+        };
+
+        const data = await fetchPublicDataJson('1360000/AsosDalyInfoService/getWthrDataList', params);
+        
+        let items = [];
+        if (data && data.response && data.response.body && data.response.body.items) {
+            const resultItems = data.response.body.items.item;
+            items = Array.isArray(resultItems) ? resultItems : [resultItems];
+        }
+
+        renderPastWeather(items, year, month);
+
+    } catch (e) {
+        console.error('[Weather] 과거 날씨 데이터 로딩 실패:', e);
+        const tipTextEl = document.getElementById('pws-tip-text');
+        if(tipTextEl) tipTextEl.innerHTML = window.t('weather.past.tip.fail');
+        const gridContainer = document.getElementById('pwc-grid-container');
+        if(gridContainer) gridContainer.innerHTML = '<div style="grid-column: 1 / -1; padding: 20px; text-align: center; color: var(--color-danger);">' + window.t('weather.past.tip.fail') + '</div>';
+    }
+}
+
+function renderPastWeather(items, year, month) {
+    const gridContainer = document.getElementById('pwc-grid-container');
+    const titleText = document.getElementById('pws-title-text');
+    const avgTempEl = document.getElementById('pws-avg-temp');
+    const rainDaysEl = document.getElementById('pws-rain-days');
+    const clearDaysEl = document.getElementById('pws-clear-days');
+    const tipTextEl = document.getElementById('pws-tip-text');
+
+    if (!gridContainer) return;
+
+    const activeTab = document.querySelector('.location-tab.active');
+    let locName = '제주';
+    if(activeTab) {
+        // I18n label is inside span data-i18n
+        const span = activeTab.querySelector('span[data-i18n]');
+        if(span) locName = span.textContent;
+    }
+    
+    // Set dynamic translation title
+    if(titleText) {
+        titleText.textContent = window.t('weather.past.title', { loc: locName, month: month });
+    }
+
+    gridContainer.innerHTML = '';
+
+    const firstDay = new Date(year, month - 1, 1).getDay();
+    const lastDate = new Date(year, month, 0).getDate();
+
+    let totalTemp = 0;
+    let tempCount = 0;
+    let rainDays = 0;
+    let clearDays = 0;
+
+    for (let i = 0; i < firstDay; i++) {
+        gridContainer.innerHTML += `<div class="pwc-date-cell empty"></div>`;
+    }
+
+    const dataMap = {};
+    if(items && items.length > 0) {
+        items.forEach(item => {
+            if(!item || !item.tm) return;
+            const d = parseInt(item.tm.split('-')[2], 10);
+            dataMap[d] = item;
+        });
+    }
+
+    for (let d = 1; d <= lastDate; d++) {
+        const item = dataMap[d];
+        const currentDayOfWeek = (firstDay + d - 1) % 7;
+        let dayClass = '';
+        if (currentDayOfWeek === 0) dayClass = 'p-red';
+        if (currentDayOfWeek === 6) dayClass = 'p-blue';
+
+        if (item) {
+            const avgTa = parseFloat(item.avgTa);
+            const minTa = parseFloat(item.minTa);
+            const maxTa = parseFloat(item.maxTa);
+            const sumRn = parseFloat(item.sumRn);
+
+            const safeAvg = isNaN(avgTa) ? 0 : avgTa;
+            const safeMin = isNaN(minTa) ? '-' : minTa;
+            const safeMax = isNaN(maxTa) ? '-' : maxTa;
+            const safeRn = isNaN(sumRn) ? 0 : sumRn;
+
+            if(!isNaN(avgTa)) {
+                totalTemp += avgTa;
+                tempCount++;
+            }
+
+            let iconHtml = '';
+            let pcpHtml = '-';
+            
+            if (safeRn > 0) {
+                rainDays++;
+                iconHtml = `<i class="ph-duotone ph-cloud-rain color-rain"></i>`;
+                pcpHtml = `<span class="p-blue">${safeRn}mm</span>`;
+            } else {
+                clearDays++;
+                iconHtml = `<i class="ph-duotone ph-sun color-sun"></i>`;
+            }
+
+            gridContainer.innerHTML += `
+                <div class="pwc-date-cell">
+                    <div class="pwc-date-num ${dayClass}">${d}</div>
+                    <div class="pwc-icon">${iconHtml}</div>
+                    <div class="pwc-temps"><span class="pwc-high">${safeMax}°</span><span class="pwc-low">${safeMin}°</span></div>
+                    <div class="pwc-pcp">${pcpHtml}</div>
+                </div>
+            `;
+        } else {
+            gridContainer.innerHTML += `
+                <div class="pwc-date-cell">
+                    <div class="pwc-date-num ${dayClass}">${d}</div>
+                    <div class="pwc-icon"><i class="ph-duotone ph-minus"></i></div>
+                    <div class="pwc-temps"><span class="pwc-high">-</span><span class="pwc-low">-</span></div>
+                    <div class="pwc-pcp">-</div>
+                </div>
+            `;
+        }
+    }
+
+    const avgT = tempCount > 0 ? (totalTemp / tempCount).toFixed(1) : '--';
+    if(avgTempEl) avgTempEl.textContent = `${avgT}°C`;
+    const daysSuffix = window.t('weather.past.days_suffix');
+    if(rainDaysEl) rainDaysEl.textContent = `${rainDays} ${daysSuffix}`;
+    if(clearDaysEl) clearDaysEl.textContent = `${clearDays} ${daysSuffix}`;
+
+    if(tipTextEl) {
+        if(avgT === '--') {
+             tipTextEl.innerHTML = window.t('weather.past.tip.nodata');
+        } else if(avgT >= 25) {
+            tipTextEl.innerHTML = window.t('weather.past.tip.hot');
+        } else if(avgT >= 20) {
+            tipTextEl.innerHTML = window.t('weather.past.tip.warm');
+        } else if(avgT >= 10) {
+            tipTextEl.innerHTML = window.t('weather.past.tip.cool');
+        } else {
+            tipTextEl.innerHTML = window.t('weather.past.tip.cold');
+        }
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {});
+

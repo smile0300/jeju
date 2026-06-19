@@ -785,3 +785,170 @@ i.ph-duotone.hover-scale:hover {
     border-left: 3px solid var(--accent);
 }
 
+/* ==================== Weather View Tabs ==================== */
+.weather-view-tabs {
+    display: flex;
+    gap: 8px;
+    background: var(--fill-secondary);
+    padding: 6px;
+    border-radius: var(--radius-md);
+    margin-bottom: 20px;
+}
+.weather-view-tabs .view-tab {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--label-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.weather-view-tabs .view-tab.active {
+    background: var(--bg-primary);
+    color: var(--label-primary);
+    font-weight: 700;
+    box-shadow: var(--shadow-sm);
+}
+
+/* ==================== Past Weather Summary Mockup ==================== */
+.past-weather-summary {
+    padding: 20px;
+    margin-bottom: 20px;
+}
+.pws-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+.pws-title {
+    font-weight: 700;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.pws-filters {
+    display: flex;
+    gap: 8px;
+}
+.pws-select {
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--separator);
+    background: var(--bg-primary);
+    font-size: 0.85rem;
+    color: var(--label-primary);
+    outline: none;
+}
+.pws-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+}
+.pws-stat-item {
+    background: var(--fill-secondary);
+    padding: 12px;
+    border-radius: 12px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.pws-stat-label {
+    font-size: 0.8rem;
+    color: var(--label-secondary);
+    font-weight: 500;
+}
+.pws-stat-val {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--label-primary);
+}
+.p-blue { color: #3B82F6; }
+.p-orange { color: #F59E0B; }
+.p-red { color: #EF4444; }
+
+.pws-tip-box {
+    background: rgba(8, 145, 178, 0.1);
+    border-radius: 12px;
+    padding: 12px 16px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    color: var(--label-primary);
+}
+.pws-tip-box i {
+    font-size: 1.2rem;
+    margin-top: 2px;
+}
+
+/* ==================== Past Weather Calendar Mockup ==================== */
+.past-weather-calendar {
+    padding: 16px;
+}
+.pwc-days-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--label-secondary);
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--separator);
+}
+.pwc-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+.pwc-date-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 4px;
+    border-radius: 8px;
+    text-align: center;
+}
+.pwc-date-cell:not(.empty):hover {
+    background: var(--fill-secondary);
+    cursor: pointer;
+}
+.pwc-date-num {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--label-primary);
+}
+.pwc-icon {
+    font-size: 1.5rem;
+    margin-bottom: 6px;
+}
+.pwc-temps {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+.pwc-high { color: #EF4444; }
+.pwc-low { color: #3B82F6; }
+.pwc-pcp {
+    font-size: 0.7rem;
+    color: var(--label-tertiary);
+}
+.pwc-pcp.p-blue {
+    color: #3B82F6;
+    font-weight: 600;
+}

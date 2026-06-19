@@ -6,7 +6,22 @@ const TRANSLATIONS = {
     zh: {
         // ── 날씨 ──
         'weather.title':      '天气预报',
-        'weather.summary':    '简略查看',
+        'weather.view.current': '实时天气',
+        'weather.view.past':    '历史天气',
+        'weather.past.title':   '{loc} {month}月 历史天气',
+        'weather.past.avg_temp': '平均气温',
+        'weather.past.rain_days': '雨天',
+        'weather.past.clear_days': '晴天',
+        'weather.past.days_suffix': '天',
+        'weather.past.sun': '日', 'weather.past.mon': '一', 'weather.past.tue': '二', 'weather.past.wed': '三', 'weather.past.thu': '四', 'weather.past.fri': '五', 'weather.past.sat': '六',
+        'weather.past.tip.loading': '<strong>提示:</strong> 正在请求数据...',
+        'weather.past.tip.fail': '<strong>提示:</strong> 未能加载历史天气数据。',
+        'weather.past.tip.nodata': '<strong>提示:</strong> 尚无该月的历史数据。',
+        'weather.past.tip.hot': '<strong>穿衣提示:</strong> 天气炎热，请准备轻薄凉爽的衣物！',
+        'weather.past.tip.warm': '<strong>穿衣提示:</strong> 适合穿短袖和薄外套的好天气。',
+        'weather.past.tip.cool': '<strong>穿衣提示:</strong> 早晚可能较凉，请务必带上外套。',
+        'weather.past.tip.cold': '<strong>穿衣提示:</strong> 天气寒冷，请准备保暖外套和防寒用品。',
+        'weather.summary':    '汇总一览',
         'weather.alert.checking': '正在检查气象特报...',
         'weather.loading':    '正在加载...',
         'weather.group.north': '北线',
@@ -324,7 +339,22 @@ const TRANSLATIONS = {
     ko: {
         // ── 날씨 ──
         'weather.title':      '날씨예보',
-        'weather.summary':    '간략보기',
+        'weather.view.current': '실시간 날씨',
+        'weather.view.past':    '과거 날씨',
+        'weather.past.title':   '{loc} {month}월 날씨 요약',
+        'weather.past.avg_temp': '평균 기온',
+        'weather.past.rain_days': '비 온 날',
+        'weather.past.clear_days': '맑은 날',
+        'weather.past.days_suffix': '일',
+        'weather.past.sun': '일', 'weather.past.mon': '월', 'weather.past.tue': '화', 'weather.past.wed': '수', 'weather.past.thu': '목', 'weather.past.fri': '금', 'weather.past.sat': '토',
+        'weather.past.tip.loading': '<strong>안내:</strong> 데이터를 요청 중입니다...',
+        'weather.past.tip.fail': '<strong>안내:</strong> 과거 날씨 데이터를 불러오지 못했습니다.',
+        'weather.past.tip.nodata': '<strong>안내:</strong> 해당 월의 과거 데이터가 아직 제공되지 않았습니다.',
+        'weather.past.tip.hot': '<strong>옷차림 팁:</strong> 무더운 여름 날씨입니다. 얇고 시원한 옷을 챙겨주세요!',
+        'weather.past.tip.warm': '<strong>옷차림 팁:</strong> 반팔과 얇은 겉옷을 챙기기 좋은 날씨예요.',
+        'weather.past.tip.cool': '<strong>옷차림 팁:</strong> 아침저녁으로 쌀쌀할 수 있으니 겉옷을 꼭 챙기세요.',
+        'weather.past.tip.cold': '<strong>옷차림 팁:</strong> 추운 겨울 날씨입니다. 따뜻한 외투와 방한용품을 준비하세요.',
+        'weather.summary':    '모아보기',
         'weather.alert.checking': '기상특보 확인 중...',
         'weather.loading':    '불러오는 중...',
         'weather.group.north': '북부',
@@ -629,7 +659,22 @@ const TRANSLATIONS = {
     en: {
         // ── Weather ──
         'weather.title':      'Weather Forecast',
-        'weather.summary':    'Summary',
+        'weather.view.current': 'Real-time Weather',
+        'weather.view.past':    'Past Weather',
+        'weather.past.title':   '{loc} - Month {month} Summary',
+        'weather.past.avg_temp': 'Avg Temp',
+        'weather.past.rain_days': 'Rainy',
+        'weather.past.clear_days': 'Sunny',
+        'weather.past.days_suffix': 'Days',
+        'weather.past.sun': 'Sun', 'weather.past.mon': 'Mon', 'weather.past.tue': 'Tue', 'weather.past.wed': 'Wed', 'weather.past.thu': 'Thu', 'weather.past.fri': 'Fri', 'weather.past.sat': 'Sat',
+        'weather.past.tip.loading': '<strong>Tip:</strong> Requesting data...',
+        'weather.past.tip.fail': '<strong>Tip:</strong> Failed to load past weather data.',
+        'weather.past.tip.nodata': '<strong>Tip:</strong> Past data for this month is not yet available.',
+        'weather.past.tip.hot': '<strong>Outfit Tip:</strong> Hot summer weather. Prepare light and cool clothes!',
+        'weather.past.tip.warm': '<strong>Outfit Tip:</strong> Nice weather for short sleeves and a light jacket.',
+        'weather.past.tip.cool': '<strong>Outfit Tip:</strong> It can be chilly in the morning and evening, so be sure to bring a jacket.',
+        'weather.past.tip.cold': '<strong>Outfit Tip:</strong> Cold winter weather. Prepare a warm coat and winter gear.',
+        'weather.summary':    'Overview',
         'weather.alert.checking': 'Checking weather alerts...',
         'weather.loading':    'Loading...',
         'weather.group.north': 'North',
@@ -938,8 +983,14 @@ let currentLang = localStorage.getItem('jeju_lang') || 'zh';
 /**
  * 번역 키에 해당하는 텍스트 반환
  */
-export function t(key) {
-    return TRANSLATIONS[currentLang]?.[key] ?? TRANSLATIONS['zh'][key] ?? key;
+export function t(key, params = {}) {
+    let str = TRANSLATIONS[currentLang]?.[key] ?? TRANSLATIONS['zh'][key] ?? key;
+    if (params) {
+        for (const [k, v] of Object.entries(params)) {
+            str = str.split(`{${k}}`).join(String(v));
+        }
+    }
+    return str;
 }
 
 /**
@@ -967,6 +1018,19 @@ export function setLanguage(lang) {
         if (activeLocTab && window.weatherApp && window.weatherApp.fetchWeatherData) {
             window.weatherApp.fetchWeatherData(activeLocTab.dataset.loc);
         }
+        
+        // 과거 날씨 탭 재렌더링
+        const pastView = document.getElementById('weather-past-view');
+        if (pastView && pastView.classList.contains('active')) {
+            const yearSelect = document.getElementById('pws-year-select');
+            const monthSelect = document.getElementById('pws-month-select');
+            if(activeLocTab && yearSelect && monthSelect && window.weatherApp && window.weatherApp.fetchPastWeather) {
+                const y = parseInt(yearSelect.value, 10);
+                const m = parseInt(monthSelect.value, 10);
+                window.weatherApp.fetchPastWeather(activeLocTab.dataset.loc, y, m);
+            }
+        }
+
         // 한라산 탭 재렌더링
         if (window.hallasanApp && window.hallasanApp.fetchStatus) {
             window.hallasanApp.fetchStatus(false, true);
