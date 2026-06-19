@@ -2328,10 +2328,14 @@
     box-shadow: 0 4px 12px rgba(8, 145, 178, 0.20);
 }
 .tab-name { 
-    font-size: 0.72rem; 
+    font-size: clamp(0.6rem, 2vw, 0.72rem); 
     font-weight: 800;
     color: #495057;
-    white-space: nowrap;
+    white-space: normal;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+    text-align: center;
+    line-height: 1.1;
 }
 .location-tab.active .tab-name {
     color: white;
