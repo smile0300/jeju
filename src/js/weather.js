@@ -1209,7 +1209,6 @@ function renderPastWeather(items, year, month) {
     const titleText = document.getElementById('pws-title-text');
     const avgTempEl = document.getElementById('pws-avg-temp');
     const rainDaysEl = document.getElementById('pws-rain-days');
-    const snowDaysEl = document.getElementById('pws-snow-days');
     const clearDaysEl = document.getElementById('pws-clear-days');
     const tipTextEl = document.getElementById('pws-tip-text');
 
@@ -1285,6 +1284,7 @@ function renderPastWeather(items, year, month) {
             let pcpHtml = '-';
             
             if (safeSnow > 0) {
+                // 눈 온 날은 내부적으로 점수 계산을 위해 snowDays로 집계
                 snowDays++;
                 iconHtml = `<i class="ph-duotone ph-snowflake color-snow"></i>`;
                 pcpHtml = `<span class="p-blue">${safeSnow}cm</span>`;
@@ -1300,13 +1300,17 @@ function renderPastWeather(items, year, month) {
                 iconHtml = `<i class="ph-duotone ph-sun color-sun"></i>`;
             }
 
+            // 풍속 색상 적용
+            const windColor = safeWs !== '-' ? getWindColor(safeWs) : 'inherit';
+            const windWeight = safeWs !== '-' && parseFloat(safeWs) >= 9 ? '800' : 'normal';
+
             gridContainer.innerHTML += `
                 <div class="pwc-date-cell">
                     <div class="pwc-date-num ${dayClass}">${d}</div>
                     <div class="pwc-icon">${iconHtml}</div>
                     <div class="pwc-temps"><span class="pwc-high">${safeMax}°</span><span class="pwc-low">${safeMin}°</span></div>
                     <div class="pwc-pcp">${pcpHtml}</div>
-                    <div class="pwc-wind">${safeWs}m/s</div>
+                    <div class="pwc-wind" style="color: ${windColor}; font-weight: ${windWeight};">${safeWs}m/s</div>
                 </div>
             `;
         } else {
@@ -1325,8 +1329,8 @@ function renderPastWeather(items, year, month) {
     const avgT = tempCount > 0 ? (totalTemp / tempCount).toFixed(1) : '--';
     if(avgTempEl) avgTempEl.textContent = `${avgT}°C`;
     const daysSuffix = window.t('weather.past.days_suffix');
-    if(rainDaysEl) rainDaysEl.textContent = `${rainDays} ${daysSuffix}`;
-    if(snowDaysEl) snowDaysEl.textContent = `${snowDays} ${daysSuffix}`;
+    // 화면에 보여줄 때는 비 온 날과 눈 온 날을 합쳐서 '비 온 날' 항목에 표시
+    if(rainDaysEl) rainDaysEl.textContent = `${rainDays + snowDays} ${daysSuffix}`;
     const cloudyDaysEl = document.getElementById('pws-cloudy-days');
     if(cloudyDaysEl) cloudyDaysEl.textContent = `${cloudyDays} ${daysSuffix}`;
     if(clearDaysEl) clearDaysEl.textContent = `${clearDays} ${daysSuffix}`;
@@ -1335,7 +1339,7 @@ function renderPastWeather(items, year, month) {
     if (scoreEl) {
         const totalDays = clearDays + cloudyDays + rainDays + snowDays;
         if (totalDays > 0) {
-            // 완화된 계산법: 맑음 1.0, 구름 0.7, 눈 0.8, 비 0.2 (제주도의 특성을 반영하여 비가 와도 0점은 아님)
+            // 다시 완화된 점수 계산법으로 원복 (맑음: 1.0, 구름: 0.7, 눈: 0.8, 비: 0.2)
             const rawScore = (clearDays * 1.0 + cloudyDays * 0.7 + snowDays * 0.8 + rainDays * 0.2) / totalDays;
             const rating = Math.round(rawScore * 5 * 2) / 2; // Round to nearest 0.5
             
