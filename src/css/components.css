@@ -894,7 +894,7 @@ i.ph-duotone.hover-scale:hover {
 
 /* ==================== Past Weather Calendar Mockup ==================== */
 .past-weather-calendar {
-    padding: 16px;
+    padding: 16px 10px; /* Reduced side padding slightly for all */
 }
 .pwc-days-header {
     display: grid;
@@ -910,13 +910,13 @@ i.ph-duotone.hover-scale:hover {
 .pwc-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 4px;
+    gap: 2px; /* Reduced from 4px */
 }
 .pwc-date-cell {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 8px 4px;
+    padding: 6px 0px; /* Removed horizontal padding to fit narrow screens */
     border-radius: 8px;
     text-align: center;
 }
@@ -927,26 +927,27 @@ i.ph-duotone.hover-scale:hover {
 .pwc-date-num {
     font-size: 0.85rem;
     font-weight: 600;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
     color: var(--label-primary);
 }
 .pwc-icon {
-    font-size: 1.5rem;
-    margin-bottom: 6px;
+    font-size: 1.35rem; /* Reduced from 1.5rem */
+    margin-bottom: 4px;
 }
 .pwc-temps {
     display: flex;
     flex-direction: column;
     gap: 2px;
-    font-size: 0.75rem;
+    font-size: 0.7rem; /* Reduced from 0.75rem */
     font-weight: 700;
     margin-bottom: 4px;
 }
 .pwc-high { color: #EF4444; }
 .pwc-low { color: #3B82F6; }
 .pwc-pcp {
-    font-size: 0.7rem;
+    font-size: 0.65rem; /* Reduced from 0.7rem */
     color: var(--label-tertiary);
+    word-break: keep-all; /* Keep "mm" with the number */
 }
 .pwc-pcp.p-blue {
     color: #3B82F6;
