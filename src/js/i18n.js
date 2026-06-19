@@ -20,13 +20,10 @@ const TRANSLATIONS = {
         'weather.past.tip.loading': '<strong>提示:</strong> 正在请求数据...',
         'weather.past.tip.fail': '<strong>提示:</strong> 未能加载历史天气数据。',
         'weather.past.tip.nodata': '<strong>提示:</strong> 尚无该月的历史数据。',
-        'weather.past.tip.prefix': '穿衣提示:',
-        'weather.past.tip.hot': '{month}月天气炎热。建议准备短袖、短裤等轻薄凉爽的衣物。',
-        'weather.past.tip.warm': '{month}月天气舒适。适合穿薄长袖或短袖。',
-        'weather.past.tip.cool': '{month}月可能有些微凉。请准备轻便外套或开衫。',
-        'weather.past.tip.cold': '{month}月天气寒冷。请务必准备保暖外套和防寒用品。',
-        'weather.past.tip.gap': '昼夜温差较大，建议携带防风外套或易于叠穿的衣物。',
-        'weather.past.tip.rain': '降雨较频繁，带上雨伞或雨衣会更安心。',
+        'weather.past.tip.hot': '<strong>穿衣提示:</strong> 天气炎热，请准备轻薄凉爽的衣物！',
+        'weather.past.tip.warm': '<strong>穿衣提示:</strong> 适合穿短袖和薄外套的好天气。',
+        'weather.past.tip.cool': '<strong>穿衣提示:</strong> 早晚可能较凉，请务必带上外套。',
+        'weather.past.tip.cold': '<strong>穿衣提示:</strong> 天气寒冷，请准备保暖外套和防寒用品。',
         'weather.summary':    '汇总一览',
         'weather.alert.checking': '正在检查气象特报...',
         'weather.loading':    '正在加载...',
@@ -360,13 +357,55 @@ const TRANSLATIONS = {
         'weather.past.tip.loading': '<strong>안내:</strong> 데이터를 요청 중입니다...',
         'weather.past.tip.fail': '<strong>안내:</strong> 과거 날씨 데이터를 불러오지 못했습니다.',
         'weather.past.tip.nodata': '<strong>안내:</strong> 해당 월의 과거 데이터가 아직 제공되지 않았습니다.',
-        'weather.past.tip.prefix': '옷차림 팁:',
-        'weather.past.tip.hot': '{month}월은 덥습니다. 반팔과 반바지 등 시원한 옷차림을 준비하세요.',
-        'weather.past.tip.warm': '{month}월은 쾌적한 날씨입니다. 얇은 긴팔이나 반팔이 적당합니다.',
-        'weather.past.tip.cool': '{month}월은 약간 쌀쌀할 수 있습니다. 가벼운 겉옷이나 카디건을 챙기세요.',
-        'weather.past.tip.cold': '{month}월은 춥습니다. 따뜻한 외투와 방한용품을 꼭 챙기세요.',
-        'weather.past.tip.gap': '일교차가 크니 겹쳐 입기 좋은 외투나 바람막이를 준비하면 좋습니다.',
-        'weather.past.tip.rain': '비가 잦은 편이니 우산이나 우비를 챙기시면 든든합니다.',
+        'weather.past.tip.hot': '<strong>옷차림 팁:</strong> 무더운 날씨입니다. 얇고 시원한 옷을 챙겨주세요!',
+        'weather.past.tip.warm': '<strong>옷차림 팁:</strong> 반팔과 얇은 겉옷이 딱 좋은 날씨예요.',
+        'weather.past.tip.cool': '<strong>옷차림 팁:</strong> 아침저녁 쌀쌀할 수 있으니 겉옷을 챙기세요.',
+        'weather.past.tip.cold': '<strong>옷차림 팁:</strong> 추운 날씨입니다. 두꺼운 외투와 방한용품을 준비하세요.',
+        // 비 많은 달
+        'weather.past.tip.rainy_m1': '<strong>옷차림 팁:</strong> 1월엔 비·눈이 잦아요. 방수 외투와 우산은 필수! 미끄러운 길 조심하세요.',
+        'weather.past.tip.rainy_m2': '<strong>옷차림 팁:</strong> 2월엔 비와 눈이 교차해요. 우산과 방한 장갑을 함께 챙기세요.',
+        'weather.past.tip.rainy_m3': '<strong>옷차림 팁:</strong> 3월은 봄비가 잦아요. 접이식 우산과 얇은 방수 재킷을 추천해요.',
+        'weather.past.tip.rainy_m4': '<strong>옷차림 팁:</strong> 4월 봄비가 내려요. 가벼운 우의나 우산을 꼭 챙기세요.',
+        'weather.past.tip.rainy_m5': '<strong>옷차림 팁:</strong> 5월에도 비가 잦아요. 방수 외투 또는 접이식 우산을 준비하세요.',
+        'weather.past.tip.rainy_m6': '<strong>옷차림 팁:</strong> 6월은 장마철! 우산·우의 필수, 습도가 높으니 통기성 좋은 옷을 입으세요.',
+        'weather.past.tip.rainy_m7': '<strong>옷차림 팁:</strong> 7월은 집중 호우 주의! 우산 필수, 단단한 샌들이나 방수 신발을 추천해요.',
+        'weather.past.tip.rainy_m8': '<strong>옷차림 팁:</strong> 8월 태풍·폭우 주의! 강한 비바람에 대비해 우산보다 우의가 더 효과적이에요.',
+        'weather.past.tip.rainy_m9': '<strong>옷차림 팁:</strong> 9월 가을비가 내려요. 가벼운 방수 재킷이나 우산을 챙기세요.',
+        'weather.past.tip.rainy_m10': '<strong>옷차림 팁:</strong> 10월에도 비가 잦아요. 우산과 얇은 외투를 함께 준비하세요.',
+        'weather.past.tip.rainy_m11': '<strong>옷차림 팁:</strong> 11월 비·바람이 잦아요. 방수 외투와 우산으로 완전 무장하세요.',
+        'weather.past.tip.rainy_m12': '<strong>옷차림 팁:</strong> 12월엔 비와 눈이 교차해요. 방수 부츠와 우산을 꼭 챙기세요.',
+        // 일교차 큰 달
+        'weather.past.tip.windy_m1': '<strong>옷차림 팁:</strong> 1월은 일교차가 매우 커요. 내복·레이어드 착장에 두꺼운 패딩 필수!',
+        'weather.past.tip.windy_m2': '<strong>옷차림 팁:</strong> 2월은 아침저녁 일교차가 크고 바람이 강해요. 바람막이와 내복을 추천해요.',
+        'weather.past.tip.windy_m3': '<strong>옷차림 팁:</strong> 3월 낮엔 따뜻해도 아침저녁은 쌀쌀해요. 얇은 옷 레이어드 + 가벼운 외투!',
+        'weather.past.tip.windy_m4': '<strong>옷차림 팁:</strong> 4월은 일교차가 큰 봄이에요. 낮엔 반팔, 저녁엔 바람막이가 딱이에요.',
+        'weather.past.tip.windy_m5': '<strong>옷차림 팁:</strong> 5월 낮엔 덥지만 밤엔 선선해요. 겉에 가벼운 재킷을 꼭 챙기세요.',
+        'weather.past.tip.windy_m9': '<strong>옷차림 팁:</strong> 9월 낮엔 덥지만 밤엔 꽤 서늘해요. 긴팔과 얇은 외투를 챙기세요.',
+        'weather.past.tip.windy_m10': '<strong>옷차림 팁:</strong> 10월 일교차가 커요. 낮엔 반팔도 가능하지만 저녁엔 두꺼운 재킷이 필요해요.',
+        'weather.past.tip.windy_m11': '<strong>옷차림 팁:</strong> 11월 일교차가 크고 바람이 세요. 바람막이 외투와 레이어드 착장을 추천해요.',
+        'weather.past.tip.windy_m12': '<strong>옷차림 팁:</strong> 12월 일교차가 크고 칼바람이 불어요. 두꺼운 패딩과 머플러·장갑을 준비하세요.',
+        // 더운 달
+        'weather.past.tip.hot_m6': '<strong>옷차림 팁:</strong> 6월부터 본격 더위! 반팔·반바지와 선크림을 꼭 챙기세요.',
+        'weather.past.tip.hot_m7': '<strong>옷차림 팁:</strong> 7월 폭염! 반팔·반바지는 기본, 자외선 차단제와 물을 충분히 마시세요.',
+        'weather.past.tip.hot_m8': '<strong>옷차림 팁:</strong> 8월 최강 더위! 시원한 반팔·반바지와 모자·선크림은 필수예요.',
+        // 따뜻한 달
+        'weather.past.tip.warm_m4': '<strong>옷차림 팁:</strong> 4월 봄 날씨! 반팔에 얇은 가디건이나 셔츠 한 장이면 충분해요.',
+        'weather.past.tip.warm_m5': '<strong>옷차림 팁:</strong> 5월 여행 최적 시즌! 반팔·반바지에 얇은 외투 하나를 챙기면 완벽해요.',
+        'weather.past.tip.warm_m9': '<strong>옷차림 팁:</strong> 9월 청명한 가을! 반팔에 가벼운 긴팔 하나를 겉에 걸치면 딱이에요.',
+        'weather.past.tip.warm_m10': '<strong>옷차림 팁:</strong> 10월 단풍 시즌! 긴팔 셔츠와 얇은 재킷이면 제주 가을을 만끽할 수 있어요.',
+        // 선선한 달
+        'weather.past.tip.cool_m3': '<strong>옷차림 팁:</strong> 3월은 봄이지만 아직 쌀쌀해요. 얇은 긴팔과 가벼운 외투를 챙기세요.',
+        'weather.past.tip.cool_m4': '<strong>옷차림 팁:</strong> 4월 아침저녁은 쌀쌀해요. 얇은 겉옷 하나를 꼭 챙기세요.',
+        'weather.past.tip.cool_m10': '<strong>옷차림 팁:</strong> 10월 아침저녁이 선선해요. 긴팔과 가벼운 재킷으로 레이어드하세요.',
+        'weather.past.tip.cool_m11': '<strong>옷차림 팁:</strong> 11월 쌀쌀해요. 긴팔에 두꺼운 재킷, 스카프도 준비하면 좋아요.',
+        // 추운 달
+        'weather.past.tip.cold_m1': '<strong>옷차림 팁:</strong> 1월은 제주도 겨울! 두꺼운 패딩과 장갑·머플러를 꼭 챙기세요.',
+        'weather.past.tip.cold_m2': '<strong>옷차림 팁:</strong> 2월 아직 추워요. 두꺼운 외투와 내복을 입고 따뜻하게 여행하세요.',
+        'weather.past.tip.cold_m11': '<strong>옷차림 팁:</strong> 11월 점점 추워져요. 두꺼운 외투와 내층 보온에 신경 쓰세요.',
+        'weather.past.tip.cold_m12': '<strong>옷차림 팁:</strong> 12월 한겨울! 두꺼운 패딩, 모자, 장갑, 머플러까지 완벽히 준비하세요.',
+        // 혹한
+        'weather.past.tip.freeze_m1': '<strong>옷차림 팁:</strong> 1월 한파 주의! 내복+두꺼운 패딩+방한 장갑과 모자는 필수예요.',
+        'weather.past.tip.freeze_m2': '<strong>옷차림 팁:</strong> 2월 매서운 추위! 레이어드 착장과 두꺼운 패딩, 핫팩도 챙기세요.',
         'weather.summary':    '모아보기',
         'weather.alert.checking': '기상특보 확인 중...',
         'weather.loading':    '불러오는 중...',
@@ -687,13 +726,10 @@ const TRANSLATIONS = {
         'weather.past.tip.loading': '<strong>Tip:</strong> Requesting data...',
         'weather.past.tip.fail': '<strong>Tip:</strong> Failed to load past weather data.',
         'weather.past.tip.nodata': '<strong>Tip:</strong> Past data for this month is not yet available.',
-        'weather.past.tip.prefix': 'Outfit Tip:',
-        'weather.past.tip.hot': 'It is hot in {month}. Pack light, cool clothing like short sleeves and shorts.',
-        'weather.past.tip.warm': 'The weather is pleasant in {month}. Thin long sleeves or short sleeves are suitable.',
-        'weather.past.tip.cool': 'It can be a bit chilly in {month}. Bring a light jacket or cardigan.',
-        'weather.past.tip.cold': 'It is cold in {month}. Be sure to pack a warm coat and winter gear.',
-        'weather.past.tip.gap': 'The temperature difference between day and night is large, so a windbreaker or layers are recommended.',
-        'weather.past.tip.rain': 'It rains frequently, so it is a good idea to pack an umbrella or raincoat.',
+        'weather.past.tip.hot': '<strong>Outfit Tip:</strong> Hot summer weather. Prepare light and cool clothes!',
+        'weather.past.tip.warm': '<strong>Outfit Tip:</strong> Nice weather for short sleeves and a light jacket.',
+        'weather.past.tip.cool': '<strong>Outfit Tip:</strong> It can be chilly in the morning and evening, so be sure to bring a jacket.',
+        'weather.past.tip.cold': '<strong>Outfit Tip:</strong> Cold winter weather. Prepare a warm coat and winter gear.',
         'weather.summary':    'Overview',
         'weather.alert.checking': 'Checking weather alerts...',
         'weather.loading':    'Loading...',
@@ -1005,7 +1041,17 @@ let currentLang = localStorage.getItem('jeju_lang') || 'zh';
  * 번역 키에 해당하는 텍스트 반환
  */
 export function t(key, params = {}) {
-    let str = TRANSLATIONS[currentLang]?.[key] ?? TRANSLATIONS['zh'][key] ?? key;
+    let str = TRANSLATIONS[currentLang]?.[key] ?? TRANSLATIONS['zh']?.[key];
+    // 월별 팁 키 (예: weather.past.tip.rainy_m7) 없을 때 기본 키로 fallback
+    if (str === undefined && key.startsWith('weather.past.tip.')) {
+        const baseKey = key.replace(/_m\d+$/, '');
+        const typeMap = { rainy: 'cold', windy: 'cool', hot: 'hot', warm: 'warm', cool: 'cool', cold: 'cold', freeze: 'cold' };
+        const tipType = key.split('.')[3]?.split('_')[0];
+        const fallbackKey = `weather.past.tip.${typeMap[tipType] || tipType}`;
+        str = TRANSLATIONS[currentLang]?.[fallbackKey] ?? TRANSLATIONS['zh']?.[fallbackKey] ?? key;
+    } else if (str === undefined) {
+        str = key;
+    }
     if (params) {
         for (const [k, v] of Object.entries(params)) {
             str = str.split(`{${k}}`).join(String(v));
