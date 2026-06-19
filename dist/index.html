@@ -197,8 +197,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         }
     </script>
 
-  <script type="module" crossorigin src="/assets/index-BXXf72ny.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-Cbw_0dw0.css">
+  <script type="module" crossorigin src="/assets/index-BVQ2vKTr.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-BlGsuMkM.css">
 </head>
 
 <body>
@@ -316,6 +316,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="section section-alt">
         <div class="container">
             
+            <!-- View Mode Tabs -->
+            <div class="weather-view-tabs">
+                <button class="view-tab active" data-view="current" onclick="switchWeatherView('current')">
+                    <span data-i18n="weather.view.current">실시간 날씨</span>
+                </button>
+                <button class="view-tab" data-view="past" onclick="switchWeatherView('past')">
+                    <span data-i18n="weather.view.past">과거 날씨</span>
+                </button>
+            </div>
+
             <!-- Regional Navigation Area -->
             <div class="weather-nav-wrapper">
                 <div class="location-tabs" id="location-tabs">
@@ -374,8 +384,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 </div>
             </div>
 
-            <div id="weather-alerts-container" class="weather-alerts-container" style="display: flex;">
-                <div class="weather-alert-card no-alerts">
+            <!-- Current Weather View (Default) -->
+            <div id="weather-current-view" class="weather-view-container active">
+                <div id="weather-alerts-container" class="weather-alerts-container" style="display: flex;">
+                    <div class="weather-alert-card no-alerts">
                     <div class="alert-msg" data-i18n="weather.alert.checking">正在检查气象特报...</div>
                 </div>
             </div>
@@ -612,6 +624,70 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     <div id="air-quality-hallasan" class="air-quality-grid"></div>
                 </div>
             </div> <!-- End weather-content-wrapper -->
+            </div> <!-- End weather-current-view -->
+
+            <!-- Past Weather View (Mockup) -->
+            <div id="weather-past-view" class="weather-view-container" style="display: none;">
+                <!-- Summary Card -->
+                <div class="past-weather-summary naver-card">
+                    <div class="pws-header">
+                        <div class="pws-title">
+                            <i class="ph-duotone ph-calendar-check color-cloud"></i> 
+                            <span id="pws-title-text">제주시 6월 날씨 요약</span>
+                        </div>
+                        <div class="pws-filters">
+                            <select class="pws-select" id="pws-year-select"></select>
+                            <select class="pws-select" id="pws-month-select"></select>
+                        </div>
+                    </div>
+                    <div class="pws-stats-row-top">
+                        <div class="pws-stat-item">
+                            <span class="pws-stat-label" data-i18n="weather.past.avg_temp">평균 기온</span>
+                            <span class="pws-stat-val" id="pws-avg-temp">--°C</span>
+                        </div>
+                        <div class="pws-stat-item">
+                            <span class="pws-stat-label" data-i18n="weather.past.score">날씨 점수</span>
+                            <span class="pws-stat-val" id="pws-weather-score">
+                                <i class="ph ph-star color-star"></i><i class="ph ph-star color-star"></i><i class="ph ph-star color-star"></i><i class="ph ph-star color-star"></i><i class="ph ph-star color-star"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="pws-stats-row-bottom">
+                        <div class="pws-stat-item">
+                            <span class="pws-stat-label" data-i18n="weather.past.rain_days">비 온 날</span>
+                            <span class="pws-stat-val p-blue" id="pws-rain-days">--일</span>
+                        </div>
+                        <div class="pws-stat-item">
+                            <span class="pws-stat-label" data-i18n="weather.past.cloudy_days">흐린 날</span>
+                            <span class="pws-stat-val p-gray" id="pws-cloudy-days">--일</span>
+                        </div>
+                        <div class="pws-stat-item">
+                            <span class="pws-stat-label" data-i18n="weather.past.clear_days">맑은 날</span>
+                            <span class="pws-stat-val p-orange" id="pws-clear-days">--일</span>
+                        </div>
+                    </div>
+                    <div class="pws-tip-box" id="pws-tip-box">
+                        <i class="ph-duotone ph-t-shirt color-primary"></i>
+                        <span id="pws-tip-text" data-i18n="weather.past.tip.loading"><strong>옷차림 팁:</strong> 데이터를 불러오는 중입니다.</span>
+                    </div>
+                </div>
+
+                <!-- Calendar Grid Mockup -->
+                <div class="past-weather-calendar naver-card">
+                    <div class="pwc-days-header">
+                        <div class="pwc-day-name p-red" data-i18n="weather.past.sun">일</div>
+                        <div class="pwc-day-name" data-i18n="weather.past.mon">월</div>
+                        <div class="pwc-day-name" data-i18n="weather.past.tue">화</div>
+                        <div class="pwc-day-name" data-i18n="weather.past.wed">수</div>
+                        <div class="pwc-day-name" data-i18n="weather.past.thu">목</div>
+                        <div class="pwc-day-name" data-i18n="weather.past.fri">금</div>
+                        <div class="pwc-day-name p-blue" data-i18n="weather.past.sat">토</div>
+                    </div>
+                    <div class="pwc-grid" id="pwc-grid-container">
+                        <!-- JS dynamically injects cells here -->
+                    </div>
+                </div>
+            </div> <!-- End weather-past-view -->
 
             <!-- SEO Content Description -->
             <div class="seo-content-desc" data-i18n="seo.desc.weather">济州岛实时天气预报和每小时预报</div>
@@ -1251,7 +1327,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
         <div id="success-modal-body">
             <!-- Populated dynamically via JS -->
-            <p style="text-align:center; color: #64748b; padding: 20px;">데이터를 불러오는 중입니다...</p>
+            <p style="text-align:center; color: #64748b; padding: 20px;" data-i18n="cctv.loading">데이터를 불러오는 중입니다...</p>
         </div>
     </div>
 </div>

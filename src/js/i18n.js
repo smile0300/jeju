@@ -58,6 +58,7 @@ const TRANSLATIONS = {
 
         // ── 홈 메뉴 ──
         'nav.cctv':       '实时监控',
+        'cctv.loading':   '正在加载 CCTV 画面...',
         'nav.weather':    '天气预报',
         'nav.hallasan':   '汉拿山',
         'nav.airport':    '机场信息',
@@ -389,9 +390,10 @@ const TRANSLATIONS = {
         'weather.hname.udo':       '우도',
         'weather.hname.hallasan':  '한라산(성판악)',
 
+        // ── 홈 메뉴 ──
         'home.subtitle':  '제주도 실시간 여행 정보',
-
         'nav.cctv':       '실시간CCTV',
+        'cctv.loading':   'CCTV 화면을 불러오는 중입니다...',
         'nav.weather':    '날씨예보',
         'nav.hallasan':   '한라산',
         'nav.airport':    '공항정보',
@@ -712,9 +714,10 @@ const TRANSLATIONS = {
         'weather.hname.udo':       'Udo Island',
         'weather.hname.hallasan':  'Hallasan (Seonpanak)',
 
+        // ── Home Menu ──
         'home.subtitle':  'Jeju Island Real-Time Travel Info',
-
         'nav.cctv':       'Live CCTV',
+        'cctv.loading':   'Loading CCTV footage...',
         'nav.weather':    'Weather',
         'nav.hallasan':   'Hallasan',
         'nav.airport':    'Airport',
