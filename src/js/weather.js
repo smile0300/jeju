@@ -60,8 +60,8 @@ const ALERT_ENGLISH_MAP = {
     '변경': ' Changed',
     '기상': 'Weather',
     '특보': ' Alert',
-    '제주도': 'Jeju Island',
-    '제주': 'Jeju',
+    '제주도': '',
+    '제주': '',
     '산지': 'Mountain Area',
     '서부': 'West Coast',
     '동부': 'East Coast',
@@ -110,7 +110,7 @@ function translateWeatherAlert(text) {
         for (const [ko, en] of Object.entries(ALERT_ENGLISH_MAP)) {
             result = result.replace(new RegExp(ko, 'g'), en);
         }
-        return result;
+        return result.replace(/\s+/g, ' ').trim();
     }
 
     for (const [ko, cn] of Object.entries(ALERT_TRANSLATIONS)) {
