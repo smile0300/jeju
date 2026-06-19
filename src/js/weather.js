@@ -1239,6 +1239,9 @@ function renderPastWeather(items, year, month) {
     let cloudyDays = 0;
     let clearDays = 0;
 
+    let totalGap = 0;
+    let gapCount = 0;
+
     for (let i = 0; i < firstDay; i++) {
         gridContainer.innerHTML += `<div class="pwc-date-cell empty"></div>`;
     }
@@ -1278,6 +1281,10 @@ function renderPastWeather(items, year, month) {
             if(!isNaN(avgTa)) {
                 totalTemp += avgTa;
                 tempCount++;
+            }
+            if(!isNaN(maxTa) && !isNaN(minTa)) {
+                totalGap += (maxTa - minTa);
+                gapCount++;
             }
 
             let iconHtml = '';
@@ -1343,8 +1350,8 @@ function renderPastWeather(items, year, month) {
             const goodRatio = (clearDays * 1.0 + cloudyDays * 0.5 + snowDays * 0.5) / totalDays;
             let calcScore = (8.4 * goodRatio) - 1.8;
             
-            // 0 ~ 5점 사이로 제한
-            calcScore = Math.max(0, Math.min(5, calcScore));
+            // 1 ~ 5점 사이로 제한 (최저 1점)
+            calcScore = Math.max(1, Math.min(5, calcScore));
             
             const rating = Math.round(calcScore * 2) / 2; // 0.5 단위 반올림
             
@@ -1371,14 +1378,23 @@ function renderPastWeather(items, year, month) {
     if(tipTextEl) {
         if(avgT === '--') {
              tipTextEl.innerHTML = window.t('weather.past.tip.nodata');
-        } else if(avgT >= 25) {
-            tipTextEl.innerHTML = window.t('weather.past.tip.hot');
-        } else if(avgT >= 20) {
-            tipTextEl.innerHTML = window.t('weather.past.tip.warm');
-        } else if(avgT >= 10) {
-            tipTextEl.innerHTML = window.t('weather.past.tip.cool');
         } else {
-            tipTextEl.innerHTML = window.t('weather.past.tip.cold');
+             let tempKey = 'cold';
+             if (avgT >= 25) tempKey = 'hot';
+             else if (avgT >= 18) tempKey = 'warm';
+             else if (avgT >= 10) tempKey = 'cool';
+
+             let tipHtml = window.t(`weather.past.tip.${tempKey}`, { month: month });
+             
+             const avgGap = gapCount > 0 ? (totalGap / gapCount) : 0;
+             if (avgGap >= 8) {
+                 tipHtml += ' ' + window.t('weather.past.tip.gap');
+             }
+             if (rainDays >= 10) {
+                 tipHtml += ' ' + window.t('weather.past.tip.rain');
+             }
+             
+             tipTextEl.innerHTML = `<strong>${window.t('weather.past.tip.prefix')}</strong> ${tipHtml}`;
         }
     }
 }
