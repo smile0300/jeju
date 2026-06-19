@@ -1185,7 +1185,7 @@ export async function fetchPastWeather(locKey, year, month) {
             stnIds: stnId
         };
 
-        const data = await fetchPublicDataJson('1360000/AsosDalyInfoService/getWthrDataList', params);
+        const data = await fetchPublicDataJson('https://apis.data.go.kr/1360000/AsosDalyInfoService/getWthrDataList', params);
         
         let items = [];
         if (data && data.response && data.response.body && data.response.body.items) {
