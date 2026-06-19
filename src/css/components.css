@@ -846,18 +846,27 @@ i.ph-duotone.hover-scale:hover {
     font-size: 0.85rem;
     color: var(--label-primary);
     outline: none;
-}
-.pws-stats-grid {
+.pws-stats-row-top {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 12px;
+}
+.pws-stats-row-bottom {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 12px;
     margin-bottom: 16px;
 }
 @media (max-width: 480px) {
-    .pws-stats-grid {
-        grid-template-columns: repeat(2, 1fr);
+    .pws-stats-row-top, .pws-stats-row-bottom {
         gap: 8px;
     }
+}
+.color-star {
+    color: #F59E0B;
+    font-size: 1.1rem;
+    margin: 0 1px;
 }
 .pws-stat-item {
     background: var(--fill-secondary);

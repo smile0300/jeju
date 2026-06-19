@@ -1318,6 +1318,33 @@ function renderPastWeather(items, year, month) {
     if(cloudyDaysEl) cloudyDaysEl.textContent = `${cloudyDays} ${daysSuffix}`;
     if(clearDaysEl) clearDaysEl.textContent = `${clearDays} ${daysSuffix}`;
 
+    const scoreEl = document.getElementById('pws-weather-score');
+    if (scoreEl) {
+        const totalDays = clearDays + cloudyDays + rainDays;
+        if (totalDays > 0) {
+            const rawScore = (clearDays * 1 + cloudyDays * 0.5 + rainDays * 0) / totalDays;
+            const rating = Math.round(rawScore * 5 * 2) / 2; // Round to nearest 0.5
+            
+            const fullStars = Math.floor(rating);
+            const hasHalfStar = rating % 1 !== 0;
+            const emptyStars = 5 - Math.ceil(rating);
+
+            let starsHtml = '';
+            for (let i = 0; i < fullStars; i++) {
+                starsHtml += '<i class="ph-fill ph-star color-star"></i>';
+            }
+            if (hasHalfStar) {
+                starsHtml += '<i class="ph-fill ph-star-half color-star"></i>';
+            }
+            for (let i = 0; i < emptyStars; i++) {
+                starsHtml += '<i class="ph ph-star color-star"></i>';
+            }
+            scoreEl.innerHTML = starsHtml;
+        } else {
+            scoreEl.innerHTML = '--';
+        }
+    }
+
     if(tipTextEl) {
         if(avgT === '--') {
              tipTextEl.innerHTML = window.t('weather.past.tip.nodata');
