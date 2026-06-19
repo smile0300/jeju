@@ -1284,7 +1284,7 @@ function renderPastWeather(items, year, month) {
                 pcpHtml = `<span class="p-blue">${safeRn}mm</span>`;
             } else if (!isNaN(avgTca) && avgTca >= 6.0) {
                 cloudyDays++;
-                iconHtml = `<i class="ph-duotone ph-cloud color-cloud" style="color: #64748B;"></i>`;
+                iconHtml = `<i class="ph-fill ph-cloud color-cloud-white"></i>`;
             } else {
                 clearDays++;
                 iconHtml = `<i class="ph-duotone ph-sun color-sun"></i>`;
