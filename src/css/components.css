@@ -845,7 +845,7 @@ i.ph-duotone.hover-scale:hover {
     background: var(--bg-primary);
     font-size: 0.85rem;
     color: var(--label-primary);
-    outline: none;
+}
 .pws-stats-row-top {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
