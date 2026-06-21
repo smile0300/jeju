@@ -782,6 +782,17 @@ export function switchWeatherLocation(locKey) {
     document.querySelectorAll('.location-weather').forEach(c => c.classList.toggle('active', c.id === `weather-content-${locKey}`));
     if (!WEATHER_STATE[locKey]) fetchWeatherData(locKey);
 
+    // 선택된 지역명을 트리거 버튼에 반영
+    const activeTab = document.querySelector(`.location-tab[data-loc="${locKey}"]`);
+    const labelEl = document.getElementById('loc-selected-label');
+    if (activeTab && labelEl) {
+        const nameSpan = activeTab.querySelector('.tab-name');
+        if (nameSpan) labelEl.textContent = nameSpan.textContent;
+    }
+
+    // 지역 선택 후 그리드 자동 닫기
+    if (window.closeLocationGrid) window.closeLocationGrid();
+
     const pastView = document.getElementById('weather-past-view');
     if (pastView && pastView.classList.contains('active')) {
         const yearSelect = document.getElementById('pws-year-select');
@@ -789,11 +800,12 @@ export function switchWeatherLocation(locKey) {
         if(yearSelect && monthSelect) {
             const y = parseInt(yearSelect.value, 10);
             const m = parseInt(monthSelect.value, 10);
-            // window.weatherApp && fetchPastWeather might be needed but fetchPastWeather is in scope
             fetchPastWeather(locKey, y, m);
         }
     }
 }
+
+
 
 const AIR_QUALITY_CACHE = {};
 const AQ_CACHE_TTL = 30 * 60 * 1000;
@@ -937,10 +949,13 @@ export async function fetchWeatherAlerts() {
             alertRotationInterval = null;
         }
 
-        if (alertsContainer) alertsContainer.style.display = 'flex';
+        // 특보 있을 때만 배너 표시 (초기에는 display:none 상태)
+        // alertsContainer는 특보 있을 때만 표시
         
         if (activeItems.length > 0) {
+            if (alertsContainer) alertsContainer.style.display = 'block';
             if (homeAlertsContainer) homeAlertsContainer.style.display = 'flex';
+
             let currentIndex = 0;
             const renderAlert = (idx) => {
                 const item = activeItems[idx];
@@ -969,14 +984,9 @@ export async function fetchWeatherAlerts() {
                 }, 5000);
             }
         } else {
+            // 특보 없음 → 날씨 페이지 배너 완전 숨김, 홈도 숨김
+            if (alertsContainer) alertsContainer.style.display = 'none';
             if (homeAlertsContainer) homeAlertsContainer.style.display = 'none';
-            if (alertsContainer) {
-                alertsContainer.innerHTML = `
-                    <div class="weather-alert-card no-alerts" onclick="window.showWeatherSectionWithAlert()" style="cursor: pointer;">
-                        <div class="alert-type-badge gray">${window.t('weather.alert.badge')}</div>
-                        <div class="alert-msg">${window.t('weather.alert.no')}</div>
-                    </div>`;
-            }
         }
     } catch (e) {
         console.error('[Alerts] Error:', e);
@@ -1206,7 +1216,6 @@ export async function fetchPastWeather(locKey, year, month) {
 
 function renderPastWeather(items, year, month) {
     const gridContainer = document.getElementById('pwc-grid-container');
-    const titleText = document.getElementById('pws-title-text');
     const avgTempEl = document.getElementById('pws-avg-temp');
     const rainDaysEl = document.getElementById('pws-rain-days');
     const clearDaysEl = document.getElementById('pws-clear-days');
@@ -1222,10 +1231,6 @@ function renderPastWeather(items, year, month) {
         if(span) locName = span.textContent;
     }
     
-    // Set dynamic translation title
-    if(titleText) {
-        titleText.textContent = window.t('weather.past.title', { loc: locName, month: month });
-    }
 
     gridContainer.innerHTML = '';
 

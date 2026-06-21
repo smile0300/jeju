@@ -797,7 +797,8 @@ i.ph-duotone.hover-scale:hover {
     background: var(--fill-secondary);
     padding: 6px;
     border-radius: var(--radius-md);
-    margin-bottom: 20px;
+    margin-top: 12px;
+    margin-bottom: 16px;
 }
 .weather-view-tabs .view-tab {
     flex: 1;
@@ -816,6 +817,16 @@ i.ph-duotone.hover-scale:hover {
     color: var(--label-primary);
     font-weight: 700;
     box-shadow: var(--shadow-sm);
+}
+
+/* 탭 전환 슬라이드 애니메이션 */
+.weather-view-container {
+    animation: weatherViewSlide 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes weatherViewSlide {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ==================== Past Weather Summary Mockup ==================== */

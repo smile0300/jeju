@@ -9,7 +9,86 @@
     <div class="section section-alt">
         <div class="container">
             
-            <!-- View Mode Tabs -->
+            <!-- ① 기상특보 배너 (조건부 최상단 — JS가 특보 없을 때 숨김 처리) -->
+            <div id="weather-alerts-container" class="weather-alerts-top-banner" style="display: none;">
+                <div class="weather-alert-card no-alerts">
+                    <div class="alert-msg" data-i18n="weather.alert.checking">正在检查气象特报...</div>
+                </div>
+            </div>
+
+            <!-- ② 지역 선택 (드롭다운 방식) -->
+            <div class="weather-nav-wrapper" id="weather-nav-wrapper">
+
+                <!-- 접힌 상태: 현재 선택된 지역 버튼 -->
+                <div class="loc-trigger-row">
+                    <button class="loc-selected-btn" id="loc-selected-btn" onclick="window.toggleLocationGrid()">
+                        <i class="ph-duotone ph-map-pin"></i>
+                        <span id="loc-selected-label" data-i18n="weather.loc.jeju">济州市</span>
+                        <i class="ph ph-caret-down loc-caret" id="loc-caret"></i>
+                    </button>
+                </div>
+
+                <!-- 펼쳐진 상태: 전체 그리드 (기본 숨김) -->
+                <div class="location-grid-panel" id="location-grid-panel">
+                    <div class="location-tabs" id="location-tabs">
+                        <!-- Row 1: North + South + West (5 items) -->
+                        <div class="loc-row">
+                            <div class="loc-group-wrapper group-north">
+                                <span class="group-label" data-i18n="weather.group.north">北线</span>
+                                <button class="location-tab active" data-loc="jeju" onclick="switchWeatherLocation('jeju')">
+                                    <span class="tab-name" data-i18n="weather.loc.jeju">济州市</span>
+                                </button>
+                            </div>
+                            <div class="loc-group-wrapper group-south">
+                                <span class="group-label" data-i18n="weather.group.south">南线</span>
+                                <button class="location-tab" data-loc="seogwipo" onclick="switchWeatherLocation('seogwipo')">
+                                    <span class="tab-name" data-i18n="weather.loc.seogwipo">西归浦</span>
+                                </button>
+                            </div>
+                            <div class="loc-group-wrapper group-west">
+                                <span class="group-label" data-i18n="weather.group.west">西线</span>
+                                <button class="location-tab" data-loc="aewol" onclick="switchWeatherLocation('aewol')">
+                                    <span class="tab-name" data-i18n="weather.loc.aewol">涯月</span>
+                                </button>
+                                <button class="location-tab" data-loc="hyeopjae" onclick="switchWeatherLocation('hyeopjae')">
+                                    <span class="tab-name" data-i18n="weather.loc.hyeopjae">挟才</span>
+                                </button>
+                                <button class="location-tab" data-loc="sanbangsan" onclick="switchWeatherLocation('sanbangsan')">
+                                    <span class="tab-name" data-i18n="weather.loc.sanbangsan">山房山</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Row 2: East + Hallasan (5 items) -->
+                        <div class="loc-row">
+                            <div class="loc-group-wrapper group-east">
+                                <span class="group-label" data-i18n="weather.group.east">东线</span>
+                                <button class="location-tab" data-loc="hamdeok" onclick="switchWeatherLocation('hamdeok')">
+                                    <span class="tab-name" data-i18n="weather.loc.hamdeok">咸德</span>
+                                </button>
+                                <button class="location-tab" data-loc="woljeong" onclick="switchWeatherLocation('woljeong')">
+                                    <span class="tab-name" data-i18n="weather.loc.woljeong">月汀</span>
+                                </button>
+                                <button class="location-tab" data-loc="seongsan" onclick="switchWeatherLocation('seongsan')">
+                                    <span class="tab-name" data-i18n="weather.loc.seongsan">日出峰</span>
+                                </button>
+                                <button class="location-tab" data-loc="udo" onclick="switchWeatherLocation('udo')">
+                                    <span class="tab-name" data-i18n="weather.loc.udo">牛岛</span>
+                                </button>
+                            </div>
+                            <div class="loc-group-wrapper group-mountain">
+                                <span class="group-label" data-i18n="weather.group.mountain">山岳</span>
+                                <button class="location-tab" data-loc="hallasan" onclick="switchWeatherLocation('hallasan')">
+                                    <span class="tab-name" data-i18n="weather.loc.hallasan">汉拿山</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ③ 실시간/과거 탭 (지역 선택 이후) -->
             <div class="weather-view-tabs">
                 <button class="view-tab active" data-view="current" onclick="switchWeatherView('current')">
                     <span data-i18n="weather.view.current">실시간 날씨</span>
@@ -19,71 +98,8 @@
                 </button>
             </div>
 
-            <!-- Regional Navigation Area -->
-            <div class="weather-nav-wrapper">
-                <div class="location-tabs" id="location-tabs">
-                    <!-- Row 1: North + South + West (5 items) -->
-                    <div class="loc-row">
-                        <div class="loc-group-wrapper group-north">
-                            <span class="group-label" data-i18n="weather.group.north">北线</span>
-                            <button class="location-tab active" data-loc="jeju" onclick="switchWeatherLocation('jeju')">
-                                <span class="tab-name" data-i18n="weather.loc.jeju">济州市</span>
-                            </button>
-                        </div>
-                        <div class="loc-group-wrapper group-south">
-                            <span class="group-label" data-i18n="weather.group.south">南线</span>
-                            <button class="location-tab" data-loc="seogwipo" onclick="switchWeatherLocation('seogwipo')">
-                                <span class="tab-name" data-i18n="weather.loc.seogwipo">西归浦</span>
-                            </button>
-                        </div>
-                        <div class="loc-group-wrapper group-west">
-                            <span class="group-label" data-i18n="weather.group.west">西线</span>
-                            <button class="location-tab" data-loc="aewol" onclick="switchWeatherLocation('aewol')">
-                                <span class="tab-name" data-i18n="weather.loc.aewol">涯月</span>
-                            </button>
-                            <button class="location-tab" data-loc="hyeopjae" onclick="switchWeatherLocation('hyeopjae')">
-                                <span class="tab-name" data-i18n="weather.loc.hyeopjae">挟才</span>
-                            </button>
-                            <button class="location-tab" data-loc="sanbangsan" onclick="switchWeatherLocation('sanbangsan')">
-                                <span class="tab-name" data-i18n="weather.loc.sanbangsan">山房山</span>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- Row 2: East + Hallasan (5 items) -->
-                    <div class="loc-row">
-                        <div class="loc-group-wrapper group-east">
-                            <span class="group-label" data-i18n="weather.group.east">东线</span>
-                            <button class="location-tab" data-loc="hamdeok" onclick="switchWeatherLocation('hamdeok')">
-                                <span class="tab-name" data-i18n="weather.loc.hamdeok">咸德</span>
-                            </button>
-                            <button class="location-tab" data-loc="woljeong" onclick="switchWeatherLocation('woljeong')">
-                                <span class="tab-name" data-i18n="weather.loc.woljeong">月汀</span>
-                            </button>
-                            <button class="location-tab" data-loc="seongsan" onclick="switchWeatherLocation('seongsan')">
-                                <span class="tab-name" data-i18n="weather.loc.seongsan">日出峰</span>
-                            </button>
-                            <button class="location-tab" data-loc="udo" onclick="switchWeatherLocation('udo')">
-                                <span class="tab-name" data-i18n="weather.loc.udo">牛岛</span>
-                            </button>
-                        </div>
-                        <div class="loc-group-wrapper group-mountain">
-                            <span class="group-label" data-i18n="weather.group.mountain">山岳</span>
-                            <button class="location-tab" data-loc="hallasan" onclick="switchWeatherLocation('hallasan')">
-                                <span class="tab-name" data-i18n="weather.loc.hallasan">汉拿山</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Current Weather View (Default) -->
             <div id="weather-current-view" class="weather-view-container active">
-                <div id="weather-alerts-container" class="weather-alerts-container" style="display: flex;">
-                    <div class="weather-alert-card no-alerts">
-                    <div class="alert-msg" data-i18n="weather.alert.checking">正在检查气象特报...</div>
-                </div>
-            </div>
 
             <!-- Weather Content Area -->
             <div class="weather-content-wrapper">
@@ -324,10 +340,7 @@
                 <!-- Summary Card -->
                 <div class="past-weather-summary naver-card">
                     <div class="pws-header">
-                        <div class="pws-title">
-                            <i class="ph-duotone ph-calendar-check color-cloud"></i> 
-                            <span id="pws-title-text">제주시 6월 날씨 요약</span>
-                        </div>
+
                         <div class="pws-filters">
                             <select class="pws-select" id="pws-year-select"></select>
                             <select class="pws-select" id="pws-month-select"></select>

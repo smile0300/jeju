@@ -257,16 +257,83 @@
 /* ==================== Weather System ==================== */
 .weather-nav-wrapper {
     width: 100%;
+    position: relative;
+}
+
+/* 접힘 상태: 선택된 지역 표시 트리거 버튼 */
+.loc-trigger-row {
+    display: flex;
+    align-items: center;
+    margin: 8px 0 4px 0;
+}
+
+.loc-selected-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--bg-primary);
+    border: 1.5px solid rgba(37, 99, 235, 0.3);
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #2563EB;
+    cursor: pointer;
+    transition: all 0.2s var(--ease-out);
+    box-shadow: 0 1px 4px rgba(37, 99, 235, 0.08);
+}
+
+.loc-selected-btn:hover {
+    background: rgba(37, 99, 235, 0.06);
+    border-color: rgba(37, 99, 235, 0.5);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(37, 99, 235, 0.12);
+}
+
+.loc-selected-btn:active {
+    transform: scale(0.97);
+}
+
+.loc-selected-btn .ph-map-pin {
+    font-size: 1.1rem;
+    color: #2563EB;
+}
+
+/* 화살표 아이콘: 펼침 시 회전 */
+.loc-caret {
+    font-size: 0.85rem;
+    color: #2563EB;
+    transition: transform 0.25s var(--ease-out);
+}
+
+.loc-caret.open {
+    transform: rotate(180deg);
+}
+
+.location-grid-panel {
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.25s ease;
+    pointer-events: none;
+}
+
+.location-grid-panel.open {
+    max-height: 500px;
+    opacity: 1;
+    pointer-events: auto;
 }
 
 .location-tabs { 
     display: flex !important;
     flex-direction: column !important;
     width: 100% !important;
-    padding: 2px 0 !important;
-    margin-top: 5px !important;
+    padding: 14px 0 4px 0 !important; /* 상단 14px: group-label(top:-10px) 잘림 방지 */
+    margin-top: 2px !important;
     gap: 0 !important;
 }
+
 
 .loc-row {
     display: grid !important;
@@ -434,7 +501,20 @@
     -webkit-overflow-scrolling: touch; 
 }
 
-/* Weather Alert Rotation */
+
+/* 최상단 기상특보 배너 (조건부 표시) */
+.weather-alerts-top-banner {
+    width: 100%;
+    margin-bottom: 12px;
+    animation: alertBannerDrop 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes alertBannerDrop {
+    from { opacity: 0; transform: translateY(-12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* 기존 weather-alerts-container (사용되지 않으나 홈화면에서 사용 중) */
 .weather-alerts-container {
     width: 100%;
     margin-top: 10px;
@@ -444,7 +524,7 @@
     min-height: 40px;
 }
 .alert-type-badge.gray { background: #adb5bd; }
-.alert-more { font-size: 0.65rem; color: #fa5252; font-weight: 700; margin-left: auto; } /* v20.0: ?�단 버튼과의 ?�백 ?�보 */
+.alert-more { font-size: 0.65rem; color: #fa5252; font-weight: 700; margin-left: auto; }
 
 
 .weather-alert-card {

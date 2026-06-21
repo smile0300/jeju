@@ -33,6 +33,28 @@ window.toggleFullscreen = function(videoId) {
 };
 window.switchWeatherLocation = switchWeatherLocation;
 
+// ===== 지역 선택 드롭다운 =====
+window.closeLocationGrid = function() {
+    const panel = document.getElementById('location-grid-panel');
+    const caret = document.getElementById('loc-caret');
+    if (panel) panel.classList.remove('open');
+    if (caret) caret.classList.remove('open');
+};
+
+window.toggleLocationGrid = function() {
+    const panel = document.getElementById('location-grid-panel');
+    const caret = document.getElementById('loc-caret');
+    if (!panel) return;
+    const isOpen = panel.classList.contains('open');
+    if (isOpen) {
+        panel.classList.remove('open');
+        if (caret) caret.classList.remove('open');
+    } else {
+        panel.classList.add('open');
+        if (caret) caret.classList.add('open');
+    }
+};
+
 window.switchWeatherView = function(viewType) {
     // 탭 UI 업데이트
     document.querySelectorAll('.weather-view-tabs .view-tab').forEach(tab => {
@@ -48,20 +70,19 @@ window.switchWeatherView = function(viewType) {
     const pastView = document.getElementById('weather-past-view');
     
     if(viewType === 'current') {
-        currentView.style.display = 'block';
         pastView.style.display = 'none';
-        // 강제로 리플로우 방지 및 애니메이션 적용 가능성 열어두기
-        setTimeout(() => {
-            currentView.classList.add('active');
-            pastView.classList.remove('active');
-        }, 10);
+        currentView.style.display = 'block';
+        // 애니메이션 재실행 (classList 트릭)
+        currentView.classList.remove('active');
+        void currentView.offsetWidth; // reflow 강제
+        currentView.classList.add('active');
     } else {
         currentView.style.display = 'none';
         pastView.style.display = 'block';
-        setTimeout(() => {
-            pastView.classList.add('active');
-            currentView.classList.remove('active');
-        }, 10);
+        // 애니메이션 재실행 (classList 트릭)
+        pastView.classList.remove('active');
+        void pastView.offsetWidth; // reflow 강제
+        pastView.classList.add('active');
         
         // 과거 날씨 연동
         const activeTab = document.querySelector('.location-tab.active');
@@ -71,6 +92,7 @@ window.switchWeatherView = function(viewType) {
         fetchPastWeather(locKey, year, month);
     }
 };
+
 
 function initPastWeatherSelects() {
     const yearSelect = document.getElementById('pws-year-select');
@@ -273,4 +295,13 @@ window.addEventListener('load', () => {
         renderHallasanDashboard(); 
     }, 10 * 60 * 1000); // 10분 간격 (v4.0 반영)
     // setInterval(fetchFoundGoods, 30 * 60 * 1000); // 자동 조회 제거
+
+    // 바깥 클릭 시 자동 닫기 (이벤트 리스너는 여기서 유지)
+    document.addEventListener('click', function(e) {
+        const wrapper = document.getElementById('weather-nav-wrapper');
+        if (wrapper && !wrapper.contains(e.target)) {
+            if (window.closeLocationGrid) window.closeLocationGrid();
+        }
+    });
 });
+

@@ -24,6 +24,16 @@ debug_*
 inspect_page.js
 test_api.py
 execution/debug_crawl.png
+execution/debug/
+
+# 7. 임시 작업 폴더 및 파일 (항상 재생성 가능)
+.tmp/
+tmp/
+deprecated/
+temp.json
+test_gas.js
+wrangler_err.txt
+wrangler_logs.txt
 
 # 6. 에셋 (특정 파일 허용)
 *.webp
