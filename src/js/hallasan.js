@@ -5,13 +5,13 @@ import { calculateVisibilityScore } from './hallasan-dashboard.js';
 import { getSunTimes } from './utils.js';
 
 export const HALLASAN_TRAILS = [
-    { nameKo: '어리목탐방로', nameCn: '御里牧登山路', nameEn: 'Eorimok Trail', distanceKo: '6.8km', distanceCn: '6.8km', distanceEn: '6.8km', timeKo: '약 3시간', timeCn: '约3小时', timeEn: 'Approx. 3h', url: 'https://www.jeju.go.kr/hallasan/info/info/realtime/course01.htm' },
-    { nameKo: '영실탐방로', nameCn: '灵室登山路', nameEn: 'Yeongsil Trail', distanceKo: '5.8km', distanceCn: '5.8km', distanceEn: '5.8km', timeKo: '약 2.5시간', timeCn: '约2.5小时', timeEn: 'Approx. 2.5h', url: 'https://www.jeju.go.kr/hallasan/info/info/realtime/course02.htm' },
-    { nameKo: '어승생악탐방로', nameCn: '御乘生岳登山路', nameEn: 'Eoseungsaengak Trail', distanceKo: '1.3km', distanceCn: '1.3km', distanceEn: '1.3km', timeKo: '약 30분', timeCn: '约30分钟', timeEn: 'Approx. 30m', url: 'https://www.jeju.go.kr/hallasan/info/info/realtime/course05.htm' },
-    { nameKo: '돈내코탐방로', nameCn: '顿乃科登山路', nameEn: 'Donnaeko Trail', distanceKo: '9.1km', distanceCn: '9.1km', distanceEn: '9.1km', timeKo: '약 4.5시간', timeCn: '约4.5小时', timeEn: 'Approx. 4.5h', url: 'https://www.jeju.go.kr/hallasan/info/info/realtime/course06.htm' },
-    { nameKo: '석굴암탐방로', nameCn: '石窟庵登山路', nameEn: 'Seokgulam Trail', distanceKo: '1.5km', distanceCn: '1.5km', distanceEn: '1.5km', timeKo: '약 50분', timeCn: '约50分钟', timeEn: 'Approx. 50m', url: 'https://www.jeju.go.kr/hallasan/info/info/realtime/course07.htm' },
-    { nameKo: '관음사탐방로', nameCn: '观音寺登山路', nameEn: 'Gwaneumsa Trail', distanceKo: '8.7km', distanceCn: '8.7km', distanceEn: '8.7km', timeKo: '약 5시간', timeCn: '约5小时', timeEn: 'Approx. 5h', url: 'https://www.jeju.go.kr/hallasan/info/info/realtime/course04.htm' },
-    { nameKo: '성판악탐방로', nameCn: '城板岳登山路', nameEn: 'Seongpanak Trail', distanceKo: '9.6km', distanceCn: '9.6km', distanceEn: '9.6km', timeKo: '약 4.5시간', timeCn: '约4.5小时', timeEn: 'Approx. 4.5h', url: 'https://www.jeju.go.kr/hallasan/info/info/realtime/course03.htm' }
+    { nameKo: '어리목탐방로', nameCn: '御里牧登山路', nameEn: 'Eorimok', distanceKo: '6.8km', distanceCn: '6.8km', distanceEn: '6.8km', timeKo: '약 3시간', timeCn: '约3小时', timeEn: 'Approx. 3h', url: 'https://www.jeju.go.kr/hallasan/info/info/realtime/course01.htm' },
+    { nameKo: '영실탐방로', nameCn: '灵室登山路', nameEn: 'Yeongsil', distanceKo: '5.8km', distanceCn: '5.8km', distanceEn: '5.8km', timeKo: '약 2.5시간', timeCn: '约2.5小时', timeEn: 'Approx. 2.5h', url: 'https://www.jeju.go.kr/hallasan/info/info/realtime/course02.htm' },
+    { nameKo: '어승생악탐방로', nameCn: '御乘生岳登山路', nameEn: 'Eoseungsaengak', distanceKo: '1.3km', distanceCn: '1.3km', distanceEn: '1.3km', timeKo: '약 30분', timeCn: '约30分钟', timeEn: 'Approx. 30m', url: 'https://www.jeju.go.kr/hallasan/info/info/realtime/course05.htm' },
+    { nameKo: '돈내코탐방로', nameCn: '顿乃科登山路', nameEn: 'Donnaeko', distanceKo: '9.1km', distanceCn: '9.1km', distanceEn: '9.1km', timeKo: '약 4.5시간', timeCn: '约4.5小时', timeEn: 'Approx. 4.5h', url: 'https://www.jeju.go.kr/hallasan/info/info/realtime/course06.htm' },
+    { nameKo: '석굴암탐방로', nameCn: '石窟庵登山路', nameEn: 'Seokgulam', distanceKo: '1.5km', distanceCn: '1.5km', distanceEn: '1.5km', timeKo: '약 50분', timeCn: '约50分钟', timeEn: 'Approx. 50m', url: 'https://www.jeju.go.kr/hallasan/info/info/realtime/course07.htm' },
+    { nameKo: '관음사탐방로', nameCn: '观音寺登山路', nameEn: 'Gwaneumsa', distanceKo: '8.7km', distanceCn: '8.7km', distanceEn: '8.7km', timeKo: '약 5시간', timeCn: '约5小时', timeEn: 'Approx. 5h', url: 'https://www.jeju.go.kr/hallasan/info/info/realtime/course04.htm' },
+    { nameKo: '성판악탐방로', nameCn: '城板岳登山路', nameEn: 'Seongpanak', distanceKo: '9.6km', distanceCn: '9.6km', distanceEn: '9.6km', timeKo: '약 4.5시간', timeCn: '约4.5小时', timeEn: 'Approx. 4.5h', url: 'https://www.jeju.go.kr/hallasan/info/info/realtime/course03.htm' }
 ];
 
 const TRAIL_STATUS_MAP = {
