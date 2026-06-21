@@ -265,10 +265,29 @@ body {
     -webkit-touch-callout: none;
 }
 
+/* 언어별 폰트 최적화 (중국어 간체 폰트 폴백 해결) */
+html[lang="zh-CN"] body {
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "PingFang SC",
+        "Hiragino Sans GB",
+        "Noto Sans SC",
+        "Microsoft YaHei",
+        "Pretendard",
+        system-ui,
+        sans-serif;
+}
+
 /* 텍스트 입력이 필요한 요소는 선택 및 포커스 허용 */
 input, textarea, [contenteditable="true"] {
     -webkit-user-select: auto;
     user-select: auto;
+}
+
+/* 폼 요소 및 버튼 폰트 상속 (브라우저 기본 폰트 무시) */
+input, textarea, select, button {
+    font-family: inherit;
 }
 
 /* ─────────────────────────────────────────

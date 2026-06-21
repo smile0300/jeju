@@ -264,6 +264,8 @@
 .loc-trigger-row {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    width: 100%;
     margin: 8px 0 4px 0;
 }
 

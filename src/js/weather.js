@@ -524,11 +524,8 @@ function highlightWeeklyCard(locKey, ymd) {
     const target = document.getElementById(`wcard-${locKey}-${ymd}`);
     if (target) {
         target.classList.add('active');
-        const header = document.getElementById(`header-${locKey}`);
-        if (header) {
-            const sumBtn = header.querySelector('.header-summary-btn');
-            if (sumBtn) sumBtn.setAttribute('onclick', `window.openWeatherSummaryModal('${ymd}')`);
-        }
+        const sumBtn = document.getElementById('global-summary-btn');
+        if (sumBtn) sumBtn.setAttribute('onclick', `window.openWeatherSummaryModal('${ymd}')`);
     }
 }
 
@@ -789,6 +786,10 @@ export function switchWeatherLocation(locKey) {
         const nameSpan = activeTab.querySelector('.tab-name');
         if (nameSpan) labelEl.textContent = nameSpan.textContent;
     }
+
+    // 모아보기 버튼 액션 초기화
+    const sumBtn = document.getElementById('global-summary-btn');
+    if (sumBtn) sumBtn.setAttribute('onclick', `window.openWeatherSummaryModal()`);
 
     // 지역 선택 후 그리드 자동 닫기
     if (window.closeLocationGrid) window.closeLocationGrid();
@@ -1239,6 +1240,10 @@ function renderPastWeather(items, year, month) {
 
     let totalTemp = 0;
     let tempCount = 0;
+    let totalMaxTemp = 0;
+    let maxTempCount = 0;
+    let totalMinTemp = 0;
+    let minTempCount = 0;
     let rainDays = 0;
     let snowDays = 0;
     let cloudyDays = 0;
@@ -1286,8 +1291,16 @@ function renderPastWeather(items, year, month) {
                 totalTemp += avgTa;
                 tempCount++;
             }
-            if(!isNaN(maxTa)) monthMaxTa = Math.max(monthMaxTa, maxTa);
-            if(!isNaN(minTa)) monthMinTa = Math.min(monthMinTa, minTa);
+            if(!isNaN(maxTa)) {
+                monthMaxTa = Math.max(monthMaxTa, maxTa);
+                totalMaxTemp += maxTa;
+                maxTempCount++;
+            }
+            if(!isNaN(minTa)) {
+                monthMinTa = Math.min(monthMinTa, minTa);
+                totalMinTemp += minTa;
+                minTempCount++;
+            }
 
             let iconHtml = '';
             let pcpHtml = '-';
@@ -1336,7 +1349,12 @@ function renderPastWeather(items, year, month) {
     }
 
     const avgT = tempCount > 0 ? (totalTemp / tempCount).toFixed(1) : '--';
-    if(avgTempEl) avgTempEl.textContent = `${avgT}°C`;
+    const avgMaxT = maxTempCount > 0 ? (totalMaxTemp / maxTempCount).toFixed(1) : '--';
+    const avgMinT = minTempCount > 0 ? (totalMinTemp / minTempCount).toFixed(1) : '--';
+    
+    if(avgTempEl) {
+        avgTempEl.innerHTML = `<span style="color: var(--color-red); font-weight: 800;">${avgMaxT}°</span><span style="color: var(--label-tertiary); margin: 0 4px; font-weight: 500;">/</span><span style="color: var(--color-blue); font-weight: 800;">${avgMinT}°</span>`;
+    }
     const daysSuffix = window.t('weather.past.days_suffix');
     // 화면에 보여줄 때는 비 온 날과 눈 온 날을 합쳐서 '비 온 날' 항목에 표시
     if(rainDaysEl) rainDaysEl.textContent = `${rainDays + snowDays} ${daysSuffix}`;
