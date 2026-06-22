@@ -113,11 +113,11 @@ function initPastWeatherSelects() {
     monthSelect.innerHTML = '';
 
     for (let y = currentYear; y >= currentYear - 5; y--) {
-        yearSelect.innerHTML += `<option value="${y}" ${y === targetYear ? 'selected' : ''}>${y}년</option>`;
+        yearSelect.innerHTML += `<option value="${y}" ${y === targetYear ? 'selected' : ''}>${y}</option>`;
     }
     for (let m = 1; m <= 12; m++) {
         const mm = m.toString().padStart(2, '0');
-        monthSelect.innerHTML += `<option value="${m}" ${m === targetMonth ? 'selected' : ''}>${mm}월</option>`;
+        monthSelect.innerHTML += `<option value="${m}" ${m === targetMonth ? 'selected' : ''}>${mm}</option>`;
     }
 
     const onChange = () => {
