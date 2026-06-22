@@ -258,6 +258,7 @@
 .weather-nav-wrapper {
     width: 100%;
     position: relative;
+    margin-top: 12px;
 }
 
 /* 접힘 상태: 선택된 지역 표시 트리거 버튼 */
