@@ -793,9 +793,9 @@ i.ph-duotone.hover-scale:hover {
 /* ==================== Weather View Tabs ==================== */
 .weather-view-tabs {
     display: flex;
-    gap: 8px;
+    gap: 0; /* 탭 사이 간격 제거 */
     background: var(--fill-secondary);
-    padding: 6px 6px 0 6px; /* 하단 패딩 제거하여 카드와 밀착 */
+    padding: 0; /* 좌우 패딩 제거하여 테두리 일치 */
     border-radius: 20px 20px 0 0; /* 아래 카드와 동일한 곡률 */
     margin-bottom: 0; /* 하단 여백 제거 */
     border: 1px solid #f1f3f5;
@@ -805,8 +805,8 @@ i.ph-duotone.hover-scale:hover {
     flex: 1;
     border: none;
     background: transparent;
-    padding: 10px;
-    border-radius: 14px 14px 0 0; /* 상단만 둥글게 */
+    padding: 12px 10px; /* 상하 패딩 약간 확대 */
+    border-radius: 20px 20px 0 0; /* 각 탭의 모서리를 둥글게 (폴더형) */
     font-size: 0.95rem;
     font-weight: 500;
     color: var(--label-secondary);
