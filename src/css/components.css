@@ -798,7 +798,7 @@ i.ph-duotone.hover-scale:hover {
     padding: 6px;
     border-radius: var(--radius-md);
     margin-top: 12px;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
 }
 .weather-view-tabs .view-tab {
     flex: 1;

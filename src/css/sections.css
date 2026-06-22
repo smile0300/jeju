@@ -1,4 +1,4 @@
-﻿/* ==================== Lost Report Modal Form ==================== */
+/* ==================== Lost Report Modal Form ==================== */
 /* (modals.html에서 이전됨 — 인라인 <style> 블록 제거) */
 .lost-report-form-content {
     padding: 32px 24px 24px 24px;
@@ -531,7 +531,7 @@
     background: rgba(255, 36, 66, 0.08); /* ?�한 빨간??배경 */
     border: 0.5px solid rgba(255, 36, 66, 0.3);
     border-radius: var(--radius-xl, 20px);
-    padding: 20px 18px;
+    padding: 12px 18px;
     display: flex;
     align-items: center;
     gap: 12px;
