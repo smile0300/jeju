@@ -506,6 +506,7 @@
 
 /* 최상단 기상특보 배너 (조건부 표시) */
 .weather-alerts-top-banner {width: 100%;
+    margin-top: 12px;
     margin-bottom: 12px;
     animation: alertBannerDrop 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -2433,6 +2434,14 @@
     overflow: hidden;
     width: 100%;
     box-sizing: border-box; /* Ensure padding doesn't add to width */
+}
+
+/* 탭과 바로 이어지는 카드의 상단 모서리 곡률 및 테두리 제거 */
+.current-weather-main,
+.past-weather-summary {
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+    border-top: none !important;
 }
 .hourly-forecast-card {
     padding-top: 10px !important; /* Reduced top padding */
