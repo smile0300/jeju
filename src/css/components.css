@@ -820,14 +820,14 @@ i.ph-duotone.hover-scale:hover {
     box-shadow: none; /* 그림자 제거하여 하나처럼 연결 */
 }
 
-/* 탭 전환 슬라이드 애니메이션 */
+/* 탭 전환 애니메이션 (이동 없이 페이드인만 적용하여 탭과 분리되는 느낌 제거) */
 .weather-view-container {
-    animation: weatherViewSlide 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: weatherViewFade 0.25s ease-out;
 }
 
-@keyframes weatherViewSlide {
-    from { opacity: 0; transform: translateY(8px); }
-    to   { opacity: 1; transform: translateY(0); }
+@keyframes weatherViewFade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
 }
 
 /* ==================== Past Weather Summary Mockup ==================== */
