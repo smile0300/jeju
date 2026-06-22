@@ -1,4 +1,4 @@
-/* ==================== Lost Report Modal Form ==================== */
+﻿/* ==================== Lost Report Modal Form ==================== */
 /* (modals.html에서 이전됨 — 인라인 <style> 블록 제거) */
 .lost-report-form-content {
     padding: 32px 24px 24px 24px;
@@ -264,9 +264,10 @@
 .loc-trigger-row {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
+    position: relative;
     width: 100%;
-    margin: 8px 0 4px 0;
+    margin: 12px 0;
 }
 
 .loc-selected-btn {
@@ -437,11 +438,10 @@
 .group-west .location-tab.active { background: #E11D48 !important; }
 .group-mountain .location-tab.active { background: #8B5A2B !important; }
 
-.current-weather {
-    background: var(--bg-tertiary);
+.current-weather {background: var(--bg-tertiary);
     border-radius: var(--radius-xl); /* 20px */
     padding: var(--space-5) var(--space-4); /* 20px 16px */
-    margin-bottom: var(--space-6); /* 24px */
+    margin-bottom: 12px; /* 12px */
     border: 0.5px solid var(--separator);
     display: flex; flex-direction: column; align-items: stretch;
     gap: var(--space-3); /* 12px */
@@ -505,8 +505,7 @@
 
 
 /* 최상단 기상특보 배너 (조건부 표시) */
-.weather-alerts-top-banner {
-    width: 100%;
+.weather-alerts-top-banner {width: 100%;
     margin-bottom: 12px;
     animation: alertBannerDrop 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -517,10 +516,9 @@
 }
 
 /* 기존 weather-alerts-container (사용되지 않으나 홈화면에서 사용 중) */
-.weather-alerts-container {
-    width: 100%;
+.weather-alerts-container {width: 100%;
     margin-top: 10px;
-    margin-bottom: 15px;
+    margin-bottom: 12px;
     display: flex;
     justify-content: center;
     min-height: 40px;
@@ -531,9 +529,9 @@
 
 .weather-alert-card {
     background: rgba(255, 36, 66, 0.08); /* ?�한 빨간??배경 */
-    border: 1.5px solid rgba(255, 36, 66, 0.2);
-    border-radius: 14px;
-    padding: 14px 18px;
+    border: 0.5px solid rgba(255, 36, 66, 0.3);
+    border-radius: var(--radius-xl, 20px);
+    padding: 20px 18px;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -2957,3 +2955,13 @@
 .spin {
     animation: spin 1s linear infinite;
 }
+
+
+
+/* Fix for double card spacing and shadow when empty state is inside naver-card */
+.naver-card .empty-state-card {
+    margin: 0;
+    box-shadow: none;
+    padding: 20px 10px; /* Reduce excessive padding inside naver-card */
+}
+
