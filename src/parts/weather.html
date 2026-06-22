@@ -27,6 +27,10 @@
                         <i class="ph ph-caret-down loc-caret" id="loc-caret"></i>
                     </button>
                     <button id="global-summary-btn" class="header-summary-btn" onclick="window.openWeatherSummaryModal()" style="position: absolute; right: 0;"><i class="ph-duotone ph-chart-bar"></i> <span data-i18n="weather.summary">简略查看</span></button>
+                    <div class="pws-filters" id="pws-filters" style="display: none; position: absolute; right: 0;">
+                        <select class="pws-select" id="pws-year-select"></select>
+                        <select class="pws-select" id="pws-month-select"></select>
+                    </div>
                 </div>
 
                 <!-- 펼쳐진 상태: 전체 그리드 (기본 숨김) -->
@@ -270,13 +274,6 @@
             <div id="weather-past-view" class="weather-view-container" style="display: none;">
                 <!-- Summary Card -->
                 <div class="past-weather-summary naver-card">
-                    <div class="pws-header">
-
-                        <div class="pws-filters">
-                            <select class="pws-select" id="pws-year-select"></select>
-                            <select class="pws-select" id="pws-month-select"></select>
-                        </div>
-                    </div>
                     <div class="pws-stats-row-top">
                         <div class="pws-stat-item">
                             <span class="pws-stat-label" data-i18n="weather.past.avg_temp">평균 기온</span>

@@ -69,11 +69,13 @@ window.switchWeatherView = function(viewType) {
     const currentView = document.getElementById('weather-current-view');
     const pastView = document.getElementById('weather-past-view');
     const globalSumBtn = document.getElementById('global-summary-btn');
+    const pwsFilters = document.getElementById('pws-filters');
     
     if(viewType === 'current') {
         pastView.style.display = 'none';
         currentView.style.display = 'block';
         if (globalSumBtn) globalSumBtn.style.display = 'inline-flex';
+        if (pwsFilters) pwsFilters.style.display = 'none';
         // 애니메이션 재실행 (classList 트릭)
         currentView.classList.remove('active');
         void currentView.offsetWidth; // reflow 강제
@@ -82,6 +84,7 @@ window.switchWeatherView = function(viewType) {
         currentView.style.display = 'none';
         pastView.style.display = 'block';
         if (globalSumBtn) globalSumBtn.style.display = 'none';
+        if (pwsFilters) pwsFilters.style.display = 'flex';
         // 애니메이션 재실행 (classList 트릭)
         pastView.classList.remove('active');
         void pastView.offsetWidth; // reflow 강제
