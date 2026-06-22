@@ -105,25 +105,47 @@ function initPastWeatherSelects() {
     const monthSelect = document.getElementById('pws-month-select');
     if(!yearSelect || !monthSelect) return;
 
-    const currentYear = new Date().getFullYear();
-    const currentMonth = new Date().getMonth() + 1; // 1~12
+    const date = new Date();
+    const currentYear = date.getFullYear();
+    const currentMonth = date.getMonth() + 1; // 1~12
 
+    // 과거 날씨이므로, 가장 최근 데이터는 이전 달(currentMonth - 1)
+    const maxAvailableYear = currentMonth === 1 ? currentYear - 1 : currentYear;
+    
     // 기본적으로 전년도 동일 월을 보여줌
     const targetYear = currentYear - 1;
     const targetMonth = currentMonth;
 
     yearSelect.innerHTML = '';
-    monthSelect.innerHTML = '';
-
-    for (let y = currentYear; y >= currentYear - 5; y--) {
+    for (let y = maxAvailableYear; y >= currentYear - 5; y--) {
         yearSelect.innerHTML += `<option value="${y}" ${y === targetYear ? 'selected' : ''}>${y}</option>`;
     }
-    for (let m = 1; m <= 12; m++) {
-        const mm = m.toString().padStart(2, '0');
-        monthSelect.innerHTML += `<option value="${m}" ${m === targetMonth ? 'selected' : ''}>${mm}</option>`;
-    }
 
-    const onChange = () => {
+    const updateMonthDropdown = () => {
+        const selectedYear = parseInt(yearSelect.value, 10);
+        const maxMonth = (selectedYear === currentYear) ? currentMonth - 1 : 12;
+        
+        let currentSelectedMonth = parseInt(monthSelect.value, 10) || targetMonth;
+        if (currentSelectedMonth > maxMonth) {
+            currentSelectedMonth = maxMonth;
+        }
+
+        monthSelect.innerHTML = '';
+        for (let m = 1; m <= maxMonth; m++) {
+            const mm = m.toString().padStart(2, '0');
+            monthSelect.innerHTML += `<option value="${m}" ${m === currentSelectedMonth ? 'selected' : ''}>${mm}</option>`;
+        }
+    };
+
+    // 초기 달 세팅
+    updateMonthDropdown();
+
+    const onChangeYear = () => {
+        updateMonthDropdown();
+        fetchPastWeatherOnSelection();
+    };
+
+    const fetchPastWeatherOnSelection = () => {
         const activeTab = document.querySelector('.location-tab.active');
         const locKey = activeTab ? activeTab.dataset.loc : 'jeju';
         const y = parseInt(yearSelect.value, 10);
@@ -131,8 +153,8 @@ function initPastWeatherSelects() {
         fetchPastWeather(locKey, y, m);
     };
 
-    yearSelect.addEventListener('change', onChange);
-    monthSelect.addEventListener('change', onChange);
+    yearSelect.addEventListener('change', onChangeYear);
+    monthSelect.addEventListener('change', fetchPastWeatherOnSelection);
 }
 
 window.fetchWeatherData = fetchWeatherData;
