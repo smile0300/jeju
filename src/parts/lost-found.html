@@ -15,8 +15,13 @@
         <div class="container">
             <div class="lost-header-row" style="margin-top: 10px;">
                 <div class="lost-filter-container search-filter-box">
-                    <div class="filter-row">
-                        <select id="pkupCmdtyLclsfCd" class="filter-select" onchange="fetchFoundGoodsManual()">
+                    <div class="filter-row" style="display:flex;gap:10px;">
+                        <select id="lostRegionCd" class="filter-select" onchange="fetchFoundGoodsManual()" style="flex:1;">
+                            <option value="LCP000" data-i18n="lost.region.jeju" selected>제주</option>
+                            <option value="LCA000" data-i18n="lost.region.seoul">서울</option>
+                            <option value="LCB000" data-i18n="lost.region.busan">부산</option>
+                        </select>
+                        <select id="pkupCmdtyLclsfCd" class="filter-select" onchange="fetchFoundGoodsManual()" style="flex:2;">
                             <option value="" data-i18n="lost.category">选择物品分类</option>
                             <option value="PRA000" data-i18n="cat.bag">包类</option>
                             <option value="PRO000" data-i18n="cat.jewelry">首饰</option>
@@ -89,7 +94,7 @@
                         <div>
                             <h4 style="margin: 0 0 8px 0; color: var(--label-primary); font-size: 15px; display: flex; align-items: center; gap: 6px;"><i class="ph-fill ph-book-open" style="color: #3182f6;"></i> <span data-i18n="lost.notice.howto">사용 방법</span></h4>
                             <ul style="padding-left: 20px; color: var(--color-text-sub); line-height: 1.6; font-size: 13.5px; margin: 0;">
-                                <li style="margin-bottom: 6px;" data-i18n-html="lost.notice.how1">원하는 <b>날짜</b>와 <b>분류</b>를 선택 후 검색 버튼을 누르면 조회됩니다.</li>
+                                <li style="margin-bottom: 6px;" data-i18n-html="lost.notice.how1">원하는 <b>지역</b>, <b>날짜</b>, <b>분류</b>를 선택 후 검색 버튼을 누르면 조회됩니다.</li>
                                 <li style="margin-bottom: 6px;" data-i18n-html="lost.notice.how2"><b>카드 모드</b>: 사진이 등록된 습득물만 빠르게 훑어볼 수 있습니다.</li>
                                 <li style="margin-bottom: 0;" data-i18n-html="lost.notice.how3"><b>표 모드</b>: 사진이 없는 물품을 포함한 모든 상세 정보를 확인할 수 있습니다.</li>
                             </ul>

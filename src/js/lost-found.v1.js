@@ -30,12 +30,14 @@ export async function fetchFoundGoods() {
 
         const selectedDate = (dateInput?.value || '').replace(/-/g, '');
         const category = categoryInput?.value || '';
+        const regionInput = document.getElementById('lostRegionCd');
+        const regionCd = regionInput?.value || 'LCP000';
 
         const countDisplay = document.getElementById('lost-result-count');
         if (countDisplay) countDisplay.innerHTML = window.t('lost.searching.status');
         grid.innerHTML = `<div class="loading-lost"><p>${window.t('lost.loading')}</p></div>`;
 
-        const commonParams = [`numOfRows=500`, `pageNo=1`, `N_FD_LCT_CD=LCP000`, `START_YMD=${selectedDate}`, `END_YMD=${selectedDate}`];
+        const commonParams = [`numOfRows=1200`, `pageNo=1`, `N_FD_LCT_CD=${regionCd}`, `START_YMD=${selectedDate}`, `END_YMD=${selectedDate}`];
         if (category) commonParams.push(`PRDT_CL_CD_01=${category}`);
 
         const polEndpoint = `http://apis.data.go.kr/1320000/LosfundInfoInqireService/getLosfundInfoAccToClAreaPd`;
@@ -458,7 +460,9 @@ window.handleImageSearch = async function(event) {
                     d.setDate(d.getDate() - i);
                     const yyyymmdd = d.toISOString().split('T')[0].replace(/-/g, '');
                     
-                    const commonParams = [`numOfRows=500`, `pageNo=1`, `N_FD_LCT_CD=LCP000`, `START_YMD=${yyyymmdd}`, `END_YMD=${yyyymmdd}`];
+                    const regionInput = document.getElementById('lostRegionCd');
+                    const regionCd = regionInput?.value || 'LCP000';
+                    const commonParams = [`numOfRows=1200`, `pageNo=1`, `N_FD_LCT_CD=${regionCd}`, `START_YMD=${yyyymmdd}`, `END_YMD=${yyyymmdd}`];
                     const polEndpoint = `http://apis.data.go.kr/1320000/LosfundInfoInqireService/getLosfundInfoAccToClAreaPd`;
                     const portalEndpoint = `http://apis.data.go.kr/1320000/LosPtfundInfoInqireService/getPtLosfundInfoAccToClAreaPd`;
 
