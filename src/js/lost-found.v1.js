@@ -339,20 +339,34 @@ export async function submitLostReport() {
                 });
             }
             
-            setTimeout(() => {
-                if (window.closeLostReportModal) window.closeLostReportModal();
-                else if (typeof closeLostReportModal === 'function') closeLostReportModal();
+            // 폼 닫기 (즉시)
+            if (window.closeLostReportModal) window.closeLostReportModal();
+            else if (typeof closeLostReportModal === 'function') closeLostReportModal();
+            
+            // 폼 초기화
+            const form = document.querySelector('.lost-report-form-content');
+            if (form) {
+                const inputs = form.querySelectorAll('input, textarea');
+                inputs.forEach(input => { if (input.type !== 'date') input.value = ''; });
+                const preview = document.getElementById('lost-report-photo-preview');
+                if (preview) preview.innerHTML = '';
+                lostReportImageBase64 = null;
+            }
+
+            // 업셀링 팝업 띄우기
+            const upsellModal = document.getElementById('lost-upsell-modal');
+            if (upsellModal) {
+                upsellModal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+                if (window.applyTranslations) window.applyTranslations(); // 번역 적용
+                if (window.pushModalState) window.pushModalState();
                 
-                // 폼 초기화
-                const form = document.querySelector('.lost-report-form-content');
-                if (form) {
-                    const inputs = form.querySelectorAll('input, textarea');
-                    inputs.forEach(input => { if (input.type !== 'date') input.value = ''; });
-                    const preview = document.getElementById('lost-report-photo-preview');
-                    if (preview) preview.innerHTML = '';
-                    lostReportImageBase64 = null;
-                }
-            }, 2500);
+                // 위챗 QR 숨기기 초기화
+                const qrContainer = document.getElementById('upsell-qr-container');
+                const actionBtns = document.getElementById('upsell-action-btns');
+                if (qrContainer) qrContainer.style.display = 'none';
+                if (actionBtns) actionBtns.style.display = 'flex';
+            }
         } else {
             throw new Error(result.error || result.message || 'Unknown Server Error');
         }
@@ -778,6 +792,22 @@ function renderSuccessModal(data) {
         </div>`;
     }).join('');
 }
+
+window.showUpsellQR = function() {
+    const qrContainer = document.getElementById('upsell-qr-container');
+    const actionBtns = document.getElementById('upsell-action-btns');
+    if (qrContainer) qrContainer.style.display = 'block';
+    if (actionBtns) actionBtns.style.display = 'none';
+};
+
+window.closeLostUpsellModal = function() {
+    const upsellModal = document.getElementById('lost-upsell-modal');
+    if (upsellModal) {
+        upsellModal.style.display = 'none';
+        document.body.style.overflow = '';
+        if (window.popModalState) window.popModalState();
+    }
+};
 
 window.lostApp = {
     fetchFoundGoods,
