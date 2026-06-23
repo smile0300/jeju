@@ -15,13 +15,15 @@
         <div class="container">
             <div class="lost-header-row" style="margin-top: 10px;">
                 <div class="lost-filter-container search-filter-box">
-                    <div class="filter-row" style="display:flex;gap:10px;">
-                        <select id="lostRegionCd" class="filter-select" onchange="fetchFoundGoodsManual()" style="flex:1;">
+                    <div class="filter-row">
+                        <select id="lostRegionCd" class="filter-select" onchange="fetchFoundGoodsManual()">
                             <option value="LCP000" data-i18n="lost.region.jeju" selected>제주</option>
                             <option value="LCA000" data-i18n="lost.region.seoul">서울</option>
                             <option value="LCB000" data-i18n="lost.region.busan">부산</option>
                         </select>
-                        <select id="pkupCmdtyLclsfCd" class="filter-select" onchange="fetchFoundGoodsManual()" style="flex:2;">
+                    </div>
+                    <div class="filter-row">
+                        <select id="pkupCmdtyLclsfCd" class="filter-select" onchange="fetchFoundGoodsManual()">
                             <option value="" data-i18n="lost.category">选择物品分类</option>
                             <option value="PRA000" data-i18n="cat.bag">包类</option>
                             <option value="PRO000" data-i18n="cat.jewelry">首饰</option>
