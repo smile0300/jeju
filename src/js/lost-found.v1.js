@@ -23,12 +23,25 @@ export async function fetchFoundGoods() {
         if (dateInput && !dateInput.value) {
             const now = new Date();
             const kstTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
-            const yesterday = new Date(kstTime);
-            yesterday.setDate(yesterday.getDate() - 1);
-            dateInput.value = yesterday.toISOString().split('T')[0];
+            const today = new Date(kstTime);
+            dateInput.value = today.toISOString().split('T')[0];
         }
 
-        const selectedDate = (dateInput?.value || '').replace(/-/g, '');
+        const selectedDate = (dateInput?.value || '');
+        let startYmd = selectedDate.replace(/-/g, '');
+        let endYmd = selectedDate.replace(/-/g, '');
+        
+        // If the selected date is today, search the last 7 days to ensure we get results (especially for regions with delayed data entry)
+        const now = new Date();
+        const kstTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
+        const todayStr = kstTime.toISOString().split('T')[0];
+        if (selectedDate === todayStr || !dateInput?.value) {
+            const pastDate = new Date(kstTime);
+            pastDate.setDate(pastDate.getDate() - 7);
+            startYmd = pastDate.toISOString().split('T')[0].replace(/-/g, '');
+            endYmd = todayStr.replace(/-/g, '');
+        }
+
         const category = categoryInput?.value || '';
         const regionInput = document.getElementById('lostRegionCd');
         const regionCd = regionInput?.value || 'LCP000';
@@ -37,7 +50,7 @@ export async function fetchFoundGoods() {
         if (countDisplay) countDisplay.innerHTML = window.t('lost.searching.status');
         grid.innerHTML = `<div class="loading-lost"><p>${window.t('lost.loading')}</p></div>`;
 
-        const commonParams = [`numOfRows=1200`, `pageNo=1`, `N_FD_LCT_CD=${regionCd}`, `START_YMD=${selectedDate}`, `END_YMD=${selectedDate}`];
+        const commonParams = [`numOfRows=1200`, `pageNo=1`, `N_FD_LCT_CD=${regionCd}`, `START_YMD=${startYmd}`, `END_YMD=${endYmd}`];
         if (category) commonParams.push(`PRDT_CL_CD_01=${category}`);
 
         const polEndpoint = `http://apis.data.go.kr/1320000/LosfundInfoInqireService/getLosfundInfoAccToClAreaPd`;

@@ -1,0 +1,3294 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html lang="ko">
+  
+
+
+
+
+
+<!-- 시연용 수정 250714 -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="og:description" content="여기를 눌려 링크를 확인하세요."/>
+    <meta property="og:image" content="https://minwon24.police.go.kr/images/logo-meta.png"/>
+    <meta property="og:url" content="https://minwon24.police.go.kr"/>
+    <title>
+        
+            
+            
+                경찰민원24
+            
+        
+    </title>
+    <link rel="shortcut icon" href="/favicon/favicon.ico" type="image/x-icon">
+
+    <!-- CSS -->
+    <link href="/css/plugin/swiper-bundle.min.css" type="text/css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/pretendardGov/pretendard-gov-subset.css" crossorigin="anonymous">
+    <link href="/css/site/output.css" type="text/css" rel="stylesheet">
+    <link href="/css/style.css" type="text/css" rel="stylesheet">
+
+    <!-- //CSS -->
+
+    <!-- Script -->
+    <script src="/js/jquery-3.6.4.min.js"></script>
+    <script defer src="/js/component/ui-script.js"></script>
+    <script src="/js/functions.js"></script>
+    <script src="/js/common.js"></script>
+    <script src="/js/popup/policeSearch.js"></script>
+    <script src="/js/plugin/parsley-config.js"></script>
+    <script src="/js/plugin/parsley.min.js"></script>
+    <script src="/js/plugin/parsley-custom-validators.js"></script>
+    <script src="/js/plugin/swiper-bundle.min.js"></script>
+    <script src="/js/pattern/pattern.js"></script>
+    <script src="/js/popup/ecrmCommonModal.js"></script>
+    <script src="/js/popup/lost112CommonModal.js"></script>
+    <script src="/js/popup/getItemFinProc.js"></script>
+    <script src="/js/lost112/lost112Common.js"></script>
+    <script src="/js/epeople/epeoplePoliceSearch.js"></script>
+    <script defer src="/js/language-switcher.js"></script>
+
+    <!-- //Script -->
+
+
+    
+
+</head>
+
+
+  <body>
+    
+
+
+
+
+
+
+
+    <script>
+        var anyidAdaptor = anyidAdaptor || {};
+
+        /*이용기관 수정 영역 Start*/
+        anyidAdaptor.orgLogin = function(data){
+            console.debug("OACX 결과(res2):", data);
+
+            console.debug("OACX 결과(response.res):", data.res);
+
+            orgLogin(data);
+        }
+        /*이용기관 수정 영역 End*/
+
+        //이용기관 자체 로그인 시
+        function orgLogin(data){
+            fetch("/login/orgLogin.do", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                credentials: "include",
+                body: JSON.stringify(data) // 로그인 데이터 전송
+            })
+                .then(res => {
+                    if (res.ok) {
+                        window.location.href = document.referrer || "/";
+                    } else {
+                        showConfirm("정부 통합로그인 오류. 오류가 지속될 시 정부 통합로그인 미사용을 이용해 주세요.");
+                        return false;
+                    }
+                })
+                .catch(err => {
+                    console.error("서버 로그인 처리 오류:", err);
+                    showConfirm("서버 로그인 처리 중 오류가 발생했습니다.");
+                    return false;
+                });
+        }
+
+
+        /*이용기관 문구수정 영역 Start*/
+        anyidAdaptor.JoinConfirm = function(portalJoinUri, memberData){
+            if(!confirm('Any-ID 사용자등록 하시겠습니까?')) {
+                anyidAdaptor.orgLogin(anyidAdaptor.certData);
+                return;
+            }else{
+                //anyidAdaptor.receiveAnyIdJoin(portalJoinUri, memberData);
+            }
+        }
+        /*이용기관 문구수정 영역 End*/
+
+
+
+
+        anyidAdaptor.portalJoinUri = "null";
+        anyidAdaptor.certData = null;
+        anyidAdaptor.ssoByPass = "0";
+        anyidAdaptor.niRegYn = "null";
+        anyidAdaptor.agencyContextPath = "";
+
+
+        anyidAdaptor.success = function(data){
+
+            /* 사용자 액션에 따른 선택적 차단
+             * isBlockState가 true일 때(모바일 클릭 직후 또는 닫기 클릭)는
+             * 들어오는 응답을 무시하고 로직을 중단함
+             */
+            if (anyidAdaptor.isBlockState && data.module === 'magcert-install') {
+                console.warn("[차단] 비정상적인 경로로 수신된 인증 데이터");
+                return;
+            }
+
+            if(anyidAdaptor.ssoByPass != 0 || !data.useSso) {
+                anyidAdaptor.orgLogin(data);
+            } else {
+                anyidAdaptor.certData = data;
+                anyidAdaptor.userCheck();
+            }
+        }
+
+        anyidAdaptor.userCheck = function(){
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", anyidAdaptor.agencyContextPath + "/oidc/userCheck", true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        anyidAdaptor.ssoLogin();
+                    } else {
+                        setTimeout(function() {
+                            anyidAdaptor.receiveAnyIdJoin(response.uri, response.data);
+                        }, 100);
+                    }
+                }
+            };
+
+            let jsonObject = new Object();
+            jsonObject.txId = anyidAdaptor.certData.txId;
+            jsonObject.ssob = anyidAdaptor.certData.ssob;
+            jsonObject.userSeCd = anyidAdaptor.certData.userSeCd;
+
+            let jsonStr = JSON.stringify(jsonObject);
+            let encodedString = btoa(jsonStr);
+
+            var data = "data=" + encodedString + "&txId=" + anyidAdaptor.certData.txId;
+            xhr.send(data);
+
+        }
+
+        //anyid가입
+        anyidAdaptor.receiveAnyIdJoin = function(portalJoinUri, memberData){
+
+            var url = portalJoinUri+encodeURIComponent(memberData);
+            anyidAdaptor.popup(url,"openAnyIdRegistUserIdv",700,740);
+
+            const messageHandler = function(event) {
+                let result;
+                try {
+                    result = JSON.parse(event.data);
+                } catch (error) {
+                    console.error("Received message is not valid JSON:", error);
+                    return;
+                }
+
+                // funcName 체크
+                if (!result.funcName ||
+                    (result.funcName !== "trmsAgreComplete" && result.funcName !== "registUserComplete")) {
+                    return;
+                }
+
+                // 처리 완료 후 리스너 제거
+                window.removeEventListener("message", messageHandler);
+
+                if (result.status === "success") {
+                    if (result.trmsAgreYn === "Y") {
+                        anyidAdaptor.ssoLogin();
+                    } else {
+                        anyidAdaptor.orgLogin(anyidAdaptor.certData);
+                    }
+                } else {
+                    const module = anyidAdaptor.certData.module;
+                    const option = {
+                        closeOnClickOutside : false
+                    };
+                    if (module === 'magcert-install' || module === 'fincert-install') {
+                        showConfirm("(개인, 사업자)공동인증서, 금융인증서는 정부 통합로그인 등록이 필수 입니다.", option);
+                        return;
+                    } else if (module === 'esign-install') {
+                        showConfirm("정부 통합인증 미등록이실 경우,정부 통합로그인 미사용 간편인증을 이용해주세요.", option);
+                        return;
+                    }
+                    anyidAdaptor.orgLogin(anyidAdaptor.certData);
+                }
+            };
+
+            window.addEventListener("message", messageHandler);
+        }
+
+        // 팝업 호출
+        anyidAdaptor.popup = function(url, name, width, height){
+            let left = (screen.width) ? (screen.width-width)/2 : 0;
+            let top = (screen.height) ? (screen.height-height)/2 : 0;
+            let popup=window.open(url, name ,"resizable=yes,toolbar=no,scrollbars=yes,location=no,top="+top+"px,left="+left+"px,width="+width+"px,height="+height+"px");
+            if(popup){
+                popup.focus();
+            }
+        }
+
+        /* 로그인 함수  */
+        anyidAdaptor.ssoLogin = function(){
+            let jsonObject = new Object();
+            jsonObject.txId = anyidAdaptor.certData.txId;
+            jsonObject.ssob = anyidAdaptor.certData.ssob;
+            jsonObject.userSeCd = anyidAdaptor.certData.userSeCd;
+            jsonObject.afData = anyidAdaptor.certData.afData;
+            let jsonStr = JSON.stringify(jsonObject);
+
+            let encodedString = btoa(jsonStr);
+            var baseUrl = window.location.origin + anyidAdaptor.agencyContextPath + "/oidc/ssoLogin";
+            var urlWithParams = baseUrl + "?data=" + encodedString;
+            console.log('anyidAdaptor.certData');
+            console.log(anyidAdaptor.certData);
+            window.location.href = urlWithParams;
+        }
+
+        anyidAdaptor.ssoLoginPageSub = function(baseUrl, endPoint, acrValues){
+            var subUrl = "";
+
+            if (endPoint && endPoint.trim() !== "") {
+                subUrl = "?endPoint=" + encodeURIComponent(endPoint);
+            }
+
+            if (!acrValues && acrValues.trim() == "") {
+                acrValues = "3";
+            }
+
+            if (acrValues && acrValues.trim() !== "") {
+                if(subUrl == ""){
+                    subUrl = "?";
+                }else{
+                    subUrl = subUrl + "&";
+                }
+                subUrl = subUrl + "acrValues=" + acrValues;
+            }
+            window.location.replace(baseUrl+subUrl);
+        }
+
+        /* sso 글로벌 로그아웃 */
+        anyidAdaptor.ssoLogout = function(endPoint) {
+            endPoint = typeof endPoint !== 'undefined' ? endPoint : "/";
+            var baseUrl = window.location.origin + anyidAdaptor.agencyContextPath + "/oidc/ssoLogout";
+            baseUrl = baseUrl + "?endPoint=" + encodeURIComponent(endPoint);
+            window.location.replace(baseUrl);
+        }
+
+        /* 상위 인증 처리
+         * 1레벨로 인증처리하고 들어왔는데 2레벨 인증이 필요할때 사용하는 함수
+         * 로그아웃하고 로그인처리 진행
+        */
+        anyidAdaptor.reAuthLevel = function(endPoint, acrValues){
+            endPoint = typeof endPoint !== 'undefined' ? endPoint : "/";
+            var baseUrl = window.location.origin + anyidAdaptor.agencyContextPath + "/oidc/reAuthLevel";
+            anyidAdaptor.ssoLoginPageSub(baseUrl, endPoint, acrValues);
+
+        }
+        /* 로그인에 연결  anyidAdaptor.ssoLoginPage(endPoint,acrValues) 클릭 */
+        /* endpoint = 로그인이 완료되었을때 최종적으로 가게되는 화면경로
+         * acrValues = 인증등급 디폴트키 3
+        */
+        anyidAdaptor.ssoLoginPage = function(endPoint, acrValues){
+            console.log("ssoLoginpage");
+            console.log(endPoint,acrValues)
+            endPoint = typeof endPoint !== 'undefined' ? endPoint : "/";
+            console.log(endPoint)
+            var baseUrl = window.location.origin + anyidAdaptor.agencyContextPath + "/oidc/auth";
+            console.log(baseUrl)
+            anyidAdaptor.ssoLoginPageSub(baseUrl, endPoint, acrValues);
+        }
+
+        /**/
+        anyidAdaptor.ssoSvcToSvc = function(url, endPoint){
+            var baseUrl = url + "/oidc/svcToSvc?endPoint=" + encodeURIComponent(endPoint);
+
+            console.log("ssoSvcToSvc");
+            console.log(url);
+            console.log(endPoint);
+            console.log(baseUrl);
+            window.open(baseUrl, "_blank");
+        }
+
+
+    </script>
+
+
+
+
+<!-- 운영일떄만 TRACER 적용 -->
+
+
+
+
+<script>
+    const isMobileApp = "" === "true";
+
+    $(function () {
+
+        
+
+        /* ===================== 공통 유틸 ===================== */
+        const getCookie = n => (document.cookie.match('(^|;)\\s*' + n + '=([^;]+)') || [])[2] || null;
+        const format = ms => {
+            const s = Math.max(0, Math.floor(ms / 1000));
+            return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+        };
+        const delCookie = n => document.cookie = n + "=; Path=/; Max-Age=0; Secure; SameSite=None";
+
+        let timerId = null;
+
+        /* ========== 멀티 탭 동기화(BC → localStorage 폴백) ========== */
+        const hasBC = typeof BroadcastChannel !== 'undefined';
+        const bc = hasBC ? new BroadcastChannel('auth-channel') : null;
+        const STORAGE_KEY = 'AUTH_EVENT';
+
+        // 송신: 다른 탭들에 이벤트 알림
+        const broadcast = (payload) => {
+            try {
+                bc?.postMessage(payload);
+            } catch {
+            }
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({...payload, ts: Date.now()}));
+                // 즉시 삭제해 스토리지 누적 방지
+                localStorage.removeItem(STORAGE_KEY);
+            } catch {
+            }
+        };
+
+        // 수신: BroadcastChannel
+        if (bc) {
+            bc.onmessage = (e) => {
+                const type = e?.data?.type;
+                if (type === 'logout' || type === 'token-expire') {
+                    stopTimerAndLogout(true); // isRemote = true
+                }
+            };
+        }
+        // 수신: localStorage 이벤트(폴백)
+        window.addEventListener('storage', (e) => {
+            if (e.key !== STORAGE_KEY || !e.newValue) return;
+            try {
+                const ev = JSON.parse(e.newValue);
+                if (ev.type === 'logout' || ev.type === 'token-expire') {
+                    stopTimerAndLogout(true);
+                }
+            } catch {
+            }
+        });
+
+        /* ===================== 로그아웃 처리 ===================== */
+        const stopTimerAndLogout = (isRemote = false) => {
+            // 내가 시작한 로그아웃이라면 먼저 브로드캐스트
+            if (!isRemote) {
+                try {
+                    broadcast({type: 'logout'});
+                } catch {
+                }
+            }
+
+            if (timerId) {
+                clearInterval(timerId);
+                timerId = null;
+            }
+            delCookie("X-TIME");
+            delCookie("X-JTI");
+
+            try {
+                fnSsoLogout(); // Spring Security → AnyID 순
+                //console.log("세션 만료/로그아웃 처리 완료");
+            } catch (e) {
+                showConfirm("ssoLogout 실행 오류");
+                //console.error("ssoLogout 실행 오류", e);
+            }
+        };
+
+        /* ===================== 남은 시간 타이머 ===================== */
+        const tick = (expMs) => {
+            const left = expMs - Date.now();
+            if (left <= 0) {
+                try {
+                    broadcast({type: 'token-expire'});
+                } catch {
+                }
+                stopTimerAndLogout();
+                return;
+            }
+            $(".time")
+                .text(format(left))
+                .toggleClass("text-danger fw-bold", left <= 60_000);
+        };
+
+        // 쿠키의 X-TIME 기준으로 타이머 시작
+        (function startTimerFromCookie() {
+            const raw = getCookie("X-TIME");
+            if (!raw) return;
+            let expMs = Number(raw);
+            if (expMs < 1e11) expMs *= 1000; // epoch(s) 보정
+            if (expMs > Date.now()) {
+                tick(expMs);
+                timerId = setInterval(() => tick(expMs), 1000);
+            } else {
+                // 이미 만료 → 즉시 로그아웃
+                stopTimerAndLogout();
+            }
+        })();
+
+        /* ===================== UI 이벤트 ===================== */
+        // 수동 로그아웃 버튼
+        $(document).on("click", ".drop-menu-logout, .mobile-logout-btn", function () {
+            stopTimerAndLogout();
+        });
+
+        // 탭 전환 후 복귀 즉시 갱신
+        $(document).on("visibilitychange", () => {
+            if (!document.hidden && timerId) {
+                const raw = getCookie("X-TIME");
+                if (raw) {
+                    let expMs = Number(raw);
+                    if (expMs < 1e11) expMs *= 1000;
+                    tick(expMs);
+                }
+            }
+        });
+
+        (function patchFetch() {
+            if (window.__fetch_patched__) return; // 중복 패치 방지
+            window.__fetch_patched__ = true;
+
+            const orig = window.fetch;
+            window.fetch = async function (input, init) {
+                const res = await orig(input, init);
+                if (res.status === 401 || res.status === 419) {
+                    try {
+                        broadcast({type: 'token-expire'});
+                    } catch {
+                    }
+                    stopTimerAndLogout();
+                }
+                return res;
+            };
+        })();
+
+        /* ===================== SSO 로그아웃 호출 ===================== */
+        function fnSsoLogout() {
+            // security 로그아웃 먼저 진행한 후 AnyID 로그아웃
+            fetch("/login/logout.do", {method: "post", cache: "no-store"})
+                .then(() => {
+                    //location.href = "/"; // 메인으로 이동
+                    anyidAdaptor.ssoLogout("/"); //anyid 정상작동할때
+                })
+                .catch(err => {
+                    //console.error("로그아웃 처리 오류", err);
+                    //location.href = "/"; // 메인으로 이동
+                    // 실패 시에도 AnyID 로그아웃 강제 시도
+                    anyidAdaptor.ssoLogout("/"); //anyid 정상작동할때
+                });
+        }
+
+        $(".btn-navi.logout").click(function () {
+            fnSsoLogout();
+        })
+    });
+
+
+    function showRealPage() {
+        $("#waitPage").css("display", "none");
+    }
+
+    function showWaitPage(type) {
+        $("#waitPage").css("display", "block");
+        $("#isWaitPage").css("display", "none");
+        $("#isRejectPage").css("display", "none");
+        $("isNotUse").css("display", "none");
+
+        if (type == 'W') {
+            $("#isWaitPage").css("display", "block");
+        } else if (type == 'NE') {
+            $("#isNotUse").css("display", "block");
+        } else if (type == 'R') {
+            $("#isRejectPage").css("display", "block");
+        }
+    }
+
+    function checkInAPI() {
+        var host = "minwon24.police.go.kr";
+        var port = "80";
+        var pageUrl = window.location.href; // 현재 페이지 정보로 변경
+        var ip = "118.235.92.252";         // 클라이언트 IP로 변경
+        var loginId = "127.0.0.1";          // 클라이언트 IP 또는 로그인 ID로 변경
+
+        callTracerApiInput(host, ip, loginId, port, pageUrl, this);
+    }
+
+    function checkOutAPI() {
+        var host = "minwon24.police.go.kr";
+        var port = "80";
+        var pageUrl = window.location.href; // 현재 페이지 정보로 변경
+        var ip = "118.235.92.252";         // 클라이언트 IP로 변경
+        var loginId = "127.0.0.1";          // 클라이언트 IP 또는 로그인 ID로 변경
+
+        callTracerApiOutput(host, ip, loginId, port, pageUrl, this);
+    }
+
+    function callBackTracer() {
+
+    }
+</script>
+
+<div id="wrap" class="checking-login">
+    <div id="krds-skip-link">
+        <a href="#container">본문 바로가기</a>
+    </div>
+    <!-- 상단 배너영역 -->
+    <div id="krds-masthead">
+        <div class="toggle-wrap">
+            <div class="toggle-head">
+                <div class="inner">
+                    <span class="nuri-txt">이 누리집은 대한민국 공식 전자정부 누리집입니다.</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!-- //상단 배너영역 -->
+    <!-- 헤더 영역 -->
+        
+        
+    <header id="krds-header" style="">
+
+        
+        <!-- 헤더 컨텐츠 영역  -->
+        <div class="gtranslate_wrapper" id="gtranslate_wrapper"
+             style="position: absolute; top: 0; left: 0; width: 200px; height: 50px; z-index: -1; opacity: 0.01;">
+        </div>
+
+        <script>
+            window.gtranslateSettings = {
+                "default_language": "ko",
+                "languages": ["ko", "en", "ja", "zh-CN", "zh-TW", "th", "vi", "id", "ms", "hi", "bn", "ur", "fa", "he", "fr", "de", "es", "it", "pt", "nl", "sv", "no", "da", "fi", "pl", "cs", "sk", "ro", "hu", "bg", "hr", "el", "uk", "sr", "sl", "ar", "tr"],
+                "wrapper_selector": ".gtranslate_wrapper",
+                "switcher_horizontal_position": "inline",
+                "native_language_names": true
+            }
+        </script>
+
+
+        <script src="/js/cdn/dropdown.js"></script>
+
+        <div class="header-in">
+            <!-- 헤더 상단 기타메뉴 -->
+            <div class="header-container">
+                <div class="inner">
+                    <div class="header-utility">
+                        <ul class="utility-list">
+                            <li>
+                                <a href="/custServiceCenter/hmpgGdMapInfo.do" class="krds-btn small text"
+                                   target="_blank" title="새 창 열기">
+                                    누리집 안내지도
+                                    <i class="svg-icon ico-go"></i>
+                                </a>
+                            </li>
+                            <li>
+                                <button type="button" class="krds-btn small text open-modal"
+                                        data-target="modal_adjust_display">
+                                    <i class="svg-icon ico-view-mode"></i>
+                                    글자·화면 설정
+                                </button>
+                            </li>
+                            <li>
+                                <div class="krds-drop-wrap krds-language notranslate">
+                                    <button type="button" class="krds-btn small text drop-btn">
+                                        Language
+                                        <i class="svg-icon ico-toggle"></i>
+                                    </button>
+                                    <div class="drop-menu">
+                                        <div class="drop-in">
+                                            <ul class="drop-list lan-drop-list"
+                                                style="max-height: 500px;overflow-y: auto;">
+                                                <!-- 원문(기본 한국어) -->
+                                                <li><a href="#" class="item-link language-link active" data-lang="ko"
+                                                       aria-selected="true">한국어<span class="sr-only">선택됨</span></a></li>
+                                                <!-- 아메리카 -->
+                                                <li><a href="#" class="item-link language-link" data-lang="en" aria-selected="false">English</a>
+                                                </li>
+                                                <!-- 아시아 -->
+                                                <li><a href="#" class="item-link language-link" data-lang="ja" aria-selected="false">日本語
+                                                    (일본어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="zh-cn"
+                                                       aria-selected="false">简体中文 (중국어 간체)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="zh-tw"
+                                                       aria-selected="false">繁體中文 (중국어 번체)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="th" aria-selected="false">ไทย
+                                                    (태국어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="vi" aria-selected="false">Tiếng
+                                                    Việt (베트남어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="id" aria-selected="false">Bahasa
+                                                    Indonesia</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="ms" aria-selected="false">Bahasa
+                                                    Melayu (말레이어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="hi" aria-selected="false">हिन्दी
+                                                    (힌디어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="bn" aria-selected="false">বাংলা
+                                                    (벵골어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="ur" aria-selected="false">اردو
+                                                    (우르두어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="fa" aria-selected="false">فارسی
+                                                    (페르시아어)</a></li>
+
+                                                <!-- 유럽 -->
+                                                <li><a href="#" class="item-link language-link" data-lang="fr" aria-selected="false">Français
+                                                    (프랑스어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="de" aria-selected="false">Deutsch
+                                                    (독일어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="es" aria-selected="false">Español
+                                                    (스페인어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="it" aria-selected="false">Italiano
+                                                    (이탈리아어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="pt"
+                                                       aria-selected="false">Português (포르투갈어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="nl" aria-selected="false">Nederlands
+                                                    (네덜란드어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="sv" aria-selected="false">Svenska
+                                                    (스웨덴어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="no" aria-selected="false">Norsk
+                                                    (노르웨이어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="da" aria-selected="false">Dansk
+                                                    (덴마크어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="fi" aria-selected="false">Suomi
+                                                    (핀란드어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="pl" aria-selected="false">Polski
+                                                    (폴란드어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="cs" aria-selected="false">Čeština
+                                                    (체코어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="sk" aria-selected="false">Slovenčina
+                                                    (슬로바키아어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="ro" aria-selected="false">Română
+                                                    (루마니아어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="hu" aria-selected="false">Magyar
+                                                    (헝가리어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="bg" aria-selected="false">Български
+                                                    (불가리아어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="hr" aria-selected="false">Hrvatski
+                                                    (크로아티아어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="el" aria-selected="false">Ελληνικά
+                                                    (그리스어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="uk" aria-selected="false">Українська
+                                                    (우크라이나어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="sr" aria-selected="false">Српски
+                                                    (세르비아어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="sl" aria-selected="false">Slovenščina
+                                                    (슬로베니아어)</a></li>
+
+                                                <!-- 중동/아프리카 -->
+                                                <li><a href="#" class="item-link language-link" data-lang="ar" aria-selected="false">العربية
+                                                    (아랍어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="tr" aria-selected="false">Türkçe
+                                                    (터키어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="ka" aria-selected="false">ქართული
+                                                    (조지아어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="az" aria-selected="false">Azərbaycan
+                                                    (아제르바이잔어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="sw" aria-selected="false">Kiswahili
+                                                    (스와힐리어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="am" aria-selected="false">አማርኛ
+                                                    (암하라어)</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="header-branding">
+                        <div class="logo">
+                            
+                                
+
+                                
+
+                                
+                                    <!-- 민원 (M) -->
+                                    <a href="/">
+                                        <span class="sr-only">경찰민원24</span>
+                                        <div class="logo-image"></div>
+                                    </a>
+                                
+                            
+                        </div>
+
+                        <div class="header-actions">
+                            <button type="button" class="btn-navi navi-row sch" onclick="ff()" title="통합검색 레이어">통합검색
+                            </button>
+                            
+                                <button type="button" class="btn-navi navi-row sch open-modal hide"
+                                        data-target="popTotalSch"
+                                        title="통합검색 레이어">통합검색
+                                </button>
+                            
+                            <a href="#" class="btn-navi navi-row login" onclick="anyidAdaptor.ssoLoginPage('','3')">anyid
+                                로그인</a>
+                            <div class="krds-drop-wrap my-drop my-gov">
+                                <button type="button" class="btn-navi navi-row my drop-btn">나의민원</button>
+                                <div class="drop-menu">
+                                    <div class="drop-in">
+                                        <div class="drop-top">
+                                            <p class="my-name"></p>
+                                        </div>
+                                        <ul class="drop-list">
+                                            <!-- <li><a href="/" class="item-link">MyGOV 홈</a></li> -->
+
+                                            <!-- 민원 (M) -->
+                                            
+
+                                            <!-- 누리캅스 (N) -->
+                                            
+
+                                            <!-- 유실물 (L) -->
+                                            
+                                        </ul>
+
+                                        <div class="drop-bottom">
+
+                                            <a href="javascript:fnSsoLogout();"
+                                               class="krds-btn medium text drop-menu-logout">
+                                                <i class="svg-icon ico-logout"></i>
+                                                로그아웃
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="m-hide navi-row btn-navi logout drop-menu-logout t-hide">
+                                <i class="svg-icon ico-logout white-filter"></i>
+                                로그아웃
+                            </button>
+                            <button type="button" class="btn-navi all" aria-controls="mobile-nav">전체메뉴</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- //헤더 상단 기타메뉴 -->
+
+            <!-- 메인메뉴 : 데스크탑 -->
+            <nav class="krds-main-menu
+    
+    ">
+                <div class="inner">
+                    <ul class="gnb-menu"></ul>
+                </div>
+            </nav>
+            <!-- //메인메뉴 : 데스크탑 -->
+        </div>
+        <!-- //헤더 컨텐츠 영역  -->
+
+        <!-- 메인메뉴 : 모바일 -->
+        <nav id="mobile-nav" class="krds-main-menu-mobile">
+            <div class="gnb-wrap">
+                <!-- gnb-header -->
+                <div class="gnb-header">
+                    <!-- gnb-utils -->
+                    <div class="gnb-utils">
+                        <ul class="utility-list">
+                            <li>
+                                <button type="button" class="krds-btn small text open-modal"
+                                        data-target="modal_adjust_display">
+                                    <i class="svg-icon ico-view-mode"></i>
+                                    글자·화면 설정
+                                </button>
+                            </li>
+                            <li>
+                                <div class="krds-drop-wrap krds-language notranslate">
+                                    <button type="button" class="krds-btn small text drop-btn">
+                                        Language
+                                        <i class="svg-icon ico-toggle"></i>
+                                    </button>
+                                    <div class="drop-menu">
+                                        <div class="drop-in">
+                                            <ul class="drop-list lan-drop-list"
+                                                style="max-height: 500px;overflow-y: auto;">
+                                                <!-- 원문(기본 한국어) -->
+                                                <li><a href="#" class="item-link language-link active" data-lang="ko"
+                                                       aria-selected="true">한국어<span class="sr-only">선택됨</span></a></li>
+                                                <!-- 아메리카 -->
+                                                <li><a href="#" class="item-link language-link" data-lang="en" aria-selected="false">English</a>
+                                                </li>
+                                                <!-- 아시아 -->
+                                                <li><a href="#" class="item-link language-link" data-lang="ja" aria-selected="false">日本語
+                                                    (일본어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="zh-cn"
+                                                       aria-selected="false">简体中文 (중국어 간체)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="zh-tw"
+                                                       aria-selected="false">繁體中文 (중국어 번체)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="zh-hk"
+                                                       aria-selected="false">中文(香港) (홍콩)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="th" aria-selected="false">ไทย
+                                                    (태국어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="vi" aria-selected="false">Tiếng
+                                                    Việt (베트남어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="id" aria-selected="false">Bahasa
+                                                    Indonesia</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="ms" aria-selected="false">Bahasa
+                                                    Melayu (말레이어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="hi" aria-selected="false">हिन्दी
+                                                    (힌디어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="bn" aria-selected="false">বাংলা
+                                                    (벵골어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="ur" aria-selected="false">اردو
+                                                    (우르두어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="fa" aria-selected="false">فارسی
+                                                    (페르시아어)</a></li>
+
+                                                <!-- 유럽 -->
+                                                <li><a href="#" class="item-link language-link" data-lang="fr" aria-selected="false">Français
+                                                    (프랑스어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="de" aria-selected="false">Deutsch
+                                                    (독일어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="es" aria-selected="false">Español
+                                                    (스페인어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="it" aria-selected="false">Italiano
+                                                    (이탈리아어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="pt"
+                                                       aria-selected="false">Português (포르투갈어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="nl" aria-selected="false">Nederlands
+                                                    (네덜란드어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="sv" aria-selected="false">Svenska
+                                                    (스웨덴어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="no" aria-selected="false">Norsk
+                                                    (노르웨이어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="da" aria-selected="false">Dansk
+                                                    (덴마크어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="fi" aria-selected="false">Suomi
+                                                    (핀란드어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="pl" aria-selected="false">Polski
+                                                    (폴란드어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="cs" aria-selected="false">Čeština
+                                                    (체코어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="sk" aria-selected="false">Slovenčina
+                                                    (슬로바키아어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="ro" aria-selected="false">Română
+                                                    (루마니아어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="hu" aria-selected="false">Magyar
+                                                    (헝가리어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="bg" aria-selected="false">Български
+                                                    (불가리아어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="hr" aria-selected="false">Hrvatski
+                                                    (크로아티아어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="el" aria-selected="false">Ελληνικά
+                                                    (그리스어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="uk" aria-selected="false">Українська
+                                                    (우크라이나어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="sr" aria-selected="false">Српски
+                                                    (세르비아어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="sl" aria-selected="false">Slovenščina
+                                                    (슬로베니아어)</a></li>
+
+                                                <!-- 중동/아프리카 -->
+                                                <li><a href="#" class="item-link language-link" data-lang="ar" aria-selected="false">العربية
+                                                    (아랍어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="tr" aria-selected="false">Türkçe
+                                                    (터키어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="ka" aria-selected="false">ქართული
+                                                    (조지아어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="az" aria-selected="false">Azərbaycan
+                                                    (아제르바이잔어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="sw" aria-selected="false">Kiswahili
+                                                    (스와힐리어)</a></li>
+                                                <li><a href="#" class="item-link language-link" data-lang="am" aria-selected="false">አማርኛ
+                                                    (암하라어)</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- //gnb-utils -->
+                    <!-- gnb-login -->
+                    <div class="gnb-login m-gnb-login">
+                        <span class="user mobile-login-name"></span>
+                        <div style="padding-top:4px">
+                            <dl class="my-time my-gov">
+                                <dt class="sr-only">남은 시간</dt>
+                                <dd style="
+                                        display: flex;
+                                        align-items: center;
+                                    ">
+                                    
+                                </dd>
+                            </dl>
+                        </div>
+                        <button type="button" class="krds-btn medium text mobile-logout-btn"><i
+                                class="svg-icon ico-logout"></i>로그아웃
+                        </button>
+
+                        <button type="button" class="krds-btn large text mobile-login-btn"
+                                onclick="anyidAdaptor.ssoLoginPage('','3')">
+                            <i class="svg-icon ico-log"></i>
+                            로그인을 해주세요
+                        </button>
+                    </div>
+                    <!-- //gnb-login -->
+                    <!-- gnb-service-menu -->
+                    <div class="gnb-service-menu hide">
+                        <a href="#" class="link">메뉴명</a>
+                    </div>
+                    <!-- gnb-service-menu -->
+                    <!-- 검색 -->
+                    <div class="sch-input hide">
+                        <input type="text" class="krds-input" placeholder="찾고자 하는 메뉴명을 입력해 주세요" title="찾고자 하는 메뉴명 입력"/>
+                        <button type="button" class="krds-btn medium icon ico-search">
+                            <span class="sr-only">검색</span>
+                            <i class="svg-icon ico-sch"></i>
+                        </button>
+                    </div>
+                    <!-- //검색 -->
+                </div>
+                <!-- //gnb-header -->
+
+                <!-- gnb-body -->
+                <div class="gnb-body">
+                    <!-- gnb-menu -->
+                    <div class="gnb-menu">
+                        <div class="menu-wrap">
+                            <ul role="tablist">
+                            </ul>
+                        </div>
+                        <div class="submenu-wrap">
+                        </div>
+                    </div>
+                    <!-- //gnb-menu -->
+                    <!-- gnb-bottom -->
+                    <!-- <div class="gnb-bottom">
+                        <a href="#" class="krds-btn medium text">
+                            메뉴명2
+                            <i class="svg-icon ico-angle right"></i>
+                        </a>
+                        <a href="#" class="krds-btn medium text" target="_blank" title="새 창 열기">
+                            메뉴명1
+                            <i class="svg-icon ico-go"></i>
+                        </a>
+                    </div> -->
+                    <!-- //gnb-bottom -->
+                </div>
+                <!-- //gnb-body -->
+
+                <!-- gnb-close -->
+                <button type="button" class="krds-btn medium icon" id="close-nav">
+                    <span class="sr-only">전체메뉴 닫기</span>
+                    <i class="svg-icon ico-popup-close"></i>
+                </button>
+                <!-- //gnb-close -->
+            </div>
+        </nav>
+        <!-- //메인메뉴 : 모바일 -->
+    </header>
+    <!-- //헤더 영역 -->
+
+    <!-- 컨테이너 영역 -->
+    <script>
+
+        window.loginInfo = {
+            //공통
+            userNm: '',
+            userId: '',
+            lgnSeCd: '',
+            userFlag: '',
+            rprsvNm: '',
+            brno: '',
+            dn: '',
+            bzmnSeCd: '',
+            crno: '',
+            di: '',
+
+
+            //민원
+            telno: '',
+            pidkNo: '',
+            userSeCd: '',
+            userCertGroupCd: '',
+            userAcrValues: '',
+            brDt: '',
+            sexdstnSeCd: '',
+            lfnrSeCd: '',
+
+            //누리캅스
+            userNo: '',
+
+            //유실물
+            hiVendNm: '',
+            hiVendId: '',
+            gvmNfcAprvYn: '',
+            trnsfBzentyNm: '',
+            trnsfBzentyNo: '',
+            orgId: '',
+            orgNm: '',
+            vendId: '',
+            vendNm: '',
+            vendGubun: '',
+            lginId: ''
+
+            //화면 변수 추가 할려면 WebCoreInterceptor 추가하시면 됩니다.  Lost112UsrVO 참고
+            //컨트롤러 사용시 MainController 참고
+        };
+        window.menuData = [{"menuLevel":1,"menuSeCd":"10","menuId":"MN0002","menuNm":"민원서비스","pathNm":"cvlcpt","contextPath":"cvlcpt","upMenuId":"0","midPath":"introductionYard.do","menuSortSeq":2,"useYn":null,"menuUrl":"/cvlcpt/cvlcptAplyGdList.do","menuExpln":null,"menuTypeNm":"main-toggle","userSeCd":"M","sub":[{"menuLevel":2,"menuSeCd":"11","menuId":"MN000201","menuNm":"민원 신청·안내","pathNm":"cvlcpt","contextPath":"cvlcpt","upMenuId":"MN0002","midPath":"cvlcptAplyGdList.do","menuSortSeq":21,"useYn":null,"menuUrl":"cvlcptAplyGdList.do","menuExpln":"모든 민원서비스에 대한 정보를 제공하고, 온라인서비스를 제공하는 민원을 신청할 수 있어요","menuTypeNm":"link","userSeCd":"M","sub":null,"category":"민원 신청·안내","name":"민원 신청·안내","type":"link","desc":"모든 민원서비스에 대한 정보를 제공하고, 온라인서비스를 제공하는 민원을 신청할 수 있어요","url":"cvlcptAplyGdList.do"},{"menuLevel":2,"menuSeCd":"12","menuId":"MN000202","menuNm":"민원 서식","pathNm":"cvlcpt","contextPath":"cvlcpt","upMenuId":"MN0002","midPath":"cvlcptTmpltGdList.do","menuSortSeq":22,"useYn":null,"menuUrl":"cvlcptTmpltGdList.do","menuExpln":"경찰민원24에서 제공하는 민원에 대한 서식을 받아보실 수 있어요","menuTypeNm":"link","userSeCd":"M","sub":null,"category":"민원 서식","name":"민원 서식","type":"link","desc":"경찰민원24에서 제공하는 민원에 대한 서식을 받아보실 수 있어요","url":"cvlcptTmpltGdList.do"},{"menuLevel":2,"menuSeCd":"13","menuId":"MN000203","menuNm":"누리캅스","pathNm":"cvlcpt","contextPath":"cvlcpt","upMenuId":"MN0002","midPath":"nuriUserEdit.do","menuSortSeq":23,"useYn":null,"menuUrl":"introductionYard.do","menuExpln":"누리캅스","menuTypeNm":"link","userSeCd":"M","sub":[{"menuLevel":3,"menuSeCd":"14","menuId":"MN00020301","menuNm":"소개마당","pathNm":"cvlcpt","contextPath":"cvlcpt","upMenuId":"MN000203","midPath":"introductionYard.do","menuSortSeq":231,"useYn":null,"menuUrl":"introductionYard.do","menuExpln":null,"menuTypeNm":"link","userSeCd":"M","sub":null,"category":"소개마당","name":"소개마당","type":"link","desc":"","url":"introductionYard.do"},{"menuLevel":3,"menuSeCd":"15","menuId":"MN00020302","menuNm":"신고마당","pathNm":"cvlcpt","contextPath":"cvlcpt","upMenuId":"MN000203","midPath":"reportingYard.do","menuSortSeq":232,"useYn":null,"menuUrl":"reportingYard.do","menuExpln":null,"menuTypeNm":"link","userSeCd":"M","sub":null,"category":"신고마당","name":"신고마당","type":"link","desc":"","url":"reportingYard.do"},{"menuLevel":3,"menuSeCd":"16","menuId":"MN00020303","menuNm":"알림마당","pathNm":"cvlcpt","contextPath":"cvlcpt","upMenuId":"MN000203","midPath":"notificationYard.do","menuSortSeq":233,"useYn":null,"menuUrl":"notificationYard.do","menuExpln":null,"menuTypeNm":"link","userSeCd":"M","sub":null,"category":"알림마당","name":"알림마당","type":"link","desc":"","url":"notificationYard.do"},{"menuLevel":3,"menuSeCd":"7","menuId":"MN00020304","menuNm":"누리캅스 회원정보","pathNm":"myPage","contextPath":"myPage","upMenuId":"MN000203","midPath":"nuriUserEdit.do","menuSortSeq":234,"useYn":null,"menuUrl":"nuriUserEdit.do","menuExpln":"내 개인정보를 확인하거나 수정(탈퇴)할 수 있어요","menuTypeNm":"link","userSeCd":"N","sub":null,"category":"누리캅스 회원정보","name":"누리캅스 회원정보","type":"link","desc":"내 개인정보를 확인하거나 수정(탈퇴)할 수 있어요","url":"nuriUserEdit.do"}],"category":"누리캅스","name":"누리캅스","type":"link","desc":"누리캅스","url":"introductionYard.do"}],"category":"민원서비스","name":"민원서비스","type":"main-toggle","desc":"","url":"/cvlcpt/cvlcptAplyGdList.do"},{"menuLevel":1,"menuSeCd":"17","menuId":"MN0003","menuNm":"국민신문고(신고·제보)","pathNm":"epeople","contextPath":"epeople","upMenuId":"0","midPath":"cvlcptPrcsRslt.do","menuSortSeq":3,"useYn":null,"menuUrl":null,"menuExpln":null,"menuTypeNm":"main-toggle","userSeCd":"M","sub":[{"menuLevel":2,"menuSeCd":"18","menuId":"MN000301","menuNm":"공익신고자 보호제도 안내","pathNm":"epeople","contextPath":"epeople","upMenuId":"MN0003","midPath":"dclPrtcSystGd.do","menuSortSeq":31,"useYn":null,"menuUrl":"dclPrtcSystGd.do","menuExpln":"공익신고자 보호하는 제도에 대한 안내를 보실 수 있어요","menuTypeNm":"link","userSeCd":"M","sub":null,"category":"공익신고자 보호제도 안내","name":"공익신고자 보호제도 안내","type":"link","desc":"공익신고자 보호하는 제도에 대한 안내를 보실 수 있어요","url":"dclPrtcSystGd.do"},{"menuLevel":2,"menuSeCd":"19","menuId":"MN000302","menuNm":"범죄신고","pathNm":"epeople","contextPath":"epeople","upMenuId":"MN0003","midPath":"crimDclr.do","menuSortSeq":32,"useYn":null,"menuUrl":"crimDclr.do","menuExpln":"다양한 종류의 범죄를 신고,제보하실 수 있어요","menuTypeNm":"link","userSeCd":"M","sub":null,"category":"범죄신고","name":"범죄신고","type":"link","desc":"다양한 종류의 범죄를 신고,제보하실 수 있어요","url":"crimDclr.do"},{"menuLevel":2,"menuSeCd":"20","menuId":"MN000303","menuNm":"제보하기","pathNm":"epeople","contextPath":"epeople","upMenuId":"MN0003","midPath":"nonKndnesRghtInfrTpof.do","menuSortSeq":33,"useYn":null,"menuUrl":"poliCrupTpof.do","menuExpln":"경찰비리, 예산낭비, 불친절, 인권침해 등에 대한 제보를 하실 수 있어요","menuTypeNm":"toggle","userSeCd":"M","sub":[{"menuLevel":3,"menuSeCd":"201","menuId":"MN00030301","menuNm":"경찰비리 제보","pathNm":"epeople","contextPath":"epeople","upMenuId":"MN000303","midPath":"poliCrupTpof.do","menuSortSeq":331,"useYn":null,"menuUrl":"poliCrupTpof.do","menuExpln":"경찰비리에 대한 제보를 하실 수 있어요","menuTypeNm":"link","userSeCd":"M","sub":null,"category":"경찰비리 제보","name":"경찰비리 제보","type":"link","desc":"경찰비리에 대한 제보를 하실 수 있어요","url":"poliCrupTpof.do"},{"menuLevel":3,"menuSeCd":"202","menuId":"MN00030302","menuNm":"예산낭비 제보","pathNm":"epeople","contextPath":"epeople","upMenuId":"MN000303","midPath":"bgtWstTpof.do","menuSortSeq":332,"useYn":null,"menuUrl":"bgtWstTpof.do","menuExpln":"예산낭비에 대한 제보를 하실 수 있어요","menuTypeNm":"link","userSeCd":"M","sub":null,"category":"예산낭비 제보","name":"예산낭비 제보","type":"link","desc":"예산낭비에 대한 제보를 하실 수 있어요","url":"bgtWstTpof.do"},{"menuLevel":3,"menuSeCd":"203","menuId":"MN00030303","menuNm":"불친절·인권침해 제보","pathNm":"epeople","contextPath":"epeople","upMenuId":"MN000303","midPath":"nonKndnesRghtInfrTpof.do","menuSortSeq":333,"useYn":null,"menuUrl":"nonKndnesRghtInfrTpof.do","menuExpln":"불친절, 인권침해에 대한 제보를 하실 수 있어요","menuTypeNm":"link","userSeCd":"M","sub":null,"category":"불친절·인권침해 제보","name":"불친절·인권침해 제보","type":"link","desc":"불친절, 인권침해에 대한 제보를 하실 수 있어요","url":"nonKndnesRghtInfrTpof.do"}],"category":"제보하기","name":"제보하기","type":"toggle","desc":"경찰비리, 예산낭비, 불친절, 인권침해 등에 대한 제보를 하실 수 있어요","url":"poliCrupTpof.do"},{"menuLevel":2,"menuSeCd":"21","menuId":"MN000304","menuNm":"교통민원","pathNm":"epeople","contextPath":"epeople","upMenuId":"MN0003","midPath":"bikrDclrTpof.do","menuSortSeq":34,"useYn":null,"menuUrl":"trfcTpof.do","menuExpln":"경찰이 제공하는 다양한 교통민원을 신청하실 수 있어요","menuTypeNm":"toggle","userSeCd":"M","sub":[{"menuLevel":3,"menuSeCd":"211","menuId":"MN00030401","menuNm":"교통 제보","pathNm":"epeople","contextPath":"epeople","upMenuId":"MN000304","midPath":"trfcTpof.do","menuSortSeq":341,"useYn":null,"menuUrl":"trfcTpof.do","menuExpln":"경찰이 제공하는 다양한 교통민원을 신청하실 수 있어요","menuTypeNm":"link","userSeCd":"M","sub":null,"category":"교통 제보","name":"교통 제보","type":"link","desc":"경찰이 제공하는 다양한 교통민원을 신청하실 수 있어요","url":"trfcTpof.do"},{"menuLevel":3,"menuSeCd":"213","menuId":"MN00030403","menuNm":"교통안전시설 개선 신고","pathNm":"epeople","contextPath":"epeople","upMenuId":"MN000304","midPath":"trfcSftyFcltImpvDclr.do","menuSortSeq":343,"useYn":null,"menuUrl":"trfcSftyFcltImpvDclr.do","menuExpln":"경찰이 제공하는 다양한 교통민원을 신청하실 수 있어요","menuTypeNm":"link","userSeCd":"M","sub":null,"category":"교통안전시설 개선 신고","name":"교통안전시설 개선 신고","type":"link","desc":"경찰이 제공하는 다양한 교통민원을 신청하실 수 있어요","url":"trfcSftyFcltImpvDclr.do"},{"menuLevel":3,"menuSeCd":"214","menuId":"MN00030404","menuNm":"뺑소니 교통사고영상 제보","pathNm":"epeople","contextPath":"epeople","upMenuId":"MN000304","midPath":"harnTracntVidoTpof.do","menuSortSeq":344,"useYn":null,"menuUrl":"harnTracntVidoTpof.do","menuExpln":"경찰이 제공하는 다양한 교통민원을 신청하실 수 있어요","menuTypeNm":"link","userSeCd":"M","sub":null,"category":"뺑소니 교통사고영상 제보","name":"뺑소니 교통사고영상 제보","type":"link","desc":"경찰이 제공하는 다양한 교통민원을 신청하실 수 있어요","url":"harnTracntVidoTpof.do"},{"menuLevel":3,"menuSeCd":"215","menuId":"MN00030405","menuNm":"이륜차 등 소음 신고,제보","pathNm":"epeople","contextPath":"epeople","upMenuId":"MN000304","midPath":"bikrDclrTpof.do","menuSortSeq":345,"useYn":null,"menuUrl":"bikrDclrTpof.do","menuExpln":"경찰이 제공하는 다양한 교통민원을 신청하실 수 있어요","menuTypeNm":"link","userSeCd":"M","sub":null,"category":"이륜차 등 소음 신고,제보","name":"이륜차 등 소음 신고,제보","type":"link","desc":"경찰이 제공하는 다양한 교통민원을 신청하실 수 있어요","url":"bikrDclrTpof.do"}],"category":"교통민원","name":"교통민원","type":"toggle","desc":"경찰이 제공하는 다양한 교통민원을 신청하실 수 있어요","url":"trfcTpof.do"},{"menuLevel":2,"menuSeCd":"22","menuId":"MN000305","menuNm":"수사민원","pathNm":"epeople","contextPath":"epeople","upMenuId":"MN0003","midPath":"ivstrAvidDclr.do","menuSortSeq":35,"useYn":null,"menuUrl":"invtgObjcDclr.do","menuExpln":"수사 과정에서 발생하는 문제에 대한 민원을 제기하실 수 있어요","menuTypeNm":"toggle","userSeCd":"M","sub":[{"menuLevel":3,"menuSeCd":"221","menuId":"MN00030501","menuNm":"수사 이의 신청","pathNm":"epeople","contextPath":"epeople","upMenuId":"MN000305","midPath":"invtgObjcDclr.do","menuSortSeq":351,"useYn":null,"menuUrl":"invtgObjcDclr.do","menuExpln":"수사 과정에서 발생하는 문제에 대한 민원을 제기하실 수 있어요","menuTypeNm":"link","userSeCd":"M","sub":null,"category":"수사 이의 신청","name":"수사 이의 신청","type":"link","desc":"수사 과정에서 발생하는 문제에 대한 민원을 제기하실 수 있어요","url":"invtgObjcDclr.do"},{"menuLevel":3,"menuSeCd":"222","menuId":"MN00030502","menuNm":"수사관 기피 신청","pathNm":"epeople","contextPath":"epeople","upMenuId":"MN000305","midPath":"ivstrAvidDclr.do","menuSortSeq":352,"useYn":null,"menuUrl":"ivstrAvidDclr.do","menuExpln":"수사 과정에서 발생하는 문제에 대한 민원을 제기하실 수 있어요","menuTypeNm":"link","userSeCd":"M","sub":null,"category":"수사관 기피 신청","name":"수사관 기피 신청","type":"link","desc":"수사 과정에서 발생하는 문제에 대한 민원을 제기하실 수 있어요","url":"ivstrAvidDclr.do"}],"category":"수사민원","name":"수사민원","type":"toggle","desc":"수사 과정에서 발생하는 문제에 대한 민원을 제기하실 수 있어요","url":"invtgObjcDclr.do"},{"menuLevel":2,"menuSeCd":"23","menuId":"MN000306","menuNm":"무엇이든 물어보세요","pathNm":"epeople","contextPath":"epeople","upMenuId":"MN0003","midPath":"askAnything.do","menuSortSeq":36,"useYn":null,"menuUrl":"askAnything.do","menuExpln":"신고, 제보, 이의 제기 등 경찰청에 대한 문의사항이 있을 경우 문의하실 수 있어요","menuTypeNm":"link","userSeCd":"M","sub":null,"category":"무엇이든 물어보세요","name":"무엇이든 물어보세요","type":"link","desc":"신고, 제보, 이의 제기 등 경찰청에 대한 문의사항이 있을 경우 문의하실 수 있어요","url":"askAnything.do"},{"menuLevel":2,"menuSeCd":"24","menuId":"MN000307","menuNm":"내 민원처리결과보기","pathNm":"epeople","contextPath":"epeople","upMenuId":"MN0003","midPath":"cvlcptPrcsRslt.do","menuSortSeq":37,"useYn":null,"menuUrl":"cvlcptPrcsRslt.do","menuExpln":"국민신문고를 통해 신고, 제보, 신청한 민원 내역과 경과를 확인하실 수 있어요","menuTypeNm":"link","userSeCd":"M","sub":null,"category":"내 민원처리결과보기","name":"내 민원처리결과보기","type":"link","desc":"국민신문고를 통해 신고, 제보, 신청한 민원 내역과 경과를 확인하실 수 있어요","url":"cvlcptPrcsRslt.do"}],"category":"국민신문고(신고·제보)","name":"국민신문고(신고·제보)","type":"main-toggle","desc":"","url":null},{"menuLevel":1,"menuSeCd":"25","menuId":"MN0004","menuNm":"고객센터","pathNm":"custServiceCenter","contextPath":"custServiceCenter","upMenuId":"0","midPath":"relSiteList.do","menuSortSeq":4,"useYn":null,"menuUrl":"ntcMttrList.do","menuExpln":null,"menuTypeNm":"main-toggle","userSeCd":"M","sub":[{"menuLevel":2,"menuSeCd":"26","menuId":"MN000401","menuNm":"공지사항","pathNm":"custServiceCenter","contextPath":"custServiceCenter","upMenuId":"MN0004","midPath":"ntcMttrList.do","menuSortSeq":41,"useYn":null,"menuUrl":"ntcMttrList.do","menuExpln":"경찰민원24에서 제공하는 서비스에대한 공지사항을 카테고리별로 보실 수 있어요","menuTypeNm":"link","userSeCd":"M","sub":null,"category":"공지사항","name":"공지사항","type":"link","desc":"경찰민원24에서 제공하는 서비스에대한 공지사항을 카테고리별로 보실 수 있어요","url":"ntcMttrList.do"},{"menuLevel":2,"menuSeCd":"27","menuId":"MN000402","menuNm":"경찰행정 Q&A","pathNm":"custServiceCenter","contextPath":"custServiceCenter","upMenuId":"MN0004","midPath":"polPbadmsQnaList.do","menuSortSeq":42,"useYn":null,"menuUrl":"polPbadmsQnaList.do","menuExpln":"경찰민원24의 경찰행정에 대한 궁금증을 모아보실 수 있어요","menuTypeNm":"link","userSeCd":"M","sub":null,"category":"경찰행정 Q&A","name":"경찰행정 Q&A","type":"link","desc":"경찰민원24의 경찰행정에 대한 궁금증을 모아보실 수 있어요","url":"polPbadmsQnaList.do"},{"menuLevel":2,"menuSeCd":"28","menuId":"MN000403","menuNm":"자주 묻는 질문","pathNm":"custServiceCenter","contextPath":"custServiceCenter","upMenuId":"MN0004","midPath":"faqList.do","menuSortSeq":43,"useYn":null,"menuUrl":"faqList.do","menuExpln":"경찰민원24에 자주 문의되는 질문들을 모아 보실 수 있어요","menuTypeNm":"link","userSeCd":"M","sub":null,"category":"자주 묻는 질문","name":"자주 묻는 질문","type":"link","desc":"경찰민원24에 자주 문의되는 질문들을 모아 보실 수 있어요","url":"faqList.do"},{"menuLevel":2,"menuSeCd":"29","menuId":"MN000404","menuNm":"시스템 문의하기","pathNm":"custServiceCenter","contextPath":"custServiceCenter","upMenuId":"MN0004","midPath":"inqoInfo.do","menuSortSeq":44,"useYn":null,"menuUrl":"inqoInfo.do","menuExpln":"경찰민원24를 이용하다 생기신 궁금증, 문의사항, 불편사항 등을 문의하실 수 있어요","menuTypeNm":"link","userSeCd":"M","sub":null,"category":"시스템 문의하기","name":"시스템 문의하기","type":"link","desc":"경찰민원24를 이용하다 생기신 궁금증, 문의사항, 불편사항 등을 문의하실 수 있어요","url":"inqoInfo.do"},{"menuLevel":2,"menuSeCd":"30","menuId":"MN000405","menuNm":"이용안내","pathNm":"custServiceCenter","contextPath":"custServiceCenter","upMenuId":"MN0004","midPath":"hmpgGdMapInfo.do","menuSortSeq":45,"useYn":null,"menuUrl":"siteUtztnGdInfo.do","menuExpln":"경찰민원24를 이용하는 방법에 대해 안내드려요","menuTypeNm":"toggle","userSeCd":"M","sub":[{"menuLevel":3,"menuSeCd":"31","menuId":"MN00040501","menuNm":"사이트 이용안내","pathNm":"custServiceCenter","contextPath":"custServiceCenter","upMenuId":"MN000405","midPath":"siteUtztnGdInfo.do","menuSortSeq":451,"useYn":null,"menuUrl":"siteUtztnGdInfo.do","menuExpln":null,"menuTypeNm":"link","userSeCd":"M","sub":null,"category":"사이트 이용안내","name":"사이트 이용안내","type":"link","desc":"","url":"siteUtztnGdInfo.do"},{"menuLevel":3,"menuSeCd":"32","menuId":"MN00040502","menuNm":"증명서 진위 확인 안내","pathNm":"custServiceCenter","contextPath":"custServiceCenter","upMenuId":"MN000405","midPath":"prdocTflsIdntyGdInfo.do","menuSortSeq":452,"useYn":null,"menuUrl":"prdocTflsIdntyGdInfo.do","menuExpln":null,"menuTypeNm":"link","userSeCd":"M","sub":null,"category":"증명서 진위 확인 안내","name":"증명서 진위 확인 안내","type":"link","desc":"","url":"prdocTflsIdntyGdInfo.do"},{"menuLevel":3,"menuSeCd":"33","menuId":"MN00040503","menuNm":"모바일앱 이용안내","pathNm":"custServiceCenter","contextPath":"custServiceCenter","upMenuId":"MN000405","midPath":"moblUtztnGdInfo.do","menuSortSeq":453,"useYn":null,"menuUrl":"moblUtztnGdInfo.do","menuExpln":null,"menuTypeNm":"link","userSeCd":"M","sub":null,"category":"모바일앱 이용안내","name":"모바일앱 이용안내","type":"link","desc":"","url":"moblUtztnGdInfo.do"},{"menuLevel":3,"menuSeCd":"34","menuId":"MN00040504","menuNm":"운영정책","pathNm":"custServiceCenter","contextPath":"custServiceCenter","upMenuId":"MN000405","midPath":"operPlcyInfo.do","menuSortSeq":454,"useYn":null,"menuUrl":"operPlcyInfo.do","menuExpln":null,"menuTypeNm":"link","userSeCd":"M","sub":null,"category":"운영정책","name":"운영정책","type":"link","desc":"","url":"operPlcyInfo.do"},{"menuLevel":3,"menuSeCd":"35","menuId":"MN00040505","menuNm":"누리집 안내지도","pathNm":"custServiceCenter","contextPath":"custServiceCenter","upMenuId":"MN000405","midPath":"hmpgGdMapInfo.do","menuSortSeq":456,"useYn":null,"menuUrl":"hmpgGdMapInfo.do","menuExpln":null,"menuTypeNm":"link","userSeCd":"M","sub":null,"category":"누리집 안내지도","name":"누리집 안내지도","type":"link","desc":"","url":"hmpgGdMapInfo.do"}],"category":"이용안내","name":"이용안내","type":"toggle","desc":"경찰민원24를 이용하는 방법에 대해 안내드려요","url":"siteUtztnGdInfo.do"},{"menuLevel":2,"menuSeCd":"36","menuId":"MN000406","menuNm":"경찰관서 찾기","pathNm":"custServiceCenter","contextPath":"custServiceCenter","upMenuId":"MN0004","midPath":"polGvmnfcList.do","menuSortSeq":46,"useYn":null,"menuUrl":"polGvmnfcList.do","menuExpln":"경찰관서를 직접 검색해보실 수 있어요","menuTypeNm":"link","userSeCd":"M","sub":null,"category":"경찰관서 찾기","name":"경찰관서 찾기","type":"link","desc":"경찰관서를 직접 검색해보실 수 있어요","url":"polGvmnfcList.do"},{"menuLevel":2,"menuSeCd":"37","menuId":"MN000407","menuNm":"유관사이트","pathNm":"custServiceCenter","contextPath":"custServiceCenter","upMenuId":"MN0004","midPath":"relSiteList.do","menuSortSeq":47,"useYn":null,"menuUrl":"relSiteList.do","menuExpln":"유관사이트를 확인할 수 있어요","menuTypeNm":"link","userSeCd":"M","sub":null,"category":"유관사이트","name":"유관사이트","type":"link","desc":"유관사이트를 확인할 수 있어요","url":"relSiteList.do"}],"category":"고객센터","name":"고객센터","type":"main-toggle","desc":"","url":"ntcMttrList.do"}];
+
+
+        $(function () {
+            let name, lgnSeCd, isLoggedIn = "";
+            let userSeCd = loginInfo.userSeCd;
+
+            let brno = loginInfo.brno;
+
+
+            if (userSeCd === "02") {
+
+                name = loginInfo.rprsvNm;
+                lgnSeCd = loginInfo.lgnSeCd;
+            } else {
+
+                name = loginInfo.userNm;
+                lgnSeCd = loginInfo.lgnSeCd;
+            }
+
+            isLoggedIn = name && lgnSeCd;
+
+            //console.log("name :::: " + name);
+            //console.log("lgnSeCd :::: " + lgnSeCd);
+            //console.log("userSeCd :::: " + userSeCd);
+            //console.log("brno :::: " + brno);
+
+            // 로그인 상태면 UI 변경
+            //$("#wrap").removeClass("checking-login");
+            $("#wrap").addClass(isLoggedIn ? "logged-in" : "logged-out");
+            $(".my-name").html(unescape(name) + "님");
+            $(".mobile-login-name").html(unescape(name) + "님");
+
+            if (isLoggedIn) {
+                $(".btn-navi.logout").removeClass("hide");
+                $(".btn-navi.login").css("display", "none");
+                $(".gnb-mypage").css("display", "block");
+                $(".my-gov").css("display", "block");
+
+                $(".mobile-login-btn").css("display", "none");
+                $(".mobile-logout-btn").css("display", "block");
+                $(".mobile-login-name").css("display", "block");
+            } else {
+                $(".btn-navi.logout").addClass("hide");
+                $(".btn-navi.login").text("로그인");
+                $(".gnb-mypage").css("display", "none");
+                $(".my-gov").css("display", "none");
+
+                $(".mobile-login-btn").css("display", "block");
+                $(".mobile-logout-btn").css("display", "none");
+                $(".mobile-login-name").css("display", "none");
+            }
+
+        });
+
+        function toggleAnyId(checked) {
+            const statusText = document.getElementById("toggleStatusText");
+            statusText.textContent = checked ? "사용" : "미사용";
+
+            // 로그인 방식 disable/enable 처리 예시
+            const loginTypes = document.querySelectorAll(".login-type");
+            loginTypes.forEach((el) => {
+                const type = el.getAttribute("data-type");
+                if (!["간편인증", "금융인증서", "모바일신분증"].includes(type)) {
+                    el.classList.toggle("disabled", checked);
+                }
+            });
+        }
+
+        function openPopup(url) {
+            window.open(url, "_blank", "width=680,height=700,resizable=yes,scrollbars=yes");
+        }
+
+        var autoSearchTimer;
+
+        function ff() {
+            var modal_ = $(`
+            <div class="ff search-overlay">
+                <div class="search-overlay__inner">
+                    <button class="search-close" onclick="javascript:$('.ff').remove();" aria-label="검색 닫기">
+                        <i class="svg-icon ico-popup-close" aria-hidden="true"></i>
+                    </button>
+
+                    <div class="search-overlay__content">
+                        <div class="search-overlay__search">
+                            <h2>검색어를 입력해주세요</h2>
+                        </div>
+
+                        <div class="search-overlay__search-input">
+                            <div class="sch-input">
+                                <input type="text"
+                                    class="krds-input ff-btn"
+                                    id="srchTmp"
+                                    placeholder="검색어를 입력해주세요"
+                                    value=""
+                                    title="검색어 입력">
+
+                                <button type="button" class="krds-btn medium icon ico-search ff-btn" onClick="totSearch()">
+                                    <span class="sr-only">검색</span>
+                                    <i class="svg-icon ico-sch"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="search-overlay__sections">
+
+                            <!-- 최근 검색어 -->
+                            <div class="search-overlay__section search-overlay__section--recent">
+                                <div class="search-overlay__section--title searchWordList">
+                                    <p class="text-bold">최근 검색어</p>
+                                </div>
+                                <ul class="ff-ul recentSearch">
+                                </ul>
+                                <button class="krds-btn text small recentSearchAllDel" onClick="removeRecentAll()">전체 삭제</button>
+                            </div>
+
+                            <!-- 자주 찾는 서비스 -->
+                            <div class="search-overlay__section search-overlay__section--favorite">
+
+                                <div class="search-overlay__section--title">
+                                    <p class="text-bold">자주 찾는 서비스</p>
+                                </div>
+
+                                <ul class="ff-ul search-favorite">
+                                    <li><a href="/cvlcpt/cvlcptGdInfo.do?cvlcptId=MW-001"><span>1</span> 분실물 신고</a></li>
+                                    <li><a href="/cvlcpt/cvlcptGdInfo.do?cvlcptId=MW-084"><span>2</span> 운전면허증 갱신 신청(2종)</a></li>
+                                    <li><a href="/cvlcpt/cvlcptGdInfo.do?cvlcptId=MW-915"><span>3</span> 착한운전 마일리지 신청</a></li>
+                                    <li><a href="/cvlcpt/cvlcptGdInfo.do?cvlcptId=MW-003"><span>4</span> 운전경력증명서 발급(국문)</a></li>
+                                    <li><a href="/cvlcpt/cvlcptGdInfo.do?cvlcptId=MW-085"><span>5</span> 운전면허증 재발급 신청</a></li>
+                                    <li><a href="/cvlcpt/cvlcptGdInfo.do?cvlcptId=MW-902"><span>6</span> 미납과태료 조회</a></li>
+                                    <li><a href="/epeople/dclPrtcSystGd.do"><span>7</span> 국민신문고</a></li>
+                                    <li><a href="/cvlcpt/introductionYard.do"><span>8</span> 누리캅스</a></li>
+                                    <li><a href="/cvlcpt/cvlcptGdInfo.do?cvlcptId=MW-028"><span>9</span> 경비원 배치 신고</a></li>
+                                    <li><a href="/cvlcpt/cvlcptGdInfo.do?cvlcptId=MW-118"><span>10</span> 제한구역 통행증 발급신청</a></li>
+                                </ul>
+
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            `);
+            $('body').before(modal_);
+
+            requestAnimationFrame(() => {
+                modal_.find('.search-close').focus();
+            });
+
+            // ESC 키로 닫기 
+            $(document).on('keydown.ffEsc', function (e) {
+                if (e.key === 'Escape') {
+                    $('.ff').remove();
+                    $(document).off('keydown.ffEsc');
+                }
+            });
+
+            setRecentSearch();
+            setFavService();
+
+            //민원검색-민원명으로 민원검색
+            $(".ff-btn").off().on("keydown", function (e) {
+                if (e.key !== "Enter") {
+                    return
+                }
+                totSearch();
+            });
+
+            // 자동완성을 위한 입력 감지 및 디바운싱 처리
+            $("#srchTmp").on("input", function () {
+                var keyword = $(this).val();
+
+                // 1. 기존에 예약된 실행이 있다면 취소 (아직 타자가 쳐지고 있다는 뜻)
+                if (autoSearchTimer) {
+                    clearTimeout(autoSearchTimer);
+                }
+
+                // 2. 새로운 타이머 설정 (300ms 동안 추가 입력이 없으면 wisenutAutoInHeader 실행)
+                autoSearchTimer = setTimeout(function () {
+                    wisenutAutoInHeader(keyword);
+                }, 300); // 300ms = 0.3초
+            });
+
+        }
+
+        // 최근검색어 세팅
+        function setRecentSearch() {
+            $('.ff-ul.recentSearch').html("");
+            const recentSearches = getRecentSearch();
+            let recentSearchHtml = "";
+            recentSearches.forEach((search) => {
+                recentSearchHtml +=
+                    "<li style='cursor:pointer;' " +
+                    "onclick='setKeywordAndSearch2(" + JSON.stringify(search) + ")'>" +
+                    "<div><span class='word'>" + search + "</span></div>" +
+                    "<button type='button' class='recentSearchdel' onclick='removeRecentOne(this)'>" +
+                    "<i class='svg-icon ico-delete-fill'></i>" +
+                    "</button></li>";
+            })
+
+            $('.ff-ul.recentSearch').html(recentSearchHtml);
+        }
+
+        // 자주 찾는 서비스 세팅
+        function setFavService() {
+
+        }
+
+        // 검색
+        function totSearch() {
+            const form = document.createElement('form');
+            form.method = 'post';
+            form.action = '/totalSearch.do';
+
+            const inputPage = document.createElement('input');
+            inputPage.type = 'hidden';
+            inputPage.name = 'pageIndex';
+            inputPage.value = "1";
+            form.appendChild(inputPage);
+
+            const container = $('#srchTmp');
+            const inputKeyword = document.createElement('input');
+            inputKeyword.type = 'hidden';
+            inputKeyword.name = 'keyword';
+            inputKeyword.value = container.val();
+
+            saveRecentSearch(container.val());
+            form.appendChild(inputKeyword);
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        // 최근검색어 삭제
+        function removeRecentOne(btn) {
+            const el = btn.closest('li');
+            el.onclick = null;
+            const word = el.querySelector('div span.word').textContent;
+            el.remove();
+            removeRecentSearch(word);
+        }
+
+        // 최근검색어 전체삭제
+        function removeRecentAll() {
+            removeRecentSearchAll();
+            setRecentSearch();
+        }
+
+        //자동완성
+        function wisenutAutoInHeader(keyword) {
+            // 공백 제거
+            keyword = keyword.trim();
+
+            // 검색어가 없으면 로직 중단 (혹은 자동완성 레이어 닫기 처리)
+            if (keyword === "") {
+                setRecentSearch();
+                setFavService();
+                $(".searchWordList").show();
+                $(".recentSearchAllDel").show();
+                return;
+            }
+
+            // 자동완성 api 호출
+            $.ajax({
+                url: "/wisenut/service.do",
+                type: "POST",
+                contentType: "application/json;charset=utf-8",
+                // [중요 2] 자바스크립트 객체를 JSON 문자열로 변환하여 전송
+                data: JSON.stringify({
+                    query: keyword
+                }),
+                success: function (response) {
+                    response = JSON.parse(response);
+                    if (response.code === 2000) {
+                        $(".recentSearch").empty();
+                        $(".searchWordList").hide();
+                        $(".recentSearchAllDel").hide();
+                        var resultHtml = "";
+                        /*
+                        response.result 에는 0번째 배열에 키워드가 앞인 자동완성, 1번째 배열에 키워드가 뒤인 자동완성이 놓임.
+                        예를 들어, keyword가 "가"면 0번째 배열에는 가로 시작하는 자동완성들이, 1번째 배열에는 가로 끝나는 자동완성들이 놓임.
+                         */
+                        const itemsFirst = (response.result[0] && response.result[0].items) ? response.result[0].items : [];
+                        const itemsSecond = (response.result[1] && response.result[1].items) ? response.result[1].items : [];
+                        // 두 배열을 순서대로 합침 (itemsFirst 뒤에 itemsSecond가 붙음)
+                        const autoComplete = [...itemsFirst, ...itemsSecond];
+                        if (autoComplete.length === 0) {
+                            resultHtml += `
+                            <li>
+                                <div>
+                                    <span class="word" style="font-size: 17px">검색결과가 없습니다.</span>
+                                </div>
+                            </li>
+                            `
+                        } else {
+                            autoComplete.forEach(function (item) {
+                                //color:null로 내려오는것 대신 font-weight: bolder로 보정
+                                var hkeyword = item.hkeyword.replace("color:null", "font-weight: bolder")
+
+                                resultHtml += `
+                                <li class="autocomplete-item" onclick="setKeywordAndSearch2('${item.keyword}')">
+                                    <div>
+                                        <span class="word" style="font-size: 17px">${hkeyword}</span>
+                                    </div>
+                                </li>
+                                `
+                            });
+                        }
+                        $(".recentSearch").html(resultHtml);
+                    } else {
+                        showConfirm("검색엔진에 에러가 발생했습니다.");
+                    }
+                },
+                error: function (error) {
+                    //검색결과 없어도 404에러 뜨니 여기에 검색결과 없음 표시
+                    if (error.status === 404) {
+                        $(".recentSearch").empty();
+                        $(".searchWordList").hide();
+                        $(".recentSearchAllDel").hide();
+                        var resultHtml = "";
+                        resultHtml += `
+                        <li>
+                            <div>
+                                <span class="word" style="font-size: 17px">검색결과가 없습니다.</span>
+                            </div>
+                        </li>
+                        `
+                        $(".recentSearch").html(resultHtml);
+                    } else {
+                        showConfirm("검색엔진에 에러가 발생했습니다.");
+                    }
+                }
+            });
+        }
+
+        // 자동완성 단어 클릭 시 실행될 함수
+        function setKeywordAndSearch2(keyword) {
+            $("#srchTmp").val(keyword); // 검색창에 단어 넣기
+            totSearch(); // 검색 실행 함수 호출 (기존에 만드신 함수)
+        }
+
+        //모바일 메뉴에서 탭 클릭시 포커스 되도록함.
+        $(document).on('click', '.gnb-main-trigger', function (e) {
+            //e.preventDefault();
+
+            // 1. 전체 active 제거
+            $('.gnb-main-trigger').removeClass('active')
+                .attr('aria-selected', 'false')
+                .removeAttr('aria-current')
+                .find('.sr-only').remove();
+
+            // 2. 현재 클릭한 메뉴 active 추가
+            $(this).addClass('active')
+                .attr('aria-selected', 'true')
+                .attr('aria-current', 'page')
+                .append('<span class="sr-only">현재 페이지</span>');
+        });
+
+    </script>
+    
+
+    <!-- 컨테이너 영역 -->
+    <div id="container">
+      <!-- breadcrumb -->
+      <nav class="krds-breadcrumb-wrap" aria-label="현재 경로">
+        <ol class="breadcrumb">
+          <li class="home"><a href="#;" class="txt">홈</a></li>
+          <li><a href="#;" class="txt">민원 서비스</a></li>
+        </ol>
+      </nav>
+      <!-- breadcrumb -->
+
+      <!-- inner 영역 (퍼블리싱 수정됨)-->
+        <div class="inner">
+            <!-- 페이지 타이틀 영역 -->
+<div class="page-title-wrap">
+    <h1 class="h-tit">
+        습득물 검색
+    </h1>
+</div>
+
+
+<div class="conts-area">
+    <!-- 내부 컨텐츠 -->
+    <div class="conts-wrap">
+
+        <div class="conts-wrap">
+            <!-- 최근 등록된 습득물 -->
+            <h3 class="sec-tit">최근 등록된 습득물</h3>
+            <div class="conts-wrap">
+                <!-- 상단 swiper -->
+                <div class="swiper">
+                    <!-- Additional required wrapper -->
+                    <div class="swiper-wrapper">
+                        <!-- Slides -->
+                        <div class="swiper-slide">
+                            <!-- <div class="txt-box bg-white swiper-txt-box">
+                              <img src="/img/error/lostNonImg_2.png" alt="분실물1">
+                              <h5 class="sec-tit swiper-item-tit" title="책, 핸드크림, 틴트, 노트, 책자, 여성 노트북">책, 핸드크림, 틴트, 노트, 책자, 여성 노트북</h5>
+                              <div class="krds-table-wrap">
+                                <table class="data">
+                                  <colgroup>
+                                    <col style="width:40%">
+                                    <col>
+                                  </colgroup>
+                                  <tbody>
+                                    <tr>
+                                      <th class="text-left">습득 일자</th>
+                                      <td class="text-left">2025.05.08</td>
+                                    </tr>
+                                    <tr>
+                                      <th class="text-left">습득 지역</th>
+                                      <td class="text-left">부산광역시</td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              </div>
+                              <div class="detail-btn-wrap">
+                                <button type="button"><span>자세히 보기</span><i class="svg-icon ico-shortcut"></i></button>
+                              </div>
+                            </div> -->
+                        </div>
+                    </div>
+                    <!-- If we need pagination -->
+                    <div class="swiper-nav-wrap">
+                        <div class="swiper-pagination carousel-indicators"></div>
+
+                        <!-- If we need navigation buttons -->
+                        <div class="swiper-nav-group">
+                            <div class="swiper-button-prev"></div>
+                            <div class="swiper-button-next"></div>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- //상단 swiper -->
+            </div>
+            <!-- //최근 등록된 습득물 -->
+
+            <!-- 검색 조건 영역 -->
+            <div class="conts-wrap">
+                <!-- 가이드 박스 -->
+                <div class="txt-box outline">
+                    <p class="outline-txt">아래 조건에 맞게 입력하고, 검색버튼을 누르시면 분실하신 물건의 습득 상황 검색을 빠르게 도와드립니다.</p>
+                    <div class="conts-desc-wrap">
+                        <ul class="krds-info-list">
+                            <li><span
+                                    class="text-primary">※ 신분증, 증명서 등은 분실자 이름으로, 휴대폰은 일련번호로 빠르고 정확하게 찾으실 수 있습니다.</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- //상단 가이드 박스 -->
+
+                <!-- accordion -->
+                <div class="krds-accordion searchArea search-filter-wrap mt2">
+                    <div class="accordion-item">
+                        <h5 class="accordion-header">
+                            <button type="button" id="accordionHeaderSample01" class="btn-accordion"
+                                    aria-controls="accordionCollapseSample01">검색 필터
+                            </button>
+                        </h5>
+                        <div id="accordionCollapseSample01" class="accordion-collapse collapse"
+                             aria-labelledby="accordionHeaderSample01">
+                            <div class="accordion-body">
+                                <div class="form-group bd-dot stack-form-conts">
+                                    <table style="border-collapse: separate;  border-spacing: 0 12px;">
+                                        <colgroup>
+                                            <col style="width:8%">
+                                            <col style="width:42%">
+                                            <col style="width:8%">
+                                            <col style="width:42%">
+                                        </colgroup>
+                                        <tbody>
+                                        <tr>
+                                            <th class="text-left">
+                                                <label for="pkupCmdtyLclsfCd">물품 분류</label>
+                                            </th>
+                                            <td>
+                                                <div class="form-group-row form-wd">
+                                                    <div class="form-group">
+                                                        <div class="form-conts">
+                                                            <select name="pkupCmdtyLclsfCd"
+                                                                    class="krds-form-select small" id="pkupCmdtyLclsfCd"
+                                                                    title="물품 대분류" data-name="대분류">
+                                                                <option value="" selected>대분류 선택</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <div class="form-conts">
+                                                            <select name="pkupCmdtyMclsfCd"
+                                                                    class="krds-form-select small" id="pkupCmdtyMclsfCd"
+                                                                    title="물품 소분류" data-name="소분류">
+                                                                <option value="" selected>소분류 선택</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </td>
+                                            <th class="text-left">
+                                                <label for="startYmd">습득일자</label>
+                                            </th>
+                                            <td>
+                                                <div class="form-group-row form-wd">
+                                                    <div class="form-conts form-calendar-conts">
+                                                        <div class="calendar-conts">
+                                                            <div class="calendar-input">
+                                                                <input type="text"
+                                                                       class="krds-input datepicker small cal"
+                                                                       placeholder="YYYY-MM-DD" id="startYmd"
+                                                                       name="startYmd" title="조회기간 시작 YYYY-MM-DD"
+                                                                       size="10" maxlength="10" data-name="조회기간"
+                                                                       autocomplete="off"/>
+                                                            </div>
+                                                            <div class="krds-calendar-area">
+                                                                <div class="calendar-wrap bottom single"
+                                                                     aria-label="달력">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <p style="width:8px; margin:auto">~</p>
+                                                        <div class="calendar-conts">
+                                                            <div class="calendar-input">
+                                                                <input type="text" id="endYmd"
+                                                                       class="krds-input datepicker small cal"
+                                                                       placeholder="YYYY-MM-DD" name="endYmd"
+                                                                       title="조회기간 끝 YYYY-MM-DD" size="10"
+                                                                       maxlength="10" data-name="조회기간"
+                                                                       autocomplete="off"/>
+                                                                <button type="button"
+                                                                        class="krds-btn medium icon form-btn-datepicker 클릭-달력-멀티">
+                                                                    <span class="sr-only">달력 열기</span>
+                                                                    <i class="svg-icon ico-calendar"></i>
+                                                                </button>
+                                                            </div>
+                                                            <div class="krds-calendar-area">
+                                                                <div class="calendar-wrap bottom single"
+                                                                     aria-label="달력">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th class="text-left">
+                                                <label for="itemCn">습득물명</label></th>
+                                            <td>
+                                                <div class="form-group-row form-wd">
+                                                    <div class="form-conts">
+                                                        <div class="input-group">
+                                                            <input type="text" name="itemCn" id="itemCn"
+                                                                   class="krds-input small" placeholder="습득물명을 입력해주세요."
+                                                                   data-name="itemCn"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <th class="text-left">
+                                                <label for="lstaoNm">분실자명</label>
+                                            </th>
+                                            <td>
+                                                <div class="form-group-row small form-wd">
+                                                    <div class="form-conts">
+                                                        <div class="input-group">
+                                                            <input type="text" name="lstaoNm" id="lstaoNm"
+                                                                   class="krds-input small" placeholder="이름을 입력해주세요"
+                                                                   data-name="lstaoNm"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div class="form-group bd-dot stack-form-conts">
+                                    <table style="border-collapse: separate;  border-spacing: 0 12px;">
+                                        <colgroup>
+                                            <col style="width:8%">
+                                            <col style="width:25%">
+                                            <col style="width:8%">
+                                            <col style="width:25%">
+                                            <col style="width:8%">
+                                            <col style="width:25%">
+                                        </colgroup>
+                                        <tbody>
+                                        <tr>
+                                            <th class="text-left">
+                                                <label for="pkupRgnSeCd">습득지역</label>
+                                            </th>
+                                            <td>
+                                                <div class="form-group-row form-wd">
+                                                    <div class="form-conts">
+                                                        <select name="pkupRgnSeCd" class="krds-form-select small"
+                                                                id="pkupRgnSeCd" title="습득지역" data-name="습득지역">
+                                                            <option value="" selected>선택해주세요</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <th class="text-left">
+                                                <label for="sggNm">지역상세</label>
+                                            </th>
+                                            <td>
+                                                <div class="form-group-row small form-wd">
+                                                    <div class="form-conts">
+                                                        <div class="input-group">
+                                                            <input type="text" name="sggNm" id="sggNm"
+                                                                   class="krds-input small" placeholder="예) 강남구, 청양군"
+                                                                   data-name="sggNm"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <th class="text-left">
+                                                <label for="pkupPlcSeCd">습득장소</label>
+                                            </th>
+                                            <td>
+                                                <div class="form-group-row form-wd">
+                                                    <div class="form-conts">
+                                                        <select name="pkupPlcSeCd" class="krds-form-select small"
+                                                                id="pkupPlcSeCd" title="습득장소" data-name="습득장소">
+                                                            <option value="" selected>선택해주세요</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th class="text-left">
+                                                <label for="kpngPlcNm">보관장소</label>
+                                            </th>
+                                            <td>
+                                                <div class="form-group-row small form-wd">
+                                                    <div class="form-conts">
+                                                        <div class="input-group">
+                                                            <input type="text" name="kpngPlcNm" id="kpngPlcNm"
+                                                                   class="krds-input small" placeholder="보관장소를 입력해주세요."
+                                                                   data-name="kpngPlcNm"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <th class="text-left">
+                                                <label for="site">접수구분</label>
+                                            </th>
+                                            <td>
+                                                <div class="form-group-row form-wd">
+                                                    <div class="form-conts">
+                                                        <select name="site" class="krds-form-select small" id="site"
+                                                                title="접수구분" data-name="접수구분">
+                                                            <option value="" selected>선택해주세요</option>
+                                                            <option value='F'>경찰관서</option>
+                                                            <option value='V'>경찰이외의기관(지하철,공항등)</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <th></th>
+                                            <td></td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div class="form-group bd-line stack-form-conts">
+                                    <table style="border-collapse: separate;  border-spacing: 0 12px;">
+                                        <colgroup>
+                                            <col style="width:8%">
+                                            <col style="width:25%">
+                                            <col style="width:8%">
+                                            <col style="width:25%">
+                                            <col style="width:8%">
+                                            <col style="width:25%">
+                                        </colgroup>
+                                        <tbody>
+                                        <tr>
+                                            <th class="text-left">
+                                                <label for="pkupCmdtyMngId">관리번호</label>
+                                            </th>
+                                            <td>
+                                                <div class="form-group-row small form-wd">
+                                                    <div class="form-conts">
+                                                        <div class="input-group">
+                                                            <input type="text" name="pkupCmdtyMngId" id="pkupCmdtyMngId"
+                                                                   class="krds-input small" placeholder="관리 번호를 입력해주세요."
+                                                                   data-name="pkupCmdtyMngId"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <th class="text-left">
+                                                <label for="istrNo">일련번호</label>
+                                            </th>
+                                            <td>
+                                                <div class="form-group-row small form-wd">
+                                                    <div class="form-conts">
+                                                        <div class="input-group">
+                                                            <input type="text" name="istrNo" id="istrNo"
+                                                                   class="krds-input small" placeholder="일련 번호를 입력해주세요."
+                                                                   data-name="istrNo"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <th class="text-left">
+                                                <label for="mdlNo">모델코드</label>
+                                            </th>
+                                            <td>
+                                                <div class="form-group-row small form-wd">
+                                                    <div class="form-conts">
+                                                        <div class="input-group">
+                                                            <input type="text" name="mdlNo" id="mdlNo"
+                                                                   class="krds-input small" placeholder="모델 코드를 입력해주세요."
+                                                                   data-name="mdlNo"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th class="text-left">
+                                                <label for="mblTelnoCn">IMEI</label>
+                                            </th>
+                                            <td>
+                                                <div class="form-group-row small form-wd">
+                                                    <div class="form-conts">
+                                                        <div class="input-group">
+                                                            <input type="text" name="mblTelnoCn" id="mblTelnoCn"
+                                                                   class="krds-input small" placeholder="IMEI를 입력해주세요."
+                                                                   data-name="mblTelnoCn"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <th></th>
+                                            <td></td>
+                                            <th></th>
+                                            <td></td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="page-btn-wrap both m-column btn-sch-wrap">
+                                    <button type="button" id="reset" class="krds-btn small tertiary">초기화</button>
+                                    <button type="button" data-tab="tab01" onclick="fn_gridSearch_4(1)"
+                                            class="krds-btn small primary">검색하기
+                                    </button>
+                                    <!--<button type="button" onclick="test24();" class="krds-btn large secondary">
+                                        정부24API테스트
+                                    </button>-->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- //accordion -->
+
+                <!-- 검색 조건 영역 -->
+                <!--<div class="txt-box searchArea" style="padding: 20px 40px 20px 40px;">
+                  <div class="box-cnt">
+                    <div class="box-sec">
+                      <h3 class="box-tit1">검색 필터</h3>
+                      <div class="form-group bd-dot">
+                        <table style="border-collapse: separate;  border-spacing: 0 12px;">
+                          <colgroup>
+                            <col style="width:8%">
+                            <col style="width:42%">
+                            <col style="width:8%">
+                            <col style="width:42%">
+                          </colgroup>
+                          <tbody>
+                          <tr>
+                            <th class="text-left">
+                              <label for="pkupCmdtyLclsfCd">물품 분류</label>
+                            </th>
+                            <td>
+                              <div class="form-group-row form-wd">
+                                <div class="form-group">
+                                  <div class="form-conts">
+                                    <select name="pkupCmdtyLclsfCd" class="krds-form-select small" id="pkupCmdtyLclsfCd" title="물품 대분류" data-name="대분류">
+                                      <option value="" selected>대분류 선택</option>
+                                    </select>
+                                  </div>
+                                </div>
+                                <div class="form-group">
+                                  <div class="form-conts">
+                                    <select name="pkupCmdtyMclsfCd" class="krds-form-select small" id="pkupCmdtyMclsfCd" title="물품 소분류" data-name="소분류">
+                                      <option value="" selected>소분류 선택</option>
+                                    </select>
+                                  </div>
+                                </div>
+                              </div>
+
+                            </td>
+                            <th class="text-left">
+                              <label for="startYmd">습득일자</label>
+                            </th>
+                            <td>
+                              <div class="form-group-row form-wd">
+                                <div class="calendar-conts">
+                                  <div class="calendar-input">
+                                    <input type="text" class="krds-input datepicker small cal" placeholder="YYYY-MM-DD" id="startYmd" name="startYmd" title="조회기간 시작 YYYY-MM-DD"  size="10" maxlength="10" data-name="조회기간" autocomplete="off" />
+                                  </div>
+                                  <div class="krds-calendar-area">
+                                    <div class="calendar-wrap bottom single" aria-label="달력">
+                                    </div>
+                                  </div>
+                                </div>
+                                <p style="width:8px; margin:auto">~</p>
+                                <div class="calendar-conts">
+                                  <div class="calendar-input">
+                                    <input type="text" id="endYmd" class="krds-input datepicker small cal" placeholder="YYYY-MM-DD" name="endYmd" title="조회기간 끝 YYYY-MM-DD"  size="10" maxlength="10" data-name="조회기간" autocomplete="off" />
+                                    <button type="button" class="krds-btn medium icon form-btn-datepicker 클릭-달력-멀티">
+                                      <span class="sr-only">달력 열기</span>
+                                      <i class="svg-icon ico-calendar"></i>
+                                    </button>
+                                  </div>
+                                  <div class="krds-calendar-area">
+                                    <div class="calendar-wrap bottom single" aria-label="달력">
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                          <tr>
+                            <th class="text-left">
+                              <label for="itemCn">습득물명</label></th>
+                            <td>
+                              <div class="form-group-row form-wd">
+                                <div class="form-conts">
+                                  <div class="input-group">
+                                    <input type="text" name="itemCn" id="itemCn" class="krds-input small" placeholder="습득물명을 입력해주세요." data-name="itemCn" />
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                            <th class="text-left">
+                              <label for="lstaoNm">분실자명</label>
+                            </th>
+                            <td>
+                              <div class="form-group-row small form-wd">
+                                <div class="form-conts">
+                                  <div class="input-group">
+                                    <input type="text" name="lstaoNm" id="lstaoNm" class="krds-input small" placeholder="이름을 입력해주세요" data-name="lstaoNm" />
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <div class="form-group bd-dot">
+                        <table style="border-collapse: separate;  border-spacing: 0 12px;">
+                          <colgroup>
+                            <col style="width:8%">
+                            <col style="width:25%">
+                            <col style="width:8%">
+                            <col style="width:25%">
+                            <col style="width:8%">
+                            <col style="width:25%">
+                          </colgroup>
+                          <tbody>
+                          <tr>
+                            <th class="text-left">
+                              <label for="pkupRgnSeCd">습득지역</label>
+                            </th>
+                            <td>
+                              <div class="form-group-row form-wd">
+                                <div class="form-conts">
+                                  <select name="pkupRgnSeCd" class="krds-form-select small" id="pkupRgnSeCd" title="습득지역" data-name="습득지역">
+                                    <option value="" selected>선택해주세요</option>
+                                  </select>
+                                </div>
+                              </div>
+                            </td>
+                            <th class="text-left">
+                              <label for="sggNm">지역상세</label>
+                            </th>
+                            <td>
+                              <div class="form-group-row small form-wd">
+                                <div class="form-conts">
+                                  <div class="input-group">
+                                    <input type="text" name="sggNm" id="sggNm" class="krds-input small" placeholder="예) 강남구, 청양군" data-name="sggNm" />
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                            <th class="text-left">
+                              <label for="pkupPlcSeCd">습득장소</label>
+                            </th>
+                            <td>
+                              <div class="form-group-row form-wd">
+                                <div class="form-conts">
+                                  <select name="pkupPlcSeCd" class="krds-form-select small" id="pkupPlcSeCd" title="습득장소" data-name="습득장소">
+                                    <option value="" selected>선택해주세요</option>
+                                  </select>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                          <tr>
+                            <th class="text-left">
+                              <label for="kpngPlcNm">보관장소</label>
+                            </th>
+                            <td>
+                              <div class="form-group-row small form-wd">
+                                <div class="form-conts">
+                                  <div class="input-group">
+                                    <input type="text" name="kpngPlcNm" id="kpngPlcNm" class="krds-input small" placeholder="보관장소를 입력해주세요." data-name="kpngPlcNm" />
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                            <th class="text-left">
+                              <label for="site">접수구분</label>
+                            </th>
+                            <td>
+                              <div class="form-group-row form-wd">
+                                <div class="form-conts">
+                                  <select name="site" class="krds-form-select small" id="site" title="접수구분" data-name="접수구분">
+                                    <option value="" selected>선택해주세요</option>
+                                    <option  value='F'>경찰관서</option>
+                                    <option  value='V'>경찰이외의기관(지하철,공항등)</option>
+                                  </select>
+                                </div>
+                              </div>
+                            </td>
+                            <th></th>
+                            <td></td>
+                          </tr>
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <div class="form-group bd-line">
+                        <table style="border-collapse: separate;  border-spacing: 0 12px;">
+                          <colgroup>
+                            <col style="width:8%">
+                            <col style="width:25%">
+                            <col style="width:8%">
+                            <col style="width:25%">
+                            <col style="width:8%">
+                            <col style="width:25%">
+                          </colgroup>
+                          <tbody>
+                          <tr>
+                            <th class="text-left">
+                              <label for="pkupCmdtyMngId">관리번호</label>
+                            </th>
+                            <td>
+                              <div class="form-group-row small form-wd">
+                                <div class="form-conts">
+                                  <div class="input-group">
+                                    <input type="text" name="pkupCmdtyMngId" id="pkupCmdtyMngId" class="krds-input small" placeholder="관리 번호를 입력해주세요." data-name="pkupCmdtyMngId" />
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                            <th class="text-left">
+                              <label for="istrNo">일련번호</label>
+                            </th>
+                            <td>
+                              <div class="form-group-row small form-wd">
+                                <div class="form-conts">
+                                  <div class="input-group">
+                                    <input type="text" name="istrNo" id="istrNo" class="krds-input small" placeholder="일련 번호를 입력해주세요." data-name="istrNo" />
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                            <th class="text-left">
+                              <label for="mdlNo">모델코드</label>
+                            </th>
+                            <td>
+                              <div class="form-group-row small form-wd">
+                                <div class="form-conts">
+                                  <div class="input-group">
+                                    <input type="text" name="mdlNo" id="mdlNo" class="krds-input small" placeholder="모델 코드를 입력해주세요." data-name="mdlNo" />
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                          <tr>
+                            <th class="text-left">
+                              <label for="mblTelnoCn">IMEI</label>
+                            </th>
+                            <td>
+                              <div class="form-group-row small form-wd">
+                                <div class="form-conts">
+                                  <div class="input-group">
+                                    <input type="text" name="mblTelnoCn" id="mblTelnoCn" class="krds-input small" placeholder="IMEI를 입력해주세요." data-name="mblTelnoCn" />
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                            <th></th>
+                            <td></td>
+                            <th></th>
+                            <td></td>
+                          </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div class="page-btn-wrap both m-column btn-sch-wrap">
+                        <button type="button" id="reset" class="krds-btn small tertiary">초기화</button>
+                        <button type="button" data-tab="tab01" onclick="fn_gridSearch_1(1)" class="krds-btn small primary">검색하기</button>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>-->
+                <!-- //검색 조건 영역 -->
+
+            </div>
+            <!-- //검색 조건 영역 -->
+
+            <!-- 검색 결과 영역-->
+            <div class="conts-wrap scroll-check">
+                <!-- 내 사이버범죄 신고 내역 조회 결과 영역 -->
+                <div class="box-cnt">
+                    <!-- 조회 -->
+                    <div class="box-sec type-table">
+                        <div class="title-area">
+                            <h5 class="box-tit3">
+                                총 <span class="text-point-primary" data-tab="tab01" data-name="totCnt">0</span>개의 항목
+                            </h5>
+                            <div class="sortCnt">
+                              <strong class="sort-label"><label for="sortCntSelect">목록 표시 개수</label></strong>
+                              <select class="krds-form-select-sort" id="sortCntSelect">
+                                <option value="10">10개</option>
+                                <option value="30">30개</option>
+                                <option value="50">50개</option>
+                              </select>
+                            </div>
+                        </div>
+
+                        <!-- result list -->
+                        <ul class="krds-structured-list type-line type-full">
+                            <!-- <li class="structured-item col2">
+                              <div class="body-wrap-left">
+                                <img class="list-img" src="/img/error/lostNonImg_2.png" alt="분실물1">
+                              </div>
+                              <div class="body-wrap-right">
+                                <div class="card-title">
+                                  <h4>책, 핸드크림, 틴트, 노트, 책자, 여성용지갑, 가방</h4>
+                                </div>
+                                <div class="card-body">
+                                  <div class="c-line">
+                                    <div class="c-info">
+                                      <strong class="key">분류</strong>
+                                      <span class="value">가방 > 여성용 가방</span>
+                                    </div>
+                                    <div class="c-info">
+                                      <strong class="key">습득 일자</strong>
+                                      <span class="value">2025.05.01</span>
+                                    </div>
+                                  </div>
+                                  <div class="c-line">
+                                    <div class="c-info">
+                                      <strong class="key">습득 장소</strong>
+                                      <span class="value">CU 부산수영성로점</span>
+                                    </div>
+                                    <div class="c-info">
+                                      <strong class="key">보관 장소</strong>
+                                      <span class="value">부산경찰서</span>
+                                    </div>
+                                  </div>
+                                  <div class="c-btn">
+                                    <div class="btn-wrap right">
+                                      <button type="button">
+                                        <span>자세히 보기</span>
+                                        <i class="svg-icon ico-shortcut"></i>
+                                      </button>
+                                      <button onclick="" class="krds-btn medium secondary" title="자료 추가제출">자료 추가제출</button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                            </li> -->
+                        </ul>
+
+                        <!-- pagination -->
+                        <div class="krds-pagination" data-tab="tab01">
+                            <span class="page-navi prev disabled" href="#">이전</span>
+                            <div class="page-links">
+                                <a class="page-link active" href="#">
+                                    <span class="sr-only">현재페이지</span>
+                                    1
+                                </a>
+                            </div>
+                            <span class="page-navi next disabled" href="#">다음</span>
+                        </div>
+                        <!-- pagination -->
+
+                        <!-- //내 신청 내역> 테이블 -->
+                    </div>
+                </div>
+                <!-- //조회 -->
+            </div>
+            <!-- //검색 결과 영역 -->
+
+
+            <!-- 하단 버튼 -->
+            <div class="box-cnt mt4">
+                <div class="box-sec">
+                    <div class="box-btn">
+                        <div class="box-btn__cont gray-bg">
+                            <div class="box-btn__header">
+                                <h3>습득물 처리절차</h3>
+                                <p>습득물 목록에서 잃어버린 물건을 찾았다면 습득물 처리 절차를 확인해주세요.</p>
+                            </div>
+                            <a href="/cvlcpt/cvlcptGdInfo.do?cvlcptId=MW-201&tab=2" class="krds-btn large pure primary"
+                               title="습득물 처리절차 페이지 이동">
+                                처리절차 보기
+                            </a>
+                        </div>
+                        <div class="box-btn__cont gray-bg">
+                            <div class="box-btn__header">
+                                <h3>분실물 신고</h3>
+                                <p>내가 잃어버린 물건을 습득물 목록에서 찾을수 없다면 분실물 신고를 해주세요.</p>
+                            </div>
+                            <a href="/cvlcpt/cvlcptAply.do?cvlcptId=MW-001" class="krds-btn large pure primary"
+                               title="분실물 신고 페이지 이동">
+                                신고하기
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="box-sec mt3">
+                    <h3 class="sec-tit">다른 서비스를 찾고 계신가요?</h3>
+                    <div class="box-btn">
+                        <div class="box-btn__cont white-bg">
+                            <div class="box-btn__header">
+                                <h3>습득 휴대폰 검색</h3>
+                                <p>분실빈도가 높은 휴대폰을 별도로 분리해 보다 쉽게 찾을수 있도록 제공합니다.</p>
+                            </div>
+                            <a href="/cvlcpt/cvlcptGdInfo.do?cvlcptId=MW-203" class="krds-btn large secondary primary"
+                               title="습득 휴대폰 검색 페이지 이동">
+                                서비스로 이동 <i class="svg-icon ico-angle right"></i>
+                            </a>
+                        </div>
+                        <div class="box-btn__cont white-bg">
+                            <div class="box-btn__header">
+                                <h3>분실물 검색</h3>
+                                <p>분실자들이 자신의 분실물을 신고한 내역을 확인할 수 있습니다.</p>
+                            </div>
+                            <a href="/cvlcpt/cvlcptGdInfo.do?cvlcptId=MW-202" class="krds-btn large secondary primary"
+                               title="분실물 검색 페이지 이동">
+                                서비스로 이동 <i class="svg-icon ico-angle right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- //하단 버튼 -->
+
+
+        </div>
+
+        <!-- // 내부 컨텐츠 -->
+    </div>
+</div>
+<style>
+    .ico-shortcut {
+        -webkit-mask-repeat: no-repeat;
+        -webkit-mask-position: center center;
+        -webkit-mask-size: contain;
+        mask-repeat: no-repeat;
+        mask-position: center center;
+        mask-size: contain;
+        -webkit-mask-image: url(/img/icon/btn-shortcut.svg);
+        mask-image: url(/img/icon/btn-shortcut.svg);
+    }
+
+    .detail-btn-wrap button {
+        display: flex;
+        gap: 2rem;
+    }
+
+    .text-left {
+        text-align: left;
+    }
+
+    .swiper-nav-wrap {
+        display: flex;
+        margin-top: 2rem;
+    }
+
+    .swiper-item-tit {
+        white-space: nowrap; /* 줄바꿈 없이 한 줄로 */
+        overflow: hidden; /* 넘치는 부분 감춤 */
+        text-overflow: ellipsis; /* ...으로 표기 */
+        margin-bottom: 0 !important;
+    }
+
+    .swiper-txt-box {
+        padding: 20px;
+        gap: 1rem !important;
+    }
+
+    .swiper-txt-box img {
+        margin-bottom: 1.5rem !important;
+    }
+
+    .krds-table-wrap {
+        padding-bottom: 1rem;
+        border-bottom: 0.1rem solid #8a949e;
+    }
+
+    .swiper {
+        width: 100%;
+    }
+
+    /* 버튼 래퍼로 감싸기 추천 */
+    .swiper-nav-group {
+        padding-right: 0.4rem;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 8px;
+        z-index: 10;
+    }
+
+    .swiper-button-next,
+    .swiper-button-prev {
+        position: static !important;
+        /* 원하는 크기/색상 등도 커스텀 가능 */
+    }
+
+    .form-group.bd-dot {
+        border-bottom: 0.2rem dotted #cccccc;
+    }
+
+    .form-group.bd-line {
+        border-bottom: 0.1rem solid #000;
+    }
+
+    .btn-sch-wrap {
+        display: flex;
+        justify-content: center !important;
+        margin: auto;
+        padding-top: 10px;
+    }
+
+    .form-group.small, .form-group-row.small.form-wd {
+        width: auto;
+    }
+
+    td .form-group-row {
+        display: flex
+    }
+
+    .form-wd {
+        gap: 2rem;
+        margin-right: 3rem;
+    }
+
+    .form-wd .krds-form-select.small {
+        width: 100%;
+    }
+
+    /* 하단 분실물 카드리스트 스타일 */
+    .box-sec.type-table .title-area {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+
+    .structured-item.col2 {
+        flex-direction: column;
+    }
+
+    .body-wrap-right {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .body-wrap-right h4 {
+        font-size: 2rem;
+    }
+
+    .krds-structured-list .structured-item.col2 .c-btn {
+        margin-left: auto;
+    }
+
+    .krds-structured-list.type-line .card-body .c-info {
+        flex-wrap: nowrap;
+    }
+
+    .body-wrap-left .list-img {
+        max-width: 150px
+    }
+
+    .body-wrap-right .c-line {
+        width: 40%;
+    }
+
+    .body-wrap-right .c-line .c-info {
+        width: 100% !important;
+    }
+
+    .c-btn {
+        height: 100%;
+        display: flex;
+        align-items: flex-end;
+        justify-content: flex-end;
+    }
+
+    .btn-wrap.right button {
+        gap: 1rem;
+        display: flex;
+    }
+
+</style>
+<script>
+    const swiper = new Swiper('.swiper', {
+        // Optional parameters
+        //direction: 'vertical',
+        slidesPerView: 1,
+        slidesPerGroup: 1,
+        spaceBetween: 8,
+        breakpoints: {
+            // 480px 이하에서는 아래 설정으로 변경
+            480: {
+                slidesPerView: 2,
+                spaceBetween: 12,
+            },
+            // 768px 이하에서는 아래 설정으로 변경
+            768: {
+                slidesPerView: 4,
+                spaceBetween: 15,
+                // ... 다른 속성도 지정 가능
+            },
+
+        },
+        autoHeight: false,
+        loop: false,
+
+        // If we need pagination
+        pagination: {
+            el: '.swiper-pagination',
+            clickable: true             // 클릭 시 해당 슬라이드로 이동
+        },
+
+        // Navigation arrows
+        navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+        },
+    });
+
+
+    // 습득물 검색 > 습득물 처리절차
+    (function () {
+        function getTabParam() {
+            const params = new URLSearchParams(location.search);
+            const v = params.get('tab');
+            if (!v) return null;
+            if (v === '2') return 'tab02';
+            if (/^tab0?2$/i.test(v)) return 'tab02';
+            return null;
+        }
+
+        const SELECTORS = [
+            '[role="tab"][aria-controls="tabpanel02"] > .btn-tab',
+            '[role="tab"][aria-controls="tabpanel02"] > button',
+            // data-tab으로 가리키는 구조
+            '[data-tab="tab02"] > .btn-tab',
+            '[data-tab="tab02"] > button',
+            '.btn-tab[aria-controls="tabpanel02"]',
+            'button[aria-controls="tabpanel02"]'
+        ];
+
+        function findTabButton() {
+            for (const sel of SELECTORS) {
+                const el = document.querySelector(sel);
+                if (el) return el;
+            }
+            return null;
+        }
+
+        function smartClick(el) {
+            try {
+                el.dispatchEvent(new MouseEvent('pointerdown', {bubbles: true}));
+                el.dispatchEvent(new MouseEvent('mousedown', {bubbles: true}));
+                el.dispatchEvent(new MouseEvent('mouseup', {bubbles: true}));
+                el.click();
+            } catch {
+                el.click();
+            }
+        }
+
+        function fallbackActivate() {
+            const tabLi =
+                document.querySelector('[role="tab"][aria-controls="tabpanel02"]')
+                || document.querySelector('[data-tab="tab02"]');
+
+            const panel = document.getElementById('tabpanel02');
+
+            if (!tabLi || !panel) return false;
+
+            document.querySelectorAll('[role="tab"]').forEach(t => t.setAttribute('aria-selected', 'false'));
+            document.querySelectorAll('[role="tabpanel"]').forEach(p => {
+
+                p.hidden = true;
+            });
+
+            tabLi.setAttribute('aria-selected', 'true');
+            const btn = tabLi.querySelector('.btn-tab, button');
+            if (btn) btn.classList.add('is-active');
+            panel.hidden = false;
+
+            return true;
+        }
+
+        function tryActivate(maxWaitMs = 6000) {
+            const start = performance.now();
+
+            return new Promise((resolve) => {
+                const tick = () => {
+                    const btn = findTabButton();
+                    if (btn) {
+                        requestAnimationFrame(() => {
+                            try {
+                                smartClick(btn);
+                                resolve(true);
+                            } catch {
+                                resolve(fallbackActivate());
+                            }
+                        });
+                        return;
+                    }
+                    if (performance.now() - start >= maxWaitMs) {
+                        resolve(fallbackActivate());
+                        return;
+                    }
+                    setTimeout(tick, 100);
+                };
+                tick();
+            });
+        }
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            const wanted = getTabParam();
+            if (wanted !== 'tab02') return;
+            await tryActivate();
+        });
+    })();
+
+
+</script>
+
+<script src="/js/biz/LostFindList.js?v=20260609_2"></script>
+
+        </div>
+      <!-- //inner 영역 -->
+    </div>
+    <!-- //컨테이너 -->
+
+    <div id="rStep5" class="hide">
+        
+    </div>
+    <div id="homeAddr" class="hide">
+        
+    </div>
+    <div id="homeDaddr" class="hide">
+        
+    </div>
+
+    <script id="jsonData" type="application/json">
+      {"svcTypeCd":"SVC_04","svcTypeNm":"조회하기","favYn":null,"cvlaFmNm":null,"cvlaFmTp":null,"fileNm":null,"filePth":null,"cvlcptId":"MW-201","cvlcptNm":"습득물 검색","verNo":null,"cvlcptTypeCd":null,"cvlcptCnvyTypeCd":null,"useYn":null,"sysKndSeCd":null,"jrsdDeptCd":"DEPT_005","jrsdDeptNm":"범죄예방","taskPicAltmntNo":"CDF_02","taskPicAltmntNm":"경찰서","aplyPsbltyYn":"Y","issuYn":"N","sprtYn":"Y","prcsYmd":null,"lmtDayCnt":null,"cvlprAlrmRcptYn":"N","alrmYn":"N","alrmRcptnYn":"N","cvlprAlrmSmsYn":"N","cvlprAlrmEmlYn":"N","rcptYn":"N","altmntYn":"N","picYn":"N","alrmPicSmsTtl":"N","alrmPicEmlTtl":"N","feePayYn":"N","fee":null,"linkMthSeCd":null,"expsrYn":"Y","prgrmSn":null,"menuSn":null,"psbltyYn":"N","cvlcptYn":"N","creatrSn":null,"crtDt":null,"crtPrgrmId":null,"crtTrxtId":null,"mdfrSn":null,"mdfcnDt":null,"mdfcnPrgrmId":null,"mdfcnTrxtId":null,"orcgCrtfNeedYn":"N","prcsCn":null,"userSeCd":null,"userSeNm":null,"cvlcptSeq":280,"linkSysNm":"LOST","statsAplySeCd":"CDF_00","sttyCvlcptYn":"Y","moblUseYn":"Y","crtfRegYn":"N","uuid":null,"cvlcptAplySn":null,"crtrCn":null,"refDataCn":null,"artclExpln":null,"aplyMthdCn":null,"expndCn":null,"cvlcptAplyCn":null,"rqdocCn":null,"tmpltCn":null,"aplcntQlfcCn":null,"gdMttr":null,"infoCn":null,"bssSttCn":null,"systCn":null,"cvlcptDtlCn":null,"reportId":null,"consulId":null,"tpofId":null,"cvlcptTpcSn":null,"cvlcptTpcCd":null,"thmCd":null,"thmNm":null,"drvLcnsDspsObjtRqstId":null,"rqstName":null,"rqstRrno":null,"rqstAddr":null,"rqstTelnoNo":null,"lclPoliceAg":null,"clss":null,"no":null,"objtRqstRsn":null,"chrgp1Nm":null,"chrgp2Nm":null,"chrgp1Telno":null,"chrgp2Telno":null,"beforeDate":null,"wbCode":null,"flNm":null,"flPthNm":null,"flPthNm1":null,"flNm1":null,"flPthNm2":null,"flNm2":null,"flPthNm3":null,"flNm3":null}
+    </script>
+
+    <script>
+      const crimPrvntUpdateParam = null;
+      const eduState = null;
+    </script>
+
+    <script>
+        const ecrmData = JSON.parse("" || "null");
+    </script>
+
+    <script>
+      window.addEventListener('load', function() {
+        if (Cvlcpt && Cvlcpt.cvlcptNm) {
+            document.title = Cvlcpt.cvlcptNm + ' | ' + Cvlcpt.svcTypeNm;
+        }
+      });
+
+    </script>
+    <script src="/js/component/cvlcptForm.js"></script>
+    <!-- footer 영역 -->
+    
+
+
+
+<!-- 운영일떄만 WEBLOG 적용 -->
+
+
+<!-- 푸터 영역 -->
+<footer id="krds-footer">
+    <div class="foot-quick">
+        <div class="inner">
+            <button type="button" class="link open-modal" title="경찰청/부속기관 레이어" data-target="popFootLink1">경찰청/부속기관</button>
+            <button type="button" class="link open-modal" title="업무관련사이트 레이어" data-target="popFootLink2">업무관련사이트</button>
+        </div>
+    </div>
+    <!-- //foot-quick -->
+    <!-- inner -->
+    <div class="inner">
+        <div class="f-cnt-logo">
+            <div class="f-logo">
+                <span class="sr-only">경찰민원24</span>
+            </div>
+            <div class="f-web">
+                <a title="새창" href="http://www.wa.or.kr/board/list.asp?BoardID=0006" target="_blank">
+                    <img class="wa" style="height:4.8rem" alt="(사)한국장애인단체총연합회􀀁 한국정보접근성인증평가원 웹 접근성 우수사이트 인증마크(WA인증마크)" src="/images/logo-web.png"/>
+                </a>
+            </div>
+        </div>
+        <div class="f-cnt">
+            <div class="f-info">
+                <p class="info-addr">(03739) 서울특별시 서대문구 통일로 97</p>
+                <ul class="info-cs">
+                    <li>
+                        <strong class="key-info">
+                            대표전화
+                            <span>182</span>
+                        </strong>
+                        <span class="more-info">(유료, 평일 09시-18시)</span>
+                    </li>
+                    <li>
+                        <strong class="key-info">
+                            해외이용
+                            <span>+82-182</span>
+                        </strong>
+                        <span class="more-info">(유료, 평일 09시-18시)</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="f-link">
+                <div class="link-go">
+                    <a href="/custServiceCenter/siteUtztnGdInfo.do" class="krds-btn text flex">
+                        이용안내
+                        <i class="svg-icon ico-angle right"></i>
+                    </a>
+                    <a href="/custServiceCenter/polGvmnfcList.do" class="krds-btn text flex">
+                        찾아오시는 길
+                        <i class="svg-icon ico-angle right"></i>
+                    </a>
+                </div>
+                <!-- <div class="link-sns">
+                    <a href="javascript:;" class="krds-btn xlarge icon border" target="_blank" title="새 창 열기">
+                        <span class="sr-only">인스타그램</span>
+                        <i class="svg-icon ico-instagram"></i>
+                    </a>
+                    <a href="javascript:;" class="krds-btn xlarge icon border" target="_blank" title="새 창 열기">
+                        <span class="sr-only">유튜브</span>
+                        <i class="svg-icon ico-youtube"></i>
+                    </a>
+                    <a href="javascript:;" class="krds-btn xlarge icon border" target="_blank" title="새 창 열기">
+                        <span class="sr-only">X</span>
+                        <i class="svg-icon ico-sns-x"></i>
+                    </a>
+                    <a href="javascript:;" class="krds-btn xlarge icon border" target="_blank" title="새 창 열기">
+                        <span class="sr-only">페이스북</span>
+                        <i class="svg-icon ico-facebook"></i>
+                    </a>
+                    <a href="javascript:;" class="krds-btn xlarge icon border" target="_blank" title="새 창 열기">
+                        <span class="sr-only">블로그</span>
+                        <i class="svg-icon ico-blog"></i>
+                    </a>
+                </div> -->
+            </div>
+        </div>
+        <div class="f-btm">
+            <div class="f-btm-text">
+                <div class="f-menu">
+                    <a href="/custServiceCenter/siteUtztnGdInfo.do" class="krds-btn small text">이용안내</a>
+                    <a href="/custServiceCenter/operPlcyInfo.do?tab=2" class="krds-btn small text footer-text-point">개인정보처리방침</a>
+                    <a href="/custServiceCenter/operPlcyInfo.do" class="krds-btn small text">저작권 정책</a>
+                    <p style="color: transparent" aria-hidden="true">#03</p>
+                    <!-- <a href="javascript:;" class="krds-btn small text">웹 접근성 품질인증 마크 획득</a> -->
+                </div>
+                <p class="f-copy">© 2025 Korean National Police Agency All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+</footer>
+<!-- //푸터 영역 -->
+</div>
+
+<!-- modal-wrap -->
+<div class="modal-wrap">
+    <!-- 푸터 모달 : 소속기관 링크 1 -->
+    <!-- 경찰청/부속기관 -->
+    <section id="popFootLink1" class="krds-modal fade popFootLink" data-type="full" aria-labelledby="tit_foot_link1">
+        <!-- modal-dialog -->
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- modal title -->
+                <div class="modal-header">
+                    <h2 id="tit_foot_link1" class="modal-title">경찰청/부속기관</h2>
+                </div>
+                <!-- //modal title -->
+                <!-- modal contents -->
+                <div class="modal-conts">
+                    <!-- 관련기관 링크 -->
+                    <ul class="pop-foot-links">
+                        <li><a href="http://www.smpa.go.kr/" target="_blank" title="새창 - 서울특별시경찰청">서울특별시경찰청</a></li>
+                        <li><a href="http://www.bspolice.go.kr/" target="_blank" title="새창 - 부산광역시경찰청">부산광역시경찰청</a></li>
+                        <li><a href="http://www.dgpolice.go.kr/" target="_blank" title="새창 - 대구광역시경찰청">대구광역시경찰청</a></li>
+                        <li><a href="http://www.icpolice.go.kr/" target="_blank" title="새창 - 인천광역시경찰청">인천광역시경찰청</a></li>
+                        <li><a href="http://www.gjpolice.go.kr/" target="_blank" title="새창 - 광주광역시경찰청">광주광역시경찰청</a></li>
+                        <li><a href="http://www.djpolice.go.kr/" target="_blank" title="새창 - 대전광역시경찰청">대전광역시경찰청</a></li>
+                        <li><a href="http://www.uspolice.go.kr/" target="_blank" title="새창 - 울산광역시경찰청">울산광역시경찰청</a></li>
+                        <li><a href="http://www.sjpolice.go.kr/" target="_blank" title="새창 - 세종특별자치시경찰청">세종특별자치시경찰청</a></li>
+                        <li><a href="http://www.ggpolice.go.kr/" target="_blank" title="새창 - 경기남부경찰청">경기남부경찰청</a></li>
+                        <li><a href="http://www.ggbpolice.go.kr/" target="_blank" title="새창 - 경기남부경찰청">경기북부경찰청</a></li>
+                        <li><a href="http://www.gwpolice.go.kr/" target="_blank" title="새창 - 강원특별자치도경찰청">강원특별자치도경찰청</a></li>
+                        <li><a href="http://www.cbpolice.go.kr/" target="_blank" title="새창 - 강원특별자치도경찰청">충청북도경찰청</a></li>
+                        <li><a href="http://www.cnpolice.go.kr/" target="_blank" title="새창 - 충청남도경찰청">충청남도경찰청</a></li>
+                        <li><a href="http://www.jbpolice.go.kr/" target="_blank" title="새창 - 전북특별자치도경찰청">전북특별자치도경찰청</a></li>
+                        <li><a href="http://www.jnpolice.go.kr/" target="_blank" title="새창 - 전라남도경찰청">전라남도경찰청</a></li>
+                        <li><a href="http://www.gbpolice.go.kr/" target="_blank" title="새창 - 경상북도경찰청">경상북도경찰청</a></li>
+                        <li><a href="http://www.gnpolice.go.kr/" target="_blank" title="새창 - 경상남도경찰청">경상남도경찰청</a></li>
+                        <li><a href="http://www.jjpolice.go.kr/" target="_blank" title="새창 - 제주특별자치도경찰청">제주특별자치도경찰청</a></li>
+                        <li><a href="http://www.police.ac.kr/" target="_blank" title="새창 - 경찰대학">경찰대학</a></li>
+                        <li><a href="http://www.cpa.go.kr/" target="_blank" title="새창 - 중앙경찰학교">중앙경찰학교</a></li>
+                        <li><a href="http://www.kpia.go.kr/" target="_blank" title="새창 - 경찰수사연수원">경찰수사연수원</a></li>
+                        <li><a href="http://www.koroad.or.kr/" target="_blank" title="새창 - 도로교통공단">도로교통공단</a></li>
+                        <li><a href="http://www.nph.go.kr/" target="_blank" title="새창 - 경찰병원">경찰병원</a></li>
+                        <li><a href="http://phrdi.go.kr/" target="_blank" title="새창 - 경찰인재개발원">경찰인재개발원</a></li>
+                    </ul>
+                    <!-- //관련기관 링크 -->
+                </div>
+                <!-- //modal contents -->
+                <!-- close button -->
+                <button type="button" class="krds-btn xlarge icon btn-close close-modal">
+                    <span class="sr-only">닫기</span>
+                    <i class="svg-icon ico-popup-close"></i>
+                </button>
+                <!-- //close button -->
+            </div>
+        </div>
+        <!-- //modal-dialog -->
+        <div class="modal-back"></div>
+    </section>
+    <!-- //푸터 모달 : 소속기관 링크 1 -->
+
+    <!-- 푸터 모달 : 소속기관 링크 2 -->
+    <!-- 업무관련사이트 -->
+    <section id="popFootLink2" class="krds-modal fade popFootLink" data-type="full" aria-labelledby="tit_foot_link2">
+        <!-- modal-dialog -->
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- modal title -->
+                <div class="modal-header">
+                    <h2 id="tit_foot_link2" class="modal-title">업무관련사이트</h2>
+                </div>
+                <!-- //modal title -->
+                <!-- modal contents -->
+                <div class="modal-conts">
+                    <!-- 관련기관 링크 -->
+                    <ul class="pop-foot-links">
+                        <li>
+                            <a href="http://www.police.go.kr/" target="_blank" title="새창 - 경찰청">경찰청</a>
+                        </li>
+                        <li><a href="https://www.police.go.kr/cmit/index.do" target="_blank" title="새창 - 국가경찰위원회">국가경찰위원회</a></li>
+                        <li><a href="http://cyberbureau.police.go.kr/" target="_blank" title="새창 - 사이버안전국">사이버안전국</a></li>
+                        <li><a href="http://www.kcsi.go.kr/" target="_blank" title="새창 - 경찰과학수사">경찰과학수사</a></li>
+                        <li><a href="http://www.knpgun.go.kr/" target="_blank" title="새창 - 총포화약안전관리시스템">총포화약안전관리시스템</a></li>
+                        <li><a href="http://www.moleg.go.kr/" target="_blank" title="새창 - 법제처">법제처</a></li>
+                        <li><a href="https://www.lost112.go.kr/" target="_blank" title="새창 - LOST112">LOST112</a></li>
+                        <li><a href="http://www.safe182.go.kr/" target="_blank" title="새창 - 안전 Dream">안전 Dream</a></li>
+                        <li><a href="https://www.gov.kr/" target="_blank" title="새창 - 정부24">정부24</a></li>
+                        <li><a href="http://www.koroad.or.kr/" target="_blank" title="새창 - 도로교통공단">도로교통공단</a></li>
+                        <li><a href="http://crims.police.go.kr/" target="_blank" title="새창 - 범죄경력회보서발급시스템">범죄경력회보서발급시스템</a></li>
+                        <li><a href="https://www.counterscam112.go.kr/" target="_blank" title="새창 - 전기통신금융사기 통합대응단">전기통신금융사기 통합대응단</a></li>
+                    </ul>
+                    <!-- //관련기관 링크 -->
+                </div>
+                <!-- //modal contents -->
+                <!-- close button -->
+                <button type="button" class="krds-btn xlarge icon btn-close close-modal">
+                    <span class="sr-only">닫기</span>
+                    <i class="svg-icon ico-popup-close"></i>
+                </button>
+                <!-- //close button -->
+            </div>
+        </div>
+        <!-- //modal-dialog -->
+        <div class="modal-back"></div>
+    </section>
+    <!-- //푸터 모달 : 소속기관 링크 2 -->
+
+    
+
+    <div id="popTotalSch" class="krds-modal fade" data-type="full" aria-labelledby="tit_total_sch" role="dialog">
+        <!-- modal-dialog -->
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- modal title -->
+                <div class="modal-header sr-only">
+                    <h2 id="tit_total_sch_type1" class="modal-title">통합검색</h2>
+                </div>
+                <!-- //modal title -->
+                <!-- modal contents -->
+                <div class="modal-conts" style="margin:auto; padding:0">
+                    <!-- 통합검색 -->
+                    <div class="pop-total-serch-wrap">
+                        <!-- 통합검색 정보입력 영역 -->
+                        <div class="search-total-top">
+                            <!-- 검색어 타이틀 -->
+                            <div class="search-tit">
+                                <label for="search-total-input-id">다양한 경찰민원 서비스, 이제 한 곳에서 찾아보세요</label>
+                                
+                            </div>
+                            <!-- //검색어 타이틀 -->
+
+                            <!-- 검색어 입력 폼 -->
+                            <div class="sch-form-wrap vert">
+                                <div class="sch-input">
+                                    <input type="text" class="krds-input xlarge" id="search-total-input-id" placeholder="검색어를 입력해 주세요." value="">
+                                    <button type="button" class="krds-btn icon xlarge ico-search" onclick="totalSearch()">
+                                        <span class="sr-only">검색</span>
+                                        <i class="svg-icon ico-sch"></i>
+                                    </button>
+                                </div>
+                                
+                            </div>
+                            <!-- //검색어 입력 폼 -->
+                        </div>
+                        <!-- //통합검색 정보입력 영역 -->
+
+                        <!-- 검색어 리스트 -->
+                        <div class="search-text">
+                            <!-- 검색어 입력 후 -->
+                            <ul class="sch-info-list">
+                                <li class="sch-info-item word-popular">
+                                    <h3 class="tit">자주 찾는 서비스</h3>
+                                    <ol class="list">
+                                        <li>
+                                            <span class="ranking-txt">안전보건교육</span>
+                                            <span class="ranking-state"></span>
+                                            
+                                        </li>
+                                        <li>
+                                            <span class="ranking-txt">산업재해조사표</span>
+                                            <span class="ranking-state"></span>
+                                        </li>
+                                        <li>
+                                            <span class="ranking-txt">퇴직금계산기</span>
+                                            <span class="ranking-state">
+                                        </span>
+                                        </li>
+                                        <li>
+                                            <span class="ranking-txt">육아휴직급여</span>
+                                            <span class="ranking-state"></span>
+                                        </li>
+                                        <li>
+                                            <span class="ranking-txt">실업인정신청</span>
+                                            <span class="ranking-state"></span>
+                                        </li>
+                                        <li>
+                                            <span class="ranking-txt">국민내일배움</span>
+                                            <span class="ranking-state"></span>
+                                        </li>
+                                        <li>
+                                            <span class="ranking-txt">노사협의회</span>
+                                            <span class="ranking-state"></span>
+                                        </li>
+                                        <li>
+                                            <span class="ranking-txt">산업안전보건</span>
+                                            <span class="ranking-state"></span>
+                                        </li>
+                                        <li>
+                                            <span class="ranking-txt">국민내일배움카드신청</span>
+                                            <span class="ranking-state"></span>
+                                        </li>
+                                        <li>
+                                            <span class="ranking-txt">안전보건교육</span>
+                                            <span class="ranking-state"></span>
+                                        </li>
+                                    </ol>
+                                </li>
+                                <li class="sch-info-item word-lately">
+                                    <h3 class="tit">최근검색어</h3>
+                                    <ul class="list" aria-live="polite">
+                                    </ul>
+                                    <button type="button" class="krds-btn medium text" onClick="removeAll()">
+                                        최근검색어 전체 삭제
+                                        <i class="svg-icon ico-delete-fill"></i>
+                                    </button>
+                                </li>
+                            </ul>
+                            <!-- //검색어 입력 후 -->
+                        </div>
+                        <!-- //검색어 리스트 -->
+                    </div>
+                    <!-- //통합검색 -->
+                </div>
+                <!-- //modal contents -->
+                <!-- close button -->
+                <button type="button" class="krds-btn xlarge icon btn-close close-modal">
+                    <span class="sr-only">닫기</span>
+                    <i class="svg-icon ico-popup-close"></i>
+                </button>
+                <!-- //close button -->
+            </div>
+        </div>
+        <!-- //modal-dialog -->
+        <div class="modal-back in"></div>
+    </div>
+
+      
+
+<section id="modal_adjust_display" class="krds-modal fade" aria-labelledby="tit_modal_adjust_display" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <!-- modal title -->
+      <div class="modal-header">
+        <h2 id="tit_modal_adjust_display" class="modal-title">글자·화면 표시 설정</h2>
+      </div>
+      <!-- //modal title -->
+      <!-- modal contents -->
+      <div class="modal-conts">
+        <div class="conts-area">
+          <!-- adjust_display -->
+          <div class="adjust_display">
+            <!-- 글자 / 화면 표시 설정 -->
+            <div class="fieldset adjust_scale">
+              <div class="form-group scale-options">
+                <h3>글자·화면 표시 설정</h3>
+                <div class="form-conts">
+                  <div class="krds-check-area chk-column">
+                    <div class="krds-form-check">
+                      <input type="radio" name="scale_level" id="scale_level_small" value="small" checked="" />
+                      <label for="scale_level_small">작게</label>
+                    </div>
+                    <div class="krds-form-check">
+                      <input type="radio" name="scale_level" id="scale_level_medium" value="medium" />
+                      <label for="scale_level_medium">보통</label>
+                    </div>
+                    <div class="krds-form-check">
+                      <input type="radio" name="scale_level" id="scale_level_large" value="large" />
+                      <label for="scale_level_large">조금 크게</label>
+                    </div>
+                    <div class="krds-form-check">
+                      <input type="radio" name="scale_level" id="scale_level_xlarge" value="xlarge" />
+                      <label for="scale_level_xlarge">크게</label>
+                    </div>
+                    <div class="krds-form-check">
+                      <input type="radio" name="scale_level" id="scale_level_xxlarge" value="xxlarge" />
+                      <label for="scale_level_xxlarge">가장 크게</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- 화면 표시 모드 -->
+            <div class="fieldset">
+              <div class="form-group view-mode-options">
+                <h3>화면 표시 모드</h3>
+                <div class="form-conts">
+                  <div class="krds-check-area chk-column">
+                    <div class="krds-form-check view-mode-light">
+                      <input type="radio" name="view_mode" id="view_mode_light" value="light" checked="" />
+                      <label for="view_mode_light">기본 (밝은 배경)</label>
+                    </div>
+                    <div class="krds-form-check view-mode-dark">
+                      <input type="radio" name="view_mode" id="view_mode_dark" value="high-contrast" />
+                      <label for="view_mode_dark">선명하게 (어두운 배경)</label>
+                    </div>
+                    <div class="krds-form-check view-mode-default">
+                      <input type="radio" name="view_mode" id="view_mode_default" value="theme" />
+                      <label for="view_mode_default">시스템 설정</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- //adjust_display -->
+        </div>
+      </div>
+      <!-- //modal contents -->
+      <!-- modal btn -->
+      <div class="modal-btn btn-wrap">
+        <button type="button" class="krds-btn medium tertiary close-modal" id="reset_display">초기화</button>
+        <button type="button" class="krds-btn medium primary close-modal">닫기</button>
+      </div>
+      <!-- //modal btn -->
+      <!-- close button -->
+      <button type="button" class="krds-btn medium icon btn-close close-modal">
+        <span class="sr-only">닫기</span>
+        <i class="svg-icon ico-popup-close"></i>
+      </button>
+      <!-- //close button -->
+    </div>
+  </div>
+  <div class="modal-back in" style="background-color: transparent;"></div>
+</section>
+
+</div>
+<!-- //modal-wrap -->
+
+
+<section id="popFilterId" class="krds-modal fade" data-type="bottom-sheet" role="dialog">
+    <!-- modal-dialog -->
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- modal title -->
+            <div class="modal-header">
+                <h2 class="modal-title">검색필터</h2>
+            </div>
+            <!-- //modal title -->
+            <!-- modal contents -->
+            <div class="modal-conts" tabindex="0">
+                <div class="pop-filter-top">
+                    <!-- 적용된 필터가 없을 경우 노출 -->
+                    <p class="filter-txt">적용된 필터가 없습니다.<br>검색 필터를 통해 상세한 검색을 해보세요</p>
+                    <!-- //적용된 필터가 없을 경우 노출 -->
+                </div>
+
+                <ul class="filter-list is-open krds-accordion type-line" data-type="multiOpen">
+                    <li class="li accordion-item active">
+                        <h3 class="accordion-header">
+                            <button type="button" class="btn-accordion active" aria-expanded="true" id="accordionHeader-id-5pcpye74" aria-controls="accordionCollapse-id-5pcpye74">
+                                <span class="tit">검색대상<span class="krds-badge bg-primary number">4</span></span>
+                            </button>
+                        </h3>
+                        <div class="accordion-collapse collapse" role="region" id="accordionCollapse-id-5pcpye74" aria-labelledby="accordionHeader-id-5pcpye74">
+                            <div class="accordion-body">
+                                <div class="row krds-check-area chk-column">
+                                    <div class="krds-form-check">
+                                        <input type="checkbox" id="filter-target_chk_1">
+                                        <label for="filter-target_chk_1">메뉴 (2)</label>
+                                    </div>
+                                    <div class="krds-form-check">
+                                        <input type="checkbox" id="filter-target_chk_2" checked="">
+                                        <label for="filter-target_chk_2">뉴스 (2,301)</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="li accordion-item active">
+                        <h3 class="accordion-header">
+                            <button type="button" class="btn-accordion active" aria-expanded="true" id="accordionHeader-id-64s68kda" aria-controls="accordionCollapse-id-64s68kda">
+                                <span class="tit">검색 기간</span>
+                            </button>
+                        </h3>
+                        <div class="accordion-collapse collapse" role="region" id="accordionCollapse-id-64s68kda" aria-labelledby="accordionHeader-id-64s68kda">
+                            <div class="accordion-body">
+                                <!-- 날짜 기간 선택 -->
+                                <div class="form-group">
+                                    <div class="chip-wrap">
+                                        <div class="krds-form-chip sm">
+                                            <input type="radio" class="radio" name="rdo_chip_date" id="rdo_chip_date1a">
+                                            <label class="krds-form-chip-outline" for="rdo_chip_date1a">1개월</label>
+                                        </div>
+                                        <div class="krds-form-chip sm">
+                                            <input type="radio" class="radio" name="rdo_chip_date" id="rdo_chip_date1b">
+                                            <label class="krds-form-chip-outline" for="rdo_chip_date1b">3개월</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="form-conts calendar-conts">
+                                        <ul class="input-group range">
+                                            <li>
+                                                <label for="datepicker1" class="form-tit">시작날짜</label>
+                                                <input type="number" class="krds-input datepicker medium" id="datepicker1" placeholder="">
+                                            </li>
+                                            <li class="mark sm">-</li>
+                                            <li>
+                                                <label for="datepicker2" class="form-tit">종료날짜</label>
+                                                <input type="number" class="krds-input datepicker medium" id="datepicker2" placeholder="">
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <!-- //날짜 기간 선택 -->
+                            </div>
+                        </div>
+                    </li>
+                    <li class="li accordion-item active">
+                        <h3 class="accordion-header">
+                            <button type="button" class="btn-accordion active" aria-expanded="true" id="accordionHeader-id-7ktcc4xx" aria-controls="accordionCollapse-id-7ktcc4xx">
+                                <span class="tit">자료 유형</span>
+                            </button>
+                        </h3>
+                        <div class="accordion-collapse collapse" role="region" id="accordionCollapse-id-7ktcc4xx" aria-labelledby="accordionHeader-id-7ktcc4xx">
+                            <div class="accordion-body">
+                                <div class="row krds-check-area chk-column">
+                                    <div class="krds-form-check">
+                                        <input type="checkbox" id="filter-data_chk_1">
+                                        <label for="filter-data_chk_1">PDF (234)</label>
+                                    </div>
+                                    <div class="krds-form-check">
+                                        <input type="checkbox" id="filter-data_chk_2">
+                                        <label for="filter-data_chk_2">HWP (220)</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+
+            </div>
+            <!-- //modal contents -->
+            <!-- modal btn -->
+            <div class="modal-btn btn-wrap">
+                <button type="button" class="krds-btn medium tertiary close-modal">초기화</button>
+                <button type="button" class="krds-btn medium primary close-modal">적용하기</button>
+            </div>
+            <!-- //modal btn -->
+            <!-- close button -->
+            <button type="button" class="krds-btn medium icon btn-close close-modal">
+                <span class="sr-only">닫기</span>
+                <i class="svg-icon ico-popup-close"></i>
+            </button>
+            <!-- //close button -->
+        </div>
+    </div>
+    <!-- //modal-dialog -->
+    <div class="modal-back in"></div>
+
+    <!-- <script>
+        /* layer : 검색필터 : 태그 */
+        const $tag = document.querySelector(".pop-filter-top .tag-in");
+        const $tagBtn = document.querySelector(".pop-filter-top #btn-toggle");
+        if ($tagBtn) {
+            $tagBtn.addEventListener("click", (e) => {
+                if (!e.currentTarget.classList.contains("active")) {
+                    $tag.classList.add("is-open");
+                    e.currentTarget.classList.add("active");
+                } else {
+                    $tag.classList.remove("is-open");
+                    e.currentTarget.classList.remove("active");
+                }
+            });
+        }
+    </script> -->
+</section>
+
+
+
+<script type="text/javascript">
+	/*$(document).on('click', '.link', function (e) {
+	    e.stopPropagation(); // 이벤트 버블링 방지
+	
+	    // 클릭된 .link 내부의 ul
+	    const $dropdown = $(this).find(".dropdown-menu");
+	
+	    // 다른 .link 안의 ul은 open 클래스 제거
+	    $(".link").not($(this)).removeClass("open");
+	    $(".link .dropdown-menu").not($dropdown).removeClass("open");
+	
+	    // 토글 방식으로 open 클래스 추가/제거
+	    $dropdown.toggleClass("open");
+	    $(this).toggleClass("open");
+	});*/
+	
+	// 문서의 다른 부분 클릭 시 메뉴 닫기
+	$(document).on('click', function () {
+	    $(".link").removeClass("open");
+	    $(".link .dropdown-menu").removeClass("open");
+	});
+
+    $("#search-total-input-id").on("keydown", function (e) {
+        if(e.key != "Enter") {
+            return;
+        }
+        totalSearch();
+    })
+    //민원검색-민원명으로 민원검색
+    function totalSearch(){
+        const form = document.createElement('form');
+        form.method = 'post';
+        form.action = '/totalSearch.do';
+
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'pageIndex';
+        input.value = "1";
+        form.appendChild(input);
+
+        const container = $('#srchTmp');
+        const keywordInput = document.createElement('input');
+        keywordInput.type = 'hidden';
+        keywordInput.name = 'keyword';
+        keywordInput.value = container.val();
+
+        saveRecentSearch(container.val());
+        form.appendChild(keywordInput);
+
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    // 통합검색 모달 shown in 될 경우 감지해서 최근검색어 추가
+    const target = document.getElementById("popTotalSch");
+
+    const observer = new MutationObserver((mutationsList) => {
+        for (const mutation of mutationsList) {
+            if (mutation.type === "attributes" && mutation.attributeName === "class") {
+                const classList = target.classList;
+                if (classList.contains("shown") && classList.contains("in")) {
+                    const recentSearches = getRecentSearch();
+                    const wrap = $(".word-lately ul");
+                    wrap.empty();
+
+                    recentSearches.forEach(recentSearch => {
+                        const listItemHTML = `
+                            <li class="word-item">
+                              <span class="word-txt">${recentSearch}</span>
+                              <button type="button" class="krds-btn small icon">
+                                <span class="sr-only">삭제</span>
+                                <i class="svg-icon ico-delete-fill"></i>
+                              </button>
+                            </li>
+                            `;
+                        wrap.append(listItemHTML);
+                    })
+                }
+            }
+        }
+    });
+
+    observer.observe(target, {
+        attributes: true,
+        attributeFilter: ["class"] // 클래스 변화만 감지
+    });
+
+    // 최근검색어 삭제
+    document.querySelector(".sch-info-item.word-lately .list").addEventListener("click", function (e) {
+        // 삭제 버튼 또는 아이콘을 클릭했는지 확인
+        const btn = e.target.closest("button.krds-btn.icon");
+        if (btn) {
+            const li = btn.closest("li");
+            if (li) {
+                li.remove(); // li 삭제
+
+                const keyword = li.querySelector(".word-txt")?.textContent.trim();
+
+                if (keyword) {
+                    removeRecentSearch(keyword);    // 최근검색어 삭제
+                }
+            }
+        }
+    });
+
+    // 최근검색어 전체 삭제
+    function removeAll() {
+        removeRecentSearchAll();
+        wrap = $(".word-lately ul").empty();
+    }
+
+
+    // 개인정보처리방침 주소 연결
+    window.addEventListener('DOMContentLoaded', () => {
+        const params = new URLSearchParams(location.search);
+        if(params.get('tab') === '2'){
+            document.querySelector('[data-tab="tab02"] button')?.click();
+        }
+    });
+
+    $(document).on('click', '.close-modal', function () {
+
+        // 1. 현재 포커스 제거
+        if (document.activeElement) {
+            document.activeElement.blur();
+        }
+
+        // 2. 혹시 모를 재포커스 방지
+        setTimeout(() => {
+            if (document.activeElement) {
+                document.activeElement.blur();
+            }
+        }, 0);
+
+    });
+
+
+    // 검색 필터
+    const $tag = document.querySelector(".pop-filter-top .tag-in");
+        const $tagBtn = document.querySelector(".pop-filter-top #btn-toggle");
+        if ($tagBtn) {
+            $tagBtn.addEventListener("click", (e) => {
+                if (!e.currentTarget.classList.contains("active")) {
+                    $tag.classList.add("is-open");
+                    e.currentTarget.classList.add("active");
+                } else {
+                    $tag.classList.remove("is-open");
+                    e.currentTarget.classList.remove("active");
+                }
+            });
+        }
+
+    /*$('#testEmail').on('click', function (e) {
+        e.preventDefault();
+
+        $.ajax({
+            url: '/custServiceCenter/testEmail.do',
+            type: 'POST',
+            data:{
+              addTo : $('#mailIdTest').val()
+            },
+            success: function (res) {
+                alert('테스트 메일 발송 성공');
+                console.log(res);
+            },
+            error: function (xhr) {
+                console.error(xhr);
+            }
+        });
+    });*/
+
+</script>
+    <!-- //footer 영역 -->
+  </body>
+</html>
