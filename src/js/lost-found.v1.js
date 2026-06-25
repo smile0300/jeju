@@ -855,7 +855,7 @@ window.openSuccessModal = function(index) {
     const titleText = window.t ? window.t('lost.modal.success_title') : '🎉 성공 사례';
     const ctaText = window.t ? window.t('lost.modal.cta') : '내 분실물도 의뢰하기';
 
-    if (modalTitle) modalTitle.innerHTML = `<i class="ph-duotone ph-confetti color-lost"></i> ${titleText}`;
+    if (modalTitle) modalTitle.innerHTML = `<i class="ph-duotone ph-confetti color-lost"></i> <span data-i18n="lost.modal.success_title">${titleText}</span>`;
 
     modalBody.innerHTML = `
         <div class="success-modal-content-wrap">
@@ -879,7 +879,7 @@ window.openSuccessModal = function(index) {
                 </div>
             </div>
 
-            <button class="btn btn-primary btn-cta-success" onclick="document.getElementById('success-modal').style.display='none'; openLostReportModal();">
+            <button class="btn btn-primary btn-cta-success" onclick="document.getElementById('success-modal').style.display='none'; openLostReportModal();" data-i18n="lost.modal.cta">
                 ${ctaText}
             </button>
         </div>
