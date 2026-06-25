@@ -4418,7 +4418,7 @@
 .success-modal-img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     filter: blur(2px);
     transition: filter 0.3s;
 }

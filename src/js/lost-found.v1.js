@@ -828,19 +828,26 @@ window.openSuccessModal = function(index) {
         }
     }
 
+    const labels = {
+        'ko': { client: '의뢰인', date: '완료일', place: '인계 장소', item: '물건', quote: 'Jeju-Live의 경찰청 통합 데이터 크로스체크 시스템과 전문 매니저의 추적을 통해 안전하게 반환되었습니다.', matched: '찾음 완료' },
+        'zh': { client: '委托人', date: '完成日期', place: '交接地点', item: '物品', quote: '通过Jeju-Live的警察厅综合数据交叉核对系统和专业经理的追踪，安全找回并归还。', matched: '已找回' },
+        'en': { client: 'Client', date: 'Date', place: 'Handover Place', item: 'Item', quote: 'Safely returned through Jeju-Live\'s integrated police data cross-check system and professional manager tracking.', matched: 'MATCHED' }
+    };
+    const tLabels = labels[lang] || labels['zh'];
+
     let imgHtml = '';
     if (imgUrl) {
         imgHtml = `
             <div class="success-modal-img-container">
                 <img src="${imgUrl}" class="success-modal-img" alt="Found Item">
-                <div class="matched-stamp">MATCHED</div>
+                <div class="matched-stamp">${tLabels.matched}</div>
             </div>
         `;
     } else {
         imgHtml = `
             <div class="success-modal-img-container no-image">
                 <i class="ph-duotone ph-package"></i>
-                <div class="matched-stamp">MATCHED</div>
+                <div class="matched-stamp">${tLabels.matched}</div>
             </div>
         `;
     }
@@ -855,26 +862,26 @@ window.openSuccessModal = function(index) {
             ${imgHtml}
             <div class="success-info-list">
                 <div class="success-info-item">
-                    <span class="success-info-label"><i class="ph-duotone ph-user"></i> 의뢰인</span>
+                    <span class="success-info-label"><i class="ph-duotone ph-user"></i> ${tLabels.client}</span>
                     <span class="success-info-value">${wechatIdMasked}</span>
                 </div>
                 <div class="success-info-item">
-                    <span class="success-info-label"><i class="ph-duotone ph-calendar"></i> 완료일</span>
+                    <span class="success-info-label"><i class="ph-duotone ph-calendar"></i> ${tLabels.date}</span>
                     <span class="success-info-value">${dateStr}</span>
                 </div>
                 <div class="success-info-item">
-                    <span class="success-info-label"><i class="ph-duotone ph-map-pin"></i> 인계 장소</span>
+                    <span class="success-info-label"><i class="ph-duotone ph-map-pin"></i> ${tLabels.place}</span>
                     <span class="success-info-value">${placeText}</span>
                 </div>
                 <div class="success-info-item">
-                    <span class="success-info-label"><i class="ph-duotone ph-package"></i> 물건</span>
+                    <span class="success-info-label"><i class="ph-duotone ph-package"></i> ${tLabels.item}</span>
                     <span class="success-info-value" style="font-weight: 700; color: var(--text-primary);">${itemName}</span>
                 </div>
             </div>
             
             <div class="success-quote">
                 <i class="ph-fill ph-quotes color-label-tertiary"></i>
-                <span>Jeju-Live의 경찰청 통합 데이터 크로스체크 시스템과 전문 매니저의 추적을 통해 안전하게 반환되었습니다.</span>
+                <span>${tLabels.quote}</span>
             </div>
 
             <button class="btn btn-primary btn-cta-success" onclick="openWechatQR()">
