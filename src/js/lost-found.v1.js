@@ -676,8 +676,8 @@ export async function fetchSuccessStories() {
         console.warn('Failed to fetch success stories from Google Sheets. Using fallback data.', e);
     }
 
+    window.successStoriesData = data;
     renderSuccessMarquee(data);
-    renderSuccessModal(data);
 }
 
 function renderSuccessMarquee(data) {
@@ -723,7 +723,7 @@ function renderSuccessMarquee(data) {
                    .replace('{region}', regionName)
                    .replace('{id}', maskId(item.WeChatId))
                    .replace('{item}', itemName);
-        return `<span class="marquee-item">${text}</span>`;
+        return `<span class="marquee-item" style="cursor:pointer;" onclick="openSuccessModal(${i})">${text}</span>`;
     }).join('');
 
     // Clone the first item for seamless scrolling
@@ -744,7 +744,7 @@ function renderSuccessMarquee(data) {
                          .replace('{region}', firstRegionName)
                          .replace('{id}', maskId(data[0].WeChatId))
                          .replace('{item}', firstItemName);
-    const firstClone = `<span class="marquee-item">${firstText}</span>`;
+    const firstClone = `<span class="marquee-item" style="cursor:pointer;" onclick="openSuccessModal(0)">${firstText}</span>`;
 
     marqueeContainer.innerHTML = itemsHtml + firstClone;
 
@@ -771,43 +771,111 @@ function renderSuccessMarquee(data) {
     marqueeContainer.style.animation = `dynamic-vertical-ticker ${animationDuration}s infinite`;
 }
 
-function renderSuccessModal(data) {
+window.openSuccessModal = function(index) {
+    if (!window.successStoriesData || !window.successStoriesData[index]) return;
+    const item = window.successStoriesData[index];
     const modalBody = document.getElementById('success-modal-body');
+    const modalTitle = document.querySelector('#success-modal .modal-title');
     if (!modalBody) return;
 
-    if (!data || data.length === 0) {
-        modalBody.innerHTML = '<p style="text-align:center; color: #64748b; padding: 20px;">등록된 성공 사례가 없습니다.</p>';
-        return;
+    const lang = window.currentLanguage || 'zh';
+
+    // Translations for Place
+    const placeTranslations = {
+        '호텔': { en: 'Hotel', zh: '酒店', ko: '호텔' },
+        '여객터미널': { en: 'Passenger Terminal', zh: '客运枢纽', ko: '여객터미널' },
+        '찜질방': { en: 'Jjimjilbang (Sauna)', zh: '汗蒸房', ko: '찜질방' },
+        '옷가게': { en: 'Clothing Store', zh: '服装店', ko: '옷가게' },
+        '택시': { en: 'Taxi', zh: '出租车', ko: '택시' },
+        '공항': { en: 'Airport', zh: '机场', ko: '공항' },
+        '경찰서': { en: 'Police Station', zh: '警察局', ko: '경찰서' }
+    };
+
+    let placeText = item.Place || '';
+    if (placeTranslations[placeText] && placeTranslations[placeText][lang]) {
+        placeText = placeTranslations[placeText][lang];
+    } else if (lang === 'zh' && item.Region_zh) {
+        placeText = placeText || item.Region_zh; // Fallback to region
     }
 
-    modalBody.innerHTML = data.map(item => {
-        const icon = item.Icon || 'ph-package';
-        const reward = item.Reward || 0;
-        const timeline = item.Timeline || 'N/A';
-        const place = item.Place || '제주 시내';
-        const delivery = item.Delivery || '우편발송';
-        const quote = item.Quote ? `"${item.Quote}"` : '"물건을 찾아주셔서 정말 감사합니다!"';
+    let itemName = item.Item;
+    if (lang === 'zh' && item.Item_zh) itemName = item.Item_zh;
+    if (lang === 'en' && item.Item_en) itemName = item.Item_en;
+    if (lang === 'ko' && item.Item_ko) itemName = item.Item_ko;
 
-        return `
-        <div class="success-card">
-            <div class="success-card-header">
-                <span class="success-card-title">${item.Item} 返回${item.Region}</span>
-                <span class="success-badge">✅ 已送达</span>
+    const wechatIdMasked = (() => {
+        let id = (item.WeChatId || '').toString().trim();
+        if (!id) return '***';
+        const len = id.length;
+        if (len <= 2) return id.charAt(0) + '*'.repeat(Math.max(0, len - 1));
+        if (len <= 4) return id.charAt(0) + '*'.repeat(len - 2) + id.charAt(len - 1);
+        return id.substring(0, 2) + '*'.repeat(len - 4) + id.substring(len - 2);
+    })();
+
+    const dateStr = item.Date ? new Date(item.Date).toLocaleDateString() : '';
+    const imgUrl = item.ItemImg && item.ItemImg.trim() !== '' ? item.ItemImg : null;
+
+    let imgHtml = '';
+    if (imgUrl) {
+        imgHtml = `
+            <div class="success-modal-img-container">
+                <img src="${imgUrl}" class="success-modal-img" alt="Found Item">
+                <div class="matched-stamp">MATCHED</div>
             </div>
-            <div class="success-img-placeholder" style="background: linear-gradient(45deg, #e2e8f0, #cbd5e1);">
-                <i class="ph-duotone ${icon}" style="font-size: 3rem; color: #64748b;"></i>
+        `;
+    } else {
+        imgHtml = `
+            <div class="success-modal-img-container no-image">
+                <i class="ph-duotone ph-package"></i>
+                <div class="matched-stamp">MATCHED</div>
             </div>
-            <div class="success-card-timeline">
-                ⏱️ <b>匹配耗时：</b> ${timeline}<br>
-                🏨 <b>交接地点：</b> ${place}<br>
-                📦 <b>发货方式：</b> ${delivery}
+        `;
+    }
+
+    const titleText = window.t ? window.t('lost.modal.success_title') : '🎉 성공 사례';
+    const ctaText = window.t ? window.t('lost.modal.cta') : '내 분실물도 의뢰하기';
+
+    if (modalTitle) modalTitle.innerHTML = `<i class="ph-duotone ph-confetti color-lost"></i> ${titleText}`;
+
+    modalBody.innerHTML = `
+        <div class="success-modal-content-wrap">
+            ${imgHtml}
+            <div class="success-info-list">
+                <div class="success-info-item">
+                    <span class="success-info-label"><i class="ph-duotone ph-user"></i> 의뢰인</span>
+                    <span class="success-info-value">${wechatIdMasked}</span>
+                </div>
+                <div class="success-info-item">
+                    <span class="success-info-label"><i class="ph-duotone ph-calendar"></i> 완료일</span>
+                    <span class="success-info-value">${dateStr}</span>
+                </div>
+                <div class="success-info-item">
+                    <span class="success-info-label"><i class="ph-duotone ph-map-pin"></i> 인계 장소</span>
+                    <span class="success-info-value">${placeText}</span>
+                </div>
+                <div class="success-info-item">
+                    <span class="success-info-label"><i class="ph-duotone ph-package"></i> 물건</span>
+                    <span class="success-info-value" style="font-weight: 700; color: var(--text-primary);">${itemName}</span>
+                </div>
             </div>
-            <div class="success-card-reward">💰 跑腿费：${reward} RMB</div>
-            <div class="success-card-quote">
-                ${quote} - ${item.WeChatId} (${item.Region})
+            
+            <div class="success-quote">
+                <i class="ph-fill ph-quotes color-label-tertiary"></i>
+                <span>Jeju-Live의 경찰청 통합 데이터 크로스체크 시스템과 전문 매니저의 추적을 통해 안전하게 반환되었습니다.</span>
             </div>
-        </div>`;
-    }).join('');
+
+            <button class="btn btn-primary btn-cta-success" onclick="openWechatQR()">
+                ${ctaText}
+            </button>
+        </div>
+    `;
+
+    const successModal = document.getElementById('success-modal');
+    if (successModal) {
+        successModal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        if (window.pushModalState) window.pushModalState('success-modal');
+    }
 }
 
 window.showUpsellQR = function() {

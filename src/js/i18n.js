@@ -229,6 +229,8 @@ const TRANSLATIONS = {
         'lost.report.success': '提交成功！',
         'lost.report.failed': '提交失败: ',
         'lost.success.marquee': '📢 [{date}] {region} {id} 已找回 {item}',
+        'lost.modal.success_title': '成功案例',
+        'lost.modal.cta': '委托寻找我的失物',
         'lost.notice.title': '失物招领中心使用指南',
         'lost.notice.howto': '使用方法',
         'lost.notice.how1': '选择上方的<b>地区</b>、<b>分类</b>和<b>日期</b>，点击搜索按钮即可查看当天的失物记录。',
@@ -269,7 +271,7 @@ const TRANSLATIONS = {
         'festival.title':   '济州精彩活动',
         'festival.ticket':  '查看景点门票',
 
-        // ── 분실물 ──
+        // ── 分类 ──
         'lost.notice.title': '失物招领中心使用指南',
         'lost.notice.1': '请选择上方的<b>分类</b>和<b>日期</b>，然后点击搜索按钮查询当天的拾获物品列表。',
         'lost.notice.2': '仅可查询最近3天内韩国警察厅综合失物招领中心接收的物品。',
@@ -618,6 +620,8 @@ const TRANSLATIONS = {
         'lost.report.success': '제출이 완료되었습니다!',
         'lost.report.failed': '제출 실패: ',
         'lost.success.marquee': '📢 [{date}] {region} {id}님, {item} 수령 완료',
+        'lost.modal.success_title': '성공 사례',
+        'lost.modal.cta': '내 분실물도 의뢰하기',
         'lost.notice.title': '분실물 센터 이용 안내',
         'lost.notice.howto': '사용 방법',
         'lost.notice.how1': '원하는 <b>지역</b>, <b>날짜</b>, <b>분류</b>를 선택 후 검색 버튼을 누르면 조회됩니다.',
@@ -996,6 +1000,8 @@ const TRANSLATIONS = {
         'lost.report.success': 'Submitted successfully!',
         'lost.report.failed': 'Submission failed: ',
         'lost.success.marquee': '📢 [{date}] {id} from {region} found {item}',
+        'lost.modal.success_title': 'Success Story',
+        'lost.modal.cta': 'Request to find my item',
         'lost.notice.title': 'Lost & Found Center Guide',
         'lost.notice.howto': 'How to Use',
         'lost.notice.how1': 'Select a <b>region</b>, <b>date</b> and <b>category</b> above, then press search to view items.',
