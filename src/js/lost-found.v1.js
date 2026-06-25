@@ -813,7 +813,20 @@ window.openSuccessModal = function(index) {
     })();
 
     const dateStr = item.Date ? new Date(item.Date).toLocaleDateString() : '';
-    const imgUrl = item.ItemImg && item.ItemImg.trim() !== '' ? item.ItemImg : null;
+    let imgUrl = item.ItemImg && item.ItemImg.trim() !== '' ? item.ItemImg : null;
+
+    // Convert Google Drive view links to direct image links
+    if (imgUrl && imgUrl.includes('drive.google.com/file/d/')) {
+        const match = imgUrl.match(/drive\.google\.com\/file\/d\/([^\/]+)/);
+        if (match && match[1]) {
+            imgUrl = `https://drive.google.com/uc?export=view&id=${match[1]}`;
+        }
+    } else if (imgUrl && imgUrl.includes('drive.google.com/open?id=')) {
+        const match = imgUrl.match(/id=([^&]+)/);
+        if (match && match[1]) {
+            imgUrl = `https://drive.google.com/uc?export=view&id=${match[1]}`;
+        }
+    }
 
     let imgHtml = '';
     if (imgUrl) {
