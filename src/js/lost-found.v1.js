@@ -705,7 +705,7 @@ function renderSuccessMarquee(data) {
         return `${d.getMonth() + 1}/${d.getDate()}`;
     };
 
-    const itemsHtml = data.map(item => {
+    const itemsHtml = data.map((item, i) => {
         let text = window.t ? window.t('lost.success.marquee') : '📢 [{date}] {region} {id}님, {item} 수령 완료';
         const lang = window.currentLanguage || 'zh';
         
