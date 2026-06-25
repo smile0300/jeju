@@ -879,7 +879,7 @@ window.openSuccessModal = function(index) {
                 </div>
             </div>
 
-            <button class="btn btn-primary btn-cta-success" onclick="openWechatQR()">
+            <button class="btn btn-primary btn-cta-success" onclick="document.getElementById('success-modal').style.display='none'; openLostReportModal();">
                 ${ctaText}
             </button>
         </div>
