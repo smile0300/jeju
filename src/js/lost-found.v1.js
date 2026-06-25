@@ -815,16 +815,16 @@ window.openSuccessModal = function(index) {
     const dateStr = item.Date ? new Date(item.Date).toLocaleDateString() : '';
     let imgUrl = item.ItemImg && item.ItemImg.trim() !== '' ? item.ItemImg : null;
 
-    // Convert Google Drive view links to direct image links
+    // Convert Google Drive view links to direct image links using thumbnail endpoint
     if (imgUrl && imgUrl.includes('drive.google.com/file/d/')) {
         const match = imgUrl.match(/drive\.google\.com\/file\/d\/([^\/]+)/);
         if (match && match[1]) {
-            imgUrl = `https://drive.google.com/uc?export=view&id=${match[1]}`;
+            imgUrl = `https://drive.google.com/thumbnail?id=${match[1]}&sz=w800`;
         }
     } else if (imgUrl && imgUrl.includes('drive.google.com/open?id=')) {
         const match = imgUrl.match(/id=([^&]+)/);
         if (match && match[1]) {
-            imgUrl = `https://drive.google.com/uc?export=view&id=${match[1]}`;
+            imgUrl = `https://drive.google.com/thumbnail?id=${match[1]}&sz=w800`;
         }
     }
 
