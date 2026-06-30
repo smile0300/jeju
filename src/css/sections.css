@@ -4619,7 +4619,7 @@ body:not(.page-home) .wechat-float-btn {
 }
 
 .cctv-apply-header {
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #3b82f6 100%);
     padding: 32px 24px 28px;
     text-align: center;
     position: relative;
@@ -4628,39 +4628,41 @@ body:not(.page-home) .wechat-float-btn {
 .cctv-apply-icon {
     width: 64px;
     height: 64px;
-    background: rgba(255, 36, 66, 0.15);
+    background: rgba(255, 255, 255, 0.15);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto 16px;
-    border: 2px solid rgba(255, 36, 66, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(4px);
 }
 
 .cctv-apply-icon i {
-    font-size: 1.8rem;
-    color: #ff2442;
+    font-size: 2.2rem;
+    color: #ffffff;
 }
 
 .cctv-apply-header h3 {
-    font-size: 1.15rem;
+    font-size: 1.25rem;
     font-weight: 800;
     color: white;
-    margin: 0 0 8px;
+    margin: 0 0 10px;
+    letter-spacing: -0.5px;
 }
 
 .cctv-apply-header p {
-    font-size: 0.88rem;
-    color: rgba(255,255,255,0.7);
+    font-size: 0.92rem;
+    color: rgba(255, 255, 255, 0.85);
     margin: 0;
-    line-height: 1.6;
+    line-height: 1.5;
 }
 
 .cctv-apply-body {
     padding: 24px 20px 8px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 20px;
 }
 
 .cctv-apply-form-group {

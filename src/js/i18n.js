@@ -107,7 +107,7 @@ const TRANSLATIONS = {
 
         // ── CCTV 8월 신청 모달 ──
         'cctv.apply.badge':    '8月预约',
-        'cctv.apply.title':    '济州 CCTV 실시간 서비스',
+        'cctv.apply.title':    '济州实时监控服务',
         'cctv.apply.desc':     '8月份 VIP 优先预约开始！<br>抢先体验济州岛实时监控画面。',
         'cctv.apply.wechat.label': '您的微信 ID',
         'cctv.apply.wechat.ph':    '请输入您的微信 ID',

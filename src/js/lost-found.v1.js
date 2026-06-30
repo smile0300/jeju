@@ -642,7 +642,8 @@ export async function fetchSuccessStories() {
             Timeline: "2시간",
             Delivery: "上海浦东机场顺丰快递",
             Place: "济州神话世界大堂",
-            Icon: "ph-device-mobile"
+            Icon: "ph-device-mobile",
+            ItemImg: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=800&auto=format&fit=crop"
         },
         {
             Date: "2026-06-16",
@@ -654,7 +655,8 @@ export async function fetchSuccessStories() {
             Timeline: "반나절",
             Delivery: "北京首都机场面交",
             Place: "济州市内咖啡馆",
-            Icon: "ph-wallet"
+            Icon: "ph-wallet",
+            ItemImg: "https://images.unsplash.com/photo-1627123424574-724758594e93?q=80&w=800&auto=format&fit=crop"
         }
     ];
 
@@ -823,6 +825,8 @@ window.openSuccessModal = function(index) {
 
     const dateStr = item.Date ? new Date(item.Date).toLocaleDateString() : '';
     let imgUrl = item.ItemImg && item.ItemImg.trim() !== '' ? item.ItemImg : null;
+    if (!imgUrl && item.Image && item.Image.trim() !== '') imgUrl = item.Image;
+    if (!imgUrl && item.Photo && item.Photo.trim() !== '') imgUrl = item.Photo;
 
     // Convert Google Drive view links to direct image links using thumbnail endpoint
     if (imgUrl && imgUrl.includes('drive.google.com/file/d/')) {
