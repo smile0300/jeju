@@ -100,6 +100,29 @@ const TRANSLATIONS = {
 
         // ── 홈 화면 ──
         'home.subtitle':  '济州岛实时旅行信息',
+        'home.tagline':   '济州旅行 · 实时情报 · 一站搞定',
+
+        // ── 위챗 플로팅 버튼 ──
+        'float.wechat':   '微信联系',
+
+        // ── CCTV 8월 신청 모달 ──
+        'cctv.apply.badge':    '8月预约',
+        'cctv.apply.title':    '济州 CCTV 실시간 서비스',
+        'cctv.apply.desc':     '8月份 VIP 优先预约开始！<br>抢先体验济州岛实时监控画面。',
+        'cctv.apply.wechat.label': '您的微信 ID',
+        'cctv.apply.wechat.ph':    '请输入您的微信 ID',
+        'cctv.apply.region.label': '关注的地区',
+        'cctv.apply.region.all':   '全部地区',
+        'cctv.apply.region.jeju':  '济州市区',
+        'cctv.apply.region.seogwipo': '西归浦',
+        'cctv.apply.region.beach': '海水浴场',
+        'cctv.apply.region.hallasan': '汉拿山',
+        'cctv.apply.benefit1': '8月优先使用资格',
+        'cctv.apply.benefit2': '实时交通 & 海滩状况',
+        'cctv.apply.benefit3': '微信第一时间通知',
+        'cctv.apply.submit':   '立即预约',
+        'cctv.apply.success':  '✅ 预约成功！将通过微信联系您。',
+        'cctv.apply.error':    '❌ 提交失败，请稍后再试。',
 
         // ── 홈 메뉴 ──
         'nav.cctv':       '实时监控',
@@ -493,6 +516,30 @@ const TRANSLATIONS = {
 
         // ── 홈 메뉴 ──
         'home.subtitle':  '제주도 실시간 여행 정보',
+        'home.tagline':   '제주 여행 · 실시간 정보 · 한 번에',
+
+        // ── 위챗 플로팅 버튼 ──
+        'float.wechat':   '위챗 연락',
+
+        // ── CCTV 8월 신청 모달 ──
+        'cctv.apply.badge':    '8월 예약',
+        'cctv.apply.title':    'CCTV 실시간 서비스 예약',
+        'cctv.apply.desc':     '8월 VIP 우선 예약 시작!<br>제주도 실시간 CCTV를 먼저 체험해보세요.',
+        'cctv.apply.wechat.label': '위챗 ID',
+        'cctv.apply.wechat.ph':    '위챗 ID를 입력해주세요',
+        'cctv.apply.region.label': '관심 지역',
+        'cctv.apply.region.all':   '전체 지역',
+        'cctv.apply.region.jeju':  '제주시내',
+        'cctv.apply.region.seogwipo': '서귀포',
+        'cctv.apply.region.beach': '해수욕장',
+        'cctv.apply.region.hallasan': '한라산',
+        'cctv.apply.benefit1': '8월 우선 사용 자격',
+        'cctv.apply.benefit2': '실시간 교통 & 해변 현황',
+        'cctv.apply.benefit3': '위챗 업데이트 통보',
+        'cctv.apply.submit':   '예약하기',
+        'cctv.apply.success':  '✅ 예약 완료! 위챗으로 연락드리겠습니다.',
+        'cctv.apply.error':    '❌ 제출 실패. 잠시 후 다시 시도해주세요.',
+
         'nav.cctv':       '실시간CCTV',
         'cctv.loading':   'CCTV 화면을 불러오는 중입니다...',
         'nav.weather':    '날씨예보',
@@ -873,6 +920,30 @@ const TRANSLATIONS = {
 
         // ── Home Menu ──
         'home.subtitle':  'Jeju Island Real-Time Travel Info',
+        'home.tagline':   'Jeju Travel · Real-time Info · All-in-One',
+
+        // ── WeChat Float Button ──
+        'float.wechat':   'WeChat',
+
+        // ── CCTV August Apply Modal ──
+        'cctv.apply.badge':    'Aug Reserve',
+        'cctv.apply.title':    'Jeju CCTV Live Service',
+        'cctv.apply.desc':     'August VIP Early Access Opens!<br>Be the first to experience Jeju live cameras.',
+        'cctv.apply.wechat.label': 'Your WeChat ID',
+        'cctv.apply.wechat.ph':    'Enter your WeChat ID',
+        'cctv.apply.region.label': 'Area of Interest',
+        'cctv.apply.region.all':   'All Areas',
+        'cctv.apply.region.jeju':  'Jeju City',
+        'cctv.apply.region.seogwipo': 'Seogwipo',
+        'cctv.apply.region.beach': 'Beaches',
+        'cctv.apply.region.hallasan': 'Hallasan',
+        'cctv.apply.benefit1': 'August Priority Access',
+        'cctv.apply.benefit2': 'Live Traffic & Beach Status',
+        'cctv.apply.benefit3': 'WeChat Updates First',
+        'cctv.apply.submit':   'Reserve Now',
+        'cctv.apply.success':  '✅ Reserved! We will contact you via WeChat.',
+        'cctv.apply.error':    '❌ Submission failed. Please try again later.',
+
         'nav.cctv':       'Live CCTV',
         'cctv.loading':   'Loading CCTV footage...',
         'nav.weather':    'Weather',

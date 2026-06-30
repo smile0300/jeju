@@ -53,6 +53,11 @@
         <button class="modal-close" onclick="closeLostReportModal()">✕</button>
         <div class="lost-report-header">
             <h3 data-i18n="modal.lost.title"><i class="ph-duotone ph-pencil-simple"></i> 登记报失物品</h3>
+            <div class="marquee-container" style="cursor: default; margin-top: 15px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid var(--separator);">
+                <div class="marquee-content" id="modal-success-marquee-content">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
             <p data-i18n="modal.lost.desc">请填写以下信息，我们将协助您在 LOST112 登记。 (填写越详细找回概率越高)</p>
         </div>
         <div class="lost-report-body">

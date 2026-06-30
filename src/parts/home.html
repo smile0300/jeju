@@ -19,15 +19,18 @@
                 <span aria-hidden="true">JEJU LIVE</span>
                 <span class="visually-hidden">Jeju Live — Real-time Jeju Island Travel Information for Foreign Tourists: Weather, Flights, Hallasan, Lost &amp; Found, Festivals | 济州岛实时旅行信息</span>
             </h1>
+            <!-- 간결한 tagline -->
+            <p class="home-tagline" data-i18n="home.tagline">济州旅行 · 实时情报 · 一站搞定</p>
         </div>
         <!-- Home Weather Alert Banner -->
         <div id="home-alerts-container" class="weather-alerts-container" style="display: none; padding: 0 20px; margin-bottom: 20px;"></div>
 
         <div class="home-grid">
-            <button class="home-item item-disabled" disabled type="button">
+            <!-- CCTV 버튼: 8월 신청폼으로 연결 -->
+            <button class="home-item item-cctv-apply" type="button" onclick="openCctvApplyModal()">
                 <span class="item-icon"><i class="ph-duotone ph-video-camera color-cctv"></i></span>
                 <span class="item-label" data-i18n="nav.cctv">实时监控</span>
-                <span class="coming-soon-badge" style="background-color: #f59e0b; color: white;">VIP</span>
+                <span class="coming-soon-badge" style="background-color: #f59e0b; color: white;" data-i18n="cctv.apply.badge">8月预约</span>
             </button>
             <a href="/weather" class="home-item item-weather" onclick="event.preventDefault(); showSection('weather')">
                 <span class="item-icon"><i class="ph-duotone ph-cloud-sun color-weather"></i></span>
@@ -68,6 +71,49 @@
     </div>
 </section>
 
+<!-- ===== 위챗 빠른 연락 플로팅 버튼 ===== -->
+<button id="wechat-float-btn" class="wechat-float-btn" onclick="openWechatQR()" title="WeChat 빠른 연락">
+    <i class="ph-duotone ph-chat-circle-dots"></i>
+</button>
+
+<!-- ===== CCTV 8월 신청 모달 ===== -->
+<div id="cctv-apply-modal" class="modal-overlay" style="display:none; z-index: 10001;" onclick="closeCctvApplyModal()">
+    <div class="modal-content cctv-apply-modal-content" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeCctvApplyModal()">✕</button>
+        <div class="cctv-apply-header">
+            <div class="cctv-apply-icon"><i class="ph-duotone ph-video-camera"></i></div>
+            <h3 data-i18n="cctv.apply.title">济州 CCTV 실시간 서비스</h3>
+            <p data-i18n="cctv.apply.desc">8月份 VIP 优先预约开始！<br>抢先体验济州岛实时监控画面。</p>
+        </div>
+        <div class="cctv-apply-body">
+            <div class="cctv-apply-form-group">
+                <label class="cctv-apply-label"><i class="ph-duotone ph-chat-circle"></i> <span data-i18n="cctv.apply.wechat.label">您的微信 ID</span> <span style="color:var(--accent); font-size:0.75rem;">*</span></label>
+                <input type="text" id="cctv-apply-wechat" class="lost-form-input" data-i18n="cctv.apply.wechat.ph" placeholder="请输入您的微信 ID">
+            </div>
+            <div class="cctv-apply-form-group">
+                <label class="cctv-apply-label"><i class="ph-duotone ph-map-pin"></i> <span data-i18n="cctv.apply.region.label">关注的地区</span></label>
+                <select id="cctv-apply-region" class="filter-select" style="width:100%;">
+                    <option value="전체" data-i18n="cctv.apply.region.all">全部地区</option>
+                    <option value="제주시내" data-i18n="cctv.apply.region.jeju">济州市区</option>
+                    <option value="서귀포" data-i18n="cctv.apply.region.seogwipo">西归浦</option>
+                    <option value="해수욕장" data-i18n="cctv.apply.region.beach">海水浴场</option>
+                    <option value="한라산" data-i18n="cctv.apply.region.hallasan">汉拿山</option>
+                </select>
+            </div>
+            <div id="cctv-apply-status" class="form-status" style="display:none;"></div>
+            <div class="cctv-apply-benefits">
+                <div class="benefit-item"><i class="ph-duotone ph-check-circle" style="color:#07c160;"></i> <span data-i18n="cctv.apply.benefit1">8月优先使用资格</span></div>
+                <div class="benefit-item"><i class="ph-duotone ph-check-circle" style="color:#07c160;"></i> <span data-i18n="cctv.apply.benefit2">实时交通 & 海滩状况</span></div>
+                <div class="benefit-item"><i class="ph-duotone ph-check-circle" style="color:#07c160;"></i> <span data-i18n="cctv.apply.benefit3">微信第一时间通知</span></div>
+            </div>
+        </div>
+        <div class="lost-form-actions" style="justify-content: center; width: 100%; padding: 0 0 8px 0;">
+            <button type="button" class="btn btn-secondary" style="flex:1;" onclick="closeCctvApplyModal()" data-i18n="modal.lost.cancel">취소</button>
+            <button id="cctv-apply-submit-btn" class="btn btn-primary" style="flex:1;" onclick="submitCctvApply()" data-i18n="cctv.apply.submit">立即预约</button>
+        </div>
+    </div>
+</div>
+
 <script>
     // 언어 드롭다운 외부 클릭 시 닫기
     document.addEventListener('click', function(event) {
@@ -79,4 +125,89 @@
             }
         }
     });
+
+    // CCTV 신청 모달 열기/닫기
+    window.openCctvApplyModal = function() {
+        const modal = document.getElementById('cctv-apply-modal');
+        if (modal) {
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            if (window.pushModalState) window.pushModalState();
+        }
+    };
+
+    window.closeCctvApplyModal = function(fromPopState = false) {
+        const modal = document.getElementById('cctv-apply-modal');
+        if (modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+            const statusEl = document.getElementById('cctv-apply-status');
+            if (statusEl) statusEl.style.display = 'none';
+            if (!fromPopState && window.location.hash === '#modal') window.history.back();
+        }
+    };
+
+    // CCTV 신청 제출
+    window.submitCctvApply = async function() {
+        const wechatEl = document.getElementById('cctv-apply-wechat');
+        const regionEl = document.getElementById('cctv-apply-region');
+        const statusEl = document.getElementById('cctv-apply-status');
+        const submitBtn = document.getElementById('cctv-apply-submit-btn');
+
+        const wechatId = wechatEl ? wechatEl.value.trim() : '';
+        const region = regionEl ? regionEl.value : '전체';
+
+        if (!wechatId) {
+            if (statusEl) {
+                statusEl.textContent = window.t ? window.t('lost.report.fill_err') : '请填写完整的信息';
+                statusEl.className = 'form-status error';
+                statusEl.style.display = 'block';
+            }
+            return;
+        }
+
+        try {
+            if (submitBtn) submitBtn.disabled = true;
+            if (statusEl) {
+                statusEl.textContent = window.t ? window.t('alert.submitting') : '提交中...';
+                statusEl.className = 'form-status';
+                statusEl.style.display = 'block';
+            }
+
+            // Google Apps Script를 통해 신청 정보 저장
+            const CONFIG = window.APP_CONFIG || { PROXY_URL: '' };
+            const res = await fetch(`${CONFIG.PROXY_URL || ''}/api/feature-request`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'cctv_apply',
+                    wechat: wechatId,
+                    region: region,
+                    month: '2026-08',
+                    timestamp: new Date().toISOString(),
+                    userAgent: navigator.userAgent
+                })
+            });
+
+            if (res.ok) {
+                if (statusEl) {
+                    statusEl.textContent = window.t ? window.t('cctv.apply.success') : '✅ 预约成功！将通过微信联系您。';
+                    statusEl.className = 'form-status success';
+                    statusEl.style.display = 'block';
+                }
+                if (wechatEl) wechatEl.value = '';
+                setTimeout(() => { window.closeCctvApplyModal(); }, 2500);
+            } else {
+                throw new Error('Server Error');
+            }
+        } catch(e) {
+            if (statusEl) {
+                statusEl.textContent = window.t ? window.t('cctv.apply.error') : '❌ 提交失败，请稍后再试。';
+                statusEl.className = 'form-status error';
+                statusEl.style.display = 'block';
+            }
+        } finally {
+            if (submitBtn) submitBtn.disabled = false;
+        }
+    };
 </script>

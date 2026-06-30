@@ -62,6 +62,13 @@ export function showSection(sectionId, pushHistory = true) {
     const mainAppBar = document.getElementById('main-app-bar');
     if (mainAppBar) mainAppBar.style.display = (sectionId === 'home' ? 'flex' : 'none');
 
+    // 플로팅 위챗 버튼: 홈화면에서만 표시
+    if (sectionId === 'home') {
+        document.body.classList.add('page-home');
+    } else {
+        document.body.classList.remove('page-home');
+    }
+
     // SEO: 동적 Title / Description / Keywords 업데이트
     const metaInfo = SEO_META[sectionId] || SEO_META['home'];
     document.title = metaInfo.title;

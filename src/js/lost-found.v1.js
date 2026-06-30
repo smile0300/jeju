@@ -748,6 +748,12 @@ function renderSuccessMarquee(data) {
 
     marqueeContainer.innerHTML = itemsHtml + firstClone;
 
+    // 모달 내부 마키도 동기화
+    const modalMarqueeContainer = document.getElementById('modal-success-marquee-content');
+    if (modalMarqueeContainer) {
+        modalMarqueeContainer.innerHTML = itemsHtml + firstClone;
+    }
+
     // Dynamic Animation based on data length
     const totalItems = data.length;
     let styleEl = document.getElementById('dynamic-marquee-style');
@@ -769,6 +775,9 @@ function renderSuccessMarquee(data) {
     styleEl.innerHTML = keyframes;
     
     marqueeContainer.style.animation = `dynamic-vertical-ticker ${animationDuration}s infinite`;
+    if (modalMarqueeContainer) {
+        modalMarqueeContainer.style.animation = `dynamic-vertical-ticker ${animationDuration}s infinite`;
+    }
 }
 
 window.openSuccessModal = function(index) {
@@ -839,8 +848,8 @@ window.openSuccessModal = function(index) {
     if (imgUrl) {
         imgHtml = `
             <div class="success-modal-img-container">
-                <img src="${imgUrl}" class="success-modal-img" alt="Found Item">
-                <div class="matched-stamp">${tLabels.matched}</div>
+                <img src="${imgUrl}" class="success-modal-img" alt="Found Item" onload="this.nextElementSibling.style.opacity = '0.85'; this.nextElementSibling.style.transform = 'translate(-50%, -50%) rotate(-15deg) scale(1)';">
+                <div class="matched-stamp" style="opacity: 0; transform: translate(-50%, -50%) rotate(-15deg) scale(0.5); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">${tLabels.matched}</div>
             </div>
         `;
     } else {

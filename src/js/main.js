@@ -185,7 +185,7 @@ window.submitCSFeedback = submitCSFeedback;
 
 // Modals closing
 const closeAllModals = () => {
-    const modals = document.querySelectorAll('.wsm-overlay, #cctv-detail-card, #cctv-modal, #lost-detail-modal, #lost-report-modal, #feature-request-modal, #cs-modal, #wechat-qr-modal, #share-modal');
+    const modals = document.querySelectorAll('.wsm-overlay, #cctv-detail-card, #cctv-modal, #lost-detail-modal, #lost-report-modal, #feature-request-modal, #cs-modal, #wechat-qr-modal, #share-modal, #cctv-apply-modal, #lost-upsell-modal');
     let wasOpen = false;
     modals.forEach(m => {
         if (m.style.display === 'block' || m.style.display === 'flex' || m.classList.contains('show')) {
