@@ -355,8 +355,8 @@ export async function submitLostReport() {
             }
             
             // 폼 닫기 (즉시)
-            if (window.closeLostReportModal) window.closeLostReportModal();
-            else if (typeof closeLostReportModal === 'function') closeLostReportModal();
+            if (window.closeLostReportModal) window.closeLostReportModal(true);
+            else if (typeof closeLostReportModal === 'function') closeLostReportModal(true);
             
             // 폼 초기화
             const form = document.querySelector('.lost-report-form-content');
@@ -913,12 +913,12 @@ window.showUpsellQR = function() {
     if (actionBtns) actionBtns.style.display = 'none';
 };
 
-window.closeLostUpsellModal = function() {
+window.closeLostUpsellModal = function(fromPopState = false) {
     const upsellModal = document.getElementById('lost-upsell-modal');
     if (upsellModal) {
         upsellModal.style.display = 'none';
         document.body.style.overflow = '';
-        if (window.popModalState) window.popModalState();
+        if (!fromPopState && window.location.hash === '#modal') window.history.back();
     }
 };
 
