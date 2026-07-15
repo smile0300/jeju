@@ -105,7 +105,7 @@
             
             <div class="lost-form-actions" style="justify-content: center; width: 100%;">
                 <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="closeLostReportModal()" data-i18n="modal.lost.cancel">취소</button>
-                <button id="lost-report-submit-btn" class="btn btn-primary" style="flex: 1;" onclick="submitLostReport()" data-i18n="modal.lost.submit">분실물 등록하기</button>
+                <button type="button" id="lost-report-submit-btn" class="btn btn-primary" style="flex: 1;" onclick="event.preventDefault(); submitLostReport()" data-i18n="modal.lost.submit">분실물 등록하기</button>
             </div>
         </div>
     </div>
