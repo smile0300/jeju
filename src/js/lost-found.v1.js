@@ -678,6 +678,9 @@ export async function fetchSuccessStories() {
         console.warn('Failed to fetch success stories from Google Sheets. Using fallback data.', e);
     }
 
+    // 최신순으로 정렬 (내림차순)
+    data.sort((a, b) => new Date(b.Date) - new Date(a.Date));
+
     window.successStoriesData = data;
     renderSuccessMarquee(data);
 }
