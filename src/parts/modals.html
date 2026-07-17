@@ -60,52 +60,136 @@
             </div>
             <p data-i18n="modal.lost.desc">请填写以下信息，我们将协助您在 LOST112 登记。 (填写越详细找回概率越高)</p>
         </div>
-        <div class="lost-report-body">
-            <div class="lost-form-group">
-                <label class="lost-form-label"><i class="ph-duotone ph-map-pin"></i> <span data-i18n="modal.lost.loc.label">丢失地点</span></label>
-                <textarea id="lost-report-location" class="lost-form-textarea" data-i18n="modal.lost.loc.ph" placeholder="例如：西归浦每日奥来市场, 红色出租车内, GD咖啡厅2层靠窗位..."></textarea>
+        <div class="lost-report-body progressive-form">
+            <div class="progress-container">
+                <div class="progress-dot active" id="lost-step-dot-1"></div>
+                <div class="progress-dot" id="lost-step-dot-2"></div>
+                <div class="progress-dot" id="lost-step-dot-3"></div>
             </div>
-            
-            <div class="lost-form-row">
-                <div class="lost-form-group">
-                    <label class="lost-form-label"><i class="ph-duotone ph-calendar"></i> <span data-i18n="modal.lost.date.label">丢失日期</span></label>
-                    <input type="date" id="lost-report-date" class="lost-form-input">
+
+            <!-- STEP 1: Item Info -->
+            <div class="lost-step active" id="lost-step-1">
+                <div class="step-title required-field" data-i18n="modal.lost.step1.title">📦 무엇을 잃어버리셨나요?</div>
+                <div class="step-desc" data-i18n="modal.lost.step1.desc">분실한 물건의 종류를 선택해주세요.</div>
+                
+                <div class="chip-group" id="item-category-chips">
+                    <button type="button" class="lost-chip" data-value="스마트폰/카메라" data-i18n="modal.lost.cat.phone">📱 스마트폰/카메라</button>
+                    <button type="button" class="lost-chip" data-value="지갑/가방/캐리어" data-i18n="modal.lost.cat.bag">💼 지갑/가방/캐리어</button>
+                    <button type="button" class="lost-chip" data-value="여권" data-i18n="modal.lost.cat.passport">📘 여권</button>
+                    <button type="button" class="lost-chip" data-value="의류" data-i18n="modal.lost.cat.clothes">👕 의류</button>
+                    <button type="button" class="lost-chip" data-value="기타" data-i18n="modal.lost.cat.other">📦 기타</button>
                 </div>
+                <input type="hidden" id="lost-report-item-category">
+
                 <div class="lost-form-group">
-                    <label class="lost-form-label"><i class="ph-duotone ph-clock"></i> <span data-i18n="modal.lost.time.label">大概时间</span></label>
-                    <input type="time" id="lost-report-time" class="lost-form-input">
+                    <label class="lost-form-label"><span data-i18n="modal.lost.spec.label">물품 상세 설명</span></label>
+                    <textarea id="lost-report-specifics" class="lost-form-textarea" data-i18n="modal.lost.spec.ph" placeholder="색상, 브랜드, 모델명, 특징 등을 상세히 적어주세요."></textarea>
                 </div>
-            </div>
-
-            <div class="lost-form-group">
-                <label class="lost-form-label"><i class="ph-duotone ph-package"></i> <span data-i18n="modal.lost.item.label">物品名称</span></label>
-                <input type="text" id="lost-report-item" class="lost-form-input" data-i18n="modal.lost.item.ph" placeholder="例如：黑色iPhone 15, 棕色古驰钱包, 蓝色背包...">
-            </div>
-
-            <div class="lost-form-group">
-                <label class="lost-form-label"><i class="ph-duotone ph-magnifying-glass-plus"></i> <span data-i18n="modal.lost.spec.label">物品特征</span></label>
-                <textarea id="lost-report-specifics" class="lost-form-textarea" data-i18n="modal.lost.spec.ph" placeholder="请详细描述物品特征, 帮助我们精准匹配..."></textarea>
-            </div>
-
-            <div class="lost-form-row" style="align-items: flex-start;">
+                
                 <div class="lost-form-group">
-                    <label class="lost-form-label"><i class="ph-duotone ph-camera"></i> <span data-i18n="modal.lost.photo.label">选择文件</span> <span style="font-weight:700; font-size:0.75rem; color:var(--accent);">*</span></label>
+                    <label class="lost-form-label"><span data-i18n="modal.lost.photo.label" class="required-field">사진 첨부</span></label>
                     <div class="lost-form-file-wrap">
                         <input type="file" id="lost-report-photo" class="lost-form-file-input" accept="image/*" onchange="handleLostImageChange(event)">
                     </div>
                     <div id="lost-report-photo-preview" class="photo-preview" style="display: none; margin-top: 10px; border-radius: 8px; overflow: hidden; border: 1px solid var(--separator);"></div>
                 </div>
-                <div class="lost-form-group">
-                    <label class="lost-form-label"><i class="ph-duotone ph-chat-circle"></i> <span data-i18n="modal.lost.wechat.label">您的微信 ID</span> <span style="font-weight:700; font-size:0.75rem; color:var(--accent);">*</span></label>
-                    <input type="text" id="lost-report-name" class="lost-form-input" data-i18n="modal.lost.name.ph" placeholder="您的姓名">
+            </div>
+
+            <!-- STEP 2: Location Info -->
+            <div class="lost-step" id="lost-step-2">
+                <div class="step-title required-field" data-i18n="modal.lost.step2.title">📍 어디서 잃어버리셨나요?</div>
+                
+                <div class="step-desc" style="margin-top:10px; margin-bottom:5px;" data-i18n="modal.lost.city.label">지역 (도시)</div>
+                <div class="chip-group" id="city-category-chips">
+                    <button type="button" class="lost-chip" data-value="제주" data-i18n="modal.lost.city.jeju">🌴 제주</button>
+                    <button type="button" class="lost-chip" data-value="서울" data-i18n="modal.lost.city.seoul">🏙️ 서울</button>
+                    <button type="button" class="lost-chip" data-value="부산" data-i18n="modal.lost.city.busan">🌊 부산</button>
+                </div>
+                <input type="hidden" id="lost-report-city-category">
+
+                <div class="step-desc" style="margin-top:10px; margin-bottom:5px;" data-i18n="modal.lost.loc_type.label">상세 장소</div>
+                
+                <div class="chip-group" id="region-category-chips">
+                    <button type="button" class="lost-chip" data-value="공항" data-i18n="modal.lost.loc.airport">✈️ 공항</button>
+                    <button type="button" class="lost-chip" data-value="호텔" data-i18n="modal.lost.loc.hotel">🏨 호텔</button>
+                    <button type="button" class="lost-chip" data-value="버스" data-i18n="modal.lost.loc.bus">🚌 버스</button>
+                    <button type="button" class="lost-chip" data-value="택시" data-i18n="modal.lost.loc.taxi">🚕 택시</button>
+                    <button type="button" class="lost-chip" data-value="기타" data-i18n="modal.lost.loc.other">📍 기타</button>
+                </div>
+                <input type="hidden" id="lost-report-region-category">
+
+                <!-- Subfields: Date/Time (Common for Airport/Other/Hotel) -->
+                <div class="sub-fields" id="sub-common-datetime">
+                    <div class="lost-form-row">
+                        <div class="lost-form-group">
+                            <label class="lost-form-label"><span data-i18n="modal.lost.date.label">분실 날짜</span></label>
+                            <input type="date" id="lost-report-date" class="lost-form-input">
+                        </div>
+                        <div class="lost-form-group">
+                            <label class="lost-form-label"><span data-i18n="modal.lost.time.label">대략적인 시간</span></label>
+                            <input type="time" id="lost-report-time" class="lost-form-input">
+                        </div>
+                    </div>
+                    <div class="lost-form-group" id="sub-detail-location-group">
+                        <label class="lost-form-label"><span data-i18n="modal.lost.detail_loc.label">상세 위치 (선택)</span></label>
+                        <input type="text" id="lost-report-detail-location" class="lost-form-input" data-i18n="modal.lost.detail_loc.ph" placeholder="예: 3번 게이트 앞, 스타벅스 애월점...">
+                    </div>
+                </div>
+
+                <!-- Subfields: Hotel -->
+                <div class="sub-fields" id="sub-hotel">
+                    <div class="lost-form-group">
+                        <label class="lost-form-label"><span data-i18n="modal.lost.hotel.name">호텔명</span></label>
+                        <input type="text" id="lost-report-hotel-name" class="lost-form-input" placeholder="e.g. Shilla Hotel (영문)">
+                    </div>
+                    <div class="lost-form-group">
+                        <label class="lost-form-label"><span data-i18n="modal.lost.hotel.booker">예약자명</span></label>
+                        <input type="text" id="lost-report-hotel-booker" class="lost-form-input" placeholder="e.g. Hong Gildong (영문)">
+                    </div>
+                    <div class="lost-form-group">
+                        <label class="lost-form-label"><span data-i18n="modal.lost.hotel.dates">체크인/체크아웃 날짜</span></label>
+                        <input type="text" id="lost-report-hotel-dates" class="lost-form-input" placeholder="예: 12/01 ~ 12/03">
+                    </div>
+                </div>
+
+                <!-- Subfields: Taxi/Bus -->
+                <div class="sub-fields" id="sub-vehicle">
+                    <div class="lost-form-group">
+                        <label class="lost-form-label"><span data-i18n="modal.lost.vehicle.no">차량 번호 (선택)</span></label>
+                        <input type="text" id="lost-report-car-no" class="lost-form-input" placeholder="예: 제주 12바 3456, 365번 버스">
+                    </div>
+                    <div class="lost-form-row">
+                        <div class="lost-form-group">
+                            <label class="lost-form-label"><span data-i18n="modal.lost.vehicle.board_loc">승차 장소</span></label>
+                            <input type="text" id="lost-report-board-loc" class="lost-form-input" placeholder="승차 장소">
+                            <input type="time" id="lost-report-board-time" class="lost-form-input" style="margin-top: 5px;">
+                        </div>
+                        <div class="lost-form-group">
+                            <label class="lost-form-label"><span data-i18n="modal.lost.vehicle.alight_loc">하차 장소</span></label>
+                            <input type="text" id="lost-report-alight-loc" class="lost-form-input" placeholder="하차 장소">
+                            <input type="time" id="lost-report-alight-time" class="lost-form-input" style="margin-top: 5px;">
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div id="lost-report-status" class="form-status"></div>
+            <!-- STEP 3: Contact Info & Submit -->
+            <div class="lost-step" id="lost-step-3">
+                <div class="step-title" data-i18n="modal.lost.step3.title">💬 연락처 정보</div>
+                <div class="step-desc" data-i18n="modal.lost.step3.desc">분실물을 찾았을 때 연락드릴 위챗 ID를 정확히 남겨주세요.</div>
+                
+                <div class="lost-form-group">
+                    <label class="lost-form-label"><i class="ph-duotone ph-chat-circle"></i> <span data-i18n="modal.lost.wechat.label" class="required-field">위챗 ID</span></label>
+                    <input type="text" id="lost-report-wechat" class="lost-form-input" data-i18n="modal.lost.name.ph" placeholder="위챗 ID를 입력해주세요">
+                </div>
+                
+                <div id="lost-report-status" class="form-status"></div>
+            </div>
             
-            <div class="lost-form-actions" style="justify-content: center; width: 100%;">
-                <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="closeLostReportModal()" data-i18n="modal.lost.cancel">취소</button>
-                <button type="button" id="lost-report-submit-btn" class="btn btn-primary" style="flex: 1;" onclick="event.preventDefault(); submitLostReport()" data-i18n="modal.lost.submit">분실물 등록하기</button>
+            <div class="lost-form-actions step-actions">
+                <button type="button" class="btn btn-secondary" id="btn-lost-prev" onclick="prevLostStep()" style="display: none;" data-i18n="modal.lost.btn_prev">이전</button>
+                <button type="button" class="btn btn-primary" id="btn-lost-next" onclick="nextLostStep()" style="flex: 1;" data-i18n="modal.lost.btn_next">다음</button>
+                <button type="button" id="lost-report-submit-btn" class="btn btn-primary" style="display: none; flex: 1;" onclick="event.preventDefault(); submitLostReport()" data-i18n="modal.lost.submit">분실물 등록하기</button>
             </div>
         </div>
     </div>

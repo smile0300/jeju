@@ -256,10 +256,130 @@ export function openLostReportModal() {
     document.getElementById('lost-report-modal').style.display = 'flex';
     const now = new Date();
     const kstTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
-    document.getElementById('lost-report-date').value = kstTime.toISOString().split('T')[0];
+    
+    const dateInput = document.getElementById('lost-report-date');
+    if(dateInput) dateInput.value = kstTime.toISOString().split('T')[0];
+    
     document.body.style.overflow = 'hidden';
+    
+    // Reset steps
+    currentLostStep = 1;
+    updateLostStepView();
+
     if (window.pushModalState) window.pushModalState();
 }
+
+let currentLostStep = 1;
+const MAX_LOST_STEP = 3;
+
+window.nextLostStep = function() {
+    // Basic validation before moving next
+    if (currentLostStep === 1) {
+        const cat = document.getElementById('lost-report-item-category')?.value;
+        if (!cat) { alert(window.t ? window.t('lost.report.cat_err') : '물품 종류를 선택해주세요.'); return; }
+        if (!lostReportImageBase64) { alert(window.t ? window.t('lost.report.fill_err') : '필수 항목(사진 포함)을 모두 입력해주세요.'); return; }
+    } else if (currentLostStep === 2) {
+        const city = document.getElementById('lost-report-city-category')?.value;
+        if (!city) { alert(window.t ? window.t('lost.report.city_err') : '지역(도시)을 선택해주세요.'); return; }
+        const reg = document.getElementById('lost-report-region-category')?.value;
+        if (!reg) { alert(window.t ? window.t('lost.report.reg_err') : '장소를 선택해주세요.'); return; }
+    }
+    
+    if (currentLostStep < MAX_LOST_STEP) {
+        currentLostStep++;
+        updateLostStepView();
+    }
+};
+
+window.prevLostStep = function() {
+    if (currentLostStep > 1) {
+        currentLostStep--;
+        updateLostStepView();
+    }
+};
+
+function updateLostStepView() {
+    // Hide all steps
+    document.querySelectorAll('.lost-step').forEach(el => el.classList.remove('active'));
+    // Show current step
+    const currentEl = document.getElementById(`lost-step-${currentLostStep}`);
+    if (currentEl) currentEl.classList.add('active');
+
+    // Update dots
+    document.querySelectorAll('.progress-dot').forEach((el, index) => {
+        el.classList.remove('active', 'done');
+        if (index + 1 === currentLostStep) el.classList.add('active');
+        else if (index + 1 < currentLostStep) el.classList.add('done');
+    });
+
+    // Toggle buttons
+    const btnPrev = document.getElementById('btn-lost-prev');
+    const btnNext = document.getElementById('btn-lost-next');
+    const btnSubmit = document.getElementById('lost-report-submit-btn');
+
+    if (btnPrev) btnPrev.style.display = currentLostStep === 1 ? 'none' : 'block';
+    
+    if (currentLostStep === MAX_LOST_STEP) {
+        if (btnNext) btnNext.style.display = 'none';
+        if (btnSubmit) btnSubmit.style.display = 'block';
+    } else {
+        if (btnNext) btnNext.style.display = 'block';
+        if (btnSubmit) btnSubmit.style.display = 'none';
+    }
+}
+
+// Global Chip Event Listener Setup
+document.addEventListener('DOMContentLoaded', () => {
+    // Item Category Chips
+    const itemChips = document.querySelectorAll('#item-category-chips .lost-chip');
+    itemChips.forEach(chip => {
+        chip.addEventListener('click', function() {
+            itemChips.forEach(c => c.classList.remove('active'));
+            this.classList.add('active');
+            const hiddenInput = document.getElementById('lost-report-item-category');
+            if (hiddenInput) hiddenInput.value = this.dataset.value;
+        });
+    });
+
+    // City Category Chips
+    const cityChips = document.querySelectorAll('#city-category-chips .lost-chip');
+    cityChips.forEach(chip => {
+        chip.addEventListener('click', function() {
+            cityChips.forEach(c => c.classList.remove('active'));
+            this.classList.add('active');
+            const hiddenInput = document.getElementById('lost-report-city-category');
+            if (hiddenInput) hiddenInput.value = this.dataset.value;
+        });
+    });
+
+    // Region Category Chips
+    const regionChips = document.querySelectorAll('#region-category-chips .lost-chip');
+    regionChips.forEach(chip => {
+        chip.addEventListener('click', function() {
+            regionChips.forEach(c => c.classList.remove('active'));
+            this.classList.add('active');
+            const val = this.dataset.value;
+            const hiddenInput = document.getElementById('lost-report-region-category');
+            if (hiddenInput) hiddenInput.value = val;
+
+            // Handle Subfields
+            document.querySelectorAll('#lost-step-2 .sub-fields').forEach(el => el.classList.remove('active'));
+            
+            if (val === '호텔') {
+                const subHotel = document.getElementById('sub-hotel');
+                if (subHotel) subHotel.classList.add('active');
+            } else if (val === '택시' || val === '버스') {
+                const subVehicle = document.getElementById('sub-vehicle');
+                if (subVehicle) subVehicle.classList.add('active');
+            } else {
+                // 공항/기타의 경우 기본 날짜/시간 폼만 표시
+                const subCommon = document.getElementById('sub-common-datetime');
+                if(subCommon) subCommon.classList.add('active');
+            }
+        });
+    });
+});
+
 
 export function handleLostImageChange(event) {
     const file = event.target.files[0];
@@ -279,45 +399,57 @@ export async function submitLostReport() {
     const statusEl = document.getElementById('lost-report-status');
     const submitBtn = document.getElementById('lost-report-submit-btn');
     
+    // Safely get element values
+    const getVal = (id) => document.getElementById(id) ? document.getElementById(id).value.trim() : '';
+
+    const regionCat = getVal('lost-report-region-category');
+    
     const data = {
         type: 'lost_report',
-        location: document.getElementById('lost-report-location').value.trim(),
-        date: document.getElementById('lost-report-date').value,
-        time: document.getElementById('lost-report-time').value,
-        itemName: document.getElementById('lost-report-item').value.trim(),
-        specifics: document.getElementById('lost-report-specifics').value.trim(),
+        // Separate Fields
+        itemCategory: getVal('lost-report-item-category'),
+        city: getVal('lost-report-city-category'),
+        itemName: "N/A", // Deprecated conceptually, but kept to not break anything if backend relies on it
+        specifics: getVal('lost-report-specifics'),
+        regionCategory: regionCat,
+        date: getVal('lost-report-date'),
+        time: getVal('lost-report-time'),
+        detailLocation: getVal('lost-report-detail-location'),
+        
+        hotelName: getVal('lost-report-hotel-name'),
+        hotelBooker: getVal('lost-report-hotel-booker'),
+        hotelDates: getVal('lost-report-hotel-dates'),
+        
+        carNumber: getVal('lost-report-car-no'),
+        boardLoc: getVal('lost-report-board-loc'),
+        boardTime: getVal('lost-report-board-time'),
+        alightLoc: getVal('lost-report-alight-loc'),
+        alightTime: getVal('lost-report-alight-time'),
+        
         photo: lostReportImageBase64 || '',
-        wechatId: document.getElementById('lost-report-wechat') ? document.getElementById('lost-report-wechat').value.trim() : document.getElementById('lost-report-name').value.trim(),
-        reporterName: document.getElementById('lost-report-name').value.trim(),
-        name: document.getElementById('lost-report-name').value.trim(), // 벡엔드(GAS) 필드명 호환성 보장용 추가
-        userAgent: navigator.userAgent
+        wechatId: getVal('lost-report-wechat'),
+        reporterName: getVal('lost-report-wechat'), // Fallback if name is same as wechatId
+        name: getVal('lost-report-wechat'),         // GAS Compatibility
+        userAgent: navigator.userAgent,
+        
+        // Construct composite legacy fields just in case backend throws if missing
+        location: `[${regionCat}] ` + (regionCat === '호텔' ? `${getVal('lost-report-hotel-name')}` : (regionCat === '택시' || regionCat === '버스' ? `${getVal('lost-report-car-no')} ${getVal('lost-report-board-loc')}~${getVal('lost-report-alight-loc')}` : getVal('lost-report-detail-location')))
     };
 
-    if (!data.location || !data.date || !data.time || !data.itemName || !data.specifics || !data.wechatId || !data.reporterName) {
+    if (!data.itemCategory || !data.city || !data.regionCategory || !data.wechatId || !data.photo) {
         if (statusEl) {
-            statusEl.textContent = window.t('lost.report.fill_err');
+            statusEl.textContent = window.t ? window.t('lost.report.fill_err') : '필수 항목(사진 포함)을 모두 입력해주세요.';
             statusEl.className = 'form-status error';
             statusEl.style.display = 'block';
         } else {
-            alert(window.t('lost.report.fill_err'));
-        }
-        return;
-    }
-
-    if (!data.photo) {
-        if (statusEl) {
-            statusEl.textContent = window.t('lost.report.photo_err');
-            statusEl.className = 'form-status error';
-            statusEl.style.display = 'block';
-        } else {
-            alert(window.t('lost.report.photo_err'));
+            alert('필수 항목(사진 포함)을 모두 입력해주세요.');
         }
         return;
     }
 
     try {
         if (statusEl) {
-            statusEl.textContent = window.t('lost.report.submitting');
+            statusEl.textContent = window.t ? window.t('lost.report.submitting') : '접수 중...';
             statusEl.className = 'form-status';
             statusEl.style.display = 'block';
         }
@@ -329,20 +461,18 @@ export async function submitLostReport() {
         });
         
         let result = { result: 'error', message: 'Unknown error' };
+        const rawText = await res.text();
         try {
-            result = await res.json();
+            result = JSON.parse(rawText);
         } catch (je) {
-            const rawText = await res.text();
             console.error('API Response Parse error:', je, rawText);
             throw new Error('Server format error');
         }
 
         if (result.result === 'success' || result.status === 'success') {
             if (statusEl) {
-                statusEl.textContent = window.t('lost.report.success');
+                statusEl.textContent = window.t ? window.t('lost.report.success') : '접수 완료';
                 statusEl.className = 'form-status success';
-            } else {
-                alert(window.t('lost.report.success'));
             }
 
             if (window.dataLayer) {
@@ -350,7 +480,7 @@ export async function submitLostReport() {
                     'event': 'lost_report_submit_success',
                     'category': 'interaction',
                     'action': 'submit_report',
-                    'label': data.itemName
+                    'label': data.itemCategory
                 });
             }
             
@@ -366,6 +496,9 @@ export async function submitLostReport() {
                 const preview = document.getElementById('lost-report-photo-preview');
                 if (preview) preview.innerHTML = '';
                 lostReportImageBase64 = null;
+                
+                // Reset chips
+                document.querySelectorAll('.lost-chip').forEach(c => c.classList.remove('active'));
             }
 
             // 업셀링 팝업 띄우기
@@ -387,10 +520,10 @@ export async function submitLostReport() {
         }
     } catch (e) {
         if (statusEl) {
-            statusEl.textContent = `${window.t('lost.report.failed')}${e.message}`;
+            statusEl.textContent = `${window.t ? window.t('lost.report.failed') : '오류 발생: '}${e.message}`;
             statusEl.className = 'form-status error';
         } else {
-            alert(`${window.t('lost.report.failed')}${e.message}`);
+            alert(`오류 발생: ${e.message}`);
         }
     } finally {
         if (submitBtn) submitBtn.disabled = false;

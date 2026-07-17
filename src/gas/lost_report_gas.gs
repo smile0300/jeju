@@ -40,7 +40,12 @@ function doPost(e) {
       if (!sheet) {
         sheet = ss.insertSheet(sheetName);
         if (data.type === 'lost_report') {
-          sheet.appendRow(['Timestamp', 'Location', 'Date', 'Time', 'ItemName', 'Specifics', 'PhotoURL', 'WechatId', 'UserAgent', 'Labels']);
+          sheet.appendRow([
+            'Timestamp', 'ItemCategory', 'City', 'Specifics', 'RegionCategory', 'Date', 'Time', 
+            'DetailLocation', 'HotelName', 'HotelBooker', 'HotelDates', 
+            'CarNumber', 'BoardLoc', 'BoardTime', 'AlightLoc', 'AlightTime', 
+            'PhotoURL', 'WechatId', 'UserAgent', 'Labels'
+          ]);
         } else {
           sheet.appendRow(['Timestamp', 'Feature', 'Contact', 'UserAgent']);
         }
@@ -54,7 +59,8 @@ function doPost(e) {
         var photoUrl = "No Photo";
         var labelsStr = "";
         if (data.photo && data.photo.includes('base64,')) {
-          photoUrl = saveBase64ImageToDrive(data.photo, data.itemName + "_" + data.wechatId);
+          var saveName = (data.itemCategory || 'Item') + "_" + data.wechatId;
+          photoUrl = saveBase64ImageToDrive(data.photo, saveName);
           // Vision API로 이미지 특징 추출
           var extractResult = extractImageLabels(data.photo);
           var labels = extractResult.success ? extractResult.labels : [];
@@ -63,14 +69,24 @@ function doPost(e) {
         
         resultRow = [
           timestamp,
-          data.location,
-          data.date,
-          data.time,
-          data.itemName,
-          data.specifics,
+          data.itemCategory || '',
+          data.city || '',
+          data.specifics || '',
+          data.regionCategory || '',
+          data.date || '',
+          data.time || '',
+          data.detailLocation || '',
+          data.hotelName || '',
+          data.hotelBooker || '',
+          data.hotelDates || '',
+          data.carNumber || '',
+          data.boardLoc || '',
+          data.boardTime || '',
+          data.alightLoc || '',
+          data.alightTime || '',
           photoUrl,
-          data.wechatId,
-          data.userAgent,
+          data.wechatId || '',
+          data.userAgent || '',
           labelsStr
         ];
       } else if (data.type === 'feature') {
