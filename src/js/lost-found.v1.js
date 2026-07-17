@@ -776,7 +776,7 @@ export async function fetchSuccessStories() {
             Delivery: "上海浦东机场顺丰快递",
             Place: "济州神话世界大堂",
             Icon: "ph-device-mobile",
-            ItemImg: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=800&auto=format&fit=crop"
+            ItemImg: ""
         },
         {
             Date: "2026-06-16",
@@ -789,7 +789,7 @@ export async function fetchSuccessStories() {
             Delivery: "北京首都机场面交",
             Place: "济州市内咖啡馆",
             Icon: "ph-wallet",
-            ItemImg: "https://images.unsplash.com/photo-1627123424574-724758594e93?q=80&w=800&auto=format&fit=crop"
+            ItemImg: ""
         }
     ];
 
