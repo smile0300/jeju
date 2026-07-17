@@ -30,7 +30,16 @@ const AIRLINE_NAMES = {
     'UO': { zh: '香港快运', ko: '홍콩익스프레스', en: 'HK Express' },
     'HB': { zh: '大湾区航空', ko: '그레이터 베이 항공', en: 'Greater Bay Airlines' },
     'NX': { zh: '澳门航空', ko: '마카오항공', en: 'Air Macau' },
-    'TR': { zh: '酷航', ko: '스쿠트항공', en: 'Scoot' }
+    'TR': { zh: '酷航', ko: '스쿠트항공', en: 'Scoot' },
+    'PN': { zh: '西部航空', ko: '서부항공', en: 'West Air' },
+    '3U': { zh: '四川航空', ko: '사천항공', en: 'Sichuan Airlines' },
+    '8L': { zh: '祥鹏航空', ko: '럭키에어', en: 'Lucky Air' },
+    'FM': { zh: '上海航空', ko: '상하이항공', en: 'Shanghai Airlines' },
+    'DR': { zh: '瑞丽航空', ko: '루이리항공', en: 'Ruili Airlines' },
+    'AQ': { zh: '九元航空', ko: '9에어', en: '9 Air' },
+    'EU': { zh: '成都航空', ko: '청두항공', en: 'Chengdu Airlines' },
+    'G5': { zh: '华夏航空', ko: '화샤항공', en: 'China Express Airlines' },
+    'KN': { zh: '中国联合航空', ko: '중국연합항공', en: 'China United Airlines' }
 };
 
 const CITY_NAMES = {
@@ -105,7 +114,18 @@ const CITY_NAMES = {
     '대중': { zh: '台中', ko: '타이중', en: 'Taichung' },
     '칭취안강': { zh: '清泉岗', ko: '칭취안강', en: 'CCK' },
     '셴양': { zh: '沈阳', ko: '선양', en: 'Shenyang' },
-    '센양': { zh: '沈阳', ko: '선양', en: 'Shenyang' }
+    '센양': { zh: '沈阳', ko: '선양', en: 'Shenyang' },
+    '우한': { zh: '武汉', ko: '우한', en: 'Wuhan' },
+    '무한': { zh: '武汉', ko: '우한', en: 'Wuhan' },
+    '구이양': { zh: '贵阳', ko: '구이양', en: 'Guiyang' },
+    '귀양': { zh: '贵阳', ko: '구이양', en: 'Guiyang' },
+    '난닝': { zh: '南宁', ko: '난닝', en: 'Nanning' },
+    '남녕': { zh: '南宁', ko: '난닝', en: 'Nanning' },
+    '취안저우': { zh: '泉州', ko: '취안저우', en: 'Quanzhou' },
+    '천주': { zh: '泉州', ko: '취안저우', en: 'Quanzhou' },
+    '진장': { zh: '晋江', ko: '진장', en: 'Jinjiang' },
+    '허페이': { zh: '合肥', ko: '허페이', en: 'Hefei' },
+    '합비': { zh: '合肥', ko: '허페이', en: 'Hefei' }
 };
 
 const DOMESTIC_AIRPORTS = new Set(['CJU', 'GMP', 'PUS', 'CJJ', 'TAE', 'KWJ', 'USN', 'KUV', 'WJU', 'HIN', 'RSU', 'KPO', 'MWX', 'YNY']);
