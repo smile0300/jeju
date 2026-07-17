@@ -81,7 +81,11 @@
                     <button id="btn-view-table" class="view-toggle-btn" onclick="switchLostView('table')">
                         <i class="ph-duotone ph-list-dashes" style="font-size: 1.15rem;"></i><span data-i18n="lost.view.table">表格模式</span>
                     </button>
+                    <button id="btn-success-all" class="view-toggle-btn success-toggle-btn" onclick="openSuccessAllModal()">
+                        <i class="ph-duotone ph-trophy" style="font-size: 1.15rem;"></i><span data-i18n="lost.success.view_all">성공사례</span>
+                    </button>
                 </div>
+
             </div>
             <div id="lost-goods-grid" class="lost-goods-grid active">
                 <div class="lost-notice-board" style="grid-column: 1 / -1; padding: 24px 20px; background: var(--color-bg-card); border-radius: 12px; margin-top: 10px; text-align: left; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-left: 4px solid #D1D5DB;">
@@ -117,8 +121,7 @@
                         <tr>
                             <th data-i18n="lost.th.photo">照片</th>
                             <th data-i18n="lost.th.category">分类</th>
-                            <th data-i18n="lost.th.name">物品名</th>
-                            <th data-i18n="lost.th.status">状态</th>
+                            <th data-i18n="lost.th.name" style="max-width: 15em;">物品名</th>
                             <th data-i18n="lost.th.date">拾获日期</th>
                             <th data-i18n="lost.th.location">保管地点</th>
                             <th data-i18n="lost.th.number">管理编号</th>

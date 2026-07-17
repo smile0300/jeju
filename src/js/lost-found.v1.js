@@ -169,7 +169,7 @@ export function renderLostGoodsTable(items) {
     const tableBody = document.getElementById('lost-table-body');
     if (!tableBody) return;
     if (!items || items.length === 0) {
-        tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;">${window.t('lost.no_records')}</td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;">${window.t('lost.no_records')}</td></tr>`;
         return;
     }
     const noImgText = window.t('lost.no_image');
@@ -184,8 +184,7 @@ export function renderLostGoodsTable(items) {
         <tr>
             <td>${item.img ? `<img src="${item.img}" class="lost-table-img" loading="lazy" onerror="this.src='${noImgSvg}'">` : '<i class="ph-duotone ph-package color-cloud"></i>'}</td>
             <td><span class="lost-category-badge">${item.category}</span></td>
-            <td style="font-weight:600;">${item.name}</td>
-            <td><span class="lost-status-tag ${isStoring ? 'active' : ''}">${displayStatus}</span></td>
+            <td style="font-weight:600; max-width: 15em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${item.name}">${item.name}</td>
             <td>${item.date}</td>
             <td>${item.place}</td>
             <td style="font-size: 11px; opacity: 0.7;">${item.id}</td>
@@ -816,10 +815,12 @@ function renderSuccessMarquee(data) {
         return `${d.getMonth() + 1}/${d.getDate()}`;
     };
 
-    const itemsHtml = data.map((item, i) => {
+    // 5번째 아이템마다 CTA 슬롯을 삽입한 배열 생성
+    const slots = [];
+    data.forEach((item, i) => {
         let text = window.t ? window.t('lost.success.marquee') : '📢 [{date}] {region} {id}님, {item} 수령 완료';
         const lang = window.currentLanguage || 'zh';
-        
+
         let itemName = item.Item;
         if (lang === 'zh' && item.Item_zh) itemName = item.Item_zh;
         if (lang === 'en' && item.Item_en) itemName = item.Item_en;
@@ -834,8 +835,15 @@ function renderSuccessMarquee(data) {
                    .replace('{region}', regionName)
                    .replace('{id}', maskId(item.WeChatId))
                    .replace('{item}', itemName);
-        return `<span class="marquee-item" style="cursor:pointer;" onclick="openSuccessModal(${i})">${text}</span>`;
-    }).join('');
+        slots.push(`<span class="marquee-item" style="cursor:pointer;" onclick="openSuccessModal(${i})">${text}</span>`);
+
+        // 5번째마다 (1-indexed: 5, 10, 15...) CTA 슬롯 삽입
+        if ((i + 1) % 5 === 0) {
+            const ctaLabel = window.t ? window.t('lost.success.view_all') : '🏆 성공 사례 모두 보기';
+            slots.push(`<span class="marquee-item marquee-cta-slot" onclick="openSuccessAllModal()">${ctaLabel}</span>`);
+        }
+    });
+    const itemsHtml = slots.join('');
 
     // Clone the first item for seamless scrolling
     let firstText = window.t ? window.t('lost.success.marquee') : '📢 [{date}] {region} {id}님, {item} 수령 완료';
@@ -865,26 +873,27 @@ function renderSuccessMarquee(data) {
         modalMarqueeContainer.innerHTML = itemsHtml + firstClone;
     }
 
-    // Dynamic Animation based on data length
+    // Dynamic Animation — CTA 슬롯 포함한 총 슬롯 수 기준으로 계산
     const totalItems = data.length;
+    const ctaCount = Math.floor(totalItems / 5); // 삽입된 CTA 슬롯 수
+    const totalSlots = totalItems + ctaCount;    // 실제 렌더링된 총 슬롯 수
     let styleEl = document.getElementById('dynamic-marquee-style');
     if (!styleEl) {
         styleEl = document.createElement('style');
         styleEl.id = 'dynamic-marquee-style';
         document.head.appendChild(styleEl);
     }
-    
-    const animationDuration = totalItems * 3; // 3 seconds per item
+
+    const animationDuration = totalSlots * 3; // 슬롯당 3초
     let keyframes = `@keyframes dynamic-vertical-ticker {\n`;
-    for (let i = 0; i < totalItems; i++) {
-        const startPercent = (i / totalItems) * 100;
-        // Pause for about 85% of its time slot
-        const pauseEndPercent = ((i + 0.85) / totalItems) * 100; 
+    for (let i = 0; i < totalSlots; i++) {
+        const startPercent = (i / totalSlots) * 100;
+        const pauseEndPercent = ((i + 0.85) / totalSlots) * 100;
         keyframes += `  ${startPercent}%, ${pauseEndPercent}% { transform: translateY(-${i * 36}px); }\n`;
     }
-    keyframes += `  100% { transform: translateY(-${totalItems * 36}px); }\n}`;
+    keyframes += `  100% { transform: translateY(-${totalSlots * 36}px); }\n}`;
     styleEl.innerHTML = keyframes;
-    
+
     marqueeContainer.style.animation = `dynamic-vertical-ticker ${animationDuration}s infinite`;
     if (modalMarqueeContainer) {
         modalMarqueeContainer.style.animation = `dynamic-vertical-ticker ${animationDuration}s infinite`;
@@ -960,8 +969,11 @@ window.openSuccessModal = function(index) {
     let imgHtml = '';
     if (imgUrl) {
         imgHtml = `
-            <div class="success-modal-img-container">
-                <img src="${imgUrl}" class="success-modal-img" alt="Found Item" onload="this.nextElementSibling.style.opacity = '0.85'; this.nextElementSibling.style.transform = 'translate(-50%, -50%) rotate(-15deg) scale(1)';">
+            <div class="success-modal-img-container" style="position: relative;">
+                <div class="img-loading-spinner" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--label-tertiary);">
+                    <i class="ph-duotone ph-circle-notch spin" style="font-size: 2rem;"></i>
+                </div>
+                <img src="${imgUrl}" class="success-modal-img" alt="Found Item" style="opacity: 0; transition: opacity 0.3s ease;" onload="this.previousElementSibling.style.display='none'; this.style.opacity='1'; this.nextElementSibling.style.opacity = '0.85'; this.nextElementSibling.style.transform = 'translate(-50%, -50%) rotate(-15deg) scale(1)';">
                 <div class="matched-stamp" style="opacity: 0; transform: translate(-50%, -50%) rotate(-15deg) scale(0.5); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">${tLabels.matched}</div>
             </div>
         `;
@@ -1014,6 +1026,95 @@ window.openSuccessModal = function(index) {
         if (window.pushModalState) window.pushModalState('success-modal');
     }
 }
+
+// 성공 사례 전체 목록 모달
+window.openSuccessAllModal = function() {
+    const data = window.successStoriesData;
+
+    const modalBody = document.getElementById('success-modal-body');
+    const modalTitle = document.querySelector('#success-modal .modal-title');
+    if (!modalBody) return;
+
+    const lang = window.currentLanguage || 'zh';
+    const allLabel = window.t ? window.t('lost.success.all_title') : '성공 사례 모두 보기';
+    const ctaText = window.t ? window.t('lost.modal.cta') : '내 분실물도 의뢰하기';
+    if (modalTitle) modalTitle.innerHTML = `<i class="ph-duotone ph-trophy color-lost"></i> <span>${allLabel}</span>`;
+
+    // 데이터 없음 / 로딩 중 상태
+    if (!data || data.length === 0) {
+        modalBody.innerHTML = `
+            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 48px 16px; gap: 12px; color: var(--label-secondary);">
+                <i class="ph-duotone ph-circle-notch spin" style="font-size: 2.5rem; color: var(--label-tertiary);"></i>
+                <p style="font-size: 0.9rem; margin: 0;">데이터를 불러오는 중...</p>
+            </div>
+            <button class="btn btn-primary btn-cta-success" onclick="document.getElementById('success-modal').style.display='none'; openLostReportModal();" data-i18n="lost.modal.cta">
+                ${ctaText}
+            </button>
+        `;
+        const successModal = document.getElementById('success-modal');
+        if (successModal) {
+            successModal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            if (window.pushModalState) window.pushModalState('success-modal');
+        }
+        return;
+    }
+
+    // 전체 목록을 카드 그리드로 렌더링
+    const cardsHtml = data.map((item, index) => {
+        let itemName = item.Item;
+        if (lang === 'zh' && item.Item_zh) itemName = item.Item_zh;
+        if (lang === 'en' && item.Item_en) itemName = item.Item_en;
+        if (lang === 'ko' && item.Item_ko) itemName = item.Item_ko;
+
+        let regionName = item.Region;
+        if (lang === 'zh' && item.Region_zh) regionName = item.Region_zh;
+        if (lang === 'en' && item.Region_en) regionName = item.Region_en;
+        if (lang === 'ko' && item.Region_ko) regionName = item.Region_ko;
+
+        const dateStr = item.Date ? new Date(item.Date).toLocaleDateString() : '';
+
+        let imgUrl = item.ItemImg && item.ItemImg.trim() !== '' ? item.ItemImg : null;
+        if (!imgUrl && item.Image && item.Image.trim() !== '') imgUrl = item.Image;
+        if (!imgUrl && item.Photo && item.Photo.trim() !== '') imgUrl = item.Photo;
+        if (imgUrl && imgUrl.includes('drive.google.com/file/d/')) {
+            const match = imgUrl.match(/drive\.google\.com\/file\/d\/([^\/]+)/);
+            if (match && match[1]) imgUrl = `https://drive.google.com/thumbnail?id=${match[1]}&sz=w400`;
+        } else if (imgUrl && imgUrl.includes('drive.google.com/open?id=')) {
+            const match = imgUrl.match(/id=([^&]+)/);
+            if (match && match[1]) imgUrl = `https://drive.google.com/thumbnail?id=${match[1]}&sz=w400`;
+        }
+
+        const imgHtml = imgUrl
+            ? `<img src="${imgUrl}" alt="${itemName}" loading="lazy" onerror="this.parentElement.innerHTML='<i class=\\'ph-duotone ph-package\\'></i>'">`
+            : `<i class="ph-duotone ph-package"></i>`;
+
+        return `
+        <div class="success-all-card" onclick="openSuccessModal(${index})">
+            <div class="success-all-img">${imgHtml}</div>
+            <div class="success-all-info">
+                <div class="success-all-item">${itemName}</div>
+                <div class="success-all-meta">${regionName} · ${dateStr}</div>
+            </div>
+            <div class="success-all-badge">✓</div>
+        </div>`;
+    }).join('');
+
+    modalBody.innerHTML = `
+        <div class="success-all-grid">${cardsHtml}</div>
+        <button class="btn btn-primary btn-cta-success" onclick="document.getElementById('success-modal').style.display='none'; openLostReportModal();" data-i18n="lost.modal.cta">
+            ${ctaText}
+        </button>
+    `;
+
+    const successModal = document.getElementById('success-modal');
+    if (successModal) {
+        successModal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        if (window.pushModalState) window.pushModalState('success-modal');
+    }
+};
+
 
 window.showUpsellQR = function() {
     const qrContainer = document.getElementById('upsell-qr-container');

@@ -197,8 +197,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         }
     </script>
 
-  <script type="module" crossorigin src="/assets/index-BuiHQVNC.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-BlGsuMkM.css">
+  <script type="module" crossorigin src="/assets/index-C4HXXvs0.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-D_f242tq.css">
 </head>
 
 <body>
@@ -229,15 +229,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 <span aria-hidden="true">JEJU LIVE</span>
                 <span class="visually-hidden">Jeju Live — Real-time Jeju Island Travel Information for Foreign Tourists: Weather, Flights, Hallasan, Lost &amp; Found, Festivals | 济州岛实时旅行信息</span>
             </h1>
+            <!-- 간결한 tagline -->
+            <p class="home-tagline" data-i18n="home.tagline">济州旅行 · 实时情报 · 一站搞定</p>
         </div>
         <!-- Home Weather Alert Banner -->
         <div id="home-alerts-container" class="weather-alerts-container" style="display: none; padding: 0 20px; margin-bottom: 20px;"></div>
 
         <div class="home-grid">
-            <button class="home-item item-disabled" disabled type="button">
+            <!-- CCTV 버튼: 8월 신청폼으로 연결 -->
+            <button class="home-item item-cctv-apply" type="button" onclick="openCctvApplyModal()">
                 <span class="item-icon"><i class="ph-duotone ph-video-camera color-cctv"></i></span>
                 <span class="item-label" data-i18n="nav.cctv">实时监控</span>
-                <span class="coming-soon-badge" style="background-color: #f59e0b; color: white;">VIP</span>
+                <span class="coming-soon-badge" style="background-color: #f59e0b; color: white;" data-i18n="cctv.apply.badge">8月预约</span>
             </button>
             <a href="/weather" class="home-item item-weather" onclick="event.preventDefault(); showSection('weather')">
                 <span class="item-icon"><i class="ph-duotone ph-cloud-sun color-weather"></i></span>
@@ -278,6 +281,49 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
 </section>
 
+<!-- ===== 위챗 빠른 연락 플로팅 버튼 ===== -->
+<button id="wechat-float-btn" class="wechat-float-btn" onclick="openWechatQR()" title="WeChat 빠른 연락">
+    <i class="ph-duotone ph-chat-circle-dots"></i>
+</button>
+
+<!-- ===== CCTV 8월 신청 모달 ===== -->
+<div id="cctv-apply-modal" class="modal-overlay" style="display:none; z-index: 10001;" onclick="closeCctvApplyModal()">
+    <div class="modal-content cctv-apply-modal-content" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeCctvApplyModal()">✕</button>
+        <div class="cctv-apply-header">
+            <div class="cctv-apply-icon"><i class="ph-duotone ph-video-camera"></i></div>
+            <h3 data-i18n="cctv.apply.title">济州 CCTV 실시간 서비스</h3>
+            <p data-i18n-html="cctv.apply.desc">8月份 VIP 优先预约开始！<br>抢先体验济州岛实时监控画面。</p>
+        </div>
+        <div class="cctv-apply-body">
+            <div class="cctv-apply-form-group">
+                <label class="cctv-apply-label"><i class="ph-duotone ph-chat-circle"></i> <span data-i18n="cctv.apply.wechat.label">您的微信 ID</span> <span style="color:var(--accent); font-size:0.75rem;">*</span></label>
+                <input type="text" id="cctv-apply-wechat" class="lost-form-input" data-i18n="cctv.apply.wechat.ph" placeholder="请输入您的微信 ID">
+            </div>
+            <div class="cctv-apply-form-group">
+                <label class="cctv-apply-label"><i class="ph-duotone ph-map-pin"></i> <span data-i18n="cctv.apply.region.label">关注的地区</span></label>
+                <select id="cctv-apply-region" class="filter-select" style="width:100%;">
+                    <option value="전체" data-i18n="cctv.apply.region.all">全部地区</option>
+                    <option value="제주시내" data-i18n="cctv.apply.region.jeju">济州市区</option>
+                    <option value="서귀포" data-i18n="cctv.apply.region.seogwipo">西归浦</option>
+                    <option value="해수욕장" data-i18n="cctv.apply.region.beach">海水浴场</option>
+                    <option value="한라산" data-i18n="cctv.apply.region.hallasan">汉拿山</option>
+                </select>
+            </div>
+            <div id="cctv-apply-status" class="form-status" style="display:none;"></div>
+            <div class="cctv-apply-benefits">
+                <div class="benefit-item"><i class="ph-duotone ph-check-circle" style="color:#07c160;"></i> <span data-i18n="cctv.apply.benefit1">8月优先使用资格</span></div>
+                <div class="benefit-item"><i class="ph-duotone ph-check-circle" style="color:#07c160;"></i> <span data-i18n="cctv.apply.benefit2">实时交通 & 海滩状况</span></div>
+                <div class="benefit-item"><i class="ph-duotone ph-check-circle" style="color:#07c160;"></i> <span data-i18n="cctv.apply.benefit3">微信第一时间通知</span></div>
+            </div>
+        </div>
+        <div class="lost-form-actions" style="justify-content: center; width: 100%; padding: 0 0 8px 0;">
+            <button type="button" class="btn btn-secondary" style="flex:1;" onclick="closeCctvApplyModal()" data-i18n="modal.lost.cancel">취소</button>
+            <button id="cctv-apply-submit-btn" class="btn btn-primary" style="flex:1;" onclick="submitCctvApply()" data-i18n="cctv.apply.submit">立即预约</button>
+        </div>
+    </div>
+</div>
+
 <script>
     // 언어 드롭다운 외부 클릭 시 닫기
     document.addEventListener('click', function(event) {
@@ -289,6 +335,91 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             }
         }
     });
+
+    // CCTV 신청 모달 열기/닫기
+    window.openCctvApplyModal = function() {
+        const modal = document.getElementById('cctv-apply-modal');
+        if (modal) {
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            if (window.pushModalState) window.pushModalState();
+        }
+    };
+
+    window.closeCctvApplyModal = function(fromPopState = false) {
+        const modal = document.getElementById('cctv-apply-modal');
+        if (modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+            const statusEl = document.getElementById('cctv-apply-status');
+            if (statusEl) statusEl.style.display = 'none';
+            if (!fromPopState && window.location.hash === '#modal') window.history.back();
+        }
+    };
+
+    // CCTV 신청 제출
+    window.submitCctvApply = async function() {
+        const wechatEl = document.getElementById('cctv-apply-wechat');
+        const regionEl = document.getElementById('cctv-apply-region');
+        const statusEl = document.getElementById('cctv-apply-status');
+        const submitBtn = document.getElementById('cctv-apply-submit-btn');
+
+        const wechatId = wechatEl ? wechatEl.value.trim() : '';
+        const region = regionEl ? regionEl.value : '전체';
+
+        if (!wechatId) {
+            if (statusEl) {
+                statusEl.textContent = window.t ? window.t('lost.report.fill_err') : '请填写完整的信息';
+                statusEl.className = 'form-status error';
+                statusEl.style.display = 'block';
+            }
+            return;
+        }
+
+        try {
+            if (submitBtn) submitBtn.disabled = true;
+            if (statusEl) {
+                statusEl.textContent = window.t ? window.t('alert.submitting') : '提交中...';
+                statusEl.className = 'form-status';
+                statusEl.style.display = 'block';
+            }
+
+            // Google Apps Script를 통해 신청 정보 저장
+            const CONFIG = window.APP_CONFIG || { PROXY_URL: '' };
+            const res = await fetch(`${CONFIG.PROXY_URL || ''}/api/feature-request`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'cctv_apply',
+                    wechat: wechatId,
+                    region: region,
+                    month: '2026-08',
+                    timestamp: new Date().toISOString(),
+                    userAgent: navigator.userAgent
+                })
+            });
+
+            if (res.ok) {
+                if (statusEl) {
+                    statusEl.textContent = window.t ? window.t('cctv.apply.success') : '✅ 预约成功！将通过微信联系您。';
+                    statusEl.className = 'form-status success';
+                    statusEl.style.display = 'block';
+                }
+                if (wechatEl) wechatEl.value = '';
+                setTimeout(() => { window.closeCctvApplyModal(); }, 2500);
+            } else {
+                throw new Error('Server Error');
+            }
+        } catch(e) {
+            if (statusEl) {
+                statusEl.textContent = window.t ? window.t('cctv.apply.error') : '❌ 提交失败，请稍后再试。';
+                statusEl.className = 'form-status error';
+                statusEl.style.display = 'block';
+            }
+        } finally {
+            if (submitBtn) submitBtn.disabled = false;
+        }
+    };
 </script>
 
     <!-- ===== CCTV Section ===== --><section id="cctv" class="app-section"><header class="app-bar"><button class="back-btn" onclick="showSection('home')">←</button><h2 class="bar-title"><i class="ph-duotone ph-webcam color-cctv"></i> 实时监控 (CCTV)</h2></header><div class="cctv-container"><!-- 필터 탭 --><div class="cctv-tabs"><button class="tab-btn active" data-region="all" onclick="filterByRegion('all')">全部</button><button class="tab-btn" data-region="jeju" onclick="filterByRegion('jeju')">济州市</button><button class="tab-btn" data-region="seogwipo" onclick="filterByRegion('seogwipo')">西归浦市</button><button class="tab-btn" data-region="east" onclick="filterByRegion('east')">东部</button><button class="tab-btn" data-region="west" onclick="filterByRegion('west')">西部</button><button class="tab-btn" data-region="udo" onclick="filterByRegion('udo')">牛岛</button></div><div id="cctv-map-wrapper"><svg class="jeju-svg-map" viewBox="0 0 3507 2480" xmlns="http://www.w3.org/2000/svg">
@@ -316,7 +447,91 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="section section-alt">
         <div class="container">
             
-            <!-- View Mode Tabs -->
+            <!-- ① 기상특보 배너 (조건부 최상단 — JS가 특보 없을 때 숨김 처리) -->
+            <div id="weather-alerts-container" class="weather-alerts-top-banner" style="display: none;">
+                <div class="weather-alert-card no-alerts">
+                    <div class="alert-msg" data-i18n="weather.alert.checking">正在检查气象特报...</div>
+                </div>
+            </div>
+
+            <!-- ② 지역 선택 (드롭다운 방식) -->
+            <div class="weather-nav-wrapper" id="weather-nav-wrapper">
+
+                <!-- 접힌 상태: 현재 선택된 지역 버튼 -->
+                <div class="loc-trigger-row">
+                    <button class="loc-selected-btn" id="loc-selected-btn" onclick="window.toggleLocationGrid()">
+                        <i class="ph-duotone ph-map-pin"></i>
+                        <span id="loc-selected-label" data-i18n="weather.loc.jeju">济州市</span>
+                        <i class="ph ph-caret-down loc-caret" id="loc-caret"></i>
+                    </button>
+                    <button id="global-summary-btn" class="header-summary-btn" onclick="window.openWeatherSummaryModal()" style="position: absolute; right: 0;"><i class="ph-duotone ph-chart-bar"></i> <span data-i18n="weather.summary">简略查看</span></button>
+                    <div class="pws-filters" id="pws-filters" style="display: none; position: absolute; right: 0;">
+                        <select class="pws-select" id="pws-year-select"></select>
+                        <select class="pws-select" id="pws-month-select"></select>
+                    </div>
+                </div>
+
+                <!-- 펼쳐진 상태: 전체 그리드 (기본 숨김) -->
+                <div class="location-grid-panel" id="location-grid-panel">
+                    <div class="location-tabs" id="location-tabs">
+                        <!-- Row 1: North + South + West (5 items) -->
+                        <div class="loc-row">
+                            <div class="loc-group-wrapper group-north">
+                                <span class="group-label" data-i18n="weather.group.north">北线</span>
+                                <button class="location-tab active" data-loc="jeju" onclick="switchWeatherLocation('jeju')">
+                                    <span class="tab-name" data-i18n="weather.loc.jeju">济州市</span>
+                                </button>
+                            </div>
+                            <div class="loc-group-wrapper group-south">
+                                <span class="group-label" data-i18n="weather.group.south">南线</span>
+                                <button class="location-tab" data-loc="seogwipo" onclick="switchWeatherLocation('seogwipo')">
+                                    <span class="tab-name" data-i18n="weather.loc.seogwipo">西归浦</span>
+                                </button>
+                            </div>
+                            <div class="loc-group-wrapper group-west">
+                                <span class="group-label" data-i18n="weather.group.west">西线</span>
+                                <button class="location-tab" data-loc="aewol" onclick="switchWeatherLocation('aewol')">
+                                    <span class="tab-name" data-i18n="weather.loc.aewol">涯月</span>
+                                </button>
+                                <button class="location-tab" data-loc="hyeopjae" onclick="switchWeatherLocation('hyeopjae')">
+                                    <span class="tab-name" data-i18n="weather.loc.hyeopjae">挟才</span>
+                                </button>
+                                <button class="location-tab" data-loc="sanbangsan" onclick="switchWeatherLocation('sanbangsan')">
+                                    <span class="tab-name" data-i18n="weather.loc.sanbangsan">山房山</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Row 2: East + Hallasan (5 items) -->
+                        <div class="loc-row">
+                            <div class="loc-group-wrapper group-east">
+                                <span class="group-label" data-i18n="weather.group.east">东线</span>
+                                <button class="location-tab" data-loc="hamdeok" onclick="switchWeatherLocation('hamdeok')">
+                                    <span class="tab-name" data-i18n="weather.loc.hamdeok">咸德</span>
+                                </button>
+                                <button class="location-tab" data-loc="woljeong" onclick="switchWeatherLocation('woljeong')">
+                                    <span class="tab-name" data-i18n="weather.loc.woljeong">月汀</span>
+                                </button>
+                                <button class="location-tab" data-loc="seongsan" onclick="switchWeatherLocation('seongsan')">
+                                    <span class="tab-name" data-i18n="weather.loc.seongsan">日出峰</span>
+                                </button>
+                                <button class="location-tab" data-loc="udo" onclick="switchWeatherLocation('udo')">
+                                    <span class="tab-name" data-i18n="weather.loc.udo">牛岛</span>
+                                </button>
+                            </div>
+                            <div class="loc-group-wrapper group-mountain">
+                                <span class="group-label" data-i18n="weather.group.mountain">山岳</span>
+                                <button class="location-tab" data-loc="hallasan" onclick="switchWeatherLocation('hallasan')">
+                                    <span class="tab-name" data-i18n="weather.loc.hallasan">汉拿山</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ③ 실시간/과거 탭 (지역 선택 이후) -->
             <div class="weather-view-tabs">
                 <button class="view-tab active" data-view="current" onclick="switchWeatherView('current')">
                     <span data-i18n="weather.view.current">실시간 날씨</span>
@@ -326,84 +541,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 </button>
             </div>
 
-            <!-- Regional Navigation Area -->
-            <div class="weather-nav-wrapper">
-                <div class="location-tabs" id="location-tabs">
-                    <!-- Row 1: North + South + West (5 items) -->
-                    <div class="loc-row">
-                        <div class="loc-group-wrapper group-north">
-                            <span class="group-label" data-i18n="weather.group.north">北线</span>
-                            <button class="location-tab active" data-loc="jeju" onclick="switchWeatherLocation('jeju')">
-                                <span class="tab-name" data-i18n="weather.loc.jeju">济州市</span>
-                            </button>
-                        </div>
-                        <div class="loc-group-wrapper group-south">
-                            <span class="group-label" data-i18n="weather.group.south">南线</span>
-                            <button class="location-tab" data-loc="seogwipo" onclick="switchWeatherLocation('seogwipo')">
-                                <span class="tab-name" data-i18n="weather.loc.seogwipo">西归浦</span>
-                            </button>
-                        </div>
-                        <div class="loc-group-wrapper group-west">
-                            <span class="group-label" data-i18n="weather.group.west">西线</span>
-                            <button class="location-tab" data-loc="aewol" onclick="switchWeatherLocation('aewol')">
-                                <span class="tab-name" data-i18n="weather.loc.aewol">涯月</span>
-                            </button>
-                            <button class="location-tab" data-loc="hyeopjae" onclick="switchWeatherLocation('hyeopjae')">
-                                <span class="tab-name" data-i18n="weather.loc.hyeopjae">挟才</span>
-                            </button>
-                            <button class="location-tab" data-loc="sanbangsan" onclick="switchWeatherLocation('sanbangsan')">
-                                <span class="tab-name" data-i18n="weather.loc.sanbangsan">山房山</span>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- Row 2: East + Hallasan (5 items) -->
-                    <div class="loc-row">
-                        <div class="loc-group-wrapper group-east">
-                            <span class="group-label" data-i18n="weather.group.east">东线</span>
-                            <button class="location-tab" data-loc="hamdeok" onclick="switchWeatherLocation('hamdeok')">
-                                <span class="tab-name" data-i18n="weather.loc.hamdeok">咸德</span>
-                            </button>
-                            <button class="location-tab" data-loc="woljeong" onclick="switchWeatherLocation('woljeong')">
-                                <span class="tab-name" data-i18n="weather.loc.woljeong">月汀</span>
-                            </button>
-                            <button class="location-tab" data-loc="seongsan" onclick="switchWeatherLocation('seongsan')">
-                                <span class="tab-name" data-i18n="weather.loc.seongsan">日出峰</span>
-                            </button>
-                            <button class="location-tab" data-loc="udo" onclick="switchWeatherLocation('udo')">
-                                <span class="tab-name" data-i18n="weather.loc.udo">牛岛</span>
-                            </button>
-                        </div>
-                        <div class="loc-group-wrapper group-mountain">
-                            <span class="group-label" data-i18n="weather.group.mountain">山岳</span>
-                            <button class="location-tab" data-loc="hallasan" onclick="switchWeatherLocation('hallasan')">
-                                <span class="tab-name" data-i18n="weather.loc.hallasan">汉拿山</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Current Weather View (Default) -->
             <div id="weather-current-view" class="weather-view-container active">
-                <div id="weather-alerts-container" class="weather-alerts-container" style="display: flex;">
-                    <div class="weather-alert-card no-alerts">
-                    <div class="alert-msg" data-i18n="weather.alert.checking">正在检查气象特报...</div>
-                </div>
-            </div>
 
             <!-- Weather Content Area -->
             <div class="weather-content-wrapper">
                 <!-- Jeju -->
                 <div id="weather-content-jeju" class="location-weather active">
-                    <div class="weather-header-container" id="header-jeju">
-                        <div class="location-info">
-                            <h3 class="location-name" data-i18n="weather.hname.jeju">济州市(莲洞)</h3>
-                        </div>
-                        <div class="header-action-btns">
-                            <button class="header-summary-btn" onclick="window.openWeatherSummaryModal()" ><i class="ph-duotone ph-chart-bar"></i> <span data-i18n="weather.summary">简略查看</span></button>
-                        </div>
-                    </div>
+
                     <div class="naver-card current-compare-card" id="current-card-jeju">
                         <div class="weather-loader"><i class="ph-duotone ph-circle-notch spin" style="font-size: 3rem; color: var(--accent-blue); margin-bottom: 15px;"></i><div class="weather-loading-text" data-i18n="weather.loading">正在加载...</div></div>
                     </div>
@@ -419,14 +564,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
                 <!-- Aewol -->
                 <div id="weather-content-aewol" class="location-weather">
-                    <div class="weather-header-container" id="header-aewol">
-                        <div class="location-info">
-                            <h3 class="location-name" data-i18n="weather.hname.aewol">涯月</h3>
-                        </div>
-                        <div class="header-action-btns">
-                            <button class="header-summary-btn" onclick="window.openWeatherSummaryModal()" ><i class="ph-duotone ph-chart-bar"></i> <span data-i18n="weather.summary">简略查看</span></button>
-                        </div>
-                    </div>
+
                     <div class="naver-card current-compare-card" id="current-card-aewol">
                         <div class="weather-loader"><i class="ph-duotone ph-circle-notch spin" style="font-size: 3rem; color: var(--accent-blue); margin-bottom: 15px;"></i><div class="weather-loading-text" data-i18n="weather.loading">正在加载...</div></div>
                     </div>
@@ -442,14 +580,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
                 <!-- Hyeopjae -->
                 <div id="weather-content-hyeopjae" class="location-weather">
-                    <div class="weather-header-container" id="header-hyeopjae">
-                        <div class="location-info">
-                            <h3 class="location-name" data-i18n="weather.hname.hyeopjae">挟才</h3>
-                        </div>
-                        <div class="header-action-btns">
-                            <button class="header-summary-btn" onclick="window.openWeatherSummaryModal()" ><i class="ph-duotone ph-chart-bar"></i> <span data-i18n="weather.summary">简略查看</span></button>
-                        </div>
-                    </div>
+
                     <div class="naver-card current-compare-card" id="current-card-hyeopjae">
                         <div class="weather-loader"><i class="ph-duotone ph-circle-notch spin" style="font-size: 3rem; color: var(--accent-blue); margin-bottom: 15px;"></i><div class="weather-loading-text" data-i18n="weather.loading">正在加载...</div></div>
                     </div>
@@ -465,14 +596,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
                 <!-- Sanbangsan -->
                 <div id="weather-content-sanbangsan" class="location-weather">
-                    <div class="weather-header-container" id="header-sanbangsan">
-                        <div class="location-info">
-                            <h3 class="location-name" data-i18n="weather.hname.sanbangsan">山房山</h3>
-                        </div>
-                        <div class="header-action-btns">
-                            <button class="header-summary-btn" onclick="window.openWeatherSummaryModal()" ><i class="ph-duotone ph-chart-bar"></i> <span data-i18n="weather.summary">简略查看</span></button>
-                        </div>
-                    </div>
+
                     <div class="naver-card current-compare-card" id="current-card-sanbangsan">
                         <div class="weather-loader"><i class="ph-duotone ph-circle-notch spin" style="font-size: 3rem; color: var(--accent-blue); margin-bottom: 15px;"></i><div class="weather-loading-text" data-i18n="weather.loading">正在加载...</div></div>
                     </div>
@@ -488,14 +612,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
                 <!-- Hamdeok -->
                 <div id="weather-content-hamdeok" class="location-weather">
-                    <div class="weather-header-container" id="header-hamdeok">
-                        <div class="location-info">
-                            <h3 class="location-name" data-i18n="weather.hname.hamdeok">咸德</h3>
-                        </div>
-                        <div class="header-action-btns">
-                            <button class="header-summary-btn" onclick="window.openWeatherSummaryModal()" ><i class="ph-duotone ph-chart-bar"></i> <span data-i18n="weather.summary">简略查看</span></button>
-                        </div>
-                    </div>
+
                     <div class="naver-card current-compare-card" id="current-card-hamdeok">
                         <div class="weather-loader"><i class="ph-duotone ph-circle-notch spin" style="font-size: 3rem; color: var(--accent-blue); margin-bottom: 15px;"></i><div class="weather-loading-text" data-i18n="weather.loading">正在加载...</div></div>
                     </div>
@@ -511,14 +628,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
                 <!-- Woljeong -->
                 <div id="weather-content-woljeong" class="location-weather">
-                    <div class="weather-header-container" id="header-woljeong">
-                        <div class="location-info">
-                            <h3 class="location-name" data-i18n="weather.hname.woljeong">月汀</h3>
-                        </div>
-                        <div class="header-action-btns">
-                            <button class="header-summary-btn" onclick="window.openWeatherSummaryModal()" ><i class="ph-duotone ph-chart-bar"></i> <span data-i18n="weather.summary">简略查看</span></button>
-                        </div>
-                    </div>
+
                     <div class="naver-card current-compare-card" id="current-card-woljeong">
                         <div class="weather-loader"><i class="ph-duotone ph-circle-notch spin" style="font-size: 3rem; color: var(--accent-blue); margin-bottom: 15px;"></i><div class="weather-loading-text" data-i18n="weather.loading">正在加载...</div></div>
                     </div>
@@ -534,14 +644,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
                 <!-- Seogwipo -->
                 <div id="weather-content-seogwipo" class="location-weather">
-                    <div class="weather-header-container" id="header-seogwipo">
-                        <div class="location-info">
-                            <h3 class="location-name" data-i18n="weather.hname.seogwipo">西归浦</h3>
-                        </div>
-                        <div class="header-action-btns">
-                            <button class="header-summary-btn" onclick="window.openWeatherSummaryModal()" ><i class="ph-duotone ph-chart-bar"></i> <span data-i18n="weather.summary">简略查看</span></button>
-                        </div>
-                    </div>
+
                     <div class="naver-card current-compare-card" id="current-card-seogwipo">
                         <div class="weather-loader"><i class="ph-duotone ph-circle-notch spin" style="font-size: 3rem; color: var(--accent-blue); margin-bottom: 15px;"></i><div class="weather-loading-text" data-i18n="weather.loading">正在加载...</div></div>
                     </div>
@@ -557,14 +660,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
                 <!-- Seongsan -->
                 <div id="weather-content-seongsan" class="location-weather">
-                    <div class="weather-header-container" id="header-seongsan">
-                        <div class="location-info">
-                            <h3 class="location-name" data-i18n="weather.hname.seongsan">城山日出峰</h3>
-                        </div>
-                        <div class="header-action-btns">
-                            <button class="header-summary-btn" onclick="window.openWeatherSummaryModal()" ><i class="ph-duotone ph-chart-bar"></i> <span data-i18n="weather.summary">简略查看</span></button>
-                        </div>
-                    </div>
+
                     <div class="naver-card current-compare-card" id="current-card-seongsan">
                         <div class="weather-loader"><i class="ph-duotone ph-circle-notch spin" style="font-size: 3rem; color: var(--accent-blue); margin-bottom: 15px;"></i><div class="weather-loading-text" data-i18n="weather.loading">正在加载...</div></div>
                     </div>
@@ -580,14 +676,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
                 <!-- Udo -->
                 <div id="weather-content-udo" class="location-weather">
-                    <div class="weather-header-container" id="header-udo">
-                        <div class="location-info">
-                            <h3 class="location-name" data-i18n="weather.hname.udo">牛岛</h3>
-                        </div>
-                        <div class="header-action-btns">
-                            <button class="header-summary-btn" onclick="window.openWeatherSummaryModal()" ><i class="ph-duotone ph-chart-bar"></i> <span data-i18n="weather.summary">简略查看</span></button>
-                        </div>
-                    </div>
+
                     <div class="naver-card current-compare-card" id="current-card-udo">
                         <div class="weather-loader"><i class="ph-duotone ph-circle-notch spin" style="font-size: 3rem; color: var(--accent-blue); margin-bottom: 15px;"></i><div class="weather-loading-text" data-i18n="weather.loading">正在加载...</div></div>
                     </div>
@@ -603,14 +692,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
                 <!-- Hallasan -->
                 <div id="weather-content-hallasan" class="location-weather">
-                    <div class="weather-header-container" id="header-hallasan">
-                        <div class="location-info">
-                            <h3 class="location-name" data-i18n="weather.hname.hallasan">汉拿山(城板岳)</h3>
-                        </div>
-                        <div class="header-action-btns">
-                            <button class="header-summary-btn" onclick="window.openWeatherSummaryModal()" ><i class="ph-duotone ph-chart-bar"></i> <span data-i18n="weather.summary">简略查看</span></button>
-                        </div>
-                    </div>
+
                     <div class="naver-card current-compare-card" id="current-card-hallasan">
                         <div class="weather-loader"><i class="ph-duotone ph-circle-notch spin" style="font-size: 3rem; color: var(--accent-blue); margin-bottom: 15px;"></i><div class="weather-loading-text" data-i18n="weather.loading">正在加载...</div></div>
                     </div>
@@ -630,16 +712,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <div id="weather-past-view" class="weather-view-container" style="display: none;">
                 <!-- Summary Card -->
                 <div class="past-weather-summary naver-card">
-                    <div class="pws-header">
-                        <div class="pws-title">
-                            <i class="ph-duotone ph-calendar-check color-cloud"></i> 
-                            <span id="pws-title-text">제주시 6월 날씨 요약</span>
-                        </div>
-                        <div class="pws-filters">
-                            <select class="pws-select" id="pws-year-select"></select>
-                            <select class="pws-select" id="pws-month-select"></select>
-                        </div>
-                    </div>
                     <div class="pws-stats-row-top">
                         <div class="pws-stat-item">
                             <span class="pws-stat-label" data-i18n="weather.past.avg_temp">평균 기온</span>
@@ -655,15 +727,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     <div class="pws-stats-row-bottom">
                         <div class="pws-stat-item">
                             <span class="pws-stat-label" data-i18n="weather.past.rain_days">비 온 날</span>
-                            <span class="pws-stat-val p-blue" id="pws-rain-days">--일</span>
+                            <span class="pws-stat-val p-blue" id="pws-rain-days">--</span>
                         </div>
                         <div class="pws-stat-item">
                             <span class="pws-stat-label" data-i18n="weather.past.cloudy_days">흐린 날</span>
-                            <span class="pws-stat-val p-gray" id="pws-cloudy-days">--일</span>
+                            <span class="pws-stat-val p-gray" id="pws-cloudy-days">--</span>
                         </div>
                         <div class="pws-stat-item">
                             <span class="pws-stat-label" data-i18n="weather.past.clear_days">맑은 날</span>
-                            <span class="pws-stat-val p-orange" id="pws-clear-days">--일</span>
+                            <span class="pws-stat-val p-orange" id="pws-clear-days">--</span>
                         </div>
                     </div>
                     <div class="pws-tip-box" id="pws-tip-box">
@@ -819,8 +891,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="container">
             <div class="lost-header-row" style="margin-top: 10px;">
                 <div class="lost-filter-container search-filter-box">
-                    <div class="filter-row">
-                        <select id="pkupCmdtyLclsfCd" class="filter-select" onchange="fetchFoundGoodsManual()">
+                    <div class="filter-row" style="display:flex;gap:10px;">
+                        <select id="lostRegionCd" class="filter-select" onchange="fetchFoundGoodsManual()" style="flex:1;">
+                            <option value="LCP000" data-i18n="lost.region.jeju" selected>제주</option>
+                            <option value="LCA000" data-i18n="lost.region.seoul">서울</option>
+                            <option value="LCT000" data-i18n="lost.region.busan">부산</option>
+                        </select>
+                        <select id="pkupCmdtyLclsfCd" class="filter-select" onchange="fetchFoundGoodsManual()" style="flex:2;">
                             <option value="" data-i18n="lost.category">选择物品分类</option>
                             <option value="PRA000" data-i18n="cat.bag">包类</option>
                             <option value="PRO000" data-i18n="cat.jewelry">首饰</option>
@@ -866,16 +943,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     </div>
                 </div>
 
-                <!-- 분실물 신고 및 이미지 검색 버튼 -->
+                <!-- 분실물 수색 및 추적 의뢰 버튼 -->
                 <div class="action-row">
-                    <button class="lost-report-btn btn btn-secondary" onclick="openLostReportModal()" data-i18n="lost.report.btn">
-                        <i class="ph-duotone ph-pencil-simple" style="color: var(--label-secondary);"></i>
+                    <button class="lost-report-btn btn btn-primary" onclick="openLostReportModal()" style="width: 100%;">
+                        <i class="ph-duotone ph-magnifying-glass-plus"></i> <span data-i18n="lost.report.btn">분실물 등록 및 추적 요청하기</span>
                     </button>
-                    <button class="btn btn-primary" onclick="document.getElementById('imageSearchInput').click()" style="position: relative;">
-                        <i class="ph-duotone ph-camera"></i> <span data-i18n="lost.search.image">사진으로 물건찾기</span>
-                        <span class="badge-beta">BETA</span>
-                    </button>
-                    <input type="file" id="imageSearchInput" accept="image/*" style="display: none;" onchange="handleImageSearch(event)">
                 </div>
                 <div id="lost-result-count" class="lost-result-count"></div>
                 <div class="view-toggle-container">
@@ -885,7 +957,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     <button id="btn-view-table" class="view-toggle-btn" onclick="switchLostView('table')">
                         <i class="ph-duotone ph-list-dashes" style="font-size: 1.15rem;"></i><span data-i18n="lost.view.table">表格模式</span>
                     </button>
+                    <button id="btn-success-all" class="view-toggle-btn success-toggle-btn" onclick="openSuccessAllModal()">
+                        <i class="ph-duotone ph-trophy" style="font-size: 1.15rem;"></i><span data-i18n="lost.success.view_all">성공사례</span>
+                    </button>
                 </div>
+
             </div>
             <div id="lost-goods-grid" class="lost-goods-grid active">
                 <div class="lost-notice-board" style="grid-column: 1 / -1; padding: 24px 20px; background: var(--color-bg-card); border-radius: 12px; margin-top: 10px; text-align: left; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-left: 4px solid #D1D5DB;">
@@ -898,7 +974,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         <div>
                             <h4 style="margin: 0 0 8px 0; color: var(--label-primary); font-size: 15px; display: flex; align-items: center; gap: 6px;"><i class="ph-fill ph-book-open" style="color: #3182f6;"></i> <span data-i18n="lost.notice.howto">사용 방법</span></h4>
                             <ul style="padding-left: 20px; color: var(--color-text-sub); line-height: 1.6; font-size: 13.5px; margin: 0;">
-                                <li style="margin-bottom: 6px;" data-i18n-html="lost.notice.how1">원하는 <b>날짜</b>와 <b>분류</b>를 선택 후 검색 버튼을 누르면 조회됩니다.</li>
+                                <li style="margin-bottom: 6px;" data-i18n-html="lost.notice.how1">원하는 <b>지역</b>, <b>날짜</b>, <b>분류</b>를 선택 후 검색 버튼을 누르면 조회됩니다.</li>
                                 <li style="margin-bottom: 6px;" data-i18n-html="lost.notice.how2"><b>카드 모드</b>: 사진이 등록된 습득물만 빠르게 훑어볼 수 있습니다.</li>
                                 <li style="margin-bottom: 0;" data-i18n-html="lost.notice.how3"><b>표 모드</b>: 사진이 없는 물품을 포함한 모든 상세 정보를 확인할 수 있습니다.</li>
                             </ul>
@@ -921,8 +997,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         <tr>
                             <th data-i18n="lost.th.photo">照片</th>
                             <th data-i18n="lost.th.category">分类</th>
-                            <th data-i18n="lost.th.name">物品名</th>
-                            <th data-i18n="lost.th.status">状态</th>
+                            <th data-i18n="lost.th.name" style="max-width: 15em;">物品名</th>
                             <th data-i18n="lost.th.date">拾获日期</th>
                             <th data-i18n="lost.th.location">保管地点</th>
                             <th data-i18n="lost.th.number">管理编号</th>
@@ -1201,54 +1276,146 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <button class="modal-close" onclick="closeLostReportModal()">✕</button>
         <div class="lost-report-header">
             <h3 data-i18n="modal.lost.title"><i class="ph-duotone ph-pencil-simple"></i> 登记报失物品</h3>
+            <div class="marquee-container" style="cursor: default; margin-top: 15px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid var(--separator);">
+                <div class="marquee-content" id="modal-success-marquee-content">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
             <p data-i18n="modal.lost.desc">请填写以下信息，我们将协助您在 LOST112 登记。 (填写越详细找回概率越高)</p>
         </div>
-        <div class="lost-report-body">
-            <div class="lost-form-group">
-                <label class="lost-form-label"><i class="ph-duotone ph-map-pin"></i> <span data-i18n="modal.lost.loc.label">丢失地点</span></label>
-                <textarea id="lost-report-location" class="lost-form-textarea" data-i18n="modal.lost.loc.ph" placeholder="例如：西归浦每日奥来市场, 红色出租车内, GD咖啡厅2层靠窗位..."></textarea>
+        <div class="lost-report-body progressive-form">
+            <div class="progress-container">
+                <div class="progress-dot active" id="lost-step-dot-1"></div>
+                <div class="progress-dot" id="lost-step-dot-2"></div>
+                <div class="progress-dot" id="lost-step-dot-3"></div>
             </div>
-            
-            <div class="lost-form-row">
-                <div class="lost-form-group">
-                    <label class="lost-form-label"><i class="ph-duotone ph-calendar"></i> <span data-i18n="modal.lost.date.label">丢失日期</span></label>
-                    <input type="date" id="lost-report-date" class="lost-form-input">
+
+            <!-- STEP 1: Item Info -->
+            <div class="lost-step active" id="lost-step-1">
+                <div class="step-title required-field" data-i18n="modal.lost.step1.title">📦 무엇을 잃어버리셨나요?</div>
+                <div class="step-desc" data-i18n="modal.lost.step1.desc">분실한 물건의 종류를 선택해주세요.</div>
+                
+                <div class="chip-group" id="item-category-chips">
+                    <button type="button" class="lost-chip" data-value="스마트폰" data-i18n="modal.lost.cat.phone">📱 스마트폰</button>
+                    <button type="button" class="lost-chip" data-value="시계/이어폰" data-i18n="modal.lost.cat.wearable">⌚ 시계/이어폰</button>
+                    <button type="button" class="lost-chip" data-value="카메라" data-i18n="modal.lost.cat.camera">📷 카메라</button>
+                    <button type="button" class="lost-chip" data-value="지갑" data-i18n="modal.lost.cat.wallet">👛 지갑</button>
+                    <button type="button" class="lost-chip" data-value="가방/캐리어" data-i18n="modal.lost.cat.bag">💼 가방/캐리어</button>
+                    <button type="button" class="lost-chip" data-value="의류" data-i18n="modal.lost.cat.clothes">👕 의류</button>
+                    <button type="button" class="lost-chip" data-value="여권" data-i18n="modal.lost.cat.passport">📘 여권</button>
+                    <button type="button" class="lost-chip" data-value="기타" data-i18n="modal.lost.cat.other">📦 기타</button>
                 </div>
+                <input type="hidden" id="lost-report-item-category">
+
                 <div class="lost-form-group">
-                    <label class="lost-form-label"><i class="ph-duotone ph-clock"></i> <span data-i18n="modal.lost.time.label">大概时间</span></label>
-                    <input type="time" id="lost-report-time" class="lost-form-input">
+                    <label class="lost-form-label"><span data-i18n="modal.lost.spec.label">물품 상세 설명</span></label>
+                    <textarea id="lost-report-specifics" class="lost-form-textarea" data-i18n="modal.lost.spec.ph" placeholder="색상, 브랜드, 모델명, 특징 등을 상세히 적어주세요."></textarea>
                 </div>
-            </div>
-
-            <div class="lost-form-group">
-                <label class="lost-form-label"><i class="ph-duotone ph-package"></i> <span data-i18n="modal.lost.item.label">物品名称</span></label>
-                <input type="text" id="lost-report-item" class="lost-form-input" data-i18n="modal.lost.item.ph" placeholder="例如：黑色iPhone 15, 棕色古驰钱包, 蓝色背包...">
-            </div>
-
-            <div class="lost-form-group">
-                <label class="lost-form-label"><i class="ph-duotone ph-magnifying-glass-plus"></i> <span data-i18n="modal.lost.spec.label">物品特征</span></label>
-                <textarea id="lost-report-specifics" class="lost-form-textarea" data-i18n="modal.lost.spec.ph" placeholder="请详细描述物品特征, 帮助我们精准匹配..."></textarea>
-            </div>
-
-            <div class="lost-form-row" style="align-items: flex-start;">
+                
                 <div class="lost-form-group">
-                    <label class="lost-form-label"><i class="ph-duotone ph-camera"></i> <span data-i18n="modal.lost.photo.label">选择文件</span> <span style="font-weight:700; font-size:0.75rem; color:var(--accent);">*</span></label>
+                    <label class="lost-form-label"><span data-i18n="modal.lost.photo.label" class="required-field">사진 첨부</span></label>
                     <div class="lost-form-file-wrap">
                         <input type="file" id="lost-report-photo" class="lost-form-file-input" accept="image/*" onchange="handleLostImageChange(event)">
                     </div>
                     <div id="lost-report-photo-preview" class="photo-preview" style="display: none; margin-top: 10px; border-radius: 8px; overflow: hidden; border: 1px solid var(--separator);"></div>
                 </div>
-                <div class="lost-form-group">
-                    <label class="lost-form-label"><i class="ph-duotone ph-chat-circle"></i> <span data-i18n="modal.lost.wechat.label">您的微信 ID</span> <span style="font-weight:700; font-size:0.75rem; color:var(--accent);">*</span></label>
-                    <input type="text" id="lost-report-name" class="lost-form-input" data-i18n="modal.lost.name.ph" placeholder="您的姓名">
+            </div>
+
+            <!-- STEP 2: Location Info -->
+            <div class="lost-step" id="lost-step-2">
+                <div class="step-title required-field" data-i18n="modal.lost.step2.title">📍 어디서 잃어버리셨나요?</div>
+                
+                <div class="step-desc" style="margin-top:10px; margin-bottom:5px;" data-i18n="modal.lost.city.label">지역 (도시)</div>
+                <div class="chip-group" id="city-category-chips">
+                    <button type="button" class="lost-chip" data-value="제주" data-i18n="modal.lost.city.jeju">🌴 제주</button>
+                    <button type="button" class="lost-chip" data-value="서울" data-i18n="modal.lost.city.seoul">🏙️ 서울</button>
+                    <button type="button" class="lost-chip" data-value="부산" data-i18n="modal.lost.city.busan">🌊 부산</button>
+                </div>
+                <input type="hidden" id="lost-report-city-category">
+
+                <div class="step-desc" style="margin-top:10px; margin-bottom:5px;" data-i18n="modal.lost.loc_type.label">상세 장소</div>
+                
+                <div class="chip-group" id="region-category-chips">
+                    <button type="button" class="lost-chip" data-value="공항" data-i18n="modal.lost.loc.airport">✈️ 공항</button>
+                    <button type="button" class="lost-chip" data-value="호텔" data-i18n="modal.lost.loc.hotel">🏨 호텔</button>
+                    <button type="button" class="lost-chip" data-value="버스" data-i18n="modal.lost.loc.bus">🚌 버스</button>
+                    <button type="button" class="lost-chip" data-value="택시" data-i18n="modal.lost.loc.taxi">🚕 택시</button>
+                    <button type="button" class="lost-chip" data-value="기타" data-i18n="modal.lost.loc.other">📍 기타</button>
+                </div>
+                <input type="hidden" id="lost-report-region-category">
+
+                <!-- Subfields: Date/Time (Common for Airport/Other/Hotel) -->
+                <div class="sub-fields" id="sub-common-datetime">
+                    <div class="lost-form-row">
+                        <div class="lost-form-group">
+                            <label class="lost-form-label"><span data-i18n="modal.lost.date.label">분실 날짜</span></label>
+                            <input type="date" id="lost-report-date" class="lost-form-input">
+                        </div>
+                        <div class="lost-form-group">
+                            <label class="lost-form-label"><span data-i18n="modal.lost.time.label">대략적인 시간</span></label>
+                            <input type="time" id="lost-report-time" class="lost-form-input">
+                        </div>
+                    </div>
+                    <div class="lost-form-group" id="sub-detail-location-group">
+                        <label class="lost-form-label"><span data-i18n="modal.lost.detail_loc.label">상세 위치 (선택)</span></label>
+                        <input type="text" id="lost-report-detail-location" class="lost-form-input" data-i18n="modal.lost.detail_loc.ph" placeholder="예: 3번 게이트 앞, 스타벅스 애월점...">
+                    </div>
+                </div>
+
+                <!-- Subfields: Hotel -->
+                <div class="sub-fields" id="sub-hotel">
+                    <div class="lost-form-group">
+                        <label class="lost-form-label"><span data-i18n="modal.lost.hotel.name">호텔명</span></label>
+                        <input type="text" id="lost-report-hotel-name" class="lost-form-input" placeholder="e.g. Shilla Hotel (영문)">
+                    </div>
+                    <div class="lost-form-group">
+                        <label class="lost-form-label"><span data-i18n="modal.lost.hotel.booker">예약자명</span></label>
+                        <input type="text" id="lost-report-hotel-booker" class="lost-form-input" placeholder="e.g. Hong Gildong (영문)">
+                    </div>
+                    <div class="lost-form-group">
+                        <label class="lost-form-label"><span data-i18n="modal.lost.hotel.dates">체크인/체크아웃 날짜</span></label>
+                        <input type="text" id="lost-report-hotel-dates" class="lost-form-input" placeholder="예: 12/01 ~ 12/03">
+                    </div>
+                </div>
+
+                <!-- Subfields: Taxi/Bus -->
+                <div class="sub-fields" id="sub-vehicle">
+                    <div class="lost-form-group">
+                        <label class="lost-form-label"><span data-i18n="modal.lost.vehicle.no">차량 번호 (선택)</span></label>
+                        <input type="text" id="lost-report-car-no" class="lost-form-input" placeholder="예: 제주 12바 3456, 365번 버스">
+                    </div>
+                    <div class="lost-form-row">
+                        <div class="lost-form-group">
+                            <label class="lost-form-label"><span data-i18n="modal.lost.vehicle.board_loc">승차 장소</span></label>
+                            <input type="text" id="lost-report-board-loc" class="lost-form-input" placeholder="승차 장소">
+                            <input type="time" id="lost-report-board-time" class="lost-form-input" style="margin-top: 5px;">
+                        </div>
+                        <div class="lost-form-group">
+                            <label class="lost-form-label"><span data-i18n="modal.lost.vehicle.alight_loc">하차 장소</span></label>
+                            <input type="text" id="lost-report-alight-loc" class="lost-form-input" placeholder="하차 장소">
+                            <input type="time" id="lost-report-alight-time" class="lost-form-input" style="margin-top: 5px;">
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div id="lost-report-status" class="form-status"></div>
+            <!-- STEP 3: Contact Info & Submit -->
+            <div class="lost-step" id="lost-step-3">
+                <div class="step-title" data-i18n="modal.lost.step3.title">💬 연락처 정보</div>
+                <div class="step-desc" data-i18n="modal.lost.step3.desc">분실물을 찾았을 때 연락드릴 위챗 ID를 정확히 남겨주세요.</div>
+                
+                <div class="lost-form-group">
+                    <label class="lost-form-label"><i class="ph-duotone ph-chat-circle"></i> <span data-i18n="modal.lost.wechat.label" class="required-field">위챗 ID</span></label>
+                    <input type="text" id="lost-report-wechat" class="lost-form-input" data-i18n="modal.lost.name.ph" placeholder="위챗 ID를 입력해주세요">
+                </div>
+                
+                <div id="lost-report-status" class="form-status"></div>
+            </div>
             
-            <div class="lost-form-actions" style="justify-content: center; width: 100%;">
-                <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="closeLostReportModal()" data-i18n="modal.lost.cancel">취소</button>
-                <button id="lost-report-submit-btn" class="btn btn-primary" style="flex: 1;" onclick="submitLostReport()" data-i18n="modal.lost.submit">분실물 등록하기</button>
+            <div class="lost-form-actions step-actions">
+                <button type="button" class="btn btn-secondary" id="btn-lost-prev" onclick="prevLostStep()" style="display: none;" data-i18n="modal.lost.btn_prev">이전</button>
+                <button type="button" class="btn btn-primary" id="btn-lost-next" onclick="nextLostStep()" style="flex: 1;" data-i18n="modal.lost.btn_next">다음</button>
+                <button type="button" id="lost-report-submit-btn" class="btn btn-primary" style="display: none; flex: 1;" onclick="event.preventDefault(); submitLostReport()" data-i18n="modal.lost.submit">분실물 등록하기</button>
             </div>
         </div>
     </div>
@@ -1332,11 +1499,35 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
 </div>
 
+<!-- ===== Lost Upsell Modal ===== -->
+<div id="lost-upsell-modal" class="modal-overlay" style="display:none; z-index: 10005;" onclick="closeLostUpsellModal()">
+    <div class="modal-content" style="max-width: 400px; text-align: center; padding: 30px 20px;" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeLostUpsellModal()">✕</button>
+        <div style="font-size: 3rem; color: var(--color-orange); margin-bottom: 15px;"><i class="ph-duotone ph-rocket-launch"></i></div>
+        <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 10px; color: var(--text-primary);" data-i18n="modal.upsell.title">접수는 완료되었습니다!</h3>
+        <p style="font-size: 0.95rem; color: var(--label-secondary); margin-bottom: 25px; line-height: 1.5;" data-i18n-html="modal.upsell.desc">
+            하지만 시스템에 등록만 해두면 찾는 데 오래 걸릴 수 있습니다.<br><br>
+            <b>단 10위안</b>에 전담 직원이 주변 호텔, 택시 등에 직접 전화를 돌려 <b>3~7일간 집중 수색 및 추적</b>을 시작할까요?
+        </p>
+        
+        <div id="upsell-qr-container" style="display:none; margin-bottom: 20px;">
+            <p style="font-size: 0.85rem; color: var(--accent); margin-bottom: 10px; font-weight: 600;" data-i18n="modal.upsell.qr_guide">👇 위챗페이로 10위안 결제 시 즉시 수색 시작 👇</p>
+            <img src="/assets/wechat_qr.png" style="width: 180px; height: 180px; border-radius: 8px; border: 1px solid #eee;">
+            <p style="font-size: 0.75rem; color: var(--label-tertiary); margin-top: 10px;" data-i18n="modal.upsell.qr_note">결제 시 꼭 비고란에 성함을 남겨주세요.</p>
+        </div>
+
+        <div id="upsell-action-btns" style="display: flex; flex-direction: column; gap: 10px;">
+            <button class="btn btn-primary" onclick="showUpsellQR()" style="width: 100%; padding: 12px; font-size: 1rem; font-weight: 700; background: var(--color-orange); border: none;" data-i18n="modal.upsell.accept">🚀 네, 10위안에 전담 수색 시작하기</button>
+            <button class="btn btn-secondary" onclick="closeLostUpsellModal()" style="width: 100%; background: transparent; border: none; color: var(--label-secondary); text-decoration: underline;" data-i18n="modal.upsell.decline">아니요, 괜찮습니다. 접수만 할게요.</button>
+        </div>
+    </div>
+</div>
+
 
 
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-    <script src="assets/libs/hls.min.js" crossorigin="anonymous"></script>
-    <script src="assets/curated_festivals.js"></script>
+    <script src="/assets/libs/hls.min.js" crossorigin="anonymous"></script>
+    <script src="/assets/curated_festivals.js"></script>
 </body>
 
 </html>

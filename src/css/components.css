@@ -119,6 +119,8 @@
     align-items: center;
     justify-content: center;
     gap: var(--space-2); /* 8px */
+    white-space: nowrap;
+    word-break: keep-all;
 }
 
 /* Apple HIG: 활성 탭 — 흰 배경 + 섀도우 (iOS Segmented 표준) */
@@ -991,3 +993,117 @@ i.ph-duotone.hover-scale:hover {
     color: var(--label-tertiary);
     margin-top: 2px;
 }
+
+/* ==================== 성공 사례 CTA — 마키 & 토글 영역 ==================== */
+
+/* 마키 내 CTA 슬롯: 오렌지 배경 강조 슬롯 */
+.marquee-cta-slot {
+    background: linear-gradient(90deg, rgba(224, 140, 58, 0.18), rgba(224, 140, 58, 0.30), rgba(224, 140, 58, 0.18));
+    color: #b85c00;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+.marquee-cta-slot::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -60%;
+    width: 40%; height: 100%;
+    background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.55) 50%, transparent 70%);
+    animation: marquee-cta-shine 2.8s ease-in-out infinite;
+}
+@keyframes marquee-cta-shine {
+    0%   { left: -60%; }
+    60%  { left: 120%; }
+    100% { left: 120%; }
+}
+
+/* 성공 사례 토글 버튼 (view-toggle-btn 스타일 기반) */
+.view-toggle-btn.success-toggle-btn {
+    color: #E08C3A; /* 주황빛 텍스트 */
+    font-weight: 700;
+}
+.view-toggle-btn.success-toggle-btn:active,
+.view-toggle-btn.success-toggle-btn.active {
+    background: rgba(224, 140, 58, 0.1);
+    color: #d1782b;
+}
+
+/* 성공 사례 전체 목록 그리드 */
+.success-all-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 4px 0 16px;
+    max-height: 55vh;
+    overflow-y: auto;
+}
+.success-all-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: var(--fill-tertiary);
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.15s ease;
+    position: relative;
+}
+.success-all-card:hover {
+    background: var(--fill-secondary);
+    transform: translateX(3px);
+}
+.success-all-card:active {
+    transform: scale(0.98);
+}
+.success-all-img {
+    width: 52px;
+    height: 52px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--fill-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--label-tertiary);
+    font-size: 1.4rem;
+}
+.success-all-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.success-all-info {
+    flex: 1;
+    min-width: 0;
+}
+.success-all-item {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--label-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.success-all-meta {
+    font-size: 0.78rem;
+    color: var(--label-secondary);
+    margin-top: 2px;
+}
+.success-all-badge {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(22, 163, 74, 0.15);
+    color: #16a34a;
+    font-size: 0.8rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
