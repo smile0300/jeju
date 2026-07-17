@@ -764,34 +764,7 @@ window.handleImageSearch = async function(event) {
 };
 
 export async function fetchSuccessStories() {
-    const defaultData = [
-        {
-            Date: "2026-06-17",
-            WeChatId: "wang***",
-            Region: "上海",
-            Item: "iPhone 15",
-            Quote: "刚开始还半信半疑，没想到顺路就能赚点奶茶钱，失主拿到手机也非常激动！",
-            Reward: 200,
-            Timeline: "2시간",
-            Delivery: "上海浦东机场顺丰快递",
-            Place: "济州神话世界大堂",
-            Icon: "ph-device-mobile",
-            ItemImg: ""
-        },
-        {
-            Date: "2026-06-16",
-            WeChatId: "li***",
-            Region: "北京",
-            Item: "Gucci 钱包",
-            Quote: "钱包里面有重要的证件，多亏了济州实时平台的旅客帮忙，太感谢了！",
-            Reward: 300,
-            Timeline: "반나절",
-            Delivery: "北京首都机场面交",
-            Place: "济州市内咖啡馆",
-            Icon: "ph-wallet",
-            ItemImg: ""
-        }
-    ];
+    const defaultData = [];
 
     let data = defaultData;
 
