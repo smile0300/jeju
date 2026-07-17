@@ -192,13 +192,16 @@ function extractImageLabels(base64Data) {
 }
 
 /**
- * GET 요청 시 RewardList 시트의 데이터를 JSON으로 반환합니다.
- * 프론트엔드에서 /api/reward-list 호출 시 동작합니다.
+ * GET 요청 시 데이터를 JSON으로 반환합니다.
+ * ?action=success -> SuccessStories 시트 반환
+ * 기본값 -> RewardList 시트 반환
  */
 function doGet(e) {
   try {
+    var action = (e.parameter && e.parameter.action) ? e.parameter.action : '';
     var ss = SpreadsheetApp.openById(SHEET_ID);
-    var sheet = ss.getSheetByName('RewardList');
+    var sheetName = (action === 'success') ? 'SuccessStories' : 'RewardList';
+    var sheet = ss.getSheetByName(sheetName);
     
     if (!sheet) {
       return ContentService.createTextOutput(JSON.stringify([])).setMimeType(ContentService.MimeType.JSON);
