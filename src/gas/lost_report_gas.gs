@@ -32,9 +32,16 @@ function doPost(e) {
     }
     // -- [END] 이미지 검색 엔드포인트 처리 --
 
-    if (data.type === 'lost_report' || data.type === 'feature') {
+    if (data.type === 'lost_report' || data.type === 'feature' || data.type === 'cctv_apply') {
       var ss = SpreadsheetApp.openById(SHEET_ID);
-      var sheetName = (data.type === 'lost_report') ? 'LostReport' : 'FeatureRequest';
+      var sheetName;
+      if (data.type === 'lost_report') {
+        sheetName = 'LostReport';
+      } else if (data.type === 'feature') {
+        sheetName = 'FeatureRequest';
+      } else if (data.type === 'cctv_apply') {
+        sheetName = 'VIP';
+      }
       var sheet = ss.getSheetByName(sheetName);
       
       if (!sheet) {
@@ -46,8 +53,10 @@ function doPost(e) {
             'CarNumber', 'BoardLoc', 'BoardTime', 'AlightLoc', 'AlightTime', 
             'PhotoURL', 'WechatId', 'UserAgent', 'Labels'
           ]);
-        } else {
+        } else if (data.type === 'feature') {
           sheet.appendRow(['Timestamp', 'Feature', 'Contact', 'UserAgent']);
+        } else if (data.type === 'cctv_apply') {
+          sheet.appendRow(['Timestamp', 'WechatId', 'Region', 'StartDate', 'EndDate', 'UserAgent']);
         }
       }
 
@@ -95,6 +104,15 @@ function doPost(e) {
           data.feature,
           data.contact,
           data.userAgent
+        ];
+      } else if (data.type === 'cctv_apply') {
+         resultRow = [
+          timestamp,
+          data.wechat || '',
+          data.region || '',
+          data.startDate || '',
+          data.endDate || '',
+          data.userAgent || ''
         ];
       }
 

@@ -100,11 +100,25 @@
                     <option value="한라산" data-i18n="cctv.apply.region.hallasan">汉拿山</option>
                 </select>
             </div>
+            <div class="cctv-apply-form-group">
+                <label class="cctv-apply-label">
+                    <span><i class="ph-duotone ph-calendar-blank"></i> <span data-i18n="cctv.apply.date.label">预约期间</span></span>
+                    <span class="cctv-price-badge" data-i18n="cctv.apply.price">10元/天</span>
+                </label>
+                <div class="date-range-wrap">
+                    <input type="date" id="cctv-apply-start" class="date-input" onchange="calculateCctvPrice()">
+                    <span class="date-separator">~</span>
+                    <input type="date" id="cctv-apply-end" class="date-input" onchange="calculateCctvPrice()">
+                </div>
+                <div id="cctv-price-preview" class="cctv-price-preview" style="display:none;"></div>
+            </div>
             <div id="cctv-apply-status" class="form-status" style="display:none;"></div>
             <div class="cctv-apply-benefits">
                 <div class="benefit-item"><i class="ph-duotone ph-check-circle" style="color:#07c160;"></i> <span data-i18n="cctv.apply.benefit1">8月优先使用资格</span></div>
                 <div class="benefit-item"><i class="ph-duotone ph-check-circle" style="color:#07c160;"></i> <span data-i18n="cctv.apply.benefit2">实时交通 & 海滩状况</span></div>
                 <div class="benefit-item"><i class="ph-duotone ph-check-circle" style="color:#07c160;"></i> <span data-i18n="cctv.apply.benefit3">微信第一时间通知</span></div>
+                <div class="benefit-item"><i class="ph-duotone ph-check-circle" style="color:#07c160;"></i> <span data-i18n="cctv.apply.benefit4">实时天气预警通知</span></div>
+                <div class="benefit-item"><i class="ph-duotone ph-check-circle" style="color:#07c160;"></i> <span data-i18n="cctv.apply.benefit5">航班延误实时提醒</span></div>
             </div>
         </div>
         <div class="lost-form-actions" style="justify-content: center; width: 100%; padding: 0 0 8px 0;">
@@ -144,6 +158,29 @@
             const statusEl = document.getElementById('cctv-apply-status');
             if (statusEl) statusEl.style.display = 'none';
             if (!fromPopState && window.location.hash === '#modal') window.history.back();
+    };
+
+    window.calculateCctvPrice = function() {
+        const startEl = document.getElementById('cctv-apply-start');
+        const endEl = document.getElementById('cctv-apply-end');
+        const previewEl = document.getElementById('cctv-price-preview');
+        
+        if (startEl.value && endEl.value) {
+            const start = new Date(startEl.value);
+            const end = new Date(endEl.value);
+            const diffTime = end - start;
+            
+            if (diffTime >= 0) {
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // Inclusive of start day
+                const totalPrice = diffDays * 10;
+                const daysText = window.t ? window.t('cctv.apply.total_days_format').replace('{n}', diffDays) : `共 ${diffDays} 天`;
+                previewEl.innerHTML = `<span>${daysText}</span> · <strong class="total-price">${totalPrice} 元</strong>`;
+                previewEl.style.display = 'flex';
+            } else {
+                previewEl.style.display = 'none';
+            }
+        } else {
+            previewEl.style.display = 'none';
         }
     };
 
@@ -154,10 +191,15 @@
         const statusEl = document.getElementById('cctv-apply-status');
         const submitBtn = document.getElementById('cctv-apply-submit-btn');
 
+        const startEl = document.getElementById('cctv-apply-start');
+        const endEl = document.getElementById('cctv-apply-end');
+
         const wechatId = wechatEl ? wechatEl.value.trim() : '';
         const region = regionEl ? regionEl.value : '전체';
+        const startDate = startEl ? startEl.value : '';
+        const endDate = endEl ? endEl.value : '';
 
-        if (!wechatId) {
+        if (!wechatId || !startDate || !endDate) {
             if (statusEl) {
                 statusEl.textContent = window.t ? window.t('lost.report.fill_err') : '请填写完整的信息';
                 statusEl.className = 'form-status error';
@@ -183,6 +225,8 @@
                     type: 'cctv_apply',
                     wechat: wechatId,
                     region: region,
+                    startDate: startDate,
+                    endDate: endDate,
                     month: '2026-08',
                     timestamp: new Date().toISOString(),
                     userAgent: navigator.userAgent
