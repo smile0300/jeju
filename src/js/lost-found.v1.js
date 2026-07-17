@@ -1026,12 +1026,23 @@ window.openSuccessModal = function(index) {
     }
 }
 
+window.successVisibleCount = 5;
+
+window.loadMoreSuccessStories = function() {
+    window.successVisibleCount += 5;
+    window.lostApp.renderSuccessGoodsView(true);
+};
+
 // 성공 사례 전체 목록을 메인 탭 뷰에 렌더링
-export function renderSuccessGoodsView() {
+export function renderSuccessGoodsView(isLoadMore = false) {
     const data = window.successStoriesData;
 
     const container = document.getElementById('lost-success-container');
     if (!container) return;
+
+    if (!isLoadMore) {
+        window.successVisibleCount = 5;
+    }
 
     const lang = window.currentLanguage || 'zh';
     const ctaText = window.t ? window.t('lost.modal.cta') : '내 분실물도 의뢰하기';
@@ -1052,8 +1063,13 @@ export function renderSuccessGoodsView() {
         return;
     }
 
+    const visibleData = data.slice(0, window.successVisibleCount);
+
     // 전체 목록을 카드 그리드로 렌더링
-    const cardsHtml = data.map((item, index) => {
+    const cardsHtml = visibleData.map((item, idx) => {
+        // Find actual index in data array for openSuccessModal
+        const actualIndex = data.indexOf(item);
+        
         let itemName = item.Item;
         if (lang === 'zh' && item.Item_zh) itemName = item.Item_zh;
         if (lang === 'en' && item.Item_en) itemName = item.Item_en;
@@ -1082,19 +1098,29 @@ export function renderSuccessGoodsView() {
             : `<i class="ph-duotone ph-package"></i>`;
 
         return `
-        <div class="success-all-card" onclick="openSuccessModal(${index})">
+        <div class="success-all-card" onclick="openSuccessModal(${actualIndex})">
             <div class="success-all-img">${imgHtml}</div>
             <div class="success-all-info">
                 <div class="success-all-item">${itemName}</div>
                 <div class="success-all-meta">${regionName} · ${dateStr}</div>
             </div>
-            <div class="success-all-badge">✓</div>
         </div>`;
     }).join('');
 
+    const hasMore = window.successVisibleCount < data.length;
+    const loadMoreText = window.t ? window.t('common.load_more') : '더보기';
+    const loadMoreHtml = hasMore 
+        ? `<div style="text-align: center; margin-top: 16px; padding: 0 16px;">
+               <button onclick="loadMoreSuccessStories()" style="width: 100%; padding: 12px; background: transparent; border: 1px solid var(--separator); color: var(--label-secondary); border-radius: 8px; font-weight: 500; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;">
+                   ${loadMoreText} <i class="ph-bold ph-caret-down"></i>
+               </button>
+           </div>`
+        : '';
+
     container.innerHTML = `
         <div class="success-all-grid">${cardsHtml}</div>
-        <div style="text-align: center; margin-top: 10px;">
+        ${loadMoreHtml}
+        <div style="text-align: center; margin-top: 16px; margin-bottom: 24px;">
             <button class="btn btn-primary btn-cta-success" onclick="openLostReportModal();" data-i18n="lost.modal.cta">
                 ${ctaText}
             </button>

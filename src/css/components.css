@@ -1041,8 +1041,8 @@ i.ph-duotone.hover-scale:hover {
 .success-all-card {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 10px 12px;
+    gap: 16px;
+    padding: 16px;
     border-radius: 12px;
     background: var(--fill-tertiary);
     cursor: pointer;
@@ -1057,9 +1057,9 @@ i.ph-duotone.hover-scale:hover {
     transform: scale(0.98);
 }
 .success-all-img {
-    width: 52px;
-    height: 52px;
-    border-radius: 10px;
+    width: 68px;
+    height: 68px;
+    border-radius: 12px;
     overflow: hidden;
     background: var(--fill-secondary);
     display: flex;
@@ -1079,7 +1079,7 @@ i.ph-duotone.hover-scale:hover {
     min-width: 0;
 }
 .success-all-item {
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-weight: 700;
     color: var(--label-primary);
     white-space: nowrap;
@@ -1087,9 +1087,9 @@ i.ph-duotone.hover-scale:hover {
     text-overflow: ellipsis;
 }
 .success-all-meta {
-    font-size: 0.78rem;
+    font-size: 0.85rem;
     color: var(--label-secondary);
-    margin-top: 2px;
+    margin-top: 4px;
 }
 .success-all-badge {
     width: 24px;
