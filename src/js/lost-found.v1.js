@@ -127,19 +127,26 @@ export function switchLostView(mode) {
     currentLostView = mode;
     const btnCard = document.getElementById('btn-view-card');
     const btnTable = document.getElementById('btn-view-table');
+    const btnSuccess = document.getElementById('btn-success-all');
     const grid = document.getElementById('lost-goods-grid');
     const tableContainer = document.getElementById('lost-goods-table-container');
+    const successContainer = document.getElementById('lost-success-container');
 
     btnCard?.classList.toggle('active', mode === 'card');
     btnTable?.classList.toggle('active', mode === 'table');
-    grid?.classList.toggle('active', mode === 'card');
-    tableContainer?.classList.toggle('active', mode === 'table');
+    btnSuccess?.classList.toggle('active', mode === 'success');
+    
+    if(grid) grid.style.display = mode === 'card' ? '' : 'none';
+    if(tableContainer) tableContainer.style.display = mode === 'table' ? '' : 'none';
+    if(successContainer) successContainer.style.display = mode === 'success' ? 'block' : 'none';
 
     if (mode === 'card') {
         const cardItems = cachedLostItems.filter(item => item.img && item.img.trim() !== '' && !item.img.includes('img02_no_img.gif'));
         renderLostGoods(grid, cardItems);
-    } else {
+    } else if (mode === 'table') {
         renderLostGoodsTable(cachedLostItems);
+    } else if (mode === 'success') {
+        renderSuccessGoodsView();
     }
 }
 
@@ -836,12 +843,6 @@ function renderSuccessMarquee(data) {
                    .replace('{id}', maskId(item.WeChatId))
                    .replace('{item}', itemName);
         slots.push(`<span class="marquee-item" style="cursor:pointer;" onclick="openSuccessModal(${i})">${text}</span>`);
-
-        // 5번째마다 (1-indexed: 5, 10, 15...) CTA 슬롯 삽입
-        if ((i + 1) % 5 === 0) {
-            const ctaLabel = window.t ? window.t('lost.success.view_all') : '🏆 성공 사례 모두 보기';
-            slots.push(`<span class="marquee-item marquee-cta-slot" onclick="openSuccessAllModal()">${ctaLabel}</span>`);
-        }
     });
     const itemsHtml = slots.join('');
 
@@ -873,10 +874,8 @@ function renderSuccessMarquee(data) {
         modalMarqueeContainer.innerHTML = itemsHtml + firstClone;
     }
 
-    // Dynamic Animation — CTA 슬롯 포함한 총 슬롯 수 기준으로 계산
-    const totalItems = data.length;
-    const ctaCount = Math.floor(totalItems / 5); // 삽입된 CTA 슬롯 수
-    const totalSlots = totalItems + ctaCount;    // 실제 렌더링된 총 슬롯 수
+    // Dynamic Animation — 전체 아이템 기준 계산
+    const totalSlots = data.length;
     let styleEl = document.getElementById('dynamic-marquee-style');
     if (!styleEl) {
         styleEl = document.createElement('style');
@@ -1027,36 +1026,29 @@ window.openSuccessModal = function(index) {
     }
 }
 
-// 성공 사례 전체 목록 모달
-window.openSuccessAllModal = function() {
+// 성공 사례 전체 목록을 메인 탭 뷰에 렌더링
+export function renderSuccessGoodsView() {
     const data = window.successStoriesData;
 
-    const modalBody = document.getElementById('success-modal-body');
-    const modalTitle = document.querySelector('#success-modal .modal-title');
-    if (!modalBody) return;
+    const container = document.getElementById('lost-success-container');
+    if (!container) return;
 
     const lang = window.currentLanguage || 'zh';
-    const allLabel = window.t ? window.t('lost.success.all_title') : '성공 사례 모두 보기';
     const ctaText = window.t ? window.t('lost.modal.cta') : '내 분실물도 의뢰하기';
-    if (modalTitle) modalTitle.innerHTML = `<i class="ph-duotone ph-trophy color-lost"></i> <span>${allLabel}</span>`;
 
     // 데이터 없음 / 로딩 중 상태
     if (!data || data.length === 0) {
-        modalBody.innerHTML = `
+        container.innerHTML = `
             <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 48px 16px; gap: 12px; color: var(--label-secondary);">
                 <i class="ph-duotone ph-circle-notch spin" style="font-size: 2.5rem; color: var(--label-tertiary);"></i>
                 <p style="font-size: 0.9rem; margin: 0;">데이터를 불러오는 중...</p>
             </div>
-            <button class="btn btn-primary btn-cta-success" onclick="document.getElementById('success-modal').style.display='none'; openLostReportModal();" data-i18n="lost.modal.cta">
-                ${ctaText}
-            </button>
+            <div style="text-align: center; margin-top: 10px;">
+                <button class="btn btn-primary btn-cta-success" onclick="openLostReportModal();" data-i18n="lost.modal.cta">
+                    ${ctaText}
+                </button>
+            </div>
         `;
-        const successModal = document.getElementById('success-modal');
-        if (successModal) {
-            successModal.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-            if (window.pushModalState) window.pushModalState('success-modal');
-        }
         return;
     }
 
@@ -1100,19 +1092,14 @@ window.openSuccessAllModal = function() {
         </div>`;
     }).join('');
 
-    modalBody.innerHTML = `
+    container.innerHTML = `
         <div class="success-all-grid">${cardsHtml}</div>
-        <button class="btn btn-primary btn-cta-success" onclick="document.getElementById('success-modal').style.display='none'; openLostReportModal();" data-i18n="lost.modal.cta">
-            ${ctaText}
-        </button>
+        <div style="text-align: center; margin-top: 10px;">
+            <button class="btn btn-primary btn-cta-success" onclick="openLostReportModal();" data-i18n="lost.modal.cta">
+                ${ctaText}
+            </button>
+        </div>
     `;
-
-    const successModal = document.getElementById('success-modal');
-    if (successModal) {
-        successModal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-        if (window.pushModalState) window.pushModalState('success-modal');
-    }
 };
 
 
@@ -1137,6 +1124,7 @@ window.lostApp = {
     switchLostView,
     renderLostGoods,
     renderLostGoodsTable,
+    renderSuccessGoodsView,
     openLostDetailModalByIndex,
     handleImageSearch,
     fetchSuccessStories

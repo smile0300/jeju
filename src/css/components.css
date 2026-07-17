@@ -1037,8 +1037,6 @@ i.ph-duotone.hover-scale:hover {
     flex-direction: column;
     gap: 10px;
     padding: 4px 0 16px;
-    max-height: 55vh;
-    overflow-y: auto;
 }
 .success-all-card {
     display: flex;
