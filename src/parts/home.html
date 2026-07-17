@@ -91,16 +91,6 @@
                 <input type="text" id="cctv-apply-wechat" class="lost-form-input" data-i18n="cctv.apply.wechat.ph" placeholder="请输入您的微信 ID">
             </div>
             <div class="cctv-apply-form-group">
-                <label class="cctv-apply-label"><i class="ph-duotone ph-map-pin"></i> <span data-i18n="cctv.apply.region.label">关注的地区</span></label>
-                <select id="cctv-apply-region" class="filter-select" style="width:100%;">
-                    <option value="전체" data-i18n="cctv.apply.region.all">全部地区</option>
-                    <option value="제주시내" data-i18n="cctv.apply.region.jeju">济州市区</option>
-                    <option value="서귀포" data-i18n="cctv.apply.region.seogwipo">西归浦</option>
-                    <option value="해수욕장" data-i18n="cctv.apply.region.beach">海水浴场</option>
-                    <option value="한라산" data-i18n="cctv.apply.region.hallasan">汉拿山</option>
-                </select>
-            </div>
-            <div class="cctv-apply-form-group">
                 <label class="cctv-apply-label">
                     <span><i class="ph-duotone ph-calendar-blank"></i> <span data-i18n="cctv.apply.date.label">预约期间</span></span>
                     <span class="cctv-price-badge" data-i18n="cctv.apply.price">10元/天</span>
@@ -188,7 +178,6 @@
     // CCTV 신청 제출
     window.submitCctvApply = async function() {
         const wechatEl = document.getElementById('cctv-apply-wechat');
-        const regionEl = document.getElementById('cctv-apply-region');
         const statusEl = document.getElementById('cctv-apply-status');
         const submitBtn = document.getElementById('cctv-apply-submit-btn');
 
@@ -196,7 +185,6 @@
         const endEl = document.getElementById('cctv-apply-end');
 
         const wechatId = wechatEl ? wechatEl.value.trim() : '';
-        const region = regionEl ? regionEl.value : '전체';
         const startDate = startEl ? startEl.value : '';
         const endDate = endEl ? endEl.value : '';
 
@@ -225,7 +213,6 @@
                 body: JSON.stringify({
                     type: 'cctv_apply',
                     wechat: wechatId,
-                    region: region,
                     startDate: startDate,
                     endDate: endDate,
                     month: '2026-08',
