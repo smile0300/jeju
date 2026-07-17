@@ -289,6 +289,14 @@ window.nextLostStep = function() {
         if (!city) { alert(window.t ? window.t('lost.report.city_err') : '지역(도시)을 선택해주세요.'); return; }
         const reg = document.getElementById('lost-report-region-category')?.value;
         if (!reg) { alert(window.t ? window.t('lost.report.reg_err') : '장소를 선택해주세요.'); return; }
+        
+        if (reg === '버스') {
+            const carNo = document.getElementById('lost-report-car-no')?.value.trim();
+            if (!carNo) {
+                alert(window.t ? window.t('lost.report.car_no_err') : '버스 번호를 입력해주세요.');
+                return;
+            }
+        }
     }
     
     if (currentLostStep < MAX_LOST_STEP) {
@@ -377,6 +385,16 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (val === '택시' || val === '버스') {
                 const subVehicle = document.getElementById('sub-vehicle');
                 if (subVehicle) subVehicle.classList.add('active');
+                
+                // 버스일 경우 차량번호(버스번호) 필수 표시
+                const vehicleLabel = document.querySelector('span[data-i18n="modal.lost.vehicle.no"]');
+                if (vehicleLabel) {
+                    if (val === '버스') {
+                        vehicleLabel.classList.add('required-field');
+                    } else {
+                        vehicleLabel.classList.remove('required-field');
+                    }
+                }
             } else {
                 // 공항/기타의 경우 기본 날짜/시간 폼만 표시
                 const subCommon = document.getElementById('sub-common-datetime');
