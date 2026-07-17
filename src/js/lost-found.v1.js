@@ -136,9 +136,17 @@ export function switchLostView(mode) {
     btnTable?.classList.toggle('active', mode === 'table');
     btnSuccess?.classList.toggle('active', mode === 'success');
     
-    if(grid) grid.style.display = mode === 'card' ? '' : 'none';
-    if(tableContainer) tableContainer.style.display = mode === 'table' ? '' : 'none';
-    if(successContainer) successContainer.style.display = mode === 'success' ? 'block' : 'none';
+    if (grid) {
+        grid.style.display = '';
+        grid.classList.toggle('active', mode === 'card');
+    }
+    if (tableContainer) {
+        tableContainer.style.display = '';
+        tableContainer.classList.toggle('active', mode === 'table');
+    }
+    if (successContainer) {
+        successContainer.style.display = mode === 'success' ? 'block' : 'none';
+    }
 
     if (mode === 'card') {
         const cardItems = cachedLostItems.filter(item => item.img && item.img.trim() !== '' && !item.img.includes('img02_no_img.gif'));
