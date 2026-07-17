@@ -165,7 +165,8 @@
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // Inclusive of start day
                 const totalPrice = diffDays * 10;
                 const daysText = window.t ? window.t('cctv.apply.total_days_format').replace('{n}', diffDays) : `共 ${diffDays} 天`;
-                previewEl.innerHTML = `<span>${daysText}</span> · <strong class="total-price">${totalPrice} 元</strong>`;
+                const currency = window.t ? window.t('cctv.apply.currency') : '元';
+                previewEl.innerHTML = `<span>${daysText}</span> · <strong class="total-price">${totalPrice} ${currency}</strong>`;
                 previewEl.style.display = 'flex';
             } else {
                 previewEl.style.display = 'none';

@@ -222,17 +222,21 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .date-input {
     flex: 1;
-    padding: 12px 14px;
+    min-width: 0;
+    padding: 12px 8px;
     border-radius: 8px;
     border: 1px solid var(--separator);
     background: var(--bg-primary);
     color: var(--label-primary);
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-family: inherit;
+    box-sizing: border-box;
 }
 
 .date-separator {
