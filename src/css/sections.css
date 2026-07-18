@@ -5045,3 +5045,11 @@ body:not(.page-home) .wechat-float-btn {
     justify-content: center;
 }
 
+
+@media (min-width: 640px) {
+    .weather-alert-card {
+        max-width: 640px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
