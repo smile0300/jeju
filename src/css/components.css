@@ -1057,8 +1057,8 @@ i.ph-duotone.hover-scale:hover {
     transform: scale(0.98);
 }
 .success-all-img {
-    width: 68px;
-    height: 68px;
+    width: 136px;
+    height: 136px;
     border-radius: 12px;
     overflow: hidden;
     background: var(--fill-secondary);
