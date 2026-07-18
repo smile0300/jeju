@@ -1156,9 +1156,9 @@ export function renderSuccessGoodsView(isLoadMore = false) {
         const caseId = item.CaseId ? item.CaseId.toString().trim() : '';
         const stepNum = parseInt(item.Step, 10) || 0;
         let STEP_LABELS;
-        if (lang === 'ko') STEP_LABELS = ['접수', '배정', '수색', '발견', '완료'];
-        else if (lang === 'en') STEP_LABELS = ['Received', 'Assigned', 'Search', 'Found', 'Complete'];
-        else STEP_LABELS = ['收到', '分配', '寻找', '找到', '完成'];
+        if (lang === 'ko') STEP_LABELS = ['접수', '배정', '수색중', '발견', '발송'];
+        else if (lang === 'en') STEP_LABELS = ['Received', 'Assigned', 'Searching', 'Found', 'Sent'];
+        else STEP_LABELS = ['收到', '分配', '寻找中', '找到', '发货'];
         const stepBarHtml = caseId ? (() => {
             const dots = STEP_LABELS.map((label, i) => {
                 const n = i + 1;
