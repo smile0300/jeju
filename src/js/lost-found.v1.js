@@ -844,8 +844,18 @@ export async function fetchSuccessStories() {
         data = defaultData; // 확실하게 fallback 데이터 사용
     }
 
-    // 최신순으로 정렬 (내림차순)
-    data.sort((a, b) => new Date(b.Date) - new Date(a.Date));
+    // 최신순으로 정렬 (CaseId 번호 기준 내림차순, 없으면 Date 기준 내림차순)
+    data.sort((a, b) => {
+        const getNum = (id) => {
+            if (!id) return 0;
+            const match = String(id).match(/\d+/);
+            return match ? parseInt(match[0], 10) : 0;
+        };
+        const numA = getNum(a.CaseId);
+        const numB = getNum(b.CaseId);
+        if (numA !== numB) return numB - numA;
+        return new Date(b.Date || 0) - new Date(a.Date || 0);
+    });
 
     window.successStoriesData = data;
     renderSuccessMarquee(data);
