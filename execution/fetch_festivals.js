@@ -69,7 +69,6 @@ async function fetchFestivals() {
             if (!clicked) {
                 console.log(`  ⚠️ ${m.month}월 탭을 찾을 수 없음, 해당 월 건너뜀`);
                 festivalData.months[m.ym] = [];
-                await page.close();
                 continue;
             }
 

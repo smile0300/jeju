@@ -135,7 +135,7 @@ export function switchLostView(mode) {
     btnCard?.classList.toggle('active', mode === 'card');
     btnTable?.classList.toggle('active', mode === 'table');
     btnSuccess?.classList.toggle('active', mode === 'success');
-    
+
     if (grid) {
         grid.style.display = '';
         grid.classList.toggle('active', mode === 'card');
@@ -796,7 +796,34 @@ window.handleImageSearch = async function(event) {
 };
 
 export async function fetchSuccessStories() {
-    const defaultData = [];
+    const defaultData = [
+        {
+            Date: "2026-07-18",
+            WeChatId: "demo1",
+            Region: "제주 버스",
+            Region_en: "Jeju Bus",
+            Region_zh: "济州公交",
+            Item: "검정색 가방",
+            Item_en: "Black Bag",
+            Item_zh: "黑色包",
+            ItemImg: "https://drive.google.com/thumbnail?id=1XE0JCPcp1Mq7s8NkYttcudzFOLmCeNrp&sz=w400",
+            CaseId: "JEJU-0042",
+            Step: "3"
+        },
+        {
+            Date: "2026-07-17",
+            WeChatId: "demo2",
+            Region: "제주 공항 1터미널",
+            Region_en: "Jeju Airport T1",
+            Region_zh: "济州机场 T1",
+            Item: "아이폰 15",
+            Item_en: "iPhone 15",
+            Item_zh: "苹果 15",
+            ItemImg: "https://drive.google.com/thumbnail?id=1XE0JCPcp1Mq7s8NkYttcudzFOLmCeNrp&sz=w400",
+            CaseId: "JEJU-0041",
+            Step: "5"
+        }
+    ];
 
     let data = defaultData;
 
@@ -814,6 +841,7 @@ export async function fetchSuccessStories() {
         }
     } catch (e) {
         console.warn('Failed to fetch success stories from Google Sheets. Using fallback data.', e);
+        data = defaultData; // 확실하게 fallback 데이터 사용
     }
 
     // 최신순으로 정렬 (내림차순)
@@ -1123,12 +1151,39 @@ export function renderSuccessGoodsView(isLoadMore = false) {
             ? `<img src="${imgUrl}" alt="${itemName}" loading="lazy" onerror="this.parentElement.innerHTML='<i class=\\'ph-duotone ph-package\\'></i>'">`
             : `<i class="ph-duotone ph-package"></i>`;
 
+        // 접수번호 + 스텝바 (CaseId 컬럼이 있을 때만 표시)
+        const caseId = item.CaseId ? item.CaseId.toString().trim() : '';
+        const stepNum = parseInt(item.Step, 10) || 0;
+        let STEP_LABELS;
+        if (lang === 'ko') STEP_LABELS = ['접수', '배정', '수색', '발견', '완료'];
+        else if (lang === 'en') STEP_LABELS = ['Received', 'Assigned', 'Search', 'Found', 'Complete'];
+        else STEP_LABELS = ['收到', '分配', '寻找', '找到', '完成'];
+        const stepBarHtml = caseId ? (() => {
+            const dots = STEP_LABELS.map((label, i) => {
+                const n = i + 1;
+                let cls = 'sc-step-dot';
+                if (n < stepNum) cls += ' done';
+                else if (n === stepNum) cls += ' current';
+                else cls += ' pending';
+                return `<span class="${cls}" title="${label}"></span>`;
+            }).join('<span class="sc-step-line"></span>');
+            const statusLabel = stepNum >= 1 && stepNum <= 5 ? STEP_LABELS[stepNum - 1] : '';
+            const isDone = stepNum >= 5;
+            return `
+                <div class="sc-case-id"># ${caseId}</div>
+                <div class="sc-step-bar">
+                    <div class="sc-step-dots">${dots}</div>
+                    <span class="sc-step-status ${isDone ? 'done' : ''}">${statusLabel}</span>
+                </div>`;
+        })() : '';
+
         return `
         <div class="success-all-card" onclick="openSuccessModal(${actualIndex})">
             <div class="success-all-img">${imgHtml}</div>
             <div class="success-all-info">
                 <div class="success-all-item">${itemName}</div>
                 <div class="success-all-meta">${regionName} · ${dateStr}</div>
+                ${stepBarHtml}
             </div>
         </div>`;
     }).join('');

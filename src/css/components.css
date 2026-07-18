@@ -1105,3 +1105,76 @@ i.ph-duotone.hover-scale:hover {
     flex-shrink: 0;
 }
 
+/* ==================== 성공사례 카드 — 접수번호 + 스텝바 ==================== */
+.sc-case-id {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--label-tertiary);
+    margin-top: 8px;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.3px;
+}
+
+.sc-step-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+    flex-wrap: nowrap;
+    overflow: hidden;
+}
+
+.sc-step-dots {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-shrink: 0;
+}
+
+/* 각 단계 점 */
+.sc-step-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: background 0.2s ease;
+}
+.sc-step-dot.done {
+    background: #16a34a;
+}
+.sc-step-dot.current {
+    background: var(--accent, #3182f6);
+    box-shadow: 0 0 0 2px rgba(49, 130, 246, 0.25);
+    animation: sc-dot-pulse 1.8s ease-in-out infinite;
+}
+.sc-step-dot.pending {
+    background: var(--fill-secondary, #e5e7eb);
+    border: 1.5px dashed var(--separator, #d1d5db);
+    width: 8px;
+    height: 8px;
+}
+
+/* 점 사이 연결선 */
+.sc-step-line {
+    width: 14px;
+    height: 2px;
+    background: var(--separator, #d1d5db);
+    flex-shrink: 0;
+}
+
+/* 현재 단계 라벨 */
+.sc-step-status {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--accent, #3182f6);
+    white-space: nowrap;
+}
+.sc-step-status.done {
+    color: #16a34a;
+}
+
+@keyframes sc-dot-pulse {
+    0%, 100% { box-shadow: 0 0 0 2px rgba(49, 130, 246, 0.25); }
+    50%       { box-shadow: 0 0 0 4px rgba(49, 130, 246, 0.12); }
+}
+

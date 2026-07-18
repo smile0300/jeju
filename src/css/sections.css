@@ -1,5 +1,5 @@
 /* ==================== Lost Report Modal Form ==================== */
-/* (modals.html에서 이전됨 — 인라인 <style> 블록 제거) */
+/* (modals.html?�서 ?�전?????�라??<style> 블록 ?�거) */
 .lost-report-form-content {
     padding: 32px 24px 24px 24px;
     max-width: 520px !important;
@@ -335,7 +335,7 @@
     height: 100%;
     display: block;
     object-fit: cover;
-    /* ?�면 ?�림 방�?�??�해 기본?�?cover, ?�요??contain */
+    /* ?�면 ?�림 방�?�??�해 기본?�?cover, ?�요??contain */
 }
 
 /* Modal specific CCTV styles */
@@ -352,7 +352,7 @@
     width: 100%;
     height: 100%;
     object-fit: contain;
-    /* ???�면?�서??가로세�?비율 ?��? 권장 */
+    /* ???�면?�서??가로세�?비율 ?��? 권장 */
 }
 
 .cctv-modal-info {
@@ -383,7 +383,7 @@
 }
 
 #festival .ad-container::before {
-    content: '광고 로드 �?..';
+    content: '광고 로드 �?..';
     position: absolute;
     top: 50%;
     left: 50%;
@@ -455,7 +455,7 @@
     margin-top: 12px;
 }
 
-/* 접힘 상태: 선택된 지역 표시 트리거 버튼 */
+/* ?�힘 ?�태: ?�택??지???�시 ?�리�?버튼 */
 .loc-trigger-row {
     display: flex;
     align-items: center;
@@ -497,7 +497,7 @@
     color: #2563EB;
 }
 
-/* 화살표 아이콘: 펼침 시 회전 */
+/* ?�살???�이�? ?�침 ???�전 */
 .loc-caret {
     font-size: 0.85rem;
     color: #2563EB;
@@ -528,7 +528,7 @@
     flex-direction: column !important;
     width: 100% !important;
     padding: 14px 0 4px 0 !important;
-    /* 상단 14px: group-label(top:-10px) 잘림 방지 */
+    /* ?�단 14px: group-label(top:-10px) ?�림 방�? */
     margin-top: 2px !important;
     gap: 0 !important;
 }
@@ -553,20 +553,20 @@
     display: none !important;
 }
 
-/* 그룹 컨테이너 (내부 버튼 간격도 Grid 간격과 완벽 일치) */
+/* 그룹 컨테?�너 (?��? 버튼 간격??Grid 간격�??�벽 ?�치) */
 .loc-group-wrapper {
     display: flex !important;
     align-items: stretch !important;
     gap: 8px !important;
-    /* 부모 간격과 동일하게 8px */
+    /* 부�?간격�??�일?�게 8px */
     position: relative !important;
     padding: 0 !important;
-    /* 모든 패딩 제거하여 버튼 크기/간격 일치 */
+    /* 모든 ?�딩 ?�거?�여 버튼 ?�기/간격 ?�치 */
     border-radius: 0 !important;
     background: transparent !important;
 }
 
-/* 5개의 컬럼에 맞게 그룹별로 차지하는 칸 수(Span) 지정 */
+/* 5개의 컬럼??맞게 그룹별로 차�??�는 �???Span) 지??*/
 .group-north {
     grid-column: span 1;
 }
@@ -587,7 +587,7 @@
     grid-column: span 1;
 }
 
-/* 라벨: 첫번째 버튼 상단 좌측 꼭지점에 기울어진 뱃지 형태로 배치 */
+/* ?�벨: 첫번�?버튼 ?�단 좌측 �???�에 기울?�진 뱃�? ?�태�?배치 */
 .group-label {
     display: inline-block !important;
     position: absolute !important;
@@ -604,10 +604,10 @@
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08) !important;
     border: 1px solid rgba(0, 0, 0, 0.04) !important;
     pointer-events: none !important;
-    /* 클릭 방해 방지 */
+    /* ?�릭 방해 방�? */
 }
 
-/* 라벨 텍스트 색상 지역별 맞춤 변경 */
+/* ?�벨 ?�스???�상 지??�� 맞춤 변�?*/
 .group-north .group-label {
     color: #2563EB !important;
 }
@@ -634,7 +634,7 @@
     min-width: 50px !important;
     background: var(--bg-primary);
     padding: 9px 0;
-    /* border 1px 추가로 인한 패딩 미세조정 */
+    /* border 1px 추�?�??�한 ?�딩 미세조정 */
     border-radius: var(--radius-md);
     cursor: pointer;
     transition: all var(--duration-fast) var(--ease-out);
@@ -650,7 +650,7 @@
     transform: scale(0.97);
 }
 
-/* 지역별 탭 기본 테두리 (미선택 상태) - 은은한 틴트 */
+/* 지??�� ??기본 ?�두�?(미선???�태) - ?�?�???�트 */
 .group-north .location-tab {
     border: 1px solid rgba(37, 99, 235, 0.25) !important;
 }
@@ -671,7 +671,7 @@
     border: 1px solid rgba(139, 90, 43, 0.25) !important;
 }
 
-/* 지역별 활성(Active) 탭 테마 컬러 */
+/* 지??�� ?�성(Active) ???�마 컬러 */
 .location-tab.active {
     box-shadow: none;
     border-color: transparent !important;
@@ -771,8 +771,8 @@
 .temp-value {
     font-size: 2.8rem;
     font-weight: 700;
-    /* Heavy → Bold */
-    /* Apple HIG: 단색 — 그라데이션 제거 */
+    /* Heavy ??Bold */
+    /* Apple HIG: ?�색 ??그라?�이???�거 */
     color: var(--label-primary);
 }
 
@@ -866,7 +866,7 @@
 }
 
 
-/* 최상단 기상특보 배너 (조건부 표시) */
+/* 최상??기상?�보 배너 (조건부 ?�시) */
 .weather-alerts-top-banner {
     width: 100%;
     margin-top: 12px;
@@ -886,7 +886,7 @@
     }
 }
 
-/* 기존 weather-alerts-container (사용되지 않으나 홈화면에서 사용 중) */
+/* 기존 weather-alerts-container (?�용?��? ?�으???�화면에???�용 �? */
 .weather-alerts-container {
     width: 100%;
     margin-top: 10px;
@@ -1079,9 +1079,9 @@
 .subsection-title,
 .cmp-cur-weather-head {
     margin: 40px 0 24px 0;
-    /* 여백 확대 */
+    /* ?�백 ?��? */
     font-size: 1.35rem;
-    /* 폰트 증대 */
+    /* ?�트 증�? */
     font-weight: 800;
     text-align: center;
     width: 100%;
@@ -1260,7 +1260,7 @@
     color: #10b981;
 }
 
-/* �?- Green */
+/* �?- Green */
 .air-lv2 {
     stroke: #f59e0b;
     color: #f59e0b;
@@ -1468,7 +1468,7 @@
     color: white;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     white-space: nowrap;
-    /* 뱃지는 줄바꿈 안함 */
+    /* 뱃�???줄바�??�함 */
 }
 
 .trail-status-badge.open {
@@ -1528,7 +1528,7 @@
     font-size: 0.75rem;
     font-weight: 800;
     color: var(--label-primary);
-    /* white-space: nowrap 제거 */
+    /* white-space: nowrap ?�거 */
     word-break: keep-all;
     text-align: center;
     width: 100%;
@@ -1543,9 +1543,9 @@
     border-top: 1px dashed var(--border-light);
     padding-top: 8px;
     flex-wrap: nowrap;
-    /* 줄바�?방�? */
+    /* 줄바�?방�? */
     gap: 5px;
-    /* ?�소 �?최소 간격 */
+    /* ?�소 �?최소 간격 */
 }
 
 .trail-info-compact span {
@@ -1553,9 +1553,9 @@
     font-weight: 700;
     color: var(--text-muted);
     white-space: nowrap;
-    /* ?�스??줄바�?방�? */
+    /* ?�스??줄바�?방�? */
     flex-shrink: 0;
-    /* ?�소가 줄어?��? ?�도�??�정 */
+    /* ?�소가 줄어?��? ?�도�??�정 */
 }
 
 /* ==================== Flights ==================== */
@@ -1587,7 +1587,7 @@
     justify-content: center;
 }
 
-/* Apple HIG: 활성 탭 — 단색 Accent */
+/* Apple HIG: ?�성 ?????�색 Accent */
 .flight-tab.active {
     background: var(--bg-primary);
     color: var(--accent);
@@ -1653,7 +1653,7 @@
     white-space: nowrap;
 }
 
-/* 航班号 */
+/* ?�班??*/
 .flight-col:nth-child(2) {
     flex: 0 0 25%;
     word-break: keep-all;
@@ -1661,7 +1661,7 @@
     line-height: 1.1;
 }
 
-/* 航空公司 */
+/* ?�空?�司 */
 .flight-col:nth-child(3) {
     flex: 0 0 21%;
     word-break: keep-all;
@@ -1669,7 +1669,7 @@
     line-height: 1.1;
 }
 
-/* 目的地/出发地 */
+/* ??��???�发??*/
 .flight-col:nth-child(4) {
     flex: 0 0 22%;
     white-space: nowrap;
@@ -1681,7 +1681,7 @@
     word-break: keep-all;
 }
 
-/* 状态 */
+/* ?��?*/
 
 /* ==================== Festival ==================== */
 .festival-month-filter {
@@ -1704,13 +1704,13 @@
     cursor: pointer;
     white-space: nowrap;
     transition: all var(--duration-fast) var(--ease-out);
-    /* 44px 최소 높이 */
+    /* 44px 최소 ?�이 */
     min-height: var(--touch-target);
     display: flex;
     align-items: center;
 }
 
-/* Apple HIG: 활성 필터 — Accent 단색 */
+/* Apple HIG: ?�성 ?�터 ??Accent ?�색 */
 .month-tab.active {
     background: var(--accent);
     color: white;
@@ -1991,7 +1991,7 @@
     height: 56px;
 }
 
-/* lost-category-badge: ????분류 �? */
+/* lost-category-badge: ????분류 �? */
 .lost-category-badge {
     display: inline-block;
     padding: 3px 10px;
@@ -3781,7 +3781,7 @@
     /* Ensure padding doesn't add to width */
 }
 
-/* 탭과 바로 이어지는 카드의 상단 모서리 곡률 및 테두리 제거 */
+/* ??�� 바로 ?�어지??카드???�단 모서�?곡률 �??�두�??�거 */
 .current-weather-main,
 .past-weather-summary {
     border-top-left-radius: 0 !important;
@@ -3963,7 +3963,7 @@
 .cw-left .current-val {
     font-size: 3.0rem;
     font-weight: 500;
-    /* 제주 티얼 accent */
+    /* ?�주 ?�얼 accent */
     color: var(--accent);
     line-height: 1;
     display: flex;
@@ -4692,9 +4692,9 @@
     box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
 }
 
-/* ==================== 홈화면 개선 ==================== */
+/* ==================== ?�화�?개선 ==================== */
 
-/* 홈 tagline */
+/* ??tagline */
 .home-tagline {
     font-size: 0.88rem;
     font-weight: 600;
@@ -4705,7 +4705,7 @@
     opacity: 0.75;
 }
 
-/* CCTV 신청 가능 버튼 (disabled가 아닌 버전) */
+/* CCTV ?�청 가??버튼 (disabled가 ?�닌 버전) */
 .home-item.item-cctv-apply {
     cursor: pointer;
     opacity: 1;
@@ -4734,10 +4734,10 @@
     transform: scale(0.97);
 }
 
-/* ==================== 위챗 플로팅 버튼 ==================== */
+/* ==================== ?�챗 ?�로??버튼 ==================== */
 .wechat-float-btn {
     position: fixed;
-    bottom: 88px;   /* 하단 네비바 위 */
+    bottom: 88px;   /* ?�단 ?�비�???*/
     right: 16px;
     z-index: 9990;
     display: flex;
@@ -4771,12 +4771,12 @@
     transform: scale(0.97);
 }
 
-/* 홈화면이 아닐 때 플로팅 버튼 숨기기 */
+/* ?�화면이 ?�닐 ???�로??버튼 ?�기�?*/
 body:not(.page-home) .wechat-float-btn {
     display: none;
 }
 
-/* ==================== CCTV 신청 모달 ==================== */
+/* ==================== CCTV ?�청 모달 ==================== */
 .cctv-apply-modal-content {
     background: var(--bg-primary);
     border-radius: 20px;
@@ -5044,3 +5044,4 @@ body:not(.page-home) .wechat-float-btn {
     gap: 10px;
     justify-content: center;
 }
+

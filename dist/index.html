@@ -197,8 +197,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         }
     </script>
 
-  <script type="module" crossorigin src="/assets/index-C_pFI91n.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-0sy69aqh.css">
+  <script type="module" crossorigin src="/assets/index-DKCY2Yko.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-BWR_CHBq.css">
 </head>
 
 <body>
@@ -290,31 +290,35 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div id="cctv-apply-modal" class="modal-overlay" style="display:none; z-index: 10001;" onclick="closeCctvApplyModal()">
     <div class="modal-content cctv-apply-modal-content" onclick="event.stopPropagation()">
         <button class="modal-close" onclick="closeCctvApplyModal()">✕</button>
-        <div class="cctv-apply-header">
-            <div class="cctv-apply-icon"><i class="ph-duotone ph-video-camera"></i></div>
-            <h3 data-i18n="cctv.apply.title">济州 CCTV 실시간 서비스</h3>
-            <p data-i18n-html="cctv.apply.desc">8月份 VIP 优先预约开始！<br>抢先体验济州岛实时监控画面。</p>
-        </div>
         <div class="cctv-apply-body">
+            <div class="cctv-apply-header">
+                <div class="cctv-apply-icon"><i class="ph-duotone ph-video-camera"></i></div>
+                <h3 data-i18n="cctv.apply.title">济州 CCTV 실시간 서비스</h3>
+                <p data-i18n-html="cctv.apply.desc">8月份 VIP 优先预约开始！<br>抢先体验济州岛实时监控画面。</p>
+            </div>
             <div class="cctv-apply-form-group">
                 <label class="cctv-apply-label"><i class="ph-duotone ph-chat-circle"></i> <span data-i18n="cctv.apply.wechat.label">您的微信 ID</span> <span style="color:var(--accent); font-size:0.75rem;">*</span></label>
                 <input type="text" id="cctv-apply-wechat" class="lost-form-input" data-i18n="cctv.apply.wechat.ph" placeholder="请输入您的微信 ID">
             </div>
             <div class="cctv-apply-form-group">
-                <label class="cctv-apply-label"><i class="ph-duotone ph-map-pin"></i> <span data-i18n="cctv.apply.region.label">关注的地区</span></label>
-                <select id="cctv-apply-region" class="filter-select" style="width:100%;">
-                    <option value="전체" data-i18n="cctv.apply.region.all">全部地区</option>
-                    <option value="제주시내" data-i18n="cctv.apply.region.jeju">济州市区</option>
-                    <option value="서귀포" data-i18n="cctv.apply.region.seogwipo">西归浦</option>
-                    <option value="해수욕장" data-i18n="cctv.apply.region.beach">海水浴场</option>
-                    <option value="한라산" data-i18n="cctv.apply.region.hallasan">汉拿山</option>
-                </select>
+                <label class="cctv-apply-label">
+                    <span><i class="ph-duotone ph-calendar-blank"></i> <span data-i18n="cctv.apply.date.label">预约期间</span></span>
+                    <span class="cctv-price-badge" data-i18n="cctv.apply.price">10元/天</span>
+                </label>
+                <div class="date-range-wrap">
+                    <input type="date" id="cctv-apply-start" class="date-input" onchange="calculateCctvPrice()">
+                    <span class="date-separator">~</span>
+                    <input type="date" id="cctv-apply-end" class="date-input" onchange="calculateCctvPrice()">
+                </div>
+                <div id="cctv-price-preview" class="cctv-price-preview" style="display:none;"></div>
             </div>
             <div id="cctv-apply-status" class="form-status" style="display:none;"></div>
             <div class="cctv-apply-benefits">
                 <div class="benefit-item"><i class="ph-duotone ph-check-circle" style="color:#07c160;"></i> <span data-i18n="cctv.apply.benefit1">8月优先使用资格</span></div>
                 <div class="benefit-item"><i class="ph-duotone ph-check-circle" style="color:#07c160;"></i> <span data-i18n="cctv.apply.benefit2">实时交通 & 海滩状况</span></div>
                 <div class="benefit-item"><i class="ph-duotone ph-check-circle" style="color:#07c160;"></i> <span data-i18n="cctv.apply.benefit3">微信第一时间通知</span></div>
+                <div class="benefit-item"><i class="ph-duotone ph-check-circle" style="color:#07c160;"></i> <span data-i18n="cctv.apply.benefit4">实时天气预警通知</span></div>
+                <div class="benefit-item"><i class="ph-duotone ph-check-circle" style="color:#07c160;"></i> <span data-i18n="cctv.apply.benefit5">航班延误实时提醒</span></div>
             </div>
         </div>
         <div class="lost-form-actions" style="justify-content: center; width: 100%; padding: 0 0 8px 0;">
@@ -357,17 +361,45 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         }
     };
 
+    window.calculateCctvPrice = function() {
+        const startEl = document.getElementById('cctv-apply-start');
+        const endEl = document.getElementById('cctv-apply-end');
+        const previewEl = document.getElementById('cctv-price-preview');
+        
+        if (startEl.value && endEl.value) {
+            const start = new Date(startEl.value);
+            const end = new Date(endEl.value);
+            const diffTime = end - start;
+            
+            if (diffTime >= 0) {
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // Inclusive of start day
+                const totalPrice = diffDays * 10;
+                const daysText = window.t ? window.t('cctv.apply.total_days_format').replace('{n}', diffDays) : `共 ${diffDays} 天`;
+                const currency = window.t ? window.t('cctv.apply.currency') : '元';
+                previewEl.innerHTML = `<span>${daysText}</span> · <strong class="total-price">${totalPrice} ${currency}</strong>`;
+                previewEl.style.display = 'flex';
+            } else {
+                previewEl.style.display = 'none';
+            }
+        } else {
+            previewEl.style.display = 'none';
+        }
+    };
+
     // CCTV 신청 제출
     window.submitCctvApply = async function() {
         const wechatEl = document.getElementById('cctv-apply-wechat');
-        const regionEl = document.getElementById('cctv-apply-region');
         const statusEl = document.getElementById('cctv-apply-status');
         const submitBtn = document.getElementById('cctv-apply-submit-btn');
 
-        const wechatId = wechatEl ? wechatEl.value.trim() : '';
-        const region = regionEl ? regionEl.value : '전체';
+        const startEl = document.getElementById('cctv-apply-start');
+        const endEl = document.getElementById('cctv-apply-end');
 
-        if (!wechatId) {
+        const wechatId = wechatEl ? wechatEl.value.trim() : '';
+        const startDate = startEl ? startEl.value : '';
+        const endDate = endEl ? endEl.value : '';
+
+        if (!wechatId || !startDate || !endDate) {
             if (statusEl) {
                 statusEl.textContent = window.t ? window.t('lost.report.fill_err') : '请填写完整的信息';
                 statusEl.className = 'form-status error';
@@ -392,7 +424,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 body: JSON.stringify({
                     type: 'cctv_apply',
                     wechat: wechatId,
-                    region: region,
+                    startDate: startDate,
+                    endDate: endDate,
                     month: '2026-08',
                     timestamp: new Date().toISOString(),
                     userAgent: navigator.userAgent
@@ -960,6 +993,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     <button id="btn-success-all" class="view-toggle-btn success-toggle-btn" onclick="switchLostView('success')">
                         <i class="ph-duotone ph-trophy" style="font-size: 1.15rem;"></i><span data-i18n="lost.success.view_all">성공사례</span>
                     </button>
+                    <button id="btn-view-tracker" class="view-toggle-btn tracker-toggle-btn" onclick="switchLostView('tracker')">
+                        <i class="ph-duotone ph-clipboard-text" style="font-size: 1.15rem;"></i><span data-i18n="lost.tracker.tab">접수조회</span>
+                    </button>
                 </div>
 
             </div>
@@ -1008,6 +1044,43 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 </table>
             </div>
             <div id="lost-success-container" class="lost-success-container" style="display: none;"></div>
+            <!-- ===== 접수번호 실시간 조회 컨테이너 ===== -->
+            <div id="lost-tracker-container" class="lost-tracker-container" style="display: none;">
+                <!-- 입력 영역 -->
+                <div class="tracker-input-section">
+                    <div class="tracker-input-header">
+                        <i class="ph-duotone ph-clipboard-text tracker-input-icon"></i>
+                        <div>
+                            <h3 class="tracker-input-title" data-i18n="lost.tracker.title">접수번호로 진행상황 확인</h3>
+                            <p class="tracker-input-subtitle" data-i18n="lost.tracker.subtitle">查询失物处理进展</p>
+                        </div>
+                    </div>
+                    <div class="tracker-input-row">
+                        <div class="tracker-input-wrap">
+                            <input
+                                type="text"
+                                id="tracker-case-id-input"
+                                class="tracker-case-input"
+                                placeholder="JEJU-2026-0718-0001"
+                                data-i18n-placeholder="lost.tracker.input.ph"
+                                maxlength="20"
+                                onkeydown="if(event.key==='Enter') trackCase()"
+                            />
+                            <button class="tracker-copy-paste-btn" onclick="pasteTrackerInput()" title="붙여넣기">
+                                <i class="ph-duotone ph-clipboard"></i>
+                            </button>
+                        </div>
+                        <button id="tracker-search-btn" class="tracker-search-btn" onclick="trackCase()">
+                            <i class="ph-duotone ph-magnifying-glass"></i>
+                            <span data-i18n="lost.tracker.search">조회</span>
+                        </button>
+                    </div>
+                    <p class="tracker-input-hint" data-i18n="lost.tracker.hint">접수번호는 신고 완료 후 화면 및 위챗으로 전달됩니다.</p>
+                </div>
+
+                <!-- 결과 영역 (JS로 채워짐) -->
+                <div id="tracker-result" class="tracker-result"></div>
+            </div>
             <!-- SEO Content Description -->
             <div class="seo-content-desc" data-i18n="seo.desc.lost">济州岛出租车、公交车、机场失物招领服务</div>
         </div>
