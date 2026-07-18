@@ -1,4 +1,5 @@
 import { CONFIG } from './config.js';
+import { escapeHTML } from './utils.js';
 
 let cachedLostItems = [];
 let currentLostView = 'card';
@@ -170,11 +171,12 @@ export function renderLostGoods(grid, items) {
     // cachedLostItems 기준 실제 인덱스를 전달해야 올바른 상세정보가 열림
     grid.innerHTML = items.map((item) => {
         const realIndex = cachedLostItems.indexOf(item);
+        const eName = escapeHTML(item.name);
         return `
         <div class="lost-card gallery-item" onclick="openLostDetailModalByIndex(${realIndex})" style="padding: 0; overflow: hidden; aspect-ratio: 1 / 1;">
             <div class="lost-img-box" style="width: 100%; height: 100%; margin: 0;">
-                <img src="${item.img || noImgSvg}" alt="${item.name}" onerror="this.src='${noImgSvg}'" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;">
-                <div class="lost-category-badge-overlay">${item.category}</div>
+                <img src="${item.img || noImgSvg}" alt="${eName}" onerror="this.src='${noImgSvg}'" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;">
+                <div class="lost-category-badge-overlay">${escapeHTML(item.category)}</div>
             </div>
         </div>`;
     }).join('');
@@ -195,14 +197,16 @@ export function renderLostGoodsTable(items) {
         const realIndex = cachedLostItems.indexOf(item);
         const isStoring = item.status.includes('보관') || item.status.includes('保管');
         const displayStatus = isStoring ? window.t('lost.storing') : item.status;
+        const eName = escapeHTML(item.name);
+        const ePlace = escapeHTML(item.place);
         return `
         <tr>
             <td>${item.img ? `<img src="${item.img}" class="lost-table-img" loading="lazy" onerror="this.src='${noImgSvg}'">` : '<i class="ph-duotone ph-package color-cloud"></i>'}</td>
-            <td><span class="lost-category-badge">${item.category}</span></td>
-            <td style="font-weight:600; max-width: 15em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${item.name}">${item.name}</td>
+            <td><span class="lost-category-badge">${escapeHTML(item.category)}</span></td>
+            <td style="font-weight:600; max-width: 15em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${eName}">${eName}</td>
             <td>${item.date}</td>
-            <td>${item.place}</td>
-            <td style="font-size: 11px; opacity: 0.7;">${item.id}</td>
+            <td>${ePlace}</td>
+            <td style="font-size: 11px; opacity: 0.7;">${escapeHTML(item.id)}</td>
             <td><button onclick="openLostDetailModalByIndex(${realIndex})" class="lost-table-btn">${window.t('lost.btn.detail')}</button></td>
         </tr>`;
     }).join('');
@@ -223,16 +227,16 @@ export function openLostDetailModalByIndex(index) {
         </div>
         <div class="lost-modal-info">
             <div class="lost-modal-header">
-                <span class="lost-modal-category">${item.category}</span>
-                <h2 class="lost-modal-title">${item.name}</h2>
+                <span class="lost-modal-category">${escapeHTML(item.category)}</span>
+                <h2 class="lost-modal-title">${escapeHTML(item.name)}</h2>
             </div>
             <div class="lost-modal-details">
-                <div class="lost-modal-field"><span class="lost-modal-label">${window.t('lost.detail.id')}</span><span class="lost-modal-value" style="font-family: monospace;">${item.id}</span></div>
+                <div class="lost-modal-field"><span class="lost-modal-label">${window.t('lost.detail.id')}</span><span class="lost-modal-value" style="font-family: monospace;">${escapeHTML(item.id)}</span></div>
                 <div class="lost-modal-field"><span class="lost-modal-label">${window.t('lost.detail.status')}</span><span class="lost-modal-value">${displayStatus}</span></div>
                 <div class="lost-modal-field"><span class="lost-modal-label">${window.t('lost.detail.date')}</span><span class="lost-modal-value">${item.date}</span></div>
-                <div class="lost-modal-field"><span class="lost-modal-label">${window.t('lost.detail.place')}</span><span class="lost-modal-value">${item.place}</span></div>
-                ${item.tel ? `<div class="lost-modal-field"><span class="lost-modal-label">${window.t('lost.detail.tel')}</span><span class="lost-modal-value"><a href="tel:${item.tel}" style="color: var(--primary-color, #0076ff); text-decoration: underline; font-weight: 500;">${item.tel}</a></span></div>` : ''}
-                ${item.desc ? `<div class="lost-modal-field" style="flex-direction: column; align-items: flex-start; gap: 6px; margin-top: 8px; border-top: 1px dashed #eee; padding-top: 8px;"><span class="lost-modal-label" style="margin-bottom: 2px;">${window.t('lost.detail.desc')}</span><span class="lost-modal-value" style="width: 100%; white-space: pre-wrap; line-height: 1.5; color: #444; background: #f8f9fa; padding: 10px 12px; border-radius: 6px; font-size: 13px; box-sizing: border-box;">${item.desc}</span></div>` : ''}
+                <div class="lost-modal-field"><span class="lost-modal-label">${window.t('lost.detail.place')}</span><span class="lost-modal-value">${escapeHTML(item.place)}</span></div>
+                ${item.tel ? `<div class="lost-modal-field"><span class="lost-modal-label">${window.t('lost.detail.tel')}</span><span class="lost-modal-value"><a href="tel:${escapeHTML(item.tel)}" style="color: var(--primary-color, #0076ff); text-decoration: underline; font-weight: 500;">${escapeHTML(item.tel)}</a></span></div>` : ''}
+                ${item.desc ? `<div class="lost-modal-field" style="flex-direction: column; align-items: flex-start; gap: 6px; margin-top: 8px; border-top: 1px dashed #eee; padding-top: 8px;"><span class="lost-modal-label" style="margin-bottom: 2px;">${window.t('lost.detail.desc')}</span><span class="lost-modal-value" style="width: 100%; white-space: pre-wrap; line-height: 1.5; color: #444; background: #f8f9fa; padding: 10px 12px; border-radius: 6px; font-size: 13px; box-sizing: border-box;">${escapeHTML(item.desc)}</span></div>` : ''}
             </div>
             <div class="lost-modal-footer">
                 <button class="lost-modal-btn secondary" onclick="closeLostDetailModal()">${window.t('lost.detail.close')}</button>
@@ -893,7 +897,7 @@ function renderSuccessMarquee(data) {
         if (item.Step && parseInt(item.Step, 10) < 5) return;
 
         let text = window.t ? window.t('lost.success.marquee') : '📢 [{date}] {region} {id}님, {item} 수령 완료';
-        const lang = window.currentLanguage || 'zh';
+        const lang = (localStorage.getItem('jeju_lang') || 'zh');
 
         let itemName = item.Item;
         if (lang === 'zh' && item.Item_zh) itemName = item.Item_zh;
@@ -915,7 +919,7 @@ function renderSuccessMarquee(data) {
 
     // Clone the first item for seamless scrolling
     let firstText = window.t ? window.t('lost.success.marquee') : '📢 [{date}] {region} {id}님, {item} 수령 완료';
-    const lang = window.currentLanguage || 'zh';
+    const lang = (localStorage.getItem('jeju_lang') || 'zh');
     
     let firstItemName = data[0].Item;
     if (lang === 'zh' && data[0].Item_zh) firstItemName = data[0].Item_zh;
@@ -973,7 +977,7 @@ window.openSuccessModal = function(index) {
     const modalTitle = document.querySelector('#success-modal .modal-title');
     if (!modalBody) return;
 
-    const lang = window.currentLanguage || 'zh';
+    const lang = (localStorage.getItem('jeju_lang') || 'zh');
 
     // Translations for Place
     const placeTranslations = {
@@ -1063,7 +1067,7 @@ window.openSuccessModal = function(index) {
             <div class="success-info-list">
                 <div class="success-info-item">
                     <span class="success-info-label"><i class="ph-duotone ph-user"></i> ${tLabels.client}</span>
-                    <span class="success-info-value">${wechatIdMasked}</span>
+                    <span class="success-info-value">${escapeHTML(wechatIdMasked)}</span>
                 </div>
                 <div class="success-info-item">
                     <span class="success-info-label"><i class="ph-duotone ph-calendar"></i> ${tLabels.date}</span>
@@ -1071,11 +1075,11 @@ window.openSuccessModal = function(index) {
                 </div>
                 <div class="success-info-item">
                     <span class="success-info-label"><i class="ph-duotone ph-map-pin"></i> ${tLabels.place}</span>
-                    <span class="success-info-value">${placeText}</span>
+                    <span class="success-info-value">${escapeHTML(placeText)}</span>
                 </div>
                 <div class="success-info-item">
                     <span class="success-info-label"><i class="ph-duotone ph-package"></i> ${tLabels.item}</span>
-                    <span class="success-info-value" style="font-weight: 700; color: var(--text-primary);">${itemName}</span>
+                    <span class="success-info-value" style="font-weight: 700; color: var(--text-primary);">${escapeHTML(itemName)}</span>
                 </div>
             </div>
 
@@ -1111,7 +1115,7 @@ export function renderSuccessGoodsView(isLoadMore = false) {
         window.successVisibleCount = 5;
     }
 
-    const lang = window.currentLanguage || 'zh';
+    const lang = (localStorage.getItem('jeju_lang') || 'zh');
     const ctaText = window.t ? window.t('lost.modal.cta') : '내 분실물도 의뢰하기';
 
     // 데이터 없음 / 로딩 중 상태
@@ -1147,6 +1151,9 @@ export function renderSuccessGoodsView(isLoadMore = false) {
         if (lang === 'zh' && item.Region_zh) regionName = item.Region_zh;
         if (lang === 'en' && item.Region_en) regionName = item.Region_en;
         if (lang === 'ko' && item.Region_ko) regionName = item.Region_ko;
+
+        itemName = escapeHTML(itemName);
+        regionName = escapeHTML(regionName);
 
         const dateStr = item.Date ? new Date(item.Date).toLocaleDateString() : '';
 
