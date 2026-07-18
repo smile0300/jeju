@@ -165,7 +165,10 @@ window.openLostDetailModalByIndex = openLostDetailModalByIndex;
 window.openLostReportModal = openLostReportModal;
 window.handleLostImageChange = handleLostImageChange;
 window.submitLostReport = submitLostReport;
-window.fetchFoundGoodsManual = fetchFoundGoods;
+window.fetchFoundGoodsManual = () => {
+    switchLostView('card');
+    fetchFoundGoods();
+};
 window.showWechatQR = showWechatQR;
 window.selectFestivalMonth = selectFestivalMonth;
 window.openWechatQR = openWechatQR;
