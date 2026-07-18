@@ -889,6 +889,9 @@ function renderSuccessMarquee(data) {
     // 5번째 아이템마다 CTA 슬롯을 삽입한 배열 생성
     const slots = [];
     data.forEach((item, i) => {
+        // Step이 존재하고 5 미만이면 아직 완료(수령/발송)된 것이 아니므로 마키(전광판)에 표시하지 않음
+        if (item.Step && parseInt(item.Step, 10) < 5) return;
+
         let text = window.t ? window.t('lost.success.marquee') : '📢 [{date}] {region} {id}님, {item} 수령 완료';
         const lang = window.currentLanguage || 'zh';
 
