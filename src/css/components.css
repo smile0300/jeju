@@ -91,44 +91,43 @@
 /* Apple HIG: iOS Segmented Control 스타일 */
 .view-toggle-container {
     display: flex;
-    gap: var(--space-1); /* 4px */
-    background: var(--fill-tertiary); /* rgba(118,118,128,0.12) — iOS 표준 */
-    padding: var(--space-1); /* 4px */
-    border-radius: var(--radius-sm); /* 8px — Segmented Control */
+    gap: 0;
+    background: var(--fill-secondary);
+    padding: 0;
+    border-radius: 20px 20px 0 0;
     width: 100%;
-    margin-top: var(--space-3); /* 12px */
+    margin-top: 12px;
+    margin-bottom: 0;
+    border: 1px solid #e5e7eb;
+    border-bottom: none;
 }
 
 .view-toggle-btn {
     flex: 1;
     border: none;
     background: transparent;
-    /* 44px 최소 높이 */
-    min-height: var(--touch-target); /* 44px */
-    padding: 0 var(--space-3); /* 0 12px */
-    border-radius: var(--radius-xs); /* 4px — 내부 pill */
-    font-size: var(--text-subheadline); /* 15pt */
+    min-height: var(--touch-target);
+    padding: 12px 10px;
+    border-radius: 20px 20px 0 0;
+    font-size: 0.95rem;
     font-weight: 500;
     color: var(--label-secondary);
     cursor: pointer;
-    transition:
-        background var(--duration-fast) var(--ease-out),
-        color var(--duration-fast) var(--ease-out),
-        box-shadow var(--duration-fast) var(--ease-out);
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--space-2); /* 8px */
+    gap: 8px;
     white-space: nowrap;
     word-break: keep-all;
 }
 
 /* Apple HIG: 활성 탭 — 흰 배경 + 섀도우 (iOS Segmented 표준) */
 .view-toggle-btn.active {
-    background: var(--bg-primary); /* white */
+    background: var(--bg-primary);
     color: var(--label-primary);
-    font-weight: 600;
-    box-shadow: var(--shadow-xs);
+    font-weight: 700;
+    box-shadow: none;
 }
 
 /* ==================== Badges ==================== */
