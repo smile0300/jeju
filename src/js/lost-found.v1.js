@@ -1158,7 +1158,7 @@ export function renderSuccessGoodsView(isLoadMore = false) {
         let STEP_LABELS;
         if (lang === 'ko') STEP_LABELS = ['접수', '배정', '수색중', '발견', '발송'];
         else if (lang === 'en') STEP_LABELS = ['Received', 'Assigned', 'Searching', 'Found', 'Sent'];
-        else STEP_LABELS = ['收到', '分配', '寻找中', '找到', '发货'];
+        else STEP_LABELS = ['收到', '分配', '寻找中', '找到', '寄出'];
         const stepBarHtml = caseId ? (() => {
             const dots = STEP_LABELS.map((label, i) => {
                 const n = i + 1;
