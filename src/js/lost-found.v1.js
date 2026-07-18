@@ -1103,10 +1103,11 @@ export function renderSuccessGoodsView(isLoadMore = false) {
 
     // 데이터 없음 / 로딩 중 상태
     if (!data || data.length === 0) {
+        const loadingText = window.t ? window.t('lost.loading') : '데이터를 불러오는 중...';
         container.innerHTML = `
             <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 48px 16px; gap: 12px; color: var(--label-secondary);">
                 <i class="ph-duotone ph-circle-notch spin" style="font-size: 2.5rem; color: var(--label-tertiary);"></i>
-                <p style="font-size: 0.9rem; margin: 0;">데이터를 불러오는 중...</p>
+                <p style="font-size: 0.9rem; margin: 0;" data-i18n="lost.loading">${loadingText}</p>
             </div>
             <div style="text-align: center; margin-top: 10px;">
                 <button class="btn btn-primary btn-cta-success" onclick="openLostReportModal();" data-i18n="lost.modal.cta">
