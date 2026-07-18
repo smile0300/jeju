@@ -100,6 +100,7 @@
     margin-bottom: 0;
     border: 1px solid #e5e7eb;
     border-bottom: none;
+    overflow: hidden;
 }
 
 .view-toggle-btn {
@@ -108,7 +109,7 @@
     background: transparent;
     min-height: var(--touch-target);
     padding: 12px 10px;
-    border-radius: 20px 20px 0 0;
+    border-radius: 0;
     font-size: 0.95rem;
     font-weight: 500;
     color: var(--label-secondary);
