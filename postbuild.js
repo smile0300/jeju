@@ -11,7 +11,7 @@ if (!fs.existsSync(indexFile)) {
 
 const routes = [
     'weather',
-    'lost-found',
+    'lost',
     'hallasan',
     'airport',
     'festival',

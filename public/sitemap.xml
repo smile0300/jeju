@@ -13,13 +13,13 @@
   </url>
   <!-- Lost and Found (최우선 서비스 페이지) -->
   <url>
-    <loc>https://jeju-live.com/lost-found</loc>
+    <loc>https://jeju-live.com/lost</loc>
     <lastmod>2026-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.95</priority>
-    <xhtml:link rel="alternate" hreflang="en"    href="https://jeju-live.com/lost-found"/>
-    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://jeju-live.com/lost-found"/>
-    <xhtml:link rel="alternate" hreflang="ko"    href="https://jeju-live.com/lost-found"/>
+    <xhtml:link rel="alternate" hreflang="en"    href="https://jeju-live.com/lost"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://jeju-live.com/lost"/>
+    <xhtml:link rel="alternate" hreflang="ko"    href="https://jeju-live.com/lost"/>
   </url>
   <!-- Weather -->
   <url>

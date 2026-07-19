@@ -30,7 +30,7 @@ const SEO_META = {
         desc: 'Real-time Jeju International Airport (CJU) arrivals and departures. Check flight delays, cancellations, and gate information. 济州岛机场实时到达·出发航班查询。',
         keywords: 'Jeju airport CJU flights, 济州机场航班, Jeju flight arrivals departures, 제주공항 실시간, Jeju airport delay cancel'
     },
-    'lost-found': {
+    'lost': {
         title: 'Jeju Island Lost & Found Service - Jeju Live | 济州失物招领',
         desc: 'Lost something in Jeju? Our professional lost & found service helps foreigners recover items from taxis, buses, airports, and tourist sites. 在济州岛丢失物品？联系我们帮您找回。',
         keywords: 'Jeju lost and found, 济州岛失物招领, lost item Jeju taxi bus, 제주 분실물, Korea LOST112 English, Jeju lost phone wallet passport'
@@ -116,7 +116,7 @@ export function showSection(sectionId, pushHistory = true) {
         const arriveData = document.getElementById('arrive-data');
         if (arriveData && !arriveData.innerHTML.includes('flight-row')) fetchFlights('arrive');
     }
-    // if (sectionId === 'lost-found') fetchFoundGoods(); // 사용자가 검색 버튼을 누를 때만 조회하도록 자동 실행 제거
+    // if (sectionId === 'lost') fetchFoundGoods(); // 사용자가 검색 버튼을 누를 때만 조회하도록 자동 실행 제거
     if (sectionId === 'festival') fetchFestivals();
     if (sectionId === 'reward') initReward();
 

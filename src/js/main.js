@@ -246,7 +246,7 @@ const ROUTE_MAP = {
     '/hallasan': 'hallasan',
     '/airport': 'airport',
     '/festival': 'festival',
-    '/lost-found': 'lost-found',
+    '/lost': 'lost',
     '/reward': 'reward'
 };
 
