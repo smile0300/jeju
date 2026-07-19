@@ -197,8 +197,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         }
     </script>
 
-  <script type="module" crossorigin src="/assets/index-DKCY2Yko.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-BWR_CHBq.css">
+  <script type="module" crossorigin src="/assets/index-Dv5MFO0s.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-5plDILV6.css">
 </head>
 
 <body>
@@ -993,9 +993,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     <button id="btn-success-all" class="view-toggle-btn success-toggle-btn" onclick="switchLostView('success')">
                         <i class="ph-duotone ph-trophy" style="font-size: 1.15rem;"></i><span data-i18n="lost.success.view_all">성공사례</span>
                     </button>
-                    <button id="btn-view-tracker" class="view-toggle-btn tracker-toggle-btn" onclick="switchLostView('tracker')">
-                        <i class="ph-duotone ph-clipboard-text" style="font-size: 1.15rem;"></i><span data-i18n="lost.tracker.tab">접수조회</span>
-                    </button>
                 </div>
 
             </div>
@@ -1044,43 +1041,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 </table>
             </div>
             <div id="lost-success-container" class="lost-success-container" style="display: none;"></div>
-            <!-- ===== 접수번호 실시간 조회 컨테이너 ===== -->
-            <div id="lost-tracker-container" class="lost-tracker-container" style="display: none;">
-                <!-- 입력 영역 -->
-                <div class="tracker-input-section">
-                    <div class="tracker-input-header">
-                        <i class="ph-duotone ph-clipboard-text tracker-input-icon"></i>
-                        <div>
-                            <h3 class="tracker-input-title" data-i18n="lost.tracker.title">접수번호로 진행상황 확인</h3>
-                            <p class="tracker-input-subtitle" data-i18n="lost.tracker.subtitle">查询失物处理进展</p>
-                        </div>
-                    </div>
-                    <div class="tracker-input-row">
-                        <div class="tracker-input-wrap">
-                            <input
-                                type="text"
-                                id="tracker-case-id-input"
-                                class="tracker-case-input"
-                                placeholder="JEJU-2026-0718-0001"
-                                data-i18n-placeholder="lost.tracker.input.ph"
-                                maxlength="20"
-                                onkeydown="if(event.key==='Enter') trackCase()"
-                            />
-                            <button class="tracker-copy-paste-btn" onclick="pasteTrackerInput()" title="붙여넣기">
-                                <i class="ph-duotone ph-clipboard"></i>
-                            </button>
-                        </div>
-                        <button id="tracker-search-btn" class="tracker-search-btn" onclick="trackCase()">
-                            <i class="ph-duotone ph-magnifying-glass"></i>
-                            <span data-i18n="lost.tracker.search">조회</span>
-                        </button>
-                    </div>
-                    <p class="tracker-input-hint" data-i18n="lost.tracker.hint">접수번호는 신고 완료 후 화면 및 위챗으로 전달됩니다.</p>
-                </div>
-
-                <!-- 결과 영역 (JS로 채워짐) -->
-                <div id="tracker-result" class="tracker-result"></div>
-            </div>
             <!-- SEO Content Description -->
             <div class="seo-content-desc" data-i18n="seo.desc.lost">济州岛出租车、公交车、机场失物招领服务</div>
         </div>
