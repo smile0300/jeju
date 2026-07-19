@@ -995,11 +995,13 @@ window.openSuccessModal = function(index) {
         '경찰서': { en: 'Police Station', zh: '警察局', ko: '경찰서' }
     };
 
-    let placeText = item.Place || '';
-    if (placeTranslations[placeText] && placeTranslations[placeText][lang]) {
-        placeText = placeTranslations[placeText][lang];
-    } else if (lang === 'zh' && item.Region_zh) {
-        placeText = placeText || item.Region_zh; // Fallback to region
+    let placeText = item.Place || item.Region || '';
+    if (item.Place && placeTranslations[item.Place] && placeTranslations[item.Place][lang]) {
+        placeText = placeTranslations[item.Place][lang];
+    } else {
+        if (lang === 'zh') placeText = item.Place_zh || item.Region_zh || placeText;
+        else if (lang === 'en') placeText = item.Place_en || item.Region_en || placeText;
+        else if (lang === 'ko') placeText = item.Place_ko || item.Region_ko || placeText;
     }
 
     let itemName = item.Item;
