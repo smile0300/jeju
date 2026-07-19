@@ -810,7 +810,7 @@ export async function fetchSuccessStories() {
             Item: "검정색 가방",
             Item_en: "Black Bag",
             Item_zh: "黑色包",
-            ItemImg: "https://lh3.googleusercontent.com/d/1XE0JCPcp1Mq7s8NkYttcudzFOLmCeNrp=w400",
+            ItemImg: "https://drive.google.com/thumbnail?id=1XE0JCPcp1Mq7s8NkYttcudzFOLmCeNrp&sz=w800",
             CaseId: "JEJU-0042",
             Step: "3"
         },
@@ -823,7 +823,7 @@ export async function fetchSuccessStories() {
             Item: "아이폰 15",
             Item_en: "iPhone 15",
             Item_zh: "苹果 15",
-            ItemImg: "https://lh3.googleusercontent.com/d/1XE0JCPcp1Mq7s8NkYttcudzFOLmCeNrp=w400",
+            ItemImg: "https://drive.google.com/thumbnail?id=1XE0JCPcp1Mq7s8NkYttcudzFOLmCeNrp&sz=w800",
             CaseId: "JEJU-0041",
             Step: "5"
         }
@@ -1025,7 +1025,7 @@ window.openSuccessModal = function(index) {
                            imgUrl.match(/[?&]id=([a-zA-Z0-9_-]{25,})/) ||
                            imgUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
         if (driveMatch && driveMatch[1]) {
-            imgUrl = `https://lh3.googleusercontent.com/d/${driveMatch[1]}=w800`;
+            imgUrl = `https://drive.google.com/thumbnail?id=${driveMatch[1]}&sz=w800`;
         }
     }
 
@@ -1165,7 +1165,7 @@ export function renderSuccessGoodsView(isLoadMore = false) {
                                imgUrl.match(/[?&]id=([a-zA-Z0-9_-]{25,})/) ||
                                imgUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
             if (driveMatch && driveMatch[1]) {
-                imgUrl = `https://lh3.googleusercontent.com/d/${driveMatch[1]}=w400`;
+                imgUrl = `https://drive.google.com/thumbnail?id=${driveMatch[1]}&sz=w800`;
             }
         }
 
