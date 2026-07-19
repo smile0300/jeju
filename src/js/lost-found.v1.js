@@ -810,7 +810,7 @@ export async function fetchSuccessStories() {
             Item: "검정색 가방",
             Item_en: "Black Bag",
             Item_zh: "黑色包",
-            ItemImg: "https://drive.google.com/thumbnail?id=1XE0JCPcp1Mq7s8NkYttcudzFOLmCeNrp&sz=w400",
+            ItemImg: "/api/image-proxy?id=1XE0JCPcp1Mq7s8NkYttcudzFOLmCeNrp",
             CaseId: "JEJU-0042",
             Step: "3"
         },
@@ -823,7 +823,7 @@ export async function fetchSuccessStories() {
             Item: "아이폰 15",
             Item_en: "iPhone 15",
             Item_zh: "苹果 15",
-            ItemImg: "https://drive.google.com/thumbnail?id=1XE0JCPcp1Mq7s8NkYttcudzFOLmCeNrp&sz=w400",
+            ItemImg: "/api/image-proxy?id=1XE0JCPcp1Mq7s8NkYttcudzFOLmCeNrp",
             CaseId: "JEJU-0041",
             Step: "5"
         }
@@ -863,6 +863,9 @@ export async function fetchSuccessStories() {
 
     window.successStoriesData = data;
     renderSuccessMarquee(data);
+    if (currentLostView === 'success') {
+        renderSuccessGoodsView();
+    }
 }
 
 function renderSuccessMarquee(data) {
@@ -1020,12 +1023,12 @@ window.openSuccessModal = function(index) {
     if (imgUrl && imgUrl.includes('drive.google.com/file/d/')) {
         const match = imgUrl.match(/drive\.google\.com\/file\/d\/([^\/]+)/);
         if (match && match[1]) {
-            imgUrl = `https://drive.google.com/thumbnail?id=${match[1]}&sz=w800`;
+            imgUrl = `/api/image-proxy?id=${match[1]}`;
         }
     } else if (imgUrl && imgUrl.includes('drive.google.com/open?id=')) {
         const match = imgUrl.match(/id=([^&]+)/);
         if (match && match[1]) {
-            imgUrl = `https://drive.google.com/thumbnail?id=${match[1]}&sz=w800`;
+            imgUrl = `/api/image-proxy?id=${match[1]}`;
         }
     }
 
@@ -1162,10 +1165,10 @@ export function renderSuccessGoodsView(isLoadMore = false) {
         if (!imgUrl && item.Photo && item.Photo.trim() !== '') imgUrl = item.Photo;
         if (imgUrl && imgUrl.includes('drive.google.com/file/d/')) {
             const match = imgUrl.match(/drive\.google\.com\/file\/d\/([^\/]+)/);
-            if (match && match[1]) imgUrl = `https://drive.google.com/thumbnail?id=${match[1]}&sz=w400`;
+            if (match && match[1]) imgUrl = `/api/image-proxy?id=${match[1]}`;
         } else if (imgUrl && imgUrl.includes('drive.google.com/open?id=')) {
             const match = imgUrl.match(/id=([^&]+)/);
-            if (match && match[1]) imgUrl = `https://drive.google.com/thumbnail?id=${match[1]}&sz=w400`;
+            if (match && match[1]) imgUrl = `/api/image-proxy?id=${match[1]}`;
         }
 
         const imgHtml = imgUrl
