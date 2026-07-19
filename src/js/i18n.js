@@ -106,7 +106,6 @@ const TRANSLATIONS = {
         'float.wechat':   '微信联系',
 
         // ── CCTV 8월 신청 모달 ──
-        'cctv.apply.badge':    '8月预约',
         'cctv.apply.title':    '济州实时监控服务',
         'cctv.apply.desc':     '8月份 VIP 优先预约开始！<br>抢先体验济州岛实时监控画面。',
         'cctv.apply.wechat.label': '您的微信 ID',
@@ -480,15 +479,15 @@ const TRANSLATIONS = {
         'lost.tracker.err.not_found_sub': '您输入的编号：{id}',
         'lost.tracker.err.not_found_hint': '接收编号将在登记完成后发放。请通过微信咨询。',
         'tracker.step1':                '登记已提交',
-        'tracker.step2':                '已分配专员',
-        'tracker.step3':                '积极追查中',
-        'tracker.step4':                '物品已找到',
-        'tracker.step5':                '已取回完毕',
+        'tracker.step2':                '积极追查中',
+        'tracker.step3':                '物品已找到',
+        'tracker.step4':                '已取回物品',
+        'tracker.step5':                '已寄出完毕',
         'tracker.status.received':      '已接收',
-        'tracker.status.assigned':      '专员已分配',
-        'tracker.status.searching':     '追查中',
-        'tracker.status.found':         '已找到',
-        'tracker.status.done':          '已完成',
+        'tracker.status.assigned':      '追查中',
+        'tracker.status.searching':     '已找到',
+        'tracker.status.found':         '已取回',
+        'tracker.status.done':          '已寄出',
         'tracker.status.hard':          '较难找回',
         'lost.tracker.status.hard':     '目前处于较难找回物品的情况。',
         'lost.tracker.status.hard_sub': '请通过微信咨询，我们将为您提供更多方案。',
@@ -604,7 +603,6 @@ const TRANSLATIONS = {
         'float.wechat':   '위챗 연락',
 
         // ── CCTV 8월 신청 모달 ──
-        'cctv.apply.badge':    '8월 예약',
         'cctv.apply.title':    'CCTV 실시간 서비스 예약',
         'cctv.apply.desc':     '8월 VIP 우선 예약 시작!<br>제주도 실시간 CCTV를 먼저 체험해보세요.',
         'cctv.apply.wechat.label': '위챗 ID',
@@ -966,15 +964,15 @@ const TRANSLATIONS = {
         'lost.tracker.err.not_found_sub': '입력한 번호: {id}',
         'lost.tracker.err.not_found_hint': '접수번호는 신고 완료 후 발급됩니다. 위챗으로 문의해 주세요.',
         'tracker.step1':                '신고 접수 완료',
-        'tracker.step2':                '담당자 배정',
-        'tracker.step3':                '수색/연락 진행 중',
-        'tracker.step4':                '물품 발견 확인',
-        'tracker.step5':                '수령 완료',
-        'tracker.status.received':      '접수완료',
-        'tracker.status.assigned':      '담당자배정',
-        'tracker.status.searching':     '수색중',
-        'tracker.status.found':         '발견',
-        'tracker.status.done':          '완료',
+        'tracker.step2':                '수색/연락 진행 중',
+        'tracker.step3':                '물품 발견 확인',
+        'tracker.step4':                '물품 수령 (보관소)',
+        'tracker.step5':                '고객 발송 완료',
+        'tracker.status.received':      '접수',
+        'tracker.status.assigned':      '수색중',
+        'tracker.status.searching':     '발견',
+        'tracker.status.found':         '수령',
+        'tracker.status.done':          '발송',
         'tracker.status.hard':          '찾기어려움',
         'lost.tracker.status.hard':     '현시점에서 물품을 찾기 어려운 상황입니다.',
         'lost.tracker.status.hard_sub': '위챗으로 문의하시면 추가 방법을 안내해 드립니다.',
@@ -1090,7 +1088,6 @@ const TRANSLATIONS = {
         'float.wechat':   'WeChat',
 
         // ── CCTV August Apply Modal ──
-        'cctv.apply.badge':    'Aug Reserve',
         'cctv.apply.title':    'Jeju CCTV Live Service',
         'cctv.apply.desc':     'August VIP Early Access Opens!<br>Be the first to experience Jeju live cameras.',
         'cctv.apply.wechat.label': 'Your WeChat ID',
@@ -1442,15 +1439,15 @@ const TRANSLATIONS = {
         'lost.tracker.err.not_found_sub': 'You entered: {id}',
         'lost.tracker.err.not_found_hint': 'Case IDs are issued after registration. Please contact us via WeChat.',
         'tracker.step1':                'Report Received',
-        'tracker.step2':                'Agent Assigned',
-        'tracker.step3':                'Searching in Progress',
-        'tracker.step4':                'Item Located',
-        'tracker.step5':                'Item Retrieved',
+        'tracker.step2':                'Searching in Progress',
+        'tracker.step3':                'Item Located',
+        'tracker.step4':                'Item Collected',
+        'tracker.step5':                'Sent to Customer',
         'tracker.status.received':      'Received',
-        'tracker.status.assigned':      'Agent Assigned',
-        'tracker.status.searching':     'Searching',
-        'tracker.status.found':         'Found',
-        'tracker.status.done':          'Complete',
+        'tracker.status.assigned':      'Searching',
+        'tracker.status.searching':     'Found',
+        'tracker.status.found':         'Collected',
+        'tracker.status.done':          'Sent',
         'tracker.status.hard':          'Difficult',
         'lost.tracker.status.hard':     'It is currently difficult to locate the item.',
         'lost.tracker.status.hard_sub': 'Please contact us via WeChat for further options.',
@@ -1553,8 +1550,9 @@ export function setLanguage(lang) {
             window.airportApp.fetchFlights(type);
         }
         // 분실물 탭 재렌더링
-        if (window.lostFoundApp && window.lostFoundApp.fetchFoundGoods) {
-            window.lostFoundApp.fetchFoundGoods();
+        if (window.lostApp) {
+            if (window.lostApp.fetchFoundGoods) window.lostApp.fetchFoundGoods();
+            if (window.lostApp.fetchSuccessStories) window.lostApp.fetchSuccessStories();
         }
     } catch (e) {
         console.error('Error during language change re-render:', e);

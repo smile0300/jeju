@@ -899,8 +899,9 @@ function renderSuccessMarquee(data) {
         // Step이 존재하고 5 미만이면 아직 완료(수령/발송)된 것이 아니므로 마키(전광판)에 표시하지 않음
         if (item.Step && parseInt(item.Step, 10) < 5) return;
 
-        let text = window.t ? window.t('lost.success.marquee') : '📢 [{date}] {region} {id}님, {item} 수령 완료';
         const lang = (localStorage.getItem('jeju_lang') || 'zh');
+        let fallbackText = lang === 'ko' ? '📢 [{date}] {region} {id}님, {item} 수령 완료' : (lang === 'en' ? '📢 [{date}] {region} {item} returned to {id}!' : '📢 [{date}] {region} {id} 的 {item} 已回家!');
+        let text = window.t ? window.t('lost.success.marquee') : fallbackText;
 
         let itemName = item.Item;
         if (lang === 'zh' && item.Item_zh) itemName = item.Item_zh;
@@ -921,8 +922,9 @@ function renderSuccessMarquee(data) {
     const itemsHtml = slots.join('');
 
     // Clone the first item for seamless scrolling
-    let firstText = window.t ? window.t('lost.success.marquee') : '📢 [{date}] {region} {id}님, {item} 수령 완료';
     const lang = (localStorage.getItem('jeju_lang') || 'zh');
+    let fallbackFirstText = lang === 'ko' ? '📢 [{date}] {region} {id}님, {item} 수령 완료' : (lang === 'en' ? '📢 [{date}] {region} {item} returned to {id}!' : '📢 [{date}] {region} {id} 的 {item} 已回家!');
+    let firstText = window.t ? window.t('lost.success.marquee') : fallbackFirstText;
     
     let firstItemName = data[0].Item;
     if (lang === 'zh' && data[0].Item_zh) firstItemName = data[0].Item_zh;
@@ -1177,9 +1179,9 @@ export function renderSuccessGoodsView(isLoadMore = false) {
         const caseId = item.CaseId ? item.CaseId.toString().trim() : '';
         const stepNum = parseInt(item.Step, 10) || 0;
         let STEP_LABELS;
-        if (lang === 'ko') STEP_LABELS = ['접수', '배정', '수색중', '발견', '발송'];
-        else if (lang === 'en') STEP_LABELS = ['Received', 'Assigned', 'Searching', 'Found', 'Sent'];
-        else STEP_LABELS = ['收到', '分配', '寻找中', '找到', '寄出'];
+        if (lang === 'ko') STEP_LABELS = ['접수', '수색중', '발견', '수령', '발송'];
+        else if (lang === 'en') STEP_LABELS = ['Received', 'Searching', 'Found', 'Collected', 'Sent'];
+        else STEP_LABELS = ['收到', '寻找中', '找到', '领取', '寄出'];
         const stepBarHtml = caseId ? (() => {
             const dots = STEP_LABELS.map((label, i) => {
                 const n = i + 1;

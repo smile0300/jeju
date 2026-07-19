@@ -30,7 +30,7 @@
             <button class="home-item item-cctv-apply" type="button" onclick="openCctvApplyModal()">
                 <span class="item-icon"><i class="ph-duotone ph-video-camera color-cctv"></i></span>
                 <span class="item-label" data-i18n="nav.cctv">实时监控</span>
-                <span class="coming-soon-badge" style="background-color: #f59e0b; color: white;" data-i18n="cctv.apply.badge">8月预约</span>
+                <span class="coming-soon-badge" style="background-color: #f59e0b; color: white;">beta</span>
             </button>
             <a href="/weather" class="home-item item-weather" onclick="event.preventDefault(); showSection('weather')">
                 <span class="item-icon"><i class="ph-duotone ph-cloud-sun color-weather"></i></span>
@@ -93,7 +93,6 @@
             <div class="cctv-apply-form-group">
                 <label class="cctv-apply-label">
                     <span><i class="ph-duotone ph-calendar-blank"></i> <span data-i18n="cctv.apply.date.label">预约期间</span></span>
-                    <span class="cctv-price-badge" data-i18n="cctv.apply.price">10元/天</span>
                 </label>
                 <div class="date-range-wrap">
                     <input type="date" id="cctv-apply-start" class="date-input" onchange="calculateCctvPrice()">
