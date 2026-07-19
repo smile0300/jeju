@@ -278,6 +278,11 @@ window.addEventListener('popstate', (event) => {
     
     // 경로에 해당하는 섹션이 이미 켜져 있다면, 그냥 모달만 닫고 화면 전환은 패스
     if (currentActive && currentActive.id === sectionId) {
+        if (window.location.hash === '#report' && typeof window.lostApp?.openLostReportModal === 'function') {
+            window.lostApp.openLostReportModal();
+        } else if (window.location.hash === '#report' && typeof openLostReportModal === 'function') {
+            openLostReportModal();
+        }
         return;
     }
 
@@ -286,6 +291,14 @@ window.addEventListener('popstate', (event) => {
         showSection(event.state.section, false);
     } else {
         handleRouting();
+    }
+    
+    // Hash deep linking
+    if (window.location.hash === '#report') {
+        setTimeout(() => {
+            if (typeof window.lostApp?.openLostReportModal === 'function') window.lostApp.openLostReportModal();
+            else if (typeof openLostReportModal === 'function') openLostReportModal();
+        }, 500);
     }
 });
 
@@ -314,6 +327,14 @@ window.addEventListener('load', () => {
     
     // 초기 로딩 시 URL에 맞는 페이지 열기
     handleRouting();
+
+    // Hash deep linking for report modal
+    if (window.location.hash === '#report') {
+        setTimeout(() => {
+            if (typeof window.lostApp?.openLostReportModal === 'function') window.lostApp.openLostReportModal();
+            else if (typeof openLostReportModal === 'function') openLostReportModal();
+        }, 500);
+    }
 
     // Update loops
     setInterval(() => {
