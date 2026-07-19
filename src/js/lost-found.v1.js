@@ -1020,15 +1020,12 @@ window.openSuccessModal = function(index) {
     if (!imgUrl && item.Photo && item.Photo.trim() !== '') imgUrl = item.Photo;
 
     // Convert Google Drive view links to direct image links using thumbnail endpoint
-    if (imgUrl && imgUrl.includes('drive.google.com/file/d/')) {
-        const match = imgUrl.match(/drive\.google\.com\/file\/d\/([^\/]+)/);
-        if (match && match[1]) {
-            imgUrl = `/api/image-proxy?id=${match[1]}`;
-        }
-    } else if (imgUrl && imgUrl.includes('drive.google.com/open?id=')) {
-        const match = imgUrl.match(/id=([^&]+)/);
-        if (match && match[1]) {
-            imgUrl = `/api/image-proxy?id=${match[1]}`;
+    if (imgUrl && imgUrl.includes('drive.google.com')) {
+        const driveMatch = imgUrl.match(/\/d\/([a-zA-Z0-9_-]{25,})/) || 
+                           imgUrl.match(/[?&]id=([a-zA-Z0-9_-]{25,})/) ||
+                           imgUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+        if (driveMatch && driveMatch[1]) {
+            imgUrl = `/api/image-proxy?id=${driveMatch[1]}`;
         }
     }
 
@@ -1163,12 +1160,13 @@ export function renderSuccessGoodsView(isLoadMore = false) {
         let imgUrl = item.ItemImg && item.ItemImg.trim() !== '' ? item.ItemImg : null;
         if (!imgUrl && item.Image && item.Image.trim() !== '') imgUrl = item.Image;
         if (!imgUrl && item.Photo && item.Photo.trim() !== '') imgUrl = item.Photo;
-        if (imgUrl && imgUrl.includes('drive.google.com/file/d/')) {
-            const match = imgUrl.match(/drive\.google\.com\/file\/d\/([^\/]+)/);
-            if (match && match[1]) imgUrl = `/api/image-proxy?id=${match[1]}`;
-        } else if (imgUrl && imgUrl.includes('drive.google.com/open?id=')) {
-            const match = imgUrl.match(/id=([^&]+)/);
-            if (match && match[1]) imgUrl = `/api/image-proxy?id=${match[1]}`;
+        if (imgUrl && imgUrl.includes('drive.google.com')) {
+            const driveMatch = imgUrl.match(/\/d\/([a-zA-Z0-9_-]{25,})/) || 
+                               imgUrl.match(/[?&]id=([a-zA-Z0-9_-]{25,})/) ||
+                               imgUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+            if (driveMatch && driveMatch[1]) {
+                imgUrl = `/api/image-proxy?id=${driveMatch[1]}`;
+            }
         }
 
         const imgHtml = imgUrl
