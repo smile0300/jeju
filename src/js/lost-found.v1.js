@@ -1038,6 +1038,13 @@ window.openSuccessModal = function(index) {
     };
     const tLabels = labels[lang] || labels['zh'];
 
+    const stepNum = parseInt(item.Step, 10) || 0;
+    const showStamp = stepNum >= 5;
+    const stampHtml = showStamp 
+        ? `<div class="matched-stamp" style="opacity: 0; transform: translate(-50%, -50%) rotate(-15deg) scale(0.5); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">${tLabels.matched}</div>`
+        : '';
+    const stampHtmlNoImage = showStamp ? `<div class="matched-stamp">${tLabels.matched}</div>` : '';
+
     let imgHtml = '';
     if (imgUrl) {
         imgHtml = `
@@ -1045,15 +1052,15 @@ window.openSuccessModal = function(index) {
                 <div class="img-loading-spinner" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--label-tertiary);">
                     <i class="ph-duotone ph-circle-notch spin" style="font-size: 2rem;"></i>
                 </div>
-                <img src="${imgUrl}" class="success-modal-img" alt="Found Item" style="opacity: 0; transition: opacity 0.3s ease;" onload="this.previousElementSibling.style.display='none'; this.style.opacity='1'; this.nextElementSibling.style.opacity = '0.85'; this.nextElementSibling.style.transform = 'translate(-50%, -50%) rotate(-15deg) scale(1)';">
-                <div class="matched-stamp" style="opacity: 0; transform: translate(-50%, -50%) rotate(-15deg) scale(0.5); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">${tLabels.matched}</div>
+                <img src="${imgUrl}" class="success-modal-img" alt="Found Item" style="opacity: 0; transition: opacity 0.3s ease;" onload="this.previousElementSibling.style.display='none'; this.style.opacity='1'; if(this.nextElementSibling) { this.nextElementSibling.style.opacity = '0.85'; this.nextElementSibling.style.transform = 'translate(-50%, -50%) rotate(-15deg) scale(1)'; }">
+                ${stampHtml}
             </div>
         `;
     } else {
         imgHtml = `
             <div class="success-modal-img-container no-image">
                 <i class="ph-duotone ph-package"></i>
-                <div class="matched-stamp">${tLabels.matched}</div>
+                ${stampHtmlNoImage}
             </div>
         `;
     }
