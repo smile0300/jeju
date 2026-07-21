@@ -1240,7 +1240,11 @@ export function renderSuccessGoodsView(isLoadMore = false) {
                 </div>`;
         }
 
-        let handoverValue = item.Place || item.LostPlace || 'jeju central ctiy hotel';
+        let handoverValue = item.Place || item.LostPlace || '';
+        if (lang === 'zh' && (item.Place_zh || item.LostPlace_zh)) handoverValue = item.Place_zh || item.LostPlace_zh;
+        if (lang === 'en' && (item.Place_en || item.LostPlace_en)) handoverValue = item.Place_en || item.LostPlace_en;
+        if (lang === 'ko' && (item.Place_ko || item.LostPlace_ko)) handoverValue = item.Place_ko || item.LostPlace_ko;
+        handoverValue = handoverValue || 'jeju central ctiy hotel';
         
         let originContentHtml = `<span class="success-timeline-text">${escapeHTML(handoverValue)}</span>`;
         
