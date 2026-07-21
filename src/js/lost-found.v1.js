@@ -1180,53 +1180,93 @@ export function renderSuccessGoodsView(isLoadMore = false) {
             }
         }
 
-        const imgHtml = imgUrl
-            ? `<img src="${imgUrl}" alt="${itemName}" loading="lazy" onerror="this.parentElement.innerHTML='<i class=\\'ph-duotone ph-package\\'></i>'">`
-            : `<i class="ph-duotone ph-package"></i>`;
-
-        // 접수번호 + 스텝바 (CaseId 컬럼이 있을 때만 표시)
         const caseId = item.CaseId ? item.CaseId.toString().trim() : '';
+        const caseIdOverlay = caseId ? `<div class="sc-case-id-overlay"># ${caseId}</div>` : '';
+
+        const imgHtml = imgUrl
+            ? `<img src="${imgUrl}" alt="${itemName}" loading="lazy" onerror="this.parentElement.innerHTML='<i class=\\'ph-duotone ph-package\\'></i>'">
+               ${caseIdOverlay}`
+            : `<i class="ph-duotone ph-package"></i>
+               ${caseIdOverlay}`;
         const stepNum = parseInt(item.Step, 10) || 0;
         let STEP_LABELS;
         if (lang === 'ko') STEP_LABELS = ['접수', '수색중', '발견', '수령', '발송'];
         else if (lang === 'en') STEP_LABELS = ['Received', 'Searching', 'Found', 'Collected', 'Sent'];
         else STEP_LABELS = ['收到', '寻找中', '找到', '领取', '寄出'];
-        const stepBarHtml = caseId ? (() => {
-            const effectiveStep = stepNum === 6 ? 5 : stepNum;
-            const dots = STEP_LABELS.map((label, i) => {
-                const n = i + 1;
-                let cls = 'sc-step-dot';
-                if (n < effectiveStep) cls += ' done';
-                else if (n === effectiveStep) cls += ' current';
-                else cls += ' pending';
-                return `<span class="${cls}" title="${label}"></span>`;
-            }).join('<span class="sc-step-line"></span>');
-            
-            let statusLabel = '';
-            if (stepNum >= 1 && stepNum <= 5) {
-                statusLabel = STEP_LABELS[stepNum - 1];
-            } else if (stepNum === 6) {
-                if (lang === 'ko') statusLabel = '직접수령';
-                else if (lang === 'en') statusLabel = 'Picked Up';
-                else statusLabel = '已自提';
+        const isCompleted = stepNum >= 5;
+        let dotsContainerHtml = '';
+        
+        if (!isCompleted) {
+            let dotsHtml = '';
+            for (let i = 2; i <= 4; i++) {
+                let isDone = stepNum >= i;
+                let isCurrent = stepNum === i;
+                let cls = 'dot';
+                let rowCls = 'success-timeline-dot-row';
+                if (isDone) {
+                    cls += ' done';
+                    rowCls += ' done';
+                }
+                if (isCurrent) {
+                    cls += ' current';
+                }
+                let textHtml = isCurrent ? `<span class="success-timeline-dot-text">${STEP_LABELS[i - 1]}</span>` : '';
+                dotsHtml += `
+                    <div class="${rowCls}">
+                        <span class="${cls}"></span>
+                        ${textHtml}
+                    </div>`;
             }
-            
-            const isDone = stepNum >= 5;
-            return `
-                <div class="sc-case-id"># ${caseId}</div>
-                <div class="sc-step-bar">
-                    <div class="sc-step-dots">${dots}</div>
-                    <span class="sc-step-status ${isDone ? 'done' : ''}">${statusLabel}</span>
+            dotsContainerHtml = `
+                <div class="success-timeline-dots">
+                    ${dotsHtml}
                 </div>`;
-        })() : '';
+        }
+
+        const lostPlace = item.LostPlace || (lang === 'zh' ? '济州岛' : (lang === 'ko' ? '제주도' : 'Jeju'));
+        
+        let dateStrHTML = '';
+        if (isCompleted && dateStr) {
+            let finalStatusStr = '';
+            if (stepNum === 6) {
+                finalStatusStr = lang === 'ko' ? '직접수령' : (lang === 'en' ? 'Picked Up' : '已自提');
+            } else {
+                finalStatusStr = lang === 'ko' ? '발송완료' : (lang === 'en' ? 'Sent' : '已寄出');
+            }
+            dateStrHTML = `
+                <div class="success-all-meta" style="margin: 0; display: flex; flex-direction: column; gap: 2px;">
+                    <span style="color: var(--accent); font-weight: 700;">${finalStatusStr}</span>
+                    <span>${dateStr}</span>
+                </div>`;
+        }
+
+        const originClass = stepNum === 1 ? 'origin active' : 'origin';
+        const destClass = isCompleted ? 'destination' : 'destination pending';
+        const timelineClass = isCompleted ? 'success-timeline-vertical' : 'success-timeline-vertical pending';
+        
+        let displayRegion = regionName;
+        if (!isCompleted) {
+            displayRegion = lang === 'zh' ? '目的地确认中...' : (lang === 'ko' ? '도착 장소 확인 중...' : 'Confirming destination...');
+        }
+
+        const timelineHtml = `
+            <div class="${timelineClass}">
+                <div class="success-timeline-item ${originClass}">
+                    <span class="success-timeline-text">${escapeHTML(lostPlace)}</span>
+                </div>
+                ${dotsContainerHtml}
+                <div class="success-timeline-item ${destClass}">
+                    <span class="success-timeline-text ${destClass}">${displayRegion}</span>
+                </div>
+            </div>`;
 
         return `
         <div class="success-all-card" onclick="openSuccessModal(${actualIndex})">
             <div class="success-all-img">${imgHtml}</div>
             <div class="success-all-info">
                 <div class="success-all-item">${itemName}</div>
-                <div class="success-all-meta">${regionName} · ${dateStr}</div>
-                ${stepBarHtml}
+                ${timelineHtml}
+                ${dateStrHTML}
             </div>
         </div>`;
     }).join('');

@@ -1040,7 +1040,7 @@ i.ph-duotone.hover-scale:hover {
 }
 .success-all-card {
     display: flex;
-    align-items: center;
+    align-items: stretch;
     gap: 16px;
     padding: 16px;
     border-radius: 12px;
@@ -1068,6 +1068,7 @@ i.ph-duotone.hover-scale:hover {
     flex-shrink: 0;
     color: var(--label-tertiary);
     font-size: 1.4rem;
+    position: relative;
 }
 .success-all-img img {
     width: 100%;
@@ -1077,19 +1078,137 @@ i.ph-duotone.hover-scale:hover {
 .success-all-info {
     flex: 1;
     min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 4px 0;
 }
 .success-all-item {
-    font-size: 1rem;
-    font-weight: 700;
+    font-size: 1.15rem;
+    font-weight: 800;
     color: var(--label-primary);
+    line-height: 1.3;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    padding-left: 6px;
+    margin-bottom: 4px;
+}
+
+/* Success Card Timeline Styles */
+.success-timeline-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: auto 0;
+    position: relative;
+    padding-left: 6px;
+}
+.success-timeline-vertical::before {
+    content: '';
+    position: absolute;
+    left: 8px; 
+    top: 12px;
+    bottom: 12px;
+    width: 2px;
+    background: var(--separator, #d1d5db);
+    z-index: 0;
+}
+.success-timeline-item {
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding-left: 16px;
+    min-height: 18px;
+}
+.success-timeline-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    z-index: 2;
+}
+.success-timeline-item.origin::before {
+    background: var(--accent, #3182f6);
+    border: 2px solid var(--accent, #3182f6);
+}
+.success-timeline-item.destination::before {
+    background: var(--accent, #3182f6);
+    border: 2px solid var(--accent, #3182f6);
+}
+.success-timeline-dots {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-start;
+    height: 36px;
+    margin-left: 1px;
+    padding: 0;
+}
+.success-timeline-dot-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.success-timeline-dot-row .dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--separator, #d1d5db);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 2;
+}
+.success-timeline-dot-row.done .dot {
+    background: var(--accent, #3182f6);
+}
+.success-timeline-dot-text {
+    font-size: 0.7rem;
+    color: var(--label-tertiary);
+    line-height: 1;
+}
+.success-timeline-dot-row.done .success-timeline-dot-text {
+    color: var(--label-primary);
+    font-weight: 600;
+}
+
+.success-timeline-text {
+    font-size: 0.82rem;
+    color: var(--label-secondary);
+    font-weight: 500;
+}
+.success-timeline-text.destination {
+    color: var(--label-primary);
+    font-weight: 600;
+}
+
+/* Pending States (Step 1-4) */
+.success-timeline-item.origin.active::before {
+    background: var(--accent, #3182f6);
+    border: 2px solid var(--accent, #3182f6);
+    box-shadow: 0 0 0 3px rgba(49, 130, 246, 0.25);
+}
+.success-timeline-dot-row .dot.current {
+    box-shadow: 0 0 0 3px rgba(49, 130, 246, 0.25);
+}
+.success-timeline-item.destination.pending::before {
+    background: var(--bg-primary, #fff);
+    border: 2px solid var(--separator, #d1d5db);
+}
+.success-timeline-text.destination.pending {
+    color: var(--label-tertiary);
+    font-weight: 500;
+    font-style: italic;
 }
 .success-all-meta {
     font-size: 0.85rem;
     color: var(--label-secondary);
     margin-top: 4px;
+    padding-left: 6px;
 }
 .success-all-badge {
     width: 24px;
@@ -1105,14 +1224,22 @@ i.ph-duotone.hover-scale:hover {
     flex-shrink: 0;
 }
 
-/* ==================== 성공사례 카드 — 접수번호 + 스텝바 ==================== */
-.sc-case-id {
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: var(--label-tertiary);
-    margin-top: 8px;
+.success-all-img .sc-case-id-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: rgba(0, 0, 0, 0.25);
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.65rem;
+    font-weight: 600;
     font-family: 'Courier New', monospace;
-    letter-spacing: 0.3px;
+    padding: 3px 5px;
+    border-bottom-right-radius: 6px;
+    z-index: 2;
+    pointer-events: none;
+    letter-spacing: -0.5px;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
 }
 
 .sc-step-bar {
