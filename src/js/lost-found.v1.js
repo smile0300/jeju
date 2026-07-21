@@ -1240,14 +1240,9 @@ export function renderSuccessGoodsView(isLoadMore = false) {
                 </div>`;
         }
 
-        let handoverLabel = lang === 'ko' ? '인계 장소' : (lang === 'zh' ? '交接地点' : 'Handover Location');
         let handoverValue = item.Place || item.LostPlace || 'jeju central ctiy hotel';
         
-        let originContentHtml = `
-            <div class="success-info-item" style="flex: 1; margin: 0; padding: 0 0 4px 0; border-bottom: none;">
-                <span class="success-info-label" style="font-size: 0.75rem; margin-right: 8px;"><i class="ph-duotone ph-map-pin"></i> ${handoverLabel}</span>
-                <span class="success-info-value" style="font-size: 0.75rem; color: var(--label-primary); font-weight: 600;">${escapeHTML(handoverValue)}</span>
-            </div>`;
+        let originContentHtml = `<span class="success-timeline-text">${escapeHTML(handoverValue)}</span>`;
         
         const originClass = stepNum === 1 ? 'origin active' : 'origin';
         const destClass = isCompleted ? 'destination' : 'destination pending';
