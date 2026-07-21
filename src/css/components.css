@@ -1180,6 +1180,10 @@ i.ph-duotone.hover-scale:hover {
     font-size: 0.82rem;
     color: var(--label-secondary);
     font-weight: 500;
+    line-height: 1.3;
+    text-wrap: balance;
+    word-break: keep-all;
+    overflow-wrap: break-word;
 }
 .success-timeline-text.destination {
     color: var(--label-primary);
