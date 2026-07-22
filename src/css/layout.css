@@ -107,7 +107,6 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     text-shadow: 0 4px 15px rgba(49, 130, 246, 0.3);
-    animation: gradient-shimmer 4s linear infinite;
 }
 
 @keyframes gradient-shimmer {
