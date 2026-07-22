@@ -159,8 +159,25 @@ export function switchLostView(mode) {
     }
 }
 
-export function renderLostGoods(grid, items) {
+window.lostGoodsVisibleCount = 50;
+
+window.loadMoreLostGoods = function() {
+    window.lostGoodsVisibleCount += 50;
+    if (currentLostView === 'card') {
+        const grid = document.getElementById('lost-goods-grid');
+        const cardItems = cachedLostItems.filter(item => item.img && item.img.trim() !== '' && !item.img.includes('img02_no_img.gif'));
+        renderLostGoods(grid, cardItems, true);
+    } else if (currentLostView === 'table') {
+        renderLostGoodsTable(cachedLostItems, true);
+    }
+};
+
+export function renderLostGoods(grid, items, isLoadMore = false) {
     if (!grid) return;
+    if (!isLoadMore) {
+        window.lostGoodsVisibleCount = 50;
+    }
+
     if (!items || items.length === 0) {
         grid.innerHTML = `<div class="loading-lost">${window.t('lost.no_records')}</div>`;
         return;
@@ -168,8 +185,10 @@ export function renderLostGoods(grid, items) {
     const noImgText = window.t('lost.no_image');
     const noImgSvg = `data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22300%22%20height%3D%22300%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20300%20300%22%3E%3Crect%20width%3D%22300%22%20height%3D%22300%22%20fill%3D%22%23eee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-size%3D%2220%22%20text-anchor%3D%22middle%22%20alignment-baseline%3D%22middle%22%20fill%3D%22%23aaa%22%3E${encodeURIComponent(noImgText)}%3C%2Ftext%3E%3C%2Fsvg%3E`;
 
+    const visibleItems = items.slice(0, window.lostGoodsVisibleCount);
+
     // cachedLostItems 기준 실제 인덱스를 전달해야 올바른 상세정보가 열림
-    grid.innerHTML = items.map((item) => {
+    const cardsHtml = visibleItems.map((item) => {
         const realIndex = cachedLostItems.indexOf(item);
         const eName = escapeHTML(item.name);
         return `
@@ -180,11 +199,25 @@ export function renderLostGoods(grid, items) {
             </div>
         </div>`;
     }).join('');
+
+    const hasMore = window.lostGoodsVisibleCount < items.length;
+    const loadMoreHtml = hasMore 
+        ? `<div style="grid-column: 1 / -1; text-align: center; margin-top: 16px; padding: 0 16px; width: 100%;">
+               <button onclick="loadMoreLostGoods()" style="width: 100%; padding: 12px; background: transparent; border: 1px solid var(--separator); color: var(--label-secondary); border-radius: 8px; font-weight: 500; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;">
+                   ${window.t ? window.t('common.load_more') : '더보기'} <i class="ph-bold ph-caret-down"></i>
+               </button>
+           </div>`
+        : '';
+
+    grid.innerHTML = cardsHtml + loadMoreHtml;
 }
 
-export function renderLostGoodsTable(items) {
+export function renderLostGoodsTable(items, isLoadMore = false) {
     const tableBody = document.getElementById('lost-table-body');
     if (!tableBody) return;
+    if (!isLoadMore) {
+        window.lostGoodsVisibleCount = 50;
+    }
     if (!items || items.length === 0) {
         tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;">${window.t('lost.no_records')}</td></tr>`;
         return;
@@ -192,8 +225,10 @@ export function renderLostGoodsTable(items) {
     const noImgText = window.t('lost.no_image');
     const noImgSvg = `data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2240%22%20height%3D%2240%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2040%2040%22%3E%3Crect%20width%3D%2240%22%20height%3D%2240%22%20fill%3D%22%23eee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-size%3D%228%22%20text-anchor%3D%22middle%22%20alignment-baseline%3D%22middle%22%20fill%3D%22%23aaa%22%3E${encodeURIComponent(noImgText)}%3C%2Ftext%3E%3C%2Fsvg%3E`;
 
+    const visibleItems = items.slice(0, window.lostGoodsVisibleCount);
+
     // cachedLostItems 기준 실제 인덱스를 전달해야 올바른 상세정보가 열림
-    tableBody.innerHTML = items.map((item) => {
+    const rowsHtml = visibleItems.map((item) => {
         const realIndex = cachedLostItems.indexOf(item);
         const isStoring = item.status.includes('보관') || item.status.includes('保管');
         const displayStatus = isStoring ? window.t('lost.storing') : item.status;
@@ -210,6 +245,17 @@ export function renderLostGoodsTable(items) {
             <td><button onclick="openLostDetailModalByIndex(${realIndex})" class="lost-table-btn">${window.t('lost.btn.detail')}</button></td>
         </tr>`;
     }).join('');
+
+    const hasMore = window.lostGoodsVisibleCount < items.length;
+    const loadMoreHtml = hasMore 
+        ? `<tr><td colspan="7" style="text-align: center; padding: 16px;">
+               <button onclick="loadMoreLostGoods()" style="width: 100%; padding: 12px; background: transparent; border: 1px solid var(--separator); color: var(--label-secondary); border-radius: 8px; font-weight: 500; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;">
+                   ${window.t ? window.t('common.load_more') : '더보기'} <i class="ph-bold ph-caret-down"></i>
+               </button>
+           </td></tr>`
+        : '';
+    
+    tableBody.innerHTML = rowsHtml + loadMoreHtml;
 }
 
 export function openLostDetailModalByIndex(index) {
