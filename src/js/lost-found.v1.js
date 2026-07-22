@@ -454,7 +454,9 @@ export async function submitLostReport() {
         
         hotelName: getVal('lost-report-hotel-name'),
         hotelBooker: getVal('lost-report-hotel-booker'),
-        hotelDates: getVal('lost-report-hotel-dates'),
+        hotelDates: (getVal('lost-report-hotel-checkin') || getVal('lost-report-hotel-checkout')) 
+            ? `${getVal('lost-report-hotel-checkin')} ~ ${getVal('lost-report-hotel-checkout')}` 
+            : '',
         
         carNumber: getVal('lost-report-car-no'),
         boardLoc: getVal('lost-report-board-loc'),
@@ -950,6 +952,11 @@ function renderSuccessMarquee(data) {
         modalMarqueeContainer.innerHTML = itemsHtml + firstClone;
     }
 
+    const upsellModalMarqueeContainer = document.getElementById('upsell-modal-success-marquee-content');
+    if (upsellModalMarqueeContainer) {
+        upsellModalMarqueeContainer.innerHTML = itemsHtml + firstClone;
+    }
+
     // Dynamic Animation — 전체 아이템 기준 계산
     const totalSlots = data.length;
     let styleEl = document.getElementById('dynamic-marquee-style');
@@ -972,6 +979,9 @@ function renderSuccessMarquee(data) {
     marqueeContainer.style.animation = `dynamic-vertical-ticker ${animationDuration}s infinite`;
     if (modalMarqueeContainer) {
         modalMarqueeContainer.style.animation = `dynamic-vertical-ticker ${animationDuration}s infinite`;
+    }
+    if (upsellModalMarqueeContainer) {
+        upsellModalMarqueeContainer.style.animation = `dynamic-vertical-ticker ${animationDuration}s infinite`;
     }
 }
 
@@ -1254,7 +1264,9 @@ export function renderSuccessGoodsView(isLoadMore = false) {
 
         let displayRegion = regionName;
         if (!isCompleted) {
-            displayRegion = lang === 'zh' ? '目的地确认中...' : (lang === 'ko' ? '도착 장소 확인 중...' : 'Confirming destination...');
+            if (!displayRegion || displayRegion.trim() === '') {
+                displayRegion = lang === 'zh' ? '目的地确认中...' : (lang === 'ko' ? '도착 장소 확인 중...' : 'Confirming destination...');
+            }
         }
         let destContentHtml = `<span class="success-timeline-text ${destClass}">${escapeHTML(displayRegion)}</span>`;
 
