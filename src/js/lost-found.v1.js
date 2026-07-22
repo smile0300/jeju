@@ -308,6 +308,15 @@ window.nextLostStep = function() {
                 alert(window.t ? window.t('lost.report.car_no_err') : '버스 번호를 입력해주세요.');
                 return;
             }
+        } else if (reg === '호텔') {
+            const hName = document.getElementById('lost-report-hotel-name')?.value.trim();
+            const hBooker = document.getElementById('lost-report-hotel-booker')?.value.trim();
+            const hCheckin = document.getElementById('lost-report-hotel-checkin')?.value.trim();
+            const hCheckout = document.getElementById('lost-report-hotel-checkout')?.value.trim();
+            if (!hName || !hBooker || !hCheckin || !hCheckout) {
+                alert(window.t ? window.t('lost.report.fill_err') : '호텔 정보(호텔명, 예약자명, 날짜)를 모두 입력해주세요.');
+                return;
+            }
         }
     }
     
