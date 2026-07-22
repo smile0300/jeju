@@ -159,10 +159,10 @@ export function switchLostView(mode) {
     }
 }
 
-window.lostGoodsVisibleCount = 50;
+window.lostGoodsVisibleCount = 45;
 
 window.loadMoreLostGoods = function() {
-    window.lostGoodsVisibleCount += 50;
+    window.lostGoodsVisibleCount += 45;
     if (currentLostView === 'card') {
         const grid = document.getElementById('lost-goods-grid');
         const cardItems = cachedLostItems.filter(item => item.img && item.img.trim() !== '' && !item.img.includes('img02_no_img.gif'));
@@ -175,7 +175,7 @@ window.loadMoreLostGoods = function() {
 export function renderLostGoods(grid, items, isLoadMore = false) {
     if (!grid) return;
     if (!isLoadMore) {
-        window.lostGoodsVisibleCount = 50;
+        window.lostGoodsVisibleCount = 45;
     }
 
     if (!items || items.length === 0) {
@@ -216,7 +216,7 @@ export function renderLostGoodsTable(items, isLoadMore = false) {
     const tableBody = document.getElementById('lost-table-body');
     if (!tableBody) return;
     if (!isLoadMore) {
-        window.lostGoodsVisibleCount = 50;
+        window.lostGoodsVisibleCount = 45;
     }
     if (!items || items.length === 0) {
         tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;">${window.t('lost.no_records')}</td></tr>`;
