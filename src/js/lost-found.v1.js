@@ -1256,19 +1256,19 @@ export function renderSuccessGoodsView(isLoadMore = false) {
         if (lang === 'ko' && (item.Place_ko || item.LostPlace_ko)) handoverValue = item.Place_ko || item.LostPlace_ko;
         handoverValue = handoverValue || 'jeju central ctiy hotel';
         
-        let originContentHtml = `<span class="success-timeline-text">${escapeHTML(handoverValue)}</span>`;
+        let originContentHtml = `<span class="success-timeline-text">${escapeHTML(regionName)}</span>`;
         
         const originClass = stepNum === 1 ? 'origin active' : 'origin';
         const destClass = isCompleted ? 'destination' : 'destination pending';
         const timelineClass = isCompleted ? 'success-timeline-vertical' : 'success-timeline-vertical pending';
 
-        let displayRegion = regionName;
+        let displayDest = handoverValue;
         if (!isCompleted) {
-            if (!displayRegion || displayRegion.trim() === '') {
-                displayRegion = lang === 'zh' ? '目的地确认中...' : (lang === 'ko' ? '도착 장소 확인 중...' : 'Confirming destination...');
+            if (!displayDest || displayDest.trim() === '') {
+                displayDest = lang === 'zh' ? '目的地确认中...' : (lang === 'ko' ? '도착 장소 확인 중...' : 'Confirming destination...');
             }
         }
-        let destContentHtml = `<span class="success-timeline-text ${destClass}">${escapeHTML(displayRegion)}</span>`;
+        let destContentHtml = `<span class="success-timeline-text ${destClass}">${escapeHTML(displayDest)}</span>`;
 
         const timelineHtml = `
             <div class="${timelineClass}">
