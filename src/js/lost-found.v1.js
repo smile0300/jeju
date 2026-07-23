@@ -1279,7 +1279,7 @@ export function renderSuccessGoodsView(isLoadMore = false) {
         let STEP_LABELS;
         if (lang === 'ko') STEP_LABELS = ['접수', '수색중', '발견', '수령', '발송'];
         else if (lang === 'en') STEP_LABELS = ['Received', 'Searching', 'Found', 'Collected', 'Sent'];
-        else STEP_LABELS = ['收到', '寻找中', '已发现', '已领取', '寄出'];
+        else STEP_LABELS = ['收到', '寻找中', '找到', '领取', '寄出'];
         const isCompleted = stepNum >= 5;
         let dotsContainerHtml = '';
         
