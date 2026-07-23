@@ -193,7 +193,7 @@ export function renderLostGoods(grid, items, isLoadMore = false) {
     const hasMore = window.lostGoodsVisibleCount < items.length;
     const loadMoreHtml = hasMore 
         ? `<div style="grid-column: 1 / -1; text-align: center; margin-top: 16px; padding: 0 16px; width: 100%;">
-               <button onclick="loadMoreLostGoods()" style="width: 100%; padding: 12px; background: transparent; border: 1px solid var(--separator); color: var(--label-secondary); border-radius: 8px; font-weight: 500; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;">
+               <button onclick="loadMoreLostGoods()" style="width: 100%; padding: 12px; background: rgba(49, 130, 246, 0.05); border: 1px solid rgba(49, 130, 246, 0.3); color: var(--color-blue, #3182f6); border-radius: 8px; font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;">
                    ${window.t ? window.t('common.load_more') : '더보기'} <i class="ph-bold ph-caret-down"></i>
                </button>
            </div>`
@@ -239,7 +239,7 @@ export function renderLostGoodsTable(items, isLoadMore = false) {
     const hasMore = window.lostGoodsVisibleCount < items.length;
     const loadMoreHtml = hasMore 
         ? `<tr><td colspan="7" style="text-align: center; padding: 16px;">
-               <button onclick="loadMoreLostGoods()" style="width: 100%; padding: 12px; background: transparent; border: 1px solid var(--separator); color: var(--label-secondary); border-radius: 8px; font-weight: 500; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;">
+               <button onclick="loadMoreLostGoods()" style="width: 100%; padding: 12px; background: rgba(49, 130, 246, 0.05); border: 1px solid rgba(49, 130, 246, 0.3); color: var(--color-blue, #3182f6); border-radius: 8px; font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;">
                    ${window.t ? window.t('common.load_more') : '더보기'} <i class="ph-bold ph-caret-down"></i>
                </button>
            </td></tr>`
