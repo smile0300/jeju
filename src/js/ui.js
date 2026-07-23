@@ -117,13 +117,10 @@ export function showSection(sectionId, pushHistory = true) {
         if (arriveData && !arriveData.innerHTML.includes('flight-row')) fetchFlights('arrive');
     }
     if (sectionId === 'lost') {
-        if (!window.hasShownLostGuide) {
-            window.hasShownLostGuide = true;
-            if (window.toggleLostGuide) {
-                const guide = document.getElementById('inline-lost-guide');
-                if (guide && guide.style.display !== 'block') {
-                    window.toggleLostGuide();
-                }
+        if (window.toggleLostGuide) {
+            const guide = document.getElementById('inline-lost-guide');
+            if (guide && guide.style.display !== 'block') {
+                window.toggleLostGuide();
             }
         }
     }
