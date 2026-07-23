@@ -846,6 +846,13 @@ window.handleImageSearch = async function(event) {
     }
 };
 
+const getValidTranslation = (original, translated) => {
+    if (!translated) return original;
+    const lower = translated.toString().toLowerCase().replace(/\s+/g, '');
+    if (lower.includes('번역오류') || lower.includes('error')) return original;
+    return translated;
+};
+
 export async function fetchSuccessStories() {
     const defaultData = [
         {
@@ -951,14 +958,14 @@ function renderSuccessMarquee(data) {
         let text = window.t ? window.t('lost.success.marquee') : fallbackText;
 
         let itemName = item.Item;
-        if (lang === 'zh' && item.Item_zh) itemName = item.Item_zh;
-        if (lang === 'en' && item.Item_en) itemName = item.Item_en;
-        if (lang === 'ko' && item.Item_ko) itemName = item.Item_ko;
+        if (lang === 'zh') itemName = getValidTranslation(item.Item, item.Item_zh);
+        if (lang === 'en') itemName = getValidTranslation(item.Item, item.Item_en);
+        if (lang === 'ko') itemName = getValidTranslation(item.Item, item.Item_ko);
 
         let regionName = item.Region;
-        if (lang === 'zh' && item.Region_zh) regionName = item.Region_zh;
-        if (lang === 'en' && item.Region_en) regionName = item.Region_en;
-        if (lang === 'ko' && item.Region_ko) regionName = item.Region_ko;
+        if (lang === 'zh') regionName = getValidTranslation(item.Region, item.Region_zh);
+        if (lang === 'en') regionName = getValidTranslation(item.Region, item.Region_en);
+        if (lang === 'ko') regionName = getValidTranslation(item.Region, item.Region_ko);
 
         text = text.replace('{date}', formatDateStr(item.Date))
                    .replace('{region}', regionName)
@@ -974,14 +981,14 @@ function renderSuccessMarquee(data) {
     let firstText = window.t ? window.t('lost.success.marquee') : fallbackFirstText;
     
     let firstItemName = data[0].Item;
-    if (lang === 'zh' && data[0].Item_zh) firstItemName = data[0].Item_zh;
-    if (lang === 'en' && data[0].Item_en) firstItemName = data[0].Item_en;
-    if (lang === 'ko' && data[0].Item_ko) firstItemName = data[0].Item_ko;
+    if (lang === 'zh') firstItemName = getValidTranslation(data[0].Item, data[0].Item_zh);
+    if (lang === 'en') firstItemName = getValidTranslation(data[0].Item, data[0].Item_en);
+    if (lang === 'ko') firstItemName = getValidTranslation(data[0].Item, data[0].Item_ko);
 
     let firstRegionName = data[0].Region;
-    if (lang === 'zh' && data[0].Region_zh) firstRegionName = data[0].Region_zh;
-    if (lang === 'en' && data[0].Region_en) firstRegionName = data[0].Region_en;
-    if (lang === 'ko' && data[0].Region_ko) firstRegionName = data[0].Region_ko;
+    if (lang === 'zh') firstRegionName = getValidTranslation(data[0].Region, data[0].Region_zh);
+    if (lang === 'en') firstRegionName = getValidTranslation(data[0].Region, data[0].Region_en);
+    if (lang === 'ko') firstRegionName = getValidTranslation(data[0].Region, data[0].Region_ko);
 
     firstText = firstText.replace('{date}', formatDateStr(data[0].Date))
                          .replace('{region}', firstRegionName)
@@ -1054,15 +1061,15 @@ window.openSuccessModal = function(index) {
     if (item.Place && placeTranslations[item.Place] && placeTranslations[item.Place][lang]) {
         placeText = placeTranslations[item.Place][lang];
     } else {
-        if (lang === 'zh') placeText = item.Place_zh || item.Region_zh || placeText;
-        else if (lang === 'en') placeText = item.Place_en || item.Region_en || placeText;
-        else if (lang === 'ko') placeText = item.Place_ko || item.Region_ko || placeText;
+        if (lang === 'zh') placeText = getValidTranslation(placeText, item.Place_zh || item.Region_zh);
+        else if (lang === 'en') placeText = getValidTranslation(placeText, item.Place_en || item.Region_en);
+        else if (lang === 'ko') placeText = getValidTranslation(placeText, item.Place_ko || item.Region_ko);
     }
 
     let itemName = item.Item;
-    if (lang === 'zh' && item.Item_zh) itemName = item.Item_zh;
-    if (lang === 'en' && item.Item_en) itemName = item.Item_en;
-    if (lang === 'ko' && item.Item_ko) itemName = item.Item_ko;
+    if (lang === 'zh') itemName = getValidTranslation(item.Item, item.Item_zh);
+    if (lang === 'en') itemName = getValidTranslation(item.Item, item.Item_en);
+    if (lang === 'ko') itemName = getValidTranslation(item.Item, item.Item_ko);
 
     const wechatIdMasked = (() => {
         let id = (item.WeChatId || '').toString().trim();
@@ -1209,14 +1216,14 @@ export function renderSuccessGoodsView(isLoadMore = false) {
         const actualIndex = data.indexOf(item);
         
         let itemName = item.Item;
-        if (lang === 'zh' && item.Item_zh) itemName = item.Item_zh;
-        if (lang === 'en' && item.Item_en) itemName = item.Item_en;
-        if (lang === 'ko' && item.Item_ko) itemName = item.Item_ko;
+        if (lang === 'zh') itemName = getValidTranslation(item.Item, item.Item_zh);
+        if (lang === 'en') itemName = getValidTranslation(item.Item, item.Item_en);
+        if (lang === 'ko') itemName = getValidTranslation(item.Item, item.Item_ko);
 
         let regionName = item.Region;
-        if (lang === 'zh' && item.Region_zh) regionName = item.Region_zh;
-        if (lang === 'en' && item.Region_en) regionName = item.Region_en;
-        if (lang === 'ko' && item.Region_ko) regionName = item.Region_ko;
+        if (lang === 'zh') regionName = getValidTranslation(item.Region, item.Region_zh);
+        if (lang === 'en') regionName = getValidTranslation(item.Region, item.Region_en);
+        if (lang === 'ko') regionName = getValidTranslation(item.Region, item.Region_ko);
 
         itemName = escapeHTML(itemName);
         regionName = escapeHTML(regionName);
