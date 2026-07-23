@@ -116,6 +116,18 @@ export async function fetchFoundGoods() {
 
 export function switchLostView(mode) {
     currentLostView = mode;
+    
+    // 탭 전환 시 가이드가 열려있다면 닫기
+    const guide = document.getElementById('inline-lost-guide');
+    const guideBtn = document.getElementById('btn-lost-guide');
+    if (guide && guide.style.display === 'block') {
+        guide.style.display = 'none';
+        if (guideBtn) {
+            guideBtn.classList.remove('active');
+            guideBtn.style.background = 'rgba(49, 130, 246, 0.05)';
+        }
+    }
+
     const btnCard = document.getElementById('btn-view-card');
     const btnTable = document.getElementById('btn-view-table');
     const btnSuccess = document.getElementById('btn-success-all');

@@ -188,11 +188,38 @@ window.submitCSFeedback = submitCSFeedback;
 
 window.toggleLostGuide = () => {
     const guide = document.getElementById('inline-lost-guide');
-    if (guide) {
-        if (guide.style.display === 'none' || !guide.style.display) {
-            guide.style.display = 'block';
-        } else {
-            guide.style.display = 'none';
+    const guideBtn = document.getElementById('btn-lost-guide');
+    if (!guide) return;
+    
+    const isOpening = guide.style.display === 'none' || !guide.style.display;
+    
+    if (isOpening) {
+        guide.style.display = 'block';
+        if (guideBtn) {
+            guideBtn.classList.add('active');
+            guideBtn.style.background = 'rgba(49, 130, 246, 0.15)';
+        }
+        
+        // 가이드가 열릴 때는 하단의 다른 정보들이 보이지 않도록 숨김 처리
+        const grid = document.getElementById('lost-goods-grid');
+        const table = document.getElementById('lost-goods-table-container');
+        const success = document.getElementById('lost-success-container');
+        if (grid) grid.style.display = 'none';
+        if (table) table.style.display = 'none';
+        if (success) success.style.display = 'none';
+    } else {
+        guide.style.display = 'none';
+        if (guideBtn) {
+            guideBtn.classList.remove('active');
+            guideBtn.style.background = 'rgba(49, 130, 246, 0.05)';
+        }
+        
+        // 가이드를 닫을 때는 활성화되어 있던 뷰 탭을 다시 클릭하여 정보를 복구
+        const activeTab = document.querySelector('.view-toggle-btn.active:not(#btn-lost-guide)');
+        if (activeTab) {
+            activeTab.click();
+        } else if (window.switchLostView) {
+            window.switchLostView('card');
         }
     }
 };
