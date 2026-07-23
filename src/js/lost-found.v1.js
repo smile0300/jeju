@@ -24,24 +24,14 @@ export async function fetchFoundGoods() {
         if (dateInput && !dateInput.value) {
             const now = new Date();
             const kstTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
-            const today = new Date(kstTime);
-            dateInput.value = today.toISOString().split('T')[0];
+            const yesterday = new Date(kstTime);
+            yesterday.setDate(yesterday.getDate() - 1);
+            dateInput.value = yesterday.toISOString().split('T')[0];
         }
 
         const selectedDate = (dateInput?.value || '');
         let startYmd = selectedDate.replace(/-/g, '');
         let endYmd = selectedDate.replace(/-/g, '');
-        
-        // If the selected date is today, search the last 7 days to ensure we get results (especially for regions with delayed data entry)
-        const now = new Date();
-        const kstTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
-        const todayStr = kstTime.toISOString().split('T')[0];
-        if (selectedDate === todayStr || !dateInput?.value) {
-            const pastDate = new Date(kstTime);
-            pastDate.setDate(pastDate.getDate() - 7);
-            startYmd = pastDate.toISOString().split('T')[0].replace(/-/g, '');
-            endYmd = todayStr.replace(/-/g, '');
-        }
 
         const category = categoryInput?.value || '';
         const regionInput = document.getElementById('lostRegionCd');
