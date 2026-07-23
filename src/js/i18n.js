@@ -777,7 +777,7 @@ const TRANSLATIONS = {
         'lost.notice.prog1': '<b>[수색중]</b> 분실물이 접수되어 매칭을 기다리는 상태입니다.',
         'lost.notice.prog2': '<b>[발견]</b> 물건을 발견하여 안전하게 보관하고 있습니다.',
         'lost.notice.prog3': '<b>[수령]</b> 소유자(또는 대리인)가 물품 수령을 완료한 상태입니다.',
-        'lost.notice.alert': '알아두세요 (공지)',
+        'lost.notice.alert': '알아두세요',
         'lost.notice.alert1': '습득물이 시스템에 등록되기까지 <b>1~3일 정도 소요</b>될 수 있으니 주기적인 확인을 권장합니다.',
         'lost.notice.alert2': '보관소에서 물품 수령 시 본인 확인을 위한 <b>신분증</b>을 지참해 주세요.',
 
