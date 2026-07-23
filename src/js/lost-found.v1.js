@@ -117,10 +117,10 @@ export async function fetchFoundGoods() {
 export function switchLostView(mode) {
     currentLostView = mode;
     
-    // 탭 전환 시 가이드가 열려있다면 닫기
+    // 탭 전환 시 가이드 무조건 닫기
     const guide = document.getElementById('inline-lost-guide');
     const guideBtn = document.getElementById('btn-lost-guide');
-    if (guide && guide.style.display === 'block') {
+    if (guide) {
         guide.style.display = 'none';
         if (guideBtn) {
             guideBtn.classList.remove('active');
