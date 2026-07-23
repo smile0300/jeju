@@ -1308,13 +1308,13 @@ export function renderSuccessGoodsView(isLoadMore = false) {
         if (lang === 'ko' && (item.Place_ko || item.LostPlace_ko)) handoverValue = item.Place_ko || item.LostPlace_ko;
         handoverValue = handoverValue || 'jeju central ctiy hotel';
         
-        let originContentHtml = `<span class="success-timeline-text">${escapeHTML(regionName)}</span>`;
+        let originContentHtml = `<span class="success-timeline-text">${escapeHTML(handoverValue)}</span>`;
         
         const originClass = stepNum === 1 ? 'origin active' : 'origin';
         const destClass = isCompleted ? 'destination' : 'destination pending';
         const timelineClass = isCompleted ? 'success-timeline-vertical' : 'success-timeline-vertical pending';
 
-        let displayDest = handoverValue;
+        let displayDest = regionName;
         if (!isCompleted) {
             if (!displayDest || displayDest.trim() === '') {
                 displayDest = lang === 'zh' ? '目的地确认中...' : (lang === 'ko' ? '도착 장소 확인 중...' : 'Confirming destination...');
