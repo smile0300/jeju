@@ -79,6 +79,9 @@
                         <i class="ph-fill ph-info" style="font-size: 1.25rem;"></i>
                     </button>
                     <div style="display: flex; gap: 4px; flex: 1; min-width: 0;">
+                        <button id="btn-success-all" class="view-toggle-btn success-toggle-btn" onclick="switchLostView('success')" style="padding: 10px 4px; font-size: 0.8rem; gap: 4px; flex: 1;">
+                            <i class="ph-duotone ph-trophy" style="font-size: 1.1rem;"></i><span data-i18n="lost.success.view_all">진행상황</span>
+                        </button>
                         <button id="btn-view-card" class="view-toggle-btn active" onclick="switchLostView('card')" style="padding: 10px 4px; font-size: 0.8rem; gap: 4px; flex: 1;">
                             <i class="ph-duotone ph-squares-four" style="font-size: 1.1rem;"></i><span data-i18n="lost.view.card">카드 모드</span>
                         </button>
@@ -86,9 +89,6 @@
                             <i class="ph-duotone ph-list-dashes" style="font-size: 1.1rem;"></i><span data-i18n="lost.view.table">표 모드</span>
                         </button>
                     </div>
-                    <button id="btn-success-all" class="view-toggle-btn success-toggle-btn" onclick="switchLostView('success')" style="flex: 0 0 auto; padding: 10px 12px; font-size: 0.8rem; gap: 4px; display: flex; align-items: center; justify-content: center;">
-                        <i class="ph-duotone ph-trophy" style="font-size: 1.1rem;"></i><span data-i18n="lost.success.view_all">진행상황</span>
-                    </button>
                 </div>
                 
                 <div id="inline-lost-guide" style="display: none; padding: 24px 20px; background: var(--bg-primary); border-radius: 12px; margin-top: 12px; border: 1px solid var(--separator); text-align: left; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-left: 4px solid #3182f6;">
