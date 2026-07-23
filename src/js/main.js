@@ -186,6 +186,17 @@ window.openCSModal = openCSModal;
 window.closeCSModal = closeCSModal;
 window.submitCSFeedback = submitCSFeedback;
 
+window.toggleLostGuide = () => {
+    const guide = document.getElementById('inline-lost-guide');
+    if (guide) {
+        if (guide.style.display === 'none' || !guide.style.display) {
+            guide.style.display = 'block';
+        } else {
+            guide.style.display = 'none';
+        }
+    }
+};
+
 // Modals closing
 const closeAllModals = () => {
     const modals = document.querySelectorAll('.wsm-overlay, #cctv-detail-card, #cctv-modal, #lost-detail-modal, #lost-report-modal, #feature-request-modal, #cs-modal, #wechat-qr-modal, #share-modal, #cctv-apply-modal, #lost-upsell-modal');
