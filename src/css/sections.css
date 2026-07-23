@@ -1,5 +1,5 @@
 /* ==================== Lost Report Modal Form ==================== */
-/* (modals.html?�서 ?�전?????�라??<style> 블록 ?�거) */
+/* (modals.html?먯꽌 ?댁쟾?????몃씪??<style> 釉붾줉 ?쒓굅) */
 .lost-report-form-content {
     padding: 32px 24px 24px 24px;
     max-width: 520px !important;
@@ -335,7 +335,7 @@
     height: 100%;
     display: block;
     object-fit: cover;
-    /* ?�면 ?�림 방�?�??�해 기본?�?cover, ?�요??contain */
+    /* ?占쎈㈃ ?占쎈┝ 諛⑼옙?占??占쏀빐 湲곕낯?占?cover, ?占쎌슂??contain */
 }
 
 /* Modal specific CCTV styles */
@@ -352,7 +352,7 @@
     width: 100%;
     height: 100%;
     object-fit: contain;
-    /* ???�면?�서??가로세�?비율 ?��? 권장 */
+    /* ???占쎈㈃?占쎌꽌??媛濡쒖꽭占?鍮꾩쑉 ?占쏙옙? 沅뚯옣 */
 }
 
 .cctv-modal-info {
@@ -383,7 +383,7 @@
 }
 
 #festival .ad-container::before {
-    content: '광고 로드 �?..';
+    content: '愿묎퀬 濡쒕뱶 占?..';
     position: absolute;
     top: 50%;
     left: 50%;
@@ -455,7 +455,7 @@
     margin-top: 12px;
 }
 
-/* ?�힘 ?�태: ?�택??지???�시 ?�리�?버튼 */
+/* ?묓옒 ?곹깭: ?좏깮??吏???쒖떆 ?몃━嫄?踰꾪듉 */
 .loc-trigger-row {
     display: flex;
     align-items: center;
@@ -497,7 +497,7 @@
     color: #2563EB;
 }
 
-/* ?�살???�이�? ?�침 ???�전 */
+/* ?붿궡???꾩씠肄? ?쇱묠 ???뚯쟾 */
 .loc-caret {
     font-size: 0.85rem;
     color: #2563EB;
@@ -528,7 +528,7 @@
     flex-direction: column !important;
     width: 100% !important;
     padding: 14px 0 4px 0 !important;
-    /* ?�단 14px: group-label(top:-10px) ?�림 방�? */
+    /* ?곷떒 14px: group-label(top:-10px) ?섎┝ 諛⑹? */
     margin-top: 2px !important;
     gap: 0 !important;
 }
@@ -538,7 +538,7 @@
     display: grid !important;
     grid-template-columns: repeat(5, 1fr) !important;
     gap: 8px !important;
-    /* Grid 간격 8px */
+    /* Grid 媛꾧꺽 8px */
     width: 100% !important;
     padding: 16px 2px 2px 2px !important;
 }
@@ -553,20 +553,20 @@
     display: none !important;
 }
 
-/* 그룹 컨테?�너 (?��? 버튼 간격??Grid 간격�??�벽 ?�치) */
+/* 洹몃９ 而⑦뀒?대꼫 (?대? 踰꾪듉 媛꾧꺽??Grid 媛꾧꺽怨??꾨꼍 ?쇱튂) */
 .loc-group-wrapper {
     display: flex !important;
     align-items: stretch !important;
     gap: 8px !important;
-    /* 부�?간격�??�일?�게 8px */
+    /* 遺紐?媛꾧꺽怨??숈씪?섍쾶 8px */
     position: relative !important;
     padding: 0 !important;
-    /* 모든 ?�딩 ?�거?�여 버튼 ?�기/간격 ?�치 */
+    /* 紐⑤뱺 ?⑤뵫 ?쒓굅?섏뿬 踰꾪듉 ?ш린/媛꾧꺽 ?쇱튂 */
     border-radius: 0 !important;
     background: transparent !important;
 }
 
-/* 5개의 컬럼??맞게 그룹별로 차�??�는 �???Span) 지??*/
+/* 5媛쒖쓽 而щ읆??留욊쾶 洹몃９蹂꾨줈 李⑥??섎뒗 移???Span) 吏??*/
 .group-north {
     grid-column: span 1;
 }
@@ -587,7 +587,7 @@
     grid-column: span 1;
 }
 
-/* ?�벨: 첫번�?버튼 ?�단 좌측 �???�에 기울?�진 뱃�? ?�태�?배치 */
+/* ?쇰꺼: 泥ル쾲吏?踰꾪듉 ?곷떒 醫뚯륫 瑗???먯뿉 湲곗슱?댁쭊 諭껋? ?뺥깭濡?諛곗튂 */
 .group-label {
     display: inline-block !important;
     position: absolute !important;
@@ -604,10 +604,10 @@
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08) !important;
     border: 1px solid rgba(0, 0, 0, 0.04) !important;
     pointer-events: none !important;
-    /* ?�릭 방해 방�? */
+    /* ?대┃ 諛⑺빐 諛⑹? */
 }
 
-/* ?�벨 ?�스???�상 지??�� 맞춤 변�?*/
+/* ?쇰꺼 ?띿뒪???됱긽 吏??퀎 留욎땄 蹂寃?*/
 .group-north .group-label {
     color: #2563EB !important;
 }
@@ -634,7 +634,7 @@
     min-width: 50px !important;
     background: var(--bg-primary);
     padding: 9px 0;
-    /* border 1px 추�?�??�한 ?�딩 미세조정 */
+    /* border 1px 異붽?濡??명븳 ?⑤뵫 誘몄꽭議곗젙 */
     border-radius: var(--radius-md);
     cursor: pointer;
     transition: all var(--duration-fast) var(--ease-out);
@@ -650,7 +650,7 @@
     transform: scale(0.97);
 }
 
-/* 지??�� ??기본 ?�두�?(미선???�태) - ?�?�???�트 */
+/* 吏??퀎 ??湲곕낯 ?뚮몢由?(誘몄꽑???곹깭) - ?????댄듃 */
 .group-north .location-tab {
     border: 1px solid rgba(37, 99, 235, 0.25) !important;
 }
@@ -671,7 +671,7 @@
     border: 1px solid rgba(139, 90, 43, 0.25) !important;
 }
 
-/* 지??�� ?�성(Active) ???�마 컬러 */
+/* 吏??퀎 ?쒖꽦(Active) ???뚮쭏 而щ윭 */
 .location-tab.active {
     box-shadow: none;
     border-color: transparent !important;
@@ -772,7 +772,7 @@
     font-size: 2.8rem;
     font-weight: 700;
     /* Heavy ??Bold */
-    /* Apple HIG: ?�색 ??그라?�이???�거 */
+    /* Apple HIG: ?⑥깋 ??洹몃씪?곗씠???쒓굅 */
     color: var(--label-primary);
 }
 
@@ -793,7 +793,7 @@
     width: 100% !important;
     text-align: center;
     grid-column: 1 / -1;
-    /* 그리???�체 ?�역 차�? 강제 */
+    /* 洹몃━???占쎌껜 ?占쎌뿭 李⑨옙? 媛뺤젣 */
 }
 
 .weather-loader {
@@ -866,7 +866,7 @@
 }
 
 
-/* 최상??기상?�보 배너 (조건부 ?�시) */
+/* 理쒖긽??湲곗긽?밸낫 諛곕꼫 (議곌굔遺 ?쒖떆) */
 .weather-alerts-top-banner {
     width: 100%;
     margin-top: 12px;
@@ -886,7 +886,7 @@
     }
 }
 
-/* 기존 weather-alerts-container (?�용?��? ?�으???�화면에???�용 �? */
+/* 湲곗〈 weather-alerts-container (?ъ슜?섏? ?딆쑝???덊솕硫댁뿉???ъ슜 以? */
 .weather-alerts-container {
     width: 100%;
     margin-top: 10px;
@@ -910,7 +910,7 @@
 
 .weather-alert-card {
     background: rgba(255, 36, 66, 0.08);
-    /* ?�한 빨간??배경 */
+    /* ?占쏀븳 鍮④컙??諛곌꼍 */
     border: 0.5px solid rgba(255, 36, 66, 0.3);
     border-radius: var(--radius-xl, 20px);
     padding: 12px 18px;
@@ -921,7 +921,7 @@
     box-sizing: border-box;
     box-shadow: 0 4px 15px rgba(255, 36, 66, 0.05);
     cursor: pointer;
-    /* v20.0: ?�릭 가???�시 */
+    /* v20.0: ?占쎈┃ 媛???占쎌떆 */
 }
 
 .weather-alert-card.no-alerts {
@@ -1079,9 +1079,9 @@
 .subsection-title,
 .cmp-cur-weather-head {
     margin: 40px 0 24px 0;
-    /* ?�백 ?��? */
+    /* ?щ갚 ?뺣? */
     font-size: 1.35rem;
-    /* ?�트 증�? */
+    /* ?고듃 利앸? */
     font-weight: 800;
     text-align: center;
     width: 100%;
@@ -1260,7 +1260,7 @@
     color: #10b981;
 }
 
-/* �?- Green */
+/* 占?- Green */
 .air-lv2 {
     stroke: #f59e0b;
     color: #f59e0b;
@@ -1272,13 +1272,13 @@
     color: #ef4444;
 }
 
-/* 轻度 - Red */
+/* 饔삣벧 - Red */
 .air-lv4 {
     stroke: #9333ea;
     color: #9333ea;
 }
 
-/* ?�度 - Purple */
+/* ?占썲벧 - Purple */
 
 .air-circle-status {
     position: absolute;
@@ -1468,7 +1468,7 @@
     color: white;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     white-space: nowrap;
-    /* 뱃�???줄바�??�함 */
+    /* 諭껋???以꾨컮轅??덊븿 */
 }
 
 .trail-status-badge.open {
@@ -1528,7 +1528,7 @@
     font-size: 0.75rem;
     font-weight: 800;
     color: var(--label-primary);
-    /* white-space: nowrap ?�거 */
+    /* white-space: nowrap ?쒓굅 */
     word-break: keep-all;
     text-align: center;
     width: 100%;
@@ -1543,9 +1543,9 @@
     border-top: 1px dashed var(--border-light);
     padding-top: 8px;
     flex-wrap: nowrap;
-    /* 줄바�?방�? */
+    /* 以꾨컮占?諛⑼옙? */
     gap: 5px;
-    /* ?�소 �?최소 간격 */
+    /* ?占쎌냼 占?理쒖냼 媛꾧꺽 */
 }
 
 .trail-info-compact span {
@@ -1553,9 +1553,9 @@
     font-weight: 700;
     color: var(--text-muted);
     white-space: nowrap;
-    /* ?�스??줄바�?방�? */
+    /* ?占쎌뒪??以꾨컮占?諛⑼옙? */
     flex-shrink: 0;
-    /* ?�소가 줄어?��? ?�도�??�정 */
+    /* ?占쎌냼媛 以꾩뼱?占쏙옙? ?占쎈룄占??占쎌젙 */
 }
 
 /* ==================== Flights ==================== */
@@ -1587,7 +1587,7 @@
     justify-content: center;
 }
 
-/* Apple HIG: ?�성 ?????�색 Accent */
+/* Apple HIG: ?쒖꽦 ?????⑥깋 Accent */
 .flight-tab.active {
     background: var(--bg-primary);
     color: var(--accent);
@@ -1653,7 +1653,7 @@
     white-space: nowrap;
 }
 
-/* ?�班??*/
+/* ?ょ룺??*/
 .flight-col:nth-child(2) {
     flex: 0 0 25%;
     word-break: keep-all;
@@ -1661,7 +1661,7 @@
     line-height: 1.1;
 }
 
-/* ?�空?�司 */
+/* ?ょ㈉?у뤈 */
 .flight-col:nth-child(3) {
     flex: 0 0 21%;
     word-break: keep-all;
@@ -1669,19 +1669,19 @@
     line-height: 1.1;
 }
 
-/* ??��???�发??*/
+/* ??쉪???뷴룕??*/
 .flight-col:nth-child(4) {
     flex: 0 0 22%;
     white-space: nowrap;
 }
 
-/* 预定/实际 */
+/* 窯꾢츣/若욇솀 */
 .flight-col:nth-child(5) {
     flex: 0 0 18%;
     word-break: keep-all;
 }
 
-/* ?��?*/
+/* ?뜻?*/
 
 /* ==================== Festival ==================== */
 .festival-month-filter {
@@ -1704,13 +1704,13 @@
     cursor: pointer;
     white-space: nowrap;
     transition: all var(--duration-fast) var(--ease-out);
-    /* 44px 최소 ?�이 */
+    /* 44px 理쒖냼 ?믪씠 */
     min-height: var(--touch-target);
     display: flex;
     align-items: center;
 }
 
-/* Apple HIG: ?�성 ?�터 ??Accent ?�색 */
+/* Apple HIG: ?쒖꽦 ?꾪꽣 ??Accent ?⑥깋 */
 .month-tab.active {
     background: var(--accent);
     color: white;
@@ -1991,7 +1991,7 @@
     height: 56px;
 }
 
-/* lost-category-badge: ????분류 �? */
+/* lost-category-badge: ????遺꾨쪟 占? */
 .lost-category-badge {
     display: inline-block;
     padding: 3px 10px;
@@ -2002,7 +2002,7 @@
     font-weight: 800;
 }
 
-/* lost-table-btn: ?�이???�세 보기 버튼 */
+/* lost-table-btn: ?占쎌씠???占쎌꽭 蹂닿린 踰꾪듉 */
 .lost-table-btn {
     padding: 8px 16px;
     background: white;
@@ -2352,6 +2352,10 @@
     gap: 10px;
     transition: all var(--transition-normal);
     box-shadow: 0 4px 12px rgba(37, 99, 235, 0.05);
+    white-space: normal;
+    word-break: keep-all;
+    text-align: center;
+    line-height: 1.2;
 }
 
 .lost-report-btn.btn-sm,
@@ -2540,10 +2544,10 @@
     }
 }
 
-/* ==================== ?�씨 ?�약 버튼 ==================== */
+/* ==================== ?占쎌뵪 ?占쎌빟 踰꾪듉 ==================== */
 /* weather-summary-btn is defined in the top titles area */
 
-/* ==================== ?�씨 ?�약 모달 ==================== */
+/* ==================== ?占쎌뵪 ?占쎌빟 紐⑤떖 ==================== */
 .wsm-overlay {
     position: fixed;
     inset: 0;
@@ -3301,7 +3305,7 @@
 .wsm-nav-zone {
     position: fixed;
     top: 60px;
-    /* Header ?�역 ?�외 */
+    /* Header ?占쎌뿭 ?占쎌쇅 */
     bottom: 0;
     width: 30%;
     z-index: 9998;
@@ -3547,7 +3551,7 @@
 .wsm-nav-zone {
     position: fixed;
     top: 60px;
-    /* Header ?�역 ?�외 */
+    /* Header ?占쎌뿭 ?占쎌쇅 */
     bottom: 0;
     width: 30%;
     z-index: 9998;
@@ -3781,7 +3785,7 @@
     /* Ensure padding doesn't add to width */
 }
 
-/* ??�� 바로 ?�어지??카드???�단 모서�?곡률 �??�두�??�거 */
+/* ??낵 諛붾줈 ?댁뼱吏??移대뱶???곷떒 紐⑥꽌由?怨〓쪧 諛??뚮몢由??쒓굅 */
 .current-weather-main,
 .past-weather-summary {
     border-top-left-radius: 0 !important;
@@ -3963,7 +3967,7 @@
 .cw-left .current-val {
     font-size: 3.0rem;
     font-weight: 500;
-    /* ?�주 ?�얼 accent */
+    /* ?쒖＜ ?곗뼹 accent */
     color: var(--accent);
     line-height: 1;
     display: flex;
@@ -4692,7 +4696,7 @@
     box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
 }
 
-/* ==================== ?�화�?개선 ==================== */
+/* ==================== ?덊솕硫?媛쒖꽑 ==================== */
 
 /* ??tagline */
 .home-tagline {
@@ -4705,7 +4709,7 @@
     opacity: 0.75;
 }
 
-/* CCTV ?�청 가??버튼 (disabled가 ?�닌 버전) */
+/* CCTV ?좎껌 媛??踰꾪듉 (disabled媛 ?꾨땶 踰꾩쟾) */
 .home-item.item-cctv-apply {
     cursor: pointer;
     opacity: 1;
@@ -4734,10 +4738,10 @@
     transform: scale(0.97);
 }
 
-/* ==================== ?�챗 ?�로??버튼 ==================== */
+/* ==================== ?꾩콟 ?뚮줈??踰꾪듉 ==================== */
 .wechat-float-btn {
     position: fixed;
-    bottom: 88px;   /* ?�단 ?�비�???*/
+    bottom: 88px;   /* ?섎떒 ?ㅻ퉬諛???*/
     right: 16px;
     z-index: 9990;
     display: flex;
@@ -4771,12 +4775,12 @@
     transform: scale(0.97);
 }
 
-/* ?�화면이 ?�닐 ???�로??버튼 ?�기�?*/
+/* ?덊솕硫댁씠 ?꾨땺 ???뚮줈??踰꾪듉 ?④린湲?*/
 body:not(.page-home) .wechat-float-btn {
     display: none;
 }
 
-/* ==================== CCTV ?�청 모달 ==================== */
+/* ==================== CCTV ?좎껌 紐⑤떖 ==================== */
 .cctv-apply-modal-content {
     background: var(--bg-primary);
     border-radius: 20px;

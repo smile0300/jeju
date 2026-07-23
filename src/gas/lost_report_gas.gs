@@ -61,7 +61,7 @@ function doPost(e) {
       }
 
       var timestamp = new Date();
-      var resultRow = [];
+      var rowData = {};
 
       if (data.type === 'lost_report') {
         // 1. 이미지 처리 (Base64 -> Google Drive File)
@@ -76,47 +76,70 @@ function doPost(e) {
           labelsStr = labels.join(',');
         }
         
-        resultRow = [
-          timestamp,
-          data.itemCategory || '',
-          data.city || '',
-          data.specifics || '',
-          data.regionCategory || '',
-          data.date || '',
-          data.time || '',
-          data.detailLocation || '',
-          data.hotelName || '',
-          data.hotelBooker || '',
-          data.hotelDates || '',
-          data.carNumber || '',
-          data.boardLoc || '',
-          data.boardTime || '',
-          data.alightLoc || '',
-          data.alightTime || '',
-          photoUrl,
-          data.wechatId || '',
-          data.userAgent || '',
-          labelsStr
-        ];
+        rowData = {
+          'Timestamp': timestamp,
+          'ItemCategory': data.itemCategory || '',
+          'City': data.city || '',
+          'Specifics': data.specifics || '',
+          'RegionCategory': data.regionCategory || '',
+          'Date': data.date || '',
+          'Time': data.time || '',
+          'DetailLocation': data.detailLocation || '',
+          'HotelName': data.hotelName || '',
+          'HotelBooker': data.hotelBooker || '',
+          'HotelDates': data.hotelDates || '',
+          'CarNumber': data.carNumber || '',
+          'BoardLoc': data.boardLoc || '',
+          'BoardTime': data.boardTime || '',
+          'AlightLoc': data.alightLoc || '',
+          'AlightTime': data.alightTime || '',
+          'PhotoURL': photoUrl,
+          'WechatId': data.wechatId || '',
+          'UserAgent': data.userAgent || '',
+          'Labels': labelsStr
+        };
       } else if (data.type === 'feature') {
-         resultRow = [
-          timestamp,
-          data.feature,
-          data.contact,
-          data.userAgent
-        ];
+         rowData = {
+          'Timestamp': timestamp,
+          'Feature': data.feature,
+          'Contact': data.contact,
+          'UserAgent': data.userAgent
+        };
       } else if (data.type === 'cctv_apply') {
-         resultRow = [
-          timestamp,
-          data.wechat || '',
-          data.region || '',
-          data.startDate || '',
-          data.endDate || '',
-          data.userAgent || ''
-        ];
+         rowData = {
+          'Timestamp': timestamp,
+          'WechatId': data.wechat || '',
+          'Region': data.region || '',
+          'StartDate': data.startDate || '',
+          'EndDate': data.endDate || '',
+          'UserAgent': data.userAgent || ''
+        };
       }
 
-      sheet.appendRow(resultRow);
+      // 2. 시트의 1행(헤더)을 읽어와서 열 순서대로 데이터를 알아서 배치합니다.
+      var lastCol = sheet.getLastColumn();
+      var headers = lastCol > 0 ? sheet.getRange(1, 1, 1, lastCol).getValues()[0] : [];
+
+      // 3. 빈 문자열("") 수식(ARRAYFORMULA 등)으로 인해 맨 아래 빈 줄에 추가되는 것을 방지하기 위해 
+      // A열(Timestamp) 기준으로 실제 마지막 행을 찾아 데이터를 추가합니다.
+      var values = sheet.getRange("A:A").getValues();
+      var lastRow = 0;
+      for (var i = values.length - 1; i >= 0; i--) {
+        if (values[i][0] !== "") {
+          lastRow = i + 1;
+          break;
+        }
+      }
+      var targetRow = lastRow + 1;
+      
+      // 4. 수식이 들어있는 열(예: 분실물(세부내용) 등)을 덮어쓰지 않도록,
+      // 데이터가 존재하는 열에만 개별적으로 값을 입력합니다.
+      for (var j = 0; j < headers.length; j++) {
+        var headerName = headers[j] ? headers[j].toString().trim() : '';
+        if (headerName && rowData[headerName] !== undefined) {
+          sheet.getRange(targetRow, j + 1).setValue(rowData[headerName]);
+        }
+      }
       
       return ContentService.createTextOutput(JSON.stringify({ "result": "success", "status": "success" }))
         .setMimeType(ContentService.MimeType.JSON);

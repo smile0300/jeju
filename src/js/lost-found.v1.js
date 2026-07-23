@@ -530,6 +530,19 @@ export async function submitLostReport() {
         return;
     }
 
+    const agreePrivacyCheckbox = document.getElementById('agreePrivacy');
+    if (agreePrivacyCheckbox && !agreePrivacyCheckbox.checked) {
+        const errMsg = window.t ? window.t('modal.lost.privacy.err') : '개인정보 수집 및 이용에 동의해주세요.';
+        if (statusEl) {
+            statusEl.textContent = errMsg;
+            statusEl.className = 'form-status error';
+            statusEl.style.display = 'block';
+        } else {
+            alert(errMsg);
+        }
+        return;
+    }
+
     try {
         if (statusEl) {
             statusEl.textContent = window.t ? window.t('lost.report.submitting') : '접수 중...';

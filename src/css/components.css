@@ -119,8 +119,10 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
-    white-space: nowrap;
+    white-space: normal;
     word-break: keep-all;
+    text-align: center;
+    line-height: 1.2;
 }
 
 /* Apple HIG: 활성 탭 — 흰 배경 + 섀도우 (iOS Segmented 표준) */
