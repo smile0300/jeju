@@ -116,7 +116,17 @@ export function showSection(sectionId, pushHistory = true) {
         const arriveData = document.getElementById('arrive-data');
         if (arriveData && !arriveData.innerHTML.includes('flight-row')) fetchFlights('arrive');
     }
-    // if (sectionId === 'lost') fetchFoundGoods(); // 사용자가 검색 버튼을 누를 때만 조회하도록 자동 실행 제거
+    if (sectionId === 'lost') {
+        if (!window.hasShownLostGuide) {
+            window.hasShownLostGuide = true;
+            if (window.toggleLostGuide) {
+                const guide = document.getElementById('inline-lost-guide');
+                if (guide && guide.style.display !== 'block') {
+                    window.toggleLostGuide();
+                }
+            }
+        }
+    }
     if (sectionId === 'festival') fetchFestivals();
     if (sectionId === 'reward') initReward();
 
