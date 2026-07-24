@@ -65,11 +65,6 @@ const routes = [
 let indexHtmlContent = fs.readFileSync(indexFile, 'utf-8');
 
 routes.forEach(route => {
-    const routeDir = path.join(distDir, route);
-    if (!fs.existsSync(routeDir)) {
-        fs.mkdirSync(routeDir, { recursive: true });
-    }
-    
     let routeHtml = indexHtmlContent;
     const meta = SEO_META[route];
     
@@ -85,8 +80,8 @@ routes.forEach(route => {
         routeHtml = routeHtml.replace(/<meta\s+name="twitter:description"\s+content="[^"]*"/is, `<meta name="twitter:description" content="${meta.desc}"`);
     }
 
-    fs.writeFileSync(path.join(routeDir, 'index.html'), routeHtml);
-    console.log(`Generated HTML with SEO for ${route}/index.html`);
+    fs.writeFileSync(path.join(distDir, `${route}.html`), routeHtml);
+    console.log(`Generated HTML with SEO for ${route}.html`);
 });
 
 console.log('Post-build SPA pre-rendering complete.');
