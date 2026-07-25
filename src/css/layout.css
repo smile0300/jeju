@@ -70,14 +70,15 @@
 
 /* 토스 스타일 홈 화면 */
 .home-screen {
-    padding: var(--space-2) var(--space-4) var(--space-8); /* 상단 여백 축소 (space-6 -> space-2) */
+    position: relative; /* 언어 선택기의 기준점이 됨 */
+    padding: 0 var(--space-4) var(--space-8); /* 상단 여백 완전 제거 (space-2 -> 0) */
     background: var(--bg-grouped);
 }
 
 .home-welcome {
     text-align: center;
     margin-bottom: var(--space-10);
-    margin-top: var(--space-10);   /* 우측 상단 언어 선택기와 겹치지 않도록 공간 확보 */
+    margin-top: 60px; /* 로고와 언어버튼 사이 간격 더 넓힘 (space-10 -> 60px) */
     padding: 0;
     max-width: 600px;
     margin-left: auto;
