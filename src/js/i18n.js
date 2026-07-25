@@ -248,6 +248,8 @@ const TRANSLATIONS = {
         'lost.err.search': '查询出错',
         'lost.err.load': '无法加载实时数据，请稍后再试',
         'lost.no_records': '该期间内暂无相关记录',
+        'lost.report.prompt': '没有找到您的失物？',
+        'lost.report.action': '登记报失',
         'lost.no_image': '暂无图片',
         'lost.btn.detail': '详细',
         'lost.detail.id': '管理编号',

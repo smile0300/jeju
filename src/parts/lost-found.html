@@ -69,8 +69,9 @@
 
                 <!-- 분실물 수색 및 추적 의뢰 버튼 -->
                 <div class="action-row">
-                    <button class="lost-report-btn btn btn-primary" style="width: 100%;" onclick="window.goToLostRegister()">
-                        <i class="ph-duotone ph-magnifying-glass-plus"></i> <span data-i18n="lost.home.register">분실물 등록</span>
+                    <button class="lost-report-btn btn btn-primary" style="width: 100%; height: auto; padding: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;" onclick="window.goToLostRegister()">
+                        <span style="font-size: 0.8rem; font-weight: 500; opacity: 0.8;" data-i18n="lost.report.prompt">분실물을 못 찾으셨나요?</span>
+                        <span style="font-size: 1.1rem; font-weight: 700;"><i class="ph-duotone ph-magnifying-glass-plus"></i> <span data-i18n="lost.report.action">분실물 신고하기</span></span>
                     </button>
                 </div>
                 <div id="lost-result-count" class="lost-result-count"></div>
