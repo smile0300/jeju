@@ -71,14 +71,14 @@
 /* 토스 스타일 홈 화면 */
 .home-screen {
     position: relative; /* 언어 선택기의 기준점이 됨 */
-    padding: 0 var(--space-4) var(--space-8); /* 상단 여백 완전 제거 (space-2 -> 0) */
+    padding: 60px var(--space-4) var(--space-8); /* 마진 병합 방지: 상단 여백을 패딩으로 확보 */
     background: var(--bg-grouped);
 }
 
 .home-welcome {
     text-align: center;
     margin-bottom: var(--space-4); /* 하단 간격 대폭 좁힘 (space-10 -> space-4) */
-    margin-top: 60px; /* 로고와 언어버튼 사이 간격 더 넓힘 (space-10 -> 60px) */
+    margin-top: 0; /* 마진 병합 방지를 위해 상단 여백 제거 (home-screen의 padding으로 대체) */
     padding: 0;
     max-width: 600px;
     margin-left: auto;

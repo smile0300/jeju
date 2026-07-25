@@ -197,8 +197,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         }
     </script>
 
-  <script type="module" crossorigin src="/assets/index-yMJ3al1I.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-BUyZfhPr.css">
+  <script type="module" crossorigin src="/assets/index-BSAfWsQt.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-d2vMa2Od.css">
 </head>
 
 <body>
@@ -206,7 +206,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PH989GKL"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
-    <header class="app-bar home-bar" id="main-app-bar"></header>
+
 
     <!-- ===== Home Section ===== -->
 <section id="home" class="app-section active">
@@ -223,15 +223,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             </div>
         </div>
 
-        <!-- 분실물 확장 시 뒤로가기 바 (평소 숨김) -->
-        <div id="home-back-bar" class="home-back-bar">
-            <button onclick="window.collapseLostGrid()" class="home-back-btn">
-                <i class="ph-bold ph-arrow-left"></i>
-                <span data-i18n="lost.home.back">返回</span>
-            </button>
-            <span class="home-back-title" data-i18n="nav.lost">失物招领</span>
-        </div>
-
         <div class="home-welcome">
             <!-- SEO: h1은 구글봇을 위해 완전한 설명 포함, 시각적 로고는 aria-hidden -->
             <h1 class="main-logo">
@@ -246,7 +237,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
         <div class="home-grid">
             <!-- CCTV 버튼: 8월 신청폼으로 연결 -->
-            <button class="home-item item-cctv-apply" type="button" onclick="openCctvApplyModal()">
+            <button class="home-item item-cctv-apply" id="home-cctv-btn" type="button" onclick="openCctvApplyModal()">
                 <span class="item-icon"><i class="ph-duotone ph-video-camera color-cctv"></i></span>
                 <span class="item-label" data-i18n="nav.cctv">实时监控</span>
                 <span class="coming-soon-badge" style="background-color: #f59e0b; color: white;">beta</span>
@@ -255,7 +246,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 <span class="item-icon"><i class="ph-duotone ph-cloud-sun color-weather"></i></span>
                 <span class="item-label" data-i18n="nav.weather">天气预报</span>
             </a>
-            <a href="/hallasan" class="home-item item-hallasan" onclick="event.preventDefault(); showSection('hallasan')">
+            <a href="/hallasan" class="home-item item-hallasan" id="home-hallasan-btn" onclick="event.preventDefault(); showSection('hallasan')">
                 <span class="item-icon"><i class="ph-duotone ph-mountains color-hallasan"></i></span>
                 <span class="item-label" data-i18n="nav.hallasan">汉拿山</span>
             </a>
@@ -271,7 +262,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 <span class="item-icon"><i class="ph-duotone ph-confetti color-festival"></i></span>
                 <span class="item-label" data-i18n="nav.festival">节日活动</span>
             </a>
-            <a href="/reward" class="home-item item-reward" onclick="event.preventDefault(); showSection('reward')">
+            <a href="/reward" class="home-item item-reward" id="home-reward-btn" onclick="event.preventDefault(); showSection('reward')">
                 <span class="item-icon"><i class="ph-duotone ph-money color-reward"></i></span>
                 <span class="item-label" data-i18n="nav.reward">红　包</span>
             </a>
@@ -281,7 +272,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 <span class="item-label" data-i18n="nav.food">济州美食</span>
                 <span class="coming-soon-badge">SOON</span>
             </button>
-            <button class="home-item item-disabled" disabled type="button">
+            <button class="home-item item-disabled" id="home-course-btn" disabled type="button">
                 <span class="item-icon"><i class="ph-duotone ph-map-trifold color-course"></i></span>
                 <span class="item-label" data-i18n="nav.course">推荐路线</span>
                 <span class="coming-soon-badge">SOON</span>
@@ -493,18 +484,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     // 서브 버튼 id → 원래 버튼 id 매핑 (서브 버튼을 원래 버튼 앞에 삽입)
     const LOST_REPLACE_MAP = [
-        { origId: 'home-weather-btn',  subId: 'lost-sub-search'   }, // 날씨예보 → 조회
-        { origId: 'home-airport-btn',  subId: 'lost-sub-status'   }, // 항공편   → 진행상황
-        { origId: 'home-festival-btn', subId: 'lost-sub-register' }, // 축제     → 등록
-        { origId: 'home-food-btn',     subId: 'lost-sub-proxy'    }, // 맛집     → 대리수령
+        { origId: 'home-weather-btn',  subId: 'lost-sub-search',   animClass: 'lost-sub-in-top',    outClass: 'lost-sub-out-top' },
+        { origId: 'home-airport-btn',  subId: 'lost-sub-status',   animClass: 'lost-sub-in-left',   outClass: 'lost-sub-out-left' },
+        { origId: 'home-festival-btn', subId: 'lost-sub-register', animClass: 'lost-sub-in-right',  outClass: 'lost-sub-out-right' },
+        { origId: 'home-food-btn',     subId: 'lost-sub-proxy',    animClass: 'lost-sub-in-bottom', outClass: 'lost-sub-out-bottom' },
     ];
 
+    const CORNER_BTN_IDS = ['home-cctv-btn', 'home-hallasan-btn', 'home-reward-btn', 'home-course-btn'];
+
     window.toggleLostExpand = function() {
-        lostExpanded ? window.collapseLostGrid() : expandLostGrid();
+        lostExpanded ? window.collapseLostGrid() : window.expandLostGrid();
     };
 
-    function expandLostGrid() {
+    window.expandLostGrid = function() {
         lostExpanded = true;
+        document.querySelector('.home-grid').classList.add('lost-expanded-grid');
 
         LOST_REPLACE_MAP.forEach(function(item, i) {
             var orig = document.getElementById(item.origId);
@@ -515,20 +509,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             orig.parentNode.insertBefore(sub, orig);
             orig.style.display = 'none';
 
-            // 딜레이 등장
+            // 딜레이 등장 대신 거의 동시에 가운데에서 퍼져나가게 처리
             setTimeout(function() {
                 sub.style.display = '';
-                sub.classList.add('lost-sub-in');
-            }, i * 70);
+                sub.classList.add(item.animClass);
+            }, i * 30); // 딜레이를 약간 줄여서 역동적으로
         });
 
-        // 분실물 버튼 강조
-        var lostBtn = document.getElementById('home-lost-btn');
-        if (lostBtn) lostBtn.classList.add('lost-active');
+        // 2. 모서리 4개 버튼 숨김 (그리드 자리 유지를 위해 visibility 사용)
+        CORNER_BTN_IDS.forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.style.visibility = 'hidden';
+        });
 
-        // 상단 뒤로가기 표시
-        var backBar = document.getElementById('home-back-bar');
-        if (backBar) backBar.classList.add('visible');
+        // 분실물 버튼 강조 및 뒤로가기로 변경
+        var lostBtn = document.getElementById('home-lost-btn');
+        if (lostBtn) {
+            lostBtn.classList.add('lost-active');
+            var icon = lostBtn.querySelector('.item-icon i');
+            var label = lostBtn.querySelector('.item-label');
+            if (icon) icon.className = 'ph-bold ph-arrow-left color-lost';
+            if (label) label.setAttribute('data-i18n', 'lost.home.back');
+        }
 
         // 번역 재적용 (서브 버튼 라벨)
         if (window.applyTranslations) window.applyTranslations();
@@ -537,24 +539,45 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     window.collapseLostGrid = function() {
         if (!lostExpanded) return;
         lostExpanded = false;
+        document.querySelector('.home-grid').classList.remove('lost-expanded-grid');
 
         LOST_REPLACE_MAP.forEach(function(item) {
             var orig = document.getElementById(item.origId);
             var sub  = document.getElementById(item.subId);
             if (!orig || !sub) return;
 
-            sub.classList.remove('lost-sub-in');
-            sub.style.display = 'none';
-            orig.style.display = '';
+            // in 애니메이션 지우고 out 애니메이션 시작
+            sub.classList.remove(item.animClass);
+            sub.classList.add(item.outClass);
+
+            // 애니메이션 종료(250ms) 후 원위치 복원
+            setTimeout(function() {
+                sub.style.display = 'none';
+                sub.classList.remove(item.outClass);
+                orig.style.display = '';
+            }, 250);
         });
 
-        // 분실물 버튼 강조 해제
+        // 분실물 버튼 원래대로 복구 (즉시 변경)
         var lostBtn = document.getElementById('home-lost-btn');
-        if (lostBtn) lostBtn.classList.remove('lost-active');
+        if (lostBtn) {
+            lostBtn.classList.remove('lost-active');
+            var icon = lostBtn.querySelector('.item-icon i');
+            var label = lostBtn.querySelector('.item-label');
+            if (icon) icon.className = 'ph-duotone ph-magnifying-glass color-lost';
+            if (label) label.setAttribute('data-i18n', 'nav.lost');
+        }
 
-        // 상단 뒤로가기 숨김
-        var backBar = document.getElementById('home-back-bar');
-        if (backBar) backBar.classList.remove('visible');
+        // 번역 재적용 (분실물 라벨 즉시 복구)
+        if (window.applyTranslations) window.applyTranslations();
+
+        // 3. 모서리 4개 버튼 복원 (애니메이션 종류 후 나타나게)
+        setTimeout(function() {
+            CORNER_BTN_IDS.forEach(function(id) {
+                var el = document.getElementById(id);
+                if (el) el.style.visibility = '';
+            });
+        }, 250);
     };
 
     // 서브 버튼 동작
@@ -565,23 +588,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     window.goToLostStatus = function() {
         window.collapseLostGrid();
-        if (window.showSection) window.showSection('lost');
-        setTimeout(function() {
-            if (window.switchLostView) window.switchLostView('success');
-        }, 300);
+        if (window.showSection) window.showSection('lost-status');
+        if (window.fetchSuccessStories) window.fetchSuccessStories();
     };
 
     window.goToLostRegister = function() {
         window.collapseLostGrid();
-        if (window.showSection) window.showSection('lost');
-        setTimeout(function() {
-            if (window.openLostReportModal) window.openLostReportModal();
-        }, 300);
+        if (window.openLostReportModal) window.openLostReportModal();
     };
 
     window.goToLostProxy = function() {
         window.collapseLostGrid();
-        if (window.showSection) window.showSection('reward');
+        if (window.openProxyPickupModal) window.openProxyPickupModal();
+        else if (window.showSection) window.showSection('proxy-pickup');
     };
 
 </script>
@@ -1041,7 +1060,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- ===== Lost & Found Section ===== -->
 <section id="lost" class="app-section">
     <header class="app-bar">
-        <button class="back-btn" onclick="showSection('home')">←</button>
+        <button class="back-btn" onclick="window.backToLostMenu()">←</button>
         <h2 class="bar-title"><i class="ph-duotone ph-magnifying-glass"></i> <span data-i18n="lost.title">济州失物招领</span></h2>
     </header>
     <!-- SEO: /lost 페이지 전용 h1 (구글봇 인식용, 화면 비노출) -->
@@ -1109,17 +1128,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
                 <!-- 분실물 수색 및 추적 의뢰 버튼 -->
                 <div class="action-row">
-                    <button class="lost-report-btn btn btn-primary" style="width: 100%;" disabled>
-                        <i class="ph-duotone ph-magnifying-glass-plus"></i> <span>업데이트 중</span>
+                    <button class="lost-report-btn btn btn-primary" style="width: 100%;" onclick="window.goToLostRegister()">
+                        <i class="ph-duotone ph-magnifying-glass-plus"></i> <span data-i18n="lost.report.btn">분실물을 못 찾으셨나요?</span>
                     </button>
                 </div>
                 <div id="lost-result-count" class="lost-result-count"></div>
                 <div class="view-toggle-container" style="display: flex; justify-content: flex-start; gap: 4px; flex-wrap: nowrap; overflow-x: auto; width: 100%;">
                     <button id="btn-lost-guide" class="view-toggle-btn" onclick="toggleLostGuide()" style="flex: 0 0 auto; width: 44px; padding: 0; display: flex; align-items: center; justify-content: center; color: var(--color-blue); border-color: rgba(49, 130, 246, 0.3); background: rgba(49, 130, 246, 0.05);" title="이용 가이드">
                         <i class="ph-fill ph-info" style="font-size: 1.25rem;"></i>
-                    </button>
-                    <button id="btn-success-all" class="view-toggle-btn success-toggle-btn" onclick="switchLostView('success')" style="padding: 10px 4px; font-size: 0.8rem; gap: 4px; flex: 1;">
-                        <i class="ph-duotone ph-trophy" style="font-size: 1.1rem;"></i><span data-i18n="lost.success.view_all">진행상황</span>
                     </button>
                     <button id="btn-view-card" class="view-toggle-btn active" onclick="switchLostView('card')" style="padding: 10px 4px; font-size: 0.8rem; gap: 4px; flex: 1;">
                         <i class="ph-duotone ph-squares-four" style="font-size: 1.1rem;"></i><span data-i18n="lost.view.card">카드 모드</span>
@@ -1185,10 +1201,293 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     <tbody id="lost-table-body"></tbody>
                 </table>
             </div>
-            <div id="lost-success-container" class="lost-success-container" style="display: none;"></div>
+
             <!-- SEO Content Description -->
             <div class="seo-content-desc" data-i18n="seo.desc.lost">济州岛出租车、公交车、机场失物招领服务</div>
         </div>
+    </div>
+</section>
+
+<!-- ===== Lost Report Form Page ===== -->
+<section id="lost-report" class="app-section">
+    <header class="app-bar">
+        <button class="back-btn" onclick="window.backToLostMenu()">←</button>
+        <h2 class="bar-title"><i class="ph-duotone ph-pencil-simple"></i> <span data-i18n="modal.lost.title">登记报失物品</span></h2>
+    </header>
+    <div class="lost-report-form-content section-content" style="padding: 20px; padding-bottom: 100px; box-sizing: border-box; overflow-y: visible !important; max-height: none !important; width: 100% !important; max-width: none !important; border-radius: 0;">
+        <div class="lost-report-header">
+            <div class="marquee-container" style="cursor: default; margin-top: 0px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid var(--separator);">
+                <div class="marquee-content" id="modal-success-marquee-content">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+            <p data-i18n="modal.lost.desc" style="margin-bottom: 20px;">请填写以下信息，我们将协助您在 LOST112 登记。 (填写越详细找回概率越高)</p>
+        </div>
+        <div class="lost-report-body progressive-form">
+            <div class="progress-container">
+                <div class="progress-dot active" id="lost-step-dot-1"></div>
+                <div class="progress-dot" id="lost-step-dot-2"></div>
+                <div class="progress-dot" id="lost-step-dot-3"></div>
+            </div>
+
+            <!-- STEP 1: Item Info -->
+            <div class="lost-step active" id="lost-step-1">
+                <div class="step-title required-field" data-i18n="modal.lost.step1.title">📦 무엇을 잃어버리셨나요?</div>
+                <div class="step-desc" data-i18n="modal.lost.step1.desc">분실한 물건의 종류를 선택해주세요.</div>
+                
+                <div class="chip-group" id="item-category-chips">
+                    <button type="button" class="lost-chip" data-value="스마트폰" data-i18n="modal.lost.cat.phone">📱 스마트폰</button>
+                    <button type="button" class="lost-chip" data-value="시계/이어폰" data-i18n="modal.lost.cat.wearable">⌚ 시계/이어폰</button>
+                    <button type="button" class="lost-chip" data-value="카메라" data-i18n="modal.lost.cat.camera">📷 카메라</button>
+                    <button type="button" class="lost-chip" data-value="지갑" data-i18n="modal.lost.cat.wallet">👛 지갑</button>
+                    <button type="button" class="lost-chip" data-value="가방/캐리어" data-i18n="modal.lost.cat.bag">💼 가방/캐리어</button>
+                    <button type="button" class="lost-chip" data-value="의류" data-i18n="modal.lost.cat.clothes">👕 의류</button>
+                    <button type="button" class="lost-chip" data-value="여권" data-i18n="modal.lost.cat.passport">📘 여권</button>
+                    <button type="button" class="lost-chip" data-value="기타" data-i18n="modal.lost.cat.other">📦 기타</button>
+                </div>
+                <input type="hidden" id="lost-report-item-category">
+
+                <div class="lost-form-group">
+                    <label class="lost-form-label"><span data-i18n="modal.lost.spec.label">물품 상세 설명</span></label>
+                    <textarea id="lost-report-specifics" class="lost-form-textarea" data-i18n="modal.lost.spec.ph" placeholder="색상, 브랜드, 모델명, 특징 등을 상세히 적어주세요."></textarea>
+                </div>
+                
+                <div class="lost-form-group">
+                    <label class="lost-form-label"><span data-i18n="modal.lost.photo.label" class="required-field">사진 첨부</span></label>
+                    <div class="lost-form-file-wrap">
+                        <input type="file" id="lost-report-photo" class="lost-form-file-input" accept="image/*" onchange="handleLostImageChange(event)">
+                    </div>
+                    <div id="lost-report-photo-preview" class="photo-preview" style="display: none; margin-top: 10px; border-radius: 8px; overflow: hidden; border: 1px solid var(--separator);"></div>
+                </div>
+            </div>
+
+            <!-- STEP 2: Location Info -->
+            <div class="lost-step" id="lost-step-2">
+                <div class="step-title required-field" data-i18n="modal.lost.step2.title">📍 어디서 잃어버리셨나요?</div>
+                
+                <div class="step-desc" style="margin-top:10px; margin-bottom:5px;" data-i18n="modal.lost.city.label">지역 (도시)</div>
+                <div class="chip-group" id="city-category-chips">
+                    <button type="button" class="lost-chip" data-value="제주" data-i18n="modal.lost.city.jeju">🌴 제주</button>
+                    <button type="button" class="lost-chip" data-value="서울" data-i18n="modal.lost.city.seoul">🏙️ 서울</button>
+                    <button type="button" class="lost-chip" data-value="부산" data-i18n="modal.lost.city.busan">🌊 부산</button>
+                </div>
+                <input type="hidden" id="lost-report-city-category">
+
+                <div class="step-desc" style="margin-top:10px; margin-bottom:5px;" data-i18n="modal.lost.loc_type.label">상세 장소</div>
+                
+                <div class="chip-group" id="region-category-chips">
+                    <button type="button" class="lost-chip" data-value="공항" data-i18n="modal.lost.loc.airport">✈️ 공항</button>
+                    <button type="button" class="lost-chip" data-value="호텔" data-i18n="modal.lost.loc.hotel">🏨 호텔</button>
+                    <button type="button" class="lost-chip" data-value="버스" data-i18n="modal.lost.loc.bus">🚌 버스</button>
+                    <button type="button" class="lost-chip" data-value="택시" data-i18n="modal.lost.loc.taxi">🚕 택시</button>
+                    <button type="button" class="lost-chip" data-value="기타" data-i18n="modal.lost.loc.other">📍 기타</button>
+                </div>
+                <input type="hidden" id="lost-report-region-category">
+
+                <!-- Subfields: Date/Time (Common for Airport/Other/Hotel) -->
+                <div class="sub-fields" id="sub-common-datetime">
+                    <div class="lost-form-row">
+                        <div class="lost-form-group">
+                            <label class="lost-form-label"><span data-i18n="modal.lost.date.label">분실 날짜</span></label>
+                            <input type="date" id="lost-report-date" class="lost-form-input">
+                        </div>
+                        <div class="lost-form-group">
+                            <label class="lost-form-label"><span data-i18n="modal.lost.time.label">대략적인 시간</span></label>
+                            <input type="time" id="lost-report-time" class="lost-form-input">
+                        </div>
+                    </div>
+                    <div class="lost-form-group" id="sub-detail-location-group">
+                        <label class="lost-form-label"><span data-i18n="modal.lost.detail_loc.label">상세 위치 (선택)</span></label>
+                        <input type="text" id="lost-report-detail-location" class="lost-form-input" data-i18n="modal.lost.detail_loc.ph" placeholder="예: 3번 게이트 앞, 스타벅스 애월점...">
+                    </div>
+                </div>
+
+                <!-- Subfields: Hotel -->
+                <div class="sub-fields" id="sub-hotel">
+                    <div class="lost-form-group">
+                        <label class="lost-form-label"><span data-i18n="modal.lost.hotel.name" class="required-field">호텔명</span></label>
+                        <input type="text" id="lost-report-hotel-name" class="lost-form-input" data-i18n="modal.lost.hotel.name.ph" placeholder="Shilla Stay (영문)">
+                    </div>
+                    <div class="lost-form-group">
+                        <label class="lost-form-label"><span data-i18n="modal.lost.hotel.booker" class="required-field">예약자명</span></label>
+                        <input type="text" id="lost-report-hotel-booker" class="lost-form-input" data-i18n="modal.lost.hotel.booker.ph" placeholder="NingNing (영문)">
+                    </div>
+                    <div class="lost-form-group">
+                        <label class="lost-form-label"><span data-i18n="modal.lost.hotel.dates" class="required-field">체크인/체크아웃 날짜</span></label>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="date" id="lost-report-hotel-checkin" class="lost-form-input" style="flex: 1;">
+                            <span style="color: #999;">~</span>
+                            <input type="date" id="lost-report-hotel-checkout" class="lost-form-input" style="flex: 1;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Subfields: Taxi/Bus -->
+                <div class="sub-fields" id="sub-vehicle">
+                    <div class="lost-form-group">
+                        <label class="lost-form-label"><span data-i18n="modal.lost.vehicle.no">차량 번호 (선택)</span></label>
+                        <input type="text" id="lost-report-car-no" class="lost-form-input" data-i18n="modal.lost.vehicle.no.ph" placeholder="제주 12바 3456, 365번 버스">
+                    </div>
+                    <div class="lost-form-row">
+                        <div class="lost-form-group">
+                            <label class="lost-form-label"><span data-i18n="modal.lost.vehicle.board_loc">승차 장소</span></label>
+                            <input type="text" id="lost-report-board-loc" class="lost-form-input" data-i18n="modal.lost.vehicle.board_loc.ph" placeholder="승차 장소">
+                            <input type="time" id="lost-report-board-time" class="lost-form-input" style="margin-top: 5px;">
+                        </div>
+                        <div class="lost-form-group">
+                            <label class="lost-form-label"><span data-i18n="modal.lost.vehicle.alight_loc">하차 장소</span></label>
+                            <input type="text" id="lost-report-alight-loc" class="lost-form-input" data-i18n="modal.lost.vehicle.alight_loc.ph" placeholder="하차 장소">
+                            <input type="time" id="lost-report-alight-time" class="lost-form-input" style="margin-top: 5px;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 3: Contact Info & Submit -->
+            <div class="lost-step" id="lost-step-3">
+                <div class="step-title" data-i18n="modal.lost.step3.title">💬 연락처 정보</div>
+                <div class="step-desc" data-i18n="modal.lost.step3.desc">분실물을 찾았을 때 연락드릴 위챗 ID를 정확히 남겨주세요.</div>
+                
+                <div class="lost-form-group">
+                    <label class="lost-form-label"><i class="ph-duotone ph-chat-circle"></i> <span data-i18n="modal.lost.wechat.label" class="required-field">위챗 ID</span></label>
+                    <input type="text" id="lost-report-wechat" class="lost-form-input" data-i18n="modal.lost.name.ph" placeholder="위챗 ID를 입력해주세요">
+                </div>
+                
+                <!-- 개인정보 동의 체크박스 추가 -->
+                <div class="privacy-consent-wrapper" style="margin-top: 25px; display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border: 1px solid var(--separator); border-radius: 8px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin: 0;">
+                        <input type="checkbox" id="agreePrivacy" required style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--color-orange); margin: 0; flex-shrink: 0;">
+                        <span class="required-field" style="font-size: 0.85rem; color: var(--text-primary); font-weight: 500; white-space: nowrap;" data-i18n="modal.lost.privacy.agree">
+                            개인정보 수집 및 이용 동의
+                        </span>
+                    </label>
+                    <a href="javascript:void(0)" onclick="showSection('privacy');" style="font-size: 0.8rem; color: var(--label-secondary); text-decoration: underline; white-space: nowrap;" data-i18n="modal.lost.privacy.detail">자세히 보기</a>
+                </div>
+                
+                <div id="lost-report-status" class="form-status"></div>
+            </div>
+            
+            <div class="lost-form-actions step-actions">
+                <button type="button" class="btn btn-secondary" id="btn-lost-prev" onclick="prevLostStep()" style="display: none;" data-i18n="modal.lost.btn_prev">이전</button>
+                <button type="button" class="btn btn-primary" id="btn-lost-next" onclick="nextLostStep()" style="flex: 1;" data-i18n="modal.lost.btn_next">다음</button>
+                <button type="button" id="lost-report-submit-btn" class="btn btn-primary" style="display: none; flex: 1;" onclick="event.preventDefault(); submitLostReport()" data-i18n="modal.lost.submit">분실물 등록하기</button>
+            </div>
+        </div>
+</section>
+
+<!-- ===== Proxy Pickup Page ===== -->
+<section id="proxy-pickup" class="app-section">
+    <header class="app-bar">
+        <button class="back-btn" onclick="window.backToLostMenu()">←</button>
+        <h2 class="bar-title"><i class="ph-duotone ph-package"></i> <span data-i18n="proxy.modal.title">대리수령 신청</span></h2>
+    </header>
+    <div class="lost-report-form-content section-content" style="padding: 20px; padding-bottom: 100px; box-sizing: border-box; overflow-y: visible !important; max-height: none !important; width: 100% !important; max-width: none !important; border-radius: 0;">
+        <div class="lost-report-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+            <div>
+                <p data-i18n="proxy.modal.desc" style="margin-top: 6px;">담당자가 물건을 보관 중인 곳에서 수령하여 전달해드립니다.</p>
+            </div>
+            <button
+                onclick="const m = document.getElementById('proxy-pickup'); copyProxyLink(m.dataset.caseId, m.dataset.itemName, m.dataset.originalWechat, m.dataset.region, m.dataset.place);"
+                style="flex: 0 0 44px; height: 44px; background: var(--bg-secondary); border: 1px solid var(--separator); border-radius: 8px; cursor: pointer; font-size: 1.2rem; color: var(--text-primary); display: flex; align-items: center; justify-content: center;"
+            >🔗</button>
+        </div>
+        <div class="lost-report-body progressive-form">
+            <!-- 개인정보 보호 안내 문구 -->
+            <div style="background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+                <p style="margin: 0; font-size: 0.85rem; color: #b91c1c; line-height: 1.5; font-weight: 500;">
+                    <i class="ph-fill ph-warning-circle" style="margin-right: 4px;"></i>
+                    <span data-i18n="proxy.modal.privacy_notice">대리수령 기준강화에 따라 여권사진은 필수서류임에 요청드립니다. 개인정보는 물건 수령 즉시 삭제됩니다.</span>
+                </p>
+            </div>
+
+            <!-- 케이스 정보 (자동입력, 읽기전용) -->
+            <div class="lost-form-group">
+                <label class="lost-form-label"><i class="ph-duotone ph-hash"></i> <span data-i18n="proxy.modal.case_id">케이스 번호</span></label>
+                <input type="text" id="proxy-case-id" class="lost-form-input" readonly style="background: var(--bg-secondary); color: var(--label-secondary); cursor: default;">
+            </div>
+            <div class="lost-form-group">
+                <label class="lost-form-label"><i class="ph-duotone ph-package"></i> <span data-i18n="proxy.modal.item_name">물품명</span></label>
+                <input type="text" id="proxy-item-name" class="lost-form-input">
+            </div>
+
+            <!-- 신청자 이름 -->
+            <div class="lost-form-group">
+                <label class="lost-form-label"><i class="ph-duotone ph-user"></i> <span class="required-field" data-i18n="proxy.modal.name">신청자 이름 (여권과 동일)</span></label>
+                <input type="text" id="proxy-name" class="lost-form-input" data-i18n="proxy.modal.name.ph" placeholder="이름을 입력해주세요">
+            </div>
+
+            <!-- 연락처 (위챗/전화번호) -->
+            <div class="lost-form-group">
+                <label class="lost-form-label"><i class="ph-duotone ph-phone"></i> <span class="required-field" data-i18n="proxy.modal.contact">연락처 (위챗 ID 또는 전화번호)</span></label>
+                <input type="text" id="proxy-contact" class="lost-form-input" data-i18n="proxy.modal.contact.ph" placeholder="연락처를 입력해주세요">
+            </div>
+
+            <!-- 여권 사진 첨부 (필수) -->
+            <div class="lost-form-group">
+                <label class="lost-form-label"><i class="ph-duotone ph-identification-card"></i> <span class="required-field" data-i18n="proxy.modal.passport">여권 사진</span></label>
+                <div class="file-upload-wrapper">
+                    <input type="file" id="proxy-passport-photo" class="lost-form-file" accept="image/*">
+                </div>
+            </div>
+
+            <!-- 물건 사진 첨부 (필수) -->
+            <div class="lost-form-group">
+                <label class="lost-form-label"><i class="ph-duotone ph-image"></i> <span class="required-field" data-i18n="proxy.modal.item_photo">물건 사진</span></label>
+                <div class="file-upload-wrapper">
+                    <input type="file" id="proxy-item-photo" class="lost-form-file" accept="image/*">
+                </div>
+            </div>
+
+            <!-- 호텔 예약내역 첨부 (조건부 필수) -->
+            <div class="lost-form-group" id="proxy-reservation-group" style="display: none;">
+                <label class="lost-form-label"><i class="ph-duotone ph-buildings"></i> <span class="required-field" data-i18n="proxy.modal.reservation">호텔 예약내역</span></label>
+                <div class="file-upload-wrapper">
+                    <input type="file" id="proxy-reservation-photo" class="lost-form-file" accept="image/*">
+                </div>
+            </div>
+
+            <!-- 관리번호 (조건부) -->
+            <div class="lost-form-group" id="proxy-mgmt-group" style="display: none;">
+                <label class="lost-form-label"><i class="ph-duotone ph-ticket"></i> <span class="required-field" data-i18n="proxy.modal.mgmt_num">접수/관리번호 (공항, 경찰서 등)</span></label>
+                <input type="text" id="proxy-mgmt-num" class="lost-form-input" data-i18n="proxy.modal.mgmt_num.ph" placeholder="관리번호를 입력해주세요">
+            </div>
+
+            <!-- 배송 주소 입력 (항상 표시) -->
+            <div id="proxy-delivery-fields">
+                <div class="lost-form-group">
+                    <label class="lost-form-label"><span class="required-field" data-i18n="proxy.modal.address">배송 주소</span></label>
+                    <textarea id="proxy-address" class="lost-form-textarea" rows="3" data-i18n="proxy.modal.address.ph" placeholder="호텔명, 방 번호 또는 귀국 편 등을 입력해주세요"></textarea>
+                </div>
+            </div>
+
+            <!-- 개인정보 동의 -->
+            <div class="privacy-consent-wrapper" style="margin-top: 20px; display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border: 1px solid var(--separator); border-radius: 8px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin: 0;">
+                    <input type="checkbox" id="proxy-agree-privacy" required style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--color-orange); margin: 0; flex-shrink: 0;">
+                    <span class="required-field" style="font-size: 0.85rem; color: var(--text-primary); font-weight: 500; white-space: nowrap;" data-i18n="modal.lost.privacy.agree">개인정보 수집 및 이용 동의</span>
+                </label>
+                <a href="javascript:void(0)" onclick="showSection('privacy');" style="font-size: 0.8rem; color: var(--label-secondary); text-decoration: underline; white-space: nowrap;" data-i18n="modal.lost.privacy.detail">자세히 보기</a>
+            </div>
+
+            <div id="proxy-status" class="form-status" style="margin-top: 12px;"></div>
+
+            <div class="step-actions" style="margin-top: 16px;">
+                <button type="button" id="proxy-submit-btn" class="btn btn-primary" onclick="submitProxyPickup()" style="width: 100%; background: var(--color-orange); padding: 14px; font-size: 1rem; font-weight: 700; border: none; border-radius: 10px; cursor: pointer;" data-i18n="proxy.modal.submit">
+                    대리수령 신청하기
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== Lost Status Page ===== -->
+<section id="lost-status" class="app-section">
+    <header class="app-bar">
+        <button class="back-btn" onclick="window.backToLostMenu()">←</button>
+        <h2 class="bar-title"><i class="ph-duotone ph-trophy"></i> <span data-i18n="lost.home.status">진행상황</span></h2>
+    </header>
+    <div class="section-content" style="padding: 20px; padding-bottom: 100px; box-sizing: border-box;">
+        <div id="lost-success-container" class="lost-success-container"></div>
     </div>
 </section>
 
@@ -1453,172 +1752,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
 </div>
 
-<!-- ===== Lost Report Form Modal ===== -->
-
-<div id="lost-report-modal" class="modal-overlay" style="display:none; z-index: 10001; justify-content: flex-start; align-items: center;" onclick="closeLostReportModal()">
-    <div class="modal-content lost-report-form-content" style="margin-top: auto; max-height: 85vh; overflow-y: auto; box-sizing: border-box;" onclick="event.stopPropagation()">
-        <button class="modal-close" onclick="closeLostReportModal()">✕</button>
-        <div class="lost-report-header">
-            <h3 data-i18n="modal.lost.title"><i class="ph-duotone ph-pencil-simple"></i> 登记报失物品</h3>
-            <div class="marquee-container" style="cursor: default; margin-top: 15px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid var(--separator);">
-                <div class="marquee-content" id="modal-success-marquee-content">
-                    <!-- Populated dynamically via JS -->
-                </div>
-            </div>
-            <p data-i18n="modal.lost.desc">请填写以下信息，我们将协助您在 LOST112 登记。 (填写越详细找回概率越高)</p>
-        </div>
-        <div class="lost-report-body progressive-form">
-            <div class="progress-container">
-                <div class="progress-dot active" id="lost-step-dot-1"></div>
-                <div class="progress-dot" id="lost-step-dot-2"></div>
-                <div class="progress-dot" id="lost-step-dot-3"></div>
-            </div>
-
-            <!-- STEP 1: Item Info -->
-            <div class="lost-step active" id="lost-step-1">
-                <div class="step-title required-field" data-i18n="modal.lost.step1.title">📦 무엇을 잃어버리셨나요?</div>
-                <div class="step-desc" data-i18n="modal.lost.step1.desc">분실한 물건의 종류를 선택해주세요.</div>
-                
-                <div class="chip-group" id="item-category-chips">
-                    <button type="button" class="lost-chip" data-value="스마트폰" data-i18n="modal.lost.cat.phone">📱 스마트폰</button>
-                    <button type="button" class="lost-chip" data-value="시계/이어폰" data-i18n="modal.lost.cat.wearable">⌚ 시계/이어폰</button>
-                    <button type="button" class="lost-chip" data-value="카메라" data-i18n="modal.lost.cat.camera">📷 카메라</button>
-                    <button type="button" class="lost-chip" data-value="지갑" data-i18n="modal.lost.cat.wallet">👛 지갑</button>
-                    <button type="button" class="lost-chip" data-value="가방/캐리어" data-i18n="modal.lost.cat.bag">💼 가방/캐리어</button>
-                    <button type="button" class="lost-chip" data-value="의류" data-i18n="modal.lost.cat.clothes">👕 의류</button>
-                    <button type="button" class="lost-chip" data-value="여권" data-i18n="modal.lost.cat.passport">📘 여권</button>
-                    <button type="button" class="lost-chip" data-value="기타" data-i18n="modal.lost.cat.other">📦 기타</button>
-                </div>
-                <input type="hidden" id="lost-report-item-category">
-
-                <div class="lost-form-group">
-                    <label class="lost-form-label"><span data-i18n="modal.lost.spec.label">물품 상세 설명</span></label>
-                    <textarea id="lost-report-specifics" class="lost-form-textarea" data-i18n="modal.lost.spec.ph" placeholder="색상, 브랜드, 모델명, 특징 등을 상세히 적어주세요."></textarea>
-                </div>
-                
-                <div class="lost-form-group">
-                    <label class="lost-form-label"><span data-i18n="modal.lost.photo.label" class="required-field">사진 첨부</span></label>
-                    <div class="lost-form-file-wrap">
-                        <input type="file" id="lost-report-photo" class="lost-form-file-input" accept="image/*" onchange="handleLostImageChange(event)">
-                    </div>
-                    <div id="lost-report-photo-preview" class="photo-preview" style="display: none; margin-top: 10px; border-radius: 8px; overflow: hidden; border: 1px solid var(--separator);"></div>
-                </div>
-            </div>
-
-            <!-- STEP 2: Location Info -->
-            <div class="lost-step" id="lost-step-2">
-                <div class="step-title required-field" data-i18n="modal.lost.step2.title">📍 어디서 잃어버리셨나요?</div>
-                
-                <div class="step-desc" style="margin-top:10px; margin-bottom:5px;" data-i18n="modal.lost.city.label">지역 (도시)</div>
-                <div class="chip-group" id="city-category-chips">
-                    <button type="button" class="lost-chip" data-value="제주" data-i18n="modal.lost.city.jeju">🌴 제주</button>
-                    <button type="button" class="lost-chip" data-value="서울" data-i18n="modal.lost.city.seoul">🏙️ 서울</button>
-                    <button type="button" class="lost-chip" data-value="부산" data-i18n="modal.lost.city.busan">🌊 부산</button>
-                </div>
-                <input type="hidden" id="lost-report-city-category">
-
-                <div class="step-desc" style="margin-top:10px; margin-bottom:5px;" data-i18n="modal.lost.loc_type.label">상세 장소</div>
-                
-                <div class="chip-group" id="region-category-chips">
-                    <button type="button" class="lost-chip" data-value="공항" data-i18n="modal.lost.loc.airport">✈️ 공항</button>
-                    <button type="button" class="lost-chip" data-value="호텔" data-i18n="modal.lost.loc.hotel">🏨 호텔</button>
-                    <button type="button" class="lost-chip" data-value="버스" data-i18n="modal.lost.loc.bus">🚌 버스</button>
-                    <button type="button" class="lost-chip" data-value="택시" data-i18n="modal.lost.loc.taxi">🚕 택시</button>
-                    <button type="button" class="lost-chip" data-value="기타" data-i18n="modal.lost.loc.other">📍 기타</button>
-                </div>
-                <input type="hidden" id="lost-report-region-category">
-
-                <!-- Subfields: Date/Time (Common for Airport/Other/Hotel) -->
-                <div class="sub-fields" id="sub-common-datetime">
-                    <div class="lost-form-row">
-                        <div class="lost-form-group">
-                            <label class="lost-form-label"><span data-i18n="modal.lost.date.label">분실 날짜</span></label>
-                            <input type="date" id="lost-report-date" class="lost-form-input">
-                        </div>
-                        <div class="lost-form-group">
-                            <label class="lost-form-label"><span data-i18n="modal.lost.time.label">대략적인 시간</span></label>
-                            <input type="time" id="lost-report-time" class="lost-form-input">
-                        </div>
-                    </div>
-                    <div class="lost-form-group" id="sub-detail-location-group">
-                        <label class="lost-form-label"><span data-i18n="modal.lost.detail_loc.label">상세 위치 (선택)</span></label>
-                        <input type="text" id="lost-report-detail-location" class="lost-form-input" data-i18n="modal.lost.detail_loc.ph" placeholder="예: 3번 게이트 앞, 스타벅스 애월점...">
-                    </div>
-                </div>
-
-                <!-- Subfields: Hotel -->
-                <div class="sub-fields" id="sub-hotel">
-                    <div class="lost-form-group">
-                        <label class="lost-form-label"><span data-i18n="modal.lost.hotel.name" class="required-field">호텔명</span></label>
-                        <input type="text" id="lost-report-hotel-name" class="lost-form-input" data-i18n="modal.lost.hotel.name.ph" placeholder="Shilla Stay (영문)">
-                    </div>
-                    <div class="lost-form-group">
-                        <label class="lost-form-label"><span data-i18n="modal.lost.hotel.booker" class="required-field">예약자명</span></label>
-                        <input type="text" id="lost-report-hotel-booker" class="lost-form-input" data-i18n="modal.lost.hotel.booker.ph" placeholder="NingNing (영문)">
-                    </div>
-                    <div class="lost-form-group">
-                        <label class="lost-form-label"><span data-i18n="modal.lost.hotel.dates" class="required-field">체크인/체크아웃 날짜</span></label>
-                        <div style="display: flex; gap: 10px; align-items: center;">
-                            <input type="date" id="lost-report-hotel-checkin" class="lost-form-input" style="flex: 1;">
-                            <span style="color: #999;">~</span>
-                            <input type="date" id="lost-report-hotel-checkout" class="lost-form-input" style="flex: 1;">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Subfields: Taxi/Bus -->
-                <div class="sub-fields" id="sub-vehicle">
-                    <div class="lost-form-group">
-                        <label class="lost-form-label"><span data-i18n="modal.lost.vehicle.no">차량 번호 (선택)</span></label>
-                        <input type="text" id="lost-report-car-no" class="lost-form-input" data-i18n="modal.lost.vehicle.no.ph" placeholder="제주 12바 3456, 365번 버스">
-                    </div>
-                    <div class="lost-form-row">
-                        <div class="lost-form-group">
-                            <label class="lost-form-label"><span data-i18n="modal.lost.vehicle.board_loc">승차 장소</span></label>
-                            <input type="text" id="lost-report-board-loc" class="lost-form-input" data-i18n="modal.lost.vehicle.board_loc.ph" placeholder="승차 장소">
-                            <input type="time" id="lost-report-board-time" class="lost-form-input" style="margin-top: 5px;">
-                        </div>
-                        <div class="lost-form-group">
-                            <label class="lost-form-label"><span data-i18n="modal.lost.vehicle.alight_loc">하차 장소</span></label>
-                            <input type="text" id="lost-report-alight-loc" class="lost-form-input" data-i18n="modal.lost.vehicle.alight_loc.ph" placeholder="하차 장소">
-                            <input type="time" id="lost-report-alight-time" class="lost-form-input" style="margin-top: 5px;">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- STEP 3: Contact Info & Submit -->
-            <div class="lost-step" id="lost-step-3">
-                <div class="step-title" data-i18n="modal.lost.step3.title">💬 연락처 정보</div>
-                <div class="step-desc" data-i18n="modal.lost.step3.desc">분실물을 찾았을 때 연락드릴 위챗 ID를 정확히 남겨주세요.</div>
-                
-                <div class="lost-form-group">
-                    <label class="lost-form-label"><i class="ph-duotone ph-chat-circle"></i> <span data-i18n="modal.lost.wechat.label" class="required-field">위챗 ID</span></label>
-                    <input type="text" id="lost-report-wechat" class="lost-form-input" data-i18n="modal.lost.name.ph" placeholder="위챗 ID를 입력해주세요">
-                </div>
-                
-                <!-- 개인정보 동의 체크박스 추가 -->
-                <div class="privacy-consent-wrapper" style="margin-top: 25px; display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border: 1px solid var(--separator); border-radius: 8px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin: 0;">
-                        <input type="checkbox" id="agreePrivacy" required style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--color-orange); margin: 0; flex-shrink: 0;">
-                        <span class="required-field" style="font-size: 0.85rem; color: var(--text-primary); font-weight: 500; white-space: nowrap;" data-i18n="modal.lost.privacy.agree">
-                            개인정보 수집 및 이용 동의
-                        </span>
-                    </label>
-                    <a href="javascript:void(0)" onclick="showSection('privacy'); closeLostReportModal();" style="font-size: 0.8rem; color: var(--label-secondary); text-decoration: underline; white-space: nowrap;" data-i18n="modal.lost.privacy.detail">자세히 보기</a>
-                </div>
-                
-                <div id="lost-report-status" class="form-status"></div>
-            </div>
-            
-            <div class="lost-form-actions step-actions">
-                <button type="button" class="btn btn-secondary" id="btn-lost-prev" onclick="prevLostStep()" style="display: none;" data-i18n="modal.lost.btn_prev">이전</button>
-                <button type="button" class="btn btn-primary" id="btn-lost-next" onclick="nextLostStep()" style="flex: 1;" data-i18n="modal.lost.btn_next">다음</button>
-                <button type="button" id="lost-report-submit-btn" class="btn btn-primary" style="display: none; flex: 1;" onclick="event.preventDefault(); submitLostReport()" data-i18n="modal.lost.submit">분실물 등록하기</button>
-            </div>
-        </div>
-    </div>
-</div>
 
 <!-- ===== Feature Request Modal ===== -->
 <div id="feature-request-modal" class="modal-overlay" style="display:none; z-index: 10001;" onclick="closeFeatureModal()">
@@ -1729,108 +1862,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
 </div>
 
-<!-- ===== Proxy Pickup Modal (대리수령 신청) ===== -->
-<div id="proxy-pickup-modal" class="modal-overlay" style="display:none; z-index: 10001; justify-content: flex-start; align-items: center;" onclick="closeProxyPickupModal()">
-    <div class="modal-content lost-report-form-content" style="margin-top: auto; max-height: 85vh; overflow-y: auto; box-sizing: border-box;" onclick="event.stopPropagation()">
-        <button class="modal-close" onclick="closeProxyPickupModal()">✕</button>
-        <div class="lost-report-header" style="display: flex; align-items: center; justify-content: space-between;">
-            <div>
-                <h3 style="margin: 0;"><i class="ph-duotone ph-package"></i> <span data-i18n="proxy.modal.title">대리수령 신청</span></h3>
-                <p data-i18n="proxy.modal.desc" style="margin-top: 6px;">담당자가 물건을 보관 중인 곳에서 수령하여 전달해드립니다.</p>
-            </div>
-            <button
-                onclick="event.stopPropagation(); const m = document.getElementById('proxy-pickup-modal'); copyProxyLink(m.dataset.caseId, m.dataset.itemName, m.dataset.originalWechat, m.dataset.region, m.dataset.place);"
-                style="flex: 0 0 44px; height: 44px; background: var(--bg-secondary); border: 1px solid var(--separator); border-radius: 8px; cursor: pointer; font-size: 1.2rem; color: var(--text-primary); display: flex; align-items: center; justify-content: center;"
-            >🔗</button>
-        </div>
-        <div class="lost-report-body">
-            <!-- 개인정보 보호 안내 문구 -->
-            <div style="background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 8px; padding: 12px; margin-bottom: 16px;">
-                <p style="margin: 0; font-size: 0.85rem; color: #b91c1c; line-height: 1.5; font-weight: 500;">
-                    <i class="ph-fill ph-warning-circle" style="margin-right: 4px;"></i>
-                    <span data-i18n="proxy.modal.privacy_notice">대리수령 기준강화에 따라 여권사진은 필수서류임에 요청드립니다. 개인정보는 물건 수령 즉시 삭제됩니다.</span>
-                </p>
-            </div>
-
-            <!-- 케이스 정보 (자동입력, 읽기전용) -->
-            <div class="lost-form-group">
-                <label class="lost-form-label"><i class="ph-duotone ph-hash"></i> <span data-i18n="proxy.modal.case_id">케이스 번호</span></label>
-                <input type="text" id="proxy-case-id" class="lost-form-input" readonly style="background: var(--bg-secondary); color: var(--label-secondary); cursor: default;">
-            </div>
-            <div class="lost-form-group">
-                <label class="lost-form-label"><i class="ph-duotone ph-package"></i> <span data-i18n="proxy.modal.item_name">물품명</span></label>
-                <input type="text" id="proxy-item-name" class="lost-form-input">
-            </div>
-
-            <!-- 신청자 이름 -->
-            <div class="lost-form-group">
-                <label class="lost-form-label"><i class="ph-duotone ph-user"></i> <span class="required-field" data-i18n="proxy.modal.name">신청자 이름 (여권과 동일)</span></label>
-                <input type="text" id="proxy-name" class="lost-form-input" data-i18n="proxy.modal.name.ph" placeholder="이름을 입력해주세요">
-            </div>
-
-            <!-- 연락처 (위챗/전화번호) -->
-            <div class="lost-form-group">
-                <label class="lost-form-label"><i class="ph-duotone ph-phone"></i> <span class="required-field" data-i18n="proxy.modal.contact">연락처 (위챗 ID 또는 전화번호)</span></label>
-                <input type="text" id="proxy-contact" class="lost-form-input" data-i18n="proxy.modal.contact.ph" placeholder="연락처를 입력해주세요">
-            </div>
-
-            <!-- 여권 사진 첨부 (필수) -->
-            <div class="lost-form-group">
-                <label class="lost-form-label"><i class="ph-duotone ph-identification-card"></i> <span class="required-field" data-i18n="proxy.modal.passport">여권 사진</span></label>
-                <div class="file-upload-wrapper">
-                    <input type="file" id="proxy-passport-photo" class="lost-form-file" accept="image/*">
-                </div>
-            </div>
-
-            <!-- 물건 사진 첨부 (필수) -->
-            <div class="lost-form-group">
-                <label class="lost-form-label"><i class="ph-duotone ph-image"></i> <span class="required-field" data-i18n="proxy.modal.item_photo">물건 사진</span></label>
-                <div class="file-upload-wrapper">
-                    <input type="file" id="proxy-item-photo" class="lost-form-file" accept="image/*">
-                </div>
-            </div>
-
-            <!-- 호텔 예약내역 첨부 (조건부 필수) -->
-            <div class="lost-form-group" id="proxy-reservation-group" style="display: none;">
-                <label class="lost-form-label"><i class="ph-duotone ph-buildings"></i> <span class="required-field" data-i18n="proxy.modal.reservation">호텔 예약내역</span></label>
-                <div class="file-upload-wrapper">
-                    <input type="file" id="proxy-reservation-photo" class="lost-form-file" accept="image/*">
-                </div>
-            </div>
-
-            <!-- 관리번호 (조건부) -->
-            <div class="lost-form-group" id="proxy-mgmt-group" style="display: none;">
-                <label class="lost-form-label"><i class="ph-duotone ph-ticket"></i> <span class="required-field" data-i18n="proxy.modal.mgmt_num">접수/관리번호 (공항, 경찰서 등)</span></label>
-                <input type="text" id="proxy-mgmt-num" class="lost-form-input" data-i18n="proxy.modal.mgmt_num.ph" placeholder="관리번호를 입력해주세요">
-            </div>
-
-            <!-- 배송 주소 입력 (항상 표시) -->
-            <div id="proxy-delivery-fields">
-                <div class="lost-form-group">
-                    <label class="lost-form-label"><span class="required-field" data-i18n="proxy.modal.address">배송 주소</span></label>
-                    <textarea id="proxy-address" class="lost-form-textarea" rows="3" data-i18n="proxy.modal.address.ph" placeholder="호텔명, 방 번호 또는 귀국 편 등을 입력해주세요"></textarea>
-                </div>
-            </div>
-
-            <!-- 개인정보 동의 -->
-            <div class="privacy-consent-wrapper" style="margin-top: 20px; display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border: 1px solid var(--separator); border-radius: 8px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin: 0;">
-                    <input type="checkbox" id="proxy-agree-privacy" required style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--color-orange); margin: 0; flex-shrink: 0;">
-                    <span class="required-field" style="font-size: 0.85rem; color: var(--text-primary); font-weight: 500; white-space: nowrap;" data-i18n="modal.lost.privacy.agree">개인정보 수집 및 이용 동의</span>
-                </label>
-                <a href="javascript:void(0)" onclick="showSection('privacy'); closeProxyPickupModal();" style="font-size: 0.8rem; color: var(--label-secondary); text-decoration: underline; white-space: nowrap;" data-i18n="modal.lost.privacy.detail">자세히 보기</a>
-            </div>
-
-            <div id="proxy-status" class="form-status" style="margin-top: 12px;"></div>
-
-            <div style="margin-top: 16px;">
-                <button type="button" id="proxy-submit-btn" class="btn btn-primary" onclick="submitProxyPickup()" style="width: 100%; background: var(--color-orange); padding: 14px; font-size: 1rem; font-weight: 700; border: none; border-radius: 10px; cursor: pointer;" data-i18n="proxy.modal.submit">
-                    대리수령 신청하기
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
 
 
 
