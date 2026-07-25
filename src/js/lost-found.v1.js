@@ -1426,12 +1426,31 @@ window.openProxyPickupModal = function(caseId, itemName, originalWechat, region,
     // 필드 자동 입력
     const caseIdInput = document.getElementById('proxy-case-id');
     const itemNameInput = document.getElementById('proxy-item-name');
-    if (caseIdInput) caseIdInput.value = caseId || '';
+    
+    // 항상 부여 예정인 새 케이스 번호를 계산하여 표시 (새로 접수되어 생성되므로)
+    const lang = localStorage.getItem('jeju_lang') || 'zh';
+    let expectedId = '';
+    if (window.successStoriesData && window.successStoriesData.length > 0) {
+        let maxNum = 0;
+        window.successStoriesData.forEach(item => {
+            const match = (item.CaseId || '').toString().match(/(\d+)$/);
+            if (match) {
+                const num = parseInt(match[1], 10);
+                if (num > maxNum) maxNum = num;
+            }
+        });
+        expectedId = 'jeju-' + String(maxNum + 1).padStart(4, '0');
+    }
+    const pendingStr = lang === 'ko' ? ' (예정)' : (lang === 'en' ? ' (Expected)' : ' (预计)');
+    const autoStr = lang === 'ko' ? '자동 부여' : (lang === 'en' ? 'Auto-assigned' : '自动分配');
+    const displayCaseId = expectedId ? expectedId + pendingStr : autoStr;
+    
+    if (caseIdInput) caseIdInput.value = displayCaseId;
     if (itemNameInput) itemNameInput.value = itemName || '';
 
     // 숨겨진 필드에 데이터 저장 (제출 및 딥링크 복사 시 사용)
     modal.dataset.originalWechat = originalWechat || '';
-    modal.dataset.caseId = caseId || '';
+    modal.dataset.caseId = ''; // 새로 부여될 것이므로 빈 값 처리
     modal.dataset.itemName = itemName || '';
     modal.dataset.region = region || '';
     modal.dataset.place = place || '';
@@ -1546,6 +1565,8 @@ window.submitProxyPickup = async function() {
             method: 'delivery',
             address,
             originalWechat,
+            region: modal?.dataset.region || '',
+            place: modal?.dataset.place || '',
             userAgent: navigator.userAgent
         };
 
@@ -1558,18 +1579,22 @@ window.submitProxyPickup = async function() {
 
         if (result.result === 'success') {
             window.backToLostMenu();
-            // 성공 토스트 메시지
+            // 성공 토스트 메시지 (케이스번호 포함)
+            const assignedCaseId = result.caseId || '';
+            const caseIdStr = assignedCaseId
+                ? (lang === 'ko' ? ` (케이스번호: ${assignedCaseId})` : lang === 'en' ? ` (Case: ${assignedCaseId})` : ` (案件号: ${assignedCaseId})`)
+                : '';
             const successMsg = lang === 'ko'
-                ? '신청이 완료되었습니다. 담당자가 위챗으로 연락드립니다.'
+                ? `신청이 완료되었습니다.${caseIdStr} 담당자가 위챗으로 연락드립니다.`
                 : lang === 'en'
-                ? 'Request submitted! Our staff will contact you via WeChat.'
-                : '申请成功！工作人员将通过微信与您联系。';
+                ? `Request submitted!${caseIdStr} Our staff will contact you via WeChat.`
+                : `申请成功！${caseIdStr}工作人员将通过微信与您联系。`;
             if (window.showToast) {
                 window.showToast(successMsg);
             } else {
                 alert(successMsg);
             }
-            // 진행상황 데이터 새로고침 (Step 4로 변경된 것을 반영)
+            // 진행상황 데이터 새로고침 (SuccessStories에 새 케이스가 추가된 것을 반영)
             if (window.lostApp?.fetchSuccessStories) {
                 window.lostApp.fetchSuccessStories();
             }

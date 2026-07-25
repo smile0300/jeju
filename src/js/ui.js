@@ -65,8 +65,6 @@ export function showSection(sectionId, pushHistory = true) {
         target.classList.add('active');
         window.scrollTo(0, 0);
     }
-    const mainAppBar = document.getElementById('main-app-bar');
-    if (mainAppBar) mainAppBar.style.display = (sectionId === 'home' ? 'flex' : 'none');
 
     // 플로팅 위챗 버튼: 홈화면에서만 표시
     if (sectionId === 'home') {

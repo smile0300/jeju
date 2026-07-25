@@ -70,15 +70,15 @@
 
 /* 토스 스타일 홈 화면 */
 .home-screen {
-    padding: var(--space-6) var(--space-4) var(--space-8);
+    padding: var(--space-2) var(--space-4) var(--space-8); /* 상단 여백 축소 (space-6 -> space-2) */
     background: var(--bg-grouped);
 }
 
 .home-welcome {
     text-align: center;
-    margin-bottom: var(--space-10); /* 40px — 여유 있는 하단 여백 */
-    margin-top: var(--space-8);    /* 32px — 상단 여백 확대 */
-    padding: var(--space-4) 0;     /* 16px — 내부 상하 패딩 */
+    margin-bottom: var(--space-10);
+    margin-top: 0;                 /* 상단 여백 제거 (space-8 -> 0) */
+    padding: 0;                    /* 내부 여백 제거 (space-4 0 -> 0) */
     max-width: 600px;
     margin-left: auto;
     margin-right: auto;
