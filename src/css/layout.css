@@ -77,7 +77,7 @@
 
 .home-welcome {
     text-align: center;
-    margin-bottom: var(--space-10);
+    margin-bottom: var(--space-4); /* 하단 간격 대폭 좁힘 (space-10 -> space-4) */
     margin-top: 60px; /* 로고와 언어버튼 사이 간격 더 넓힘 (space-10 -> 60px) */
     padding: 0;
     max-width: 600px;
