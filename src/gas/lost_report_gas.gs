@@ -34,21 +34,26 @@ function doPost(e) {
 
     if (data.type === 'proxy_pickup') {
       // ══════════════════════════════════════════════════════
-      // 대리수령 신청 → 2-시트 분리 저장
-      //   ① SuccessStories : 공개용 진행상황 (기본 정보 + Step)
-      //   ② ProxyPickup    : 관리자용 신청 상세 (민감 개인정보)
-      // CaseId 가 두 시트를 연결하는 FK 역할
+      // 대리수령 신청 → SuccessStories 1개 시트에 통합 저장
+      //   공개 컬럼: CaseId, Step, Date, WeChatId, Item, Region, Place, ItemImg, Note
+      //   비공개 컬럼(관리자 전용): Timestamp, RequesterName, Contact, PickupMethod,
+      //                             Address, PassportPhoto, ReservationPhoto,
+      //                             MgmtNumber, Status, UserAgent, AdminNote
+      // ※ ItemImg(공개)로 이미지 컬럼 통일 — ItemPhoto 중복 컬럼 제거
+      // doGet 에서 공개 컬럼만 필터링하여 반환
       // ══════════════════════════════════════════════════════
       var ss = SpreadsheetApp.openById(SHEET_ID);
       var timestamp = new Date();
 
-      // ────────────────────────────────────────────────────
-      // ① SuccessStories 시트 처리
-      // ────────────────────────────────────────────────────
       var successSheet = ss.getSheetByName('SuccessStories');
       if (!successSheet) {
         successSheet = ss.insertSheet('SuccessStories');
-        successSheet.appendRow(['CaseId', 'Step', 'Date', 'WeChatId', 'Item', 'Region', 'Place', 'ItemImg', 'Note']);
+        successSheet.appendRow([
+          'CaseId', 'Step', 'Date', 'WeChatId', 'Item', 'Region', 'Place', 'ItemImg', 'Note',
+          'Timestamp', 'RequesterName', 'Contact', 'PickupMethod', 'Address',
+          'PassportPhoto', 'ReservationPhoto', 'MgmtNumber',
+          'Status', 'UserAgent', 'AdminNote'
+        ]);
       }
 
       // CaseId 자동 채번: 기존 최대 번호 + 1
@@ -68,45 +73,10 @@ function doPost(e) {
       // 오늘 날짜 (YYYY-MM-DD, 한국시간)
       var today = Utilities.formatDate(timestamp, 'Asia/Seoul', 'yyyy-MM-dd');
 
-      // SuccessStories 헤더 순서에 맞게 행 추가
-      // CaseId | Step | Date | WeChatId | Item | Region | Place | ItemImg | Note
-      var ssHeaders = existingData.length > 0 ? existingData[0] : ['CaseId', 'Step', 'Date', 'WeChatId', 'Item', 'Region', 'Place', 'ItemImg', 'Note'];
-      var ssFieldMap = {
-        'CaseId'  : newCaseId,
-        'Step'    : 3,
-        'Date'    : today,
-        'WeChatId': data.originalWechat || data.wechatId || '',
-        'Item'    : data.itemName || '',
-        'Region'  : data.region  || '',
-        'Place'   : data.place   || '',
-        'ItemImg' : '',
-        'Note'    : ''   // 관리자가 직접 입력 (예: "공항 보관중", "배송 준비중")
-      };
-      var ssRow = [];
-      for (var sh = 0; sh < ssHeaders.length; sh++) {
-        var shName = ssHeaders[sh] ? ssHeaders[sh].toString().trim() : '';
-        ssRow.push(ssFieldMap[shName] !== undefined ? ssFieldMap[shName] : '');
-      }
-      successSheet.appendRow(ssRow);
-
-      // ────────────────────────────────────────────────────
-      // ② ProxyPickup 시트 처리 (관리자 전용 상세 정보)
-      // ────────────────────────────────────────────────────
-      var proxySheet = ss.getSheetByName('ProxyPickup');
-      if (!proxySheet) {
-        proxySheet = ss.insertSheet('ProxyPickup');
-        proxySheet.appendRow([
-          'Timestamp', 'CaseId', 'ItemName', 'OriginalWechat', 'RequesterName',
-          'Contact', 'PickupMethod', 'Address', 'PassportPhoto', 'ReservationPhoto',
-          'MgmtNumber', 'ItemPhoto', 'Status', 'UserAgent',
-          'Region', 'Place', 'AdminNote'
-        ]);
-      }
-
       // 이미지 처리: Base64 → Google Drive URL
-      var passportUrl     = '';
-      var itemPhotoUrl    = '';
-      var reservationUrl  = '';
+      var passportUrl    = '';
+      var itemPhotoUrl   = '';
+      var reservationUrl = '';
       if (data.passportPhoto && data.passportPhoto.includes('base64,')) {
         passportUrl = saveBase64ImageToDrive(data.passportPhoto, 'Passport_' + newCaseId);
       }
@@ -117,18 +87,27 @@ function doPost(e) {
         reservationUrl = saveBase64ImageToDrive(data.reservationPhoto, 'Reservation_' + newCaseId);
       }
 
-      // ProxyPickup 헤더 순서에 맞게 행 추가 (기존 시트 헤더를 그대로 읽어 매핑)
-      var ppHeaders = proxySheet.getLastColumn() > 0
-        ? proxySheet.getRange(1, 1, 1, proxySheet.getLastColumn()).getValues()[0]
-        : ['Timestamp', 'CaseId', 'ItemName', 'OriginalWechat', 'RequesterName',
-           'Contact', 'PickupMethod', 'Address', 'PassportPhoto', 'ReservationPhoto',
-           'MgmtNumber', 'ItemPhoto', 'Status', 'UserAgent',
-           'Region', 'Place', 'AdminNote'];
-      var ppFieldMap = {
-        'Timestamp'       : timestamp,
+      // 시트 헤더를 읽어 컬럼 순서대로 매핑
+      var headers = existingData.length > 0
+        ? existingData[0]
+        : ['CaseId', 'Step', 'Date', 'WeChatId', 'Item', 'Region', 'Place', 'ItemImg', 'Note',
+           'Timestamp', 'RequesterName', 'Contact', 'PickupMethod', 'Address',
+           'PassportPhoto', 'ReservationPhoto', 'MgmtNumber',
+           'Status', 'UserAgent', 'AdminNote'];
+
+      var fieldMap = {
+        // 공개 컬럼
         'CaseId'          : newCaseId,
-        'ItemName'        : data.itemName       || '',
-        'OriginalWechat'  : data.originalWechat || '',
+        'Step'            : 3,
+        'Date'            : today,
+        'WeChatId'        : data.originalWechat || data.wechatId || '',
+        'Item'            : data.itemName   || '',
+        'Region'          : data.region     || '',
+        'Place'           : data.place      || '',
+        'ItemImg'         : itemPhotoUrl,
+        'Note'            : '',
+        // 비공개 컬럼 (관리자 전용)
+        'Timestamp'       : timestamp,
         'RequesterName'   : data.requesterName  || '',
         'Contact'         : data.contact        || '',
         'PickupMethod'    : data.method         || 'delivery',
@@ -136,24 +115,23 @@ function doPost(e) {
         'PassportPhoto'   : passportUrl,
         'ReservationPhoto': reservationUrl,
         'MgmtNumber'      : data.mgmtNumber     || '',
-        'ItemPhoto'       : itemPhotoUrl,
         'Status'          : 'pending',
         'UserAgent'       : data.userAgent      || '',
-        'Region'          : data.region         || '',   // 시트에 Region 컬럼 추가 필요
-        'Place'           : data.place          || '',   // 시트에 Place 컬럼 추가 필요
-        'AdminNote'       : ''                            // 시트에 AdminNote 컬럼 추가 필요
+        'AdminNote'       : ''
       };
-      var ppRow = [];
-      for (var ph = 0; ph < ppHeaders.length; ph++) {
-        var phName = ppHeaders[ph] ? ppHeaders[ph].toString().trim() : '';
-        ppRow.push(ppFieldMap[phName] !== undefined ? ppFieldMap[phName] : '');
+
+      var row = [];
+      for (var h = 0; h < headers.length; h++) {
+        var hName = headers[h] ? headers[h].toString().trim() : '';
+        row.push(fieldMap[hName] !== undefined ? fieldMap[hName] : '');
       }
-      proxySheet.appendRow(ppRow);
+      successSheet.appendRow(row);
 
       return ContentService.createTextOutput(JSON.stringify({ "result": "success", "caseId": newCaseId }))
         .setMimeType(ContentService.MimeType.JSON);
 
     } else if (data.type === 'lost_report' || data.type === 'feature' || data.type === 'cctv_apply') {
+
       var ss = SpreadsheetApp.openById(SHEET_ID);
       var sheetName;
       if (data.type === 'lost_report') {
@@ -379,7 +357,7 @@ function extractImageLabels(base64Data) {
 
 /**
  * GET 요청 시 데이터를 JSON으로 반환합니다.
- * ?action=success -> SuccessStories 시트 반환
+ * ?action=success -> SuccessStories 시트 반환 (공개 컬럼만 필터링)
  * 기본값 -> RewardList 시트 반환
  */
 function doGet(e) {
@@ -399,6 +377,17 @@ function doGet(e) {
     }
     
     var headers = data[0];
+
+    // SuccessStories 시트는 공개 허용된 컬럼만 반환 (개인정보 보호)
+    var PUBLIC_COLUMNS = [
+      'CaseId', 'Step', 'Date', 'WeChatId', 'Item', 'Region', 'Place', 'ItemImg', 'Note',
+      'Item_zh', 'Item_en', 'Item_ko',
+      'Region_zh', 'Region_en', 'Region_ko',
+      'Place_zh', 'Place_en', 'Place_ko',
+      'LostPlace', 'LostPlace_zh', 'LostPlace_en', 'LostPlace_ko'
+    ];
+    var isSuccessSheet = (action === 'success');
+
     var result = [];
     
     for (var i = 1; i < data.length; i++) {
@@ -408,11 +397,12 @@ function doGet(e) {
         var header = headers[j] ? headers[j].toString().trim() : '';
         // 빈 헤더는 건너뜀
         if (!header) continue;
-        
-        // 프론트엔드에서 사용하는 키 (id, title, reward, imageUrl 등)로 맞춰주거나 그대로 사용
-        // 대소문자를 맞춰주기 위해 프론트엔드 (reward.js)가 처리하도록 그대로 둠
+        // SuccessStories 시트: 공개 허용 컬럼만 포함 (개인정보 보호)
+        if (isSuccessSheet && PUBLIC_COLUMNS.indexOf(header) === -1) continue;
         obj[header] = row[j];
       }
+      // Date가 없는 빈 행은 건너뜀
+      if (isSuccessSheet && (!obj['Date'] || obj['Date'].toString().trim() === '')) continue;
       result.push(obj);
     }
     

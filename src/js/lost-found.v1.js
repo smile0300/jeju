@@ -868,52 +868,20 @@ const getValidTranslation = (original, translated) => {
 };
 
 export async function fetchSuccessStories() {
-    const defaultData = [
-        {
-            Date: "2026-07-18",
-            WeChatId: "demo1",
-            Region: "제주 버스",
-            Region_en: "Jeju Bus",
-            Region_zh: "济州公交",
-            Item: "검정색 가방",
-            Item_en: "Black Bag",
-            Item_zh: "黑色包",
-            ItemImg: "https://drive.google.com/thumbnail?id=1XE0JCPcp1Mq7s8NkYttcudzFOLmCeNrp&sz=w800",
-            CaseId: "JEJU-0042",
-            Step: "3"
-        },
-        {
-            Date: "2026-07-17",
-            WeChatId: "demo2",
-            Region: "제주 공항 1터미널",
-            Region_en: "Jeju Airport T1",
-            Region_zh: "济州机场 T1",
-            Item: "아이폰 15",
-            Item_en: "iPhone 15",
-            Item_zh: "苹果 15",
-            ItemImg: "https://drive.google.com/thumbnail?id=1XE0JCPcp1Mq7s8NkYttcudzFOLmCeNrp&sz=w800",
-            CaseId: "JEJU-0041",
-            Step: "5"
-        }
-    ];
-
-    let data = defaultData;
+    let data = [];
 
     try {
         const response = await fetch('/api/success-list');
         if (response.ok) {
             const result = await response.json();
-            // Validate the result is an array and filter out rows without Date
+            // 배열이고 Date가 있는 행만 유효 데이터로 인정
             if (Array.isArray(result) && result.length > 0) {
-                const validData = result.filter(item => item.Date && item.Date.toString().trim() !== '');
-                if (validData.length > 0) {
-                    data = validData;
-                }
+                data = result.filter(item => item.Date && item.Date.toString().trim() !== '');
             }
         }
     } catch (e) {
-        console.warn('Failed to fetch success stories from Google Sheets. Using fallback data.', e);
-        data = defaultData; // 확실하게 fallback 데이터 사용
+        console.warn('Failed to fetch success stories from Google Sheets.', e);
+        // 시트 fetch 실패 시 빈 배열 유지 (demo 데이터 표시 안 함)
     }
 
     // 최신순으로 정렬 (CaseId 번호 기준 내림차순, 없으면 Date 기준 내림차순)
