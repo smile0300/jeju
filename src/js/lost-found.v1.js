@@ -1509,6 +1509,12 @@ window.submitProxyPickup = async function() {
     if (!address) return showError(lang === 'ko' ? '배송 주소를 입력해주세요.' : '请输入收货地址。');
     if (!privacyCheck?.checked) return showError(lang === 'ko' ? '개인정보 수집 및 이용에 동의해주세요.' : '请同意个人信息收集及使用。');
 
+    // 용량 제한 검사 (2MB)
+    const MAX_SIZE = 2 * 1024 * 1024;
+    if (passportFile && passportFile.size > MAX_SIZE) return showError(lang === 'ko' ? '여권 사진은 2MB 이하로 첨부해주세요.' : '护照照片大小不能超过2MB。');
+    if (itemFile && itemFile.size > MAX_SIZE) return showError(lang === 'ko' ? '물건 사진은 2MB 이하로 첨부해주세요.' : '物品照片大小不能超过2MB。');
+    if (isHotel && reservationFile && reservationFile.size > MAX_SIZE) return showError(lang === 'ko' ? '호텔 예약내역은 2MB 이하로 첨부해주세요.' : '酒店预订记录大小不能超过2MB。');
+
     // ── 제출 ──
     if (statusDiv) { statusDiv.innerHTML = ''; statusDiv.style.display = 'none'; }
     if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = '...'; }
