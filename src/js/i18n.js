@@ -292,7 +292,7 @@ const TRANSLATIONS = {
         'proxy.modal.address.ph':      '酒店名称、房间号或返程航班等',
         'proxy.modal.direct.guide':    '工作人员将通过微信告知您保管位置及领取时间。',
         'proxy.modal.submit':          '提交代领申请',
-        'proxy.modal.privacy_notice':  '根据代领标准的加强，护照照片为必填项。您的个人信息将在物品交付后立即删除。',
+        'proxy.modal.privacy_notice':  '根据代领标准的加强，护照照片为必填项。应酒店要求，未附护照照片将无法代领。您的个人信息将在物品交付后立即删除。',
         'lost.modal.cta': '委托寻找我的失物',
         'lost.notice.title': '失物招领中心使用指南',
         'lost.notice.howto': '使用方法',
@@ -643,7 +643,7 @@ const TRANSLATIONS = {
         'proxy.modal.address.ph':      '호텔명, 방 번호 또는 귀국 편 등을 입력해주세요',
         'proxy.modal.direct.guide':    '담당자가 보관 위치와 수령 시간을 위챗으로 안내해드립니다.',
         'proxy.modal.submit':          '대리수령 신청하기',
-        'proxy.modal.privacy_notice':  '대리수령 기준강화에 따라 여권사진은 필수서류임에 요청드립니다. 개인정보는 물건 수령 즉시 삭제됩니다.',
+        'proxy.modal.privacy_notice':  '물품 대리수령 기준강화에 따라 여권사진은 필수입니다. 호텔요구사항으로 여권사진 미첨부시 수령은 불가합니다. 개인정보는 물건 수령 즉시 삭제됩니다.',
         // 추운 달
         'weather.past.tip.cold_m1': '<strong>옷차림 팁:</strong> 1월은 일 년 중 가장 춥고 눈도 자주 내리는 제주도의 겨울입니다.<br>찬 바람을 완벽히 차단할 수 있는 두꺼운 롱패딩과 장갑, 머플러를 필수적으로 챙기세요.<br>산간 지역을 방문하신다면 눈길에 대비한 든든한 방한화나 등산화 착용을 권장합니다.',
         'weather.past.tip.cold_m2': '<strong>옷차림 팁:</strong> 2월은 아직 겨울의 추위가 맹위를 떨치며 찬 바람이 강하게 붑니다.<br>체온을 보호해 줄 두꺼운 외투와 보온 내복을 든든하게 입고 따뜻하게 여행하세요.<br>따뜻한 카페 투어나 실내 전시관람 등으로 동선을 유연하게 짜는 것을 추천해 드립니다.',
@@ -1560,7 +1560,7 @@ const TRANSLATIONS = {
         'proxy.modal.address.ph':      'Hotel name, room number, return flight info, etc.',
         'proxy.modal.direct.guide':    'Our staff will send you pickup location and time details via WeChat.',
         'proxy.modal.submit':          'Submit Pickup Request',
-        'proxy.modal.privacy_notice':  'Due to reinforced pickup verification, a passport photo is required. Personal information will be deleted immediately upon delivery.',
+        'proxy.modal.privacy_notice':  'Due to reinforced pickup verification, a passport photo is required. Per hotel requirements, pickup is not possible without it. Personal information will be deleted immediately upon delivery.',
 
         'alert.empty':       'Please enter a message.',
         'alert.submitting':  'Submitting...',
