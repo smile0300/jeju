@@ -1515,8 +1515,7 @@ window.submitProxyPickup = async function() {
 
     try {
         const { CONFIG } = await import('./config.js');
-        const gasUrl = CONFIG.GAS_URL || CONFIG.APPS_SCRIPT_URL;
-        if (!gasUrl) throw new Error('GAS URL not configured');
+        const apiUrl = `${CONFIG.PROXY_URL}/api/lost-report`;
 
         // 파일 인코딩 대기 (1~2초 소요)
         statusDiv.innerHTML = `<span style="color: var(--label-secondary);">${lang === 'ko' ? '파일 업로드 중...' : '正在上传文件...'}</span>`;
@@ -1544,9 +1543,9 @@ window.submitProxyPickup = async function() {
             userAgent: navigator.userAgent
         };
 
-        const res = await fetch(gasUrl, {
+        const res = await fetch(apiUrl, {
             method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
         const result = await res.json();
