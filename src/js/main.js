@@ -165,6 +165,7 @@ window.openLostDetailModalByIndex = openLostDetailModalByIndex;
 window.openLostReportModal = openLostReportModal;
 window.handleLostImageChange = handleLostImageChange;
 window.submitLostReport = submitLostReport;
+window.fetchSuccessStories = fetchSuccessStories;
 window.fetchFoundGoodsManual = () => {
     switchLostView('card');
     fetchFoundGoods();
@@ -203,10 +204,8 @@ window.toggleLostGuide = () => {
         // 가이드가 열릴 때는 하단의 다른 정보들이 보이지 않도록 숨김 처리
         const grid = document.getElementById('lost-goods-grid');
         const table = document.getElementById('lost-goods-table-container');
-        const success = document.getElementById('lost-success-container');
         if (grid) grid.style.display = 'none';
         if (table) table.style.display = 'none';
-        if (success) success.style.display = 'none';
     } else {
         guide.style.display = 'none';
         if (guideBtn) {
@@ -240,7 +239,6 @@ const closeAllModals = () => {
     if (window.closeCctvCard) window.closeCctvCard(true); // true means skip history.back()
     if (window.closeCctvModal) window.closeCctvModal(true);
     if (window.closeLostDetailModal) window.closeLostDetailModal(true);
-    if (window.closeLostReportModal) window.closeLostReportModal(true);
     if (window.exitWeatherFullscreen) window.exitWeatherFullscreen();
     
     document.body.style.overflow = '';
@@ -261,11 +259,6 @@ window.closeCctvModal = (fromPopState = false) => {
 window.closeLostDetailModal = (fromPopState = false) => { 
     document.getElementById('lost-detail-modal').style.display = 'none'; 
     document.body.style.overflow = 'auto'; 
-    if (!fromPopState && window.location.hash === '#modal') window.history.back();
-};
-window.closeLostReportModal = (fromPopState = false) => { 
-    document.getElementById('lost-report-modal').style.display = 'none'; 
-    document.body.style.overflow = ''; 
     if (!fromPopState && window.location.hash === '#modal') window.history.back();
 };
 window.closeCSModal = (fromPopState = false) => { 
@@ -360,6 +353,11 @@ window.addEventListener('load', () => {
             if (typeof window.lostApp?.openLostReportModal === 'function') window.lostApp.openLostReportModal();
             else if (typeof openLostReportModal === 'function') openLostReportModal();
         }, 500);
+    }
+
+    // Proxy Pickup Deep Link Check
+    if (typeof window.lostApp?.checkProxyDeepLink === 'function') {
+        window.lostApp.checkProxyDeepLink();
     }
 
     // Update loops

@@ -1145,11 +1145,10 @@ i.ph-duotone.hover-scale:hover {
 .success-timeline-dots {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    gap: 6px;
     align-items: flex-start;
-    height: 36px;
     margin-left: 1px;
-    padding: 0;
+    padding: 4px 0;
 }
 .success-timeline-dot-row {
     display: flex;

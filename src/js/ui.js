@@ -53,6 +53,11 @@ const SEO_META = {
 };
 
 export function showSection(sectionId, pushHistory = true) {
+    // 홈으로 이동 시 분실물 확장 상태 초기화
+    if (sectionId === 'home' && window.collapseLostGrid) {
+        window.collapseLostGrid();
+    }
+
     document.querySelectorAll('.app-section').forEach(s => s.classList.remove('active'));
     const target = document.getElementById(sectionId);
     if (target) {

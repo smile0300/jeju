@@ -130,14 +130,11 @@ export function switchLostView(mode) {
 
     const btnCard = document.getElementById('btn-view-card');
     const btnTable = document.getElementById('btn-view-table');
-    const btnSuccess = document.getElementById('btn-success-all');
     const grid = document.getElementById('lost-goods-grid');
     const tableContainer = document.getElementById('lost-goods-table-container');
-    const successContainer = document.getElementById('lost-success-container');
 
     btnCard?.classList.toggle('active', mode === 'card');
     btnTable?.classList.toggle('active', mode === 'table');
-    btnSuccess?.classList.toggle('active', mode === 'success');
 
     if (grid) {
         grid.style.display = '';
@@ -147,17 +144,12 @@ export function switchLostView(mode) {
         tableContainer.style.display = '';
         tableContainer.classList.toggle('active', mode === 'table');
     }
-    if (successContainer) {
-        successContainer.style.display = mode === 'success' ? 'block' : 'none';
-    }
 
     if (mode === 'card') {
         const cardItems = cachedLostItems.filter(item => item.img && item.img.trim() !== '' && !item.img.includes('img02_no_img.gif'));
         renderLostGoods(grid, cardItems);
     } else if (mode === 'table') {
         renderLostGoodsTable(cachedLostItems);
-    } else if (mode === 'success') {
-        renderSuccessGoodsView();
     }
 }
 
@@ -319,20 +311,16 @@ export function showWechatQR() {
 }
 
 export function openLostReportModal() {
-    document.getElementById('lost-report-modal').style.display = 'flex';
+    showSection('lost-report');
     const now = new Date();
     const kstTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
     
     const dateInput = document.getElementById('lost-report-date');
     if(dateInput) dateInput.value = kstTime.toISOString().split('T')[0];
     
-    document.body.style.overflow = 'hidden';
-    
     // Reset steps
     currentLostStep = 1;
     updateLostStepView();
-
-    if (window.pushModalState) window.pushModalState();
 }
 
 let currentLostStep = 1;
@@ -593,8 +581,9 @@ export async function submitLostReport() {
             }
             
             // 폼 닫기 (즉시)
-            if (window.closeLostReportModal) window.closeLostReportModal(true);
-            else if (typeof closeLostReportModal === 'function') closeLostReportModal(true);
+            // 성공 모달 표시 처리
+            // if (window.closeLostReportModal) window.closeLostReportModal(true);
+            // else if (typeof closeLostReportModal === 'function') closeLostReportModal(true);
             
             // 폼 초기화
             const form = document.querySelector('.lost-report-form-content');
@@ -942,9 +931,7 @@ export async function fetchSuccessStories() {
 
     window.successStoriesData = data;
     renderSuccessMarquee(data);
-    if (currentLostView === 'success') {
-        renderSuccessGoodsView();
-    }
+    renderSuccessGoodsView();
 }
 
 function renderSuccessMarquee(data) {
@@ -1297,9 +1284,26 @@ export function renderSuccessGoodsView(isLoadMore = false) {
                 if (isCurrent) {
                     cls += ' current';
                 }
-                let textHtml = isCurrent ? `<span class="success-timeline-dot-text">${STEP_LABELS[i - 1]}</span>` : '';
+                let textHtml = isCurrent ? `<span class="success-timeline-dot-text" style="position: relative;">${STEP_LABELS[i - 1]}</span>` : '';
+                
+                // [대리수령 버튼] Step 3(발견) 상태일 때 "找到" 텍스트 옆에 버튼 추가
+                if (i === 3 && stepNum === 3) {
+                    const proxyBtnLabel = lang === 'ko' ? '📬 대리수령 신청' : lang === 'en' ? '📬 Request Proxy Pickup' : '📬 申请代为领取';
+                    const safeCaseId   = (item.CaseId  || '').toString().replace(/'/g, '');
+                    const safeItemName = (item.Item    || '').toString().replace(/'/g, '');
+                    const safeWechat   = (item.WeChatId|| '').toString().replace(/'/g, '');
+                    const safeRegion   = (item.Region  || '').toString().replace(/'/g, '');
+                    const safePlace    = (item.Place   || '').toString().replace(/'/g, '');
+                    
+                    textHtml += `<button
+                        class="btn btn-primary proxy-pickup-btn"
+                        onclick="event.stopPropagation(); openProxyPickupModal('${safeCaseId}', '${safeItemName}', '${safeWechat}', '${safeRegion}', '${safePlace}')"
+                        style="margin-left: 4px; padding: 0 5px; height: 18px; min-height: 18px; font-size: 0.65rem; line-height: 1; background: var(--color-orange); border: none; border-radius: 3px; cursor: pointer; font-weight: 600; color: white; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; flex-shrink: 0; vertical-align: middle;"
+                    >${proxyBtnLabel}</button>`;
+                }
+
                 dotsHtml += `
-                    <div class="${rowCls}">
+                    <div class="${rowCls}" style="display: flex; align-items: center; position: relative;">
                         <span class="${cls}"></span>
                         ${textHtml}
                     </div>`;
@@ -1326,6 +1330,8 @@ export function renderSuccessGoodsView(isLoadMore = false) {
                     <span>${dateStr}</span>
                 </div>`;
         }
+
+
 
         let handoverValue = item.Place || item.LostPlace || '';
         if (lang === 'zh' && (item.Place_zh || item.LostPlace_zh)) handoverValue = item.Place_zh || item.LostPlace_zh;
@@ -1407,6 +1413,178 @@ window.closeLostUpsellModal = function(fromPopState = false) {
     }
 };
 
+// ─────────────────────────────────────────────────────────────
+// 대리수령 신청 모달 함수들
+// ─────────────────────────────────────────────────────────────
+
+/** 대리수령 모달 열기: CaseId, 물품명, 원래 위챗ID, 장소(호텔 여부 판별) 자동 입력 */
+window.openProxyPickupModal = function(caseId, itemName, originalWechat, region, place) {
+    showSection('proxy-pickup');
+    const modal = document.getElementById('proxy-pickup');
+    if (!modal) return;
+
+    // 필드 자동 입력
+    const caseIdInput = document.getElementById('proxy-case-id');
+    const itemNameInput = document.getElementById('proxy-item-name');
+    if (caseIdInput) caseIdInput.value = caseId || '';
+    if (itemNameInput) itemNameInput.value = itemName || '';
+
+    // 숨겨진 필드에 데이터 저장 (제출 및 딥링크 복사 시 사용)
+    modal.dataset.originalWechat = originalWechat || '';
+    modal.dataset.caseId = caseId || '';
+    modal.dataset.itemName = itemName || '';
+    modal.dataset.region = region || '';
+    modal.dataset.place = place || '';
+
+    // 장소(호텔, 공항/경찰서) 판별하여 조건부 입력란 표시
+    const locationStr = ((region || '') + ' ' + (place || '')).toLowerCase();
+    const isHotel = locationStr.includes('호텔') || locationStr.includes('hotel') || locationStr.includes('酒店');
+    
+    document.getElementById('proxy-reservation-group').style.display = isHotel ? 'block' : 'none';
+    document.getElementById('proxy-mgmt-group').style.display = isHotel ? 'none' : 'block';
+
+    // 폼 초기화
+    ['proxy-name', 'proxy-contact', 'proxy-passport-photo', 'proxy-item-photo', 'proxy-reservation-photo', 'proxy-mgmt-num', 'proxy-address'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+    
+    const privacyCheck = document.getElementById('proxy-agree-privacy');
+    if (privacyCheck) privacyCheck.checked = false;
+    const statusDiv = document.getElementById('proxy-status');
+    if (statusDiv) { statusDiv.innerHTML = ''; statusDiv.style.display = 'none'; }
+    const submitBtn = document.getElementById('proxy-submit-btn');
+    if (submitBtn) submitBtn.disabled = false;
+};
+
+/** 파일 읽기를 Promise로 감싸는 유틸 */
+function readAsBase64(file) {
+    return new Promise((resolve, reject) => {
+        if (!file) return resolve(null);
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+        reader.readAsDataURL(file);
+    });
+}
+
+/** 대리수령 신청 제출 */
+window.submitProxyPickup = async function() {
+    const lang = localStorage.getItem('jeju_lang') || 'zh';
+    const statusDiv = document.getElementById('proxy-status');
+    const submitBtn = document.getElementById('proxy-submit-btn');
+    const modal     = document.getElementById('proxy-pickup');
+
+    const caseId        = (document.getElementById('proxy-case-id')?.value || '').trim();
+    const itemName      = (document.getElementById('proxy-item-name')?.value || '').trim();
+    const requesterName = (document.getElementById('proxy-name')?.value || '').trim();
+    const contact       = (document.getElementById('proxy-contact')?.value || '').trim();
+    const mgmtNum       = (document.getElementById('proxy-mgmt-num')?.value || '').trim();
+    
+    const passportFile    = document.getElementById('proxy-passport-photo')?.files[0];
+    const itemFile        = document.getElementById('proxy-item-photo')?.files[0];
+    const reservationFile = document.getElementById('proxy-reservation-photo')?.files[0];
+    
+    const isHotel = document.getElementById('proxy-reservation-group').style.display !== 'none';
+
+    const address       = (document.getElementById('proxy-address')?.value || '').trim();
+    const privacyCheck  = document.getElementById('proxy-agree-privacy');
+    const originalWechat = modal?.dataset.originalWechat || '';
+
+    // ── 유효성 검사 ──
+    const showError = (msg) => {
+        if (statusDiv) {
+            statusDiv.innerHTML = `<span style="color: var(--color-red, #e53e3e);">${msg}</span>`;
+            statusDiv.style.display = 'block';
+        }
+    };
+
+    if (!requesterName) return showError(lang === 'ko' ? '신청자 이름을 입력해주세요.' : '请输入申请人姓名。');
+    if (!contact) return showError(lang === 'ko' ? '연락처를 입력해주세요.' : '请输入联系方式。');
+    if (!passportFile) return showError(lang === 'ko' ? '여권 사진을 첨부해주세요.' : '请上传护照照片。');
+    if (!itemFile) return showError(lang === 'ko' ? '물건 사진을 첨부해주세요.' : '请上传物品照片。');
+    if (isHotel && !reservationFile) return showError(lang === 'ko' ? '호텔 예약내역을 첨부해주세요.' : '请上传酒店预订记录。');
+    if (!isHotel && !mgmtNum) return showError(lang === 'ko' ? '관리번호를 입력해주세요.' : '请输入管理号码。');
+
+    if (!address) return showError(lang === 'ko' ? '배송 주소를 입력해주세요.' : '请输入收货地址。');
+    if (!privacyCheck?.checked) return showError(lang === 'ko' ? '개인정보 수집 및 이용에 동의해주세요.' : '请同意个人信息收集及使用。');
+
+    // ── 제출 ──
+    if (statusDiv) { statusDiv.innerHTML = ''; statusDiv.style.display = 'none'; }
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = '...'; }
+
+    try {
+        const { CONFIG } = await import('./config.js');
+        const gasUrl = CONFIG.GAS_URL || CONFIG.APPS_SCRIPT_URL;
+        if (!gasUrl) throw new Error('GAS URL not configured');
+
+        // 파일 인코딩 대기 (1~2초 소요)
+        statusDiv.innerHTML = `<span style="color: var(--label-secondary);">${lang === 'ko' ? '파일 업로드 중...' : '正在上传文件...'}</span>`;
+        statusDiv.style.display = 'block';
+        
+        const passportBase64 = await readAsBase64(passportFile);
+        const itemBase64 = await readAsBase64(itemFile);
+        const reservationBase64 = await readAsBase64(reservationFile);
+
+        statusDiv.innerHTML = `<span style="color: var(--label-secondary);">${lang === 'ko' ? '처리 중...' : '处理中...'}</span>`;
+
+        const payload = {
+            type: 'proxy_pickup',
+            caseId,
+            itemName,
+            requesterName,
+            contact,
+            mgmtNumber: mgmtNum,
+            passportPhoto: passportBase64,
+            itemPhoto: itemBase64,
+            reservationPhoto: reservationBase64,
+            method: 'delivery',
+            address,
+            originalWechat,
+            userAgent: navigator.userAgent
+        };
+
+        const res = await fetch(gasUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload)
+        });
+        const result = await res.json();
+
+        if (result.result === 'success') {
+            window.closeProxyPickupModal();
+            // 성공 토스트 메시지
+            const successMsg = lang === 'ko'
+                ? '신청이 완료되었습니다. 담당자가 위챗으로 연락드립니다.'
+                : lang === 'en'
+                ? 'Request submitted! Our staff will contact you via WeChat.'
+                : '申请成功！工作人员将通过微信与您联系。';
+            if (window.showToast) {
+                window.showToast(successMsg);
+            } else {
+                alert(successMsg);
+            }
+            // 진행상황 데이터 새로고침 (Step 4로 변경된 것을 반영)
+            if (window.lostApp?.fetchSuccessStories) {
+                window.lostApp.fetchSuccessStories();
+            }
+        } else {
+            throw new Error(result.message || 'Unknown error');
+        }
+    } catch (err) {
+        const errMsg = lang === 'ko' ? '신청 중 오류가 발생했습니다. 다시 시도해주세요.'
+                     : lang === 'en' ? 'Submission failed. Please try again.'
+                     : '提交失败，请重试。';
+        showError(errMsg);
+        if (submitBtn) {
+            const submitLabel = lang === 'ko' ? '대리수령 신청하기' : lang === 'en' ? 'Submit Pickup Request' : '提交代领申请';
+            submitBtn.disabled = false;
+            submitBtn.textContent = submitLabel;
+        }
+        console.error('[ProxyPickup] submit error:', err);
+    }
+};
+
 window.lostApp = {
     fetchFoundGoods,
     switchLostView,
@@ -1417,3 +1595,43 @@ window.lostApp = {
     handleImageSearch,
     fetchSuccessStories
 };
+
+/** 딥링크 공유 (클립보드 복사) */
+window.copyProxyLink = function(caseId, itemName, wechat, region, place) {
+    const lang = localStorage.getItem('jeju_lang') || 'zh';
+    const url = new URL(window.location.origin + '/lost');
+    if (caseId) url.searchParams.set('proxy', caseId);
+    if (itemName) url.searchParams.set('item', itemName);
+    if (wechat) url.searchParams.set('wechat', wechat);
+    if (region) url.searchParams.set('region', region);
+    if (place) url.searchParams.set('place', place);
+    
+    navigator.clipboard.writeText(url.toString()).then(() => {
+        const msg = lang === 'ko' ? '링크가 복사되었습니다!' : lang === 'en' ? 'Link copied!' : '链接已复制！';
+        if (window.showToast) window.showToast(msg);
+        else alert(msg);
+    });
+};
+
+/** 딥링크 파싱 (페이지 로드 시 자동 모달) */
+export function checkProxyDeepLink() {
+    const params = new URLSearchParams(window.location.search);
+    const proxyCase = params.get('proxy');
+    if (proxyCase) {
+        const itemName = params.get('item') || '';
+        const wechat = params.get('wechat') || '';
+        const region = params.get('region') || '';
+        const place = params.get('place') || '';
+        
+        // Lost 섹션 활성화
+        if (window.showSection) window.showSection('lost');
+        
+        setTimeout(() => {
+            window.openProxyPickupModal(proxyCase, itemName, wechat, region, place);
+        }, 500);
+        
+        // URL에서 파라미터 제거 (보안 및 클린 URL)
+        window.history.replaceState({}, '', window.location.pathname);
+    }
+}
+window.lostApp.checkProxyDeepLink = checkProxyDeepLink;

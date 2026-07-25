@@ -32,7 +32,7 @@ function doPost(e) {
     }
     // -- [END] 이미지 검색 엔드포인트 처리 --
 
-    if (data.type === 'lost_report' || data.type === 'feature' || data.type === 'cctv_apply') {
+    if (data.type === 'lost_report' || data.type === 'feature' || data.type === 'cctv_apply' || data.type === 'proxy_pickup') {
       var ss = SpreadsheetApp.openById(SHEET_ID);
       var sheetName;
       if (data.type === 'lost_report') {
@@ -41,6 +41,8 @@ function doPost(e) {
         sheetName = 'FeatureRequest';
       } else if (data.type === 'cctv_apply') {
         sheetName = 'VIP';
+      } else if (data.type === 'proxy_pickup') {
+        sheetName = 'ProxyPickup';
       }
       var sheet = ss.getSheetByName(sheetName);
       
@@ -57,6 +59,13 @@ function doPost(e) {
           sheet.appendRow(['Timestamp', 'Feature', 'Contact', 'UserAgent']);
         } else if (data.type === 'cctv_apply') {
           sheet.appendRow(['Timestamp', 'WechatId', 'Region', 'StartDate', 'EndDate', 'UserAgent']);
+        } else if (data.type === 'proxy_pickup') {
+          sheet.appendRow([
+            'Timestamp', 'CaseId', 'ItemName', 'OriginalWechat',
+            'RequesterName', 'Contact', 'PickupMethod', 'Address',
+            'PassportPhoto', 'ReservationPhoto', 'MgmtNumber', 'ItemPhoto',
+            'Status', 'UserAgent'
+          ]);
         }
       }
 
@@ -114,6 +123,37 @@ function doPost(e) {
           'EndDate': data.endDate || '',
           'UserAgent': data.userAgent || ''
         };
+      } else if (data.type === 'proxy_pickup') {
+        var passportUrl = '';
+        var reservationUrl = '';
+        var itemPhotoUrl = '';
+
+        if (data.passportPhoto && data.passportPhoto.includes('base64,')) {
+          passportUrl = saveBase64ImageToDrive(data.passportPhoto, "Passport_" + (data.caseId || 'Proxy'));
+        }
+        if (data.reservationPhoto && data.reservationPhoto.includes('base64,')) {
+          reservationUrl = saveBase64ImageToDrive(data.reservationPhoto, "Reservation_" + (data.caseId || 'Proxy'));
+        }
+        if (data.itemPhoto && data.itemPhoto.includes('base64,')) {
+          itemPhotoUrl = saveBase64ImageToDrive(data.itemPhoto, "Item_" + (data.caseId || 'Proxy'));
+        }
+
+        rowData = {
+          'Timestamp': timestamp,
+          'CaseId': data.caseId || '',
+          'ItemName': data.itemName || '',
+          'OriginalWechat': data.originalWechat || '',
+          'RequesterName': data.requesterName || '',
+          'Contact': data.contact || '',
+          'PickupMethod': data.method || '',
+          'Address': data.address || '',
+          'PassportPhoto': passportUrl,
+          'ReservationPhoto': reservationUrl,
+          'MgmtNumber': data.mgmtNumber || '',
+          'ItemPhoto': itemPhotoUrl,
+          'Status': 'pending',
+          'UserAgent': data.userAgent || ''
+        };
       }
 
       // 2. 시트의 1행(헤더)을 읽어와서 열 순서대로 데이터를 알아서 배치합니다.
@@ -141,6 +181,33 @@ function doPost(e) {
         }
       }
       
+      // [대리수령] SuccessStories 시트의 해당 케이스 Step 3 → 4 로 업데이트
+      if (data.type === 'proxy_pickup' && data.caseId) {
+        try {
+          var successSheet = ss.getSheetByName('SuccessStories');
+          if (successSheet) {
+            var successData = successSheet.getDataRange().getValues();
+            var headers = successData[0];
+            var caseIdColIndex = headers.indexOf('CaseId');
+            var stepColIndex = headers.indexOf('Step');
+            if (caseIdColIndex >= 0 && stepColIndex >= 0) {
+              for (var k = 1; k < successData.length; k++) {
+                if (String(successData[k][caseIdColIndex]).trim() === String(data.caseId).trim()) {
+                  // 수식이 아닌 경우에만 업데이트 (Step이 3인 경우에만)
+                  if (String(successData[k][stepColIndex]).trim() === '3') {
+                    successSheet.getRange(k + 1, stepColIndex + 1).setValue(4);
+                  }
+                  break;
+                }
+              }
+            }
+          }
+        } catch (stepErr) {
+          // Step 업데이트 실패는 전체 요청 실패로 처리하지 않음
+          Logger.log('Step update failed: ' + stepErr.toString());
+        }
+      }
+
       return ContentService.createTextOutput(JSON.stringify({ "result": "success", "status": "success" }))
         .setMimeType(ContentService.MimeType.JSON);
     } else {

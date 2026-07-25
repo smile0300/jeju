@@ -480,3 +480,66 @@
     color: var(--label-primary);
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
+
+/* ==================== 분실물 홈 확장 (십자가 배열) ==================== */
+
+/* 분실물 버튼 활성(확장) 상태 */
+.home-item.item-lost.lost-active {
+    background: rgba(224, 140, 58, 0.10);
+    border-color: rgba(224, 140, 58, 0.50);
+    box-shadow:
+        0 0 0 2px rgba(224, 140, 58, 0.18),
+        var(--shadow-sm);
+    transform: scale(1); /* hover scale 방지 */
+}
+
+/* 서브 버튼 공통 스타일 */
+.home-item.item-lost-sub {
+    cursor: pointer;
+}
+
+@keyframes lostSubInTop {
+    from { transform: translateY(calc(100% + var(--space-4))) scale(0.3); opacity: 0; }
+    to { transform: translateY(0) scale(1); opacity: 1; }
+}
+@keyframes lostSubInLeft {
+    from { transform: translateX(calc(100% + var(--space-4))) scale(0.3); opacity: 0; }
+    to { transform: translateX(0) scale(1); opacity: 1; }
+}
+@keyframes lostSubInRight {
+    from { transform: translateX(calc(-100% - var(--space-4))) scale(0.3); opacity: 0; }
+    to { transform: translateX(0) scale(1); opacity: 1; }
+}
+@keyframes lostSubInBottom {
+    from { transform: translateY(calc(-100% - var(--space-4))) scale(0.3); opacity: 0; }
+    to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.lost-sub-in-top { animation: lostSubInTop 0.35s var(--ease-spring) both; }
+.lost-sub-in-left { animation: lostSubInLeft 0.35s var(--ease-spring) both; }
+.lost-sub-in-right { animation: lostSubInRight 0.35s var(--ease-spring) both; }
+.lost-sub-in-bottom { animation: lostSubInBottom 0.35s var(--ease-spring) both; }
+
+@keyframes lostSubOutTop {
+    from { transform: translateY(0) scale(1); opacity: 1; }
+    to { transform: translateY(calc(100% + var(--space-4))) scale(0.3); opacity: 0; }
+}
+@keyframes lostSubOutLeft {
+    from { transform: translateX(0) scale(1); opacity: 1; }
+    to { transform: translateX(calc(100% + var(--space-4))) scale(0.3); opacity: 0; }
+}
+@keyframes lostSubOutRight {
+    from { transform: translateX(0) scale(1); opacity: 1; }
+    to { transform: translateX(calc(-100% - var(--space-4))) scale(0.3); opacity: 0; }
+}
+@keyframes lostSubOutBottom {
+    from { transform: translateY(0) scale(1); opacity: 1; }
+    to { transform: translateY(calc(-100% - var(--space-4))) scale(0.3); opacity: 0; }
+}
+
+.lost-sub-out-top { animation: lostSubOutTop 0.25s var(--ease-in-out) both; }
+.lost-sub-out-left { animation: lostSubOutLeft 0.25s var(--ease-in-out) both; }
+.lost-sub-out-right { animation: lostSubOutRight 0.25s var(--ease-in-out) both; }
+.lost-sub-out-bottom { animation: lostSubOutBottom 0.25s var(--ease-in-out) both; }
+
+

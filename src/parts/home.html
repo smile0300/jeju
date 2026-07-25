@@ -27,46 +27,71 @@
 
         <div class="home-grid">
             <!-- CCTV 버튼: 8월 신청폼으로 연결 -->
-            <button class="home-item item-cctv-apply" type="button" onclick="openCctvApplyModal()">
+            <button class="home-item item-cctv-apply" id="home-cctv-btn" type="button" onclick="openCctvApplyModal()">
                 <span class="item-icon"><i class="ph-duotone ph-video-camera color-cctv"></i></span>
                 <span class="item-label" data-i18n="nav.cctv">实时监控</span>
                 <span class="coming-soon-badge" style="background-color: #f59e0b; color: white;">beta</span>
             </button>
-            <a href="/weather" class="home-item item-weather" onclick="event.preventDefault(); showSection('weather')">
+            <a href="/weather" class="home-item item-weather" id="home-weather-btn" onclick="event.preventDefault(); showSection('weather')">
                 <span class="item-icon"><i class="ph-duotone ph-cloud-sun color-weather"></i></span>
                 <span class="item-label" data-i18n="nav.weather">天气预报</span>
             </a>
-            <a href="/hallasan" class="home-item item-hallasan" onclick="event.preventDefault(); showSection('hallasan')">
+            <a href="/hallasan" class="home-item item-hallasan" id="home-hallasan-btn" onclick="event.preventDefault(); showSection('hallasan')">
                 <span class="item-icon"><i class="ph-duotone ph-mountains color-hallasan"></i></span>
                 <span class="item-label" data-i18n="nav.hallasan">汉拿山</span>
             </a>
-            <a href="/airport" class="home-item item-airport" onclick="event.preventDefault(); showSection('airport')">
+            <a href="/airport" class="home-item item-airport" id="home-airport-btn" onclick="event.preventDefault(); showSection('airport')">
                 <span class="item-icon"><i class="ph-duotone ph-airplane-tilt color-airport"></i></span>
                 <span class="item-label" data-i18n="nav.airport">机场信息</span>
             </a>
-            <a href="/lost" class="home-item item-lost" onclick="event.preventDefault(); showSection('lost')">
+            <a href="/lost" class="home-item item-lost" id="home-lost-btn" onclick="event.preventDefault(); window.toggleLostExpand()">
                 <span class="item-icon"><i class="ph-duotone ph-magnifying-glass color-lost"></i></span>
                 <span class="item-label" data-i18n="nav.lost">失物招领</span>
             </a>
-            <a href="/festival" class="home-item item-festival" onclick="event.preventDefault(); showSection('festival')">
+            <a href="/festival" class="home-item item-festival" id="home-festival-btn" onclick="event.preventDefault(); showSection('festival')">
                 <span class="item-icon"><i class="ph-duotone ph-confetti color-festival"></i></span>
                 <span class="item-label" data-i18n="nav.festival">节日活动</span>
             </a>
-            <a href="/reward" class="home-item item-reward" onclick="event.preventDefault(); showSection('reward')">
+            <a href="/reward" class="home-item item-reward" id="home-reward-btn" onclick="event.preventDefault(); showSection('reward')">
                 <span class="item-icon"><i class="ph-duotone ph-money color-reward"></i></span>
                 <span class="item-label" data-i18n="nav.reward">红　包</span>
             </a>
             <!-- 맛집 & 여행 코스 준비 중 -->
-            <button class="home-item item-disabled" disabled type="button">
+            <button class="home-item item-disabled" id="home-food-btn" disabled type="button">
                 <span class="item-icon"><i class="ph-duotone ph-hamburger color-food"></i></span>
                 <span class="item-label" data-i18n="nav.food">济州美食</span>
                 <span class="coming-soon-badge">SOON</span>
             </button>
-            <button class="home-item item-disabled" disabled type="button">
+            <button class="home-item item-disabled" id="home-course-btn" disabled type="button">
                 <span class="item-icon"><i class="ph-duotone ph-map-trifold color-course"></i></span>
                 <span class="item-label" data-i18n="nav.course">推荐路线</span>
                 <span class="coming-soon-badge">SOON</span>
             </button>
+            <!-- ===== 분실물 서브 버튼 (평소 숨김, 분실물 클릭 시 해당 자리에 삽입) ===== -->
+            <!-- 조회: 날씨예보 자리 대체 -->
+            <div class="home-item item-lost-sub" id="lost-sub-search"
+                 style="display:none" onclick="window.goToLostSearch()">
+                <span class="item-icon"><i class="ph-duotone ph-magnifying-glass color-lost"></i></span>
+                <span class="item-label" data-i18n="lost.home.search">查询</span>
+            </div>
+            <!-- 진행상황: 항공편 자리 대체 -->
+            <div class="home-item item-lost-sub" id="lost-sub-status"
+                 style="display:none" onclick="window.goToLostStatus()">
+                <span class="item-icon"><i class="ph-duotone ph-trophy color-lost"></i></span>
+                <span class="item-label" data-i18n="lost.home.status">进展状况</span>
+            </div>
+            <!-- 등록: 축제 자리 대체 -->
+            <div class="home-item item-lost-sub" id="lost-sub-register"
+                 style="display:none" onclick="window.goToLostRegister()">
+                <span class="item-icon"><i class="ph-duotone ph-magnifying-glass-plus color-lost"></i></span>
+                <span class="item-label" data-i18n="lost.home.register">失物登记</span>
+            </div>
+            <!-- 대리수령: 맛집 자리 대체 -->
+            <div class="home-item item-lost-sub" id="lost-sub-proxy"
+                 style="display:none" onclick="window.goToLostProxy()">
+                <span class="item-icon"><i class="ph-duotone ph-package color-lost"></i></span>
+                <span class="item-label" data-i18n="lost.home.proxy">代领服务</span>
+            </div>
         </div>
     </div>
 </section>
@@ -242,4 +267,128 @@
             if (submitBtn) submitBtn.disabled = false;
         }
     };
+
+    // ===== 분실물 홈버튼 → 십자가 배열 토글 =====
+
+    let lostExpanded = false;
+
+    // 서브 버튼 id → 원래 버튼 id 매핑 (서브 버튼을 원래 버튼 앞에 삽입)
+    const LOST_REPLACE_MAP = [
+        { origId: 'home-weather-btn',  subId: 'lost-sub-search',   animClass: 'lost-sub-in-top',    outClass: 'lost-sub-out-top' },
+        { origId: 'home-airport-btn',  subId: 'lost-sub-status',   animClass: 'lost-sub-in-left',   outClass: 'lost-sub-out-left' },
+        { origId: 'home-festival-btn', subId: 'lost-sub-register', animClass: 'lost-sub-in-right',  outClass: 'lost-sub-out-right' },
+        { origId: 'home-food-btn',     subId: 'lost-sub-proxy',    animClass: 'lost-sub-in-bottom', outClass: 'lost-sub-out-bottom' },
+    ];
+
+    const CORNER_BTN_IDS = ['home-cctv-btn', 'home-hallasan-btn', 'home-reward-btn', 'home-course-btn'];
+
+    window.toggleLostExpand = function() {
+        lostExpanded ? window.collapseLostGrid() : expandLostGrid();
+    };
+
+    function expandLostGrid() {
+        lostExpanded = true;
+
+        LOST_REPLACE_MAP.forEach(function(item, i) {
+            var orig = document.getElementById(item.origId);
+            var sub  = document.getElementById(item.subId);
+            if (!orig || !sub) return;
+
+            // 서브 버튼을 원래 버튼 바로 앞에 이동 (같은 그리드 위치)
+            orig.parentNode.insertBefore(sub, orig);
+            orig.style.display = 'none';
+
+            // 딜레이 등장 대신 거의 동시에 가운데에서 퍼져나가게 처리
+            setTimeout(function() {
+                sub.style.display = '';
+                sub.classList.add(item.animClass);
+            }, i * 30); // 딜레이를 약간 줄여서 역동적으로
+        });
+
+        // 2. 모서리 4개 버튼 숨김 (그리드 자리 유지를 위해 visibility 사용)
+        CORNER_BTN_IDS.forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.style.visibility = 'hidden';
+        });
+
+        // 분실물 버튼 강조 및 뒤로가기로 변경
+        var lostBtn = document.getElementById('home-lost-btn');
+        if (lostBtn) {
+            lostBtn.classList.add('lost-active');
+            var icon = lostBtn.querySelector('.item-icon i');
+            var label = lostBtn.querySelector('.item-label');
+            if (icon) icon.className = 'ph-bold ph-arrow-left color-lost';
+            if (label) label.setAttribute('data-i18n', 'lost.home.back');
+        }
+
+        // 번역 재적용 (서브 버튼 라벨)
+        if (window.applyTranslations) window.applyTranslations();
+    }
+
+    window.collapseLostGrid = function() {
+        if (!lostExpanded) return;
+        lostExpanded = false;
+
+        LOST_REPLACE_MAP.forEach(function(item) {
+            var orig = document.getElementById(item.origId);
+            var sub  = document.getElementById(item.subId);
+            if (!orig || !sub) return;
+
+            // in 애니메이션 지우고 out 애니메이션 시작
+            sub.classList.remove(item.animClass);
+            sub.classList.add(item.outClass);
+
+            // 애니메이션 종료(250ms) 후 원위치 복원
+            setTimeout(function() {
+                sub.style.display = 'none';
+                sub.classList.remove(item.outClass);
+                orig.style.display = '';
+            }, 250);
+        });
+
+        // 분실물 버튼 원래대로 복구 (즉시 변경)
+        var lostBtn = document.getElementById('home-lost-btn');
+        if (lostBtn) {
+            lostBtn.classList.remove('lost-active');
+            var icon = lostBtn.querySelector('.item-icon i');
+            var label = lostBtn.querySelector('.item-label');
+            if (icon) icon.className = 'ph-duotone ph-magnifying-glass color-lost';
+            if (label) label.setAttribute('data-i18n', 'nav.lost');
+        }
+
+        // 번역 재적용 (분실물 라벨 즉시 복구)
+        if (window.applyTranslations) window.applyTranslations();
+
+        // 3. 모서리 4개 버튼 복원 (애니메이션 종류 후 나타나게)
+        setTimeout(function() {
+            CORNER_BTN_IDS.forEach(function(id) {
+                var el = document.getElementById(id);
+                if (el) el.style.visibility = '';
+            });
+        }, 250);
+    };
+
+    // 서브 버튼 동작
+    window.goToLostSearch = function() {
+        window.collapseLostGrid();
+        if (window.showSection) window.showSection('lost');
+    };
+
+    window.goToLostStatus = function() {
+        window.collapseLostGrid();
+        if (window.showSection) window.showSection('lost-status');
+        if (window.fetchSuccessStories) window.fetchSuccessStories();
+    };
+
+    window.goToLostRegister = function() {
+        window.collapseLostGrid();
+        if (window.openLostReportModal) window.openLostReportModal();
+    };
+
+    window.goToLostProxy = function() {
+        window.collapseLostGrid();
+        if (window.openProxyPickupModal) window.openProxyPickupModal();
+        else if (window.showSection) window.showSection('proxy-pickup');
+    };
+
 </script>
