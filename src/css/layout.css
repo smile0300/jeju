@@ -547,14 +547,20 @@
         display: none !important;
     }
     .home-grid.lost-expanded-grid {
-        display: flex;
+        display: grid;
+        grid-template-columns: repeat(3, 110px); /* 조금 넉넉하게 110px */
         justify-content: center;
-        flex-wrap: wrap;
+        gap: var(--space-4);
     }
     .home-grid.lost-expanded-grid .home-item {
-        width: 100px;
-        flex: 0 0 100px;
+        width: 100%; /* grid 내부 꽉 채우기 */
     }
+    /* 뒤로가기 버튼을 우측 상단(1행 3열)으로 고정하기 위한 순서 지정 */
+    #lost-sub-search { order: 1; }
+    #lost-sub-status { order: 2; }
+    #home-lost-btn.lost-active { order: 3; }
+    #lost-sub-register { order: 4; }
+    #lost-sub-proxy { order: 5; }
 }
 
 
