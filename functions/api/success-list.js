@@ -30,6 +30,7 @@ export async function onRequest(context) {
     // Append ?action=success to query the SuccessStories tab
     const fetchUrl = new URL(gasUrl);
     fetchUrl.searchParams.append('action', 'success');
+    fetchUrl.searchParams.append('t', Date.now().toString());
 
     const gasResponse = await fetch(fetchUrl.toString(), {
       method: 'GET',

@@ -871,7 +871,7 @@ export async function fetchSuccessStories() {
     let data = [];
 
     try {
-        const response = await fetch('/api/success-list');
+        const response = await fetch(`/api/success-list?t=${Date.now()}`);
         if (response.ok) {
             const result = await response.json();
             // 배열이고 Date가 있는 행만 유효 데이터로 인정
