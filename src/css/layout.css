@@ -542,4 +542,19 @@
 .lost-sub-out-right { animation: lostSubOutRight 0.25s var(--ease-in-out) both; }
 .lost-sub-out-bottom { animation: lostSubOutBottom 0.25s var(--ease-in-out) both; }
 
+@media (min-width: 500px) {
+    .home-grid.lost-expanded-grid .home-item[style*="visibility: hidden"] {
+        display: none !important;
+    }
+    .home-grid.lost-expanded-grid {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    .home-grid.lost-expanded-grid .home-item {
+        width: 100px;
+        flex: 0 0 100px;
+    }
+}
+
 

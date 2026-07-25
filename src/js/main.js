@@ -187,6 +187,16 @@ window.openCSModal = openCSModal;
 window.closeCSModal = closeCSModal;
 window.submitCSFeedback = submitCSFeedback;
 
+window.backToLostMenu = () => {
+    window.keepLostMenuOpen = true;
+    if (history.length > 1) {
+        window.history.back();
+    } else {
+        showSection('home');
+        if (window.expandLostGrid) window.expandLostGrid();
+    }
+};
+
 window.toggleLostGuide = () => {
     const guide = document.getElementById('inline-lost-guide');
     const guideBtn = document.getElementById('btn-lost-guide');

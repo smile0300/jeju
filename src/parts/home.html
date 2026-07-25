@@ -288,6 +288,7 @@
 
     function expandLostGrid() {
         lostExpanded = true;
+        document.querySelector('.home-grid').classList.add('lost-expanded-grid');
 
         LOST_REPLACE_MAP.forEach(function(item, i) {
             var orig = document.getElementById(item.origId);
@@ -328,6 +329,7 @@
     window.collapseLostGrid = function() {
         if (!lostExpanded) return;
         lostExpanded = false;
+        document.querySelector('.home-grid').classList.remove('lost-expanded-grid');
 
         LOST_REPLACE_MAP.forEach(function(item) {
             var orig = document.getElementById(item.origId);
