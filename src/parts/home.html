@@ -283,10 +283,10 @@
     const CORNER_BTN_IDS = ['home-cctv-btn', 'home-hallasan-btn', 'home-reward-btn', 'home-course-btn'];
 
     window.toggleLostExpand = function() {
-        lostExpanded ? window.collapseLostGrid() : expandLostGrid();
+        lostExpanded ? window.collapseLostGrid() : window.expandLostGrid();
     };
 
-    function expandLostGrid() {
+    window.expandLostGrid = function() {
         lostExpanded = true;
         document.querySelector('.home-grid').classList.add('lost-expanded-grid');
 
