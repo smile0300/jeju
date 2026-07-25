@@ -1557,7 +1557,7 @@ window.submitProxyPickup = async function() {
         const result = await res.json();
 
         if (result.result === 'success') {
-            window.closeProxyPickupModal();
+            window.backToLostMenu();
             // 성공 토스트 메시지
             const successMsg = lang === 'ko'
                 ? '신청이 완료되었습니다. 담당자가 위챗으로 연락드립니다.'
