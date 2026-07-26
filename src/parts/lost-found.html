@@ -355,15 +355,15 @@
                 
                 <div class="lost-form-group">
                     <label class="lost-form-label"><span class="required-field" data-i18n="proxy.modal.loc_type">물건이 보관된 장소</span></label>
-                    <select id="proxy-location-category" class="lost-form-select" onchange="updateProxyStepView()">
-                        <option value="" disabled selected data-i18n="proxy.modal.loc_placeholder">선택해주세요</option>
-                        <option value="호텔">호텔</option>
-                        <option value="공항">공항</option>
-                        <option value="경찰서">경찰서</option>
-                        <option value="택시">택시</option>
-                        <option value="버스">버스</option>
-                        <option value="기타">기타</option>
-                    </select>
+                    <div class="chip-group" id="proxy-location-chips">
+                        <button type="button" class="lost-chip" data-value="호텔" data-i18n="modal.lost.loc.hotel">🏨 호텔</button>
+                        <button type="button" class="lost-chip" data-value="공항" data-i18n="modal.lost.loc.airport">✈️ 공항</button>
+                        <button type="button" class="lost-chip" data-value="경찰서" data-i18n="modal.lost.loc.police">👮 경찰서</button>
+                        <button type="button" class="lost-chip" data-value="택시" data-i18n="modal.lost.loc.taxi">🚕 택시</button>
+                        <button type="button" class="lost-chip" data-value="버스" data-i18n="modal.lost.loc.bus">🚌 버스</button>
+                        <button type="button" class="lost-chip" data-value="기타" data-i18n="modal.lost.loc.other">📍 기타</button>
+                    </div>
+                    <input type="hidden" id="proxy-location-category">
                 </div>
 
                 <div class="lost-form-group">
