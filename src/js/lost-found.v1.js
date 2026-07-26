@@ -22,11 +22,12 @@ export async function fetchFoundGoods() {
         const dateInput = document.getElementById('lost-date');
         
         if (dateInput && !dateInput.value) {
-            const now = new Date();
-            const kstTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
-            const yesterday = new Date(kstTime);
-            yesterday.setDate(yesterday.getDate() - 1);
-            dateInput.value = yesterday.toISOString().split('T')[0];
+            const formatter = new Intl.DateTimeFormat('en-CA', { 
+                timeZone: 'Asia/Seoul', 
+                year: 'numeric', month: '2-digit', day: '2-digit' 
+            });
+            const yesterdayUTC = new Date(Date.now() - 24 * 60 * 60 * 1000);
+            dateInput.value = formatter.format(yesterdayUTC);
         }
 
         const selectedDate = (dateInput?.value || '');
@@ -93,6 +94,7 @@ export async function fetchFoundGoods() {
         const allItems = [...polItems, ...portalItems]
             .sort((a, b) => b.date.localeCompare(a.date));
         cachedLostItems = allItems;
+        window.lostGoodsVisibleCount = 45; // 최초 검색 시에만 45개로 초기화
         const hasImgCount = allItems.filter(item => item.img && item.img.trim() !== '' && !item.img.includes('img02_no_img.gif')).length;
         if (countDisplay) {
             countDisplay.innerHTML = window.t('lost.summary')
@@ -168,9 +170,6 @@ window.loadMoreLostGoods = function() {
 
 export function renderLostGoods(grid, items, isLoadMore = false) {
     if (!grid) return;
-    if (!isLoadMore) {
-        window.lostGoodsVisibleCount = 45;
-    }
 
     if (!items || items.length === 0) {
         grid.innerHTML = `<div class="loading-lost">${window.t('lost.no_records')}</div>`;
@@ -209,9 +208,6 @@ export function renderLostGoods(grid, items, isLoadMore = false) {
 export function renderLostGoodsTable(items, isLoadMore = false) {
     const tableBody = document.getElementById('lost-table-body');
     if (!tableBody) return;
-    if (!isLoadMore) {
-        window.lostGoodsVisibleCount = 45;
-    }
     if (!items || items.length === 0) {
         tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;">${window.t('lost.no_records')}</td></tr>`;
         return;
@@ -334,7 +330,7 @@ window.nextLostStep = function() {
         if (!lostReportImageBase64) { alert(window.t ? window.t('lost.report.fill_err') : '필수 항목(사진 포함)을 모두 입력해주세요.'); return; }
     } else if (currentLostStep === 2) {
         const city = document.getElementById('lost-report-city-category')?.value;
-        if (!city) { alert(window.t ? window.t('lost.report.city_err') : '지역(도시)을 선택해주세요.'); return; }
+        if (!city) { alert(window.t ? window.t('modal.lost.city_err') : '지역(도시)을 선택해주세요.'); return; }
         const reg = document.getElementById('lost-report-region-category')?.value;
         if (!reg) { alert(window.t ? window.t('lost.report.reg_err') : '장소를 선택해주세요.'); return; }
         
@@ -476,6 +472,12 @@ document.addEventListener('DOMContentLoaded', () => {
 export function handleLostImageChange(event) {
     const file = event.target.files[0];
     if (!file) return;
+    const fileExt = file.name.toLowerCase().split('.').pop();
+    if (file.type === 'image/heic' || file.type === 'image/heif' || fileExt === 'heic' || fileExt === 'heif') {
+        alert(window.t ? window.t('lost.report.heic_err') : "아이폰 고효율(HEIC) 사진은 지원하지 않습니다. 캡처본(JPEG/PNG)으로 올려주세요.");
+        event.target.value = '';
+        return;
+    }
     if (file.size > 2 * 1024 * 1024) { alert(window.t('lost.report.size_err')); return; }
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -536,7 +538,7 @@ export async function submitLostReport() {
             statusEl.className = 'form-status error';
             statusEl.style.display = 'block';
         } else {
-            alert('필수 항목(사진 포함)을 모두 입력해주세요.');
+            alert(window.t ? window.t('lost.report.fill_err') : '필수 항목(사진 포함)을 모두 입력해주세요.');
         }
         return;
     }
@@ -638,238 +640,6 @@ export async function submitLostReport() {
     }
 }
 
-window.handleImageSearch = async function(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    
-    event.target.value = ''; // Reset input
-
-    if (file.size > 5 * 1024 * 1024) {
-        alert(window.t('lost.report.size_err') || "이미지 크기는 5MB 이하여야 합니다.");
-        return;
-    }
-    
-    // 아이폰 HEIC/HEIF 포맷 차단 (Vision API 미지원)
-    const fileExt = file.name.toLowerCase().split('.').pop();
-    if (file.type === 'image/heic' || file.type === 'image/heif' || fileExt === 'heic' || fileExt === 'heif') {
-        alert("아이폰 고효율(HEIC) 사진은 지원하지 않습니다.\n갤러리에서 화면을 캡처한 뒤, 캡처본(JPEG/PNG)으로 올려주세요!");
-        return;
-    }
-
-    const grid = document.getElementById('lost-goods-grid');
-    const tableContainer = document.getElementById('lost-goods-table-container');
-    const countDisplay = document.getElementById('lost-result-count');
-    const imageBtn = document.querySelector('.btn.btn-primary[onclick*="imageSearchInput"]');
-    
-    // 테이블 뷰 숨기고 그리드 뷰 활성화
-    if (tableContainer) tableContainer.classList.remove('active');
-    if (grid) grid.classList.add('active');
-    
-    // ✅ 파일 선택 즉시 로딩 UI 표시 (FileReader 완료 전에도 피드백 제공)
-    if (countDisplay) countDisplay.innerHTML = '';
-    const loadingText = window.t ? window.t('lost.searching_ai') : '이미지 분석 및 검색 중...';
-    if (grid) grid.innerHTML = `
-        <div class="loading-lost" style="grid-column: 1/-1; padding: 40px; text-align: center;">
-            <i class="ph-duotone ph-circle-notch spin" style="font-size: 3rem; color: var(--accent-blue); margin-bottom: 15px; display: inline-block;"></i>
-            <p style="color: var(--label-secondary); font-size: 0.95rem; font-weight: 600;">${loadingText}</p>
-        </div>`;
-    if (imageBtn) imageBtn.disabled = true;
-    
-
-    try {
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-            const base64Data = e.target.result;
-            
-            const data = {
-                type: 'search_by_image',
-                photo: base64Data
-            };
-
-            // 1. AI 태그 추출 (GAS)
-            const res = await fetch(`${CONFIG.PROXY_URL}/api/lost-report`, {
-                method: 'POST', 
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-
-            if (!res.ok) throw new Error('Network error');
-            const result = await res.json();
-
-            if (result.result === 'success') {
-                const labels = result.labels || [];
-                if (labels.length === 0) {
-                     if (grid) grid.innerHTML = `<div class="loading-lost" style="padding:40px; text-align:center;">이미지에서 특징을 찾지 못했습니다. 다른 사진으로 시도해주세요.</div>`;
-                     return;
-                }
-
-                // 2. 경찰청 데이터 최근 3일치 가져오기
-                const daysToFetch = 3;
-                const allItems = [];
-                const now = new Date();
-                const kstTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
-                
-                for (let i = 0; i < daysToFetch; i++) {
-                    const d = new Date(kstTime);
-                    d.setDate(d.getDate() - i);
-                    const yyyymmdd = d.toISOString().split('T')[0].replace(/-/g, '');
-                    
-                    const regionInput = document.getElementById('lostRegionCd');
-                    const regionCd = regionInput?.value || 'LCP000';
-                    const commonParams = [`numOfRows=1200`, `pageNo=1`, `N_FD_LCT_CD=${regionCd}`, `START_YMD=${yyyymmdd}`, `END_YMD=${yyyymmdd}`];
-                    const polEndpoint = `http://apis.data.go.kr/1320000/LosfundInfoInqireService/getLosfundInfoAccToClAreaPd`;
-                    const portalEndpoint = `http://apis.data.go.kr/1320000/LosPtfundInfoInqireService/getPtLosfundInfoAccToClAreaPd`;
-
-                    const polUrl = `${CONFIG.PROXY_URL}/api/public-data?endpoint=${encodeURIComponent(polEndpoint)}&${commonParams.join('&')}`;
-                    const portalUrl = `${CONFIG.PROXY_URL}/api/public-data?endpoint=${encodeURIComponent(portalEndpoint)}&${commonParams.join('&')}`;
-                    
-                    const fetchResults = async (apiUrl) => {
-                        try {
-                            const resAPI = await fetch(apiUrl);
-                            if (!resAPI.ok) return [];
-                            const text = await resAPI.text();
-                            if (text.trim().startsWith('{')) {
-                                const json = JSON.parse(text);
-                                const rawItems = json.response?.body?.items?.item || json.response?.body?.items || json.body?.items?.item || json.body?.items || json.items?.item || json.items || [];
-                                const items = Array.isArray(rawItems) ? rawItems : [rawItems];
-                                return items.map(item => {
-                                    const rawCategory = item.prdtClNm || '';
-                                    const categoryClean = rawCategory.split(' > ')[0] || '기타';
-                                    const catKey = LOST_CATEGORY_KEY_MAP[categoryClean] || 'cat.other';
-                                    return {
-                                        id: item.atcId, name: item.fdPrdtNm, place: item.depPlace, date: item.fdYmd,
-                                        category: window.t ? window.t(catKey) : categoryClean,
-                                        img: item.fdFilePathImg, lct: item.fdFndPlace || item.lctNm || item.depPlace || '정보 없음',
-                                        status: item.csteState || '보관',
-                                        desc: item.uniqNm || '',
-                                        tel: item.tel || ''
-                                    };
-                                });
-                            }
-                            const xmlDoc = new DOMParser().parseFromString(text, "text/xml");
-                            return Array.from(xmlDoc.querySelectorAll('item')).map(node => {
-                                const getTag = (tag) => node.querySelector(tag)?.textContent || '';
-                                const rawCategory = getTag('prdtClNm') || '';
-                                const categoryClean = rawCategory.split(' > ')[0] || '기타';
-                                const catKey = LOST_CATEGORY_KEY_MAP[categoryClean] || 'cat.other';
-                                return {
-                                    id: getTag('atcId'), name: getTag('fdPrdtNm'), place: getTag('depPlace'), date: getTag('fdYmd'),
-                                    category: window.t ? window.t(catKey) : categoryClean,
-                                    img: getTag('fdFilePathImg'), lct: getTag('fdFndPlace') || getTag('lctNm') || getTag('depPlace') || '정보 없음',
-                                    status: getTag('csteState') || '보관',
-                                    desc: getTag('uniqNm') || '',
-                                    tel: getTag('tel') || ''
-                                };
-                            });
-                        } catch(e) { return []; }
-                    };
-
-                    const [polItems, portalItems] = await Promise.all([fetchResults(polUrl), fetchResults(portalUrl)]);
-                    allItems.push(...polItems, ...portalItems);
-                }
-
-                // 중복 제거 (id 기준)
-                const uniqueItemsMap = new Map();
-                allItems.forEach(item => { if (item.id) uniqueItemsMap.set(item.id, item); });
-                const uniqueItems = Array.from(uniqueItemsMap.values());
-
-                // 영문 AI 태그 -> 한글 매칭용 사전
-                const VISION_LABEL_MAP = {
-                    "electronic device": "전자기기 스마트폰", "gadget": "전자기기", "mobile phone": "스마트폰 핸드폰 휴대폰",
-                    "smartphone": "스마트폰 핸드폰 휴대폰", "iphone": "스마트폰 아이폰", "telephone": "전화기 스마트폰",
-                    "wallet": "지갑", "purse": "지갑 가방", "bag": "가방", "luggage": "가방 캐리어", "backpack": "가방 백팩",
-                    "glasses": "안경", "sunglasses": "선글라스 안경", "clothing": "옷 의류", "apparel": "옷 의류",
-                    "shoe": "신발", "footwear": "신발", "watch": "시계", "smartwatch": "스마트워치 시계",
-                    "camera": "카메라", "headphones": "이어폰 헤드폰", "earphones": "이어폰 헤드폰",
-                    "laptop": "노트북 컴퓨터", "computer": "컴퓨터 노트북", "tablet": "태블릿 아이패드", "ipad": "태블릿 아이패드",
-                    "keys": "열쇠 차키", "umbrella": "우산", "book": "책 도서", "card": "카드 신용카드 신분증",
-                    "id card": "신분증", "credit card": "신용카드", "cash": "현금 돈", "jewelry": "귀금속 반지 목걸이",
-                    "ring": "반지", "necklace": "목걸이", "earrings": "귀걸이", "bracelet": "팔찌",
-                    "cosmetics": "화장품", "bottle": "물병 텀블러", "tumbler": "텀블러",
-                    "black": "검은색 블랙", "white": "흰색 화이트", "red": "빨간색 레드", "blue": "파란색 블루",
-                    "green": "초록색 그린", "yellow": "노란색 옐로우", "leather": "가죽", "plastic": "플라스틱", "metal": "금속 철"
-                };
-
-                // 3. 태그 기반 스코어링
-                const matchedItems = [];
-                let translatedKeywords = [];
-                labels.forEach(l => {
-                    const lower = l.toLowerCase();
-                    translatedKeywords.push(lower);
-                    Object.keys(VISION_LABEL_MAP).forEach(engKey => {
-                        if (lower.includes(engKey)) {
-                            translatedKeywords.push(...VISION_LABEL_MAP[engKey].split(' '));
-                        }
-                    });
-                });
-                const searchKeywords = [...new Set(translatedKeywords)];
-                
-                uniqueItems.forEach(item => {
-                    let matchScore = 0;
-                    const targetText = `${item.name} ${item.category} ${item.desc} ${item.lct}`.toLowerCase();
-                    
-                    searchKeywords.forEach(keyword => {
-                        if (targetText.includes(keyword)) {
-                            matchScore++;
-                        }
-                    });
-
-                    if (matchScore > 0) {
-                        item.matchScore = matchScore;
-                        matchedItems.push(item);
-                    }
-                });
-
-                // 점수 내림차순 정렬
-                matchedItems.sort((a, b) => b.matchScore - a.matchScore);
-                
-                // 글로벌 캐시 업데이트 (상세 모달용)
-                cachedLostItems = matchedItems;
-
-                if (countDisplay) {
-                    countDisplay.innerHTML = `최근 3일간 <b>${matchedItems.length}개</b>의 비슷한 물건을 찾았습니다.`;
-                }
-                
-                if (matchedItems.length === 0) {
-                     if (grid) grid.innerHTML = `<div class="loading-lost" style="padding:40px; text-align:center;">최근 3일간 접수된 내역 중 비슷한 물건을 찾지 못했습니다.</div>`;
-                     return;
-                }
-                
-                // 렌더링
-                const noImgText = window.t ? window.t('lost.no_image') : 'No Image';
-                const noImgSvg = `data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22300%22%20height%3D%22300%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20300%20300%22%3E%3Crect%20width%3D%22300%22%20height%3D%22300%22%20fill%3D%22%23eee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-size%3D%2220%22%20text-anchor%3D%22middle%22%20alignment-baseline%3D%22middle%22%20fill%3D%22%23aaa%22%3E${encodeURIComponent(noImgText)}%3C%2Ftext%3E%3C%2Fsvg%3E`;
-
-                if (grid) {
-                    grid.innerHTML = matchedItems.map((item, index) => {
-                        const imgSrc = (item.img && !item.img.includes('img02_no_img.gif')) ? item.img : noImgSvg;
-                        return `
-                        <div class="lost-card gallery-item" onclick="openLostDetailModalByIndex(${index})" style="padding: 10px; border: 2px solid var(--color-orange); border-radius: 12px; cursor: pointer;">
-                            <div class="lost-img-box" style="width: 100%; height: 180px; margin: 0; position: relative;">
-                                <img src="${imgSrc}" alt="${item.name}" loading="lazy" onerror="this.src='${noImgSvg}'" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
-                                <div class="lost-category-badge-overlay" style="background: var(--color-orange); top: 8px; left: 8px; border-radius: 4px; padding: 4px 8px; font-weight: bold;">매칭점수 ${item.matchScore}</div>
-                            </div>
-                            <div style="margin-top: 12px; padding: 0 4px;">
-                                <h4 style="margin:0 0 6px 0; font-size: 15px; color: #333;">${item.name}</h4>
-                                <p style="margin:0 0 4px 0; font-size: 13px; color: #666;"><i class="ph-duotone ph-map-pin"></i> ${item.lct || item.place}</p>
-                                <p style="margin:0; font-size: 12px; color: #999;"><i class="ph-duotone ph-calendar"></i> ${item.date}</p>
-                            </div>
-                        </div>`
-                    }).join('');
-                }
-            } else {
-                throw new Error(result.message || 'Server error');
-            }
-        };
-        reader.readAsDataURL(file);
-    } catch (e) {
-        console.error('Image Search Error:', e);
-        if (countDisplay) countDisplay.innerHTML = "검색 중 오류가 발생했습니다.";
-        if (grid) grid.innerHTML = `<div class="loading-lost">오류 발생: ${e.message}</div>`;
-    } finally {
-        // ✅ 검색 완료 후 이미지 검색 버튼 재활성화
-        if (imageBtn) imageBtn.disabled = false;
-    }
-};
 
 const getValidTranslation = (original, translated) => {
     if (!translated) return original;
@@ -1618,9 +1388,12 @@ window.submitProxyPickup = async function() {
     const caseId        = (document.getElementById('proxy-case-id')?.value || '').trim();
     const itemName      = (document.getElementById('proxy-item-name')?.value || '').trim();
     const requesterName = (document.getElementById('proxy-name')?.value || '').trim();
-    const contact       = (document.getElementById('proxy-contact')?.value || '').trim();
+    const contact       = (document.getElementById('proxy-contact')?.value || '').trim(); // WeChat ID
+    const phone         = (document.getElementById('proxy-phone')?.value || '').trim();   // Phone number
     
     const loc = document.getElementById('proxy-location-category')?.value;
+    const hotelName = document.getElementById('proxy-hotel-name')?.value || '';
+    const hotelBooker = document.getElementById('proxy-hotel-booker')?.value || '';
     const mgmtNum = document.getElementById('proxy-mgmt-num')?.value || '';
     const roomNum = document.getElementById('proxy-room-num')?.value || '';
     const vehicleInfo = document.getElementById('proxy-vehicle-info')?.value || '';
@@ -1644,11 +1417,20 @@ window.submitProxyPickup = async function() {
     };
 
     if (!contact) return showError(lang === 'ko' ? '위챗 ID를 입력해주세요.' : '请输入微信 ID。');
+    if (!phone) return showError(lang === 'ko' ? '연락처(전화번호)를 입력해주세요.' : '请输入联系电话。');
     if (!address) return showError(lang === 'ko' ? '최종 배송 주소를 입력해주세요.' : '请输入最终收货地址。');
     if (!privacyCheck?.checked) return showError(lang === 'ko' ? '개인정보 수집 및 이용에 동의해주세요.' : '请同意个人信息收集及使用。');
 
-    // 용량 제한 검사 (2MB)
+    // HEIC 및 용량 제한 검사
     const MAX_SIZE = 2 * 1024 * 1024;
+    const isHeic = (f) => {
+        if (!f) return false;
+        const ext = f.name.toLowerCase().split('.').pop();
+        return f.type === 'image/heic' || f.type === 'image/heif' || ext === 'heic' || ext === 'heif';
+    };
+    if (isHeic(passportFile) || isHeic(itemFile) || (loc === '호텔' && isHeic(reservationFile))) {
+        return showError(lang === 'ko' ? '아이폰 고효율(HEIC) 사진은 지원하지 않습니다. 캡처본(JPEG/PNG)으로 올려주세요.' : '不支持苹果高效(HEIC)照片格式，请上传截图(JPEG/PNG)。');
+    }
     if (passportFile && passportFile.size > MAX_SIZE) return showError(lang === 'ko' ? '여권 사진은 2MB 이하로 첨부해주세요.' : '护照照片大小不能超过2MB。');
     if (itemFile && itemFile.size > MAX_SIZE) return showError(lang === 'ko' ? '물건 사진은 2MB 이하로 첨부해주세요.' : '物品照片大小不能超过2MB。');
     if (loc === '호텔' && reservationFile && reservationFile.size > MAX_SIZE) return showError(lang === 'ko' ? '호텔 예약내역은 2MB 이하로 첨부해주세요.' : '酒店预订记录大小不能超过2MB。');
@@ -1690,10 +1472,13 @@ window.submitProxyPickup = async function() {
             
             // New fields
             proxyLocationType: loc,
+            hotelName,
+            hotelBooker,
             roomNum,
             vehicleInfo,
             boardTime,
-            locDetail
+            locDetail,
+            phone // passed separately
         };
 
         const res = await fetch(apiUrl, {
@@ -1748,7 +1533,6 @@ window.lostApp = {
     renderLostGoodsTable,
     renderSuccessGoodsView,
     openLostDetailModalByIndex,
-    handleImageSearch,
     fetchSuccessStories
 };
 

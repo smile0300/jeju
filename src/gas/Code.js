@@ -8,30 +8,12 @@
 
 var SHEET_ID = '1M5dzVG2_iWtVkL-hlYSWaS-Sjw_3z0PwAkmBn_G1XAA';
 var FOLDER_NAME = 'Jeju_Lost_Photos'; // 이미지가 저장될 드라이브 폴더 이름
-var VISION_API_KEY = 'YOUR_API_KEY_HERE'; // TODO: 구글 클라우드 콘솔에서 발급받은 Vision API 키를 여기에 붙여넣으세요.
+
 
 function doPost(e) {
   try {
     var data = JSON.parse(e.postData.contents);
     
-    // -- [NEW] 이미지 검색 엔드포인트 처리 (프론트엔드 키워드 매칭용) --
-    if (data.type === 'search_by_image') {
-      if (!data.photo || !data.photo.includes('base64,')) {
-        return ContentService.createTextOutput(JSON.stringify({ "result": "error", "message": "No photo provided" })).setMimeType(ContentService.MimeType.JSON);
-      }
-
-      // Vision API로 한글 태그 추출
-      var extractResult = extractImageLabels(data.photo);
-      
-      if (!extractResult.success) {
-        return ContentService.createTextOutput(JSON.stringify({ "result": "error", "message": "Vision API Error: " + extractResult.error })).setMimeType(ContentService.MimeType.JSON);
-      }
-      
-      var searchLabels = extractResult.labels;
-      return ContentService.createTextOutput(JSON.stringify({ "result": "success", "labels": searchLabels })).setMimeType(ContentService.MimeType.JSON);
-    }
-    // -- [END] 이미지 검색 엔드포인트 처리 --
-
     if (data.type === 'proxy_pickup') {
       // ══════════════════════════════════════════════════════
       // 대리수령 신청 → SuccessStories 1개 시트에 통합 저장
@@ -56,79 +38,98 @@ function doPost(e) {
         ]);
       }
 
-      // CaseId 자동 채번: 기존 최대 번호 + 1
-      var existingData = successSheet.getDataRange().getValues();
-      var maxNum = 0;
-      for (var r = 1; r < existingData.length; r++) {
-        var existCaseId = existingData[r][0] ? existingData[r][0].toString() : '';
-        var numMatch = existCaseId.match(/(\d+)$/);
-        if (numMatch) {
-          var num = parseInt(numMatch[1], 10);
-          if (num > maxNum) maxNum = num;
+      var lock = LockService.getScriptLock();
+      try {
+        lock.waitLock(10000); // 최대 10초 대기
+        
+        // CaseId 자동 채번: 기존 최대 번호 + 1
+        var existingData = successSheet.getDataRange().getValues();
+        var maxNum = 0;
+        for (var r = 1; r < existingData.length; r++) {
+          var existCaseId = existingData[r][0] ? existingData[r][0].toString() : '';
+          var numMatch = existCaseId.match(/(\d+)$/);
+          if (numMatch) {
+            var num = parseInt(numMatch[1], 10);
+            if (num > maxNum) maxNum = num;
+          }
         }
+        var newNum = maxNum + 1;
+        var newCaseId = 'jeju-' + String(newNum).padStart(4, '0');
+
+        // 오늘 날짜 (YYYY-MM-DD, 한국시간)
+        var today = Utilities.formatDate(timestamp, 'Asia/Seoul', 'yyyy-MM-dd');
+
+        // 이미지 처리: Base64 → Google Drive URL
+        var passportUrl    = '';
+        var itemPhotoUrl   = '';
+        var reservationUrl = '';
+        if (data.passportPhoto && data.passportPhoto.includes('base64,')) {
+          passportUrl = saveBase64ImageToDrive(data.passportPhoto, 'Passport_' + newCaseId);
+        }
+        if (data.itemPhoto && data.itemPhoto.includes('base64,')) {
+          itemPhotoUrl = saveBase64ImageToDrive(data.itemPhoto, 'Item_' + newCaseId);
+        }
+        if (data.reservationPhoto && data.reservationPhoto.includes('base64,')) {
+          reservationUrl = saveBase64ImageToDrive(data.reservationPhoto, 'Reservation_' + newCaseId);
+        }
+
+        // 시트 헤더를 읽어 컬럼 순서대로 매핑
+        var headers = existingData.length > 0
+          ? existingData[0]
+          : ['CaseId', 'Step', 'Date', 'WeChatId', 'Item', 'Region', 'Place', 'ItemImg', 'Note',
+             'Timestamp', 'RequesterName', 'Contact', 'PickupMethod', 'Address',
+             'PassportPhoto', 'ReservationPhoto', 'MgmtNumber',
+             'Status', 'UserAgent', 'AdminNote'];
+
+        var extraNotes = [];
+        if (data.proxyLocationType) extraNotes.push('장소: ' + data.proxyLocationType);
+        if (data.hotelName) extraNotes.push('호텔명: ' + data.hotelName);
+        if (data.hotelBooker) extraNotes.push('예약자: ' + data.hotelBooker);
+        if (data.roomNum) extraNotes.push('객실번호: ' + data.roomNum);
+        if (data.vehicleInfo) extraNotes.push('차량/기사: ' + data.vehicleInfo);
+        if (data.boardTime) extraNotes.push('탑승시간: ' + data.boardTime);
+        if (data.locDetail) extraNotes.push('상세: ' + data.locDetail);
+
+        var fieldMap = {
+          // 공개 컬럼
+          'CaseId'          : newCaseId,
+          'Step'            : 3,
+          'Date'            : today,
+          'WeChatId'        : data.contact || data.originalWechat || data.wechatId || '',
+          'Item'            : data.itemName   || '',
+          'Region'          : data.region     || '',
+          'Place'           : data.place      || '',
+          'ItemImg'         : itemPhotoUrl,
+          'Note'            : '',
+          // 비공개 컬럼 (관리자 전용)
+          'Timestamp'       : timestamp,
+          'RequesterName'   : data.requesterName  || '',
+          'Contact'         : data.phone          || '',
+          'PickupMethod'    : data.method         || 'delivery',
+          'Address'         : data.address        || '',
+          'PassportPhoto'   : passportUrl,
+          'ReservationPhoto': reservationUrl,
+          'MgmtNumber'      : data.mgmtNumber     || '',
+          'Status'          : 'pending',
+          'UserAgent'       : data.userAgent      || '',
+          'AdminNote'       : extraNotes.join(' / ')
+        };
+
+        var row = [];
+        for (var h = 0; h < headers.length; h++) {
+          var hName = headers[h] ? headers[h].toString().trim() : '';
+          row.push(fieldMap[hName] !== undefined ? fieldMap[hName] : '');
+        }
+        successSheet.appendRow(row);
+
+        return ContentService.createTextOutput(JSON.stringify({ "result": "success", "caseId": newCaseId }))
+          .setMimeType(ContentService.MimeType.JSON);
+      } catch (e) {
+        return ContentService.createTextOutput(JSON.stringify({ "result": "error", "message": "동시 접속자가 많습니다. 잠시 후 다시 시도해주세요." }))
+          .setMimeType(ContentService.MimeType.JSON);
+      } finally {
+        lock.releaseLock();
       }
-      var newNum = maxNum + 1;
-      var newCaseId = 'jeju-' + String(newNum).padStart(4, '0');
-
-      // 오늘 날짜 (YYYY-MM-DD, 한국시간)
-      var today = Utilities.formatDate(timestamp, 'Asia/Seoul', 'yyyy-MM-dd');
-
-      // 이미지 처리: Base64 → Google Drive URL
-      var passportUrl    = '';
-      var itemPhotoUrl   = '';
-      var reservationUrl = '';
-      if (data.passportPhoto && data.passportPhoto.includes('base64,')) {
-        passportUrl = saveBase64ImageToDrive(data.passportPhoto, 'Passport_' + newCaseId);
-      }
-      if (data.itemPhoto && data.itemPhoto.includes('base64,')) {
-        itemPhotoUrl = saveBase64ImageToDrive(data.itemPhoto, 'Item_' + newCaseId);
-      }
-      if (data.reservationPhoto && data.reservationPhoto.includes('base64,')) {
-        reservationUrl = saveBase64ImageToDrive(data.reservationPhoto, 'Reservation_' + newCaseId);
-      }
-
-      // 시트 헤더를 읽어 컬럼 순서대로 매핑
-      var headers = existingData.length > 0
-        ? existingData[0]
-        : ['CaseId', 'Step', 'Date', 'WeChatId', 'Item', 'Region', 'Place', 'ItemImg', 'Note',
-           'Timestamp', 'RequesterName', 'Contact', 'PickupMethod', 'Address',
-           'PassportPhoto', 'ReservationPhoto', 'MgmtNumber',
-           'Status', 'UserAgent', 'AdminNote'];
-
-      var fieldMap = {
-        // 공개 컬럼
-        'CaseId'          : newCaseId,
-        'Step'            : 3,
-        'Date'            : today,
-        'WeChatId'        : data.originalWechat || data.wechatId || '',
-        'Item'            : data.itemName   || '',
-        'Region'          : data.region     || '',
-        'Place'           : data.place      || '',
-        'ItemImg'         : itemPhotoUrl,
-        'Note'            : '',
-        // 비공개 컬럼 (관리자 전용)
-        'Timestamp'       : timestamp,
-        'RequesterName'   : data.requesterName  || '',
-        'Contact'         : data.contact        || '',
-        'PickupMethod'    : data.method         || 'delivery',
-        'Address'         : data.address        || '',
-        'PassportPhoto'   : passportUrl,
-        'ReservationPhoto': reservationUrl,
-        'MgmtNumber'      : data.mgmtNumber     || '',
-        'Status'          : 'pending',
-        'UserAgent'       : data.userAgent      || '',
-        'AdminNote'       : ''
-      };
-
-      var row = [];
-      for (var h = 0; h < headers.length; h++) {
-        var hName = headers[h] ? headers[h].toString().trim() : '';
-        row.push(fieldMap[hName] !== undefined ? fieldMap[hName] : '');
-      }
-      successSheet.appendRow(row);
-
-      return ContentService.createTextOutput(JSON.stringify({ "result": "success", "caseId": newCaseId }))
-        .setMimeType(ContentService.MimeType.JSON);
 
     } else if (data.type === 'lost_report' || data.type === 'feature' || data.type === 'cctv_apply') {
 
@@ -174,10 +175,7 @@ function doPost(e) {
         if (data.photo && data.photo.includes('base64,')) {
           var saveName = (data.itemCategory || 'Item') + "_" + data.wechatId;
           photoUrl = saveBase64ImageToDrive(data.photo, saveName);
-          // Vision API로 이미지 특징 추출
-          var extractResult = extractImageLabels(data.photo);
-          var labels = extractResult.success ? extractResult.labels : [];
-          labelsStr = labels.join(',');
+
         }
         
         rowData = {
@@ -187,16 +185,16 @@ function doPost(e) {
           'Specifics': data.specifics || '',
           'RegionCategory': data.regionCategory || '',
           'Date': data.date || '',
-          'Time': data.time || '',
+          'Time': data.time ? "'" + data.time : '',
           'DetailLocation': data.detailLocation || '',
           'HotelName': data.hotelName || '',
           'HotelBooker': data.hotelBooker || '',
           'HotelDates': data.hotelDates || '',
           'CarNumber': data.carNumber || '',
           'BoardLoc': data.boardLoc || '',
-          'BoardTime': data.boardTime || '',
+          'BoardTime': data.boardTime ? "'" + data.boardTime : '',
           'AlightLoc': data.alightLoc || '',
-          'AlightTime': data.alightTime || '',
+          'AlightTime': data.alightTime ? "'" + data.alightTime : '',
           'PhotoURL': photoUrl,
           'WechatId': data.wechatId || '',
           'UserAgent': data.userAgent || '',
@@ -300,60 +298,6 @@ function saveBase64ImageToDrive(base64Data, fileNamePrefix) {
   }
 }
 
-function extractImageLabels(base64Data) {
-  if (VISION_API_KEY === 'YOUR_API_KEY_HERE' || !VISION_API_KEY) {
-    return { success: false, error: "API 키가 입력되지 않았습니다." };
-  }
-  
-  try {
-    var rawData = base64Data.split('base64,')[1];
-    var url = 'https://vision.googleapis.com/v1/images:annotate?key=' + VISION_API_KEY;
-    
-    var payload = {
-      "requests": [
-        {
-          "image": {
-            "content": rawData
-          },
-          "features": [
-            {
-              "type": "LABEL_DETECTION",
-              "maxResults": 10
-            }
-          ],
-          "imageContext": {
-            "languageHints": ["ko"]
-          }
-        }
-      ]
-    };
-    
-    var options = {
-      "method": "post",
-      "contentType": "application/json",
-      "payload": JSON.stringify(payload),
-      "muteHttpExceptions": true
-    };
-    
-    var response = UrlFetchApp.fetch(url, options);
-    var responseText = response.getContentText();
-    var json = JSON.parse(responseText);
-    
-    if (json.error) {
-      return { success: false, error: json.error.message || responseText };
-    }
-    
-    var labels = [];
-    if (json.responses && json.responses[0] && json.responses[0].labelAnnotations) {
-      for (var i = 0; i < json.responses[0].labelAnnotations.length; i++) {
-        labels.push(json.responses[0].labelAnnotations[i].description);
-      }
-    }
-    return { success: true, labels: labels };
-  } catch (e) {
-    return { success: false, error: e.toString() };
-  }
-}
 
 /**
  * GET 요청 시 데이터를 JSON으로 반환합니다.

@@ -48,15 +48,13 @@
                         <input type="date" id="lost-date" class="date-input" style="flex:1;" onchange="fetchFoundGoodsManual()">
                         <script>
                             (function () {
-                                const now = new Date();
-                                const kstTime = new Date(now.getTime() + (9 * 60 * 60 * 1000));
-                                const yesterday = new Date(kstTime);
-                                yesterday.setDate(yesterday.getDate() - 1);
-
-                                const yyyy = yesterday.getUTCFullYear();
-                                const mm = String(yesterday.getUTCMonth() + 1).padStart(2, '0');
-                                const dd = String(yesterday.getUTCDate()).padStart(2, '0');
-                                const yyyymmdd = `${yyyy}-${mm}-${dd}`;
+                                const formatter = new Intl.DateTimeFormat('en-CA', { 
+                                    timeZone: 'Asia/Seoul', 
+                                    year: 'numeric', month: '2-digit', day: '2-digit' 
+                                });
+                                // 어제 날짜 구하기 (현재 시간에서 24시간 빼기)
+                                const yesterdayUTC = new Date(Date.now() - 24 * 60 * 60 * 1000);
+                                const yyyymmdd = formatter.format(yesterdayUTC);
 
                                 const dateInput = document.getElementById('lost-date');
                                 dateInput.setAttribute('max', yyyymmdd);
@@ -324,14 +322,11 @@
         <h2 class="bar-title"><i class="ph-duotone ph-package"></i> <span data-i18n="proxy.modal.title">대리수령 신청</span></h2>
     </header>
     <div class="lost-report-form-content section-content" style="padding: 20px; padding-bottom: 100px; box-sizing: border-box; overflow-y: visible !important; max-height: none !important; width: 100% !important; max-width: none !important; border-radius: 0;">
-        <div class="lost-report-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
-            <div>
-                <p data-i18n="proxy.modal.desc" style="margin-top: 6px;">담당자가 물건을 보관 중인 곳에서 수령하여 전달해드립니다.</p>
+        <div class="lost-report-header" style="margin-bottom: 24px;">
+            <div style="margin-bottom: 12px; padding: 12px; background: rgba(229, 62, 62, 0.05); border: 1px solid rgba(229, 62, 62, 0.2); border-radius: 8px;">
+                <p data-i18n="proxy.modal.privacy_notice" style="color: var(--color-red, #e53e3e); font-size: 0.85rem; line-height: 1.4; margin: 0; word-break: keep-all;">대리수령 본인확인 강화로 인해 여권 사진이 필수입니다. 호텔 등의 요구사항으로 여권 사진이 없으면 수령이 불가합니다. 개인정보는 전달 완료 후 즉시 파기됩니다.</p>
             </div>
-            <button
-                onclick="const m = document.getElementById('proxy-pickup'); copyProxyLink(m.dataset.caseId, m.dataset.itemName, m.dataset.originalWechat, m.dataset.region, m.dataset.place);"
-                style="flex: 0 0 44px; height: 44px; background: var(--bg-secondary); border: 1px solid var(--separator); border-radius: 8px; cursor: pointer; font-size: 1.2rem; color: var(--text-primary); display: flex; align-items: center; justify-content: center;"
-            >🔗</button>
+            <p data-i18n="proxy.modal.desc" style="margin-top: 6px;">담당자가 물건을 보관 중인 곳에서 수령하여 전달해드립니다.</p>
         </div>
         
         <div class="lost-report-body progressive-form">
@@ -344,14 +339,6 @@
             <!-- STEP 1: Basic Info & Item Photo -->
             <div class="lost-step active" id="proxy-step-1">
                 <div class="step-title" data-i18n="proxy.modal.step1.title">물품 정보</div>
-                <div class="lost-form-group">
-                    <label class="lost-form-label"><i class="ph-duotone ph-hash"></i> <span data-i18n="proxy.modal.case_id">케이스 번호</span></label>
-                    <input type="text" id="proxy-case-id" class="lost-form-input" readonly style="background: var(--bg-secondary); color: var(--label-secondary); cursor: default;">
-                </div>
-                <div class="lost-form-group">
-                    <label class="lost-form-label"><i class="ph-duotone ph-package"></i> <span data-i18n="proxy.modal.item_name">물품명</span></label>
-                    <input type="text" id="proxy-item-name" class="lost-form-input">
-                </div>
                 
                 <div class="lost-form-group">
                     <label class="lost-form-label"><span class="required-field" data-i18n="proxy.modal.loc_type">물건이 보관된 장소</span></label>
@@ -364,6 +351,15 @@
                         <button type="button" class="lost-chip" data-value="기타" data-i18n="modal.lost.loc.other">📍 기타</button>
                     </div>
                     <input type="hidden" id="proxy-location-category">
+                </div>
+
+                <div class="lost-form-group">
+                    <label class="lost-form-label"><i class="ph-duotone ph-hash"></i> <span data-i18n="proxy.modal.case_id">케이스 번호</span></label>
+                    <input type="text" id="proxy-case-id" class="lost-form-input" readonly style="background: var(--bg-secondary); color: var(--label-secondary); cursor: default;">
+                </div>
+                <div class="lost-form-group">
+                    <label class="lost-form-label"><i class="ph-duotone ph-package"></i> <span data-i18n="proxy.modal.item_name">물품명</span></label>
+                    <input type="text" id="proxy-item-name" class="lost-form-input">
                 </div>
 
                 <div class="lost-form-group">
@@ -381,6 +377,14 @@
                 <!-- Sub: Hotel -->
                 <div class="proxy-sub-fields" id="proxy-sub-hotel">
                     <div class="lost-form-group">
+                        <label class="lost-form-label"><span class="required-field" data-i18n="proxy.modal.hotel_name">호텔명</span></label>
+                        <input type="text" id="proxy-hotel-name" class="lost-form-input" placeholder="예: 신라 스테이 제주">
+                    </div>
+                    <div class="lost-form-group">
+                        <label class="lost-form-label"><span class="required-field" data-i18n="proxy.modal.hotel_booker">예약자명</span></label>
+                        <input type="text" id="proxy-hotel-booker" class="lost-form-input" placeholder="예: HONG GILDONG">
+                    </div>
+                    <div class="lost-form-group">
                         <label class="lost-form-label"><span class="required-field" data-i18n="proxy.modal.room_num">방 번호</span></label>
                         <input type="text" id="proxy-room-num" class="lost-form-input" placeholder="예: 1204호">
                     </div>
@@ -396,7 +400,7 @@
                 <div class="proxy-sub-fields" id="proxy-sub-official" style="display: none;">
                     <div class="lost-form-group">
                         <label class="lost-form-label"><span class="required-field" data-i18n="proxy.modal.mgmt_num">관리번호 (접수번호)</span></label>
-                        <input type="text" id="proxy-mgmt-num" class="lost-form-input" placeholder="예: LOST-12345">
+                        <input type="text" id="proxy-mgmt-num" class="lost-form-input" placeholder="예: F2026072600000284-1">
                     </div>
                 </div>
 
@@ -438,8 +442,12 @@
             <div class="lost-step" id="proxy-step-3">
                 <div class="step-title" data-i18n="proxy.modal.step3.title">배송 및 연락처</div>
                 <div class="lost-form-group">
-                    <label class="lost-form-label"><i class="ph-duotone ph-phone"></i> <span class="required-field" data-i18n="proxy.modal.contact">위챗 ID</span></label>
-                    <input type="text" id="proxy-contact" class="lost-form-input" data-i18n="proxy.modal.contact.ph" placeholder="연락처를 입력해주세요">
+                    <label class="lost-form-label"><i class="ph-duotone ph-wechat-logo"></i> <span class="required-field" data-i18n="proxy.modal.wechat">위챗 ID</span></label>
+                    <input type="text" id="proxy-contact" class="lost-form-input" data-i18n="proxy.modal.wechat.ph" placeholder="위챗 ID를 입력해주세요">
+                </div>
+                <div class="lost-form-group">
+                    <label class="lost-form-label"><i class="ph-duotone ph-phone"></i> <span class="required-field" data-i18n="proxy.modal.phone">연락처 (전화번호)</span></label>
+                    <input type="text" id="proxy-phone" class="lost-form-input" data-i18n="proxy.modal.phone.ph" placeholder="연락 가능한 전화번호를 입력해주세요">
                 </div>
 
                 <div class="lost-form-group">

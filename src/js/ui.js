@@ -53,9 +53,13 @@ const SEO_META = {
 };
 
 export function showSection(sectionId, pushHistory = true) {
-    // 홈으로 이동 시 분실물 확장 상태 초기화 (keepLostMenuOpen이 true면 유지)
-    if (sectionId === 'home' && window.collapseLostGrid && !window.keepLostMenuOpen) {
-        window.collapseLostGrid();
+    // 홈으로 이동 시 분실물 확장 상태 관리
+    if (sectionId === 'home') {
+        if (window.keepLostMenuOpen && window.expandLostGrid) {
+            window.expandLostGrid();
+        } else if (window.collapseLostGrid && !window.keepLostMenuOpen) {
+            window.collapseLostGrid();
+        }
     }
     window.keepLostMenuOpen = false;
 
