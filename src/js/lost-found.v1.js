@@ -907,7 +907,8 @@ window.openSuccessModal = function(index) {
     }
 
     const titleText = window.t ? window.t('lost.modal.success_title') : '🎉 성공 사례';
-    const ctaText = window.t ? window.t('lost.modal.cta') : '내 분실물도 의뢰하기';
+    const ctaReportText = window.t ? window.t('lost.modal.cta_report') : '분실신고신청';
+    const ctaProxyText = window.t ? window.t('lost.modal.cta_proxy') : '대리수령신청';
 
     if (modalTitle) modalTitle.innerHTML = `<i class="ph-duotone ph-confetti color-lost"></i> <span data-i18n="lost.modal.success_title">${titleText}</span>`;
 
@@ -933,9 +934,14 @@ window.openSuccessModal = function(index) {
                 </div>
             </div>
 
-            <button class="btn btn-primary btn-cta-success" onclick="document.getElementById('success-modal').style.display='none'; openLostReportModal();" data-i18n="lost.modal.cta">
-                ${ctaText}
+        <div style="display: flex; gap: 10px; justify-content: center; width: 100%;">
+            <button class="btn btn-primary btn-cta-success" style="flex: 1; padding: 12px 0;" onclick="document.getElementById('success-modal').style.display='none'; openLostReportModal();" data-i18n="lost.modal.cta_report">
+                ${ctaReportText}
             </button>
+            <button class="btn btn-primary btn-cta-success" style="flex: 1; background: var(--color-orange, #f59e0b); border: none; padding: 12px 0;" onclick="document.getElementById('success-modal').style.display='none'; openProxyPickupModal();" data-i18n="lost.modal.cta_proxy">
+                ${ctaProxyText}
+            </button>
+        </div>
         </div>
     `;
 
@@ -966,7 +972,8 @@ export function renderSuccessGoodsView(isLoadMore = false) {
     }
 
     const lang = (localStorage.getItem('jeju_lang') || 'zh');
-    const ctaText = window.t ? window.t('lost.modal.cta') : '내 분실물도 의뢰하기';
+    const ctaReportText = window.t ? window.t('lost.modal.cta_report') : '분실신고신청';
+    const ctaProxyText = window.t ? window.t('lost.modal.cta_proxy') : '대리수령신청';
 
     // 로딩 중 상태 (데이터가 아직 fetch 되지 않음)
     if (!data) {
@@ -977,9 +984,14 @@ export function renderSuccessGoodsView(isLoadMore = false) {
                 <p style="font-size: 0.9rem; margin: 0;" data-i18n="lost.loading">${loadingText}</p>
             </div>
             <div style="text-align: center; margin-top: 10px;">
-                <button class="btn btn-primary btn-cta-success" onclick="openLostReportModal();" data-i18n="lost.modal.cta">
-                    ${ctaText}
-                </button>
+                <div style="display: flex; gap: 10px; justify-content: center; width: 100%;">
+                    <button class="btn btn-primary btn-cta-success" style="flex: 1; padding: 12px 0;" onclick="openLostReportModal();" data-i18n="lost.modal.cta_report">
+                        ${ctaReportText}
+                    </button>
+                    <button class="btn btn-primary btn-cta-success" style="flex: 1; background: var(--color-orange, #f59e0b); border: none; padding: 12px 0;" onclick="openProxyPickupModal();" data-i18n="lost.modal.cta_proxy">
+                        ${ctaProxyText}
+                    </button>
+                </div>
             </div>
         `;
         return;
@@ -994,9 +1006,14 @@ export function renderSuccessGoodsView(isLoadMore = false) {
                 <p style="font-size: 0.9rem; margin: 0;">${emptyText}</p>
             </div>
             <div style="text-align: center; margin-top: 10px;">
-                <button class="btn btn-primary btn-cta-success" onclick="openLostReportModal();" data-i18n="lost.modal.cta">
-                    ${ctaText}
-                </button>
+                <div style="display: flex; gap: 10px; justify-content: center; width: 100%;">
+                    <button class="btn btn-primary btn-cta-success" style="flex: 1; padding: 12px 0;" onclick="openLostReportModal();" data-i18n="lost.modal.cta_report">
+                        ${ctaReportText}
+                    </button>
+                    <button class="btn btn-primary btn-cta-success" style="flex: 1; background: var(--color-orange, #f59e0b); border: none; padding: 12px 0;" onclick="openProxyPickupModal();" data-i18n="lost.modal.cta_proxy">
+                        ${ctaProxyText}
+                    </button>
+                </div>
             </div>
         `;
         return;
@@ -1171,9 +1188,14 @@ export function renderSuccessGoodsView(isLoadMore = false) {
         <div class="success-all-grid">${cardsHtml}</div>
         ${loadMoreHtml}
         <div style="text-align: center; margin-top: 16px; margin-bottom: 24px;">
-            <button class="btn btn-primary btn-cta-success" onclick="openLostReportModal();" data-i18n="lost.modal.cta">
-                ${ctaText}
+        <div style="display: flex; gap: 10px; justify-content: center; width: 100%;">
+            <button class="btn btn-primary btn-cta-success" style="flex: 1; padding: 12px 0;" onclick="openLostReportModal();" data-i18n="lost.modal.cta_report">
+                ${window.t ? window.t('lost.modal.cta_report') : '분실신고신청'}
             </button>
+            <button class="btn btn-primary btn-cta-success" style="flex: 1; background: var(--color-orange, #f59e0b); border: none; padding: 12px 0;" onclick="openProxyPickupModal();" data-i18n="lost.modal.cta_proxy">
+                ${window.t ? window.t('lost.modal.cta_proxy') : '대리수령신청'}
+            </button>
+        </div>
         </div>
     `;
 };
