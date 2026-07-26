@@ -100,15 +100,7 @@
                             </ul>
                         </div>
 
-                        <!-- 진행상황 안내 -->
-                        <div>
-                            <h4 style="margin: 0 0 8px 0; color: var(--label-primary); font-size: 15px; display: flex; align-items: center; gap: 6px;"><i class="ph-fill ph-clock-counter-clockwise" style="color: #3182f6;"></i> <span data-i18n="lost.notice.progress_title">진행 상황 안내</span></h4>
-                            <ul style="padding-left: 20px; color: var(--color-text-sub); line-height: 1.6; font-size: 13.5px; margin: 0;">
-                                <li style="margin-bottom: 6px;" data-i18n-html="lost.notice.prog1"><b>[수색중]</b> 접수된 정보를 바탕으로 분실물을 수색 중인 상태입니다.</li>
-                                <li style="margin-bottom: 6px;" data-i18n-html="lost.notice.prog2"><b>[발견]</b> 물건을 발견하여 안전하게 보관 중인 상태입니다.</li>
-                                <li style="margin-bottom: 0;" data-i18n-html="lost.notice.prog3"><b>[수령]</b> 대리수령자가 물품 수령을 완료한 상태입니다.</li>
-                            </ul>
-                        </div>
+
 
                         <!-- 공지사항 -->
                         <div>
@@ -487,6 +479,16 @@
         <h2 class="bar-title"><i class="ph-duotone ph-trophy"></i> <span data-i18n="lost.home.status">진행상황</span></h2>
     </header>
     <div class="section-content" style="padding: 20px; padding-bottom: 100px; box-sizing: border-box;">
+        <!-- 진행상황 안내 -->
+        <div style="margin-bottom: 20px; padding: 16px; background: rgba(49, 130, 246, 0.05); border: 1px solid rgba(49, 130, 246, 0.1); border-radius: 8px;">
+            <h4 style="margin: 0 0 8px 0; color: var(--label-primary); font-size: 15px; display: flex; align-items: center; gap: 6px;"><i class="ph-fill ph-clock-counter-clockwise" style="color: #3182f6;"></i> <span data-i18n="lost.notice.progress_title">진행 상황 안내</span></h4>
+            <ul style="padding-left: 20px; color: var(--color-text-sub); line-height: 1.6; font-size: 13.5px; margin: 0;">
+                <li style="margin-bottom: 6px;" data-i18n-html="lost.notice.prog1"><b>[수색중]</b> 분실물이 접수되어 매칭을 기다리는 상태입니다.</li>
+                <li style="margin-bottom: 6px;" data-i18n-html="lost.notice.prog2"><b>[발견]</b> 물건을 발견하여 안전하게 보관하고 있습니다.</li>
+                <li style="margin-bottom: 0;" data-i18n-html="lost.notice.prog3"><b>[수령]</b> 소유자(또는 대리인)가 물품 수령을 완료한 상태입니다.</li>
+            </ul>
+        </div>
+
         <div class="marquee-container" style="cursor: default; margin-top: 0px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid var(--separator);">
             <div class="marquee-content" id="status-success-marquee-content">
                 <!-- Populated dynamically via JS -->
