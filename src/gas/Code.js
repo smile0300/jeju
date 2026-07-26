@@ -93,7 +93,7 @@ function doPost(e) {
         var fieldMap = {
           // 공개 컬럼
           'CaseId'          : newCaseId,
-          'Step'            : 3,
+          'Step'            : 1,
           'Date'            : today,
           'WeChatId'        : data.contact || data.originalWechat || data.wechatId || '',
           'Item'            : data.itemName   || '',
