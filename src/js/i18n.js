@@ -746,7 +746,7 @@ const TRANSLATIONS = {
         'nav.hallasan':   '한라산',
         'nav.airport':    '공항정보',
         'nav.lost':       '분실물',
-        'lost.home.search':   '조회',
+        'lost.home.search':   '분실 조회',
         'lost.home.status':   '진행상황',
         'lost.home.register': '분실신고',
         'lost.home.proxy':    '대리수령',
