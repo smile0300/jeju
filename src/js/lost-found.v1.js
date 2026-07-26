@@ -1405,6 +1405,7 @@ window.submitProxyPickup = async function() {
     const reservationFile = document.getElementById('proxy-reservation-photo')?.files[0];
     
     const address       = (document.getElementById('proxy-address')?.value || '').trim();
+    const deliveryCity  = (document.getElementById('proxy-delivery-city')?.value || '').trim();
     const privacyCheck  = document.getElementById('proxy-agree-privacy');
     const originalWechat = modal?.dataset.originalWechat || '';
 
@@ -1418,6 +1419,7 @@ window.submitProxyPickup = async function() {
 
     if (!contact) return showError(lang === 'ko' ? '위챗 ID를 입력해주세요.' : '请输入微信 ID。');
     if (!phone) return showError(lang === 'ko' ? '연락처(전화번호)를 입력해주세요.' : '请输入联系电话。');
+    if (!deliveryCity) return showError(lang === 'ko' ? '배송 받을 지역(도시)을 입력해주세요.' : '请输入收件地区(城市)。');
     if (!address) return showError(lang === 'ko' ? '최종 배송 주소를 입력해주세요.' : '请输入最终收货地址。');
     if (!privacyCheck?.checked) return showError(lang === 'ko' ? '개인정보 수집 및 이용에 동의해주세요.' : '请同意个人信息收集及使用。');
 
@@ -1468,6 +1470,7 @@ window.submitProxyPickup = async function() {
             originalWechat,
             region: modal?.dataset.region || '',
             place: modal?.dataset.place || '',
+            deliveryCity,
             userAgent: navigator.userAgent,
             
             // New fields

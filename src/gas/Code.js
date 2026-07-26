@@ -97,8 +97,8 @@ function doPost(e) {
           'Date'            : today,
           'WeChatId'        : data.contact || data.originalWechat || data.wechatId || '',
           'Item'            : data.itemName   || '',
-          'Region'          : data.region     || '',
-          'Place'           : data.place      || '',
+          'Region'          : data.deliveryCity     || '',
+          'Place'           : (data.proxyLocationType || '') + (data.hotelName ? ' - ' + data.hotelName : ''),
           'ItemImg'         : itemPhotoUrl,
           'Note'            : '',
           // 비공개 컬럼 (관리자 전용)
