@@ -1063,15 +1063,15 @@ export function renderSuccessGoodsView(isLoadMore = false) {
                ${caseIdOverlay}`;
         const stepNum = parseInt(item.Step, 10) || 0;
         let STEP_LABELS;
-        if (lang === 'ko') STEP_LABELS = ['접수', '수색중', '발견', '수령', '발송'];
-        else if (lang === 'en') STEP_LABELS = ['Received', 'Searching', 'Found', 'Collected', 'Sent'];
-        else STEP_LABELS = ['收到', '寻找中', '找到', '领取', '寄出'];
-        const isCompleted = stepNum >= 5;
+        if (lang === 'ko') STEP_LABELS = ['접수', '물품확인중', '수령완료', '발송완료', '직접수령'];
+        else if (lang === 'en') STEP_LABELS = ['Received', 'Item Checking', 'Pickup Complete', 'Dispatch Complete', 'Direct Pickup'];
+        else STEP_LABELS = ['接收', '物品确认中', '领取完成', '发送完成', '直接领取'];
+        const isCompleted = stepNum >= 4; // 4 or 5 is completed
         let dotsContainerHtml = '';
         
         if (!isCompleted) {
             let dotsHtml = '';
-            for (let i = 2; i <= 4; i++) {
+            for (let i = 2; i <= 3; i++) {
                 let isDone = stepNum >= i;
                 let isCurrent = stepNum === i;
                 let cls = 'dot';
@@ -1085,8 +1085,8 @@ export function renderSuccessGoodsView(isLoadMore = false) {
                 }
                 let textHtml = isCurrent ? `<span class="success-timeline-dot-text" style="position: relative;">${STEP_LABELS[i - 1]}</span>` : '';
                 
-                // [대리수령 버튼] Step 3(발견) 상태일 때 "找到" 텍스트 옆에 버튼 추가
-                if (i === 3 && stepNum === 3) {
+                // [대리수령 버튼] Step 2(물품확인중) 상태일 때 "물품확인중" 텍스트 옆에 버튼 추가
+                if (i === 2 && stepNum === 2) {
                     const proxyBtnLabel = lang === 'ko' ? '📬 대리수령 신청' : lang === 'en' ? '📬 Request Proxy Pickup' : '📬 申请代为领取';
                     const safeCaseId   = (item.CaseId  || '').toString().replace(/'/g, '');
                     const safeItemName = (item.Item    || '').toString().replace(/'/g, '');
@@ -1118,10 +1118,10 @@ export function renderSuccessGoodsView(isLoadMore = false) {
         let dateStrHTML = '';
         if (isCompleted && dateStr) {
             let finalStatusStr = '';
-            if (stepNum === 6) {
-                finalStatusStr = lang === 'ko' ? '직접수령' : (lang === 'en' ? 'Picked Up' : '已自提');
+            if (stepNum === 5) {
+                finalStatusStr = lang === 'ko' ? '직접수령' : (lang === 'en' ? 'Direct Pickup' : '直接领取');
             } else {
-                finalStatusStr = lang === 'ko' ? '발송완료' : (lang === 'en' ? 'Sent' : '已寄出');
+                finalStatusStr = lang === 'ko' ? '발송완료' : (lang === 'en' ? 'Dispatch Complete' : '发送完成');
             }
             dateStrHTML = `
                 <div class="success-all-meta" style="margin: 0; display: flex; flex-direction: column; gap: 2px;">
