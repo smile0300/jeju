@@ -459,6 +459,17 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    // Proxy Location Category Chips
+    const proxyLocChips = document.querySelectorAll('#proxy-location-chips .lost-chip');
+    proxyLocChips.forEach(chip => {
+        chip.addEventListener('click', function() {
+            proxyLocChips.forEach(c => c.classList.remove('active'));
+            this.classList.add('active');
+            const hiddenInput = document.getElementById('proxy-location-category');
+            if (hiddenInput) hiddenInput.value = this.dataset.value;
+        });
+    });
 });
 
 
@@ -1402,6 +1413,9 @@ window.closeLostUpsellModal = function(fromPopState = false) {
 // 대리수령 신청 모달 함수들
 // ─────────────────────────────────────────────────────────────
 
+let currentProxyStep = 1;
+const MAX_PROXY_STEP = 3;
+
 /** 대리수령 모달 열기: CaseId, 물품명, 원래 위챗ID, 장소(호텔 여부 판별) 자동 입력 */
 window.openProxyPickupModal = function(caseId, itemName, originalWechat, region, place) {
     showSection('proxy-pickup');
@@ -1440,17 +1454,17 @@ window.openProxyPickupModal = function(caseId, itemName, originalWechat, region,
     modal.dataset.region = region || '';
     modal.dataset.place = place || '';
 
-    // 장소(호텔, 공항/경찰서) 판별하여 조건부 입력란 표시
-    const locationStr = ((region || '') + ' ' + (place || '')).toLowerCase();
-    const isHotel = locationStr.includes('호텔') || locationStr.includes('hotel') || locationStr.includes('酒店');
-    
-    document.getElementById('proxy-reservation-group').style.display = isHotel ? 'block' : 'none';
-    document.getElementById('proxy-mgmt-group').style.display = isHotel ? 'none' : 'block';
-
     // 폼 초기화
-    ['proxy-name', 'proxy-contact', 'proxy-passport-photo', 'proxy-item-photo', 'proxy-reservation-photo', 'proxy-mgmt-num', 'proxy-address'].forEach(id => {
+    [
+        'proxy-name', 'proxy-contact', 'proxy-passport-photo', 'proxy-item-photo', 
+        'proxy-reservation-photo', 'proxy-mgmt-num', 'proxy-address', 
+        'proxy-room-num', 'proxy-vehicle-info', 'proxy-board-time', 'proxy-location-detail'
+    ].forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.value = '';
+        if (el) {
+            if(el.type === 'file') el.value = '';
+            else el.value = '';
+        }
     });
     
     const privacyCheck = document.getElementById('proxy-agree-privacy');
@@ -1459,7 +1473,129 @@ window.openProxyPickupModal = function(caseId, itemName, originalWechat, region,
     if (statusDiv) { statusDiv.innerHTML = ''; statusDiv.style.display = 'none'; }
     const submitBtn = document.getElementById('proxy-submit-btn');
     if (submitBtn) submitBtn.disabled = false;
+
+    // 장소 자동 매핑 시도
+    const locationStr = ((region || '') + ' ' + (place || '')).toLowerCase();
+    let mappedLoc = '';
+    if (locationStr.includes('호텔') || locationStr.includes('hotel') || locationStr.includes('酒店')) mappedLoc = '호텔';
+    else if (locationStr.includes('공항') || locationStr.includes('airport') || locationStr.includes('机场')) mappedLoc = '공항';
+    else if (locationStr.includes('경찰') || locationStr.includes('police') || locationStr.includes('警察')) mappedLoc = '경찰서';
+    else if (locationStr.includes('택시') || locationStr.includes('taxi') || locationStr.includes('出租车')) mappedLoc = '택시';
+    else if (locationStr.includes('버스') || locationStr.includes('bus') || locationStr.includes('公交')) mappedLoc = '버스';
+
+    // 칩 초기화 및 선택
+    const locChips = document.querySelectorAll('#proxy-location-chips .lost-chip');
+    locChips.forEach(c => c.classList.remove('active'));
+    document.getElementById('proxy-location-category').value = '';
+    if (mappedLoc) {
+        locChips.forEach(c => {
+            if (c.dataset.value === mappedLoc) c.classList.add('active');
+        });
+        document.getElementById('proxy-location-category').value = mappedLoc;
+    }
+
+    currentProxyStep = 1;
+    updateProxyStepView();
 };
+
+window.nextProxyStep = function() {
+    const lang = localStorage.getItem('jeju_lang') || 'zh';
+    
+    if (currentProxyStep === 1) {
+        const loc = document.getElementById('proxy-location-category')?.value;
+        if (!loc) {
+            alert(lang === 'ko' ? '보관 장소를 선택해주세요.' : (lang === 'en' ? 'Please select a location.' : '请选择保管场所。'));
+            return;
+        }
+    } else if (currentProxyStep === 2) {
+        const loc = document.getElementById('proxy-location-category')?.value;
+        const name = document.getElementById('proxy-name')?.value.trim();
+        const passport = document.getElementById('proxy-passport-photo')?.files[0];
+        
+        if (!name) { alert(lang === 'ko' ? '신청자 이름을 입력해주세요.' : '请输入申请人姓名。'); return; }
+        if (!passport) { alert(lang === 'ko' ? '여권 사진을 첨부해주세요.' : '请上传护照照片。'); return; }
+        
+        if (loc === '호텔') {
+            const res = document.getElementById('proxy-reservation-photo')?.files[0];
+            if (!res) { alert(lang === 'ko' ? '호텔 예약내역을 첨부해주세요.' : '请上传酒店预订记录。'); return; }
+        } else if (loc === '공항' || loc === '경찰서') {
+            const mgmt = document.getElementById('proxy-mgmt-num')?.value.trim();
+            if (!mgmt) { alert(lang === 'ko' ? '접수/관리번호를 입력해주세요.' : '请输入管理号码。'); return; }
+        } else if (loc === '택시' || loc === '버스') {
+            const vInfo = document.getElementById('proxy-vehicle-info')?.value.trim();
+            if (!vInfo) { alert(lang === 'ko' ? '차량 번호 또는 기사님 연락처를 입력해주세요.' : '请输入车牌号或司机联系方式。'); return; }
+        } else if (loc === '기타') {
+            const lDetail = document.getElementById('proxy-location-detail')?.value.trim();
+            if (!lDetail) { alert(lang === 'ko' ? '보관 장소 상세 설명을 입력해주세요.' : '请输入保管场所详细说明。'); return; }
+        }
+    }
+    
+    if (currentProxyStep < MAX_PROXY_STEP) {
+        currentProxyStep++;
+        updateProxyStepView();
+    }
+};
+
+window.prevProxyStep = function() {
+    if (currentProxyStep > 1) {
+        currentProxyStep--;
+        updateProxyStepView();
+    }
+};
+
+function updateProxyStepView() {
+    const lang = localStorage.getItem('jeju_lang') || 'zh';
+    
+    document.querySelectorAll('#proxy-pickup .lost-step').forEach(el => el.classList.remove('active'));
+    const currentEl = document.getElementById(`proxy-step-${currentProxyStep}`);
+    if (currentEl) currentEl.classList.add('active');
+
+    document.querySelectorAll('#proxy-pickup .progress-dot').forEach((el, index) => {
+        el.classList.remove('active', 'done');
+        if (index + 1 === currentProxyStep) el.classList.add('active');
+        else if (index + 1 < currentProxyStep) el.classList.add('done');
+    });
+
+    const loc = document.getElementById('proxy-location-category')?.value;
+    
+    // Step 2 동적 필드 표시 로직
+    if (currentProxyStep === 2) {
+        document.querySelectorAll('.proxy-sub-fields').forEach(el => el.style.display = 'none');
+        
+        const nameLabel = document.getElementById('proxy-name-label');
+        if (nameLabel) {
+            if (loc === '호텔') {
+                nameLabel.textContent = lang === 'ko' ? '호텔 예약자명 (영문명)' : (lang === 'en' ? 'Reservation Name (English)' : '酒店预订人姓名 (英文)');
+            } else {
+                nameLabel.textContent = lang === 'ko' ? '신청자 이름 (여권과 동일)' : (lang === 'en' ? 'Applicant Name (Same as passport)' : '申请人姓名 (与护照一致)');
+            }
+        }
+
+        if (loc === '호텔') {
+            document.getElementById('proxy-sub-hotel').style.display = 'block';
+        } else if (loc === '공항' || loc === '경찰서') {
+            document.getElementById('proxy-sub-official').style.display = 'block';
+        } else if (loc === '택시' || loc === '버스') {
+            document.getElementById('proxy-sub-vehicle').style.display = 'block';
+        } else if (loc === '기타') {
+            document.getElementById('proxy-sub-other').style.display = 'block';
+        }
+    }
+
+    const btnPrev = document.getElementById('btn-proxy-prev');
+    const btnNext = document.getElementById('btn-proxy-next');
+    const btnSubmit = document.getElementById('proxy-submit-btn');
+
+    if (btnPrev) btnPrev.style.display = currentProxyStep === 1 ? 'none' : 'block';
+    
+    if (currentProxyStep === MAX_PROXY_STEP) {
+        if (btnNext) btnNext.style.display = 'none';
+        if (btnSubmit) btnSubmit.style.display = 'block';
+    } else {
+        if (btnNext) btnNext.style.display = 'block';
+        if (btnSubmit) btnSubmit.style.display = 'none';
+    }
+}
 
 /** 파일 읽기를 Promise로 감싸는 유틸 */
 function readAsBase64(file) {
@@ -1483,14 +1619,18 @@ window.submitProxyPickup = async function() {
     const itemName      = (document.getElementById('proxy-item-name')?.value || '').trim();
     const requesterName = (document.getElementById('proxy-name')?.value || '').trim();
     const contact       = (document.getElementById('proxy-contact')?.value || '').trim();
-    const mgmtNum       = (document.getElementById('proxy-mgmt-num')?.value || '').trim();
+    
+    const loc = document.getElementById('proxy-location-category')?.value;
+    const mgmtNum = document.getElementById('proxy-mgmt-num')?.value || '';
+    const roomNum = document.getElementById('proxy-room-num')?.value || '';
+    const vehicleInfo = document.getElementById('proxy-vehicle-info')?.value || '';
+    const boardTime = document.getElementById('proxy-board-time')?.value || '';
+    const locDetail = document.getElementById('proxy-location-detail')?.value || '';
     
     const passportFile    = document.getElementById('proxy-passport-photo')?.files[0];
     const itemFile        = document.getElementById('proxy-item-photo')?.files[0];
     const reservationFile = document.getElementById('proxy-reservation-photo')?.files[0];
     
-    const isHotel = document.getElementById('proxy-reservation-group').style.display !== 'none';
-
     const address       = (document.getElementById('proxy-address')?.value || '').trim();
     const privacyCheck  = document.getElementById('proxy-agree-privacy');
     const originalWechat = modal?.dataset.originalWechat || '';
@@ -1503,21 +1643,15 @@ window.submitProxyPickup = async function() {
         }
     };
 
-    if (!requesterName) return showError(lang === 'ko' ? '신청자 이름을 입력해주세요.' : '请输入申请人姓名。');
-    if (!contact) return showError(lang === 'ko' ? '연락처를 입력해주세요.' : '请输入联系方式。');
-    if (!passportFile) return showError(lang === 'ko' ? '여권 사진을 첨부해주세요.' : '请上传护照照片。');
-    if (!itemFile) return showError(lang === 'ko' ? '물건 사진을 첨부해주세요.' : '请上传物品照片。');
-    if (isHotel && !reservationFile) return showError(lang === 'ko' ? '호텔 예약내역을 첨부해주세요.' : '请上传酒店预订记录。');
-    if (!isHotel && !mgmtNum) return showError(lang === 'ko' ? '관리번호를 입력해주세요.' : '请输入管理号码。');
-
-    if (!address) return showError(lang === 'ko' ? '배송 주소를 입력해주세요.' : '请输入收货地址。');
+    if (!contact) return showError(lang === 'ko' ? '위챗 ID를 입력해주세요.' : '请输入微信 ID。');
+    if (!address) return showError(lang === 'ko' ? '최종 배송 주소를 입력해주세요.' : '请输入最终收货地址。');
     if (!privacyCheck?.checked) return showError(lang === 'ko' ? '개인정보 수집 및 이용에 동의해주세요.' : '请同意个人信息收集及使用。');
 
     // 용량 제한 검사 (2MB)
     const MAX_SIZE = 2 * 1024 * 1024;
     if (passportFile && passportFile.size > MAX_SIZE) return showError(lang === 'ko' ? '여권 사진은 2MB 이하로 첨부해주세요.' : '护照照片大小不能超过2MB。');
     if (itemFile && itemFile.size > MAX_SIZE) return showError(lang === 'ko' ? '물건 사진은 2MB 이하로 첨부해주세요.' : '物品照片大小不能超过2MB。');
-    if (isHotel && reservationFile && reservationFile.size > MAX_SIZE) return showError(lang === 'ko' ? '호텔 예약내역은 2MB 이하로 첨부해주세요.' : '酒店预订记录大小不能超过2MB。');
+    if (loc === '호텔' && reservationFile && reservationFile.size > MAX_SIZE) return showError(lang === 'ko' ? '호텔 예약내역은 2MB 이하로 첨부해주세요.' : '酒店预订记录大小不能超过2MB。');
 
     // ── 제출 ──
     if (statusDiv) { statusDiv.innerHTML = ''; statusDiv.style.display = 'none'; }
@@ -1552,7 +1686,14 @@ window.submitProxyPickup = async function() {
             originalWechat,
             region: modal?.dataset.region || '',
             place: modal?.dataset.place || '',
-            userAgent: navigator.userAgent
+            userAgent: navigator.userAgent,
+            
+            // New fields
+            proxyLocationType: loc,
+            roomNum,
+            vehicleInfo,
+            boardTime,
+            locDetail
         };
 
         const res = await fetch(apiUrl, {
