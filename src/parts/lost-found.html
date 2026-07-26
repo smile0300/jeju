@@ -306,22 +306,159 @@
                 </div>
                 
                 <div id="lost-report-status" class="form-status"></div>
+            </div>
+            
+            <div class="lost-form-actions step-actions">
+                <button type="button" class="btn btn-secondary" id="btn-lost-prev" onclick="prevLostStep()" style="display: none;" data-i18n="modal.lost.btn_prev">이전</button>
+                <button type="button" class="btn btn-primary" id="btn-lost-next" onclick="nextLostStep()" style="flex: 1;" data-i18n="modal.lost.btn_next">다음</button>
+                <button type="button" id="lost-report-submit-btn" class="btn btn-primary" style="display: none; flex: 1;" onclick="event.preventDefault(); submitLostReport()" data-i18n="modal.lost.submit">분실물 등록하기</button>
+            </div>
+        </div>
+    </div>
+</section>
 
-            <!-- 개인정보 동의 -->
-            <div class="privacy-consent-wrapper" style="margin-top: 20px; display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border: 1px solid var(--separator); border-radius: 8px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin: 0;">
-                    <input type="checkbox" id="proxy-agree-privacy" required style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--color-orange); margin: 0; flex-shrink: 0;">
-                    <span class="required-field" style="font-size: 0.85rem; color: var(--text-primary); font-weight: 500; white-space: nowrap;" data-i18n="modal.lost.privacy.agree">개인정보 수집 및 이용 동의</span>
-                </label>
-                <a href="javascript:void(0)" onclick="showSection('privacy');" style="font-size: 0.8rem; color: var(--label-secondary); text-decoration: underline; white-space: nowrap;" data-i18n="modal.lost.privacy.detail">자세히 보기</a>
+<!-- ===== Proxy Pickup Page ===== -->
+<section id="proxy-pickup" class="app-section">
+    <header class="app-bar">
+        <button class="back-btn" onclick="window.backToLostMenu()">←</button>
+        <h2 class="bar-title"><i class="ph-duotone ph-package"></i> <span data-i18n="proxy.modal.title">대리수령 신청</span></h2>
+    </header>
+    <div class="lost-report-form-content section-content" style="padding: 20px; padding-bottom: 100px; box-sizing: border-box; overflow-y: visible !important; max-height: none !important; width: 100% !important; max-width: none !important; border-radius: 0;">
+        <div class="lost-report-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+            <div>
+                <p data-i18n="proxy.modal.desc" style="margin-top: 6px;">담당자가 물건을 보관 중인 곳에서 수령하여 전달해드립니다.</p>
+            </div>
+            <button
+                onclick="const m = document.getElementById('proxy-pickup'); copyProxyLink(m.dataset.caseId, m.dataset.itemName, m.dataset.originalWechat, m.dataset.region, m.dataset.place);"
+                style="flex: 0 0 44px; height: 44px; background: var(--bg-secondary); border: 1px solid var(--separator); border-radius: 8px; cursor: pointer; font-size: 1.2rem; color: var(--text-primary); display: flex; align-items: center; justify-content: center;"
+            >🔗</button>
+        </div>
+        
+        <div class="lost-report-body progressive-form">
+            <div class="progress-container">
+                <div class="progress-dot active" id="proxy-step-dot-1"></div>
+                <div class="progress-dot" id="proxy-step-dot-2"></div>
+                <div class="progress-dot" id="proxy-step-dot-3"></div>
             </div>
 
-            <div id="proxy-status" class="form-status" style="margin-top: 12px;"></div>
+            <!-- STEP 1: Basic Info & Item Photo -->
+            <div class="lost-step active" id="proxy-step-1">
+                <div class="step-title" data-i18n="proxy.modal.step1.title">물품 정보</div>
+                <div class="lost-form-group">
+                    <label class="lost-form-label"><i class="ph-duotone ph-hash"></i> <span data-i18n="proxy.modal.case_id">케이스 번호</span></label>
+                    <input type="text" id="proxy-case-id" class="lost-form-input" readonly style="background: var(--bg-secondary); color: var(--label-secondary); cursor: default;">
+                </div>
+                <div class="lost-form-group">
+                    <label class="lost-form-label"><i class="ph-duotone ph-package"></i> <span data-i18n="proxy.modal.item_name">물품명</span></label>
+                    <input type="text" id="proxy-item-name" class="lost-form-input">
+                </div>
+                <div class="lost-form-group">
+                    <label class="lost-form-label"><i class="ph-duotone ph-image"></i> <span class="required-field" data-i18n="proxy.modal.item_photo">물건 사진</span></label>
+                    <div class="file-upload-wrapper">
+                        <input type="file" id="proxy-item-photo" class="lost-form-file" accept="image/*">
+                    </div>
+                </div>
+            </div>
 
-            <div class="step-actions" style="margin-top: 16px;">
-                <button type="button" id="proxy-submit-btn" class="btn btn-primary" onclick="submitProxyPickup()" style="width: 100%; background: var(--color-orange); padding: 14px; font-size: 1rem; font-weight: 700; border: none; border-radius: 10px; cursor: pointer;" data-i18n="proxy.modal.submit">
-                    대리수령 신청하기
-                </button>
+            <!-- STEP 2: Location & Person Info -->
+            <div class="lost-step" id="proxy-step-2">
+                <div class="step-title" data-i18n="proxy.modal.step2.title">보관 장소 및 본인 확인</div>
+                <div class="lost-form-group">
+                    <label class="lost-form-label"><span class="required-field" data-i18n="proxy.modal.loc_type">물건이 보관된 장소</span></label>
+                    <select id="proxy-location-category" class="lost-form-select" onchange="updateProxyStepView()">
+                        <option value="호텔">호텔</option>
+                        <option value="공항">공항</option>
+                        <option value="경찰서">경찰서</option>
+                        <option value="택시">택시</option>
+                        <option value="버스">버스</option>
+                        <option value="기타">기타</option>
+                    </select>
+                </div>
+                
+                <!-- Sub: Hotel -->
+                <div class="proxy-sub-fields" id="proxy-sub-hotel">
+                    <div class="lost-form-group">
+                        <label class="lost-form-label"><span class="required-field" data-i18n="proxy.modal.room_num">방 번호</span></label>
+                        <input type="text" id="proxy-room-num" class="lost-form-input" placeholder="예: 1204호">
+                    </div>
+                    <div class="lost-form-group">
+                        <label class="lost-form-label"><span class="required-field" data-i18n="proxy.modal.reservation">호텔 예약내역</span></label>
+                        <div class="file-upload-wrapper">
+                            <input type="file" id="proxy-reservation-photo" class="lost-form-file" accept="image/*">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sub: Official (Airport/Police) -->
+                <div class="proxy-sub-fields" id="proxy-sub-official" style="display: none;">
+                    <div class="lost-form-group">
+                        <label class="lost-form-label"><span class="required-field" data-i18n="proxy.modal.mgmt_num">관리번호 (접수번호)</span></label>
+                        <input type="text" id="proxy-mgmt-num" class="lost-form-input" placeholder="예: LOST-12345">
+                    </div>
+                </div>
+
+                <!-- Sub: Vehicle (Taxi/Bus) -->
+                <div class="proxy-sub-fields" id="proxy-sub-vehicle" style="display: none;">
+                    <div class="lost-form-group">
+                        <label class="lost-form-label"><span class="required-field" data-i18n="proxy.modal.vehicle_info">차량번호 또는 기사연락처</span></label>
+                        <input type="text" id="proxy-vehicle-info" class="lost-form-input" placeholder="예: 제주 12바 3456">
+                    </div>
+                    <div class="lost-form-group">
+                        <label class="lost-form-label"><span data-i18n="proxy.modal.board_time">승/하차 시간</span></label>
+                        <input type="text" id="proxy-board-time" class="lost-form-input" placeholder="예: 오후 2시경">
+                    </div>
+                </div>
+
+                <!-- Sub: Other -->
+                <div class="proxy-sub-fields" id="proxy-sub-other" style="display: none;">
+                    <div class="lost-form-group">
+                        <label class="lost-form-label"><span class="required-field" data-i18n="proxy.modal.loc_detail">보관 장소 상세</span></label>
+                        <input type="text" id="proxy-location-detail" class="lost-form-input" placeholder="상세 설명을 적어주세요">
+                    </div>
+                </div>
+
+                <div class="lost-form-group">
+                    <label class="lost-form-label"><i class="ph-duotone ph-user"></i> <span id="proxy-name-label" class="required-field" data-i18n="proxy.modal.name">신청자 이름 (여권과 동일)</span></label>
+                    <input type="text" id="proxy-name" class="lost-form-input" data-i18n="proxy.modal.name.ph" placeholder="이름을 입력해주세요">
+                </div>
+
+                <!-- 여권 사진 첨부 (필수) -->
+                <div class="lost-form-group">
+                    <label class="lost-form-label"><i class="ph-duotone ph-identification-card"></i> <span class="required-field" data-i18n="proxy.modal.passport">여권 사진</span></label>
+                    <div class="file-upload-wrapper">
+                        <input type="file" id="proxy-passport-photo" class="lost-form-file" accept="image/*">
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 3: Delivery Info & Submit -->
+            <div class="lost-step" id="proxy-step-3">
+                <div class="step-title" data-i18n="proxy.modal.step3.title">배송 및 연락처</div>
+                <div class="lost-form-group">
+                    <label class="lost-form-label"><i class="ph-duotone ph-phone"></i> <span class="required-field" data-i18n="proxy.modal.contact">위챗 ID</span></label>
+                    <input type="text" id="proxy-contact" class="lost-form-input" data-i18n="proxy.modal.contact.ph" placeholder="연락처를 입력해주세요">
+                </div>
+
+                <div class="lost-form-group">
+                    <label class="lost-form-label"><span class="required-field" data-i18n="proxy.modal.address">최종 배송 주소</span></label>
+                    <textarea id="proxy-address" class="lost-form-textarea" rows="3" data-i18n="proxy.modal.address.ph" placeholder="호텔명, 방 번호 또는 귀국 편 등을 입력해주세요"></textarea>
+                </div>
+
+                <div class="privacy-consent-wrapper" style="margin-top: 20px; display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border: 1px solid var(--separator); border-radius: 8px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin: 0;">
+                        <input type="checkbox" id="proxy-agree-privacy" required style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--color-orange); margin: 0; flex-shrink: 0;">
+                        <span class="required-field" style="font-size: 0.85rem; color: var(--text-primary); font-weight: 500; white-space: nowrap;" data-i18n="modal.lost.privacy.agree">개인정보 수집 및 이용 동의</span>
+                    </label>
+                    <a href="javascript:void(0)" onclick="showSection('privacy');" style="font-size: 0.8rem; color: var(--label-secondary); text-decoration: underline; white-space: nowrap;" data-i18n="modal.lost.privacy.detail">자세히 보기</a>
+                </div>
+
+                <div id="proxy-status" class="form-status" style="margin-top: 12px;"></div>
+            </div>
+
+            <div class="lost-form-actions step-actions" style="margin-top: 16px; display: flex; gap: 10px;">
+                <button type="button" class="btn btn-secondary" id="btn-proxy-prev" onclick="prevProxyStep()" style="display: none; flex: 1;" data-i18n="modal.lost.btn_prev">이전</button>
+                <button type="button" class="btn btn-primary" id="btn-proxy-next" onclick="nextProxyStep()" style="flex: 2;" data-i18n="modal.lost.btn_next">다음</button>
+                <button type="button" id="proxy-submit-btn" class="btn btn-primary" onclick="submitProxyPickup()" style="display: none; flex: 2; background: var(--color-orange); border: none;" data-i18n="proxy.modal.submit">대리수령 신청하기</button>
             </div>
         </div>
     </div>
