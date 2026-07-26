@@ -97,7 +97,7 @@ function doPost(e) {
           'Date'            : today,
           'WeChatId'        : data.contact || data.originalWechat || data.wechatId || '',
           'Item'            : data.itemName   || '',
-          'Region'          : data.deliveryCity     || '',
+          'Region'          : '',
           'Place'           : (data.proxyLocationType || '') + (data.hotelName ? ' - ' + data.hotelName : ''),
           'ItemImg'         : itemPhotoUrl,
           'Note'            : '',
