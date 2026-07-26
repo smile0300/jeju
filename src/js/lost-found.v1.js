@@ -770,6 +770,16 @@ function renderSuccessMarquee(data) {
         upsellModalMarqueeContainer.innerHTML = itemsHtml + firstClone;
     }
 
+    const proxyMarqueeContainer = document.getElementById('proxy-success-marquee-content');
+    if (proxyMarqueeContainer) {
+        proxyMarqueeContainer.innerHTML = itemsHtml + firstClone;
+    }
+
+    const statusMarqueeContainer = document.getElementById('status-success-marquee-content');
+    if (statusMarqueeContainer) {
+        statusMarqueeContainer.innerHTML = itemsHtml + firstClone;
+    }
+
     // Dynamic Animation — 전체 아이템 기준 계산
     const totalSlots = data.length;
     let styleEl = document.getElementById('dynamic-marquee-style');
@@ -795,6 +805,12 @@ function renderSuccessMarquee(data) {
     }
     if (upsellModalMarqueeContainer) {
         upsellModalMarqueeContainer.style.animation = `dynamic-vertical-ticker ${animationDuration}s infinite`;
+    }
+    if (proxyMarqueeContainer) {
+        proxyMarqueeContainer.style.animation = `dynamic-vertical-ticker ${animationDuration}s infinite`;
+    }
+    if (statusMarqueeContainer) {
+        statusMarqueeContainer.style.animation = `dynamic-vertical-ticker ${animationDuration}s infinite`;
     }
 }
 

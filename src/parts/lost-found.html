@@ -323,6 +323,11 @@
     </header>
     <div class="lost-report-form-content section-content" style="padding: 20px; padding-bottom: 100px; box-sizing: border-box; overflow-y: visible !important; max-height: none !important; width: 100% !important; max-width: none !important; border-radius: 0;">
         <div class="lost-report-header" style="margin-bottom: 24px;">
+            <div class="marquee-container" style="cursor: default; margin-top: 0px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid var(--separator);">
+                <div class="marquee-content" id="proxy-success-marquee-content">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
             <div style="margin-bottom: 12px; padding: 12px; background: rgba(229, 62, 62, 0.05); border: 1px solid rgba(229, 62, 62, 0.2); border-radius: 8px;">
                 <p data-i18n="proxy.modal.privacy_notice" style="color: var(--color-red, #e53e3e); font-size: 0.85rem; line-height: 1.4; margin: 0; word-break: keep-all;">대리수령 기준 강화에 따라 여권사진은 필수 서류입니다. 여권사진이 없을시 호텔, 경찰서 등에서 물품 수령이 불가합니다. 수령 완료후 여권사진 외 개인정보는 즉시 삭제됩니다.</p>
             </div>
@@ -482,6 +487,11 @@
         <h2 class="bar-title"><i class="ph-duotone ph-trophy"></i> <span data-i18n="lost.home.status">진행상황</span></h2>
     </header>
     <div class="section-content" style="padding: 20px; padding-bottom: 100px; box-sizing: border-box;">
+        <div class="marquee-container" style="cursor: default; margin-top: 0px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid var(--separator);">
+            <div class="marquee-content" id="status-success-marquee-content">
+                <!-- Populated dynamically via JS -->
+            </div>
+        </div>
         <div id="lost-success-container" class="lost-success-container"></div>
     </div>
 </section>
