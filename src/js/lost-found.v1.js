@@ -1085,21 +1085,7 @@ export function renderSuccessGoodsView(isLoadMore = false) {
                 }
                 let textHtml = isCurrent ? `<span class="success-timeline-dot-text" style="position: relative;">${STEP_LABELS[i - 1]}</span>` : '';
                 
-                // [대리수령 버튼] Step 2(물품확인중) 상태일 때 "물품확인중" 텍스트 옆에 버튼 추가
-                if (i === 2 && stepNum === 2) {
-                    const proxyBtnLabel = lang === 'ko' ? '📬 대리수령 신청' : lang === 'en' ? '📬 Request Proxy Pickup' : '📬 申请代为领取';
-                    const safeCaseId   = (item.CaseId  || '').toString().replace(/'/g, '');
-                    const safeItemName = (item.Item    || '').toString().replace(/'/g, '');
-                    const safeWechat   = (item.WeChatId|| '').toString().replace(/'/g, '');
-                    const safeRegion   = (item.Region  || '').toString().replace(/'/g, '');
-                    const safePlace    = (item.Place   || '').toString().replace(/'/g, '');
-                    
-                    textHtml += `<button
-                        class="btn btn-primary proxy-pickup-btn"
-                        onclick="event.stopPropagation(); openProxyPickupModal('${safeCaseId}', '${safeItemName}', '${safeWechat}', '${safeRegion}', '${safePlace}')"
-                        style="margin-left: 4px; padding: 0 5px; height: 18px; min-height: 18px; font-size: 0.65rem; line-height: 1; background: var(--color-orange); border: none; border-radius: 3px; cursor: pointer; font-weight: 600; color: white; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; flex-shrink: 0; vertical-align: middle;"
-                    >${proxyBtnLabel}</button>`;
-                }
+
 
                 dotsHtml += `
                     <div class="${rowCls}" style="display: flex; align-items: center; position: relative;">
