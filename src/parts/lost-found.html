@@ -352,6 +352,20 @@
                     <label class="lost-form-label"><i class="ph-duotone ph-package"></i> <span data-i18n="proxy.modal.item_name">물품명</span></label>
                     <input type="text" id="proxy-item-name" class="lost-form-input">
                 </div>
+                
+                <div class="lost-form-group">
+                    <label class="lost-form-label"><span class="required-field" data-i18n="proxy.modal.loc_type">물건이 보관된 장소</span></label>
+                    <select id="proxy-location-category" class="lost-form-select" onchange="updateProxyStepView()">
+                        <option value="" disabled selected data-i18n="proxy.modal.loc_placeholder">선택해주세요</option>
+                        <option value="호텔">호텔</option>
+                        <option value="공항">공항</option>
+                        <option value="경찰서">경찰서</option>
+                        <option value="택시">택시</option>
+                        <option value="버스">버스</option>
+                        <option value="기타">기타</option>
+                    </select>
+                </div>
+
                 <div class="lost-form-group">
                     <label class="lost-form-label"><i class="ph-duotone ph-image"></i> <span class="required-field" data-i18n="proxy.modal.item_photo">물건 사진</span></label>
                     <div class="file-upload-wrapper">
@@ -363,17 +377,6 @@
             <!-- STEP 2: Location & Person Info -->
             <div class="lost-step" id="proxy-step-2">
                 <div class="step-title" data-i18n="proxy.modal.step2.title">보관 장소 및 본인 확인</div>
-                <div class="lost-form-group">
-                    <label class="lost-form-label"><span class="required-field" data-i18n="proxy.modal.loc_type">물건이 보관된 장소</span></label>
-                    <select id="proxy-location-category" class="lost-form-select" onchange="updateProxyStepView()">
-                        <option value="호텔">호텔</option>
-                        <option value="공항">공항</option>
-                        <option value="경찰서">경찰서</option>
-                        <option value="택시">택시</option>
-                        <option value="버스">버스</option>
-                        <option value="기타">기타</option>
-                    </select>
-                </div>
                 
                 <!-- Sub: Hotel -->
                 <div class="proxy-sub-fields" id="proxy-sub-hotel">
