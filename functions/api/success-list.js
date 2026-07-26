@@ -22,14 +22,7 @@ export async function onRequest(context) {
   }
 
   try {
-    // Cloudflare 대시보드의 환경변수가 이전 버전을 가리킬 수 있으므로 최신 URL을 명시적으로 추가
-    const LATEST_GAS_URL = 'https://script.google.com/macros/s/AKfycbyg_7wPmQwOtHrPXSHOaSm4Erwo7Z_Os5jgmNg-d32mxb6CCFNja9MbpvWFLEg7CDPk/exec';
-    
-    // 만약 env에 설정된 URL이 구버전이라면 강제로 LATEST_GAS_URL을 사용
-    let gasUrl = env.GAS_URL || env.SECRET_GAS_URL || LATEST_GAS_URL;
-    if (gasUrl.includes('AKfycbwK02Ne0Mu95a8qF3QfbNJ-_iUAS0pSKLYVXtJ_lnpa45IPxAOC-rVsN1h0ZJ5kihRF')) {
-      gasUrl = LATEST_GAS_URL;
-    }
+    const gasUrl = env.GAS_URL || env.SECRET_GAS_URL;
     
     if (!gasUrl) {
       return new Response(JSON.stringify([]), { headers: NO_CACHE_HEADERS });

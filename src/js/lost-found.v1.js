@@ -1171,13 +1171,30 @@ export function renderSuccessGoodsView(isLoadMore = false) {
     const lang = (localStorage.getItem('jeju_lang') || 'zh');
     const ctaText = window.t ? window.t('lost.modal.cta') : '내 분실물도 의뢰하기';
 
-    // 데이터 없음 / 로딩 중 상태
-    if (!data || data.length === 0) {
+    // 로딩 중 상태 (데이터가 아직 fetch 되지 않음)
+    if (!data) {
         const loadingText = window.t ? window.t('lost.loading') : '데이터를 불러오는 중...';
         container.innerHTML = `
             <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 48px 16px; gap: 12px; color: var(--label-secondary);">
                 <i class="ph-duotone ph-circle-notch spin" style="font-size: 2.5rem; color: var(--label-tertiary);"></i>
                 <p style="font-size: 0.9rem; margin: 0;" data-i18n="lost.loading">${loadingText}</p>
+            </div>
+            <div style="text-align: center; margin-top: 10px;">
+                <button class="btn btn-primary btn-cta-success" onclick="openLostReportModal();" data-i18n="lost.modal.cta">
+                    ${ctaText}
+                </button>
+            </div>
+        `;
+        return;
+    }
+
+    // 데이터 없음 상태 (fetch 완료되었으나 데이터가 0개)
+    if (data.length === 0) {
+        const emptyText = lang === 'ko' ? '등록된 진행상황이 없습니다.' : (lang === 'en' ? 'No progress updates available.' : '暂无进展状况。');
+        container.innerHTML = `
+            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 48px 16px; gap: 12px; color: var(--label-secondary);">
+                <i class="ph-duotone ph-folder-open" style="font-size: 2.5rem; color: var(--label-tertiary);"></i>
+                <p style="font-size: 0.9rem; margin: 0;">${emptyText}</p>
             </div>
             <div style="text-align: center; margin-top: 10px;">
                 <button class="btn btn-primary btn-cta-success" onclick="openLostReportModal();" data-i18n="lost.modal.cta">
