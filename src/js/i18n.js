@@ -513,7 +513,7 @@ const TRANSLATIONS = {
         // ── 대리수령 신청 (proxy pickup) ──
         'proxy.modal.title':           '申请代为领取',
         'proxy.modal.desc':            '工作人员将代为领取物品并交付给您。',
-        'proxy.modal.case_id':         '案例编号',
+        'proxy.modal.case_id':         '管理编号',
         'proxy.modal.loc_type':        '物品保管场所',
         'proxy.modal.hotel_name':      '酒店名称',
         'proxy.modal.hotel_name.ph':   '例: 济州新罗舒泰酒店',
@@ -1081,7 +1081,7 @@ const TRANSLATIONS = {
         // ── 대리수령 신청 모달 (proxy pickup) ──
         'proxy.modal.title':           '대리수령 신청',
         'proxy.modal.desc':            '담당자가 물건을 보관 중인 곳에서 수령하여 전달해드립니다.',
-        'proxy.modal.case_id':         '케이스 번호',
+        'proxy.modal.case_id':         '관리번호',
         'proxy.modal.loc_type':        '물건이 보관된 장소',
         'proxy.modal.hotel_name':      '호텔명',
         'proxy.modal.hotel_name.ph':   '예: 신라 스테이 제주',
@@ -1615,7 +1615,7 @@ const TRANSLATIONS = {
         // ── Proxy Pickup Modal ──
         'proxy.modal.title':           'Request Proxy Pickup',
         'proxy.modal.desc':            'Our staff will collect your item and deliver it to you.',
-        'proxy.modal.case_id':         'Case ID',
+        'proxy.modal.case_id':         'Management Number',
         'proxy.modal.loc_type':        'Storage Location',
         'proxy.modal.hotel_name':      'Hotel Name',
         'proxy.modal.hotel_name.ph':   'e.g. Shilla Stay Jeju',
