@@ -1341,10 +1341,8 @@ window.nextProxyStep = function() {
         }
     } else if (currentProxyStep === 2) {
         const loc = document.getElementById('proxy-location-category')?.value;
-        const name = document.getElementById('proxy-name')?.value.trim();
         const passport = document.getElementById('proxy-passport-photo')?.files[0];
         
-        if (!name) { alert(lang === 'ko' ? '신청자 이름을 입력해주세요.' : '请输入申请人姓名。'); return; }
         if (!passport) { alert(lang === 'ko' ? '여권 사진을 첨부해주세요.' : '请上传护照照片。'); return; }
         
         if (loc === '호텔') {
@@ -1393,16 +1391,6 @@ function updateProxyStepView() {
     // Step 2 동적 필드 표시 로직
     if (currentProxyStep === 2) {
         document.querySelectorAll('.proxy-sub-fields').forEach(el => el.style.display = 'none');
-        
-        const nameLabel = document.getElementById('proxy-name-label');
-        if (nameLabel) {
-            if (loc === '호텔') {
-                nameLabel.textContent = lang === 'ko' ? '호텔 예약자명 (영문명)' : (lang === 'en' ? 'Reservation Name (English)' : '酒店预订人姓名 (英文)');
-            } else {
-                nameLabel.textContent = lang === 'ko' ? '신청자 이름 (여권과 동일)' : (lang === 'en' ? 'Applicant Name (Same as passport)' : '申请人姓名 (与护照一致)');
-            }
-        }
-
         if (loc === '호텔') {
             document.getElementById('proxy-sub-hotel').style.display = 'block';
         } else if (loc === '공항' || loc === '경찰서') {
@@ -1449,7 +1437,7 @@ window.submitProxyPickup = async function() {
 
     const caseId        = modal?.dataset.caseId || '';
     const itemName      = (document.getElementById('proxy-item-name')?.value || '').trim();
-    const requesterName = (document.getElementById('proxy-name')?.value || '').trim();
+    const requesterName = '';
     const contact       = (document.getElementById('proxy-contact')?.value || '').trim(); // WeChat ID
     const phone         = (document.getElementById('proxy-phone')?.value || '').trim();   // Phone number
     

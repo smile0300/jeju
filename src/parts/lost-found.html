@@ -388,15 +388,15 @@
                 <div class="proxy-sub-fields" id="proxy-sub-hotel">
                     <div class="lost-form-group">
                         <label class="lost-form-label"><span class="required-field" data-i18n="proxy.modal.hotel_name">호텔명</span></label>
-                        <input type="text" id="proxy-hotel-name" class="lost-form-input" placeholder="예: 신라 스테이 제주">
+                        <input type="text" id="proxy-hotel-name" class="lost-form-input" data-i18n="proxy.modal.hotel_name.ph" placeholder="예: 신라 스테이 제주">
                     </div>
                     <div class="lost-form-group">
                         <label class="lost-form-label"><span class="required-field" data-i18n="proxy.modal.hotel_booker">예약자명</span></label>
-                        <input type="text" id="proxy-hotel-booker" class="lost-form-input" placeholder="예: HONG GILDONG">
+                        <input type="text" id="proxy-hotel-booker" class="lost-form-input" data-i18n="proxy.modal.hotel_booker.ph" placeholder="예: HONG GILDONG">
                     </div>
                     <div class="lost-form-group">
                         <label class="lost-form-label"><span class="required-field" data-i18n="proxy.modal.room_num">방 번호</span></label>
-                        <input type="text" id="proxy-room-num" class="lost-form-input" placeholder="예: 1204호">
+                        <input type="text" id="proxy-room-num" class="lost-form-input" data-i18n="proxy.modal.room_num.ph" placeholder="예: 1204호">
                     </div>
                     <div class="lost-form-group">
                         <label class="lost-form-label"><span class="required-field" data-i18n="proxy.modal.reservation">호텔 예약내역</span></label>
@@ -410,7 +410,7 @@
                 <div class="proxy-sub-fields" id="proxy-sub-official" style="display: none;">
                     <div class="lost-form-group">
                         <label class="lost-form-label"><span class="required-field" data-i18n="proxy.modal.mgmt_num">관리번호 (접수번호)</span></label>
-                        <input type="text" id="proxy-mgmt-num" class="lost-form-input" placeholder="예: F2026072600000284-1">
+                        <input type="text" id="proxy-mgmt-num" class="lost-form-input" data-i18n="proxy.modal.mgmt_num.ph" placeholder="예: F2026072600000284-1">
                     </div>
                 </div>
 
@@ -418,11 +418,11 @@
                 <div class="proxy-sub-fields" id="proxy-sub-vehicle" style="display: none;">
                     <div class="lost-form-group">
                         <label class="lost-form-label"><span class="required-field" data-i18n="proxy.modal.vehicle_info">차량번호 또는 기사연락처</span></label>
-                        <input type="text" id="proxy-vehicle-info" class="lost-form-input" placeholder="예: 제주 12바 3456">
+                        <input type="text" id="proxy-vehicle-info" class="lost-form-input" data-i18n="proxy.modal.vehicle_info.ph" placeholder="예: 제주 12바 3456">
                     </div>
                     <div class="lost-form-group">
                         <label class="lost-form-label"><span data-i18n="proxy.modal.board_time">승/하차 시간</span></label>
-                        <input type="text" id="proxy-board-time" class="lost-form-input" placeholder="예: 오후 2시경">
+                        <input type="text" id="proxy-board-time" class="lost-form-input" data-i18n="proxy.modal.board_time.ph" placeholder="예: 오후 2시경">
                     </div>
                 </div>
 
@@ -430,14 +430,11 @@
                 <div class="proxy-sub-fields" id="proxy-sub-other" style="display: none;">
                     <div class="lost-form-group">
                         <label class="lost-form-label"><span class="required-field" data-i18n="proxy.modal.loc_detail">보관 장소 상세</span></label>
-                        <input type="text" id="proxy-location-detail" class="lost-form-input" placeholder="상세 설명을 적어주세요">
+                        <input type="text" id="proxy-location-detail" class="lost-form-input" data-i18n="proxy.modal.location_detail.ph" placeholder="상세히 적어주세요">
                     </div>
                 </div>
 
-                <div class="lost-form-group">
-                    <label class="lost-form-label"><i class="ph-duotone ph-user"></i> <span id="proxy-name-label" class="required-field" data-i18n="proxy.modal.name">신청자 이름 (여권과 동일)</span></label>
-                    <input type="text" id="proxy-name" class="lost-form-input" data-i18n="proxy.modal.name.ph" placeholder="이름을 입력해주세요">
-                </div>
+
 
                 <!-- 여권 사진 첨부 (필수) -->
                 <div class="lost-form-group">
