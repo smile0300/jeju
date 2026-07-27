@@ -312,7 +312,7 @@ const TRANSLATIONS = {
         'lost.notice.title': '失物招领中心使用指南',
         'lost.notice.howto': '使用方法',
         'lost.notice.how1': '选择上方的<b>地区</b>、<b>分类</b>和<b>日期</b>，点击搜索按钮即可查看当天的失物记录。',
-        'lost.notice.how2': '如果没有找到您的物品，请点击右下角的<b>+ 报失登记</b>按钮进行申告。',
+        'lost.notice.how2': '如果没有找到您的物品，请点击上方的<b>+ 报失登记</b>按钮。我们将协助您联系遗失地点或相关企业。',
         'lost.notice.how3': '使用列表上方的 <b>快速预览</b> 按钮可通过照片快速浏览，或使用 <b>详细信息</b> 按钮以表格形式查看详细信息。',
         'lost.notice.how4': '如果没有照片，说明相关机构未上传照片（护照、身份证等因涉及个人隐私，不上传照片）。',
         'lost.notice.progress_title': '进度说明',
@@ -323,7 +323,7 @@ const TRANSLATIONS = {
         'lost.notice.prog5': '<b>[客户自提]</b> 客户已亲自领取物品。',
         'lost.notice.alert': '注意事项',
         'lost.notice.alert1': '失物录入系统可能需要<b>1~3天时间</b>，建议您定期查看。',
-        'lost.notice.alert3': '公交车和出租车的遗失物录入系统可能需要<b>7天以上时间</b>。请直接联系相关运输公司。',
+        'lost.notice.alert3': '公交车和出租车的遗失物录入系统可能需要<b>7天以上时间</b>。请联系相关运输公司。',
         'lost.notice.alert2': '在保管处领取物品时，请务必携带<b>有效身份证件</b>以供核对。',
 
         // ── 현상금 동적 텍스트 ──
@@ -890,7 +890,7 @@ const TRANSLATIONS = {
         'lost.notice.title': '분실물 센터 이용 안내',
         'lost.notice.howto': '사용 방법',
         'lost.notice.how1': '원하는 <b>지역</b>, <b>날짜</b>, <b>분류</b>를 선택 후 검색 버튼을 누르면 조회됩니다.',
-        'lost.notice.how2': '내 물건이 없다면, 우측 하단의 <b>+ 분실물 등록</b> 버튼을 눌러 신고해 주세요.',
+        'lost.notice.how2': '내 물건이 없다면 상단의 <b>+ 분실물 등록</b> 버튼을 눌러 주세요. 분실장소, 해당업체에 연락 도와드립니다.',
         'lost.notice.how3': '목록 상단의 <b>미리보기</b> 버튼으로 사진과 함께 빠르게 훑어보거나, <b>상세 정보</b> 버튼을 통해 자세한 정보를 표 형태로 확인할 수 있습니다.',
         'lost.notice.how4': '사진이 없는 경우는 해당 기관에서 등록하지 않은 것입니다 (여권, 신분증의 경우 개인정보 보호를 위해 사진을 등록하지 않습니다).',
         'lost.notice.progress_title': '진행 상황 안내',
@@ -901,7 +901,7 @@ const TRANSLATIONS = {
         'lost.notice.prog5': '<b>[직접수령]</b> 고객님께서 직접 물품을 찾아가셨습니다.',
         'lost.notice.alert': '알아두세요',
         'lost.notice.alert1': '습득물이 시스템에 등록되기까지 <b>1~3일 정도 소요</b>될 수 있으니 주기적인 확인을 권장합니다.',
-        'lost.notice.alert3': '버스나 택시 분실물은 등록되는데까지 <b>7일 이상 소요</b>됩니다. 해당 운수회사로 직접 문의하셔야 합니다.',
+        'lost.notice.alert3': '버스나 택시 분실물은 등록되는데까지 <b>7일 이상 소요</b>됩니다. 해당 운수회사로 문의하셔야 합니다.',
         'lost.notice.alert2': '보관소에서 물품 수령 시 본인 확인을 위한 <b>신분증</b>을 지참해 주세요.',
 
         // ── 현상금 동적 텍스트 ──
@@ -1429,7 +1429,7 @@ const TRANSLATIONS = {
         'lost.notice.title': 'Lost & Found Center Guide',
         'lost.notice.howto': 'How to Use',
         'lost.notice.how1': 'Select a <b>region</b>, <b>date</b> and <b>category</b> above, then press search to view items.',
-        'lost.notice.how2': 'If you cannot find your item, click the <b>+ Register Lost Item</b> button at the bottom right to report it.',
+        'lost.notice.how2': 'If you cannot find your item, click the <b>+ Register Lost Item</b> button at the top. We will assist you in contacting the lost location or related company.',
         'lost.notice.how3': 'Use the <b>Preview</b> button at the top to quickly browse with photos, or the <b>Detailed Info</b> button to view detailed information in a table format.',
         'lost.notice.how4': 'If there is no photo, it means the organization did not upload one (for passports and IDs, photos are omitted to protect privacy).',
         'lost.notice.progress_title': 'Status Guide',
