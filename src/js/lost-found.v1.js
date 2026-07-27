@@ -515,6 +515,7 @@ export async function submitLostReport() {
         hotelDates: (getVal('lost-report-hotel-checkin') || getVal('lost-report-hotel-checkout')) 
             ? `${getVal('lost-report-hotel-checkin')} ~ ${getVal('lost-report-hotel-checkout')}` 
             : '',
+        hotelRoom: getVal('lost-report-hotel-room'),
         
         carNumber: getVal('lost-report-car-no'),
         boardLoc: getVal('lost-report-board-loc'),
@@ -529,7 +530,7 @@ export async function submitLostReport() {
         userAgent: navigator.userAgent,
         
         // Construct composite legacy fields just in case backend throws if missing
-        location: `[${regionCat}] ` + (regionCat === '호텔' ? `${getVal('lost-report-hotel-name')}` : (regionCat === '택시' || regionCat === '버스' ? `${getVal('lost-report-car-no')} ${getVal('lost-report-board-loc')}~${getVal('lost-report-alight-loc')}` : getVal('lost-report-detail-location')))
+        location: `[${regionCat}] ` + (regionCat === '호텔' ? `${getVal('lost-report-hotel-name')} ${getVal('lost-report-hotel-room')}호` : (regionCat === '택시' || regionCat === '버스' ? `${getVal('lost-report-car-no')} ${getVal('lost-report-board-loc')}~${getVal('lost-report-alight-loc')}` : getVal('lost-report-detail-location')))
     };
 
     if (!data.itemCategory || !data.city || !data.regionCategory || !data.wechatId || !data.photo) {
