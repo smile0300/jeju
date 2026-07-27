@@ -543,6 +543,17 @@ export async function submitLostReport() {
         }
         return;
     }
+    
+    if (data.regionCategory === '호텔' && !data.hotelRoom) {
+        if (statusEl) {
+            statusEl.textContent = window.t ? window.t('lost.report.fill_err') : '필수 항목(사진 포함)을 모두 입력해주세요.';
+            statusEl.className = 'form-status error';
+            statusEl.style.display = 'block';
+        } else {
+            alert(window.t ? window.t('lost.report.fill_err') : '필수 항목(사진 포함)을 모두 입력해주세요.');
+        }
+        return;
+    }
 
     const agreePrivacyCheckbox = document.getElementById('agreePrivacy');
     if (agreePrivacyCheckbox && !agreePrivacyCheckbox.checked) {
