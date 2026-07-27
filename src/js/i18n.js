@@ -418,7 +418,7 @@ const TRANSLATIONS = {
 
         // ── 모달: 분실물 신고 ──
         'modal.lost.title':      '登记报失物品',
-        'modal.lost.desc':       '请填写以下信息，我们将协助您在 LOST112 登记。 (填写越详细找回概率越高)',
+        'modal.lost.desc':       '请填写以下信息，我们将协助您在 MINWO24(LOST112) 登记。 (填写越详细找回概率越高)',
         'modal.lost.loc.label':  '丢失地点 (尽量详细)',
         'modal.lost.loc.ph':     '例如：西归浦每日奥来市场, 红色出租车内, GD咖啡厅2层靠窗位...',
         'modal.lost.date.label': '丢失日期',
@@ -989,7 +989,7 @@ const TRANSLATIONS = {
         'modal.wechat.copy':  '복사',
 
         'modal.lost.title':      '분실물 등록',
-        'modal.lost.desc':       '아래 정보를 입력해 주세요. LOST112 등록을 도와드립니다. (자세할수록 찾을 확률이 높아요)',
+        'modal.lost.desc':       '아래 정보를 입력해 주세요. MINWO24(LOST112) 등록을 도와드립니다. (자세할수록 찾을 확률이 높아요)',
         'modal.lost.loc.label':  '분실 장소 (최대한 자세히)',
         'modal.lost.loc.ph':     '예: 서귀포 이마트, 빨간 택시 안, GD카페 2층 창가...',
         'modal.lost.date.label': '분실 날짜',
@@ -1527,7 +1527,7 @@ const TRANSLATIONS = {
         'modal.wechat.copy':  'Copy',
 
         'modal.lost.title':      'Register Lost Item',
-        'modal.lost.desc':       'Fill in the details below and we\'ll help you register on LOST112. (More details = higher chance of recovery)',
+        'modal.lost.desc':       'Fill in the details below and we\'ll help you register on MINWO24(LOST112). (More details = higher chance of recovery)',
         'modal.lost.loc.label':  'Lost Location (as detailed as possible)',
         'modal.lost.loc.ph':     'e.g. Seogwipo Daily Olle Market, inside red taxi, GD Cafe 2F window seat...',
         'modal.lost.date.label': 'Date Lost',
