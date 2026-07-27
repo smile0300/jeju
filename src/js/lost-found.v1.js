@@ -1105,9 +1105,9 @@ export function renderSuccessGoodsView(isLoadMore = false) {
         if (isCompleted && dateStr) {
             let finalStatusStr = '';
             if (stepNum === 5) {
-                finalStatusStr = lang === 'ko' ? '직접수령' : (lang === 'en' ? 'Direct Pickup' : '直接领取');
+                finalStatusStr = lang === 'ko' ? '직접수령' : (lang === 'en' ? 'Direct Pickup' : '客户自提');
             } else {
-                finalStatusStr = lang === 'ko' ? '발송완료' : (lang === 'en' ? 'Dispatch Complete' : '发送完成');
+                finalStatusStr = lang === 'ko' ? '발송완료' : (lang === 'en' ? 'Dispatch Complete' : '已寄出');
             }
             dateStrHTML = `
                 <div class="success-all-meta" style="margin: 0; display: flex; flex-direction: column; gap: 2px;">
