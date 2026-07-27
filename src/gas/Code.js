@@ -18,9 +18,9 @@ function doPost(e) {
       // ══════════════════════════════════════════════════════
       // 대리수령 신청 → SuccessStories 1개 시트에 통합 저장
       //   공개 컬럼: CaseId, Step, Date, WeChatId, Item, Region, Place, ItemImg, Note
-      //   비공개 컬럼(관리자 전용): Timestamp, RequesterName, Contact, PickupMethod,
-      //                             Address, PassportPhoto, ReservationPhoto,
-      //                             MgmtNumber, Status, UserAgent, AdminNote
+      //   비공개 컬럼(관리자 전용): Timestamp, RequesterName, Contact, Address,
+      //                             PassportPhoto, ReservationPhoto,
+      //                             MgmtNumber, UserAgent, AdminNote
       // ※ ItemImg(공개)로 이미지 컬럼 통일 — ItemPhoto 중복 컬럼 제거
       // doGet 에서 공개 컬럼만 필터링하여 반환
       // ══════════════════════════════════════════════════════
@@ -32,9 +32,9 @@ function doPost(e) {
         successSheet = ss.insertSheet('SuccessStories');
         successSheet.appendRow([
           'CaseId', 'Step', 'Date', 'WeChatId', 'Item', 'Region', 'Place', 'ItemImg', 'Note',
-          'Timestamp', 'RequesterName', 'Contact', 'PickupMethod', 'Address',
+          'Timestamp', 'RequesterName', 'Contact', 'Address',
           'PassportPhoto', 'ReservationPhoto', 'MgmtNumber',
-          'Status', 'UserAgent', 'AdminNote'
+          'UserAgent', 'AdminNote'
         ]);
       }
 
@@ -77,9 +77,9 @@ function doPost(e) {
         var headers = existingData.length > 0
           ? existingData[0]
           : ['CaseId', 'Step', 'Date', 'WeChatId', 'Item', 'Region', 'Place', 'ItemImg', 'Note',
-             'Timestamp', 'RequesterName', 'Contact', 'PickupMethod', 'Address',
+             'Timestamp', 'RequesterName', 'Contact', 'Address',
              'PassportPhoto', 'ReservationPhoto', 'MgmtNumber',
-             'Status', 'UserAgent', 'AdminNote'];
+             'UserAgent', 'AdminNote'];
 
         var extraNotes = [];
         if (data.proxyLocationType) extraNotes.push('장소: ' + data.proxyLocationType);
@@ -105,12 +105,10 @@ function doPost(e) {
           'Timestamp'       : timestamp,
           'RequesterName'   : data.requesterName  || '',
           'Contact'         : data.phone          || '',
-          'PickupMethod'    : data.method         || 'delivery',
           'Address'         : data.address        || '',
           'PassportPhoto'   : passportUrl,
           'ReservationPhoto': reservationUrl,
           'MgmtNumber'      : data.mgmtNumber     || '',
-          'Status'          : 'pending',
           'UserAgent'       : data.userAgent      || '',
           'AdminNote'       : extraNotes.join(' / ')
         };

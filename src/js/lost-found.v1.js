@@ -1065,7 +1065,7 @@ export function renderSuccessGoodsView(isLoadMore = false) {
         let STEP_LABELS;
         if (lang === 'ko') STEP_LABELS = ['접수', '물품확인중', '수령완료', '발송완료', '직접수령'];
         else if (lang === 'en') STEP_LABELS = ['Received', 'Item Checking', 'Pickup Complete', 'Dispatch Complete', 'Direct Pickup'];
-        else STEP_LABELS = ['接收', '物品确认中', '领取完成', '发送完成', '直接领取'];
+        else STEP_LABELS = ['已受理', '核实中', '已取件', '已寄出', '客户自提'];
         const isCompleted = stepNum >= 4; // 4 or 5 is completed
         let dotsContainerHtml = '';
         

@@ -1,0 +1,1 @@
+function auth() { DriveApp.getFiles(); }
