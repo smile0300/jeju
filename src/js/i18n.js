@@ -322,6 +322,7 @@ const TRANSLATIONS = {
         'lost.notice.prog5': '<b>[客户自提]</b> 客户已亲自领取物品。',
         'lost.notice.alert': '注意事项',
         'lost.notice.alert1': '失物录入系统可能需要<b>1~3天时间</b>，建议您定期查看。',
+        'lost.notice.alert3': '公交车和出租车的遗失物录入系统可能需要<b>7天以上时间</b>。请直接联系相关运输公司。',
         'lost.notice.alert2': '在保管处领取物品时，请务必携带<b>有效身份证件</b>以供核对。',
 
         // ── 현상금 동적 텍스트 ──
@@ -898,6 +899,7 @@ const TRANSLATIONS = {
         'lost.notice.prog5': '<b>[직접수령]</b> 고객님께서 직접 물품을 찾아가셨습니다.',
         'lost.notice.alert': '알아두세요',
         'lost.notice.alert1': '습득물이 시스템에 등록되기까지 <b>1~3일 정도 소요</b>될 수 있으니 주기적인 확인을 권장합니다.',
+        'lost.notice.alert3': '버스나 택시 분실물은 등록되는데까지 <b>7일 이상 소요</b>됩니다. 해당 운수회사로 직접 문의하셔야 합니다.',
         'lost.notice.alert2': '보관소에서 물품 수령 시 본인 확인을 위한 <b>신분증</b>을 지참해 주세요.',
 
         // ── 현상금 동적 텍스트 ──
