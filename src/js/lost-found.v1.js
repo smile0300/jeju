@@ -1209,7 +1209,7 @@ window.closeLostUpsellModal = function(fromPopState = false) {
 
 window.checkProxyDeepLink = function() {
     const params = new URLSearchParams(window.location.search);
-    const isProxy = params.get('proxy') === 'true' || params.get('section') === 'proxy-pickup' || params.get('action') === 'proxy';
+    const isProxy = window.location.pathname === '/pickup' || params.get('proxy') === 'true' || params.get('section') === 'proxy-pickup' || params.get('action') === 'proxy';
     if (isProxy) {
         const caseId = params.get('caseId') || '';
         const itemName = params.get('item') || '';
