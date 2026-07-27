@@ -366,8 +366,8 @@ window.addEventListener('load', () => {
     }
 
     // Proxy Pickup Deep Link Check
-    if (typeof window.lostApp?.checkProxyDeepLink === 'function') {
-        window.lostApp.checkProxyDeepLink();
+    if (typeof window.checkProxyDeepLink === 'function') {
+        window.checkProxyDeepLink();
     }
 
     // Update loops

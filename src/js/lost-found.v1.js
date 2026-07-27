@@ -1207,6 +1207,25 @@ window.closeLostUpsellModal = function(fromPopState = false) {
 // 대리수령 신청 모달 함수들
 // ─────────────────────────────────────────────────────────────
 
+window.checkProxyDeepLink = function() {
+    const params = new URLSearchParams(window.location.search);
+    const isProxy = params.get('proxy') === 'true' || params.get('section') === 'proxy-pickup' || params.get('action') === 'proxy';
+    if (isProxy) {
+        const caseId = params.get('caseId') || '';
+        const itemName = params.get('item') || '';
+        const wechat = params.get('wechat') || '';
+        const region = params.get('region') || '';
+        const place = params.get('place') || '';
+        
+        setTimeout(() => {
+            if (typeof window.openProxyPickupModal === 'function') {
+                window.openProxyPickupModal(caseId, itemName, wechat, region, place);
+            }
+        }, 300);
+    }
+};
+
+
 let currentProxyStep = 1;
 const MAX_PROXY_STEP = 3;
 
