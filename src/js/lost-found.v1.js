@@ -1239,30 +1239,37 @@ window.openProxyPickupModal = function(caseId, itemName, originalWechat, region,
     const caseIdInput = document.getElementById('proxy-case-id');
     const itemNameInput = document.getElementById('proxy-item-name');
     
-    // 항상 부여 예정인 새 케이스 번호를 계산하여 표시 (새로 접수되어 생성되므로)
+    // 2. 만약 caseId가 전달되었다면 그걸 쓰고, 없으면 새로 부여 예정인 케이스 번호를 계산
     const lang = localStorage.getItem('jeju_lang') || 'zh';
-    let expectedId = '';
-    if (window.successStoriesData && window.successStoriesData.length > 0) {
-        let maxNum = 0;
-        window.successStoriesData.forEach(item => {
-            const match = (item.CaseId || '').toString().match(/(\d+)$/);
-            if (match) {
-                const num = parseInt(match[1], 10);
-                if (num > maxNum) maxNum = num;
-            }
-        });
-        expectedId = 'jeju-' + String(maxNum + 1).padStart(4, '0');
+    let displayCaseId = '';
+    
+    if (caseId && caseId.trim() !== '') {
+        displayCaseId = caseId.trim();
+        modal.dataset.caseId = displayCaseId; // 기존 건 업데이트용으로 보존
+    } else {
+        let expectedId = '';
+        if (window.successStoriesData && window.successStoriesData.length > 0) {
+            let maxNum = 0;
+            window.successStoriesData.forEach(item => {
+                const match = (item.CaseId || '').toString().match(/(\d+)$/);
+                if (match) {
+                    const num = parseInt(match[1], 10);
+                    if (num > maxNum) maxNum = num;
+                }
+            });
+            expectedId = 'jeju-' + String(maxNum + 1).padStart(4, '0');
+        }
+        const pendingStr = lang === 'ko' ? ' (예정)' : (lang === 'en' ? ' (Expected)' : ' (预计)');
+        const autoStr = lang === 'ko' ? '자동 부여' : (lang === 'en' ? 'Auto-assigned' : '自动分配');
+        displayCaseId = expectedId ? expectedId + pendingStr : autoStr;
+        modal.dataset.caseId = ''; // 새로 부여될 것이므로 빈 값 처리
     }
-    const pendingStr = lang === 'ko' ? ' (예정)' : (lang === 'en' ? ' (Expected)' : ' (预计)');
-    const autoStr = lang === 'ko' ? '자동 부여' : (lang === 'en' ? 'Auto-assigned' : '自动分配');
-    const displayCaseId = expectedId ? expectedId + pendingStr : autoStr;
     
     if (caseIdInput) caseIdInput.value = displayCaseId;
     if (itemNameInput) itemNameInput.value = itemName || '';
 
     // 숨겨진 필드에 데이터 저장 (제출 및 딥링크 복사 시 사용)
     modal.dataset.originalWechat = originalWechat || '';
-    modal.dataset.caseId = ''; // 새로 부여될 것이므로 빈 값 처리
     modal.dataset.itemName = itemName || '';
     modal.dataset.region = region || '';
     modal.dataset.place = place || '';
@@ -1428,7 +1435,7 @@ window.submitProxyPickup = async function() {
     const submitBtn = document.getElementById('proxy-submit-btn');
     const modal     = document.getElementById('proxy-pickup');
 
-    const caseId        = (document.getElementById('proxy-case-id')?.value || '').trim();
+    const caseId        = modal?.dataset.caseId || '';
     const itemName      = (document.getElementById('proxy-item-name')?.value || '').trim();
     const requesterName = (document.getElementById('proxy-name')?.value || '').trim();
     const contact       = (document.getElementById('proxy-contact')?.value || '').trim(); // WeChat ID
