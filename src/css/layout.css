@@ -356,11 +356,18 @@
 
 /* ==================== 언어 선택기 ==================== */
 /* 언어 선택기 (드롭다운 구조) */
-.lang-selector {
+.top-controls {
     position: absolute;
     top: 10px;
     right: 10px;
     z-index: 100;
+    display: flex;
+    align-items: center;
+    flex-direction: row-reverse;
+    gap: 8px;
+}
+.lang-selector {
+    position: relative;
 }
 
 .lang-icon-btn {

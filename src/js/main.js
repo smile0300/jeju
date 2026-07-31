@@ -400,5 +400,65 @@ window.addEventListener('load', () => {
                 console.log('ServiceWorker registration failed: ', err);
             });
     }
+
+    // Dynamic Alternating Banner (Weather <-> Marquee)
+    setInterval(() => {
+        const alertEl = document.getElementById('home-alerts-container');
+        const marqueeEl = document.getElementById('home-marquee-container');
+        if (!alertEl || !marqueeEl) return;
+
+        // Ensure marquee is at least display flex
+        if (marqueeEl.style.display === 'none') {
+            marqueeEl.style.display = 'flex';
+            marqueeEl.style.opacity = '1';
+        }
+        if (alertEl.style.display !== 'none' && alertEl.style.display !== '') {
+            const hasAlert = alertEl.innerHTML.trim().length > 0 && !alertEl.querySelector('.no-alerts');
+            if (hasAlert) {
+                const alertVisible = alertEl.style.opacity === '1' || alertEl.style.opacity === '';
+                if (alertVisible) {
+                    alertEl.style.opacity = '0';
+                    alertEl.style.pointerEvents = 'none';
+                    marqueeEl.style.opacity = '1';
+                    marqueeEl.style.pointerEvents = 'auto';
+                    marqueeEl.style.zIndex = '2';
+                    alertEl.style.zIndex = '1';
+                } else {
+                    alertEl.style.opacity = '1';
+                    alertEl.style.pointerEvents = 'auto';
+                    marqueeEl.style.opacity = '0';
+                    marqueeEl.style.pointerEvents = 'none';
+                    alertEl.style.zIndex = '2';
+                    marqueeEl.style.zIndex = '1';
+                }
+            } else {
+                alertEl.style.opacity = '0';
+                marqueeEl.style.opacity = '1';
+            }
+        }
+    }, 5000);
 });
+
+// PWA Install Logic
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    const btn = document.getElementById('pwa-install-btn');
+    if (btn) btn.style.display = 'block';
+});
+
+window.installPWA = async () => {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+            deferredPrompt = null;
+            document.getElementById('pwa-install-btn').style.display = 'none';
+        }
+    } else {
+        alert(window.t ? window.t('install.not_supported') : 'Please use the Share > Add to Home Screen feature in your browser.');
+    }
+};
+
 

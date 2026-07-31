@@ -594,6 +594,7 @@ const TRANSLATIONS = {
         'seo.desc.hallasan': '汉拿山登山路线实时通行状态及管制信息',
         'seo.desc.airport': '济州机场(CJU)实时航班起降信息',
         'seo.desc.festival': '济州岛近期节庆活动日历',
+        'install.not_supported': '如果是在 iPhone(Safari) 上，请点击下方的分享按钮，选择「添加到主屏幕」即可安装！',
     },
 
     ko: {

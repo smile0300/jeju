@@ -1310,3 +1310,17 @@ i.ph-duotone.hover-scale:hover {
     50%       { box-shadow: 0 0 0 4px rgba(49, 130, 246, 0.12); }
 }
 
+
+/* APP Install Button */
+.app-install-btn {
+    background: #000;
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    cursor: pointer;
+    margin-left: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}

@@ -1,16 +1,21 @@
 <!-- ===== Home Section ===== -->
 <section id="home" class="app-section active">
     <div class="home-screen">
-        <!-- 언어 선택기 (우측 상단) -->
-        <div class="lang-selector">
-            <button class="lang-icon-btn" onclick="document.querySelector('.lang-selector').classList.toggle('show')">
-                <i class="ph-duotone ph-globe"></i>
-            </button>
-            <div class="lang-dropdown">
-                <button class="lang-btn active" data-lang="zh" onclick="setLanguage('zh')">CN</button>
-                <button class="lang-btn" data-lang="ko" onclick="setLanguage('ko')">KR</button>
-                <button class="lang-btn" data-lang="en" onclick="setLanguage('en')">EN</button>
+        <!-- 상단 컨트롤 -->
+        <div class="top-controls">
+            <!-- 언어 선택기 (우측 상단) -->
+            <div class="lang-selector">
+                <button class="lang-icon-btn" onclick="document.querySelector('.lang-selector').classList.toggle('show')">
+                    <i class="ph-duotone ph-globe"></i>
+                </button>
+                <div class="lang-dropdown">
+                    <button class="lang-btn active" data-lang="zh" onclick="setLanguage('zh')">CN</button>
+                    <button class="lang-btn" data-lang="ko" onclick="setLanguage('ko')">KR</button>
+                    <button class="lang-btn" data-lang="en" onclick="setLanguage('en')">EN</button>
+                </div>
             </div>
+            <!-- APP 설치 버튼 -->
+            <button id="pwa-install-btn" class="app-install-btn" style="display:none;" onclick="installPWA()">APP</button>
         </div>
 
         <div class="home-welcome">
@@ -22,8 +27,26 @@
             <!-- 간결한 tagline -->
             <p class="home-tagline" data-i18n="home.tagline">济州旅行 · 实时情报 · 一站搞定</p>
         </div>
-        <!-- Home Weather Alert Banner -->
-        <div id="home-alerts-container" class="weather-alerts-container" style="display: none; padding: 0 20px; margin-bottom: 20px;"></div>
+        <!-- Home Dynamic Banner Area (Weather Alert <-> Lost Success Marquee) -->
+        <div id="home-dynamic-banner-area" style="padding: 0 20px; margin-bottom: 20px; height: 64px; display: flex; align-items: center; justify-content: center; position: relative;">
+            
+            <!-- 1. Weather Alert -->
+            <div id="home-alerts-container" class="weather-alerts-container" style="display: none; margin: 0; position: absolute; width: calc(100% - 40px); transition: opacity 0.5s ease;"></div>
+            
+            <!-- 2. Lost & Found Success Marquee -->
+            <div id="home-marquee-container" class="weather-alert-card marquee-alert-card" style="display: none; margin: 0; position: absolute; width: calc(100% - 40px); background: rgba(255, 145, 0, 0.08); border: 0.5px solid rgba(255, 145, 0, 0.3); box-shadow: 0 4px 15px rgba(255, 145, 0, 0.05); overflow: hidden; padding: 12px 18px; transition: opacity 0.5s ease;" onclick="window.goToLostStatus()">
+                <!-- Badge like weather alert -->
+                <div class="alert-type-badge" style="background: var(--color-orange); color: white; border-radius: 8px; padding: 4px 8px; font-weight: 800; font-size: 0.75rem; white-space: nowrap; flex-shrink: 0;"><i class="ph-duotone ph-confetti"></i> <span data-i18n="lost.modal.success_title">寻物动态</span></div>
+                
+                <!-- Marquee Content -->
+                <div class="marquee-container" style="flex-grow: 1; border: none; box-shadow: none; margin: 0; padding: 0 0 0 12px; background: transparent;">
+                    <div class="marquee-content" id="home-success-marquee-content" style="color: var(--text-primary); font-size: 0.85rem; font-weight: 600;">
+                        <!-- JS injected -->
+                    </div>
+                </div>
+            </div>
+
+        </div>
 
         <div class="home-grid">
             <!-- CCTV 버튼: 8월 신청폼으로 연결 -->
