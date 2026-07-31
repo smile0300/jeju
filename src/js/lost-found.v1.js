@@ -817,6 +817,11 @@ function renderSuccessMarquee(data) {
         statusMarqueeContainer.innerHTML = itemsHtml + firstClone;
     }
 
+    const homeMarqueeContainer = document.getElementById('home-success-marquee-content');
+    if (homeMarqueeContainer) {
+        homeMarqueeContainer.innerHTML = itemsHtml + firstClone;
+    }
+
     // Dynamic Animation — 전체 아이템 기준 계산
     const totalSlots = data.length;
     let styleEl = document.getElementById('dynamic-marquee-style');
@@ -848,6 +853,9 @@ function renderSuccessMarquee(data) {
     }
     if (statusMarqueeContainer) {
         statusMarqueeContainer.style.animation = `dynamic-vertical-ticker ${animationDuration}s infinite`;
+    }
+    if (homeMarqueeContainer) {
+        homeMarqueeContainer.style.animation = `dynamic-vertical-ticker ${animationDuration}s infinite`;
     }
 }
 

@@ -418,15 +418,19 @@ window.addEventListener('load', () => {
                 const alertVisible = alertEl.style.opacity === '1' || alertEl.style.opacity === '';
                 if (alertVisible) {
                     alertEl.style.opacity = '0';
+                    alertEl.style.transform = 'translateY(-10px) scale(0.98)';
                     alertEl.style.pointerEvents = 'none';
                     marqueeEl.style.opacity = '1';
+                    marqueeEl.style.transform = 'translateY(0) scale(1)';
                     marqueeEl.style.pointerEvents = 'auto';
                     marqueeEl.style.zIndex = '2';
                     alertEl.style.zIndex = '1';
                 } else {
                     alertEl.style.opacity = '1';
+                    alertEl.style.transform = 'translateY(0) scale(1)';
                     alertEl.style.pointerEvents = 'auto';
                     marqueeEl.style.opacity = '0';
+                    marqueeEl.style.transform = 'translateY(10px) scale(0.98)';
                     marqueeEl.style.pointerEvents = 'none';
                     alertEl.style.zIndex = '2';
                     marqueeEl.style.zIndex = '1';
@@ -434,6 +438,7 @@ window.addEventListener('load', () => {
             } else {
                 alertEl.style.opacity = '0';
                 marqueeEl.style.opacity = '1';
+                marqueeEl.style.transform = 'translateY(0) scale(1)';
             }
         }
     }, 5000);

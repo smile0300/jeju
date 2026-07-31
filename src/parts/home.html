@@ -31,10 +31,10 @@
         <div id="home-dynamic-banner-area" style="padding: 0 20px; margin-bottom: 20px; height: 64px; display: flex; align-items: center; justify-content: center; position: relative;">
             
             <!-- 1. Weather Alert -->
-            <div id="home-alerts-container" class="weather-alerts-container" style="display: none; margin: 0; position: absolute; width: calc(100% - 40px); transition: opacity 0.5s ease;"></div>
+            <div id="home-alerts-container" style="display: none; margin: 0; position: absolute; left: 20px; width: calc(100% - 40px); transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); transform-origin: center;"></div>
             
             <!-- 2. Lost & Found Success Marquee -->
-            <div id="home-marquee-container" class="weather-alert-card marquee-alert-card" style="display: none; margin: 0; position: absolute; width: calc(100% - 40px); background: rgba(255, 145, 0, 0.08); border: 0.5px solid rgba(255, 145, 0, 0.3); box-shadow: 0 4px 15px rgba(255, 145, 0, 0.05); overflow: hidden; padding: 12px 18px; transition: opacity 0.5s ease;" onclick="window.goToLostStatus()">
+            <div id="home-marquee-container" class="weather-alert-card marquee-alert-card" style="display: none; margin: 0; position: absolute; left: 20px; width: calc(100% - 40px); background: rgba(255, 145, 0, 0.08); border: 0.5px solid rgba(255, 145, 0, 0.3); box-shadow: 0 4px 15px rgba(255, 145, 0, 0.05); overflow: hidden; padding: 12px 18px; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); transform-origin: center;" onclick="window.goToLostStatus()">
                 <!-- Badge like weather alert -->
                 <div class="alert-type-badge" style="background: var(--color-orange); color: white; border-radius: 8px; padding: 4px 8px; font-weight: 800; font-size: 0.75rem; white-space: nowrap; flex-shrink: 0;"><i class="ph-duotone ph-confetti"></i> <span data-i18n="lost.modal.success_title">寻物动态</span></div>
                 
