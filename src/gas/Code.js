@@ -98,7 +98,7 @@ function doPost(e) {
           'WeChatId'        : data.contact || data.originalWechat || data.wechatId || '',
           'Item'            : data.itemName   || '',
           'Region'          : '',
-          'Place'           : (data.proxyLocationType || '') + (data.hotelName ? ' - ' + data.hotelName : ''),
+          'Place'           : data.proxyLocationType === '호텔' ? (data.hotelName || '호텔') : (data.proxyLocationType || '') + (data.hotelName ? ' - ' + data.hotelName : ''),
           'ItemImg'         : itemPhotoUrl,
           'Note'            : '',
           // 비공개 컬럼 (관리자 전용)
@@ -176,11 +176,19 @@ function doPost(e) {
 
         }
         
+        var translatedSpecifics = "";
+        if (data.specifics) {
+          try { translatedSpecifics = MY_DEEPL(data.specifics, "KO"); } catch(e) {}
+        }
+        
         rowData = {
           'Timestamp': timestamp,
           'ItemCategory': data.itemCategory || '',
           'City': data.city || '',
           'Specifics': data.specifics || '',
+          '분실내용(자동번역)': translatedSpecifics,
+          'Specifics_Trans': translatedSpecifics,
+          'Specifics_ko': translatedSpecifics,
           'RegionCategory': data.regionCategory || '',
           'Date': data.date || '',
           'Time': data.time ? "'" + data.time : '',

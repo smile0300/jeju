@@ -478,13 +478,38 @@ export function handleLostImageChange(event) {
         event.target.value = '';
         return;
     }
-    if (file.size > 2 * 1024 * 1024) { alert(window.t('lost.report.size_err')); return; }
     const reader = new FileReader();
     reader.onload = (e) => {
-        lostReportImageBase64 = e.target.result;
-        const preview = document.getElementById('lost-report-photo-preview');
-        preview.innerHTML = `<img src="${lostReportImageBase64}" alt="Preview">`;
-        preview.style.display = 'block';
+        const img = new Image();
+        img.onload = () => {
+            let width = img.width;
+            let height = img.height;
+            const MAX_SIZE = 1200;
+            
+            if (width > height) {
+                if (width > MAX_SIZE) {
+                    height *= MAX_SIZE / width;
+                    width = MAX_SIZE;
+                }
+            } else {
+                if (height > MAX_SIZE) {
+                    width *= MAX_SIZE / height;
+                    height = MAX_SIZE;
+                }
+            }
+            
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            lostReportImageBase64 = canvas.toDataURL('image/jpeg', 0.7);
+            const preview = document.getElementById('lost-report-photo-preview');
+            preview.innerHTML = `<img src="${lostReportImageBase64}" alt="Preview" style="max-width: 100%; border-radius: 4px;">`;
+            preview.style.display = 'block';
+        };
+        img.src = e.target.result;
     };
     reader.readAsDataURL(file);
 }
