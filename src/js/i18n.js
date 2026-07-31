@@ -1171,6 +1171,7 @@ const TRANSLATIONS = {
         'seo.desc.hallasan': '한라산 등산로 실시간 통제 및 개방 정보',
         'seo.desc.airport': '제주공항 실시간 운항 및 지연 정보',
         'seo.desc.festival': '제주도 다가오는 축제 및 행사 일정',
+        'install.not_supported': '아이폰(Safari)의 경우, 화면 하단의 공유(보내기) 버튼을 누른 후 [홈 화면에 추가]를 선택하시면 설치됩니다!',
     },
 
     en: {
@@ -1707,6 +1708,7 @@ const TRANSLATIONS = {
         'seo.desc.hallasan': 'Hallasan Mountain trail live status and closure information',
         'seo.desc.airport': 'Jeju Airport (CJU) live flight arrivals and departures',
         'seo.desc.festival': 'Jeju Island upcoming festivals and events calendar',
+        'install.not_supported': 'On iOS (Safari), please tap the Share button and select [Add to Home Screen] to install!',
     }
 
 };
