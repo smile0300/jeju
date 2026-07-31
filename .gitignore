@@ -40,4 +40,5 @@ wrangler_logs.txt
 *.png
 !public/assets/*.png
 !public/assets/*.webp
+!public/img/*.png
 .vercel
