@@ -46,6 +46,12 @@
                 </div>
             </div>
 
+            <!-- 3. Notice Banner (APP Download) -->
+            <div id="home-notice-container" class="weather-alert-card notice-alert-card" style="display: none; margin: 0; position: absolute; left: 20px; width: calc(100% - 40px); overflow: hidden; padding: 12px 18px; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); transform-origin: center;" onclick="window.openAppDownloadModal()">
+                <div class="alert-type-badge" style="background: var(--color-blue); color: white; border-radius: 8px; padding: 4px 8px; font-weight: 800; font-size: 0.75rem; white-space: nowrap; flex-shrink: 0;"><i class="ph-duotone ph-info"></i> <span data-i18n="notice.badge">Notice</span></div>
+                <div class="alert-msg" style="margin-left: 12px; font-size: 0.95rem;" data-i18n="notice.app_download">JEJU LIVE APP사용 확대</div>
+            </div>
+
         </div>
 
         <div class="home-grid">

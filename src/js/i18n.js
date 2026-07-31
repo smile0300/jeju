@@ -595,6 +595,12 @@ const TRANSLATIONS = {
         'seo.desc.airport': '济州机场(CJU)实时航班起降信息',
         'seo.desc.festival': '济州岛近期节庆活动日历',
         'install.not_supported': '如果是在 iPhone(Safari) 上，请点击下方的分享按钮，选择「添加到主屏幕」即可安装！',
+        'notice.badge': '公告',
+        'notice.app_download': 'JEJU LIVE APP 推广中，欢迎安装使用',
+        'modal.app_download.title': 'JEJU LIVE APP 安装方法',
+        'modal.app_download.ios': '点击屏幕下方的 [分享] 按钮，然后选择 [添加到主屏幕] 即可。',
+        'modal.app_download.aos': '点击右上角的菜单 (⋮)，然后选择 [安装应用] 或 [添加到主屏幕] 即可。',
+        'modal.app_download.confirm': '明白了',
     },
 
     ko: {
@@ -1172,6 +1178,12 @@ const TRANSLATIONS = {
         'seo.desc.airport': '제주공항 실시간 운항 및 지연 정보',
         'seo.desc.festival': '제주도 다가오는 축제 및 행사 일정',
         'install.not_supported': '아이폰(Safari)의 경우, 화면 하단의 공유(보내기) 버튼을 누른 후 [홈 화면에 추가]를 선택하시면 설치됩니다!',
+        'notice.badge': 'Notice',
+        'notice.app_download': 'JEJU LIVE APP사용 확대',
+        'modal.app_download.title': 'JEJU LIVE APP 설치 방법',
+        'modal.app_download.ios': '화면 하단의 [공유] 버튼을 누른 후, [홈 화면에 추가]를 선택하세요.',
+        'modal.app_download.aos': '우측 상단의 메뉴(⋮)를 누른 후, [앱 설치] 또는 [홈 화면에 추가]를 선택하세요.',
+        'modal.app_download.confirm': '확인했습니다',
     },
 
     en: {
@@ -1709,6 +1721,12 @@ const TRANSLATIONS = {
         'seo.desc.airport': 'Jeju Airport (CJU) live flight arrivals and departures',
         'seo.desc.festival': 'Jeju Island upcoming festivals and events calendar',
         'install.not_supported': 'On iOS (Safari), please tap the Share button and select [Add to Home Screen] to install!',
+        'notice.badge': 'Notice',
+        'notice.app_download': 'Install the JEJU LIVE APP today',
+        'modal.app_download.title': 'How to install JEJU LIVE APP',
+        'modal.app_download.ios': 'Tap the [Share] button at the bottom of the screen, then select [Add to Home Screen].',
+        'modal.app_download.aos': 'Tap the menu (⋮) at the top right, then select [Install App] or [Add to Home Screen].',
+        'modal.app_download.confirm': 'Got it',
     }
 
 };

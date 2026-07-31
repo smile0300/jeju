@@ -921,7 +921,13 @@
     box-sizing: border-box;
     box-shadow: 0 4px 15px rgba(255, 36, 66, 0.05);
     cursor: pointer;
-    /* v20.0: ?占쎈┃ 媛???占쎌떆 */
+    height: 52px;
+}
+
+.notice-alert-card {
+    background: rgba(49, 130, 246, 0.08) !important;
+    border: 0.5px solid rgba(49, 130, 246, 0.3) !important;
+    box-shadow: 0 4px 15px rgba(49, 130, 246, 0.05) !important;
 }
 
 .weather-alert-card.no-alerts {

@@ -401,46 +401,80 @@ window.addEventListener('load', () => {
             });
     }
 
-    // Dynamic Alternating Banner (Weather <-> Marquee)
+    // Dynamic Alternating Banner (Weather, Marquee, Notice)
     setInterval(() => {
         const alertEl = document.getElementById('home-alerts-container');
         const marqueeEl = document.getElementById('home-marquee-container');
-        if (!alertEl || !marqueeEl) return;
+        const noticeEl = document.getElementById('home-notice-container');
+        if (!alertEl || !marqueeEl || !noticeEl) return;
 
-        // Ensure marquee is at least display flex
-        if (marqueeEl.style.display === 'none') {
-            marqueeEl.style.display = 'flex';
-            marqueeEl.style.opacity = '1';
-        }
-        if (alertEl.style.display !== 'none' && alertEl.style.display !== '') {
-            const hasAlert = alertEl.innerHTML.trim().length > 0 && !alertEl.querySelector('.no-alerts');
-            if (hasAlert) {
-                const alertVisible = alertEl.style.opacity === '1' || alertEl.style.opacity === '';
-                if (alertVisible) {
-                    alertEl.style.opacity = '0';
-                    alertEl.style.transform = 'translateY(-10px) scale(0.98)';
-                    alertEl.style.pointerEvents = 'none';
-                    marqueeEl.style.opacity = '1';
-                    marqueeEl.style.transform = 'translateY(0) scale(1)';
-                    marqueeEl.style.pointerEvents = 'auto';
-                    marqueeEl.style.zIndex = '2';
-                    alertEl.style.zIndex = '1';
-                } else {
-                    alertEl.style.opacity = '1';
-                    alertEl.style.transform = 'translateY(0) scale(1)';
-                    alertEl.style.pointerEvents = 'auto';
-                    marqueeEl.style.opacity = '0';
-                    marqueeEl.style.transform = 'translateY(10px) scale(0.98)';
-                    marqueeEl.style.pointerEvents = 'none';
-                    alertEl.style.zIndex = '2';
-                    marqueeEl.style.zIndex = '1';
+        const hasAlert = alertEl.innerHTML.trim().length > 0 && !alertEl.querySelector('.no-alerts');
+        const marqueeContentEl = document.getElementById('home-success-marquee-content');
+        const hasMarquee = marqueeContentEl && marqueeContentEl.innerHTML.trim().length > 0;
+        const hasNotice = true;
+
+        const validBanners = [];
+        if (hasAlert) validBanners.push(alertEl);
+        if (hasMarquee) validBanners.push(marqueeEl);
+        if (hasNotice) validBanners.push(noticeEl);
+
+        if (validBanners.length === 0) return;
+
+        validBanners.forEach(el => {
+            if (el.style.display === 'none') el.style.display = 'flex';
+        });
+
+        if (validBanners.length === 1) {
+            const singleEl = validBanners[0];
+            singleEl.style.opacity = '1';
+            singleEl.style.transform = 'translateY(0) scale(1)';
+            singleEl.style.pointerEvents = 'auto';
+            singleEl.style.zIndex = '2';
+            
+            [alertEl, marqueeEl, noticeEl].forEach(el => {
+                if (el !== singleEl) {
+                    el.style.opacity = '0';
+                    el.style.pointerEvents = 'none';
+                    el.style.zIndex = '1';
+                    el.style.display = 'none';
                 }
-            } else {
-                alertEl.style.opacity = '0';
-                marqueeEl.style.opacity = '1';
-                marqueeEl.style.transform = 'translateY(0) scale(1)';
-            }
+            });
+            return;
         }
+
+        let currentIndex = validBanners.findIndex(el => el.style.opacity === '1');
+        if (currentIndex === -1) currentIndex = 0;
+
+        const nextIndex = (currentIndex + 1) % validBanners.length;
+        const currentEl = validBanners[currentIndex];
+        const nextEl = validBanners[nextIndex];
+
+        if (currentEl) {
+            currentEl.style.opacity = '0';
+            currentEl.style.transform = 'translateY(-10px) scale(0.98)';
+            currentEl.style.pointerEvents = 'none';
+            currentEl.style.zIndex = '1';
+        }
+        
+        if (nextEl) {
+            if (nextEl.style.opacity === '0') {
+                nextEl.style.transform = 'translateY(10px) scale(0.98)';
+            }
+            setTimeout(() => {
+                nextEl.style.opacity = '1';
+                nextEl.style.transform = 'translateY(0) scale(1)';
+                nextEl.style.pointerEvents = 'auto';
+                nextEl.style.zIndex = '2';
+            }, 50);
+        }
+        
+        [alertEl, marqueeEl, noticeEl].forEach(el => {
+            if (el !== currentEl && el !== nextEl) {
+                el.style.opacity = '0';
+                el.style.pointerEvents = 'none';
+                el.style.zIndex = '1';
+            }
+        });
     }, 5000);
 });
 
@@ -467,3 +501,26 @@ window.installPWA = async () => {
 };
 
 
+
+
+window.openAppDownloadModal = function() {
+    const modal = document.getElementById('app-download-modal');
+    if (modal) {
+        modal.style.display = 'flex';
+        // Trigger reflow
+        void modal.offsetWidth;
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+};
+
+window.closeAppDownloadModal = function() {
+    const modal = document.getElementById('app-download-modal');
+    if (modal) {
+        modal.classList.remove('show');
+        setTimeout(() => {
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+        }, 300);
+    }
+};
