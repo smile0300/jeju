@@ -11,9 +11,9 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          'i18n': ['./src/js/i18n.js'],
-          'weather': ['./src/js/weather.js'],
-          'lost': ['./src/js/lost-found.v1.js']
+          'i18n': ['./src/js/core/i18n.js'],
+          'weather': ['./src/js/features/weather.js'],
+          'lost': ['./src/js/features/lost-found.v1.js']
         }
       }
     }

@@ -1,5 +1,5 @@
-import { CONFIG } from './config.js';
-import { escapeHTML } from './utils.js';
+import { CONFIG } from '../core/config.js';
+import { escapeHTML } from '../core/utils.js';
 
 let cachedLostItems = [];
 let currentLostView = 'card';
@@ -1524,7 +1524,7 @@ window.submitProxyPickup = async function() {
     if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = '...'; }
 
     try {
-        const { CONFIG } = await import('./config.js');
+        const { CONFIG } = await import('../core/config.js');
         const apiUrl = `${CONFIG.PROXY_URL}/api/lost-report`;
 
         // 파일 인코딩 대기 (1~2초 소요)

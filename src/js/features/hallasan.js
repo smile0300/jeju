@@ -1,8 +1,8 @@
-import { CONFIG } from './config.js';
+import { CONFIG } from '../core/config.js';
 import { initHlsPlayer } from './cctv.js';
 import { WEATHER_STATE } from './weather.js';
 import { calculateVisibilityScore } from './hallasan-dashboard.js';
-import { getSunTimes } from './utils.js';
+import { getSunTimes } from '../core/utils.js';
 
 export const HALLASAN_TRAILS = [
     { nameKo: '어리목탐방로', nameCn: '御里牧登山路', nameEn: 'Eorimok', distanceKo: '6.8km', distanceCn: '6.8km', distanceEn: '6.8km', timeKo: '약 3시간', timeCn: '约3小时', timeEn: 'Approx. 3h', url: 'https://www.jeju.go.kr/hallasan/info/info/realtime/course01.htm' },

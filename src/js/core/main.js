@@ -2,16 +2,17 @@
 import { CONFIG } from './config.js';
 import { initI18n } from './i18n.js';
 
-import { initCCTV, openCctvModalById, openCctvModal, initHlsPlayer } from './cctv.js';
-import { fetchWeatherData, switchWeatherLocation, updateHourlyWeather, fetchWeatherAlerts, fetchPastWeather } from './weather.js';
-import { fetchHallasanStatus } from './hallasan.js';
-import { renderHallasanDashboard } from './hallasan-dashboard.js';
-import { fetchFlights, switchFlightTab } from './airport.js';
-import { fetchFoundGoods, switchLostView, openLostDetailModalByIndex, openLostReportModal, handleLostImageChange, submitLostReport, showWechatQR, fetchSuccessStories } from './lost-found.v1.js';
-import { fetchFestivals, selectFestivalMonth, initMonthFilter } from './festival.js';
-import { initReward } from './reward.js';
-import { showSection, openWechatQR, closeWechatQR, openFeatureModal, closeFeatureModal, submitFeatureRequest, openCSModal, closeCSModal, submitCSFeedback, copyWechatId, openWeatherSummaryModal, closeWeatherSummaryModal, openShareModal, closeShareModal, shareToPlatform } from './ui.js';
-import './home.js';
+import { initCCTV, openCctvModalById, openCctvModal, initHlsPlayer } from '../features/cctv.js';
+import { fetchWeatherData, switchWeatherLocation, updateHourlyWeather, fetchWeatherAlerts, fetchPastWeather } from '../features/weather.js';
+import { fetchHallasanStatus } from '../features/hallasan.js';
+import { renderHallasanDashboard } from '../features/hallasan-dashboard.js';
+import { fetchFlights, switchFlightTab } from '../features/airport.js';
+import { fetchFoundGoods, switchLostView, openLostDetailModalByIndex, openLostReportModal, handleLostImageChange, submitLostReport, showWechatQR, fetchSuccessStories } from '../features/lost-found.v1.js';
+import { fetchFestivals, selectFestivalMonth, initMonthFilter } from '../features/festival.js';
+import { initReward } from '../features/reward.js';
+import { showSection, openWechatQR, closeWechatQR, openFeatureModal, closeFeatureModal, submitFeatureRequest, openCSModal, closeCSModal, submitCSFeedback, copyWechatId, openWeatherSummaryModal, closeWeatherSummaryModal, openShareModal, closeShareModal, shareToPlatform } from '../ui/ui.js';
+import '../ui/home.js';
+
 
 
 // Global function assignments for HTML event handlers

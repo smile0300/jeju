@@ -1,4 +1,4 @@
-import { CONFIG } from './config.js';
+import { CONFIG } from '../core/config.js';
 import { renderHallasanDashboard } from './hallasan-dashboard.js';
 
 // ============================================================

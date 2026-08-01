@@ -1,6 +1,6 @@
 import { WEATHER_STATE } from './weather.js';
-import { CONFIG } from './config.js';
-import { getSunTimes } from './utils.js';
+import { CONFIG } from '../core/config.js';
+import { getSunTimes } from '../core/utils.js';
 
 /**
  * 한라산 가시성 및 일출 대시보드 렌더링 (간소화 버전)

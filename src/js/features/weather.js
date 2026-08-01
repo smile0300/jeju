@@ -1,6 +1,6 @@
-import { CONFIG } from './config.js';
-import { getSkyInfo, getWindDesc, getWindColor, formatPrecip, formatBaseTime, translateMidWf, getMidTempVal, getSunTimes } from './utils.js';
-import { fetchPublicDataJson } from './api.js';
+import { CONFIG } from '../core/config.js';
+import { getSkyInfo, getWindDesc, getWindColor, formatPrecip, formatBaseTime, translateMidWf, getMidTempVal, getSunTimes } from '../core/utils.js';
+import { fetchPublicDataJson } from '../core/api.js';
 
 
 // 날씨 데이터 전역 상태 관리 (지역별 데이터 캐싱)

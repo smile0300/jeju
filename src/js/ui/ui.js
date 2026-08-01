@@ -1,7 +1,7 @@
-import { CONFIG } from './config.js';
-import { t } from './i18n.js';
+import { CONFIG } from '../core/config.js';
+import { t } from '../core/i18n.js';
 
-import { getSkyInfo, getWindColor } from './utils.js';
+import { getSkyInfo, getWindColor } from '../core/utils.js';
 
 const _initialized = {};
 

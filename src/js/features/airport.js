@@ -1,5 +1,5 @@
-import { CONFIG } from './config.js';
-import { fetchPublicDataText } from './api.js';
+import { CONFIG } from '../core/config.js';
+import { fetchPublicDataText } from '../core/api.js';
 
 const AIRLINE_NAMES = {
     'KE': { zh: '大韩航空', ko: '대한항공', en: 'Korean Air' },
