@@ -2,4 +2,7 @@ name = "jeju-live"
 pages_build_output_dir = "dist"
 
 [build]
-command = "npm run build"
+command = "npm install && npm run build"
+
+[vars]
+NODE_VERSION = "20"
