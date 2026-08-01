@@ -1864,24 +1864,48 @@ function updateLangSelector() {
 
 /**
  * 초기화: 저장된 언어 적용
+ * ─────────────────────────────────────────────────────────────────────
+ * [Self-Initializing Module 패턴]
+ * 이 모듈은 import 되는 즉시 스스로 초기화합니다.
+ * - html[lang] 속성: 모듈 파싱 즉시 설정 (SEO 최적화)
+ * - applyTranslations: DOMContentLoaded 또는 즉시 실행
+ * initI18n()은 하위 호환성을 위해 유지되며 중복 호출 시 no-op.
+ * ─────────────────────────────────────────────────────────────────────
  */
-export function initI18n() {
-    // SEO: 초기 로딩 시 저장된 언어로 html[lang] 즉시 설정
-    const savedLang = localStorage.getItem('jeju_lang') || currentLang;
-    const langMap = { zh: 'zh-CN', ko: 'ko', en: 'en' };
-    document.documentElement.lang = langMap[savedLang] || 'en';
+let _i18nInitialized = false;
 
-    // DOM이 준비된 후 번역 적용
+export function initI18n() {
+    // 이미 자동 초기화가 완료된 경우 no-op (중복 방지)
+    if (_i18nInitialized) return;
+    _autoInit();
+}
+
+function _autoInit() {
+    if (_i18nInitialized) return;
+    _i18nInitialized = true;
+
+    // SEO: html[lang] 속성 즉시 설정 (DOM 준비 여부와 무관)
+    const langMap = { zh: 'zh-CN', ko: 'ko', en: 'en' };
+    document.documentElement.lang = langMap[currentLang] || 'zh-CN';
+
+    // 번역 적용: DOM 준비 여부에 따라 분기
     if (document.readyState === 'loading') {
+        // DOMContentLoaded 이전 → 이벤트 등록 (window.load보다 훨씬 빠름)
         document.addEventListener('DOMContentLoaded', () => {
             applyTranslations();
             updateLangSelector();
-        });
+        }, { once: true });
     } else {
+        // DOMContentLoaded 이후 (또는 complete) → 즉시 실행
         applyTranslations();
         updateLangSelector();
     }
 }
+
+// ── 모듈 자동 초기화 (import 즉시 실행) ──────────────────────────────
+// type="module" 스크립트는 defer로 동작하므로 DOMContentLoaded 직전/직후에
+// 실행됩니다. window.load(외부 리소스 완료)를 기다리지 않아도 됩니다.
+_autoInit();
 
 // 전역 노출 (HTML onclick 등에서 사용)
 window.setLanguage = setLanguage;
