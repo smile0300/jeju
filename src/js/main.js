@@ -372,11 +372,14 @@ window.addEventListener('load', () => {
     }
 
     // Update loops
-    setInterval(() => {
+    if (window.flightIntervalId) clearInterval(window.flightIntervalId);
+    window.flightIntervalId = setInterval(() => {
         const activeTab = document.querySelector('.flight-tab.active');
         fetchFlights(activeTab?.id === 'tab-depart' ? 'depart' : 'arrive');
     }, 60000);
-    setInterval(() => {
+
+    if (window.weatherIntervalId) clearInterval(window.weatherIntervalId);
+    window.weatherIntervalId = setInterval(() => {
         Object.keys(CONFIG.WEATHER_LOCATIONS).forEach(loc => fetchWeatherData(loc));
         fetchWeatherAlerts();
         renderHallasanDashboard(); 
@@ -402,7 +405,8 @@ window.addEventListener('load', () => {
     }
 
     // Dynamic Alternating Banner (Weather, Marquee, Notice)
-    setInterval(() => {
+    if (window.bannerIntervalId) clearInterval(window.bannerIntervalId);
+    window.bannerIntervalId = setInterval(() => {
         const alertEl = document.getElementById('home-alerts-container');
         const marqueeEl = document.getElementById('home-marquee-container');
         const noticeEl = document.getElementById('home-notice-container');

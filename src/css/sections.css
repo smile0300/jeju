@@ -1,8 +1,8 @@
 /* ==================== Lost Report Modal Form ==================== */
-/* (modals.html?먯꽌 ?댁쟾?????몃씪??<style> 釉붾줉 ?쒓굅) */
+/* (modals.html?�?�� ??�쟾?????몃씪??<style> ?�붾�???�굅) */
 .lost-report-form-content {
     padding: 32px 24px 24px 24px;
-    max-width: 520px !important;
+    max-width: 520px;
     max-height: 85vh;
     overflow-y: auto;
     box-sizing: border-box;
@@ -141,8 +141,8 @@
 
 /* ==================== CCTV ==================== */
 .cctv-apply-modal-content {
-    max-width: 400px !important;
-    padding: 32px 24px 24px 24px !important;
+    max-width: 400px;
+    padding: 32px 24px 24px 24px;
     text-align: center;
     max-height: 90vh; /* svh is better but vh is safer for old browsers */
     max-height: 90svh; 
@@ -335,7 +335,7 @@
     height: 100%;
     display: block;
     object-fit: cover;
-    /* ?占쎈㈃ ?占쎈┝ 諛⑼옙?占??占쏀빐 湲곕낯?占?cover, ?占쎌슂??contain */
+    /* ??�쎈????�쎈??諛⑼??????��?�?湲곕????cover, ??�쎌???contain */
 }
 
 /* Modal specific CCTV styles */
@@ -352,7 +352,7 @@
     width: 100%;
     height: 100%;
     object-fit: contain;
-    /* ???占쎈㈃?占쎌꽌??媛濡쒖꽭占?鍮꾩쑉 ?占쏙옙? 沅뚯옣 */
+    /* ????�쎈???�쎌�??媛濡?�꽭????��????�쏙?? 沅뚯??*/
 }
 
 .cctv-modal-info {
@@ -383,7 +383,7 @@
 }
 
 #festival .ad-container::before {
-    content: '愿묎퀬 濡쒕뱶 占?..';
+    content: '?�묎??濡쒕�???..';
     position: absolute;
     top: 50%;
     left: 50%;
@@ -455,7 +455,7 @@
     margin-top: 12px;
 }
 
-/* ?묓옒 ?곹깭: ?좏깮??吏???쒖떆 ?몃━嫄?踰꾪듉 */
+/* ?묓옒 ?곹깭: ?좏깮??�????�떆 ?몃━�?踰꾪??*/
 .loc-trigger-row {
     display: flex;
     align-items: center;
@@ -497,7 +497,7 @@
     color: #2563EB;
 }
 
-/* ?붿궡???꾩씠肄? ?쇱묠 ???뚯쟾 */
+/* ?붿궡???꾩씠?? ??�묠 ?????�� */
 .loc-caret {
     font-size: 0.85rem;
     color: #2563EB;
@@ -524,49 +524,49 @@
 }
 
 .location-tabs {
-    display: flex !important;
-    flex-direction: column !important;
-    width: 100% !important;
-    padding: 14px 0 4px 0 !important;
-    /* ?곷떒 14px: group-label(top:-10px) ?섎┝ 諛⑹? */
-    margin-top: 2px !important;
-    gap: 0 !important;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 14px 0 4px 0;
+    /* ?곷떒 14px: group-label(top:-10px) ??�┝ 諛⑹? */
+    margin-top: 2px;
+    gap: 0;
 }
 
 
 .loc-row {
-    display: grid !important;
-    grid-template-columns: repeat(5, 1fr) !important;
-    gap: 8px !important;
-    /* Grid 媛꾧꺽 8px */
-    width: 100% !important;
-    padding: 16px 2px 2px 2px !important;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    /* Grid 媛꾧�?8px */
+    width: 100%;
+    padding: 16px 2px 2px 2px;
 }
 
 /* 2nd Row Specific: adjust padding */
 .loc-row:nth-child(2) {
-    padding-top: 12px !important;
-    padding-bottom: 16px !important;
+    padding-top: 12px;
+    padding-bottom: 16px;
 }
 
 .loc-row::-webkit-scrollbar {
-    display: none !important;
+    display: none;
 }
 
-/* 洹몃９ 而⑦뀒?대꼫 (?대? 踰꾪듉 媛꾧꺽??Grid 媛꾧꺽怨??꾨꼍 ?쇱튂) */
+/* 洹몃�??�⑦???��?(??�? 踰꾪??媛꾧�??Grid 媛꾧꺽�??꾨꼍 ??�튂) */
 .loc-group-wrapper {
-    display: flex !important;
-    align-items: stretch !important;
-    gap: 8px !important;
-    /* 遺紐?媛꾧꺽怨??숈씪?섍쾶 8px */
-    position: relative !important;
-    padding: 0 !important;
-    /* 紐⑤뱺 ?⑤뵫 ?쒓굅?섏뿬 踰꾪듉 ?ш린/媛꾧꺽 ?쇱튂 */
-    border-radius: 0 !important;
-    background: transparent !important;
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+    /* ?�紐?媛꾧꺽�???�씪??�쾶 8px */
+    position: relative;
+    padding: 0;
+    /* 紐⑤�???�뵫 ??�굅??�뿬 踰꾪????�?媛꾧�???�튂 */
+    border-radius: 0;
+    background: transparent;
 }
 
-/* 5媛쒖쓽 而щ읆??留욊쾶 洹몃９蹂꾨줈 李⑥??섎뒗 移???Span) 吏??*/
+/* 5媛쒖???�щ읆??留욊�?洹몃９蹂꾨줈 李⑥???�뒗 �???Span) �??*/
 .group-north {
     grid-column: span 1;
 }
@@ -587,61 +587,61 @@
     grid-column: span 1;
 }
 
-/* ?쇰꺼: 泥ル쾲吏?踰꾪듉 ?곷떒 醫뚯륫 瑗???먯뿉 湲곗슱?댁쭊 諭껋? ?뺥깭濡?諛곗튂 */
+/* ??�꺼: 泥ル쾲吏?踰꾪???곷떒 ?�뚯�?????�?�� 湲곗???�쭊 �?��? ?뺥깭�?諛곗??*/
 .group-label {
-    display: inline-block !important;
-    position: absolute !important;
-    top: -10px !important;
-    left: -4px !important;
-    background: #ffffff !important;
-    padding: 2px 6px !important;
-    font-size: 0.65rem !important;
-    font-weight: 900 !important;
-    line-height: 1.2 !important;
-    z-index: 30 !important;
-    border-radius: 4px !important;
-    transform: rotate(-10deg) !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08) !important;
-    border: 1px solid rgba(0, 0, 0, 0.04) !important;
-    pointer-events: none !important;
-    /* ?대┃ 諛⑺빐 諛⑹? */
+    display: inline-block;
+    position: absolute;
+    top: -10px;
+    left: -4px;
+    background: #ffffff;
+    padding: 2px 6px;
+    font-size: 0.65rem;
+    font-weight: 900;
+    line-height: 1.2;
+    z-index: 30;
+    border-radius: 4px;
+    transform: rotate(-10deg);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    pointer-events: none;
+    /* ??�??諛⑺�?諛⑹? */
 }
 
-/* ?쇰꺼 ?띿뒪???됱긽 吏??퀎 留욎땄 蹂寃?*/
+/* ??�꺼 ??�뒪????�긽 �????留욎??蹂寃?*/
 .group-north .group-label {
-    color: #2563EB !important;
+    color: #2563EB;
 }
 
 .group-south .group-label {
-    color: #EA580C !important;
+    color: #EA580C;
 }
 
 .group-west .group-label {
-    color: #E11D48 !important;
+    color: #E11D48;
 }
 
 .group-east .group-label {
-    color: #059669 !important;
+    color: #059669;
 }
 
 .group-mountain .group-label {
-    color: #8B5A2B !important;
+    color: #8B5A2B;
 }
 
 .location-tab {
-    flex: 1 1 0 !important;
-    width: auto !important;
-    min-width: 50px !important;
+    flex: 1 1 0;
+    width: auto;
+    min-width: 50px;
     background: var(--bg-primary);
     padding: 9px 0;
-    /* border 1px 異붽?濡??명븳 ?⑤뵫 誘몄꽭議곗젙 */
+    /* border 1px ?�붽?�??명븳 ??�뵫 誘몄�??곗젙 */
     border-radius: var(--radius-md);
     cursor: pointer;
     transition: all var(--duration-fast) var(--ease-out);
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    gap: 3px !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 }
 
@@ -650,31 +650,31 @@
     transform: scale(0.97);
 }
 
-/* 吏??퀎 ??湲곕낯 ?뚮몢由?(誘몄꽑???곹깭) - ?????댄듃 */
+/* �??????湲곕?????��??(誘몄�???곹깭) - ??????�듃 */
 .group-north .location-tab {
-    border: 1px solid rgba(37, 99, 235, 0.25) !important;
+    border: 1px solid rgba(37, 99, 235, 0.25);
 }
 
 .group-south .location-tab {
-    border: 1px solid rgba(234, 88, 12, 0.25) !important;
+    border: 1px solid rgba(234, 88, 12, 0.25);
 }
 
 .group-east .location-tab {
-    border: 1px solid rgba(5, 150, 105, 0.25) !important;
+    border: 1px solid rgba(5, 150, 105, 0.25);
 }
 
 .group-west .location-tab {
-    border: 1px solid rgba(225, 29, 72, 0.25) !important;
+    border: 1px solid rgba(225, 29, 72, 0.25);
 }
 
 .group-mountain .location-tab {
-    border: 1px solid rgba(139, 90, 43, 0.25) !important;
+    border: 1px solid rgba(139, 90, 43, 0.25);
 }
 
-/* 吏??퀎 ?쒖꽦(Active) ???뚮쭏 而щ윭 */
+/* �??????�꽦(Active) ?????�� ?�щ윭 */
 .location-tab.active {
     box-shadow: none;
-    border-color: transparent !important;
+    border-color: transparent;
 }
 
 .tab-icon {
@@ -702,33 +702,33 @@
 
     .location-tab {
         padding: 6px 0;
-        min-width: 0 !important;
+        min-width: 0;
     }
 }
 
 .location-tab.active .tab-icon,
 .location-tab.active .tab-name {
-    color: white !important;
+    color: white;
 }
 
 .group-north .location-tab.active {
-    background: #2563EB !important;
+    background: #2563EB;
 }
 
 .group-south .location-tab.active {
-    background: #EA580C !important;
+    background: #EA580C;
 }
 
 .group-east .location-tab.active {
-    background: #059669 !important;
+    background: #059669;
 }
 
 .group-west .location-tab.active {
-    background: #E11D48 !important;
+    background: #E11D48;
 }
 
 .group-mountain .location-tab.active {
-    background: #8B5A2B !important;
+    background: #8B5A2B;
 }
 
 .current-weather {
@@ -772,7 +772,7 @@
     font-size: 2.8rem;
     font-weight: 700;
     /* Heavy ??Bold */
-    /* Apple HIG: ?⑥깋 ??洹몃씪?곗씠???쒓굅 */
+    /* Apple HIG: ??�깋 ??洹몃??곗씠????�굅 */
     color: var(--label-primary);
 }
 
@@ -790,10 +790,10 @@
     align-items: center;
     justify-content: center;
     padding: 30px 0;
-    width: 100% !important;
+    width: 100%;
     text-align: center;
     grid-column: 1 / -1;
-    /* 洹몃━???占쎌껜 ?占쎌뿭 李⑨옙? 媛뺤젣 */
+    /* 洹몃?????�쎌�???�쎌�?李⑨?? 媛뺤??*/
 }
 
 .weather-loader {
@@ -866,7 +866,7 @@
 }
 
 
-/* 理쒖긽??湲곗긽?밸낫 諛곕꼫 (議곌굔遺 ?쒖떆) */
+/* 理쒖�??湲곗�?밸낫 諛곕�?(議곌굔遺 ??�떆) */
 .weather-alerts-top-banner {
     width: 100%;
     margin-top: 12px;
@@ -886,7 +886,7 @@
     }
 }
 
-/* 湲곗〈 weather-alerts-container (?ъ슜?섏? ?딆쑝???덊솕硫댁뿉???ъ슜 以? */
+/* 湲곗??weather-alerts-container (?????? ??�쑝????�솕硫댁�??????�? */
 .weather-alerts-container {
     width: 100%;
     margin-top: 10px;
@@ -910,7 +910,7 @@
 
 .weather-alert-card {
     background: rgba(255, 36, 66, 0.08);
-    /* ?占쏀븳 鍮④컙??諛곌꼍 */
+    /* ??��?�???���??諛곌�?*/
     border: 0.5px solid rgba(255, 36, 66, 0.3);
     border-radius: var(--radius-xl, 20px);
     padding: 12px 18px;
@@ -925,9 +925,9 @@
 }
 
 .notice-alert-card {
-    background: rgba(49, 130, 246, 0.08) !important;
-    border: 0.5px solid rgba(49, 130, 246, 0.3) !important;
-    box-shadow: 0 4px 15px rgba(49, 130, 246, 0.05) !important;
+    background: rgba(49, 130, 246, 0.08);
+    border: 0.5px solid rgba(49, 130, 246, 0.3);
+    box-shadow: 0 4px 15px rgba(49, 130, 246, 0.05);
 }
 
 .weather-alert-card.no-alerts {
@@ -1051,14 +1051,14 @@
 
 /* Titles and Alignment */
 .subsection-title-wrap {
-    display: none !important;
+    display: none;
     /* Title removed per user request */
 }
 
 /* Weather Dashboard UI Improvements */
 .weekly-item.active .weekly-day {
-    color: var(--accent-blue) !important;
-    font-weight: 900 !important;
+    color: var(--accent-blue);
+    font-weight: 900;
 }
 
 .weather-summary-btn-container {
@@ -1068,9 +1068,9 @@
 }
 
 .weather-summary-btn.inline {
-    position: static !important;
-    transform: none !important;
-    margin: 0 auto !important;
+    position: static;
+    transform: none;
+    margin: 0 auto;
 }
 
 .subsection-title-wrap {
@@ -1085,7 +1085,7 @@
 .subsection-title,
 .cmp-cur-weather-head {
     margin: 40px 0 24px 0;
-    /* ?щ갚 ?뺣? */
+    /* ??�??�? */
     font-size: 1.35rem;
     /* ?고듃 利앸? */
     font-weight: 800;
@@ -1266,7 +1266,7 @@
     color: #10b981;
 }
 
-/* 占?- Green */
+/* ??- Green */
 .air-lv2 {
     stroke: #f59e0b;
     color: #f59e0b;
@@ -1278,13 +1278,13 @@
     color: #ef4444;
 }
 
-/* 饔삣벧 - Red */
+/* 饔삣�?- Red */
 .air-lv4 {
     stroke: #9333ea;
     color: #9333ea;
 }
 
-/* ?占썲벧 - Purple */
+/* ??�썲�?- Purple */
 
 .air-circle-status {
     position: absolute;
@@ -1474,7 +1474,7 @@
     color: white;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     white-space: nowrap;
-    /* 諭껋???以꾨컮轅??덊븿 */
+    /* �?��???以꾨�?��???�븿 */
 }
 
 .trail-status-badge.open {
@@ -1503,7 +1503,7 @@
 }
 
 .probability-block {
-    padding: 0 !important;
+    padding: 0;
     overflow: hidden;
     justify-content: space-between;
     min-height: 100px;
@@ -1534,7 +1534,7 @@
     font-size: 0.75rem;
     font-weight: 800;
     color: var(--label-primary);
-    /* white-space: nowrap ?쒓굅 */
+    /* white-space: nowrap ??�굅 */
     word-break: keep-all;
     text-align: center;
     width: 100%;
@@ -1549,9 +1549,9 @@
     border-top: 1px dashed var(--border-light);
     padding-top: 8px;
     flex-wrap: nowrap;
-    /* 以꾨컮占?諛⑼옙? */
+    /* 以꾨�?��?諛⑼?? */
     gap: 5px;
-    /* ?占쎌냼 占?理쒖냼 媛꾧꺽 */
+    /* ??�쎌????理쒖??媛꾧�?*/
 }
 
 .trail-info-compact span {
@@ -1559,9 +1559,9 @@
     font-weight: 700;
     color: var(--text-muted);
     white-space: nowrap;
-    /* ?占쎌뒪??以꾨컮占?諛⑼옙? */
+    /* ??�쎌???以꾨�?��?諛⑼?? */
     flex-shrink: 0;
-    /* ?占쎌냼媛 以꾩뼱?占쏙옙? ?占쎈룄占??占쎌젙 */
+    /* ??�쎌?�媛 以꾩�??�쏙?? ??�쎈룄占???�쎌??*/
 }
 
 /* ==================== Flights ==================== */
@@ -1593,7 +1593,7 @@
     justify-content: center;
 }
 
-/* Apple HIG: ?쒖꽦 ?????⑥깋 Accent */
+/* Apple HIG: ??�꽦 ??????�깋 Accent */
 .flight-tab.active {
     background: var(--bg-primary);
     color: var(--accent);
@@ -1659,7 +1659,7 @@
     white-space: nowrap;
 }
 
-/* ?ょ룺??*/
+/* ??�룺??*/
 .flight-col:nth-child(2) {
     flex: 0 0 25%;
     word-break: keep-all;
@@ -1667,7 +1667,7 @@
     line-height: 1.1;
 }
 
-/* ?ょ㈉?у뤈 */
+/* ??�㈉??�?*/
 .flight-col:nth-child(3) {
     flex: 0 0 21%;
     word-break: keep-all;
@@ -1675,19 +1675,19 @@
     line-height: 1.1;
 }
 
-/* ??쉪???뷴룕??*/
+/* ??????뷴룕??*/
 .flight-col:nth-child(4) {
     flex: 0 0 22%;
     white-space: nowrap;
 }
 
-/* 窯꾢츣/若욇솀 */
+/* �?���?若욇?� */
 .flight-col:nth-child(5) {
     flex: 0 0 18%;
     word-break: keep-all;
 }
 
-/* ?뜻?*/
+/* ???*/
 
 /* ==================== Festival ==================== */
 .festival-month-filter {
@@ -1710,13 +1710,13 @@
     cursor: pointer;
     white-space: nowrap;
     transition: all var(--duration-fast) var(--ease-out);
-    /* 44px 理쒖냼 ?믪씠 */
+    /* 44px 理쒖???믪씠 */
     min-height: var(--touch-target);
     display: flex;
     align-items: center;
 }
 
-/* Apple HIG: ?쒖꽦 ?꾪꽣 ??Accent ?⑥깋 */
+/* Apple HIG: ??�꽦 ?꾪꽣 ??Accent ??�깋 */
 .month-tab.active {
     background: var(--accent);
     color: white;
@@ -1781,7 +1781,7 @@
     color: white;
     border-radius: 12px 0 12px 0;
     z-index: 2;
-    background: #222 !important;
+    background: #222;
 }
 
 .festival-info {
@@ -1997,7 +1997,7 @@
     height: 56px;
 }
 
-/* lost-category-badge: ????遺꾨쪟 占? */
+/* lost-category-badge: ?????�꾨�??? */
 .lost-category-badge {
     display: inline-block;
     padding: 3px 10px;
@@ -2008,7 +2008,7 @@
     font-weight: 800;
 }
 
-/* lost-table-btn: ?占쎌씠???占쎌꽭 蹂닿린 踰꾪듉 */
+/* lost-table-btn: ??�쎌?????�쎌�?蹂닿�?踰꾪??*/
 .lost-table-btn {
     padding: 8px 16px;
     background: white;
@@ -2376,9 +2376,9 @@
 .lost-report-btn:hover,
 .hallasan-action-btn:hover {
     background: var(--primary-gradient);
-    color: white !important;
+    color: white;
     /* Ensure inline text color changes on hover */
-    border-color: transparent !important;
+    border-color: transparent;
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(37, 99, 235, 0.2);
 }
@@ -2550,10 +2550,10 @@
     }
 }
 
-/* ==================== ?占쎌뵪 ?占쎌빟 踰꾪듉 ==================== */
+/* ==================== ??�쎌�???�쎌�?踰꾪??==================== */
 /* weather-summary-btn is defined in the top titles area */
 
-/* ==================== ?占쎌뵪 ?占쎌빟 紐⑤떖 ==================== */
+/* ==================== ??�쎌�???�쎌�?紐⑤??==================== */
 .wsm-overlay {
     position: fixed;
     inset: 0;
@@ -2929,8 +2929,8 @@
 /* CCTV Map Marker Premium Styles */
 .cctv-marker {
     cursor: pointer;
-    transition: none !important;
-    transform: none !important;
+    transition: none;
+    transform: none;
 }
 
 .marker-dot {
@@ -2938,14 +2938,14 @@
     stroke: #ffffff;
     stroke-width: 4px;
     filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.8));
-    transition: none !important;
+    transition: none;
 }
 
 .marker-label {
     font-family: "Outfit", sans-serif;
     pointer-events: none;
     opacity: 0.9;
-    transition: none !important;
+    transition: none;
 }
 
 .jeju-region {
@@ -3009,16 +3009,16 @@
 
 /* Centering title fix */
 .wsm-header2 {
-    position: relative !important;
-    display: flex !important;
-    justify-content: flex-end !important;
+    position: relative;
+    display: flex;
+    justify-content: flex-end;
 }
 
 .wsm-title-bar {
-    position: absolute !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    pointer-events: none !important;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: none;
 }
 
 /* Capture Result Modal Overlay */
@@ -3168,28 +3168,28 @@
 
 /* ==================== Weather Summary Fullscreen (Clean View) ==================== */
 .wsm-overlay.fullscreen {
-    background: #f8fafc !important;
-    backdrop-filter: none !important;
-    padding: 0 !important;
+    background: #f8fafc;
+    backdrop-filter: none;
+    padding: 0;
 }
 
 .wsm-panel.fullscreen {
-    max-width: none !important;
-    max-height: 100% !important;
-    height: 100% !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
+    max-width: none;
+    max-height: 100%;
+    height: 100%;
+    border-radius: 0;
+    box-shadow: none;
 }
 
 .wsm-panel.fullscreen .wsm-body2 {
-    display: flex !important;
-    overflow-x: auto !important;
-    scroll-snap-type: x mandatory !important;
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
-    padding: 0 !important;
-    margin: 0 !important;
-    height: 100% !important;
-    width: 100% !important;
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    width: 100%;
     scrollbar-width: none;
     /* Firefox */
     -ms-overflow-style: none;
@@ -3197,7 +3197,7 @@
 }
 
 .wsm-fullscreen-hide {
-    display: none !important;
+    display: none;
 }
 
 .wsm-exit-hint {
@@ -3227,8 +3227,8 @@
     right: 15px;
     width: 36px;
     height: 36px;
-    background: rgba(255, 255, 255, 0.4) !important;
-    backdrop-filter: blur(2px) !important;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(2px);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -3243,21 +3243,21 @@
 }
 
 .wsm-fullscreen-exit-btn:hover {
-    background: rgba(255, 255, 255, 0.8) !important;
+    background: rgba(255, 255, 255, 0.8);
     transform: scale(1.1);
 }
 
 
 /* ==================== Weather Summary Slider Mode ==================== */
 .wsm-panel.fullscreen .wsm-body2 {
-    display: flex !important;
-    overflow-x: auto !important;
-    scroll-snap-type: x mandatory !important;
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
-    padding: 0 !important;
-    margin: 0 !important;
-    height: 100% !important;
-    width: 100% !important;
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    width: 100%;
     scrollbar-width: none;
     /* Firefox */
     -ms-overflow-style: none;
@@ -3265,19 +3265,19 @@
 }
 
 .wsm-panel.fullscreen .wsm-loc-block {
-    width: 100% !important;
-    min-width: 100% !important;
-    flex-shrink: 0 !important;
-    scroll-snap-align: start !important;
-    margin: 0 !important;
-    padding: 50px 15px 30px 15px !important;
-    box-sizing: border-box !important;
-    display: flex !important;
-    flex-direction: column !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    height: 100% !important;
-    overflow-y: hidden !important;
+    width: 100%;
+    min-width: 100%;
+    flex-shrink: 0;
+    scroll-snap-align: start;
+    margin: 0;
+    padding: 50px 15px 30px 15px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    background: transparent;
+    box-shadow: none;
+    height: 100%;
+    overflow-y: hidden;
     justify-content: center;
 }
 
@@ -3311,7 +3311,7 @@
 .wsm-nav-zone {
     position: fixed;
     top: 60px;
-    /* Header ?占쎌뿭 ?占쎌쇅 */
+    /* Header ??�쎌�???�쎌??*/
     bottom: 0;
     width: 30%;
     z-index: 9998;
@@ -3329,152 +3329,152 @@
 
 /* Fullscreen Compact Layout Optimization */
 .wsm-panel.fullscreen .wsm-loc-title {
-    font-size: 1.1rem !important;
-    margin-bottom: 15px !important;
+    font-size: 1.1rem;
+    margin-bottom: 15px;
 }
 
 .wsm-panel.fullscreen .wsm-hourly-grid {
-    display: grid !important;
-    grid-template-columns: repeat(6, 1fr) !important;
-    gap: 6px 4px !important;
-    width: 100% !important;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 6px 4px;
+    width: 100%;
 }
 
 .wsm-panel.fullscreen .wsm-h-item {
-    padding: 6px 2px !important;
-    background: rgba(255, 255, 255, 0.05) !important;
-    border-radius: 8px !important;
+    padding: 6px 2px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
 }
 
 .wsm-panel.fullscreen .h-time {
-    font-size: 0.65rem !important;
+    font-size: 0.65rem;
     opacity: 0.8;
 }
 
 .wsm-panel.fullscreen .h-icon {
-    font-size: 1.4rem !important;
-    margin: 2px 0 !important;
+    font-size: 1.4rem;
+    margin: 2px 0;
 }
 
 .wsm-panel.fullscreen .h-temp {
-    font-size: 0.85rem !important;
-    font-weight: 800 !important;
+    font-size: 0.85rem;
+    font-weight: 800;
 }
 
 .wsm-panel.fullscreen .h-wind {
-    font-size: 0.6rem !important;
+    font-size: 0.6rem;
 }
 
 .wsm-panel.fullscreen .h-precip {
-    font-size: 0.6rem !important;
+    font-size: 0.6rem;
 }
 
 @media (max-height: 700px) {
     .wsm-panel.fullscreen .wsm-loc-block {
-        width: 100% !important;
-        min-width: 100% !important;
-        flex-shrink: 0 !important;
-        scroll-snap-align: start !important;
-        margin: 0 !important;
-        padding: 50px 15px 30px 15px !important;
-        box-sizing: border-box !important;
-        display: flex !important;
-        flex-direction: column !important;
-        background: transparent !important;
-        box-shadow: none !important;
-        height: 100% !important;
-        overflow-y: hidden !important;
+        width: 100%;
+        min-width: 100%;
+        flex-shrink: 0;
+        scroll-snap-align: start;
+        margin: 0;
+        padding: 50px 15px 30px 15px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        background: transparent;
+        box-shadow: none;
+        height: 100%;
+        overflow-y: hidden;
         justify-content: center;
     }
 
     .wsm-panel.fullscreen .wsm-hourly-grid {
-        grid-template-columns: repeat(8, 1fr) !important;
-        gap: 4px 2px !important;
+        grid-template-columns: repeat(8, 1fr);
+        gap: 4px 2px;
     }
 
     .wsm-panel.fullscreen .h-icon {
-        font-size: 1.1rem !important;
+        font-size: 1.1rem;
     }
 
     .wsm-panel.fullscreen .wsm-loc-title {
-        font-size: 0.9rem !important;
-        margin-bottom: 8px !important;
+        font-size: 0.9rem;
+        margin-bottom: 8px;
     }
 }
 
 /* Fullscreen Header Elements */
 .wsm-fs-indicator-header {
-    font-size: 0.8rem !important;
-    background: rgba(0, 0, 0, 0.05) !important;
-    padding: 4px 12px !important;
-    border-radius: 20px !important;
-    color: #475569 !important;
-    font-weight: 800 !important;
-    margin-right: 12px !important;
-    display: inline-flex !important;
-    align-items: center !important;
+    font-size: 0.8rem;
+    background: rgba(0, 0, 0, 0.05);
+    padding: 4px 12px;
+    border-radius: 20px;
+    color: #475569;
+    font-weight: 800;
+    margin-right: 12px;
+    display: inline-flex;
+    align-items: center;
 }
 
 .wsm-fs-close-btn {
-    background: rgba(0, 0, 0, 0.05) !important;
-    border: 1px solid rgba(0, 0, 0, 0.1) !important;
-    width: 32px !important;
-    height: 32px !important;
-    border-radius: 50% !important;
-    color: #475569 !important;
-    font-size: 1.1rem !important;
-    cursor: pointer !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    transition: all 0.2s !important;
-    padding: 0 !important;
-    line-height: 1 !important;
-    z-index: 10001 !important;
+    background: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    color: #475569;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    padding: 0;
+    line-height: 1;
+    z-index: 10001;
 }
 
 .wsm-fs-close-btn:hover {
-    background: rgba(0, 0, 0, 0.1) !important;
+    background: rgba(0, 0, 0, 0.1);
     transform: scale(1.1);
 }
 
 .wsm-header-btns.wsm-fullscreen-hide>button:not(.wsm-fs-close-btn) {
-    display: none !important;
+    display: none;
 }
 
 .wsm-header-btns.wsm-fullscreen-hide {
-    display: flex !important;
-    align-items: center !important;
-    opacity: 1 !important;
-    visibility: visible !important;
+    display: flex;
+    align-items: center;
+    opacity: 1;
+    visibility: visible;
 }
 
 /* Force hide all weather titles across all locations */
 #weather .subsection-title,
 [id^="hourly-title-"] {
-    display: none !important;
-    visibility: hidden !important;
-    height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: hidden !important;
+    display: none;
+    visibility: hidden;
+    height: 0;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
 }
 
 .wsm-watermark {
-    position: fixed !important;
-    bottom: 20px !important;
-    right: 25px !important;
-    font-size: 1.2rem !important;
-    font-weight: 900 !important;
-    color: #475569 !important;
-    opacity: 0 !important;
-    letter-spacing: 0.5px !important;
-    text-transform: uppercase !important;
-    pointer-events: none !important;
-    z-index: 9999 !important;
-    font-family: inherit !important;
-    user-select: none !important;
-    white-space: nowrap !important;
+    position: fixed;
+    bottom: 20px;
+    right: 25px;
+    font-size: 1.2rem;
+    font-weight: 900;
+    color: #475569;
+    opacity: 0;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    pointer-events: none;
+    z-index: 9999;
+    font-family: inherit;
+    user-select: none;
+    white-space: nowrap;
     animation: fadeInWatermarkCorner 1s ease-out forwards;
 }
 
@@ -3493,17 +3493,17 @@
 /* Force hide all weather titles across all locations */
 #weather .subsection-title,
 [id^="hourly-title-"] {
-    display: none !important;
-    visibility: hidden !important;
-    height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    scroll-snap-type: x mandatory !important;
+    display: none;
+    visibility: hidden;
+    height: 0;
+    margin: 0;
+    padding: 0;
+    scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
-    padding: 0 !important;
-    margin: 0 !important;
-    height: 100% !important;
-    width: 100% !important;
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    width: 100%;
     scrollbar-width: none;
     /* Firefox */
     -ms-overflow-style: none;
@@ -3511,19 +3511,19 @@
 }
 
 .wsm-panel.fullscreen .wsm-loc-block {
-    width: 100% !important;
-    min-width: 100% !important;
-    flex-shrink: 0 !important;
-    scroll-snap-align: start !important;
-    margin: 0 !important;
-    padding: 50px 15px 30px 15px !important;
-    box-sizing: border-box !important;
-    display: flex !important;
-    flex-direction: column !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    height: 100% !important;
-    overflow-y: hidden !important;
+    width: 100%;
+    min-width: 100%;
+    flex-shrink: 0;
+    scroll-snap-align: start;
+    margin: 0;
+    padding: 50px 15px 30px 15px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    background: transparent;
+    box-shadow: none;
+    height: 100%;
+    overflow-y: hidden;
     justify-content: center;
 }
 
@@ -3557,7 +3557,7 @@
 .wsm-nav-zone {
     position: fixed;
     top: 60px;
-    /* Header ?占쎌뿭 ?占쎌쇅 */
+    /* Header ??�쎌�???�쎌??*/
     bottom: 0;
     width: 30%;
     z-index: 9998;
@@ -3575,153 +3575,153 @@
 
 /* Fullscreen Compact Layout Optimization */
 .wsm-panel.fullscreen .wsm-loc-title {
-    font-size: 1.1rem !important;
-    margin-bottom: 15px !important;
+    font-size: 1.1rem;
+    margin-bottom: 15px;
 }
 
 .wsm-panel.fullscreen .wsm-hourly-grid {
-    display: grid !important;
-    grid-template-columns: repeat(6, 1fr) !important;
-    gap: 6px 4px !important;
-    width: 100% !important;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 6px 4px;
+    width: 100%;
 }
 
 .wsm-panel.fullscreen .wsm-h-item {
-    padding: 6px 2px !important;
-    background: rgba(255, 255, 255, 0.05) !important;
-    border-radius: 8px !important;
+    padding: 6px 2px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
 }
 
 .wsm-panel.fullscreen .h-time {
-    font-size: 0.65rem !important;
+    font-size: 0.65rem;
     opacity: 0.8;
 }
 
 .wsm-panel.fullscreen .h-icon {
-    font-size: 1.4rem !important;
-    margin: 2px 0 !important;
+    font-size: 1.4rem;
+    margin: 2px 0;
 }
 
 .wsm-panel.fullscreen .h-temp {
-    font-size: 0.85rem !important;
-    font-weight: 800 !important;
+    font-size: 0.85rem;
+    font-weight: 800;
 }
 
 .wsm-panel.fullscreen .h-wind {
-    font-size: 0.6rem !important;
+    font-size: 0.6rem;
 }
 
 .wsm-panel.fullscreen .h-precip {
-    font-size: 0.6rem !important;
+    font-size: 0.6rem;
 }
 
 @media (max-height: 700px) {
     .wsm-panel.fullscreen .wsm-loc-block {
-        width: 100% !important;
-        min-width: 100% !important;
-        flex-shrink: 0 !important;
-        scroll-snap-align: start !important;
-        margin: 0 !important;
-        padding: 50px 15px 30px 15px !important;
-        box-sizing: border-box !important;
-        display: flex !important;
-        flex-direction: column !important;
-        background: transparent !important;
-        box-shadow: none !important;
-        height: 100% !important;
-        overflow-y: hidden !important;
+        width: 100%;
+        min-width: 100%;
+        flex-shrink: 0;
+        scroll-snap-align: start;
+        margin: 0;
+        padding: 50px 15px 30px 15px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        background: transparent;
+        box-shadow: none;
+        height: 100%;
+        overflow-y: hidden;
         justify-content: center;
     }
 
     .wsm-panel.fullscreen .wsm-hourly-grid {
-        grid-template-columns: repeat(8, 1fr) !important;
-        gap: 4px 2px !important;
+        grid-template-columns: repeat(8, 1fr);
+        gap: 4px 2px;
     }
 
     .wsm-panel.fullscreen .h-icon {
-        font-size: 1.1rem !important;
+        font-size: 1.1rem;
     }
 
     .wsm-panel.fullscreen .wsm-loc-title {
-        font-size: 0.9rem !important;
-        margin-bottom: 8px !important;
+        font-size: 0.9rem;
+        margin-bottom: 8px;
     }
 }
 
 /* Fullscreen Header Elements */
 .wsm-fs-indicator-header {
-    font-size: 0.8rem !important;
-    background: rgba(0, 0, 0, 0.05) !important;
-    padding: 4px 12px !important;
-    border-radius: 20px !important;
-    color: #475569 !important;
-    font-weight: 800 !important;
-    margin-right: 12px !important;
-    display: inline-flex !important;
-    align-items: center !important;
+    font-size: 0.8rem;
+    background: rgba(0, 0, 0, 0.05);
+    padding: 4px 12px;
+    border-radius: 20px;
+    color: #475569;
+    font-weight: 800;
+    margin-right: 12px;
+    display: inline-flex;
+    align-items: center;
 }
 
 .wsm-fs-close-btn {
-    background: rgba(0, 0, 0, 0.05) !important;
-    border: 1px solid rgba(0, 0, 0, 0.1) !important;
-    width: 32px !important;
-    height: 32px !important;
-    border-radius: 50% !important;
-    color: #475569 !important;
-    font-size: 1.1rem !important;
-    cursor: pointer !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    transition: all 0.2s !important;
-    padding: 0 !important;
-    line-height: 1 !important;
-    z-index: 10001 !important;
+    background: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    color: #475569;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    padding: 0;
+    line-height: 1;
+    z-index: 10001;
 }
 
 .wsm-fs-close-btn:hover {
-    background: rgba(0, 0, 0, 0.1) !important;
+    background: rgba(0, 0, 0, 0.1);
     transform: scale(1.1);
 }
 
 .wsm-header-btns.wsm-fullscreen-hide>button:not(.wsm-fs-close-btn) {
-    display: none !important;
+    display: none;
 }
 
 .wsm-header-btns.wsm-fullscreen-hide {
-    display: flex !important;
-    align-items: center !important;
-    opacity: 1 !important;
-    visibility: visible !important;
+    display: flex;
+    align-items: center;
+    opacity: 1;
+    visibility: visible;
 }
 
 /* ==================== Location Weather Container ==================== */
 .location-weather {
     display: none;
-    width: 100% !important;
-    max-width: 100vw !important;
-    box-sizing: border-box !important;
-    overflow-x: hidden !important;
-    clear: both !important;
+    width: 100%;
+    max-width: 100vw;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    clear: both;
 }
 
 .location-weather.active {
-    display: block !important;
+    display: block;
 }
 
 /* Force block stack for all weather containers */
 #weather .section-alt,
 #weather .container {
-    display: block !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    padding: 0 !important;
-    margin: 0 !important;
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    padding: 0;
+    margin: 0;
 }
 
 #weather .container {
-    padding: 0 12px 20px 12px !important;
-    box-sizing: border-box !important;
+    padding: 0 12px 20px 12px;
+    box-sizing: border-box;
 }
 
 /* Location Selection Tabs - Updated to 2x5 Grid */
@@ -3757,7 +3757,7 @@
 .location-tab.active {
     background: var(--accent);
     border-color: var(--accent);
-    color: white !important;
+    color: white;
     box-shadow: 0 4px 12px rgba(8, 145, 178, 0.20);
 }
 
@@ -3791,16 +3791,16 @@
     /* Ensure padding doesn't add to width */
 }
 
-/* ??낵 諛붾줈 ?댁뼱吏??移대뱶???곷떒 紐⑥꽌由?怨〓쪧 諛??뚮몢由??쒓굅 */
+/* ????諛붾�???�뼱�??移�?�???곷떒 紐⑥꽌由??�〓쪧 �????��????�굅 */
 .current-weather-main,
 .past-weather-summary {
-    border-top-left-radius: 0 !important;
-    border-top-right-radius: 0 !important;
-    border-top: none !important;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-top: none;
 }
 
 .hourly-forecast-card {
-    padding-top: 10px !important;
+    padding-top: 10px;
     /* Reduced top padding */
 }
 
@@ -3929,9 +3929,9 @@
     .cw-right {
         flex: 1.3;
         /* Increased space */
-        padding-left: 8px !important;
-        border-left: 1px solid #f1f3f5 !important;
-        align-items: flex-start !important;
+        padding-left: 8px;
+        border-left: 1px solid #f1f3f5;
+        align-items: flex-start;
         /* Reverted to Left */
         min-width: 0;
     }
@@ -3973,7 +3973,7 @@
 .cw-left .current-val {
     font-size: 3.0rem;
     font-weight: 500;
-    /* ?쒖＜ ?곗뼹 accent */
+    /* ??�＜ ?곗뼹 accent */
     color: var(--accent);
     line-height: 1;
     display: flex;
@@ -4032,7 +4032,7 @@
 
 /* Details Scroll Bar - HIDDEN */
 .weather-details-bar {
-    display: none !important;
+    display: none;
     display: flex;
     gap: 10px;
     overflow-x: auto;
@@ -4412,9 +4412,9 @@
 }
 
 .sun-time {
-    color: #fd7e14 !important;
-    font-weight: 800 !important;
-    font-size: 0.65rem !important;
+    color: #fd7e14;
+    font-weight: 800;
+    font-size: 0.65rem;
 }
 
 .sun-badge {
@@ -4526,7 +4526,7 @@
 
 .w-pop {
     color: #228be6;
-    font-size: 0.6rem !important;
+    font-size: 0.6rem;
 }
 
 
@@ -4537,20 +4537,20 @@
 }
 
 .p-blue {
-    color: #228be6 !important;
+    color: #228be6;
     font-weight: 800;
 }
 
 /* Weekly Card Active State */
 .weekly-card.active {
-    border-color: #339af0 !important;
-    background: #e7f5ff !important;
-    box-shadow: 0 4px 12px rgba(51, 154, 240, 0.15) !important;
+    border-color: #339af0;
+    background: #e7f5ff;
+    box-shadow: 0 4px 12px rgba(51, 154, 240, 0.15);
 }
 
 .weekly-card.active .w-date {
-    color: #1971c2 !important;
-    font-weight: 800 !important;
+    color: #1971c2;
+    font-weight: 800;
 }
 
 @keyframes spin {
@@ -4702,7 +4702,7 @@
     box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
 }
 
-/* ==================== ?덊솕硫?媛쒖꽑 ==================== */
+/* ==================== ??�솕�?媛쒖�?==================== */
 
 /* ??tagline */
 .home-tagline {
@@ -4715,7 +4715,7 @@
     opacity: 0.75;
 }
 
-/* CCTV ?좎껌 媛??踰꾪듉 (disabled媛 ?꾨땶 踰꾩쟾) */
+/* CCTV ?좎껌 �??踰꾪??(disabled�??꾨땶 踰꾩?? */
 .home-item.item-cctv-apply {
     cursor: pointer;
     opacity: 1;
@@ -4744,10 +4744,10 @@
     transform: scale(0.97);
 }
 
-/* ==================== ?꾩콟 ?뚮줈??踰꾪듉 ==================== */
+/* ==================== ?꾩콟 ???��??踰꾪??==================== */
 .wechat-float-btn {
     position: fixed;
-    bottom: 88px;   /* ?섎떒 ?ㅻ퉬諛???*/
+    bottom: 88px;   /* ??�떒 ??�퉬�???*/
     right: 16px;
     z-index: 9990;
     display: flex;
@@ -4781,12 +4781,12 @@
     transform: scale(0.97);
 }
 
-/* ?덊솕硫댁씠 ?꾨땺 ???뚮줈??踰꾪듉 ?④린湲?*/
+/* ??�솕硫댁???꾨땺 ?????��??踰꾪????�린�?*/
 body:not(.page-home) .wechat-float-btn {
     display: none;
 }
 
-/* ==================== CCTV ?좎껌 紐⑤떖 ==================== */
+/* ==================== CCTV ?좎껌 紐⑤??==================== */
 .cctv-apply-modal-content {
     background: var(--bg-primary);
     border-radius: 20px;
@@ -5066,12 +5066,70 @@ body:not(.page-home) .wechat-float-btn {
 
 /* Flatten top corners of table container to connect with tabs */
 .lost-table-container {
-    border-radius: 0 0 20px 20px !important;
-    margin-top: 0 !important;
+    border-radius: 0 0 20px 20px;
+    margin-top: 0;
 }
 .lost-table th:first-child {
-    border-top-left-radius: 0 !important;
+    border-top-left-radius: 0;
 }
 .lost-table th:last-child {
-    border-top-right-radius: 0 !important;
+    border-top-right-radius: 0;
+}
+
+/* Home Banner Styles */
+.home-dynamic-banner-area {
+    padding: 0 10px;
+    margin: 0 auto 20px auto;
+    max-width: 640px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.home-alerts-container {
+    margin: 0;
+    position: absolute;
+    left: 10px;
+    width: calc(100% - 20px);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: center;
+}
+
+.weather-alert-card.marquee-alert-card {
+    margin: 0;
+    position: absolute;
+    left: 10px;
+    width: calc(100% - 20px);
+    background: rgba(255, 145, 0, 0.08);
+    border: 0.5px solid rgba(255, 145, 0, 0.3);
+    box-shadow: 0 4px 15px rgba(255, 145, 0, 0.05);
+    overflow: hidden;
+    padding: 12px 10px;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: center;
+}
+
+.marquee-alert-card .marquee-container {
+    flex-grow: 1;
+    border: none;
+    box-shadow: none;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+}
+
+.weather-alert-card.notice-alert-card {
+    display: flex;
+    margin: 0;
+    position: absolute;
+    left: 10px;
+    width: calc(100% - 20px);
+    overflow: hidden;
+    padding: 12px 10px;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: center;
+    pointer-events: auto;
+    z-index: 2;
 }
