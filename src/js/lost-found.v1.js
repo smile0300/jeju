@@ -773,7 +773,7 @@ function renderSuccessMarquee(data) {
                    .replace('{id}', maskId(item.WeChatId))
                    .replace('{item}', itemName);
         
-        slots.push(`<span class="marquee-item" style="cursor:pointer;" onclick="openSuccessModal(${i})">${text}</span>`);
+        slots.push(`<span class="marquee-item" style="cursor:pointer; text-align: left; padding: 0 4px;" onclick="openSuccessModal(${i})">${text}</span>`);
     }
     const itemsHtml = slots.join('');
 
