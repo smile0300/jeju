@@ -844,6 +844,7 @@ function renderSuccessMarquee(data) {
     if (statusMarqueeContainer) {
         statusMarqueeContainer.style.animation = `dynamic-vertical-ticker ${animationDuration}s infinite`;
     }
+    const homeMarqueeContainer = document.getElementById('homeMarqueeContainer');
     if (homeMarqueeContainer) {
         homeMarqueeContainer.style.animation = `dynamic-vertical-ticker ${animationDuration}s infinite`;
     }
