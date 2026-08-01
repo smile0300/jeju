@@ -104,9 +104,10 @@ export function showSection(sectionId, pushHistory = true) {
     if (ogDescTag) ogDescTag.setAttribute('content', metaInfo.desc);
 
     // SEO: html[lang] 동적 업데이트 (현재 선택된 언어 반영)
-    const currentLang = localStorage.getItem('lang') || 'en';
+    // window.getLang()은 i18n.js 모듈이 관리하는 단일 소스 (키: 'jeju_lang')
+    const currentLang = window.getLang?.() || localStorage.getItem('jeju_lang') || 'zh';
     const langMap = { zh: 'zh-CN', ko: 'ko', en: 'en' };
-    document.documentElement.lang = langMap[currentLang] || 'en';
+    document.documentElement.lang = langMap[currentLang] || 'zh-CN';
 
     if (sectionId === 'cctv') initCCTV();
     if (sectionId === 'weather') {
