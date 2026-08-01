@@ -746,15 +746,22 @@ function renderSuccessMarquee(data) {
         return `${d.getMonth() + 1}/${d.getDate()}`;
     };
 
-    // 5번째 아이템마다 CTA 슬롯을 삽입한 배열 생성
     const slots = [];
     data.forEach((item, i) => {
-        // Step이 존재하고 5 미만이면 아직 완료(수령/발송)된 것이 아니므로 마키(전광판)에 표시하지 않음
-        if (item.Step && parseInt(item.Step, 10) < 5) return;
-
         const lang = (localStorage.getItem('jeju_lang') || 'zh');
-        let fallbackText = lang === 'ko' ? '📢 [{date}] {region} {id}님, {item} 수령 완료' : (lang === 'en' ? '📢 [{date}] {region} {item} returned to {id}!' : '📢 [{date}] {region} {id} 的 {item} 已回家!');
-        let text = window.t ? window.t('lost.success.marquee') : fallbackText;
+        
+        const stepNum = parseInt(item.Step, 10) || 1;
+        let statusText = '';
+        if (lang === 'ko') {
+            const labels = ['접수 완료', '물품 확인중', '수령 완료', '발송 완료', '전달 완료'];
+            statusText = labels[stepNum - 1] || '진행중';
+        } else if (lang === 'en') {
+            const labels = ['Received', 'Checking', 'Pickup Complete', 'Dispatched', 'Returned'];
+            statusText = labels[stepNum - 1] || 'Processing';
+        } else {
+            const labels = ['已受理', '核实中', '已取件', '已寄出', '已回家'];
+            statusText = labels[stepNum - 1] || '处理中';
+        }
 
         let itemName = item.Item;
         if (lang === 'zh') itemName = getValidTranslation(item.Item, item.Item_zh);
@@ -766,10 +773,17 @@ function renderSuccessMarquee(data) {
         if (lang === 'en') regionName = getValidTranslation(item.Region, item.Region_en);
         if (lang === 'ko') regionName = getValidTranslation(item.Region, item.Region_ko);
 
-        text = text.replace('{date}', formatDateStr(item.Date))
-                   .replace('{region}', regionName)
-                   .replace('{id}', maskId(item.WeChatId))
-                   .replace('{item}', itemName);
+        let text = '';
+        if (lang === 'ko') {
+            text = `📢 [{date}] ${regionName} ${maskId(item.WeChatId)}님, ${itemName} - ${statusText}`;
+        } else if (lang === 'en') {
+            text = `📢 [{date}] ${regionName} ${itemName} - ${statusText}`;
+        } else {
+            text = `📢 [{date}] ${regionName} ${maskId(item.WeChatId)} 的 ${itemName} - ${statusText}`;
+        }
+
+        text = text.replace('{date}', formatDateStr(item.Date));
+        
         slots.push(`<span class="marquee-item" style="cursor:pointer;" onclick="openSuccessModal(${i})">${text}</span>`);
     });
     const itemsHtml = slots.join('');
