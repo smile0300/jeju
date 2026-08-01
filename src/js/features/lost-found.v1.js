@@ -828,15 +828,19 @@ function renderSuccessMarquee(data) {
     styleEl.innerHTML = keyframes;
 
     marqueeContainer.style.animation = `dynamic-vertical-ticker ${animationDuration}s infinite`;
+    const modalMarqueeContainer = document.getElementById('modalMarqueeContainer');
     if (modalMarqueeContainer) {
         modalMarqueeContainer.style.animation = `dynamic-vertical-ticker ${animationDuration}s infinite`;
     }
+    const upsellModalMarqueeContainer = document.getElementById('upsellModalMarqueeContainer');
     if (upsellModalMarqueeContainer) {
         upsellModalMarqueeContainer.style.animation = `dynamic-vertical-ticker ${animationDuration}s infinite`;
     }
+    const proxyMarqueeContainer = document.getElementById('proxyMarqueeContainer');
     if (proxyMarqueeContainer) {
         proxyMarqueeContainer.style.animation = `dynamic-vertical-ticker ${animationDuration}s infinite`;
     }
+    const statusMarqueeContainer = document.getElementById('statusMarqueeContainer');
     if (statusMarqueeContainer) {
         statusMarqueeContainer.style.animation = `dynamic-vertical-ticker ${animationDuration}s infinite`;
     }
