@@ -15,15 +15,6 @@ function doPost(e) {
     var data = JSON.parse(e.postData.contents);
     
     if (data.type === 'proxy_pickup') {
-      // ══════════════════════════════════════════════════════
-      // 대리수령 신청 → SuccessStories 1개 시트에 통합 저장
-      //   공개 컬럼: CaseId, Step, Date, WeChatId, Item, Region, Place, ItemImg, Note
-      //   비공개 컬럼(관리자 전용): Timestamp, RequesterName, Contact, Address,
-      //                             PassportPhoto, ReservationPhoto,
-      //                             MgmtNumber, UserAgent, AdminNote
-      // ※ ItemImg(공개)로 이미지 컬럼 통일 — ItemPhoto 중복 컬럼 제거
-      // doGet 에서 공개 컬럼만 필터링하여 반환
-      // ══════════════════════════════════════════════════════
       var ss = SpreadsheetApp.openById(SHEET_ID);
       var timestamp = new Date();
 
@@ -32,6 +23,7 @@ function doPost(e) {
         successSheet = ss.insertSheet('SuccessStories');
         successSheet.appendRow([
           'CaseId', 'Step', 'Date', 'WeChatId', 'Item', 'Region', 'Place', 'ItemImg', 'Note',
+          'Item_zh', 'Item_en', 'Region_zh', 'Region_en', 'Place_zh', 'Place_en',
           'Timestamp', 'RequesterName', 'Contact', 'Address',
           'PassportPhoto', 'ReservationPhoto', 'MgmtNumber',
           'UserAgent', 'AdminNote'
@@ -42,7 +34,7 @@ function doPost(e) {
       try {
         lock.waitLock(10000); // 최대 10초 대기
         
-        // CaseId 자동 채번: 기존 최대 번호 + 1
+        // CaseId 자동 채번
         var existingData = successSheet.getDataRange().getValues();
         var maxNum = 0;
         for (var r = 1; r < existingData.length; r++) {
@@ -55,11 +47,9 @@ function doPost(e) {
         }
         var newNum = maxNum + 1;
         var newCaseId = 'jeju-' + String(newNum).padStart(4, '0');
-
-        // 오늘 날짜 (YYYY-MM-DD, 한국시간)
         var today = Utilities.formatDate(timestamp, 'Asia/Seoul', 'yyyy-MM-dd');
 
-        // 이미지 처리: Base64 → Google Drive URL
+        // 이미지 처리
         var passportUrl    = '';
         var itemPhotoUrl   = '';
         var reservationUrl = '';
@@ -73,14 +63,7 @@ function doPost(e) {
           reservationUrl = saveBase64ImageToDrive(data.reservationPhoto, 'Reservation_' + newCaseId);
         }
 
-        // 시트 헤더를 읽어 컬럼 순서대로 매핑
-        var headers = existingData.length > 0
-          ? existingData[0]
-          : ['CaseId', 'Step', 'Date', 'WeChatId', 'Item', 'Region', 'Place', 'ItemImg', 'Note',
-             'Timestamp', 'RequesterName', 'Contact', 'Address',
-             'PassportPhoto', 'ReservationPhoto', 'MgmtNumber',
-             'UserAgent', 'AdminNote'];
-
+        var headers = existingData.length > 0 ? existingData[0] : [];
         var extraNotes = [];
         if (data.proxyLocationType) extraNotes.push('장소: ' + data.proxyLocationType);
         if (data.hotelName) extraNotes.push('호텔명: ' + data.hotelName);
@@ -90,18 +73,38 @@ function doPost(e) {
         if (data.boardTime) extraNotes.push('탑승시간: ' + data.boardTime);
         if (data.locDetail) extraNotes.push('상세: ' + data.locDetail);
 
+        // 👉 번역할 텍스트 추출
+        var itemText = data.itemName || '';
+        var regionText = data.region || '';
+        var placeText = (data.proxyLocationType || '') + (data.hotelName ? ' - ' + data.hotelName : '');
+
+        // 👉 여기서 즉시 번역을 수행합니다!
+        var item_zh = MY_DEEPL(itemText, "ZH");
+        var item_en = MY_DEEPL(itemText, "EN-US");
+        
+        var region_zh = MY_DEEPL(regionText, "ZH");
+        var region_en = MY_DEEPL(regionText, "EN-US");
+        
+        var place_zh = MY_DEEPL(placeText, "ZH");
+        var place_en = MY_DEEPL(placeText, "EN-US");
+
+        // 매핑 딕셔너리에 번역된 항목까지 포함
         var fieldMap = {
-          // 공개 컬럼
           'CaseId'          : newCaseId,
           'Step'            : 1,
           'Date'            : today,
           'WeChatId'        : data.contact || data.originalWechat || data.wechatId || '',
-          'Item'            : data.itemName   || '',
-          'Region'          : '',
-          'Place'           : data.proxyLocationType === '호텔' ? (data.hotelName || '호텔') : (data.proxyLocationType || '') + (data.hotelName ? ' - ' + data.hotelName : ''),
+          'Item'            : itemText,
+          'Item_zh'         : item_zh,
+          'Item_en'         : item_en,
+          'Region'          : regionText,
+          'Region_zh'       : region_zh,
+          'Region_en'       : region_en,
+          'Place'           : placeText,
+          'Place_zh'        : place_zh,
+          'Place_en'        : place_en,
           'ItemImg'         : itemPhotoUrl,
           'Note'            : '',
-          // 비공개 컬럼 (관리자 전용)
           'Timestamp'       : timestamp,
           'RequesterName'   : data.requesterName  || '',
           'Contact'         : data.phone          || '',
@@ -130,7 +133,6 @@ function doPost(e) {
       }
 
     } else if (data.type === 'lost_report' || data.type === 'feature' || data.type === 'cctv_apply') {
-
       var ss = SpreadsheetApp.openById(SHEET_ID);
       var sheetName;
       if (data.type === 'lost_report') {
@@ -167,18 +169,11 @@ function doPost(e) {
       var rowData = {};
 
       if (data.type === 'lost_report') {
-        // 1. 이미지 처리 (Base64 -> Google Drive File)
         var photoUrl = "No Photo";
         var labelsStr = "";
         if (data.photo && data.photo.includes('base64,')) {
           var saveName = (data.itemCategory || 'Item') + "_" + data.wechatId;
           photoUrl = saveBase64ImageToDrive(data.photo, saveName);
-
-        }
-        
-        var translatedSpecifics = "";
-        if (data.specifics) {
-          try { translatedSpecifics = MY_DEEPL(data.specifics, "KO"); } catch(e) {}
         }
         
         rowData = {
@@ -186,9 +181,6 @@ function doPost(e) {
           'ItemCategory': data.itemCategory || '',
           'City': data.city || '',
           'Specifics': data.specifics || '',
-          '분실내용(자동번역)': translatedSpecifics,
-          'Specifics_Trans': translatedSpecifics,
-          'Specifics_ko': translatedSpecifics,
           'RegionCategory': data.regionCategory || '',
           'Date': data.date || '',
           'Time': data.time ? "'" + data.time : '',
@@ -224,11 +216,7 @@ function doPost(e) {
         };
       }
 
-      // 2. 시트의 1행(헤더)을 읽어와서 열 순서대로 데이터를 알아서 배치합니다.
       var headers = lastCol > 0 ? sheet.getRange(1, 1, 1, lastCol).getValues()[0] : [];
-
-      // 3. 빈 문자열("") 수식(ARRAYFORMULA 등)으로 인해 맨 아래 빈 줄에 추가되는 것을 방지하기 위해 
-      // A열(Timestamp) 기준으로 실제 마지막 행을 찾아 데이터를 추가합니다.
       var values = sheet.getRange("A:A").getValues();
       var lastRow = 0;
       for (var i = values.length - 1; i >= 0; i--) {
@@ -239,8 +227,6 @@ function doPost(e) {
       }
       var targetRow = lastRow + 1;
       
-      // 4. 수식이 들어있는 열(예: 분실물(세부내용) 등)을 덮어쓰지 않도록,
-      // 데이터가 존재하는 열에만 개별적으로 값을 입력합니다.
       var writtenCount = 0;
       for (var j = 0; j < headers.length; j++) {
         var headerName = headers[j] ? headers[j].toString().trim() : '';
@@ -250,8 +236,7 @@ function doPost(e) {
         }
       }
 
-      // [안전장치] 만약 시트의 1행이 한글로 되어 있거나 영어 이름이 안 맞아서 단 한 칸도 안 적혔다면, 
-      // 강제로 맨 아랫줄에 순서대로 데이터를 밀어 넣습니다.
+      // 만약 헤더 이름이 하나도 안 맞아서 setValue가 안 되었다면, appendRow로 통째로 덧붙임
       if (writtenCount === 0) {
         if (data.type === 'lost_report') {
           sheet.appendRow([
@@ -265,6 +250,38 @@ function doPost(e) {
           sheet.appendRow([rowData['Timestamp'], rowData['Feature'], rowData['Contact'], rowData['UserAgent']]);
         } else if (data.type === 'cctv_apply') {
           sheet.appendRow([rowData['Timestamp'], rowData['WechatId'], rowData['Region'], rowData['StartDate'], rowData['EndDate'], rowData['UserAgent']]);
+        }
+        
+        // appendRow로 데이터가 맨 밑에 들어갔으므로, targetRow를 진짜 마지막 행으로 갱신!
+        targetRow = sheet.getLastRow();
+      }
+
+      // 👉 SuccessStories 시트 방식처럼, doPost에서 즉시 번역하여 V열(22번째 열)에 삽입
+      // (반드시 데이터가 모두 써진 뒤에 올바른 targetRow 위치에 기록해야 함)
+      if (data.type === 'lost_report') {
+        var wValues = [
+          rowData['Specifics'],       // D열
+          rowData['DetailLocation'],  // H열
+          rowData['HotelName'],       // I열
+          rowData['HotelBooker'],     // J열
+          rowData['HotelDates'],      // K열
+          rowData['CarNumber'],       // L열
+          rowData['BoardLoc'],        // M열
+          rowData['BoardTime'],       // N열
+          rowData['AlightLoc'],       // O열
+          rowData['AlightTime'],      // P열
+          rowData['PhotoURL']         // Q열
+        ];
+        
+        // 빈 값 제외하고 공백으로 이어붙이기 (W열의 TEXTJOIN 역할)
+        var wText = wValues.filter(function(v) { return v && String(v).trim() !== ''; }).join(" ");
+        
+        if (wText) {
+          var vTranslated = MY_DEEPL(wText, "KO"); // 한국어로 번역
+          
+          // 배열 수식 충돌(에러)을 원천 차단하기 위해, V열과 W열 모두 스크립트로 직접 타이핑합니다!
+          sheet.getRange(targetRow, 22).setValue(vTranslated); // V열(22열)에 한국어 번역 저장
+          sheet.getRange(targetRow, 23).setValue(wText);       // W열(23열)에 원본 결합 텍스트 저장
         }
       }
 
@@ -280,9 +297,6 @@ function doPost(e) {
   }
 }
 
-/**
- * Base64 이미지를 드라이브에 저장하고 공유 가능한 링크를 반환함
- */
 function saveBase64ImageToDrive(base64Data, fileNamePrefix) {
   try {
     var splitData = base64Data.split('base64,');
@@ -291,7 +305,6 @@ function saveBase64ImageToDrive(base64Data, fileNamePrefix) {
     var decoded = Utilities.base64Decode(rawData);
     var blob = Utilities.newBlob(decoded, contentType, fileNamePrefix + "_" + new Date().getTime());
     
-    // 폴더 찾기 또는 생성
     var folders = DriveApp.getFoldersByName(FOLDER_NAME);
     var folder = folders.hasNext() ? folders.next() : DriveApp.createFolder(FOLDER_NAME);
     
@@ -304,12 +317,6 @@ function saveBase64ImageToDrive(base64Data, fileNamePrefix) {
   }
 }
 
-
-/**
- * GET 요청 시 데이터를 JSON으로 반환합니다.
- * ?action=success -> SuccessStories 시트 반환 (공개 컬럼만 필터링)
- * 기본값 -> RewardList 시트 반환
- */
 function doGet(e) {
   try {
     var action = (e.parameter && e.parameter.action) ? e.parameter.action : '';
@@ -328,7 +335,6 @@ function doGet(e) {
     
     var headers = data[0];
 
-    // SuccessStories 시트는 공개 허용된 컬럼만 반환 (개인정보 보호)
     var PUBLIC_COLUMNS = [
       'CaseId', 'Step', 'Date', 'WeChatId', 'Item', 'Region', 'Place', 'ItemImg', 'Note',
       'Item_zh', 'Item_en', 'Item_ko',
@@ -345,13 +351,10 @@ function doGet(e) {
       var obj = {};
       for (var j = 0; j < headers.length; j++) {
         var header = headers[j] ? headers[j].toString().trim() : '';
-        // 빈 헤더는 건너뜀
         if (!header) continue;
-        // SuccessStories 시트: 공개 허용 컬럼만 포함 (개인정보 보호)
         if (isSuccessSheet && PUBLIC_COLUMNS.indexOf(header) === -1) continue;
         obj[header] = row[j];
       }
-      // Date가 없는 빈 행은 건너뜀
       if (isSuccessSheet && (!obj['Date'] || obj['Date'].toString().trim() === '')) continue;
       result.push(obj);
     }
@@ -362,41 +365,109 @@ function doGet(e) {
   }
 }
 
+// MY_DEEPL 함수는 deepl.js에 정의되어 있습니다. (중복 정의 방지)
+
 /**
- * DeepL 번역 맞춤 함수
- * @customfunction
+ * 구글 시트 편집 시 자동 실행되는 함수 (설치형 트리거 연결용)
+ * LostReport 시트의 원본 데이터(D열, H~Q열)를 편집하면, 
+ * 수식이 적용된 W열(23번째 열)의 값을 읽어와 V열(22번째 열)에 DeepL 번역 결과를 삽입합니다.
+ * 주의: 이 함수는 단순 onEdit이 아닌 '설치형 트리거(수정 시)'로 등록해야 동작합니다.
  */
-function MY_DEEPL(text, targetLang) {
-  if (!text) return "";
+function translateOnEdit(e) {
+  if (!e || !e.range) return;
+  var sheet = e.range.getSheet();
   
-  // 💡 아래 따옴표 안에 홈페이지에서 발급받은 DeepL 인증 키를 붙여넣으세요.
-  var apiKey = "146541f2-fd38-4c97-b919-178db54e5990:fx"; 
-  
-  var url = "https://api-free.deepl.com/v2/translate";
-  var payload = {
-    "text": String(text),
-    "target_lang": targetLang // "ZH"(중국어) 또는 "EN-US"(영어)
-  };
-  
-  var options = {
-    "method": "post",
-    "headers": {
-      "Authorization": "DeepL-Auth-Key " + apiKey
-    },
-    "payload": payload,
-    "muteHttpExceptions": true
-  };
-  
-  try {
-    var response = UrlFetchApp.fetch(url, options);
-    var json = JSON.parse(response.getContentText());
-    if (json.translations) {
-      return json.translations[0].text;
-    } else {
-      return "에러: " + (json.message || "원인을 알 수 없는 오류");
+  if (sheet.getName() === 'LostReport') {
+    var range = e.range;
+    var col = range.getColumn();
+    var row = range.getRow();
+    
+    // W열은 수식(=BYROW)에 의해 계산되므로 onEdit 이벤트가 발생하지 않습니다.
+    // 따라서 수식의 바탕이 되는 데이터인 D열(4), H~Q열(8~17)이 편집되었을 때 이벤트를 감지합니다.
+    if ((col === 4 || (col >= 8 && col <= 17)) && row > 1) { 
+      
+      // 시트 내의 수식(BYROW)이 다시 계산될 때까지 변경사항을 강제로 즉시 반영(대기)합니다.
+      SpreadsheetApp.flush();
+      
+      var wText = sheet.getRange(row, 23).getValue(); // 계산된 W열(23번째)의 값 가져오기
+      var targetCell = sheet.getRange(row, 22);       // V열(22번째 열)
+      
+      if (wText) {
+        // DeepL을 이용해 한국어(KO)로 자동 번역. (필요 시 언어 코드 수정 가능)
+        var translated = MY_DEEPL(wText, "KO"); 
+        targetCell.setValue(translated);
+      } else {
+        // W열에 값이 없어지면 번역 셀도 비움
+        targetCell.clearContent();
+      }
     }
-  } catch (e) {
-    return "번역 오류";
   }
 }
 
+/**
+ * 기존에 등록된 LostReport 데이터에 V열(번역)과 W열(원본합침)을 소급 적용하는 함수
+ * Apps Script 편집기에서 이 함수를 선택하고 [▶ 실행] 버튼을 눌러주세요.
+ * DeepL API 한도를 고려하여 V열이 비어있는 행만 처리합니다.
+ */
+function backfillLostReport() {
+  var ss = SpreadsheetApp.openById(SHEET_ID);
+  var sheet = ss.getSheetByName('LostReport');
+  if (!sheet) {
+    Logger.log('LostReport 시트를 찾을 수 없습니다.');
+    return;
+  }
+
+  var lastRow = sheet.getLastRow();
+  Logger.log('총 행 수: ' + lastRow);
+
+  var processedCount = 0;
+  var skippedCount = 0;
+
+  for (var row = 2; row <= lastRow; row++) {
+    // V열(22번째)이 이미 채워져 있으면 건너뜀
+    var vCell = sheet.getRange(row, 22).getValue();
+    if (vCell && String(vCell).trim() !== '') {
+      skippedCount++;
+      continue;
+    }
+
+    // D열(4)과 H~Q열(8~17)의 값을 읽어 합치기
+    var d  = sheet.getRange(row, 4).getValue()  || '';  // Specifics
+    var h  = sheet.getRange(row, 8).getValue()  || '';  // DetailLocation
+    var i  = sheet.getRange(row, 9).getValue()  || '';  // HotelName
+    var j2 = sheet.getRange(row, 10).getValue() || '';  // HotelBooker
+    var k  = sheet.getRange(row, 11).getValue() || '';  // HotelDates
+    var l  = sheet.getRange(row, 12).getValue() || '';  // CarNumber
+    var m  = sheet.getRange(row, 13).getValue() || '';  // BoardLoc
+    var n  = sheet.getRange(row, 14).getValue() || '';  // BoardTime
+    var o  = sheet.getRange(row, 15).getValue() || '';  // AlightLoc
+    var p  = sheet.getRange(row, 16).getValue() || '';  // AlightTime
+    var q  = sheet.getRange(row, 17).getValue() || '';  // PhotoURL
+
+    var parts = [d, h, i, j2, k, l, m, n, o, p, q].filter(function(v) {
+      return v && String(v).trim() !== '';
+    });
+    var wText = parts.join(' ');
+
+    if (!wText) {
+      skippedCount++;
+      continue;
+    }
+
+    // W열(23번째)에 원본 합친 텍스트 저장
+    sheet.getRange(row, 23).setValue(wText);
+
+    // V열(22번째)에 한국어 번역 저장
+    var translated = MY_DEEPL(wText, 'KO');
+    sheet.getRange(row, 22).setValue(translated);
+
+    processedCount++;
+    Logger.log(row + '행 처리 완료: ' + wText.substring(0, 30));
+
+    // DeepL API 과부하 방지: 행마다 0.5초 대기
+    Utilities.sleep(500);
+  }
+
+  Logger.log('완료! 처리: ' + processedCount + '행 / 건너뜀: ' + skippedCount + '행');
+  SpreadsheetApp.getUi().alert('소급 적용 완료!\n처리: ' + processedCount + '행\n건너뜀: ' + skippedCount + '행');
+}

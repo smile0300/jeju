@@ -48,8 +48,19 @@ export async function onRequest(context) {
       cf: { cacheEverything: false, cacheTtl: 0 },
     });
 
-    const result = await gasResponse.text();
-    return new Response(result, { headers: NO_CACHE_HEADERS });
+    const resultText = await gasResponse.text();
+    
+    // Check if the response is valid JSON. If GAS returns an HTML error page, this will throw.
+    try {
+      JSON.parse(resultText);
+    } catch (parseError) {
+      return new Response(JSON.stringify({ error: 'Invalid JSON from Google Sheets', details: resultText.substring(0, 100) }), {
+        status: 502,
+        headers: NO_CACHE_HEADERS,
+      });
+    }
+
+    return new Response(resultText, { headers: NO_CACHE_HEADERS });
   } catch (e) {
     return new Response(JSON.stringify({ error: e.message }), {
       status: 500,

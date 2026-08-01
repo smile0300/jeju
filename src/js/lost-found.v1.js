@@ -699,6 +699,7 @@ export async function fetchSuccessStories() {
         }
     } catch (e) {
         console.warn('Failed to fetch success stories from Google Sheets.', e);
+        window.successStoriesError = true;
         // 시트 fetch 실패 시 빈 배열 유지 (demo 데이터 표시 안 함)
     }
 
@@ -773,57 +774,39 @@ function renderSuccessMarquee(data) {
     });
     const itemsHtml = slots.join('');
 
+    const containers = [
+        marqueeContainer,
+        document.getElementById('modal-success-marquee-content'),
+        document.getElementById('upsell-modal-success-marquee-content'),
+        document.getElementById('proxy-success-marquee-content'),
+        document.getElementById('status-success-marquee-content'),
+        document.getElementById('home-success-marquee-content')
+    ];
+
+    if (slots.length === 0) {
+        containers.forEach(c => { 
+            if (c) {
+                c.innerHTML = ''; 
+                const parent = c.closest('.marquee-container');
+                if (parent) parent.style.display = 'none';
+            } 
+        });
+        return;
+    }
+
     // Clone the first item for seamless scrolling
-    const lang = (localStorage.getItem('jeju_lang') || 'zh');
-    let fallbackFirstText = lang === 'ko' ? '📢 [{date}] {region} {id}님, {item} 수령 완료' : (lang === 'en' ? '📢 [{date}] {region} {item} returned to {id}!' : '📢 [{date}] {region} {id} 的 {item} 已回家!');
-    let firstText = window.t ? window.t('lost.success.marquee') : fallbackFirstText;
-    
-    let firstItemName = data[0].Item;
-    if (lang === 'zh') firstItemName = getValidTranslation(data[0].Item, data[0].Item_zh);
-    if (lang === 'en') firstItemName = getValidTranslation(data[0].Item, data[0].Item_en);
-    if (lang === 'ko') firstItemName = getValidTranslation(data[0].Item, data[0].Item_ko);
+    const firstClone = slots[0];
 
-    let firstRegionName = data[0].Region;
-    if (lang === 'zh') firstRegionName = getValidTranslation(data[0].Region, data[0].Region_zh);
-    if (lang === 'en') firstRegionName = getValidTranslation(data[0].Region, data[0].Region_en);
-    if (lang === 'ko') firstRegionName = getValidTranslation(data[0].Region, data[0].Region_ko);
-
-    firstText = firstText.replace('{date}', formatDateStr(data[0].Date))
-                         .replace('{region}', firstRegionName)
-                         .replace('{id}', maskId(data[0].WeChatId))
-                         .replace('{item}', firstItemName);
-    const firstClone = `<span class="marquee-item" style="cursor:pointer;" onclick="openSuccessModal(0)">${firstText}</span>`;
-
-    marqueeContainer.innerHTML = itemsHtml + firstClone;
-
-    // 모달 내부 마키도 동기화
-    const modalMarqueeContainer = document.getElementById('modal-success-marquee-content');
-    if (modalMarqueeContainer) {
-        modalMarqueeContainer.innerHTML = itemsHtml + firstClone;
-    }
-
-    const upsellModalMarqueeContainer = document.getElementById('upsell-modal-success-marquee-content');
-    if (upsellModalMarqueeContainer) {
-        upsellModalMarqueeContainer.innerHTML = itemsHtml + firstClone;
-    }
-
-    const proxyMarqueeContainer = document.getElementById('proxy-success-marquee-content');
-    if (proxyMarqueeContainer) {
-        proxyMarqueeContainer.innerHTML = itemsHtml + firstClone;
-    }
-
-    const statusMarqueeContainer = document.getElementById('status-success-marquee-content');
-    if (statusMarqueeContainer) {
-        statusMarqueeContainer.innerHTML = itemsHtml + firstClone;
-    }
-
-    const homeMarqueeContainer = document.getElementById('home-success-marquee-content');
-    if (homeMarqueeContainer) {
-        homeMarqueeContainer.innerHTML = itemsHtml + firstClone;
-    }
+    containers.forEach(c => {
+        if (c) {
+            c.innerHTML = itemsHtml + firstClone;
+            const parent = c.closest('.marquee-container');
+            if (parent) parent.style.display = '';
+        }
+    });
 
     // Dynamic Animation — 전체 아이템 기준 계산
-    const totalSlots = data.length;
+    const totalSlots = slots.length;
     let styleEl = document.getElementById('dynamic-marquee-style');
     if (!styleEl) {
         styleEl = document.createElement('style');
@@ -1037,6 +1020,21 @@ export function renderSuccessGoodsView(isLoadMore = false) {
                         ${ctaProxyText}
                     </button>
                 </div>
+            </div>
+        `;
+        return;
+    }
+
+    // 에러 상태 (데이터 로드 실패)
+    if (window.successStoriesError) {
+        const errorText = lang === 'ko' ? '데이터를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.' : (lang === 'en' ? 'Failed to load data. Please try again later.' : '加载数据失败，请稍后再试。');
+        container.innerHTML = `
+            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 48px 16px; gap: 12px; color: var(--color-red, #e53e3e);">
+                <i class="ph-duotone ph-warning-circle" style="font-size: 2.5rem;"></i>
+                <p style="font-size: 0.9rem; margin: 0; text-align: center;">${errorText}</p>
+            </div>
+            <div style="text-align: center; margin-top: 10px;">
+                <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.9rem;" onclick="if(window.fetchSuccessStories) window.fetchSuccessStories();" data-i18n="common.retry">${window.t ? window.t('common.retry') : '다시 시도'}</button>
             </div>
         `;
         return;
