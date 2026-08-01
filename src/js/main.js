@@ -187,6 +187,11 @@ window.openCSModal = openCSModal;
 window.closeCSModal = closeCSModal;
 window.submitCSFeedback = submitCSFeedback;
 
+window.fetchHallasanStatus = fetchHallasanStatus;
+window.fetchFestivals = fetchFestivals;
+window.initReward = initReward;
+window.fetchFlights = fetchFlights;
+
 window.backToLostMenu = () => {
     window.keepLostMenuOpen = true;
     if (history.length > 1) {
@@ -340,18 +345,13 @@ document.addEventListener('click', function(e) {
 });
 
 window.addEventListener('load', () => {
-    // 참고: initI18n()은 i18n.js 모듈 로드 시 자동 실행되므로 여기서 호출 불필요
-    initCCTV();
-    Object.keys(CONFIG.WEATHER_LOCATIONS).forEach(loc => fetchWeatherData(loc));
-    fetchWeatherAlerts(); // 기상특보 초기 호출 추가
-    fetchHallasanStatus();
-    renderHallasanDashboard();
-    fetchFlights('arrive');
-    // fetchFoundGoods(); // 첫 로딩 시 자동 조회 제거
-    initMonthFilter();
-    fetchFestivals();
-    initReward();
+    // 홈 화면 동적 배너를 위한 필수 호출
+    fetchWeatherAlerts(); 
     fetchSuccessStories();
+    
+    // 데이터 Fetch가 필요 없는 UI 초기화
+    renderHallasanDashboard();
+    initMonthFilter();
     initPastWeatherSelects();
     
     // 초기 로딩 시 URL에 맞는 페이지 열기

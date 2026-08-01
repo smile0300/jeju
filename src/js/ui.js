@@ -1,13 +1,9 @@
 import { CONFIG } from './config.js';
 import { t } from './i18n.js';
-import { initCCTV } from './cctv.js';
-import { fetchWeatherData, WEATHER_STATE } from './weather.js';
-import { fetchHallasanStatus } from './hallasan.js';
-import { fetchFlights } from './airport.js';
-import { fetchFoundGoods } from './lost-found.v1.js';
-import { fetchFestivals } from './festival.js';
-import { initReward } from './reward.js';
+
 import { getSkyInfo, getWindColor } from './utils.js';
+
+const _initialized = {};
 
 const SEO_META = {
     'home': {
@@ -109,22 +105,29 @@ export function showSection(sectionId, pushHistory = true) {
     const langMap = { zh: 'zh-CN', ko: 'ko', en: 'en' };
     document.documentElement.lang = langMap[currentLang] || 'zh-CN';
 
-    if (sectionId === 'cctv') initCCTV();
-    if (sectionId === 'weather') {
-        const activeLoc = document.querySelector('.location-tab.active')?.dataset.loc || 'jeju';
-        fetchWeatherData(activeLoc);
+    if (!_initialized[sectionId]) {
+        _initialized[sectionId] = true;
 
-        // 나머지 지역은 1초 간격으로 순차적(지연) 로드하여 429 에러 방지
-        const otherLocs = Object.keys(CONFIG.WEATHER_LOCATIONS).filter(l => l !== activeLoc);
-        otherLocs.forEach((loc, index) => {
-            setTimeout(() => fetchWeatherData(loc), (index + 1) * 1000);
-        });
+        if (sectionId === 'cctv' && window.initCCTV) window.initCCTV();
+        if (sectionId === 'weather' && window.fetchWeatherData) {
+            const activeLoc = document.querySelector('.location-tab.active')?.dataset.loc || 'jeju';
+            window.fetchWeatherData(activeLoc);
+
+            // 나머지 지역은 1초 간격으로 순차적(지연) 로드하여 429 에러 방지
+            const otherLocs = Object.keys(CONFIG.WEATHER_LOCATIONS).filter(l => l !== activeLoc);
+            otherLocs.forEach((loc, index) => {
+                setTimeout(() => window.fetchWeatherData(loc), (index + 1) * 1000);
+            });
+        }
+        if (sectionId === 'hallasan' && window.fetchHallasanStatus) window.fetchHallasanStatus();
+        if (sectionId === 'airport' && window.fetchFlights) {
+            const arriveData = document.getElementById('arrive-data');
+            if (arriveData && !arriveData.innerHTML.includes('flight-row')) window.fetchFlights('arrive');
+        }
+        if (sectionId === 'festival' && window.fetchFestivals) window.fetchFestivals();
+        if (sectionId === 'reward' && window.initReward) window.initReward();
     }
-    if (sectionId === 'hallasan') fetchHallasanStatus();
-    if (sectionId === 'airport') {
-        const arriveData = document.getElementById('arrive-data');
-        if (arriveData && !arriveData.innerHTML.includes('flight-row')) fetchFlights('arrive');
-    }
+
     if (sectionId === 'lost') {
         if (window.toggleLostGuide) {
             const guide = document.getElementById('inline-lost-guide');
@@ -133,8 +136,6 @@ export function showSection(sectionId, pushHistory = true) {
             }
         }
     }
-    if (sectionId === 'festival') fetchFestivals();
-    if (sectionId === 'reward') initReward();
 
     if (pushHistory) {
         const path = sectionId === 'home' ? '/' : `/${sectionId}`;
