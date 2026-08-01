@@ -6,10 +6,17 @@ export default defineConfig({
     injectHTML(),
   ],
   build: {
-    // 빌드 결과물을 dist/ 폴더에 생성
     outDir: 'dist',
-    // 정적 에셋(assets, src)을 올바르게 복사
     assetsDir: 'assets',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'i18n': ['./src/js/i18n.js'],
+          'weather': ['./src/js/weather.js'],
+          'lost': ['./src/js/lost-found.v1.js']
+        }
+      }
+    }
   },
   // 개발 서버 설정
   server: {

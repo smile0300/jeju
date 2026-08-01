@@ -11,6 +11,7 @@ import { fetchFoundGoods, switchLostView, openLostDetailModalByIndex, openLostRe
 import { fetchFestivals, selectFestivalMonth, initMonthFilter } from './festival.js';
 import { initReward } from './reward.js';
 import { showSection, openWechatQR, closeWechatQR, openFeatureModal, closeFeatureModal, submitFeatureRequest, openCSModal, closeCSModal, submitCSFeedback, copyWechatId, openWeatherSummaryModal, closeWeatherSummaryModal, openShareModal, closeShareModal, shareToPlatform } from './ui.js';
+import './home.js';
 
 
 // Global function assignments for HTML event handlers
