@@ -1,4 +1,4 @@
-const CACHE_NAME = 'jeju-live-cache-v3';
+const CACHE_NAME = 'jeju-live-cache-v4';
 const urlsToCache = [
   '/',
   '/manifest.json'
