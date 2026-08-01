@@ -747,9 +747,12 @@ function renderSuccessMarquee(data) {
     };
 
     const slots = [];
-    data.forEach((item, i) => {
+    for (let i = 0; i < data.length; i++) {
+        if (slots.length >= 10) break; // 최대 최신 10건만 마키에 노출
+        const item = data[i];
+
         // Step이 존재하고 4 미만이면 아직 완료(발송대기 이상)된 것이 아니므로 마키(전광판)에 표시하지 않음
-        if (item.Step && parseInt(item.Step, 10) < 4) return;
+        if (item.Step && parseInt(item.Step, 10) < 4) continue;
 
         const lang = (localStorage.getItem('jeju_lang') || 'zh');
         let fallbackText = lang === 'ko' ? '📢 [{date}] {region} {id}님, {item} 수령 완료' : (lang === 'en' ? '📢 [{date}] {region} {item} returned to {id}!' : '📢 [{date}] {region} {id} 的 {item} 已回家!');
@@ -771,7 +774,7 @@ function renderSuccessMarquee(data) {
                    .replace('{item}', itemName);
         
         slots.push(`<span class="marquee-item" style="cursor:pointer;" onclick="openSuccessModal(${i})">${text}</span>`);
-    });
+    }
     const itemsHtml = slots.join('');
 
     const containers = [
