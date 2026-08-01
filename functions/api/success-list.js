@@ -22,7 +22,8 @@ export async function onRequest(context) {
   }
 
   try {
-    const gasUrl = env.GAS_URL || env.SECRET_GAS_URL;
+    const LATEST_GAS_URL = 'https://script.google.com/macros/s/AKfycbyKQiffY5B8SsbMJkXAHrLHFSsUqohXpBc9xq2BdPV1rY8zGMOZal9cP4EM2Wu02Z4/exec';
+    const gasUrl = env.GAS_URL || env.SECRET_GAS_URL || LATEST_GAS_URL;
     
     if (!gasUrl) {
       return new Response(JSON.stringify([]), { headers: NO_CACHE_HEADERS });
