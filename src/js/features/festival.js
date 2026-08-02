@@ -89,6 +89,15 @@ export async function fetchFestivals() {
     } else {
         renderFestivalItems(listContainer, activeItems);
     }
+
+    const countContainer = document.getElementById('festival-result-count');
+    if (countContainer) {
+        const totalStr = window.t && window.t('lost.result.count') !== 'lost.result.count' 
+            ? window.t('lost.result.count').replace('{count}', activeItems.length) 
+            : `총 <span class="highlight">${activeItems.length}</span>건이 검색되었습니다.`;
+        countContainer.innerHTML = totalStr;
+        countContainer.style.display = 'block';
+    }
 }
 
 function isPeriodOverlap(searchStartStr, searchEndStr, periodStr) {
