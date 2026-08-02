@@ -338,6 +338,7 @@ const TRANSLATIONS = {
         'festival.no_title': '无标题活动',
         'festival.status.ing': '进行中',
         'festival.status.upcoming': '即将开始',
+        'festival.result.count': '共查询到 <span class="highlight">{count}</span> 个活动。',
 
         // ── 공항 ──
         'airport.err.failed': 'Error: API Request Failed (API请求失败)',
@@ -925,6 +926,7 @@ const TRANSLATIONS = {
         'festival.no_title': '제목 없음',
         'festival.status.ing': '진행중',
         'festival.status.upcoming': '예정',
+        'festival.result.count': '총 <span class="highlight">{count}</span>건이 검색되었습니다.',
 
         'airport.err.failed': '공항 API 호출에 실패했습니다.',
         'airport.title':    '제주 실시간 항공편',
@@ -1472,6 +1474,7 @@ const TRANSLATIONS = {
         'festival.no_title': 'Untitled Event',
         'festival.status.ing': 'Ongoing',
         'festival.status.upcoming': 'Upcoming',
+        'festival.result.count': 'Found <span class="highlight">{count}</span> festivals.',
 
         'airport.err.failed': 'Error: API Request Failed',
         'airport.title':    'Jeju Live Flights',

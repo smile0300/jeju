@@ -92,8 +92,8 @@ export async function fetchFestivals() {
 
     const countContainer = document.getElementById('festival-result-count');
     if (countContainer) {
-        const totalStr = window.t && window.t('lost.result.count') !== 'lost.result.count' 
-            ? window.t('lost.result.count').replace('{count}', activeItems.length) 
+        const totalStr = window.t && window.t('festival.result.count') !== 'festival.result.count' 
+            ? window.t('festival.result.count').replace('{count}', activeItems.length) 
             : `총 <span class="highlight">${activeItems.length}</span>건이 검색되었습니다.`;
         countContainer.innerHTML = totalStr;
         countContainer.style.display = 'block';
