@@ -59,6 +59,10 @@ export async function onRequest(context) {
       if (lk !== 'content-encoding' && lk !== 'content-length' && lk !== 'transfer-encoding' && lk !== 'content-security-policy') newHeaders.set(key, value);
     }
 
+    if (hostname.includes('apis.data.go.kr')) {
+      newHeaders.set('Cache-Control', 'public, max-age=1800, s-maxage=1800');
+    }
+
     const contentType = res.headers.get('content-type') || '';
     if (contentType.includes('application/vnd.apple.mpegurl') || targetUrlString.toLowerCase().includes('.m3u8')) {
       const sourceText = await res.text();

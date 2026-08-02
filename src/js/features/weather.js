@@ -1,5 +1,5 @@
 import { CONFIG } from '../core/config.js';
-import { getSkyInfo, getWindDesc, getWindColor, formatPrecip, formatBaseTime, translateMidWf, getMidTempVal, getSunTimes } from '../core/utils.js';
+import { getSkyInfo, getWindDesc, getWindColor, formatPrecip, formatBaseTime, translateMidWf, getMidTempVal, getSunTimes, showToast } from '../core/utils.js';
 import { fetchPublicDataJson } from '../core/api.js';
 
 
@@ -248,7 +248,18 @@ export async function fetchWeatherData(locKey) {
 
         if (items.length === 0 && !mountainData) {
             console.error(`[Weather] ${locKey} 필수 데이터(단기예보/산악기상) 모두 누락`);
+            // 기상청 서버 부하 가능성이 높으므로 사용자에게 토스트 알림
+            const lang = window.getLang ? window.getLang() : 'zh';
+            const toastMsg = lang === 'ko' ? '기상청 서버 접속이 지연되고 있습니다.' :
+                             lang === 'en' ? 'Weather server is slow. Retrying...' :
+                             '气象局服务器繁忙，请稍候';
+            showToast(toastMsg, 'warn', 4000);
             throw new Error('Required weather data missing');
+        }
+
+        // 부분 데이터만 있어도 렌더링 허용 (산악기상만 있는 경우 등)
+        if (items.length === 0 && mountainData) {
+            console.warn(`[Weather] ${locKey} 단기예보 누락, 산악기상 데이터로만 렌더링`);
         }
 
         parseAndRenderWeather(locKey, items, midData, mountainData);
