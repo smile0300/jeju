@@ -2,6 +2,7 @@ import { CONFIG } from '../core/config.js';
 import { t } from '../core/i18n.js';
 
 import { getSkyInfo, getWindColor } from '../core/utils.js';
+import { WEATHER_STATE, fetchWeatherData } from '../features/weather.js';
 
 const _initialized = {};
 
