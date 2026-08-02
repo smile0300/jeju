@@ -39,9 +39,10 @@ function resolveImageUrl(item) {
     if (typeof url === 'string' && url.trim() && !url.trim().startsWith('http')) {
         let filename = url.trim();
         
-        // HEIC 형식인 경우 브라우저 미지원 경고 출력
+        // HEIC 형식인 경우 브라우저 미지원 안내
         if (filename.toLowerCase().endsWith('.heic')) {
             console.error(`[Reward] HEIC format detected: "${filename}". This format is NOT supported by browsers. Please convert to JPG/PNG.`);
+            return { primary: '', fallback: '', id: '', isHeic: true, filename };
         }
 
         // 기본 경로 반환 (상태 표시용 ID 포함)
@@ -117,15 +118,24 @@ export function renderRewardList() {
         const imgData = resolveImageUrl(item);
         const placeholderText = encodeURIComponent(window.t('lost.no_image'));
         const placeholder = `data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22100%25%22%20height%3D%22100%25%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20fill%3D%22%23f8fafc%22%2F%3E%3Cg%20stroke%3D%22%23cbd5e1%22%20stroke-width%3D%222%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M25%2040%20h50%20v30%20h-50%20z%20M40%2040%20l5%20-10%20h10%20l5%2010%22%2F%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2255%22%20r%3D%228%22%2F%3E%3Cline%20x1%3D%2220%22%20y1%3D%2225%22%20x2%3D%2280%22%20y2%3D%2285%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E`;
-        
+
+        // HEIC \ud615\uc2dd\uc73c\ub85c \uc5c5\ub85c\ub4dc\ub41c \uc774\ubbf8\uc9c0\uc778 \uacbd\uc6b0 \uc548\ub0b4 \uba54\uc2dc\uc9c0 \ud45c\uc2dc
+        const imgHtml = imgData.isHeic
+            ? `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:160px;gap:8px;background:#f8fafc;color:#94a3b8;font-size:0.78rem;text-align:center;padding:12px;">
+                <i class="ph-duotone ph-warning-circle" style="font-size:2rem;color:#f59e0b;"></i>
+                <span>HEIC \ud615\uc2dd - \ube0c\ub77c\uc6b0\uc800 \ubbf8\uc9c0\uc6d0</span>
+                <span style="opacity:0.7;">JPG/PNG\ub85c \ubcc0\ud658 \ud544\uc694</span>
+               </div>`
+            : `<img src="${imgData.primary || placeholder}"
+                     data-fallback="${imgData.fallback}"
+                     data-retry="0"
+                     alt="${item.title}"
+                     onerror="handleRewardImageError(this)">`;
+
         return `
             <div class="reward-card" onclick="applyRewardMission()">
                 <div class="reward-img-top">
-                    <img src="${imgData.primary || placeholder}" 
-                         data-fallback="${imgData.fallback}"
-                         data-retry="0"
-                         alt="${item.title}" 
-                         onerror="handleRewardImageError(this)">
+                    ${imgHtml}
                 </div>
                 <div class="reward-info">
                     <h4 class="reward-item-name">${item.title || window.t('reward.default.title')}</h4>

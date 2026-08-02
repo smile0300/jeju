@@ -149,3 +149,74 @@ export function escapeHTML(str) {
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
 }
+
+/**
+ * 토스트 알림 표시 유틸리티
+ * @param {string} message - 표시할 메시지
+ * @param {'info'|'warn'|'error'} type - 알림 타입
+ * @param {number} duration - 표시 시간 (ms), 기본 3500ms
+ */
+export function showToast(message, type = 'info', duration = 3500) {
+    // 기존 같은 메시지의 토스트가 있으면 중복 방지
+    const existingToasts = document.querySelectorAll('.app-toast');
+    for (const t of existingToasts) {
+        if (t.dataset.message === message) return;
+    }
+
+    const colorMap = {
+        info: '#3b82f6',
+        warn: '#f59e0b',
+        error: '#ef4444'
+    };
+    const iconMap = {
+        info: '<i class="ph-duotone ph-info"></i>',
+        warn: '<i class="ph-duotone ph-warning"></i>',
+        error: '<i class="ph-duotone ph-warning-octagon"></i>'
+    };
+
+    const toast = document.createElement('div');
+    toast.className = 'app-toast';
+    toast.dataset.message = message;
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 80px;
+        left: 50%;
+        transform: translateX(-50%) translateY(20px);
+        background: rgba(30,30,40,0.95);
+        backdrop-filter: blur(12px);
+        color: #fff;
+        padding: 12px 20px;
+        border-radius: 14px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        z-index: 99999;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        border-left: 3px solid ${colorMap[type] || colorMap.info};
+        opacity: 0;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        max-width: 320px;
+        text-align: center;
+        pointer-events: none;
+    `;
+    toast.innerHTML = `<span style="color:${colorMap[type]};font-size:1rem;">${iconMap[type]}</span><span>${message}</span>`;
+    document.body.appendChild(toast);
+
+    // 나타나는 애니메이션
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            toast.style.opacity = '1';
+            toast.style.transform = 'translateX(-50%) translateY(0)';
+        });
+    });
+
+    // 사라지는 애니메이션
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(-50%) translateY(20px)';
+        setTimeout(() => toast.remove(), 350);
+    }, duration);
+}
+

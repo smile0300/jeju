@@ -340,9 +340,19 @@ export async function onRequest(context) {
     }
   }
 
-  // 3.1 /api/reward-list (GET) [NEW]
-  if (pathname === '/api/reward-list' && request.method === 'GET') {
+  // 3.1 /api/reward-list 및 /api/success-list (GET) [캐싱 1시간 적용]
+  if ((pathname === '/api/reward-list' || pathname === '/api/success-list') && request.method === 'GET') {
+    const cacheUrl = new URL(request.url);
+    const cacheKey = new Request(cacheUrl.toString(), request);
+    const cache = caches.default;
+
     try {
+      // 1. 캐시 확인
+      let cachedResponse = await cache.match(cacheKey);
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+
       const gasUrl = env.GAS_URL || env.SECRET_GAS_URL;
       if (!gasUrl) {
         // GAS_URL이 설정되지 않은 경우 빈 배열 반환 (기본값 대응)
@@ -351,18 +361,35 @@ export async function onRequest(context) {
         });
       }
 
-      // GAS Script는 GET 요청 시 시트 데이터를 반환하도록 설계됨
-      const gasResponse = await fetch(gasUrl, {
+      // 파라미터 구성 (success-list인 경우 action=success 추가)
+      let targetUrl = gasUrl;
+      if (pathname === '/api/success-list') {
+        // GAS_URL에 이미 파라미터가 있는지 확인 (보통은 기본 주소임)
+        targetUrl += targetUrl.includes('?') ? '&action=success' : '?action=success';
+      }
+
+      // GAS Script로 GET 요청
+      const gasResponse = await fetch(targetUrl, {
         method: 'GET',
         headers: { 'Accept': 'application/json' }
       });
 
       const result = await gasResponse.text();
-      return new Response(result, {
-        headers: { 'Access-Control-Allow-Origin': ALLOWED_ORIGIN, 'Content-Type': 'application/json' }
+      const finalResponse = new Response(result, {
+        status: 200,
+        headers: { 
+          'Access-Control-Allow-Origin': ALLOWED_ORIGIN, 
+          'Content-Type': 'application/json; charset=utf-8',
+          'Cache-Control': 'public, max-age=3600' // 1시간 캐싱
+        }
       });
+
+      // 3. 캐시 저장
+      context.waitUntil(cache.put(cacheKey, finalResponse.clone()));
+      return finalResponse;
+
     } catch (e) {
-      return new Response(JSON.stringify({ error: e.message }), { status: 500 });
+      return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: { 'Access-Control-Allow-Origin': ALLOWED_ORIGIN, 'Content-Type': 'application/json' } });
     }
   }
 

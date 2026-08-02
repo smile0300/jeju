@@ -195,6 +195,33 @@ export async function fetchFlights(type) {
     const container = document.getElementById(`${type}-data`);
     if (!container) return;
 
+    // JSON 응답 키를 소문자로 정규화하여 대소문자 변칙 대응
+    const normalizeKeys = (obj) => {
+        if (!obj || typeof obj !== 'object') return obj;
+        if (Array.isArray(obj)) return obj.map(normalizeKeys);
+        return Object.fromEntries(
+            Object.entries(obj).map(([k, v]) => [k.toLowerCase(), normalizeKeys(v)])
+        );
+    };
+
+    // 지수 백오프 재시도 래퍼 (최대 2회 재시도)
+    const fetchWithRetry = async (endpoint, params, maxRetries = 2) => {
+        let lastError;
+        for (let attempt = 0; attempt <= maxRetries; attempt++) {
+            try {
+                return await fetchPublicDataText(endpoint, params);
+            } catch (err) {
+                lastError = err;
+                if (attempt < maxRetries) {
+                    const delay = Math.pow(2, attempt) * 1000; // 1s, 2s
+                    console.warn(`[Airport] Fetch attempt ${attempt + 1} failed, retrying in ${delay}ms...`, err.message);
+                    await new Promise(r => setTimeout(r, delay));
+                }
+            }
+        }
+        throw lastError;
+    };
+
     try {
         const today = new Date();
         const ymd = today.getFullYear() + String(today.getMonth() + 1).padStart(2, '0') + String(today.getDate()).padStart(2, '0');
@@ -219,7 +246,7 @@ export async function fetchFlights(type) {
                 <div class="skeleton skeleton-card" style="height: 60px;"></div>
             </div>`;
 
-        const text = await fetchPublicDataText(apiEndpoint, params);
+        const text = await fetchWithRetry(apiEndpoint, params);
         let itemsArray = [];
 
         const getVal = (obj, tag) => {
@@ -266,9 +293,9 @@ export async function fetchFlights(type) {
         };
 
         if (text.trim().startsWith('{')) {
-            const json = JSON.parse(text);
+            const rawJson = JSON.parse(text);
+            const json = normalizeKeys(rawJson);
             const rawItems = json.response?.body?.items?.item || json.response?.body?.items || json.body?.items?.item || json.body?.items || [];
-            const typeIcon = type === 'arrive' ? '<i class="ph-duotone ph-airplane-landing"></i>' : '<i class="ph-duotone ph-airplane-takeoff"></i>';
             const items = Array.isArray(rawItems) ? rawItems : [rawItems];
             itemsArray = items.map(mapItem);
         } else {

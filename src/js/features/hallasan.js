@@ -2,7 +2,7 @@ import { CONFIG } from '../core/config.js';
 import { initHlsPlayer } from './cctv.js';
 import { WEATHER_STATE } from './weather.js';
 import { calculateVisibilityScore } from './hallasan-dashboard.js';
-import { getSunTimes } from '../core/utils.js';
+import { getSunTimes, showToast } from '../core/utils.js';
 
 export const HALLASAN_TRAILS = [
     { nameKo: '어리목탐방로', nameCn: '御里牧登山路', nameEn: 'Eorimok', distanceKo: '6.8km', distanceCn: '6.8km', distanceEn: '6.8km', timeKo: '약 3시간', timeCn: '约3小时', timeEn: 'Approx. 3h', url: 'https://www.jeju.go.kr/hallasan/info/info/realtime/course01.htm' },
@@ -135,6 +135,14 @@ export async function fetchHallasanStatus(isAutoRetry = false, forceRefresh = fa
                     <p style="color: var(--text-muted); font-size: 0.85rem;">${errorText}</p>
                     <button onclick="window.hallasanApp.fetchStatus()" style="margin-top:10px; padding: 8px 16px; border-radius: 8px; border:none; background:var(--primary-gradient); color:white; font-weight:700;">${window.t('hallasan.err.reload')}</button>
                 </div>`;
+            } else {
+                // 캐시 데이터가 화면에 표시된 상태이면 에러 UI 대신 토스트로만 알림
+                const isTimeout = e.name === 'TimeoutError' || e.message.includes('timeout') || e.message.includes('signal');
+                const lang = window.getLang ? window.getLang() : 'zh';
+                const toastMsg = isTimeout
+                    ? (lang === 'ko' ? '한라산 서버 응답 지연 - 캐시 표시 중' : lang === 'en' ? 'Hallasan server slow - showing cache' : '汉拿山服务器迟缓，显示缓存数据')
+                    : (lang === 'ko' ? '한라산 업데이트 실패 - 캐시 표시 중' : lang === 'en' ? 'Update failed - showing cache' : '更新失败，显示缓存数据');
+                showToast(toastMsg, 'warn', 4000);
             }
         }
     }

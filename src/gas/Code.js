@@ -186,6 +186,7 @@ function doPost(e) {
           'Time': data.time ? "'" + data.time : '',
           'DetailLocation': data.detailLocation || '',
           'HotelName': data.hotelName || '',
+          'hotelRoom': data.hotelRoom || '',   // J열
           'HotelBooker': data.hotelBooker || '',
           'HotelDates': data.hotelDates || '',
           'CarNumber': data.carNumber || '',
@@ -242,9 +243,9 @@ function doPost(e) {
           sheet.appendRow([
             rowData['Timestamp'], rowData['ItemCategory'], rowData['City'], rowData['Specifics'], 
             rowData['RegionCategory'], rowData['Date'], rowData['Time'], rowData['DetailLocation'], 
-            rowData['HotelName'], rowData['HotelBooker'], rowData['HotelDates'], rowData['CarNumber'], 
-            rowData['BoardLoc'], rowData['BoardTime'], rowData['AlightLoc'], rowData['AlightTime'], 
-            rowData['PhotoURL'], rowData['WechatId'], rowData['UserAgent'], rowData['Labels']
+            rowData['HotelName'], rowData['hotelRoom'], rowData['HotelBooker'], rowData['HotelDates'],
+            rowData['CarNumber'], rowData['BoardLoc'], rowData['BoardTime'], rowData['AlightLoc'],
+            rowData['AlightTime'], rowData['PhotoURL'], rowData['WechatId'], rowData['UserAgent'], rowData['Labels']
           ]);
         } else if (data.type === 'feature') {
           sheet.appendRow([rowData['Timestamp'], rowData['Feature'], rowData['Contact'], rowData['UserAgent']]);
@@ -263,14 +264,14 @@ function doPost(e) {
           rowData['Specifics'],       // D열
           rowData['DetailLocation'],  // H열
           rowData['HotelName'],       // I열
-          rowData['HotelBooker'],     // J열
-          rowData['HotelDates'],      // K열
-          rowData['CarNumber'],       // L열
-          rowData['BoardLoc'],        // M열
-          rowData['BoardTime'],       // N열
-          rowData['AlightLoc'],       // O열
-          rowData['AlightTime'],      // P열
-          rowData['PhotoURL']         // Q열
+          rowData['hotelRoom'],       // J열
+          rowData['HotelBooker'],     // K열
+          rowData['HotelDates'],      // L열
+          rowData['CarNumber'],       // M열
+          rowData['BoardLoc'],        // N열
+          rowData['BoardTime'],       // O열
+          rowData['AlightLoc'],       // P열
+          rowData['AlightTime']       // Q열 (PhotoURL/R열 제외)
         ];
         
         // 빈 값 제외하고 공백으로 이어붙이기 (W열의 TEXTJOIN 역할)
@@ -431,18 +432,19 @@ function backfillLostReport() {
       continue;
     }
 
-    // D열(4)과 H~Q열(8~17)의 값을 읽어 합치기
-    var d  = sheet.getRange(row, 4).getValue()  || '';  // Specifics
-    var h  = sheet.getRange(row, 8).getValue()  || '';  // DetailLocation
-    var i  = sheet.getRange(row, 9).getValue()  || '';  // HotelName
-    var j2 = sheet.getRange(row, 10).getValue() || '';  // HotelBooker
-    var k  = sheet.getRange(row, 11).getValue() || '';  // HotelDates
-    var l  = sheet.getRange(row, 12).getValue() || '';  // CarNumber
-    var m  = sheet.getRange(row, 13).getValue() || '';  // BoardLoc
-    var n  = sheet.getRange(row, 14).getValue() || '';  // BoardTime
-    var o  = sheet.getRange(row, 15).getValue() || '';  // AlightLoc
-    var p  = sheet.getRange(row, 16).getValue() || '';  // AlightTime
-    var q  = sheet.getRange(row, 17).getValue() || '';  // PhotoURL
+    // D열(4) + H~Q열(8~17) 읽기 — PhotoURL은 R열(18)이므로 제외
+    var d  = sheet.getRange(row, 4).getValue()  || '';  // D: Specifics
+    var h  = sheet.getRange(row, 8).getValue()  || '';  // H: DetailLocation
+    var i  = sheet.getRange(row, 9).getValue()  || '';  // I: HotelName
+    var j2 = sheet.getRange(row, 10).getValue() || '';  // J: hotelRoom
+    var k  = sheet.getRange(row, 11).getValue() || '';  // K: HotelBooker
+    var l  = sheet.getRange(row, 12).getValue() || '';  // L: HotelDates
+    var m  = sheet.getRange(row, 13).getValue() || '';  // M: CarNumber
+    var n  = sheet.getRange(row, 14).getValue() || '';  // N: BoardLoc
+    var o  = sheet.getRange(row, 15).getValue() || '';  // O: BoardTime
+    var p  = sheet.getRange(row, 16).getValue() || '';  // P: AlightLoc
+    var q  = sheet.getRange(row, 17).getValue() || '';  // Q: AlightTime
+    // R열(18) = PhotoURL → 제외
 
     var parts = [d, h, i, j2, k, l, m, n, o, p, q].filter(function(v) {
       return v && String(v).trim() !== '';

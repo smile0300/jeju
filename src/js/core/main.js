@@ -289,7 +289,6 @@ window.closeCSModal = (fromPopState = false) => {
 
 const ROUTE_MAP = {
     '/': 'home',
-    '/cctv': 'cctv',
     '/weather': 'weather',
     '/hallasan': 'hallasan',
     '/airport': 'airport',
