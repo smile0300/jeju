@@ -19,6 +19,32 @@ export function initMonthFilter() {
     filterContainer.innerHTML = months.map(m => `
         <div class="month-tab ${m.ym === currentFestivalMonth ? 'active' : ''}" 
              onclick="selectFestivalMonth('${m.ym}')" data-ym="${m.ym}">${m.label}</div>`).join('');
+
+    const rangeInput = document.getElementById('festival-date-range');
+    if (rangeInput && typeof flatpickr !== 'undefined' && !rangeInput._flatpickr) {
+        const lang = window.getLang ? window.getLang() : 'ko';
+        const locale = lang === 'zh-CN' || lang === 'zh' ? 'zh' : (lang === 'en' ? 'en' : 'ko');
+        
+        flatpickr(rangeInput, {
+            mode: "range",
+            dateFormat: "Y-m-d",
+            locale: locale,
+            onChange: function(selectedDates, dateStr, instance) {
+                const startInput = document.getElementById('festival-date-start');
+                const endInput = document.getElementById('festival-date-end');
+                if (selectedDates.length === 2) {
+                    const offset = selectedDates[0].getTimezoneOffset() * 60000;
+                    startInput.value = (new Date(selectedDates[0].getTime() - offset)).toISOString().split('T')[0];
+                    endInput.value = (new Date(selectedDates[1].getTime() - offset)).toISOString().split('T')[0];
+                    handleDateChange();
+                } else if (selectedDates.length === 0) {
+                    startInput.value = '';
+                    endInput.value = '';
+                    handleDateChange();
+                }
+            }
+        });
+    }
 }
 
 export function selectFestivalMonth(ym) {
@@ -167,8 +193,12 @@ export function handleDateChange() {
 export function clearDateSearch() {
     const startDateInput = document.getElementById('festival-date-start');
     const endDateInput = document.getElementById('festival-date-end');
+    const rangeInput = document.getElementById('festival-date-range');
     if (startDateInput) startDateInput.value = '';
     if (endDateInput) endDateInput.value = '';
+    if (rangeInput && rangeInput._flatpickr) {
+        rangeInput._flatpickr.clear();
+    }
     fetchFestivals();
 }
 

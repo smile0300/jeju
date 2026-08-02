@@ -11,9 +11,9 @@
             <!-- 날짜 검색 필터 추가 -->
             <div class="festival-filter-container search-filter-box" style="margin-top: 10px; margin-bottom: 15px;">
                 <div class="filter-row" style="display:flex;gap:10px;align-items:center;">
-                    <input type="date" id="festival-date-start" class="date-input" style="flex:1;" onchange="window.festivalApp.handleDateChange()">
-                    <span>~</span>
-                    <input type="date" id="festival-date-end" class="date-input" style="flex:1;" onchange="window.festivalApp.handleDateChange()">
+                    <input type="text" id="festival-date-range" class="date-input" style="flex:1; text-align: center; font-size: 0.95em; cursor: pointer;" placeholder="시작일 ~ 마감일 선택" readonly>
+                    <input type="hidden" id="festival-date-start">
+                    <input type="hidden" id="festival-date-end">
                     <button class="search-btn" onclick="window.festivalApp.handleDateChange()">
                         <i class="ph-duotone ph-list-magnifying-glass" style="color: white;"></i>
                     </button>
