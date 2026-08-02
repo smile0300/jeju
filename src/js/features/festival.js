@@ -149,13 +149,15 @@ export function handleDateChange() {
     
     if (targetDateStr) {
         const selectedDate = new Date(targetDateStr);
-        const ym = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}`;
-        
-        if (currentFestivalMonth !== ym) {
-            currentFestivalMonth = ym;
-            document.querySelectorAll('.month-tab').forEach(tab => {
-                tab.classList.toggle('active', tab.dataset.ym === ym);
-            });
+        if (!isNaN(selectedDate.getTime())) {
+            const ym = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}`;
+            
+            if (currentFestivalMonth !== ym) {
+                currentFestivalMonth = ym;
+                document.querySelectorAll('.month-tab').forEach(tab => {
+                    tab.classList.toggle('active', tab.dataset.ym === ym);
+                });
+            }
         }
     }
     

@@ -333,7 +333,7 @@ const TRANSLATIONS = {
 
         // ── 축제 동적 텍스트 ──
         'festival.month_suffix': '月',
-        'festival.empty.list': '该月目前暂无进行中的活动<br><span style="font-size:1.1rem; color:var(--accent-blue); font-weight:800; display:block; margin-top:10px;">我们将持续为您更新 {month}月的精彩活动</span>',
+        'festival.empty.list': '该月目前暂无进行中的活动<br><span style="font-size:1.1rem; color:var(--accent-blue); font-weight:800; display:block; margin-top:10px;">我们将持续为您更新 {month}的精彩活动</span>',
         'festival.loading.notice': '✨ 济州节庆数据正在加载中',
         'festival.no_title': '无标题活动',
         'festival.status.ing': '进行中',
