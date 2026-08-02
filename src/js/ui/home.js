@@ -129,13 +129,13 @@
 
     // 서브 버튼 id → 원래 버튼 id 매핑 (서브 버튼을 원래 버튼 앞에 삽입)
     const LOST_REPLACE_MAP = [
-        { origId: 'home-weather-btn',  subId: 'lost-sub-search',   animClass: 'lost-sub-in-top',    outClass: 'lost-sub-out-top' },
-        { origId: 'home-airport-btn',  subId: 'lost-sub-status',   animClass: 'lost-sub-in-left',   outClass: 'lost-sub-out-left' },
-        { origId: 'home-festival-btn', subId: 'lost-sub-register', animClass: 'lost-sub-in-right',  outClass: 'lost-sub-out-right' },
-        { origId: 'home-food-btn',     subId: 'lost-sub-proxy',    animClass: 'lost-sub-in-bottom', outClass: 'lost-sub-out-bottom' },
+        { origId: 'home-hallasan-btn', subId: 'lost-sub-search',   animClass: 'lost-sub-in-top',    outClass: 'lost-sub-out-top' },
+        { origId: 'home-festival-btn', subId: 'lost-sub-status',   animClass: 'lost-sub-in-left',   outClass: 'lost-sub-out-left' },
+        { origId: 'home-reward-btn',   subId: 'lost-sub-register', animClass: 'lost-sub-in-right',  outClass: 'lost-sub-out-right' },
+        { origId: 'home-course-btn',   subId: 'lost-sub-proxy',    animClass: 'lost-sub-in-bottom', outClass: 'lost-sub-out-bottom' },
     ];
 
-    const CORNER_BTN_IDS = ['home-cctv-btn', 'home-hallasan-btn', 'home-reward-btn', 'home-course-btn'];
+    const CORNER_BTN_IDS = ['home-weather-btn', 'home-airport-btn', 'home-food-btn'];
 
     window.toggleLostExpand = function() {
         lostExpanded ? window.collapseLostGrid() : window.expandLostGrid();

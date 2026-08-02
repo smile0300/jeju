@@ -40,27 +40,125 @@ export async function fetchFestivals() {
     }
 
     const today = new Date().toISOString().split('T')[0];
-    const monthData = window.FESTIVAL_DATA.months[currentFestivalMonth] || [];
+    const startDateInput = document.getElementById('festival-date-start');
+    const endDateInput = document.getElementById('festival-date-end');
     
-    // Filter expired items
-    const activeItems = monthData.filter(item => {
-        if (!item.period || !item.period.includes('~')) return true;
-        const endPart = item.period.split('~')[1].trim();
-        const endDate = endPart.replace(/\./g, '-');
-        return new Date(endDate) >= new Date(today);
-    });
+    const startDateStr = startDateInput && startDateInput.value ? startDateInput.value : null;
+    const endDateStr = endDateInput && endDateInput.value ? endDateInput.value : null;
+    const hasDateSearch = startDateStr || endDateStr;
+
+    let activeItems = [];
+    
+    if (hasDateSearch) {
+        for (const month in window.FESTIVAL_DATA.months) {
+            const items = window.FESTIVAL_DATA.months[month];
+            items.forEach(item => {
+                if (isPeriodOverlap(startDateStr, endDateStr, item.period)) {
+                    if (!activeItems.find(a => a.title === item.title)) {
+                        activeItems.push(item);
+                    }
+                }
+            });
+        }
+    } else {
+        const monthData = window.FESTIVAL_DATA.months[currentFestivalMonth] || [];
+        activeItems = monthData.filter(item => {
+            if (!item.period || !item.period.includes('~')) return true;
+            const endPart = item.period.split('~')[1].trim();
+            const endDate = endPart.replace(/\./g, '-');
+            return new Date(endDate) >= new Date(today);
+        });
+    }
 
     if (activeItems.length === 0) {
         const monthNum = currentFestivalMonth.split('-')[1];
-        const monthSuffix = window.t('festival.month_suffix');
+        const monthSuffix = window.t ? window.t('festival.month_suffix') : '월';
         const monthStr = `${parseInt(monthNum)}${monthSuffix}`;
+        
+        let msg = '';
+        if (hasDateSearch) {
+            msg = window.t ? window.t('festival.empty.date') || '해당 기간에 진행되는 축제가 없습니다.' : '해당 기간에 진행되는 축제가 없습니다.';
+        } else {
+            msg = window.t ? window.t('festival.empty.list').replace('{month}', monthStr) : `${monthStr}에 진행중인 축제가 없습니다.`;
+        }
+        
         listContainer.innerHTML = `
             <div style="text-align:center;padding:40px;color:var(--text-muted)">
-                ${window.t('festival.empty.list').replace('{month}', monthStr)}
+                ${msg}
             </div>`;
     } else {
         renderFestivalItems(listContainer, activeItems);
     }
+}
+
+function isPeriodOverlap(searchStartStr, searchEndStr, periodStr) {
+    if (!periodStr) return false;
+    
+    let searchStart = searchStartStr ? new Date(searchStartStr).getTime() : -Infinity;
+    let searchEnd = searchEndStr ? new Date(searchEndStr).getTime() : Infinity;
+    
+    if (searchEndStr) {
+        const d = new Date(searchEndStr);
+        d.setHours(23,59,59,999);
+        searchEnd = d.getTime();
+    }
+    
+    let festStart, festEnd;
+    
+    if (periodStr.includes('~')) {
+        const parts = periodStr.split('~');
+        let startStr = parts[0].trim().replace(/\./g, '-');
+        let endStr = parts[1].trim().replace(/\./g, '-');
+        
+        if (endStr.length <= 5 && startStr.length >= 4) {
+            const year = startStr.substring(0, 4);
+            endStr = `${year}-${endStr}`;
+        }
+        
+        festStart = new Date(startStr).getTime();
+        const d = new Date(endStr);
+        d.setHours(23,59,59,999);
+        festEnd = d.getTime();
+    } else {
+        const exactDate = new Date(periodStr.trim().replace(/\./g, '-'));
+        festStart = exactDate.getTime();
+        exactDate.setHours(23,59,59,999);
+        festEnd = exactDate.getTime();
+    }
+    
+    return searchStart <= festEnd && searchEnd >= festStart;
+}
+
+export function handleDateChange() {
+    const startDateInput = document.getElementById('festival-date-start');
+    const endDateInput = document.getElementById('festival-date-end');
+    
+    const startDateStr = startDateInput && startDateInput.value ? startDateInput.value : null;
+    const endDateStr = endDateInput && endDateInput.value ? endDateInput.value : null;
+    
+    const targetDateStr = startDateStr || endDateStr;
+    
+    if (targetDateStr) {
+        const selectedDate = new Date(targetDateStr);
+        const ym = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}`;
+        
+        if (currentFestivalMonth !== ym) {
+            currentFestivalMonth = ym;
+            document.querySelectorAll('.month-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.ym === ym);
+            });
+        }
+    }
+    
+    fetchFestivals();
+}
+
+export function clearDateSearch() {
+    const startDateInput = document.getElementById('festival-date-start');
+    const endDateInput = document.getElementById('festival-date-end');
+    if (startDateInput) startDateInput.value = '';
+    if (endDateInput) endDateInput.value = '';
+    fetchFestivals();
 }
 
 export function renderFestivalNotice(container) {
@@ -550,5 +648,7 @@ export function renderFestivalItems(container, items) {
 
 window.festivalApp = {
     initMonthFilter: initMonthFilter,
-    fetchFestivals: fetchFestivals
+    fetchFestivals: fetchFestivals,
+    handleDateChange: handleDateChange,
+    clearDateSearch: clearDateSearch
 };

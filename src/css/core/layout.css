@@ -589,9 +589,6 @@
 .lost-sub-out-bottom { animation: lostSubOutBottom 0.25s var(--ease-in-out) both; }
 
 @media (min-width: 500px) {
-    .home-grid.lost-expanded-grid .home-item[style*="visibility: hidden"] {
-        display: none !important;
-    }
     .home-grid.lost-expanded-grid {
         display: grid;
         grid-template-columns: repeat(3, 110px); /* 조금 넉넉하게 110px */
@@ -601,12 +598,6 @@
     .home-grid.lost-expanded-grid .home-item {
         width: 100%; /* grid 내부 꽉 채우기 */
     }
-    /* 뒤로가기 버튼을 우측 상단(1행 3열)으로 고정하기 위한 순서 지정 */
-    #lost-sub-search { order: 1; }
-    #lost-sub-status { order: 2; }
-    #home-lost-btn.lost-active { order: 3; }
-    #lost-sub-register { order: 4; }
-    #lost-sub-proxy { order: 5; }
 }
 
 

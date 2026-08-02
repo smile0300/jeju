@@ -8,6 +8,22 @@
     <h1 class="visually-hidden">Jeju Island Festivals &amp; Events 2026 — Current &amp; Upcoming | 济州岛节庆活动 제주 축제 행사</h1>
     <div class="section">
         <div class="container">
+            <!-- 날짜 검색 필터 추가 -->
+            <div class="festival-filter-container search-filter-box" style="margin-top: 10px; margin-bottom: 15px;">
+                <div class="filter-row" style="display:flex;gap:10px;align-items:center;">
+                    <input type="date" id="festival-date-start" class="date-input" style="flex:1;" onchange="window.festivalApp.handleDateChange()">
+                    <span>~</span>
+                    <input type="date" id="festival-date-end" class="date-input" style="flex:1;" onchange="window.festivalApp.handleDateChange()">
+                    <button class="search-btn" onclick="window.festivalApp.handleDateChange()">
+                        <i class="ph-duotone ph-list-magnifying-glass color-festival"></i>
+                    </button>
+                    <!-- 초기화 버튼 -->
+                    <button class="search-btn" style="width: 44px; flex: none;" onclick="window.festivalApp.clearDateSearch()" title="초기화">
+                        <i class="ph-duotone ph-arrow-counter-clockwise"></i>
+                    </button>
+                </div>
+            </div>
+
             <!-- 월별 축제 필터 (v5.0) -->
             <div class="festival-month-filter" id="month-filter">
                 <!-- script.js에서 동적으로 생성됩니다 -->
