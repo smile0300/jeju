@@ -1324,3 +1324,8 @@ i.ph-duotone.hover-scale:hover {
     margin-left: 10px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.15);
 }
+
+/* 홈화면 마키 전용 왼쪽 정렬 */
+#home-success-marquee-content .marquee-item {
+    text-align: left !important;
+}

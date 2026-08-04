@@ -45,8 +45,8 @@ export async function fetchFoundGoods() {
         const commonParams = [`numOfRows=1200`, `pageNo=1`, `N_FD_LCT_CD=${regionCd}`, `START_YMD=${startYmd}`, `END_YMD=${endYmd}`];
         if (category) commonParams.push(`PRDT_CL_CD_01=${category}`);
 
-        const polEndpoint = `http://apis.data.go.kr/1320000/LosfundInfoInqireService/getLosfundInfoAccToClAreaPd`;
-        const portalEndpoint = `http://apis.data.go.kr/1320000/LosPtfundInfoInqireService/getPtLosfundInfoAccToClAreaPd`;
+        const polEndpoint = `https://apis.data.go.kr/1320000/LosfundInfoInqireService/getLosfundInfoAccToClAreaPd`;
+        const portalEndpoint = `https://apis.data.go.kr/1320000/LosPtfundInfoInqireService/getPtLosfundInfoAccToClAreaPd`;
 
         const polUrl = `${CONFIG.PROXY_URL}/api/public-data?endpoint=${encodeURIComponent(polEndpoint)}&${commonParams.join('&')}`;
         const portalUrl = `${CONFIG.PROXY_URL}/api/public-data?endpoint=${encodeURIComponent(portalEndpoint)}&${commonParams.join('&')}`;
@@ -688,6 +688,19 @@ const getValidTranslation = (original, translated) => {
 export async function fetchSuccessStories() {
     let data = [];
 
+    // 캐시된 데이터가 있으면 먼저 화면에 즉시 렌더링
+    try {
+        const cached = localStorage.getItem('cachedSuccessStories');
+        if (cached) {
+            const cachedData = JSON.parse(cached);
+            if (Array.isArray(cachedData) && cachedData.length > 0) {
+                window.successStoriesData = cachedData;
+                renderSuccessMarquee(cachedData);
+                renderSuccessGoodsView();
+            }
+        }
+    } catch(e) {}
+
     try {
         const response = await fetch(`/api/success-list?t=${Date.now()}`);
         if (response.ok) {
@@ -715,6 +728,11 @@ export async function fetchSuccessStories() {
         if (numA !== numB) return numB - numA;
         return new Date(b.Date || 0) - new Date(a.Date || 0);
     });
+
+    // 새로 받아온 정렬된 데이터를 캐시에 저장
+    try {
+        localStorage.setItem('cachedSuccessStories', JSON.stringify(data));
+    } catch(e) {}
 
     window.successStoriesData = data;
     renderSuccessMarquee(data);
@@ -773,7 +791,7 @@ function renderSuccessMarquee(data) {
                    .replace('{id}', maskId(item.WeChatId))
                    .replace('{item}', itemName);
         
-        slots.push(`<span class="marquee-item" style="cursor:pointer; text-align: left; padding: 0;" onclick="openSuccessModal(${i})">${text}</span>`);
+        slots.push(`<span class="marquee-item" style="cursor:pointer; text-align: center; padding: 0;" onclick="openSuccessModal(${i})">${text}</span>`);
     }
     const itemsHtml = slots.join('');
 

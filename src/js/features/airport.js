@@ -228,7 +228,7 @@ export async function fetchFlights(type) {
         const endpointType = type === 'arrive' ? 'getArrFlightStatusList' : 'getDepFlightStatusList';
         const airportParam = type === 'arrive' ? 'arr_airport_code=CJU' : 'airport_code=CJU';
 
-        const apiEndpoint = `http://openapi.airport.co.kr/service/rest/StatusOfFlights/${endpointType}`;
+        const apiEndpoint = `https://openapi.airport.co.kr/service/rest/StatusOfFlights/${endpointType}`;
         const params = {
             pageNo: 1,
             numOfRows: 1000,

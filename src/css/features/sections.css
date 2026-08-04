@@ -1,5 +1,5 @@
 /* ==================== Lost Report Modal Form ==================== */
-/* (modals.html?�?�� ??�쟾?????몃씪??<style> ?�붾�???�굅) */
+/* (modals.html?諟?� ??�𥰡?????諈�𡡤??<style> ?参馮鴗???檾�) */
 .lost-report-form-content {
     padding: 32px 24px 24px 24px;
     max-width: 520px;
@@ -335,7 +335,7 @@
     height: 100%;
     display: block;
     object-fit: cover;
-    /* ??�쎈????�쎈??諛⑼??????��?�?湲곕????cover, ??�쎌???contain */
+    /* ??𥔱�????𥔱�??隢𥕞鐤??????𥔱?赬?皝舂�????cover, ??𥔱�???contain */
 }
 
 /* Modal specific CCTV styles */
@@ -352,7 +352,7 @@
     width: 100%;
     height: 100%;
     object-fit: contain;
-    /* ????�쎈???�쎌�??媛濡?�꽭????��????�쏙?? 沅뚯??*/
+    /* ????𥔱�???𥔱�篚??慦𥟇縑?佲蔬????儔????𥔱�?? 瘝�黢??*/
 }
 
 .cctv-modal-info {
@@ -383,7 +383,7 @@
 }
 
 #festival .ad-container::before {
-    content: '?�묎??濡쒕�???..';
+    content: '?辨�??瞈∫�貑???..';
     position: absolute;
     top: 50%;
     left: 50%;
@@ -455,7 +455,7 @@
     margin-top: 12px;
 }
 
-/* ?묓옒 ?곹깭: ?좏깮??�????�떆 ?몃━�?踰꾪??*/
+/* ?諡𣟕� ?窸實僮: ?鮈𡛟僥??鴽????濚� ?諈��憳?頦國儐??*/
 .loc-trigger-row {
     display: flex;
     align-items: center;
@@ -497,7 +497,7 @@
     color: #2563EB;
 }
 
-/* ?붿궡???꾩씠?? ??�묠 ?????�� */
+/* ?賱輳間???篨拖�?? ??梵� ?????𥰡 */
 .loc-caret {
     font-size: 0.85rem;
     color: #2563EB;
@@ -528,7 +528,7 @@
     flex-direction: column;
     width: 100%;
     padding: 14px 0 4px 0;
-    /* ?곷떒 14px: group-label(top:-10px) ??�┝ 諛⑹? */
+    /* ?窸瑛� 14px: group-label(top:-10px) ??𢛶� 隢𥕞鼂? */
     margin-top: 2px;
     gap: 0;
 }
@@ -538,7 +538,7 @@
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 8px;
-    /* Grid 媛꾧�?8px */
+    /* Grid 慦㓻儒篝?8px */
     width: 100%;
     padding: 16px 2px 2px 2px;
 }
@@ -553,20 +553,20 @@
     display: none;
 }
 
-/* 洹몃�??�⑦???��?(??�? 踰꾪??媛꾧�??Grid 媛꾧꺽�??꾨꼍 ??�튂) */
+/* 瘣寨�嚗??𢞖𪈳???�篥?(??�? 頦國儐??慦㓻儒篝??Grid 慦㓻儒篝賣�??篨刷� ??桶�) */
 .loc-group-wrapper {
     display: flex;
     align-items: stretch;
     gap: 8px;
-    /* ?�紐?媛꾧꺽�???�씪??�쾶 8px */
+    /* ?綽�?慦㓻儒篝賣�???�𡡤??𣽁噤 8px */
     position: relative;
     padding: 0;
-    /* 紐⑤�???�뵫 ??�굅??�뿬 踰꾪????�?媛꾧�???�튂 */
+    /* 鴽謿𪈠貑???月筍 ??檾�??䘕翱 頦國儐????謔?慦㓻儒篝???桶� */
     border-radius: 0;
     background: transparent;
 }
 
-/* 5媛쒖???�щ읆??留욊�?洹몃９蹂꾨줈 李⑥???�뒗 �???Span) �??*/
+/* 5慦惞�???𧄍吣�??鴽𣽁�儩?瘣寨�嚗躰�篨到� 鴽﹦𡤻???𤩥� 蝘???Span) 鴽??*/
 .group-north {
     grid-column: span 1;
 }
@@ -587,7 +587,7 @@
     grid-column: span 1;
 }
 
-/* ??�꺼: 泥ル쾲吏?踰꾪???곷떒 ?�뚯�?????�?�� 湲곗???�쭊 �?��? ?뺥깭�?諛곗??*/
+/* ??國獐: 鴽��儩莎�?頦國儐???窸瑛� ?恨黢諝?????諟?� 皝舂�???�� 隢?�? ?赮伉僮瞈?隢㓻�??*/
 .group-label {
     display: inline-block;
     position: absolute;
@@ -604,10 +604,10 @@
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
     border: 1px solid rgba(0, 0, 0, 0.04);
     pointer-events: none;
-    /* ??�??諛⑺�?諛⑹? */
+    /* ??�??隢𥕞鼈赬?隢𥕞鼂? */
 }
 
-/* ??�꺼 ??�뒪????�긽 �????留욎??蹂寃?*/
+/* ??國獐 ??辨傁????梓蜇 鴽????鴽𣽁�??頩��?*/
 .group-north .group-label {
     color: #2563EB;
 }
@@ -634,7 +634,7 @@
     min-width: 50px;
     background: var(--bg-primary);
     padding: 9px 0;
-    /* border 1px ?�붽?�??명븳 ??�뵫 誘몄�??곗젙 */
+    /* border 1px ?圉飭?瞈??諈�董 ??月筍 隤䁪�篚??窸𢿣� */
     border-radius: var(--radius-md);
     cursor: pointer;
     transition: all var(--duration-fast) var(--ease-out);
@@ -650,7 +650,7 @@
     transform: scale(0.97);
 }
 
-/* �??????湲곕?????��??(誘몄�???곹깭) - ??????�듃 */
+/* 鴽??????皝舂�?????炎??(隤䁪�篚???窸實僮) - ??????�� */
 .group-north .location-tab {
     border: 1px solid rgba(37, 99, 235, 0.25);
 }
@@ -671,7 +671,7 @@
     border: 1px solid rgba(139, 90, 43, 0.25);
 }
 
-/* �??????�꽦(Active) ?????�� ?�щ윭 */
+/* 鴽??????佲膠(Active) ?????� ?𧄍吣𤧐 */
 .location-tab.active {
     box-shadow: none;
     border-color: transparent;
@@ -772,7 +772,7 @@
     font-size: 2.8rem;
     font-weight: 700;
     /* Heavy ??Bold */
-    /* Apple HIG: ??�깋 ??洹몃??곗씠????�굅 */
+    /* Apple HIG: ??伉� ??瘣寨�??窸𢿣�????檾� */
     color: var(--label-primary);
 }
 
@@ -793,7 +793,7 @@
     width: 100%;
     text-align: center;
     grid-column: 1 / -1;
-    /* 洹몃?????�쎌�???�쎌�?李⑨?? 媛뺤??*/
+    /* 瘣寨�?????𥔱�篕???𥔱�踸?鴽﹦𪂹?? 慦𣏌漱??*/
 }
 
 .weather-loader {
@@ -866,7 +866,7 @@
 }
 
 
-/* 理쒖�??湲곗�?밸낫 諛곕�?(議곌굔遺 ??�떆) */
+/* 鴽木�篣??皝舂�篣?諻賈� 隢㓻�篥?(霅國�窱娪� ??濚�) */
 .weather-alerts-top-banner {
     width: 100%;
     margin-top: 12px;
@@ -886,7 +886,7 @@
     }
 }
 
-/* 湲곗??weather-alerts-container (?????? ??�쑝????�솕硫댁�??????�? */
+/* 皝舂�??weather-alerts-container (?????? ??��????𥇣�鴽𤩥�踸??????隞? */
 .weather-alerts-container {
     width: 100%;
     margin-top: 10px;
@@ -910,7 +910,7 @@
 
 .weather-alert-card {
     background: rgba(255, 36, 66, 0.08);
-    /* ??��?�???���??諛곌�?*/
+    /* ??𥔱?賳???𪆓儢??隢㓻�篥?*/
     border: 0.5px solid rgba(255, 36, 66, 0.3);
     border-radius: var(--radius-xl, 20px);
     padding: 12px 18px;
@@ -1085,9 +1085,9 @@
 .subsection-title,
 .cmp-cur-weather-head {
     margin: 40px 0 24px 0;
-    /* ??�??�? */
+    /* ??穈??赮? */
     font-size: 1.35rem;
-    /* ?고듃 利앸? */
+    /* ?窸𧙖� 鴽吖彍? */
     font-weight: 800;
     text-align: center;
     width: 100%;
@@ -1278,13 +1278,13 @@
     color: #ef4444;
 }
 
-/* 饔삣�?- Red */
+/* 擖䇹�貒?- Red */
 .air-lv4 {
     stroke: #9333ea;
     color: #9333ea;
 }
 
-/* ??�썲�?- Purple */
+/* ??𥔱㬢貒?- Purple */
 
 .air-circle-status {
     position: absolute;
@@ -1474,7 +1474,7 @@
     color: white;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     white-space: nowrap;
-    /* �?��???以꾨�?��???�븿 */
+    /* 隢?�???隞伉儘儢?�???㗻蛾 */
 }
 
 .trail-status-badge.open {
@@ -1534,7 +1534,7 @@
     font-size: 0.75rem;
     font-weight: 800;
     color: var(--label-primary);
-    /* white-space: nowrap ??�굅 */
+    /* white-space: nowrap ??檾� */
     word-break: keep-all;
     text-align: center;
     width: 100%;
@@ -1549,9 +1549,9 @@
     border-top: 1px dashed var(--border-light);
     padding-top: 8px;
     flex-wrap: nowrap;
-    /* 以꾨�?��?諛⑼?? */
+    /* 隞伉儘儢?�?隢𥕞鐤?? */
     gap: 5px;
-    /* ??�쎌????理쒖??媛꾧�?*/
+    /* ??𥔱�????鴽木�??慦㓻儒篝?*/
 }
 
 .trail-info-compact span {
@@ -1559,9 +1559,9 @@
     font-weight: 700;
     color: var(--text-muted);
     white-space: nowrap;
-    /* ??�쎌???以꾨�?��?諛⑼?? */
+    /* ??𥔱�???隞伉儘儢?�?隢𥕞鐤?? */
     flex-shrink: 0;
-    /* ??�쎌?�媛 以꾩�??�쏙?? ??�쎈룄占???�쎌??*/
+    /* ??𥔱�?澆� 隞伉儔趧??𥔱�?? ??𥔱�諴��???𥔱�??*/
 }
 
 /* ==================== Flights ==================== */
@@ -1593,7 +1593,7 @@
     justify-content: center;
 }
 
-/* Apple HIG: ??�꽦 ??????�깋 Accent */
+/* Apple HIG: ??佲膠 ??????伉� Accent */
 .flight-tab.active {
     background: var(--bg-primary);
     color: var(--accent);
@@ -1659,7 +1659,7 @@
     white-space: nowrap;
 }
 
-/* ??�룺??*/
+/* ??�ㄩ??*/
 .flight-col:nth-child(2) {
     flex: 0 0 25%;
     word-break: keep-all;
@@ -1667,7 +1667,7 @@
     line-height: 1.1;
 }
 
-/* ??�㈉??�?*/
+/* ??��??諵?*/
 .flight-col:nth-child(3) {
     flex: 0 0 21%;
     word-break: keep-all;
@@ -1675,13 +1675,13 @@
     line-height: 1.1;
 }
 
-/* ??????뷴룕??*/
+/* ??????賰渠�??*/
 .flight-col:nth-child(4) {
     flex: 0 0 22%;
     white-space: nowrap;
 }
 
-/* �?���?若욇?� */
+/* 蝒?麩鼽?鴷渥�?� */
 .flight-col:nth-child(5) {
     flex: 0 0 18%;
     word-break: keep-all;
@@ -1710,13 +1710,13 @@
     cursor: pointer;
     white-space: nowrap;
     transition: all var(--duration-fast) var(--ease-out);
-    /* 44px 理쒖???믪씠 */
+    /* 44px 鴽木�???諯初� */
     min-height: var(--touch-target);
     display: flex;
     align-items: center;
 }
 
-/* Apple HIG: ??�꽦 ?꾪꽣 ??Accent ??�깋 */
+/* Apple HIG: ??佲膠 ?篨虎膛 ??Accent ??伉� */
 .month-tab.active {
     background: var(--accent);
     color: white;
@@ -1997,7 +1997,7 @@
     height: 56px;
 }
 
-/* lost-category-badge: ?????�꾨�??? */
+/* lost-category-badge: ?????粽儘鴘??? */
 .lost-category-badge {
     display: inline-block;
     padding: 3px 10px;
@@ -2008,7 +2008,7 @@
     font-weight: 800;
 }
 
-/* lost-table-btn: ??�쎌?????�쎌�?蹂닿�?踰꾪??*/
+/* lost-table-btn: ??𥔱�?????𥔱�篚?頩�嚉謔?頦國儐??*/
 .lost-table-btn {
     padding: 8px 16px;
     background: white;
@@ -2550,10 +2550,10 @@
     }
 }
 
-/* ==================== ??�쎌�???�쎌�?踰꾪??==================== */
+/* ==================== ??𥔱�賮???𥔱�赬?頦國儐??==================== */
 /* weather-summary-btn is defined in the top titles area */
 
-/* ==================== ??�쎌�???�쎌�?紐⑤??==================== */
+/* ==================== ??𥔱�賮???𥔱�赬?鴽謿𪈠??==================== */
 .wsm-overlay {
     position: fixed;
     inset: 0;
@@ -3311,7 +3311,7 @@
 .wsm-nav-zone {
     position: fixed;
     top: 60px;
-    /* Header ??�쎌�???�쎌??*/
+    /* Header ??𥔱�踸???𥔱�??*/
     bottom: 0;
     width: 30%;
     z-index: 9998;
@@ -3557,7 +3557,7 @@
 .wsm-nav-zone {
     position: fixed;
     top: 60px;
-    /* Header ??�쎌�???�쎌??*/
+    /* Header ??𥔱�踸???𥔱�??*/
     bottom: 0;
     width: 30%;
     z-index: 9998;
@@ -3724,57 +3724,7 @@
     box-sizing: border-box;
 }
 
-/* Location Selection Tabs - Updated to 2x5 Grid */
-.location-tabs {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    /* 5 columns */
-    gap: 6px;
-    margin-bottom: 15px;
-    width: 100%;
-    padding: 5px 0;
-}
 
-.location-tabs::-webkit-scrollbar {
-    display: none;
-}
-
-.location-tab {
-    background: #ffffff;
-    border: 1px solid #f1f3f5;
-    padding: 10px 2px;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-width: 0;
-    /* Important for grid sharing */
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
-}
-
-.location-tab.active {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: white;
-    box-shadow: 0 4px 12px rgba(8, 145, 178, 0.20);
-}
-
-.tab-name {
-    font-size: clamp(0.6rem, 2vw, 0.72rem);
-    font-weight: 800;
-    color: #495057;
-    white-space: normal;
-    word-break: keep-all;
-    overflow-wrap: break-word;
-    text-align: center;
-    line-height: 1.1;
-}
-
-.location-tab.active .tab-name {
-    color: white;
-}
 
 /* ==================== Naver Style Weather Redesign ==================== */
 .naver-card {
@@ -3791,7 +3741,7 @@
     /* Ensure padding doesn't add to width */
 }
 
-/* ????諛붾�???�뼱�??移�?�???곷떒 紐⑥꽌由??�〓쪧 �????��????�굅 */
+/* ????隢𣏌馮鴗???�摹鴽??蝘骰?貑???窸瑛� 鴽謿𡤻篚𣬚眏??具�𣟕爭 隢????炎????檾� */
 .current-weather-main,
 .past-weather-summary {
     border-top-left-radius: 0;
@@ -3973,7 +3923,7 @@
 .cw-left .current-val {
     font-size: 3.0rem;
     font-weight: 500;
-    /* ??�＜ ?곗뼹 accent */
+    /* ??吔� ?窸𤩱撕 accent */
     color: var(--accent);
     line-height: 1;
     display: flex;
@@ -4702,7 +4652,7 @@
     box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
 }
 
-/* ==================== ??�솕�?媛쒖�?==================== */
+/* ==================== ??𥇣�鴽?慦惞�篚?==================== */
 
 /* ??tagline */
 .home-tagline {
@@ -4715,7 +4665,7 @@
     opacity: 0.75;
 }
 
-/* CCTV ?좎껌 �??踰꾪??(disabled�??꾨땶 踰꾩?? */
+/* CCTV ?鮈橓� 慦??頦國儐??(disabled慦??篨刺訜 頦國儔?? */
 .home-item.item-cctv-apply {
     cursor: pointer;
     opacity: 1;
@@ -4744,10 +4694,10 @@
     transform: scale(0.97);
 }
 
-/* ==================== ?꾩콟 ???��??踰꾪??==================== */
+/* ==================== ?篨拖� ???�??頦國儐??==================== */
 .wechat-float-btn {
     position: fixed;
-    bottom: 88px;   /* ??�떒 ??�퉬�???*/
+    bottom: 88px;   /* ??𤩥� ??魁碸隢???*/
     right: 16px;
     z-index: 9990;
     display: flex;
@@ -4781,12 +4731,12 @@
     transform: scale(0.97);
 }
 
-/* ??�솕硫댁???꾨땺 ?????��??踰꾪????�린�?*/
+/* ??𥇣�鴽𤩥�???篨刺𤊄 ?????�??頦國儐????�旭皝?*/
 body:not(.page-home) .wechat-float-btn {
     display: none;
 }
 
-/* ==================== CCTV ?좎껌 紐⑤??==================== */
+/* ==================== CCTV ?鮈橓� 鴽謿𪈠??==================== */
 .cctv-apply-modal-content {
     background: var(--bg-primary);
     border-radius: 20px;
