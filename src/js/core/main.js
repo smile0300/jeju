@@ -347,8 +347,11 @@ document.addEventListener('click', function(e) {
 });
 
 window.addEventListener('load', () => {
-    // 웹 푸시 알림 권한 요청 및 초기화 (PWA)
-    initWebPushNotifications();
+    // 안드로이드 크롬 등 최신 브라우저는 접속하자마자 알림창을 띄우면 스팸으로 차단합니다.
+    // 따라서 사용자가 화면을 한 번이라도 터치/클릭했을 때 권한을 요청하도록 변경합니다.
+    document.body.addEventListener('click', () => {
+        initWebPushNotifications();
+    }, { once: true }); // 한 번만 실행되도록
 
     // 홈 화면 동적 배너를 위한 필수 호출
     fetchWeatherAlerts(); 
