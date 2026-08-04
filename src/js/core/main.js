@@ -1,6 +1,7 @@
 
 import { CONFIG } from './config.js';
 import { initI18n } from './i18n.js';
+import { initWebPushNotifications } from './web-push.js';
 
 import { initCCTV, openCctvModalById, openCctvModal, initHlsPlayer } from '../features/cctv.js';
 import { fetchWeatherData, switchWeatherLocation, updateHourlyWeather, fetchWeatherAlerts, fetchPastWeather } from '../features/weather.js';
@@ -346,6 +347,9 @@ document.addEventListener('click', function(e) {
 });
 
 window.addEventListener('load', () => {
+    // 웹 푸시 알림 권한 요청 및 초기화 (PWA)
+    initWebPushNotifications();
+
     // 홈 화면 동적 배너를 위한 필수 호출
     fetchWeatherAlerts(); 
     fetchSuccessStories();
