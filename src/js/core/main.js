@@ -2,6 +2,8 @@
 import { CONFIG } from './config.js';
 import { initI18n } from './i18n.js';
 import { initWebPushNotifications } from './web-push.js';
+import { initPushNotifications } from './push.js';
+import { Capacitor } from '@capacitor/core';
 
 import { initCCTV, openCctvModalById, openCctvModal, initHlsPlayer } from '../features/cctv.js';
 import { fetchWeatherData, switchWeatherLocation, updateHourlyWeather, fetchWeatherAlerts, fetchPastWeather } from '../features/weather.js';
@@ -350,7 +352,11 @@ window.addEventListener('load', () => {
     // 안드로이드 크롬 등 최신 브라우저는 접속하자마자 알림창을 띄우면 스팸으로 차단합니다.
     // 따라서 사용자가 화면을 한 번이라도 터치/클릭했을 때 권한을 요청하도록 변경합니다.
     document.body.addEventListener('click', () => {
-        initWebPushNotifications();
+        if (Capacitor.isNativePlatform()) {
+            initPushNotifications();
+        } else {
+            initWebPushNotifications();
+        }
     }, { once: true }); // 한 번만 실행되도록
 
     // 홈 화면 동적 배너를 위한 필수 호출

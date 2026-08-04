@@ -65,7 +65,7 @@ export const initWebPushNotifications = async () => {
             onMessage(messaging, (payload) => {
                 console.log('포그라운드 메시지 수신:', payload);
                 // 자체적인 UI 알림창 띄우기 (옵션)
-                // alert(`[알림] ${payload.notification?.title}\n${payload.notification?.body}`);
+                window.alert(`[제주라이브 웹 알림]\n${payload.notification?.title}\n${payload.notification?.body}`);
             });
 
         } else {
