@@ -402,6 +402,35 @@ function translateOnEdit(e) {
         targetCell.clearContent();
       }
     }
+  } else if (sheet.getName() === 'SuccessStories') {
+    var range = e.range;
+    var col = range.getColumn();
+    var row = range.getRow();
+    
+    // E(5) = Item, F(6) = Region, G(7) = Place 열 편집 시
+    if (col >= 5 && col <= 7 && row > 1) {
+      var text = range.getValue();
+      
+      // E(5) -> J(10), K(11)
+      // F(6) -> L(12), M(13)
+      // G(7) -> N(14), O(15)
+      var targetColZh = 10 + (col - 5) * 2;
+      var targetColEn = 11 + (col - 5) * 2;
+      
+      var targetCellZh = sheet.getRange(row, targetColZh);
+      var targetCellEn = sheet.getRange(row, targetColEn);
+      
+      if (text) {
+        var translated_zh = MY_DEEPL(text, "ZH");
+        var translated_en = MY_DEEPL(text, "EN-US"); 
+        
+        targetCellZh.setValue(translated_zh);
+        targetCellEn.setValue(translated_en);
+      } else {
+        targetCellZh.clearContent();
+        targetCellEn.clearContent();
+      }
+    }
   }
 }
 

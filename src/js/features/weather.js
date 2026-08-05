@@ -919,12 +919,22 @@ export async function fetchWeatherAlerts() {
     const homeAlertsContainer = document.getElementById('home-alerts-container');
     if (!alertsContainer && !homeAlertsContainer) return;
     try {
-        const endpoint = 'https://apis.data.go.kr/1360000/WthrWrnInfoService/getWthrWrnList';
+        const listEndpoint = 'https://apis.data.go.kr/1360000/WthrWrnInfoService/getWthrWrnList';
+        const msgEndpoint = 'https://apis.data.go.kr/1360000/WthrWrnInfoService/getWthrWrnMsg';
         const params = { numOfRows: 40, pageNo: 1, dataType: 'JSON', stnId: 184 };
-        const json = await fetchPublicDataJson(endpoint, params);
-        const rawItems = json?.response?.body?.items?.item;
-        let allItems = Array.isArray(rawItems) ? rawItems : (rawItems ? [rawItems] : []);
-        allItems = allItems.filter(item => item && item.title);
+        const msgParams = { numOfRows: 10, pageNo: 1, dataType: 'JSON', stnId: 184 };
+
+        const [listJson, msgJson] = await Promise.all([
+            fetchPublicDataJson(listEndpoint, params).catch(() => null),
+            fetchPublicDataJson(msgEndpoint, msgParams).catch(() => null)
+        ]);
+
+        let allItems = [];
+        if (listJson) {
+            const rawItems = listJson?.response?.body?.items?.item;
+            allItems = Array.isArray(rawItems) ? rawItems : (rawItems ? [rawItems] : []);
+            allItems = allItems.filter(item => item && item.title);
+        }
 
         // KST 기준 오늘 날짜 계산 (YYYYMMDD)
         const kstDate = new Date(Date.now() + 9 * 60 * 60 * 1000);
@@ -945,17 +955,35 @@ export async function fetchWeatherAlerts() {
             IS_HISTORY_FALLBACK = true;
         }
 
-        const latestByType = {};
-        allItems.forEach(item => {
-            const match = item.title.match(/\[(.*?)\]/);
-            if (match) {
-                const fullType = match[1];
-                const type = fullType.replace(' 해제', '').replace('해제', '').trim();
-                if (!latestByType[type]) latestByType[type] = item;
-            }
-        });
+        const activeItems = [];
+        if (msgJson) {
+            const rawMsgItems = msgJson?.response?.body?.items?.item;
+            const msgItems = Array.isArray(rawMsgItems) ? rawMsgItems : (rawMsgItems ? [rawMsgItems] : []);
+            const latestMsg = msgItems[0]; // 가장 최근 현황 1개
 
-        const activeItems = Object.values(latestByType).filter(item => !item.title.includes('해제'));
+            if (latestMsg && latestMsg.t3) {
+                const lines = latestMsg.t3.split('\n');
+                for (let line of lines) {
+                    line = line.trim();
+                    if (line.startsWith('o ')) {
+                        const parts = line.substring(2).split(':');
+                        if (parts.length >= 2) {
+                            const type = parts[0].trim(); 
+                            const desc = parts.slice(1).join(':').trim(); 
+                            if (desc.includes('제주') || desc.includes('추자') || desc.includes('남해') || desc.includes('바다') || desc.includes('해상')) {
+                                activeItems.push({
+                                    title: `[${type}] ${desc}`,
+                                    type: type,
+                                    desc: desc,
+                                    tmFc: latestMsg.tmFc || latestMsg.tmSeq
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         LATEST_ALERTS = activeItems;
 
         if (alertRotationInterval) {
@@ -974,11 +1002,12 @@ export async function fetchWeatherAlerts() {
             const renderAlert = (idx) => {
                 const item = activeItems[idx];
                 if (!item || !item.title) return;
-                let title = item.title.includes('/') ? item.title.split('/').slice(1).join('/').trim() : item.title;
-                const translatedTitle = translateWeatherAlert(title).replace(/\(\*\)/g, '').trim();
+                let titleToTranslate = item.title;
+                const translatedTitle = translateWeatherAlert(titleToTranslate).replace(/\(\*\)/g, '').trim();
+                
                 let alertTypeKey = 'weather.alert.badge';
-                if (title.includes('주의보')) alertTypeKey = 'weather.alert.badge.warn';
-                else if (title.includes('경보')) alertTypeKey = 'weather.alert.badge.danger';
+                if (item.type.includes('주의보')) alertTypeKey = 'weather.alert.badge.warn';
+                else if (item.type.includes('경보')) alertTypeKey = 'weather.alert.badge.danger';
 
                 const alertType = window.t(alertTypeKey);
 
