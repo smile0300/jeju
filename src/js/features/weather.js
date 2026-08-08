@@ -965,7 +965,7 @@ export async function fetchWeatherAlerts() {
                 const lines = latestMsg.t3.split('\n');
                 for (let line of lines) {
                     line = line.trim();
-                    if (line.startsWith('o ')) {
+                    if (line.startsWith('o ') || line.startsWith('○ ')) {
                         const parts = line.substring(2).split(':');
                         if (parts.length >= 2) {
                             const type = parts[0].trim(); 

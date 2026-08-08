@@ -72,8 +72,13 @@ async function checkAndSendAlerts(env) {
     const serviceKey = env.KMA_API_KEY;
     if (!serviceKey) throw new Error("KMA_API_KEY is not set");
     
+    let encodedKey = serviceKey.trim();
+    if (!encodedKey.includes('%')) {
+      encodedKey = encodeURIComponent(encodedKey);
+    }
+    
     const kmaEndpoint = "https://apis.data.go.kr/1360000/WthrWrnInfoService/getWthrWrnMsg";
-    const url = `${kmaEndpoint}?ServiceKey=${serviceKey}&numOfRows=10&pageNo=1&dataType=JSON&stnId=184`;
+    const url = `${kmaEndpoint}?ServiceKey=${encodedKey}&numOfRows=10&pageNo=1&dataType=JSON&stnId=184`;
     
     const res = await fetch(url);
     const json = await res.json();
@@ -87,7 +92,7 @@ async function checkAndSendAlerts(env) {
       const lines = latestMsg.t3.split('\n');
       for (let line of lines) {
         line = line.trim();
-        if (line.startsWith('o ')) {
+        if (line.startsWith('o ') || line.startsWith('○ ')) {
           const parts = line.substring(2).split(':');
           if (parts.length >= 2) {
             const type = parts[0].trim();
