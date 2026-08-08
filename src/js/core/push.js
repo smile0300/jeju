@@ -34,15 +34,15 @@ export const initPushNotifications = async () => {
             if (savedToken !== token.value) {
                 localStorage.setItem('FCM_TOKEN', token.value);
                 
-                // TODO: 백엔드 서버(API)가 구축되면 아래 주석을 풀고 토큰을 서버 DB에 저장하세요.
-                // 제주도 날씨 경보 발송 시 서버에서 이 토큰들을 모아서 일괄 전송(FCM API 호출)하게 됩니다.
-                /*
-                fetch('https://api.yourserver.com/v1/users/push-token', {
+                // Cloudflare Worker로 토큰 전송하여 'jeju_weather_alerts' 주제 구독
+                fetch('https://jeju-weather-alerts.smile0300.workers.dev/api/subscribe', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token: token.value, platform: Capacitor.getPlatform() })
-                }).catch(err => console.error('토큰 서버 전송 실패', err));
-                */
+                    body: JSON.stringify({ token: token.value })
+                }).then(res => {
+                    if (res.ok) console.log('모바일 기상특보 알림 구독 완료!');
+                    else console.error('모바일 구독 실패', res.status);
+                }).catch(err => console.error('모바일 구독 요청 에러:', err));
             }
         });
 
