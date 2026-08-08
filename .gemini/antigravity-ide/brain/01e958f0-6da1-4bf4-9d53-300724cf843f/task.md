@@ -1,0 +1,6 @@
+- [x] Cloudflare Worker 프로젝트 세팅 (`workers/weather-alerts`)
+- [x] `wrangler.toml` 파일 생성 및 설정
+- [x] `src/index.js` 작성 (Cron 핸들러, API 엔드포인트)
+- [x] `src/fcm.js` 작성 (Firebase JWT 및 HTTP v1 통신)
+- [ ] 클라이언트 사이드 웹 푸시 권한 요청 로직 추가 (`src/js/features/weather.js` 등에 추가 안내)
+- [ ] 환경변수 세팅 및 배포 (사용자 가이드)

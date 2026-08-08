@@ -54,13 +54,13 @@ export const initWebPushNotifications = async () => {
                 const savedToken = localStorage.getItem('FCM_WEB_TOKEN');
                 if (savedToken !== currentToken) {
                     localStorage.setItem('FCM_WEB_TOKEN', currentToken);
-                    // Cloudflare Worker로 토큰 전송하여 'jeju_weather_alerts' 주제 구독
+                    // Cloudflare Worker로 토큰 전송 → jeju_weather_alerts + jeju_hallasan_alerts 동시 구독
                     fetch('https://jeju-weather-alerts.smile0300.workers.dev/api/subscribe', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ token: currentToken })
                     }).then(res => {
-                        if (res.ok) console.log('기상특보 알림 구독 완료!');
+                        if (res.ok) console.log('기상특보 + 한라산 알림 구독 완료!');
                         else console.error('구독 실패', res.status);
                     }).catch(err => console.error('구독 요청 에러:', err));
                 }

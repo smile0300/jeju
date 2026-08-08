@@ -1,5 +1,21 @@
 import { getAccessToken, sendFCMMessage } from './fcm.js';
 
+// FCM Topic에 토큰을 구독시키는 공통 헬퍼
+async function subscribeTokenToTopic(token, topic, accessToken) {
+  const iidUrl = `https://iid.googleapis.com/iid/v1/${token}/rel/topics/${topic}`;
+  const res = await fetch(iidUrl, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${accessToken}`,
+      "Content-Type": "application/json"
+    }
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Failed to subscribe to ${topic}: ${err}`);
+  }
+}
+
 export default {
   // HTTP 엔드포인트: 프론트엔드에서 기기 토큰을 받아 Topic 구독 처리
   async fetch(request, env, ctx) {
@@ -27,29 +43,22 @@ export default {
         }
 
         const accessToken = await getAccessToken(serviceAccount);
-        const topic = "jeju_weather_alerts";
 
-        // Instance ID API를 사용하여 해당 토큰을 Topic에 강제 구독
-        const iidUrl = `https://iid.googleapis.com/iid/v1/${token}/rel/topics/${topic}`;
-        const res = await fetch(iidUrl, {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${accessToken}`,
-            "Content-Type": "application/json"
-          }
+        // 기상특보 + 한라산 탐방로 두 Topic에 모두 구독
+        const topics = ["jeju_weather_alerts", "jeju_hallasan_alerts"];
+        const results = await Promise.allSettled(
+          topics.map(topic => subscribeTokenToTopic(token, topic, accessToken))
+        );
+
+        const failed = results.filter(r => r.status === 'rejected');
+        if (failed.length > 0) {
+          console.warn("일부 Topic 구독 실패:", failed.map(f => f.reason?.message));
+        }
+
+        return new Response(JSON.stringify({ success: true, subscribed: topics }), {
+          headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
         });
 
-        if (res.ok) {
-          return new Response(JSON.stringify({ success: true }), {
-            headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
-          });
-        } else {
-          const err = await res.text();
-          return new Response(JSON.stringify({ success: false, error: err }), {
-            status: 500,
-            headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
-          });
-        }
       } catch (e) {
         return new Response(JSON.stringify({ success: false, error: e.message }), {
           status: 500,
@@ -61,13 +70,17 @@ export default {
     return new Response("Not Found", { status: 404 });
   },
 
-  // 스케줄러: 매 10분마다 실행되어 기상특보 확인 후 알림 발송
+  // 스케줄러: 매 10분마다 실행 - 기상특보 + 한라산 탐방로 동시 체크
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(checkAndSendAlerts(env));
+    ctx.waitUntil(Promise.allSettled([
+      checkAndSendWeatherAlerts(env),
+      checkAndSendHallasanAlerts(env),
+    ]));
   }
 };
 
-async function checkAndSendAlerts(env) {
+// ─── 기상특보 체크 (기존 함수, 이름만 변경) ───────────────────────────────
+async function checkAndSendWeatherAlerts(env) {
   try {
     const serviceKey = env.KMA_API_KEY;
     if (!serviceKey) throw new Error("KMA_API_KEY is not set");
@@ -111,54 +124,123 @@ async function checkAndSendAlerts(env) {
     }
     
     if (activeItems.length > 0) {
-      // 가장 최근에 발생한 특보를 기준으로 알림 발송
       const latestAlert = activeItems[0];
       
-      // 아침 8시(KST)를 기준으로 리마인더 날짜(주기)를 계산합니다.
+      // 아침 8시(KST) 기준으로 리마인더 날짜 계산
       const now = new Date();
       const kstTime = new Date(now.getTime() + 9 * 60 * 60 * 1000);
       const kstHour = kstTime.getUTCHours();
       
       let reminderDate = kstTime;
-      // 새벽 0시 ~ 아침 7시 59분까지는 '어제' 날짜 주기에 속하므로 리마인더 날짜를 어제로 유지
       if (kstHour < 8) {
         reminderDate = new Date(kstTime.getTime() - 24 * 60 * 60 * 1000);
       }
       const reminderDateString = reminderDate.toISOString().slice(0, 10);
-      
-      // getWthrWrnMsg의 tmFc(발표시간)와 리마인더 날짜를 결합하여 고유 ID 생성
-      // 이 로직을 통해 발표시간이 동일하더라도 매일 아침 8시가 넘으면 ID가 갱신되어 1회 다시 발송됨
       const alertId = `${latestAlert.tmFc}_${latestAlert.type}_${reminderDateString}`;
       
       const kv = env.WEATHER_KV;
       if (kv) {
-        // 이미 발송한 알림인지 확인 (중복 발송 방지)
         const lastSent = await kv.get("LAST_SENT_ALERT_ID");
         if (lastSent === alertId) {
-          console.log("Already sent this alert:", alertId);
+          console.log("Weather alert already sent:", alertId);
           return;
         }
         await kv.put("LAST_SENT_ALERT_ID", alertId);
       } else {
-        console.warn("WEATHER_KV is not bound, proceeding without deduplication");
+        console.warn("WEATHER_KV is not bound");
       }
 
-      // FCM 발송
       const serviceAccountJson = env.FIREBASE_SERVICE_ACCOUNT;
       const sa = typeof serviceAccountJson === 'string' ? JSON.parse(serviceAccountJson) : serviceAccountJson;
       const projectId = sa.project_id;
-      
       const accessToken = await getAccessToken(serviceAccountJson);
-      
-      // 제목 클리닝 (예: [호우주의보] 제주도 산지 -> 호우주의보)
+
       const cleanTitle = latestAlert.title.replace(/\(\*\)/g, '').trim();
       const title = "🚨 제주도 기상특보 발효";
       const body = cleanTitle;
       
       await sendFCMMessage(accessToken, projectId, "jeju_weather_alerts", title, body);
-      console.log("Push sent successfully!", body);
+      console.log("Weather alert push sent:", body);
+    } else {
+      console.log("No active Jeju weather alerts.");
     }
   } catch (error) {
-    console.error("Error in scheduled task:", error.message);
+    console.error("Error in checkAndSendWeatherAlerts:", error.message);
+  }
+}
+
+// ─── 한라산 탐방로 통제 체크 ──────────────────────────────────────────────
+async function checkAndSendHallasanAlerts(env) {
+  try {
+    // 이미 Cloudflare Pages Function에서 크롤링/파싱하여 제공 중인 엔드포인트 활용
+    const res = await fetch('https://jeju-live.pages.dev/api/hallasan-status', {
+      signal: AbortSignal.timeout(15000)
+    });
+    if (!res.ok) throw new Error(`Hallasan API error: HTTP ${res.status}`);
+    
+    const trails = await res.json();
+    if (!Array.isArray(trails) || trails.length === 0) throw new Error("Invalid hallasan response");
+    if (trails.error) throw new Error(trails.error);
+
+    // 통제/제한 탐방로 필터
+    const controlled = trails.filter(t => {
+      const s = t.status || '';
+      return s.includes('통제') || s.includes('제한') || s.includes('탐방불가') || s.includes('입산제한');
+    });
+
+    // 전체 상태 판단: 전면통제 / 부분통제 / 정상운영
+    const totalCount = trails.length;
+    const controlledCount = controlled.length;
+
+    let overallStatus;
+    if (controlledCount === 0) {
+      overallStatus = 'open';
+    } else if (controlledCount >= totalCount) {
+      overallStatus = 'closed';
+    } else {
+      overallStatus = 'partial';
+    }
+
+    const kv = env.WEATHER_KV;
+
+    // 정상 운영 중이면 알림 불필요 → KV 상태만 초기화 후 종료
+    if (overallStatus === 'open') {
+      if (kv) await kv.put("LAST_HALLASAN_STATUS", "open");
+      console.log("Hallasan: all trails open, no alert needed.");
+      return;
+    }
+
+    // 이전 상태와 동일하면 중복 발송 방지
+    if (kv) {
+      const lastStatus = await kv.get("LAST_HALLASAN_STATUS");
+      if (lastStatus === overallStatus) {
+        console.log("Hallasan: status unchanged, skipping:", overallStatus);
+        return;
+      }
+      await kv.put("LAST_HALLASAN_STATUS", overallStatus);
+    }
+
+    // FCM 발송
+    const serviceAccountJson = env.FIREBASE_SERVICE_ACCOUNT;
+    const sa = typeof serviceAccountJson === 'string' ? JSON.parse(serviceAccountJson) : serviceAccountJson;
+    const projectId = sa.project_id;
+    const accessToken = await getAccessToken(serviceAccountJson);
+
+    const controlledNames = controlled.map(t => t.name.replace('탐방로', '')).join(', ');
+
+    let title, body;
+    if (overallStatus === 'closed') {
+      title = "⛰️ 한라산 전면 통제";
+      body = `기상 악화로 모든 탐방로 입산이 금지되었습니다.`;
+    } else {
+      title = "⛰️ 한라산 일부 탐방로 통제";
+      body = `${controlledNames} 구간 통제 중. 등산 전 확인 바랍니다.`;
+    }
+
+    await sendFCMMessage(accessToken, projectId, "jeju_hallasan_alerts", title, body);
+    console.log("Hallasan alert push sent:", body);
+
+  } catch (error) {
+    console.error("Error in checkAndSendHallasanAlerts:", error.message);
   }
 }
