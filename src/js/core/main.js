@@ -511,21 +511,45 @@ window.installPWA = async () => {
         const { outcome } = await deferredPrompt.userChoice;
         if (outcome === 'accepted') {
             deferredPrompt = null;
-            document.getElementById('pwa-install-btn').style.display = 'none';
+            const btn = document.getElementById('pwa-install-btn');
+            if (btn) btn.style.display = 'none';
         }
     } else {
-        alert(window.t ? window.t('install.not_supported') : 'Please use the Share > Add to Home Screen feature in your browser.');
+        // prompt 없으면 모달로 수동 안내
+        window.openAppDownloadModal();
     }
 };
 
-
-
-
 window.openAppDownloadModal = function() {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const lang = window.getLang ? window.getLang() : 'zh';
+
+    // Android + beforeinstallprompt 준비됨 → 모달 없이 바로 설치 다이얼로그
+    if (!isIOS && deferredPrompt) {
+        window.installPWA();
+        return;
+    }
+
+    // 플랫폼별 모달 내용 갱신
+    const iosBlock  = document.getElementById('modal-ios-block');
+    const aosBlock  = document.getElementById('modal-aos-block');
+    const aosManual = document.getElementById('modal-aos-manual');
+
+    if (iosBlock && aosBlock) {
+        if (isIOS) {
+            // iPhone: Safari 수동 안내만 표시
+            iosBlock.style.display  = 'block';
+            aosBlock.style.display  = 'none';
+        } else {
+            // Android Chrome 이지만 prompt 없음 (이미 설치됨 or 비Chrome)
+            iosBlock.style.display  = 'none';
+            aosBlock.style.display  = 'block';
+        }
+    }
+
     const modal = document.getElementById('app-download-modal');
     if (modal) {
         modal.style.display = 'flex';
-        // Trigger reflow
         void modal.offsetWidth;
         modal.classList.add('show');
         document.body.style.overflow = 'hidden';
@@ -542,3 +566,4 @@ window.closeAppDownloadModal = function() {
         }, 300);
     }
 };
+

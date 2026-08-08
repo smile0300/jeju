@@ -137,6 +137,145 @@
         </div>
 
         <div style="font-size: 3rem; color: var(--color-orange); margin-bottom: 15px;"><i class="ph-duotone ph-rocket-launch"></i></div>
+<!-- ===== CCTV Modal ===== -->
+<div id="cctv-modal" class="modal-overlay" style="display:none" onclick="closeCctvModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeCctvModal()">✕</button>
+        <div id="modal-body"></div>
+    </div>
+</div>
+
+<!-- CCTV 상세 정보 카드 (전역 사용) -->
+<div id="cctv-detail-card" class="cctv-detail-card" onclick="if(event.target===this)closeCctvCard()">
+    <div class="cctv-detail-inner">
+        <div class="detail-header">
+            <h3 id="cctv-target-name">监控名称</h3>
+            <button class="detail-close" onclick="closeCctvCard()">✕</button>
+        </div>
+        <div class="detail-body">
+            <div class="video-wrapper">
+                <video id="cctv-live-video" muted playsinline autoplay></video>
+                <div class="live-indicator">LIVE</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== Lost Detail Modal ===== -->
+<div id="lost-detail-modal" class="modal-overlay" style="display:none" onclick="closeLostDetailModal()">
+    <div class="modal-content lost-detail-content" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeLostDetailModal()">✕</button>
+        <div id="lost-modal-body" class="lost-modal-body">
+            <!-- Data will be injected here -->
+        </div>
+    </div>
+</div>
+
+<!-- ===== WeChat QR Modal ===== -->
+<div id="wechat-qr-modal" class="modal-overlay" style="display:none; z-index: 10001;" onclick="closeWechatQR()">
+    <div class="modal-content modal-wechat" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeWechatQR()">✕</button>
+        <h3 class="modal-wechat-title" data-i18n="modal.wechat.title">联系我们 (WeChat)</h3>
+        <p class="modal-wechat-desc" data-i18n-html="modal.wechat.desc">通过扫描下方二维码<br>或复制ID添加我的微信</p>
+        <img src="/assets/wechat_qr.png" class="modal-wechat-qr">
+        <div class="modal-copy-row">
+            <input type="text" id="wechat-id-input" class="modal-copy-input" value="jeju_jk" readonly>
+            <button onclick="copyWechatId()" class="btn btn-primary" data-i18n="modal.wechat.copy">复制</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- ===== Feature Request Modal ===== -->
+<div id="feature-request-modal" class="modal-overlay" style="display:none; z-index: 10001;" onclick="closeFeatureModal()">
+    <div class="modal-content modal-sm" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeFeatureModal()">✕</button>
+        <h3 class="modal-title" data-i18n="modal.feature.title"><i class="ph-duotone ph-lightbulb color-sun"></i> 提交建议或功能请求</h3>
+        <textarea id="feature-content" class="modal-textarea" data-i18n="modal.feature.ph" placeholder="在此输入您的建议或发现的漏洞..."></textarea>
+        <button id="feature-submit-btn" class="btn btn-primary" onclick="submitFeatureRequest()" style="width: 100%;" data-i18n="modal.feature.submit">提交反馈</button>
+        <div id="feature-status" class="modal-status" style="display: none;"></div>
+    </div>
+</div>
+
+<!-- ===== Share Modal ===== -->
+<div id="share-modal" class="modal-overlay" style="display:none; z-index: 10002;" onclick="closeShareModal()">
+    <div class="modal-content share-modal-content" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeShareModal()">✕</button>
+        <div class="share-header">
+            <h3 class="modal-title" style="text-align: center;" data-i18n="modal.share.title"><i class="ph-duotone ph-export color-hallasan"></i> 分享到 SNS</h3>
+            <p class="modal-desc" style="text-align: center;" data-i18n="modal.share.desc">分享济州岛实时旅行信息</p>
+        </div>
+        <div class="share-grid">
+            <button class="share-option-btn" onclick="copyCurrentUrl('wechat')">
+                <div class="share-icon"><i class="ph-duotone ph-chat-circle-text"></i></div>
+                <span data-i18n="modal.share.wechat">微信分享</span>
+            </button>
+            <button class="share-option-btn" onclick="copyCurrentUrl('xhs')">
+                <div class="share-icon"><i class="ph-duotone ph-book-bookmark"></i></div>
+                <span data-i18n="modal.share.xhs">小红书分享</span>
+            </button>
+            <button class="share-option-btn" onclick="handleWebShare()">
+                <div class="share-icon"><i class="ph-duotone ph-link"></i></div>
+                <span data-i18n="modal.share.system">系统分享</span>
+            </button>
+        </div>
+        <div class="share-copy-row">
+            <input type="text" id="share-url-input" class="share-url-input" value="https://jeju-live.com" readonly>
+            <button onclick="copyCurrentUrl()" class="btn btn-primary" data-i18n="modal.share.copy">复制</button>
+        </div>
+        <div id="share-status" class="share-status" style="display: none;"></div>
+    </div>
+</div>
+
+<!-- ===== Customer Service Modal ===== -->
+<div id="cs-modal" class="modal-overlay" style="display:none; z-index: 10001;" onclick="closeCSModal()">
+    <div class="modal-content modal-sm" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeCSModal()">✕</button>
+        <h3 class="modal-title" data-i18n="modal.cs.title"><i class="ph-duotone ph-headphones color-weather"></i> 联系客服</h3>
+        <p class="modal-desc" data-i18n="modal.cs.desc">请输入您的投诉、建议或业务咨询。</p>
+
+        <div class="form-group" style="margin-bottom: 15px;">
+            <label class="modal-label" data-i18n="modal.cs.content.label">投诉建议 *</label>
+            <textarea id="cs-content" class="modal-textarea" data-i18n="modal.cs.content.ph" placeholder="请输入内容..."></textarea>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 25px;">
+            <label class="modal-label" data-i18n="modal.cs.wechat.label">微信 ID (选填)</label>
+            <input type="text" id="cs-wechat" class="modal-input" data-i18n="modal.cs.wechat.ph" placeholder="您的微信 ID">
+        </div>
+
+        <button id="cs-submit-btn" class="btn btn-primary" onclick="submitCSFeedback()" style="width: 100%;" data-i18n="modal.cs.submit">提交</button>
+        <div id="cs-status" class="modal-status" style="display: none;"></div>
+    </div>
+</div>
+
+<!-- ===== Success Stories Modal ===== -->
+<div id="success-modal" class="modal-overlay" style="display:none; z-index: 10001;" onclick="closeSuccessModal()">
+    <div class="modal-content" style="max-width: 500px; padding: 20px; background: #f8fafc;" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeSuccessModal()">✕</button>
+        <h3 class="modal-title" style="text-align:center; font-weight: 800; color: #1e293b; margin-bottom: 20px;">
+            <i class="ph-duotone ph-confetti color-lost"></i> 失物招领成功案例
+        </h3>
+
+        <div id="success-modal-body">
+            <!-- Populated dynamically via JS -->
+            <p style="text-align:center; color: #64748b; padding: 20px;" data-i18n="cctv.loading">데이터를 불러오는 중입니다...</p>
+        </div>
+    </div>
+</div>
+
+<!-- ===== Lost Upsell Modal ===== -->
+<div id="lost-upsell-modal" class="modal-overlay" style="display:none; z-index: 10005;" onclick="closeLostUpsellModal()">
+    <div class="modal-content" style="max-width: 400px; text-align: center; padding: 30px 20px;" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeLostUpsellModal()">✕</button>
+
+        <div class="marquee-container" style="cursor: default; margin-top: 0; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid var(--separator);">
+            <div class="marquee-content" id="upsell-modal-success-marquee-content">
+                <!-- Populated dynamically via JS -->
+            </div>
+        </div>
+
+        <div style="font-size: 3rem; color: var(--color-orange); margin-bottom: 15px;"><i class="ph-duotone ph-rocket-launch"></i></div>
         <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 10px; color: var(--text-primary);" data-i18n="modal.upsell.title">접수는 완료되었습니다!</h3>
         <p style="font-size: 0.95rem; color: var(--label-secondary); margin-bottom: 25px; line-height: 1.5;" data-i18n-html="modal.upsell.desc">
             하지만 시스템에 등록만 해두면 찾는 데 오래 걸릴 수 있습니다.<br><br>
@@ -161,13 +300,17 @@
     <div class="modal-content" style="max-width: 400px; text-align: center; padding: 30px 20px;" onclick="event.stopPropagation()">
         <button class="modal-close" onclick="closeAppDownloadModal()">✕</button>
 
-        <div style="font-size: 3rem; color: var(--color-blue); margin-bottom: 15px;"><i class="ph-duotone ph-download-simple"></i></div>
-        <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 10px; color: var(--text-primary);" data-i18n="modal.app_download.title">JEJU LIVE APP 설치 방법</h3>
-        
-        <div style="text-align: left; background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+        <div style="font-size: 3rem; color: var(--color-blue); margin-bottom: 15px;"><i class="ph-duotone ph-device-mobile"></i></div>
+        <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 16px; color: var(--text-primary);" data-i18n="modal.app_download.title">JEJU LIVE APP 설치 방법</h3>
+
+        <!-- iOS 전용 안내 -->
+        <div id="modal-ios-block" style="text-align: left; background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
             <h4 style="font-weight: 700; margin-bottom: 8px; color: #1e293b;"><i class="ph-fill ph-apple-logo"></i> iPhone (Safari)</h4>
-            <p style="font-size: 0.85rem; color: #475569; margin-bottom: 15px;" data-i18n="modal.app_download.ios">화면 하단의 [공유] 버튼을 누른 후, [홈 화면에 추가]를 선택하세요.</p>
-            
+            <p style="font-size: 0.85rem; color: #475569; margin-bottom: 0;" data-i18n="modal.app_download.ios">화면 하단의 [공유] 버튼을 누른 후, [홈 화면에 추가]를 선택하세요.</p>
+        </div>
+
+        <!-- Android 전용 안내 (prompt 없을 때만 표시) -->
+        <div id="modal-aos-block" style="text-align: left; background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px; display:none;">
             <h4 style="font-weight: 700; margin-bottom: 8px; color: #1e293b;"><i class="ph-fill ph-android-logo" style="color: #a4c639;"></i> Android (Chrome)</h4>
             <p style="font-size: 0.85rem; color: #475569; margin-bottom: 0;" data-i18n="modal.app_download.aos">우측 상단의 메뉴(⋮)를 누른 후, [앱 설치] 또는 [홈 화면에 추가]를 선택하세요.</p>
         </div>
