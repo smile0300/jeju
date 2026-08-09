@@ -170,22 +170,43 @@ async function checkAndSendWeatherAlerts(env) {
 }
 
 // ─── 한라산 탐방로 통제 체크 ──────────────────────────────────────────────
+// jeju.go.kr 직접 스크래핑 (Pages Function 캐시 의존성 제거)
+function parseHallasanHtml(html) {
+  const blockPattern = /<dl[^>]*>[\s\S]*?<\/dl>/g;
+  const namePattern = /<dt[^>]*>([\s\S]*?)<\/dt>/;
+  const statusPattern = /<dd[^>]*class="[^"]*situation[^"]*"[^>]*>([\s\S]*?)<\/dd>/;
+  const decodeHtmlEntities = (str) => str.replace(/&#(\d+);/g, (_, dec) => String.fromCharCode(dec));
+  const stripTags = (str) => decodeHtmlEntities((str || '').replace(/<[^>]*>?/gm, '').replace(/&nbsp;/g, '').replace(/\s+/g, ' ').trim());
+  const results = [];
+  let match;
+  while ((match = blockPattern.exec(html)) !== null) {
+    const block = match[0];
+    const nameMatch = namePattern.exec(block);
+    const statusMatch = statusPattern.exec(block);
+    if (nameMatch && statusMatch) {
+      results.push({ name: stripTags(nameMatch[1]), status: stripTags(statusMatch[1]) });
+    }
+  }
+  return results;
+}
+
 async function checkAndSendHallasanAlerts(env) {
   try {
-    // 이미 Cloudflare Pages Function에서 크롤링/파싱하여 제공 중인 엔드포인트 활용
-    const res = await fetch('https://jeju-live.pages.dev/api/hallasan-status', {
-      signal: AbortSignal.timeout(15000)
+    // jeju.go.kr 직접 스크래핑 (캐시 없음, 실시간)
+    const res = await fetch('https://jeju.go.kr/tool/hallasan/road-body.jsp', {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' },
+      signal: AbortSignal.timeout(20000)
     });
-    if (!res.ok) throw new Error(`Hallasan API error: HTTP ${res.status}`);
-    
-    const trails = await res.json();
-    if (!Array.isArray(trails) || trails.length === 0) throw new Error("Invalid hallasan response");
-    if (trails.error) throw new Error(trails.error);
+    if (!res.ok) throw new Error(`Hallasan scrape error: HTTP ${res.status}`);
+
+    const html = await res.text();
+    const trails = parseHallasanHtml(html);
+    if (trails.length === 0) throw new Error("Hallasan scraper matched 0 items - HTML structure may have changed");
 
     // 통제/제한 탐방로 필터
     const controlled = trails.filter(t => {
       const s = t.status || '';
-      return s.includes('통제') || s.includes('제한') || s.includes('탐방불가') || s.includes('입산제한');
+      return s.includes('통제') || s.includes('제한') || s.includes('탐방불가') || s.includes('입산제한') || s.includes('부분탐방');
     });
 
     // 전체 상태 판단: 전면통제 / 부분통제 / 정상운영

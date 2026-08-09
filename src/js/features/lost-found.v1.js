@@ -226,7 +226,7 @@ export function renderLostGoodsTable(items, isLoadMore = false) {
         const ePlace = escapeHTML(item.place);
         return `
         <tr>
-            <td>${item.img ? `<img src="${item.img}" class="lost-table-img" loading="lazy" onerror="this.src='${noImgSvg}'">` : '<i class="ph-duotone ph-package color-cloud"></i>'}</td>
+            <td>${item.img ? `<img src="${item.img}" alt="${escapeHTML(item.name || 'Lost Item')}" class="lost-table-img" loading="lazy" onerror="this.src='${noImgSvg}'">` : '<i class="ph-duotone ph-package color-cloud"></i>'}</td>
             <td><span class="lost-category-badge">${escapeHTML(item.category)}</span></td>
             <td style="font-weight:600; max-width: 15em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${eName}">${eName}</td>
             <td>${item.date}</td>
@@ -259,7 +259,7 @@ export function openLostDetailModalByIndex(index) {
 
     body.innerHTML = `
         <div class="lost-modal-img-container">
-            ${item.img ? `<img src="${item.img}" class="lost-modal-img" onerror="this.src='${noImgSvg}'">` : `<div class="lost-modal-no-img"><i class="ph-duotone ph-package color-cloud"></i></div>`}
+            ${item.img ? `<img src="${item.img}" alt="${escapeHTML(item.name || 'Lost Item')}" class="lost-modal-img" onerror="this.src='${noImgSvg}'">` : `<div class="lost-modal-no-img"><i class="ph-duotone ph-package color-cloud"></i></div>`}
         </div>
         <div class="lost-modal-info">
             <div class="lost-modal-header">
@@ -280,7 +280,7 @@ export function openLostDetailModalByIndex(index) {
             </div>
             <div id="wechat-qr-container" style="display:none; text-align:center; padding: 15px; border-top: 1px solid #eee;">
                 <p style="font-size: 14px; color: #666; margin-bottom: 10px;">${window.t('lost.detail.wechat_guide')}</p>
-                <img src="/assets/wechat_qr.png" style="width: 200px; height: 200px;">
+                <img src="/assets/wechat_qr.png" alt="WeChat QR Code" style="width: 200px; height: 200px;">
             </div>
         </div>`;
     document.getElementById('lost-detail-modal').style.display = 'flex';

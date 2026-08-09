@@ -137,6 +137,25 @@
         </div>
 
         <div style="font-size: 3rem; color: var(--color-orange); margin-bottom: 15px;"><i class="ph-duotone ph-rocket-launch"></i></div>
+        <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 10px; color: var(--text-primary);" data-i18n="modal.upsell.title">접수는 완료되었습니다!</h3>
+        <p style="font-size: 0.95rem; color: var(--label-secondary); margin-bottom: 25px; line-height: 1.5;" data-i18n-html="modal.upsell.desc">
+            하지만 시스템에 등록만 해두면 찾는 데 오래 걸릴 수 있습니다.<br><br>
+            <b>단 10위안</b>에 전담 직원이 주변 호텔, 택시 등에 직접 전화를 돌려 <b>3~7일간 집중 수색 및 추적</b>을 시작할까요?
+        </p>
+        
+        <div id="upsell-qr-container" style="display:none; margin-bottom: 20px;">
+            <p style="font-size: 0.85rem; color: var(--accent); margin-bottom: 10px; font-weight: 600;" data-i18n="modal.upsell.qr_guide">👇 위챗페이로 10위안 결제 시 즉시 수색 시작 👇</p>
+            <img src="/assets/wechat_qr.png" style="width: 180px; height: 180px; border-radius: 8px; border: 1px solid #eee;">
+            <p style="font-size: 0.75rem; color: var(--label-tertiary); margin-top: 10px;" data-i18n="modal.upsell.qr_note">결제 시 꼭 비고란에 성함을 남겨주세요.</p>
+        </div>
+
+        <div id="upsell-action-btns" style="display: flex; flex-direction: column; gap: 10px;">
+            <button class="btn btn-primary" onclick="showUpsellQR()" style="width: 100%; padding: 12px; font-size: 1rem; font-weight: 700; background: var(--color-orange); border: none;" data-i18n="modal.upsell.accept">🚀 네, 10위안에 전담 수색 시작하기</button>
+            <button class="btn btn-secondary" onclick="closeLostUpsellModal()" style="width: 100%; background: transparent; border: none; color: var(--label-secondary); text-decoration: underline;" data-i18n="modal.upsell.decline">아니요, 괜찮습니다. 접수만 할게요.</button>
+        </div>
+    </div>
+</div>
+
 <!-- ===== CCTV Modal ===== -->
 <div id="cctv-modal" class="modal-overlay" style="display:none" onclick="closeCctvModal()">
     <div class="modal-content" onclick="event.stopPropagation()">
