@@ -298,7 +298,8 @@ const ROUTE_MAP = {
     '/festival': 'festival',
     '/lost': 'lost',
     '/reward': 'reward',
-    '/pickup': 'proxy-pickup'
+    '/pickup': 'proxy-pickup',
+    '/proxy-pickup': 'proxy-pickup'
 };
 
 function handleRouting() {
