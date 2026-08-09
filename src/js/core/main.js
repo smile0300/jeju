@@ -299,7 +299,12 @@ const ROUTE_MAP = {
     '/lost': 'lost',
     '/reward': 'reward',
     '/pickup': 'proxy-pickup',
-    '/proxy-pickup': 'proxy-pickup'
+    '/proxy-pickup': 'proxy-pickup',
+    '/cctv': 'cctv',
+    '/terms': 'terms',
+    '/privacy': 'privacy',
+    '/lost-report': 'lost-report',
+    '/lost-status': 'lost-status'
 };
 
 function handleRouting() {
