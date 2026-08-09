@@ -225,19 +225,20 @@ export async function fetchFlights(type) {
     try {
         const today = new Date();
         const ymd = today.getFullYear() + String(today.getMonth() + 1).padStart(2, '0') + String(today.getDate()).padStart(2, '0');
-        const endpointType = type === 'arrive' ? 'getArrFlightStatusList' : 'getDepFlightStatusList';
-        const airportParam = type === 'arrive' ? 'arr_airport_code=CJU' : 'airport_code=CJU';
 
-        // 신규 GW 엔드포인트 적용 (apis.data.go.kr/B551178/flight-status)
-        const apiEndpoint = `https://apis.data.go.kr/B551178/flight-status/${endpointType}`;
+        // 신규 GW 통합 오퍼레이션 (getDepFlightStatusList/getArrFlightStatusList 폐기 → getFlightOpratInfoList)
+        const apiEndpoint = `https://apis.data.go.kr/B551178/flight-status/getFlightOpratInfoList`;
         const params = {
             pageNo: 1,
             numOfRows: 1000,
             searchday: ymd,
+            depAirportCode: type === 'arrive' ? '' : 'CJU',
+            arrAirportCode: type === 'arrive' ? 'CJU' : '',
             _: Date.now()
         };
-        if (type === 'arrive') params.arr_airport_code = 'CJU';
-        else params.airport_code = 'CJU';
+        // 빈 파라미터 제거
+        if (!params.depAirportCode) delete params.depAirportCode;
+        if (!params.arrAirportCode) delete params.arrAirportCode;
 
         container.innerHTML = `
             <div style="padding: 16px;">
