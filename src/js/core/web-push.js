@@ -42,15 +42,15 @@ export const initWebPushNotifications = async () => {
             // 3. 서비스 워커 등록 확인 후 토큰 획득
             // main.js에서 등록한 /sw.js(또는 백그라운드용 firebase-messaging-sw.js)를 사용합니다.
             const registration = await navigator.serviceWorker.ready;
-            
-            const currentToken = await getToken(messaging, { 
+
+            const currentToken = await getToken(messaging, {
                 vapidKey: VAPID_KEY,
                 serviceWorkerRegistration: registration
             });
 
             if (currentToken) {
                 console.log('웹 푸시 기기 토큰 획득:', currentToken);
-                
+
                 const savedToken = localStorage.getItem('FCM_WEB_TOKEN');
                 if (savedToken !== currentToken) {
                     localStorage.setItem('FCM_WEB_TOKEN', currentToken);
