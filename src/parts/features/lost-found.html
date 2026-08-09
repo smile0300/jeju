@@ -195,7 +195,10 @@
                 <div class="lost-form-group">
                     <label class="lost-form-label"><span data-i18n="modal.lost.photo.label" class="required-field">사진 첨부</span></label>
                     <div class="lost-form-file-wrap">
-                        <input type="file" id="lost-report-photo" class="lost-form-file-input" accept="image/*" onchange="handleLostImageChange(event)">
+                        <label class="custom-file-upload-btn">
+    <input type="file" id="lost-report-photo" class="lost-form-file-input" style="display:none;" accept="image/*" onchange="handleLostImageChange(event)">
+    <i class="ph-duotone ph-upload-simple"></i> <span data-i18n="modal.lost.upload_btn">사진 파일 선택</span>
+</label>
                     </div>
                     <div id="lost-report-photo-preview" class="photo-preview" style="display: none; margin-top: 10px; border-radius: 8px; overflow: hidden; border: 1px solid var(--separator);"></div>
                 </div>
@@ -375,7 +378,10 @@
                 <div class="lost-form-group">
                     <label class="lost-form-label"><i class="ph-duotone ph-image"></i> <span class="required-field" data-i18n="proxy.modal.item_photo">물건 사진</span></label>
                     <div class="file-upload-wrapper">
-                        <input type="file" id="proxy-item-photo" class="lost-form-file" accept="image/*">
+                        <label class="custom-file-upload-btn">
+    <input type="file" id="proxy-item-photo" class="lost-form-file" accept="image/*">
+    <i class="ph-duotone ph-upload-simple"></i> <span data-i18n="modal.lost.upload_btn">사진 파일 선택</span>
+</label>
                     </div>
                 </div>
             </div>
@@ -401,7 +407,10 @@
                     <div class="lost-form-group">
                         <label class="lost-form-label"><span class="required-field" data-i18n="proxy.modal.reservation">호텔 예약내역</span></label>
                         <div class="file-upload-wrapper">
-                            <input type="file" id="proxy-reservation-photo" class="lost-form-file" accept="image/*">
+                            <label class="custom-file-upload-btn">
+    <input type="file" id="proxy-reservation-photo" class="lost-form-file" accept="image/*">
+    <i class="ph-duotone ph-upload-simple"></i> <span data-i18n="modal.lost.upload_btn">사진 파일 선택</span>
+</label>
                         </div>
                     </div>
                 </div>
@@ -440,7 +449,10 @@
                 <div class="lost-form-group">
                     <label class="lost-form-label"><i class="ph-duotone ph-identification-card"></i> <span class="required-field" data-i18n="proxy.modal.passport">여권 사진</span></label>
                     <div class="file-upload-wrapper">
-                        <input type="file" id="proxy-passport-photo" class="lost-form-file" accept="image/*">
+                        <label class="custom-file-upload-btn">
+    <input type="file" id="proxy-passport-photo" class="lost-form-file" accept="image/*">
+    <i class="ph-duotone ph-upload-simple"></i> <span data-i18n="modal.lost.upload_btn">사진 파일 선택</span>
+</label>
                     </div>
                 </div>
             </div>

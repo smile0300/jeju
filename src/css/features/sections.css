@@ -5047,3 +5047,23 @@ body:not(.page-home) .wechat-float-btn {
     pointer-events: auto;
     z-index: 2;
 }
+
+.custom-file-upload-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    background: var(--fill-tertiary);
+    color: var(--label-primary);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all var(--duration-fast) var(--ease-out);
+}
+.custom-file-upload-btn:active {
+    transform: scale(0.97);
+}
+.custom-file-upload-btn i {
+    font-size: 1.1rem;
+}
