@@ -42,6 +42,13 @@ export const initWebPushNotifications = async () => {
             // 3. 서비스 워커 등록 확인 후 토큰 획득
             // main.js에서 등록한 /sw.js(또는 백그라운드용 firebase-messaging-sw.js)를 사용합니다.
             const registration = await navigator.serviceWorker.ready;
+            
+            // 핵심 수정: 기존 VAPID 키로 생성된 푸시 구독(Subscription)이 남아있으면 401 에러가 발생하므로 강제로 삭제합니다.
+            const oldSubscription = await registration.pushManager.getSubscription();
+            if (oldSubscription) {
+                console.log('기존 푸시 구독 발견, 충돌 방지를 위해 삭제합니다...', oldSubscription);
+                await oldSubscription.unsubscribe();
+            }
 
             const currentToken = await getToken(messaging, {
                 vapidKey: VAPID_KEY,
