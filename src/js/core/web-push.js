@@ -57,8 +57,6 @@ export const initWebPushNotifications = async () => {
 
             if (currentToken) {
                 console.log('웹 푸시 기기 토큰 획득:', currentToken);
-                // 모바일 디버깅용: 토큰 획득 성공 알림
-                window.alert('✅ 스마트폰 토큰 발급 성공!');
 
                 const savedToken = localStorage.getItem('FCM_WEB_TOKEN');
                 if (savedToken !== currentToken) {
@@ -75,7 +73,6 @@ export const initWebPushNotifications = async () => {
                 }
             } else {
                 console.log('푸시 토큰을 가져올 수 없습니다. 알림 권한을 다시 확인해주세요.');
-                window.alert('❌ 토큰을 가져올 수 없습니다.');
             }
 
             // 4. 포그라운드(앱이 켜져있을 때) 메시지 수신 리스너
@@ -87,12 +84,9 @@ export const initWebPushNotifications = async () => {
 
         } else {
             console.log('알림 권한이 거부되었거나 무시되었습니다.');
-            window.alert('❌ 알림 권한이 거부되었습니다.');
         }
 
     } catch (error) {
         console.error('웹 푸시 초기화 중 오류 발생:', error);
-        // 모바일 디버깅용: 구체적인 에러 메시지를 팝업으로 띄움
-        window.alert('🚨 에러 발생: ' + error.message);
     }
 };
