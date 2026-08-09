@@ -1694,24 +1694,22 @@
     display: flex;
     gap: 10px;
     overflow-x: auto;
-    padding: 10px 4px;
+    padding: 10px 4px 15px 4px;
     margin-bottom: 20px;
     -webkit-overflow-scrolling: touch;
 }
 
 .month-tab {
-    padding: var(--space-2) var(--space-5);
-    /* 8px 20px */
+    padding: 6px 14px;
     border-radius: var(--radius-full);
     background: var(--fill-tertiary);
     color: var(--label-secondary);
-    font-size: var(--text-subheadline);
-    font-weight: 600;
+    font-size: 0.85rem;
+    font-weight: 500;
     cursor: pointer;
     white-space: nowrap;
     transition: all var(--duration-fast) var(--ease-out);
-    /* 44px 鴽木�???諯初� */
-    min-height: var(--touch-target);
+    min-height: 32px;
     display: flex;
     align-items: center;
 }
@@ -2127,42 +2125,8 @@
 
     .hourly-item {
         min-width: 72px;
-        padding: 10px 4px;
-    }
-
-    .hourly-precip {
-        font-size: 0.7rem;
-    }
-
-    /* Festival Notice Styles (v12.0) */
-    .festival-notice-container {
-        padding: 30px 10px;
-        display: flex;
-        justify-content: center;
-        width: 100%;
-    }
-
-    .festival-notice-card {
-        background: #f8fafc;
-        border-radius: 20px;
-        border: 1.5px dashed #cbd5e1;
-        padding: 40px 20px;
-        text-align: center;
-        width: 100%;
-        max-width: 500px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
-        transition: all 0.3s ease;
-    }
-
-    .festival-notice-card:hover {
-        transform: translateY(-3px);
-        border-color: var(--accent-blue);
-        background: #f0f7ff;
-    }
-
-    .notice-icon {
-        font-size: 2.5rem;
-        margin-bottom: 20px;
+        padding: 10px 4px 15px 4px;
+    margin-bottom: 20px;
     }
 
     .notice-title {

@@ -12,7 +12,7 @@
             <div class="festival-filter-container search-filter-box" style="margin-top: 10px; margin-bottom: 20px; padding: 20px;">
                 <!-- 날짜 범위 선택 -->
                 <div class="filter-row" style="display:flex; gap:10px; align-items:center;">
-                    <input type="text" id="festival-date-range" class="date-input" style="flex:1; text-align: center; font-size: 0.95em; cursor: pointer;" placeholder="기간 선택" data-i18n-placeholder="festival.date_range" readonly>
+                    <input type="text" id="festival-date-range" class="date-input" style="flex:1; text-align: center; font-size: 0.95em; cursor: pointer;" placeholder="기간 선택" data-i18n="festival.date_range" readonly>
                     <input type="hidden" id="festival-date-start">
                     <input type="hidden" id="festival-date-end">
                     <button class="search-btn" onclick="window.festivalApp.handleDateChange()">
@@ -24,7 +24,7 @@
                 <div style="height: 1px; background: #eaeaea; margin: 15px 0;"></div>
                 
                 <!-- 월별 축제 필터 -->
-                <div class="festival-month-filter" id="month-filter" style="margin-bottom: 0; padding: 0;">
+                <div class="festival-month-filter" id="month-filter" style="margin-bottom: 0;">
                     <!-- script.js에서 동적으로 생성됩니다 -->
                 </div>
             </div>
