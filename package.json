@@ -6,7 +6,8 @@
   },
   "dependencies": {
     "@capacitor/push-notifications": "^8.1.2",
-    "firebase": "^12.17.0"
+    "firebase": "^10.12.2",
+    "firebase-admin": "^14.2.0"
   },
   "devDependencies": {
     "@capacitor/android": "^8.4.2",
