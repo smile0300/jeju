@@ -245,5 +245,5 @@
     window.goToLostProxy = function() {
         window.collapseLostGrid();
         if (window.openProxyPickupModal) window.openProxyPickupModal();
-        else if (window.showSection) window.showSection('proxy-pickup');
+        else if (window.showSection) window.showSection('pickup');
     };

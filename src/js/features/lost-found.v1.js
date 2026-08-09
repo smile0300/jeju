@@ -1278,7 +1278,7 @@ window.closeLostUpsellModal = function(fromPopState = false) {
 
 window.checkProxyDeepLink = function() {
     const params = new URLSearchParams(window.location.search);
-    const isProxy = window.location.pathname === '/pickup' || params.get('proxy') === 'true' || params.get('section') === 'proxy-pickup' || params.get('action') === 'proxy';
+    const isProxy = window.location.pathname === '/pickup' || params.get('proxy') === 'true' || params.get('section') === 'pickup' || params.get('action') === 'proxy';
     if (isProxy) {
         const caseId = params.get('caseId') || '';
         const itemName = params.get('item') || '';
@@ -1300,8 +1300,8 @@ const MAX_PROXY_STEP = 3;
 
 /** 대리수령 모달 열기: CaseId, 물품명, 원래 위챗ID, 장소(호텔 여부 판별) 자동 입력 */
 window.openProxyPickupModal = function(caseId, itemName, originalWechat, region, place) {
-    showSection('proxy-pickup');
-    const modal = document.getElementById('proxy-pickup');
+    showSection('pickup');
+    const modal = document.getElementById('pickup');
     if (!modal) return;
 
     // 필드 자동 입력
@@ -1433,11 +1433,11 @@ window.prevProxyStep = function() {
 function updateProxyStepView() {
     const lang = localStorage.getItem('jeju_lang') || 'zh';
     
-    document.querySelectorAll('#proxy-pickup .lost-step').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('#pickup .lost-step').forEach(el => el.classList.remove('active'));
     const currentEl = document.getElementById(`proxy-step-${currentProxyStep}`);
     if (currentEl) currentEl.classList.add('active');
 
-    document.querySelectorAll('#proxy-pickup .progress-dot').forEach((el, index) => {
+    document.querySelectorAll('#pickup .progress-dot').forEach((el, index) => {
         el.classList.remove('active', 'done');
         if (index + 1 === currentProxyStep) el.classList.add('active');
         else if (index + 1 < currentProxyStep) el.classList.add('done');
@@ -1490,7 +1490,7 @@ window.submitProxyPickup = async function() {
     const lang = localStorage.getItem('jeju_lang') || 'zh';
     const statusDiv = document.getElementById('proxy-status');
     const submitBtn = document.getElementById('proxy-submit-btn');
-    const modal     = document.getElementById('proxy-pickup');
+    const modal     = document.getElementById('pickup');
 
     const caseId        = modal?.dataset.caseId || '';
     const itemName      = (document.getElementById('proxy-item-name')?.value || '').trim();
