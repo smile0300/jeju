@@ -11,7 +11,7 @@ const firebaseConfig = {
     measurementId: "G-FL4TEBRYKC"
 };
 
-const VAPID_KEY = "BEN4mJFcbOt1tSQlHOFL771ltC76Wr1TRP5ZpsqWcFXYsSWnZTisEQdvAahBdcJOTb8IhETHwSwvDNJeeprcw6I";
+const VAPID_KEY = "BHvAAvF_g3Smd8GXZLkSL2pEXsXAR0EG3WERoB7JWPLcW4oybj9wvVIXNp7Cy4MBiJIh2QB1nfR-eH7wCv-lWyU";
 
 export const initWebPushNotifications = async () => {
     try {
