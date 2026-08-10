@@ -255,6 +255,10 @@ export async function fetchFlights(type) {
             </div>`;
 
         const text = await fetchWithRetry(apiEndpoint, params);
+        console.log(`[DEBUG] Airport API Endpoint: ${apiEndpoint}`);
+        console.log(`[DEBUG] Airport API Params:`, params);
+        console.log(`[DEBUG] Airport API Raw Text:`, text);
+        
         let itemsArray = [];
 
         const getVal = (obj, tag) => {
