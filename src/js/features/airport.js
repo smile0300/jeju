@@ -309,12 +309,21 @@ export async function fetchFlights(type) {
 
         if (itemsArray.length > 0) {
             const filteredFlights = itemsArray.filter(f => {
-                // arrival/depart API는 이미 목적에 맞게 내려오므로 방향 체크를 완화함.
-                const oppositeCode = type === 'arrive' ? (f.dep_code || f.arr_code) : (f.arr_code || f.dep_code);
+                let oppositeCode = '';
+                let directionMatch = true;
+
+                // API가 출발/도착 공항 코드를 모두 제공하는 경우 (정상)
+                if (f.dep_code && f.arr_code && f.dep_code !== f.arr_code) {
+                    oppositeCode = type === 'arrive' ? f.dep_code : f.arr_code;
+                    directionMatch = type === 'arrive' ? f.arr_code === 'CJU' : f.dep_code === 'CJU';
+                } else {
+                    // API가 단일 상대방 공항코드(cityCode 등)만 제공하는 경우
+                    oppositeCode = f.dep_code || f.arr_code;
+                    // API 자체 파라미터로 이미 필터링되었다고 가정
+                    directionMatch = true;
+                }
                 
-                // CJU 코드가 아예 없어도 통과시키도록 수정 (API가 자신의 공항 코드를 생략하고 내려줄 수 있음)
-                const directionMatch = true; 
-                
+                // 해외노선(중화권) 필터링: 국내선이 아니면서 중화권(REGION_AIRPORTS)에 포함된 경우만 통과
                 return directionMatch && oppositeCode && (f.is_intl || !DOMESTIC_AIRPORTS.has(oppositeCode)) && REGION_AIRPORTS.has(oppositeCode);
             });
             renderFlightList(container, filteredFlights, type);
