@@ -226,15 +226,14 @@ export async function fetchFlights(type) {
         const today = new Date();
         const ymd = today.getFullYear() + String(today.getMonth() + 1).padStart(2, '0') + String(today.getDate()).padStart(2, '0');
 
-        // 신규 GW 통합 오퍼레이션 (getFlightOpratInfoList 대신 승인받은 /arrival 또는 /depart 사용)
-        const operation = type === 'arrive' ? 'arrival' : 'depart';
-        const apiEndpoint = `https://apis.data.go.kr/B551178/flight-status/${operation}`;
+        // 신규 GW 통합 오퍼레이션: 실시간 운항정보는 '/info' 를 사용합니다. (/arrival, /depart는 지연/결항 전용)
+        const apiEndpoint = `https://apis.data.go.kr/B551178/flight-status/info`;
         const params = {
             pageNo: 1,
             numOfRows: 1000,
             searchday: ymd,
             schDate: ymd, 
-            schAirportCode: 'CJU', // 추가된 필수 파라미터 (공항코드)
+            schAirportCode: 'CJU',
             schArrvCityCode: type === 'arrive' ? 'CJU' : '',
             schDeptCityCode: type === 'arrive' ? '' : 'CJU',
             depAirportCode: type === 'arrive' ? '' : 'CJU',
