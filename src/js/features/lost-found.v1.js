@@ -31,8 +31,16 @@ export async function fetchFoundGoods() {
         }
 
         const selectedDate = (dateInput?.value || '');
-        let startYmd = selectedDate.replace(/-/g, '');
-        let endYmd = selectedDate.replace(/-/g, '');
+        let startYmd = '';
+        let endYmd = '';
+        if (selectedDate.includes(' to ')) {
+            const parts = selectedDate.split(' to ');
+            startYmd = parts[0].replace(/-/g, '');
+            endYmd = parts[1].replace(/-/g, '');
+        } else {
+            startYmd = selectedDate.replace(/-/g, '');
+            endYmd = selectedDate.replace(/-/g, '');
+        }
 
         const category = categoryInput?.value || '';
         const regionInput = document.getElementById('lostRegionCd');

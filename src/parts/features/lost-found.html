@@ -45,7 +45,7 @@
                         </select>
                     </div>
                     <div class="filter-row" style="display:flex;gap:10px;">
-                        <input type="date" id="lost-date" class="date-input" style="flex:1;" onchange="fetchFoundGoodsManual()">
+                        <input type="text" id="lost-date" class="date-input" style="flex:1;" placeholder="날짜 선택" readonly>
                         <script>
                             (function () {
                                 const formatter = new Intl.DateTimeFormat('en-CA', { 
@@ -57,8 +57,52 @@
                                 const yyyymmdd = formatter.format(yesterdayUTC);
 
                                 const dateInput = document.getElementById('lost-date');
-                                dateInput.setAttribute('max', yyyymmdd);
-                                dateInput.value = yyyymmdd;
+                                const regionSelect = document.getElementById('lostRegionCd');
+                                
+                                if (typeof flatpickr !== 'undefined') {
+                                    const lang = localStorage.getItem('jeju_lang') || 'zh';
+                                    const fpLang = lang === 'ko' ? 'ko' : 'zh';
+                                    
+                                    const fp = flatpickr(dateInput, {
+                                        locale: fpLang,
+                                        maxDate: yyyymmdd,
+                                        defaultDate: yyyymmdd,
+                                        mode: regionSelect.value === 'LCP000' ? 'range' : 'single',
+                                        onChange: function(selectedDates, dateStr, instance) {
+                                            if (instance.config.mode === 'range') {
+                                                if (selectedDates.length === 2) {
+                                                    const diffTime = Math.abs(selectedDates[1] - selectedDates[0]);
+                                                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                                                    if (diffDays > 31) {
+                                                        alert(lang === 'ko' ? '최대 31일까지만 조회 가능합니다.' : (lang === 'en' ? 'Search is limited to 31 days.' : '最多可查询31天。'));
+                                                        instance.clear();
+                                                        instance.setDate([selectedDates[0], new Date(selectedDates[0].getTime() + 31 * 24 * 60 * 60 * 1000)]);
+                                                    }
+                                                    if (window.fetchFoundGoodsManual) window.fetchFoundGoodsManual();
+                                                }
+                                            } else {
+                                                if (selectedDates.length === 1) {
+                                                    if (window.fetchFoundGoodsManual) window.fetchFoundGoodsManual();
+                                                }
+                                            }
+                                        }
+                                    });
+                                    
+                                    regionSelect.addEventListener('change', function() {
+                                        if (regionSelect.value === 'LCP000') {
+                                            fp.set('mode', 'range');
+                                        } else {
+                                            fp.set('mode', 'single');
+                                            if (fp.selectedDates.length > 1) {
+                                                fp.setDate(fp.selectedDates[0]);
+                                            }
+                                        }
+                                    });
+                                } else {
+                                    dateInput.type = 'date';
+                                    dateInput.setAttribute('max', yyyymmdd);
+                                    dateInput.value = yyyymmdd;
+                                }
                             })();
                         </script>
                         <button class="search-btn" onclick="fetchFoundGoodsManual()"><i class="ph-duotone ph-list-magnifying-glass color-gnb"></i></button>
