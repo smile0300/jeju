@@ -226,8 +226,9 @@ export async function fetchFlights(type) {
         const today = new Date();
         const ymd = today.getFullYear() + String(today.getMonth() + 1).padStart(2, '0') + String(today.getDate()).padStart(2, '0');
 
-        // 신규 GW 통합 오퍼레이션: 실시간 운항정보는 '/info' 를 사용합니다. (/arrival, /depart는 지연/결항 전용)
-        const apiEndpoint = `https://apis.data.go.kr/B551178/flight-status/info`;
+        // 사용자가 신청한 실제 엔드포인트(/arrival, /depart)로 다시 복구
+        const operation = type === 'arrive' ? 'arrival' : 'depart';
+        const apiEndpoint = `https://apis.data.go.kr/B551178/flight-status/${operation}`;
         const params = {
             pageNo: 1,
             numOfRows: 1000,
