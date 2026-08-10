@@ -7,6 +7,7 @@ async function subscribeTokenToTopic(token, topic, accessToken) {
     method: "POST",
     headers: {
       "Authorization": `Bearer ${accessToken}`,
+      "access_token_auth": "true",   // OAuth2 토큰 사용 시 필수
       "Content-Type": "application/json"
     }
   });
@@ -66,9 +67,44 @@ export default {
         });
       }
     }
-    
+
+    // 테스트 알림 전송 (POST /api/send-test)
+    if (request.method === "POST" && url.pathname === "/api/send-test") {
+      try {
+        const serviceAccount = env.FIREBASE_SERVICE_ACCOUNT;
+        if (!serviceAccount) throw new Error("FIREBASE_SERVICE_ACCOUNT is not configured");
+
+        const reqBody = await request.json().catch(() => ({}));
+        const topic = reqBody.topic || "jeju_weather_alerts";
+        const title = reqBody.title || "济州LIVE 通知功能介绍";
+        const msg = reqBody.body || "使用APP可接收实时推送通知：灾难预警 / 天气预报 / 航班延误！";
+
+        // 서비스 계정 파싱 오류 디버깅용
+        let sa;
+        try {
+          sa = typeof serviceAccount === 'string' ? JSON.parse(serviceAccount) : serviceAccount;
+        } catch (parseErr) {
+          const preview = typeof serviceAccount === 'string' ? serviceAccount.substring(0, 80) : String(serviceAccount);
+          throw new Error(`SA JSON parse failed: ${parseErr.message} | preview: ${preview}`);
+        }
+
+        const accessToken = await getAccessToken(serviceAccount);
+        const result = await sendFCMMessage(accessToken, sa.project_id, topic, title, msg);
+
+        return new Response(JSON.stringify({ success: true, result }), {
+          headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+        });
+      } catch (e) {
+        return new Response(JSON.stringify({ success: false, error: e.message }), {
+          status: 500,
+          headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+        });
+      }
+    }
+
     return new Response("Not Found", { status: 404 });
   },
+
 
   // 스케줄러: 매 10분마다 실행 - 기상특보 + 한라산 탐방로 동시 체크
   async scheduled(event, env, ctx) {

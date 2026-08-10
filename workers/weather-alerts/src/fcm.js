@@ -73,23 +73,27 @@ export async function getAccessToken(serviceAccountJson) {
 
 /**
  * Send FCM Message using HTTP v1 API
+ * target: topic name OR 'token:xxxx' for direct token delivery
  */
-export async function sendFCMMessage(accessToken, projectId, topic, title, body) {
+export async function sendFCMMessage(accessToken, projectId, target, title, body) {
   const url = `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`;
+
+  // token: 접두사면 토큰 직접 발송, 아니면 토픽 발송
+  const messageTarget = target.startsWith('token:')
+    ? { token: target.slice(6) }
+    : { topic: target };
+
   const message = {
     message: {
-      topic: topic,
-      notification: {
-        title: title,
-        body: body
-      },
+      ...messageTarget,
+      notification: { title, body },
       webpush: {
-        fcm_options: {
-          link: "https://jejulive.net" // 알림 클릭 시 이동할 URL
-        }
+        fcm_options: { link: "https://jeju-live.com" }
       }
     }
   };
+
+  console.log("FCM 발송 Payload:", JSON.stringify(message));
 
   const res = await fetch(url, {
     method: 'POST',
@@ -100,5 +104,6 @@ export async function sendFCMMessage(accessToken, projectId, topic, title, body)
     body: JSON.stringify(message)
   });
 
-  return await res.json();
+  const resultJson = await res.json();
+  return { ...resultJson, _debugPayload: message };
 }

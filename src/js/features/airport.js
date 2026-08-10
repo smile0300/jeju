@@ -231,10 +231,9 @@ export async function fetchFlights(type) {
         const apiEndpoint = `https://apis.data.go.kr/B551178/flight-status/${operation}`;
         const params = {
             pageNo: 1,
-            numOfRows: 1000,
+            numOfRows: 100,
             searchday: ymd,
             schDate: ymd, 
-            schAirportCode: 'CJU',
             schArrvCityCode: type === 'arrive' ? 'CJU' : '',
             schDeptCityCode: type === 'arrive' ? '' : 'CJU',
             depAirportCode: type === 'arrive' ? '' : 'CJU',
