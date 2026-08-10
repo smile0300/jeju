@@ -33,13 +33,17 @@ export async function fetchFoundGoods() {
         const selectedDate = (dateInput?.value || '');
         let startYmd = '';
         let endYmd = '';
-        if (selectedDate.includes(' to ')) {
+        if (selectedDate.includes('~')) {
+            const parts = selectedDate.split('~');
+            startYmd = parts[0].replace(/-/g, '').trim();
+            endYmd = parts[1].replace(/-/g, '').trim();
+        } else if (selectedDate.includes(' to ')) { // fallback
             const parts = selectedDate.split(' to ');
-            startYmd = parts[0].replace(/-/g, '');
-            endYmd = parts[1].replace(/-/g, '');
+            startYmd = parts[0].replace(/-/g, '').trim();
+            endYmd = parts[1].replace(/-/g, '').trim();
         } else {
-            startYmd = selectedDate.replace(/-/g, '');
-            endYmd = selectedDate.replace(/-/g, '');
+            startYmd = selectedDate.replace(/-/g, '').trim();
+            endYmd = selectedDate.replace(/-/g, '').trim();
         }
 
         const category = categoryInput?.value || '';

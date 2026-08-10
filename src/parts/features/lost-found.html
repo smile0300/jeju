@@ -45,7 +45,7 @@
                         </select>
                     </div>
                     <div class="filter-row" style="display:flex;gap:10px;">
-                        <input type="text" id="lost-date" class="date-input" style="flex:1;" placeholder="날짜 선택" readonly>
+                        <input type="text" id="lost-date" class="date-input" style="flex:1; font-size: 0.85rem;" data-i18n="lost.date.ph" placeholder="날짜 선택" readonly>
                         <script>
                             (function () {
                                 const formatter = new Intl.DateTimeFormat('en-CA', { 
@@ -62,6 +62,10 @@
                                 if (typeof flatpickr !== 'undefined') {
                                     const lang = localStorage.getItem('jeju_lang') || 'zh';
                                     const fpLang = lang === 'ko' ? 'ko' : 'zh';
+                                    
+                                    if (flatpickr.l10ns && flatpickr.l10ns[fpLang]) {
+                                        flatpickr.l10ns[fpLang].rangeSeparator = '~';
+                                    }
                                     
                                     const fp = flatpickr(dateInput, {
                                         locale: fpLang,
