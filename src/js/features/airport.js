@@ -233,11 +233,12 @@ export async function fetchFlights(type) {
             pageNo: 1,
             numOfRows: 1000,
             searchday: ymd,
-            schDate: ymd, // /arrival, /depart 에서 사용할 수 있는 파라미터명 추가
+            schDate: ymd, 
+            schAirportCode: 'CJU', // 추가된 필수 파라미터 (공항코드)
+            schArrvCityCode: type === 'arrive' ? 'CJU' : '',
+            schDeptCityCode: type === 'arrive' ? '' : 'CJU',
             depAirportCode: type === 'arrive' ? '' : 'CJU',
             arrAirportCode: type === 'arrive' ? 'CJU' : '',
-            schDeptCityCode: type === 'arrive' ? '' : 'CJU',
-            schArrvCityCode: type === 'arrive' ? 'CJU' : '',
             _: Date.now()
         };
         // 빈 파라미터 제거
@@ -259,12 +260,10 @@ export async function fetchFlights(type) {
 
         const getVal = (obj, tag) => {
             if (!obj) return '';
-            // 1. XML Element인 경우
             if (typeof obj.getElementsByTagName === 'function') {
                 let el = obj.getElementsByTagName(tag)[0] || obj.getElementsByTagName(tag.toLowerCase())[0] || obj.getElementsByTagName(tag.toUpperCase())[0];
                 return (el?.textContent || '').trim();
             }
-            // 2. JSON Object인 경우 (대소문자 무시 검색)
             const targetKey = tag.toLowerCase();
             const actualKey = Object.keys(obj).find(k => k.toLowerCase() === targetKey);
             return (actualKey ? (obj[actualKey] || '') : (obj[tag] || '')).toString().trim();
@@ -273,21 +272,18 @@ export async function fetchFlights(type) {
         const mapItem = (node) => {
             const getStr = (tag) => getVal(node, tag);
             
-            // v21.3: 시간 필드명 철자 및 대소문자 변칙에 완벽 대응
-            // scheduledatetime, scheduledDateTime, scheduleddatetime, schtime 등 다양한 변종 시도
-            const schedText = getStr('scheduledatetime') || getStr('scheduledDateTime') || getStr('scheduledatetime'.toUpperCase()) || getStr('planTime') || '';
-            const estText = getStr('estimatedatetime') || getStr('estimatedatetime') || getStr('estimatedDateTime') || getStr('estimatedatetime'.toUpperCase()) || getStr('estTime') || '';
+            const schedText = getStr('scheduledatetime') || getStr('scheduledDateTime') || getStr('scheduledatetime'.toUpperCase()) || getStr('planTime') || getStr('std') || getStr('sta') || '';
+            const estText = getStr('estimatedatetime') || getStr('estimatedDateTime') || getStr('estimatedatetime'.toUpperCase()) || getStr('estTime') || getStr('etd') || getStr('eta') || '';
             
-            const fId = getStr('flightid') || getStr('flightId') || getStr('fid') || '';
-            const airlineName = getStr('airline') || getStr('airlineKorean') || '';
-            const depAirport = getStr('depAirport') || getStr('boardingKorean') || getStr('depairport') || '';
-            const arrAirport = getStr('arrAirport') || getStr('arrivedKorean') || getStr('arrairport') || '';
-            const depCode = (getStr('depAirportCode') || getStr('boardingEng') || getStr('depairportcode') || '').toUpperCase();
-            const arrCode = (getStr('arrAirportCode') || getStr('arrivedEng') || getStr('arrairportcode') || '').toUpperCase();
+            const fId = getStr('flightid') || getStr('flightId') || getStr('fid') || getStr('airFln') || '';
+            const airlineName = getStr('airline') || getStr('airlineKorean') || getStr('airlineEnglish') || '';
+            const depAirport = getStr('depAirport') || getStr('boardingKorean') || getStr('depairport') || getStr('city') || ''; // 'city' is often used when it's implied
+            const arrAirport = getStr('arrAirport') || getStr('arrivedKorean') || getStr('arrairport') || getStr('city') || '';
+            const depCode = (getStr('depAirportCode') || getStr('boardingEng') || getStr('depairportcode') || getStr('cityCode') || '').toUpperCase();
+            const arrCode = (getStr('arrAirportCode') || getStr('arrivedEng') || getStr('arrairportcode') || getStr('cityCode') || '').toUpperCase();
 
             return {
                 flight_id: fId.toUpperCase(),
-                // 12자리(YYYYMMDDHHMM) 또는 4자리(HHMM) 대응
                 plan_time: (schedText.length >= 12 ? schedText.slice(8, 12) : (schedText.length >= 4 ? schedText.slice(-4) : '')),
                 est_time: (estText.length >= 12 ? estText.slice(8, 12) : (estText.length >= 4 ? estText.slice(-4) : '')),
                 dep_airport: depAirport,
@@ -295,7 +291,7 @@ export async function fetchFlights(type) {
                 arr_airport: arrAirport,
                 arr_code: arrCode,
                 airline: airlineName,
-                status: getStr('rmkKor') || getStr('rmkEng') || '',
+                status: getStr('rmkKor') || getStr('rmkEng') || getStr('status') || '',
                 is_intl: getStr('io') === 'I' || getStr('line')?.includes('국제')
             };
         };
@@ -314,8 +310,12 @@ export async function fetchFlights(type) {
 
         if (itemsArray.length > 0) {
             const filteredFlights = itemsArray.filter(f => {
-                const oppositeCode = type === 'arrive' ? f.dep_code : f.arr_code;
-                const directionMatch = (type === 'arrive' ? f.arr_code === 'CJU' : f.dep_code === 'CJU');
+                // arrival/depart API는 이미 목적에 맞게 내려오므로 방향 체크를 완화함.
+                const oppositeCode = type === 'arrive' ? (f.dep_code || f.arr_code) : (f.arr_code || f.dep_code);
+                
+                // CJU 코드가 아예 없어도 통과시키도록 수정 (API가 자신의 공항 코드를 생략하고 내려줄 수 있음)
+                const directionMatch = true; 
+                
                 return directionMatch && oppositeCode && (f.is_intl || !DOMESTIC_AIRPORTS.has(oppositeCode)) && REGION_AIRPORTS.has(oppositeCode);
             });
             renderFlightList(container, filteredFlights, type);
