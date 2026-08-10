@@ -45,8 +45,8 @@ export default {
 
         const accessToken = await getAccessToken(serviceAccount);
 
-        // 기상특보 + 한라산 탐방로 두 Topic에 모두 구독
-        const topics = ["jeju_weather_alerts", "jeju_hallasan_alerts"];
+        // 기상특보 + 한라산 탐방로 + 항공편 결항 Topic 모두 구독
+        const topics = ["jeju_weather_alerts", "jeju_hallasan_alerts", "jeju_flight_alerts"];
         const results = await Promise.allSettled(
           topics.map(topic => subscribeTokenToTopic(token, topic, accessToken))
         );
@@ -108,6 +108,7 @@ export default {
 
   // 스케줄러: 매 10분마다 실행 - 기상특보 + 한라산 탐방로 동시 체크
   async scheduled(event, env, ctx) {
+    ctx.waitUntil(checkFlightCancellations(env));
     ctx.waitUntil(Promise.allSettled([
       checkAndSendWeatherAlerts(env),
       checkAndSendHallasanAlerts(env),
@@ -299,5 +300,115 @@ async function checkAndSendHallasanAlerts(env) {
 
   } catch (error) {
     console.error("Error in checkAndSendHallasanAlerts:", error.message);
+  }
+}
+
+
+// ─── 항공편 결항 체크 ──────────────────────────────────────────────
+async function checkFlightCancellations(env) {
+  try {
+    const serviceKey = env.PUBLIC_DATA_KEY || env.KMA_API_KEY;
+    if (!serviceKey) throw new Error("PUBLIC_DATA_KEY is not set");
+
+    let encodedKey = serviceKey.trim();
+    if (!encodedKey.includes('%')) {
+      encodedKey = encodeURIComponent(encodedKey);
+    }
+
+    const today = new Date();
+    // KST 시간 기준으로 오늘 날짜 YYYYMMDD
+    const kstTime = new Date(today.getTime() + 9 * 60 * 60 * 1000);
+    const ymd = kstTime.getFullYear() + String(kstTime.getMonth() + 1).padStart(2, '0') + String(kstTime.getDate()).padStart(2, '0');
+
+    // /info 엔드포인트: 1000개 호출 시도 (하루 분량)
+    const url = `https://apis.data.go.kr/B551178/flight-status/info?ServiceKey=${encodedKey}&pageNo=1&numOfRows=1000&searchday=${ymd}&schDate=${ymd}&schAirportCode=CJU`;
+    
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("Flight API error: HTTP " + res.status);
+    const text = await res.text();
+
+    // 정규식으로 item 파싱
+    const blockPattern = /<item>[\s\S]*?<\/item>/g;
+    let match;
+    const canceledFlights = [];
+
+    const DOMESTIC_AIRPORTS = new Set(['CJU', 'GMP', 'PUS', 'CJJ', 'TAE', 'KWJ', 'USN', 'KUV', 'WJU', 'HIN', 'RSU', 'KPO', 'MWX', 'YNY']);
+    const REGION_AIRPORTS = new Set([
+        'PVG', 'SHA', 'PEK', 'PKX', 'HGH', 'CAN', 'SZX', 'NKG', 'TAO', 'XIY', 'CTU', 'CKG',
+        'KMG', 'TSN', 'DLC', 'SHE', 'HRB', 'WUX', 'NGB', 'FOC', 'XMN', 'SYX', 'HAK', 'TNA',
+        'CGQ', 'CGO', 'WNZ', 'SWA', 'KWL', 'NNG', 'HFE', 'TYN', 'KHN', 'LHW', 'XNN', 'HET',
+        'URC', 'CSX', 'DYG', 'YNT', 'WEI', 'YIW', 'LYA', 'JNZ', 'LYI', 'ENH', 'INC', 'HIA',
+        'TPE', 'TSA', 'KHH', 'RMQ', 'TNN', 'HKG', 'MFM'
+    ]);
+
+    const getTag = (block, tag) => {
+        const p = new RegExp(`<` + tag + `>([\\s\\S]*?)<\\/` + tag + `>`, 'i');
+        const m = p.exec(block);
+        return m ? m[1].trim() : '';
+    };
+
+    while ((match = blockPattern.exec(text)) !== null) {
+      const block = match[0];
+      const rmkKor = getTag(block, 'rmkKor') || getTag(block, 'rmkEng') || getTag(block, 'status');
+      if (rmkKor.includes('결항') || rmkKor.includes('Canceled')) {
+        const flightId = getTag(block, 'flightid') || getTag(block, 'flightId');
+        const airline = getTag(block, 'airline');
+        const depCode = (getTag(block, 'depAirportCode') || getTag(block, 'boardingEng')).toUpperCase();
+        const arrCode = (getTag(block, 'arrAirportCode') || getTag(block, 'arrivedEng') || getTag(block, 'arrvAirportCode')).toUpperCase();
+        const io = getTag(block, 'io'); // I or O
+        const isIntl = io === 'I' || (getTag(block, 'line') || '').includes('국제');
+
+        let oppositeCode = '';
+        let isMatch = false;
+
+        if (depCode && arrCode && depCode !== arrCode) {
+            oppositeCode = (arrCode === 'CJU') ? depCode : arrCode;
+            isMatch = (arrCode === 'CJU' || depCode === 'CJU');
+        } else {
+            oppositeCode = depCode || arrCode;
+            isMatch = true; // 단일 제공시 API에서 필터링되었다고 가정
+        }
+
+        if (isMatch && oppositeCode && (isIntl || !DOMESTIC_AIRPORTS.has(oppositeCode)) && REGION_AIRPORTS.has(oppositeCode)) {
+            const schedText = getTag(block, 'scheduledatetime');
+            const pTime = schedText.length >= 4 ? schedText.slice(-4) : '';
+            canceledFlights.push({ flightId, airline, depCode, arrCode, pTime, io });
+        }
+      }
+    }
+
+    if (canceledFlights.length === 0) {
+      console.log("No canceled international flights for Jeju.");
+      return;
+    }
+
+    const kv = env.WEATHER_KV;
+    const serviceAccountJson = env.FIREBASE_SERVICE_ACCOUNT;
+    const sa = typeof serviceAccountJson === 'string' ? JSON.parse(serviceAccountJson) : serviceAccountJson;
+    const projectId = sa.project_id;
+    const accessToken = await getAccessToken(serviceAccountJson);
+
+    for (const f of canceledFlights) {
+      // flightid + date + time을 키로 중복 방지 (동일 비행기가 여러 번 검색될 수 있음)
+      const flightKey = `flight_cancel_${f.flightId}_${ymd}_${f.pTime}`;
+      if (kv) {
+        const sent = await kv.get(flightKey);
+        if (sent) continue;
+      }
+
+      const title = `✈️ 航班取消提醒`;
+      const body = `[${f.airline}] ${f.flightId} (${f.depCode} -> ${f.arrCode}) 航班已取消。`;
+
+      await sendFCMMessage(accessToken, projectId, "jeju_flight_alerts", title, body);
+      console.log("Flight cancel push sent:", body);
+
+      if (kv) {
+        // 24시간 후 만료 (하루 동안만 유지)
+        await kv.put(flightKey, "sent", { expirationTtl: 86400 });
+      }
+    }
+
+  } catch (error) {
+    console.error("Error in checkFlightCancellations:", error.message);
   }
 }
