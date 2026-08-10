@@ -313,7 +313,7 @@ export async function fetchFlights(type) {
             const depAirport = getStr('depAirport') || getStr('boardingKorean') || getStr('depairport') || getStr('city') || ''; // 'city' is often used when it's implied
             const arrAirport = getStr('arrAirport') || getStr('arrivedKorean') || getStr('arrairport') || getStr('city') || '';
             const depCode = (getStr('depAirportCode') || getStr('boardingEng') || getStr('depairportcode') || getStr('cityCode') || '').toUpperCase();
-            const arrCode = (getStr('arrAirportCode') || getStr('arrivedEng') || getStr('arrairportcode') || getStr('cityCode') || '').toUpperCase();
+            const arrCode = (getStr('arrAirportCode') || getStr('arrvAirportCode') || getStr('arrivedEng') || getStr('arrairportcode') || getStr('cityCode') || '').toUpperCase();
 
             return {
                 flight_id: fId.toUpperCase(),
