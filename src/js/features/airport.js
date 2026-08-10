@@ -254,10 +254,40 @@ export async function fetchFlights(type) {
                 <div class="skeleton skeleton-card" style="height: 60px;"></div>
             </div>`;
 
-        const text = await fetchWithRetry(apiEndpoint, params);
-        console.log(`[DEBUG] Airport API Endpoint: ${apiEndpoint}`);
-        console.log(`[DEBUG] Airport API Params:`, params);
-        console.log(`[DEBUG] Airport API Raw Text:`, text);
+        const fetchAllTexts = async (baseParams) => {
+            const texts = [];
+            const firstText = await fetchWithRetry(apiEndpoint, baseParams);
+            texts.push(firstText);
+            
+            let totalCount = 0;
+            if (firstText.trim().startsWith('<')) {
+                const m = firstText.match(/<totalCount>(\d+)<\/totalCount>/i);
+                if (m) totalCount = parseInt(m[1], 10);
+            } else if (firstText.trim().startsWith('{')) {
+                const m = firstText.match(/"totalCount"\s*:\s*(\d+)/i);
+                if (m) totalCount = parseInt(m[1], 10);
+            }
+
+            const maxRows = baseParams.numOfRows;
+            if (totalCount > maxRows) {
+                const totalPages = Math.ceil(totalCount / maxRows);
+                const promises = [];
+                const fetchPages = Math.min(totalPages, 15); // 최대 15페이지 (1500개)
+                for (let i = 2; i <= fetchPages; i++) {
+                    const p = { ...baseParams, pageNo: i };
+                    promises.push(fetchWithRetry(apiEndpoint, p).catch(e => {
+                        console.error('Page fetch error:', e);
+                        return '';
+                    }));
+                }
+                const results = await Promise.all(promises);
+                texts.push(...results.filter(t => t));
+            }
+            return texts;
+        };
+
+        const texts = await fetchAllTexts(params);
+        console.log(`[DEBUG] Fetched ${texts.length} pages from ${apiEndpoint}`);
         
         let itemsArray = [];
 
@@ -299,16 +329,18 @@ export async function fetchFlights(type) {
             };
         };
 
-        if (text.trim().startsWith('{')) {
-            const rawJson = JSON.parse(text);
-            const json = normalizeKeys(rawJson);
-            const rawItems = json.response?.body?.items?.item || json.response?.body?.items || json.body?.items?.item || json.body?.items || [];
-            const items = Array.isArray(rawItems) ? rawItems : [rawItems];
-            itemsArray = items.map(mapItem);
-        } else {
-            const xmlDoc = new DOMParser().parseFromString(text, "text/xml");
-            const itemsElement = xmlDoc.getElementsByTagName('item');
-            itemsArray = Array.from(itemsElement).map(mapItem);
+        for (const text of texts) {
+            if (text.trim().startsWith('{')) {
+                const rawJson = JSON.parse(text);
+                const json = normalizeKeys(rawJson);
+                const rawItems = json.response?.body?.items?.item || json.response?.body?.items || json.body?.items?.item || json.body?.items || [];
+                const items = Array.isArray(rawItems) ? rawItems : [rawItems];
+                itemsArray = itemsArray.concat(items.map(mapItem));
+            } else if (text.trim().startsWith('<')) {
+                const xmlDoc = new DOMParser().parseFromString(text, "text/xml");
+                const itemsElement = xmlDoc.getElementsByTagName('item');
+                itemsArray = itemsArray.concat(Array.from(itemsElement).map(mapItem));
+            }
         }
 
         if (itemsArray.length > 0) {
