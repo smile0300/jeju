@@ -102,7 +102,39 @@ export default {
       }
     }
 
+    // 관리자 알림 전송 (POST /api/notify-admin)
+    // GAS에서 분실물/대리수령 등록 성공 시 호출 → 관리자 FCM 토큰으로 직접 발송
+    if (request.method === "POST" && url.pathname === "/api/notify-admin") {
+      try {
+        const serviceAccount = env.FIREBASE_SERVICE_ACCOUNT;
+        const adminToken = env.ADMIN_FCM_TOKEN;
+
+        if (!serviceAccount) throw new Error("FIREBASE_SERVICE_ACCOUNT is not configured");
+        if (!adminToken) throw new Error("ADMIN_FCM_TOKEN is not configured");
+
+        const sa = typeof serviceAccount === 'string' ? JSON.parse(serviceAccount) : serviceAccount;
+        const body = await request.json().catch(() => ({}));
+
+        const title = body.title || "📋 새 신청이 접수되었습니다";
+        const msg   = body.body  || "jeju-live 앱에서 확인하세요.";
+
+        const accessToken = await getAccessToken(serviceAccount);
+        const result = await sendFCMMessage(accessToken, sa.project_id, `token:${adminToken}`, title, msg);
+
+        return new Response(JSON.stringify({ success: true, result }), {
+          headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+        });
+      } catch (e) {
+        console.error("[notify-admin] error:", e.message);
+        return new Response(JSON.stringify({ success: false, error: e.message }), {
+          status: 500,
+          headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+        });
+      }
+    }
+
     return new Response("Not Found", { status: 404 });
+
   },
 
 
@@ -193,8 +225,30 @@ async function checkAndSendWeatherAlerts(env) {
       const accessToken = await getAccessToken(serviceAccountJson);
 
       const cleanTitle = latestAlert.title.replace(/\(\*\)/g, '').trim();
-      const title = "🚨 제주도 기상특보 발효";
-      const body = cleanTitle;
+      
+      const translatedBody = cleanTitle
+        .replace(/강풍/g, '强风')
+        .replace(/호우/g, '暴雨')
+        .replace(/대설/g, '大雪')
+        .replace(/풍랑/g, '风浪')
+        .replace(/폭염/g, '高温')
+        .replace(/한파/g, '寒潮')
+        .replace(/태풍/g, '台风')
+        .replace(/건조/g, '干燥')
+        .replace(/주의보/g, '预警')
+        .replace(/경보/g, '警报')
+        .replace(/제주도/g, '济州岛')
+        .replace(/산지/g, '山区')
+        .replace(/해상/g, '海上')
+        .replace(/앞바다/g, '近海')
+        .replace(/남해/g, '南海')
+        .replace(/동해/g, '东海')
+        .replace(/서해/g, '西海')
+        .replace(/발효/g, '生效')
+        .replace(/해제/g, '解除');
+
+      const title = "🚨 济州岛天气预警";
+      const body = translatedBody;
       
       await sendFCMMessage(accessToken, projectId, "jeju_weather_alerts", title, body);
       console.log("Weather alert push sent:", body);
@@ -284,15 +338,28 @@ async function checkAndSendHallasanAlerts(env) {
     const projectId = sa.project_id;
     const accessToken = await getAccessToken(serviceAccountJson);
 
-    const controlledNames = controlled.map(t => t.name.replace('탐방로', '')).join(', ');
+    const trailNameMap = {
+      '어리목': '御里牧',
+      '영실': '灵室',
+      '성판악': '城板岳',
+      '관음사': '观音寺',
+      '돈내코': '顿乃克',
+      '어승생악': '御乘生岳',
+      '석굴암': '石窟庵'
+    };
+
+    const controlledNames = controlled.map(t => {
+      let name = t.name.replace('탐방로', '').trim();
+      return trailNameMap[name] || name;
+    }).join(', ');
 
     let title, body;
     if (overallStatus === 'closed') {
-      title = "⛰️ 한라산 전면 통제";
-      body = `기상 악화로 모든 탐방로 입산이 금지되었습니다.`;
+      title = "⛰️ 汉拿山全面封山";
+      body = `因天气恶劣，所有探访路禁止入山。`;
     } else {
-      title = "⛰️ 한라산 일부 탐방로 통제";
-      body = `${controlledNames} 구간 통제 중. 등산 전 확인 바랍니다.`;
+      title = "⛰️ 汉拿山部分探访路封闭";
+      body = `${controlledNames} 路段封闭。登山前请确认。`;
     }
 
     await sendFCMMessage(accessToken, projectId, "jeju_hallasan_alerts", title, body);
@@ -331,6 +398,7 @@ async function checkFlightCancellations(env) {
     const blockPattern = /<item>[\s\S]*?<\/item>/g;
     let match;
     const canceledFlights = [];
+    const delayedFlights = [];
 
     const DOMESTIC_AIRPORTS = new Set(['CJU', 'GMP', 'PUS', 'CJJ', 'TAE', 'KWJ', 'USN', 'KUV', 'WJU', 'HIN', 'RSU', 'KPO', 'MWX', 'YNY']);
     const REGION_AIRPORTS = new Set([
@@ -350,7 +418,11 @@ async function checkFlightCancellations(env) {
     while ((match = blockPattern.exec(text)) !== null) {
       const block = match[0];
       const rmkKor = getTag(block, 'rmkKor') || getTag(block, 'rmkEng') || getTag(block, 'status');
-      if (rmkKor.includes('결항') || rmkKor.includes('Canceled')) {
+      
+      const isCanceled = rmkKor.includes('결항') || rmkKor.includes('Canceled');
+      const isDelayed = rmkKor.includes('지연') || rmkKor.includes('Delayed');
+
+      if (isCanceled || isDelayed) {
         const flightId = getTag(block, 'flightid') || getTag(block, 'flightId');
         const airline = getTag(block, 'airline');
         const depCode = (getTag(block, 'depAirportCode') || getTag(block, 'boardingEng')).toUpperCase();
@@ -371,14 +443,30 @@ async function checkFlightCancellations(env) {
 
         if (isMatch && oppositeCode && (isIntl || !DOMESTIC_AIRPORTS.has(oppositeCode)) && REGION_AIRPORTS.has(oppositeCode)) {
             const schedText = getTag(block, 'scheduledatetime');
+            const estText = getTag(block, 'estimatedatetime');
             const pTime = schedText.length >= 4 ? schedText.slice(-4) : '';
-            canceledFlights.push({ flightId, airline, depCode, arrCode, pTime, io });
+            const eTime = estText.length >= 4 ? estText.slice(-4) : '';
+            
+            if (isCanceled) {
+                canceledFlights.push({ flightId, airline, depCode, arrCode, pTime, io });
+            } else if (isDelayed && pTime && eTime) {
+                const sH = parseInt(pTime.slice(0, 2), 10);
+                const sM = parseInt(pTime.slice(2), 10);
+                const eH = parseInt(eTime.slice(0, 2), 10);
+                const eM = parseInt(eTime.slice(2), 10);
+                let diff = (eH * 60 + eM) - (sH * 60 + sM);
+                if (diff < -720) diff += 1440;
+                
+                if (diff >= 60) {
+                    delayedFlights.push({ flightId, airline, depCode, arrCode, pTime, eTime, io, diff });
+                }
+            }
         }
       }
     }
 
-    if (canceledFlights.length === 0) {
-      console.log("No canceled international flights for Jeju.");
+    if (canceledFlights.length === 0 && delayedFlights.length === 0) {
+      console.log("No canceled or heavily delayed international flights for Jeju.");
       return;
     }
 
@@ -389,21 +477,39 @@ async function checkFlightCancellations(env) {
     const accessToken = await getAccessToken(serviceAccountJson);
 
     for (const f of canceledFlights) {
-      // flightid + date + time을 키로 중복 방지 (동일 비행기가 여러 번 검색될 수 있음)
       const flightKey = `flight_cancel_${f.flightId}_${ymd}_${f.pTime}`;
       if (kv) {
         const sent = await kv.get(flightKey);
         if (sent) continue;
       }
-
       const title = `✈️ 航班取消提醒`;
       const body = `[${f.airline}] ${f.flightId} (${f.depCode} -> ${f.arrCode}) 航班已取消。`;
-
       await sendFCMMessage(accessToken, projectId, "jeju_flight_alerts", title, body);
       console.log("Flight cancel push sent:", body);
+      if (kv) {
+        await kv.put(flightKey, "sent", { expirationTtl: 86400 });
+      }
+    }
+
+    for (const f of delayedFlights) {
+      const flightKey = `flight_delay_${f.flightId}_${ymd}_${f.pTime}`;
+      if (kv) {
+        const sent = await kv.get(flightKey);
+        if (sent) continue;
+      }
+
+      const title = `✈️ 航班延误提醒`;
+      const diffHr = Math.floor(f.diff / 60);
+      const diffMin = f.diff % 60;
+      let delayText = diffHr > 0 ? `${diffHr}小时` : ``;
+      if (diffMin > 0) delayText += `${diffMin}分钟`;
+
+      const body = `[${f.airline}] ${f.flightId} (${f.depCode} -> ${f.arrCode}) 预计延误 ${delayText}。(原定: ${f.pTime.slice(0,2)}:${f.pTime.slice(2)} -> 预计: ${f.eTime.slice(0,2)}:${f.eTime.slice(2)})`;
+      
+      await sendFCMMessage(accessToken, projectId, "jeju_flight_alerts", title, body);
+      console.log("Flight delay push sent:", body);
 
       if (kv) {
-        // 24시간 후 만료 (하루 동안만 유지)
         await kv.put(flightKey, "sent", { expirationTtl: 86400 });
       }
     }

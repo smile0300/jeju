@@ -9,6 +9,24 @@
 var SHEET_ID = '1M5dzVG2_iWtVkL-hlYSWaS-Sjw_3z0PwAkmBn_G1XAA';
 var FOLDER_NAME = 'Jeju_Lost_Photos'; // 이미지가 저장될 드라이브 폴더 이름
 
+// 관리자 앱 알림을 보낼 Cloudflare Worker 주소
+var WORKER_NOTIFY_URL = 'https://jeju-weather-alerts.smile0300.workers.dev/api/notify-admin';
+
+/** 관리자(Admin) FCM 푸시 알림 전송 */
+function notifyAdmin(title, body) {
+  try {
+    var options = {
+      method: 'post',
+      contentType: 'application/json',
+      payload: JSON.stringify({ title: title, body: body }),
+      muteHttpExceptions: true
+    };
+    UrlFetchApp.fetch(WORKER_NOTIFY_URL, options);
+  } catch (err) {
+    console.warn('[notifyAdmin] 알림 전송 실패 (주요 기능에 영향 없음):', err.message);
+  }
+}
+
 
 function doPost(e) {
   try {
@@ -131,6 +149,12 @@ function doPost(e) {
       } finally {
         lock.releaseLock();
       }
+
+      // 관리자 알림 전송 (라억 후 실행 – lock 해제 후라서 실패해도 시트 기록에는 영향 없음)
+      notifyAdmin(
+        '📦 대리수령 신청 접수',
+        '[케이스] ' + newCaseId + '  [상품] ' + (data.itemName || '(unknown)') + '  [어디] ' + (data.proxyLocationType || '') + (data.hotelName ? ' - ' + data.hotelName : '') + '  [위챗] ' + (data.contact || data.originalWechat || '')
+      );
 
     } else if (data.type === 'lost_report' || data.type === 'feature' || data.type === 'cctv_apply') {
       var ss = SpreadsheetApp.openById(SHEET_ID);
@@ -286,8 +310,17 @@ function doPost(e) {
         }
       }
 
+      // 분실물 등록 성공 시 관리자 알림
+      if (data.type === 'lost_report') {
+        notifyAdmin(
+          '🔍 분실물 신고 접수',
+          '[분류] ' + (data.itemCategory || '') + '  [도시] ' + (data.city || '') + '  [위챗] ' + (data.wechatId || '')
+        );
+      }
+
       return ContentService.createTextOutput(JSON.stringify({ "result": "success", "status": "success" }))
         .setMimeType(ContentService.MimeType.JSON);
+
     } else {
       return ContentService.createTextOutput(JSON.stringify({ "result": "error", "message": "Unknown type" }))
         .setMimeType(ContentService.MimeType.JSON);
