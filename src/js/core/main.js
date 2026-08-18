@@ -400,6 +400,47 @@ window.addEventListener('load', () => {
         window.checkProxyDeepLink();
     }
 
+    // 관리자 기기 등록 Deep Link: ?admin_register=비밀키
+    (function checkAdminRegister() {
+        const params = new URLSearchParams(window.location.search);
+        const secret = params.get('admin_register');
+        if (!secret) return;
+
+        // URL 파라미터 즉시 제거 (보안)
+        window.history.replaceState({}, '', window.location.pathname);
+
+        const doRegister = async (token) => {
+            try {
+                const res = await fetch('https://jeju-weather-alerts.smile0300.workers.dev/api/register-admin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token, secret })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('✅ 이 기기가 관리자 기기로 등록되었습니다!\n이제 분실물/대리수령 신청이 들어오면 이 기기로 알림이 옵니다.');
+                } else {
+                    alert('❌ 관리자 등록 실패: ' + (data.error || '알 수 없는 오류'));
+                }
+            } catch (err) {
+                alert('❌ 등록 중 오류 발생: ' + err.message);
+            }
+        };
+
+        // FCM 토큰이 이미 저장되어 있으면 즉시 사용, 없으면 최대 10초 대기
+        const tryWithToken = (retries = 20) => {
+            const token = localStorage.getItem('FCM_TOKEN') || localStorage.getItem('FCM_WEB_TOKEN');
+            if (token) {
+                doRegister(token);
+            } else if (retries > 0) {
+                setTimeout(() => tryWithToken(retries - 1), 500);
+            } else {
+                alert('❌ FCM 토큰을 찾을 수 없습니다. 앱 알림 권한이 허용되어 있는지 확인해주세요.');
+            }
+        };
+        tryWithToken();
+    })();
+
     // Update loops
     if (window.flightIntervalId) clearInterval(window.flightIntervalId);
     window.flightIntervalId = setInterval(() => {

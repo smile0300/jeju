@@ -102,15 +102,50 @@ export default {
       }
     }
 
+    // 관리자 기기 등록 (POST /api/register-admin)
+    // 앱에서 비밀키와 FCM 토큰을 보내면 KV에 저장 → 이후 알림이 이 기기로 발송됨
+    if (request.method === "POST" && url.pathname === "/api/register-admin") {
+      try {
+        const body = await request.json().catch(() => ({}));
+        const { token, secret } = body;
+
+        if (!token) return new Response(JSON.stringify({ success: false, error: "token required" }), { status: 400, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
+
+        // 비밀키 검증 (ADMIN_SECRET 환경변수와 비교)
+        const adminSecret = env.ADMIN_SECRET;
+        if (!adminSecret || secret !== adminSecret) {
+          return new Response(JSON.stringify({ success: false, error: "unauthorized" }), {
+            status: 401,
+            headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+          });
+        }
+
+        // KV에 관리자 토큰 저장
+        await env.WEATHER_KV.put("admin_fcm_token", token);
+
+        console.log("[register-admin] 관리자 토큰 등록 완료:", token.substring(0, 20) + "...");
+        return new Response(JSON.stringify({ success: true, message: "관리자 기기로 등록되었습니다." }), {
+          headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+        });
+      } catch (e) {
+        return new Response(JSON.stringify({ success: false, error: e.message }), {
+          status: 500,
+          headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+        });
+      }
+    }
+
     // 관리자 알림 전송 (POST /api/notify-admin)
-    // GAS에서 분실물/대리수령 등록 성공 시 호출 → 관리자 FCM 토큰으로 직접 발송
+    // GAS에서 분실물/대리수령 등록 성공 시 호출 → KV에 저장된 관리자 토큰으로 발송
     if (request.method === "POST" && url.pathname === "/api/notify-admin") {
       try {
         const serviceAccount = env.FIREBASE_SERVICE_ACCOUNT;
-        const adminToken = env.ADMIN_FCM_TOKEN;
-
         if (!serviceAccount) throw new Error("FIREBASE_SERVICE_ACCOUNT is not configured");
-        if (!adminToken) throw new Error("ADMIN_FCM_TOKEN is not configured");
+
+        // KV에서 관리자 토큰 조회 (없으면 환경변수 ADMIN_FCM_TOKEN 폴백)
+        let adminToken = await env.WEATHER_KV.get("admin_fcm_token");
+        if (!adminToken) adminToken = env.ADMIN_FCM_TOKEN || null;
+        if (!adminToken) throw new Error("관리자 FCM 토큰이 등록되지 않았습니다. 앱에서 관리자 등록을 먼저 해주세요.");
 
         const sa = typeof serviceAccount === 'string' ? JSON.parse(serviceAccount) : serviceAccount;
         const body = await request.json().catch(() => ({}));
