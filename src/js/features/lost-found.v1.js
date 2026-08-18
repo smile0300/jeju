@@ -320,16 +320,55 @@ export function showWechatQR() {
 
 export function openLostReportModal() {
     showSection('lost-report');
+    resetLostReportForm();
+}
+
+/** 분실물 등록 폼 완전 초기화 */
+function resetLostReportForm() {
     const now = new Date();
     const kstTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
-    
+
     const dateInput = document.getElementById('lost-report-date');
-    if(dateInput) dateInput.value = kstTime.toISOString().split('T')[0];
-    
-    // Reset steps
+    if (dateInput) dateInput.value = kstTime.toISOString().split('T')[0];
+
+    // 텍스트/선택 필드 초기화
+    ['lost-report-specifics', 'lost-report-time', 'lost-report-detail-location',
+     'lost-report-hotel-name', 'lost-report-hotel-booker', 'lost-report-hotel-room',
+     'lost-report-hotel-checkin', 'lost-report-hotel-checkout',
+     'lost-report-car-no', 'lost-report-board-loc', 'lost-report-alight-loc',
+     'lost-report-board-time', 'lost-report-alight-time', 'lost-report-wechat'
+    ].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+
+    // 파일 초기화
+    const photoInput = document.getElementById('lost-report-photo');
+    if (photoInput) photoInput.value = '';
+    const preview = document.getElementById('lost-report-photo-preview');
+    if (preview) { preview.innerHTML = ''; preview.style.display = 'none'; }
+    lostReportImageBase64 = null;
+
+    // 체크박스 초기화
+    const privacyCheck = document.getElementById('agreePrivacy');
+    if (privacyCheck) privacyCheck.checked = false;
+
+    // 칩 선택 초기화
+    ['lost-report-item-category', 'lost-report-city-category', 'lost-report-region-category'
+    ].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    document.querySelectorAll('#item-category-chips .lost-chip, #city-category-chips .lost-chip, #region-category-chips .lost-chip')
+        .forEach(c => c.classList.remove('active'));
+
+    // 서브 필드 숨기기
+    document.querySelectorAll('#lost-step-2 .sub-fields').forEach(el => el.classList.remove('active'));
+
+    // 상태 메시지 초기화
+    const statusEl = document.getElementById('lost-report-status');
+    if (statusEl) { statusEl.textContent = ''; statusEl.style.display = 'none'; }
+
+    // 단계 리셋
     currentLostStep = 1;
     updateLostStepView();
 }
+window._resetLostReportForm = resetLostReportForm;
+
 
 let currentLostStep = 1;
 const MAX_LOST_STEP = 3;
@@ -1399,6 +1438,40 @@ window.openProxyPickupModal = function(caseId, itemName, originalWechat, region,
     updateProxyStepView();
 };
 
+/** 대리수령 폼 완전 초기화 (페이지에서 나갈 때 호출) */
+window._resetProxyForm = function() {
+    [
+        'proxy-name', 'proxy-contact', 'proxy-phone', 'proxy-address',
+        'proxy-hotel-name', 'proxy-hotel-booker', 'proxy-room-num',
+        'proxy-mgmt-num', 'proxy-vehicle-info', 'proxy-board-time', 'proxy-location-detail',
+        'proxy-item-name'
+    ].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+
+    ['proxy-passport-photo', 'proxy-item-photo', 'proxy-reservation-photo'
+    ].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+
+    const privacyCheck = document.getElementById('proxy-agree-privacy');
+    if (privacyCheck) privacyCheck.checked = false;
+
+    // 칩 선택 초기화
+    document.querySelectorAll('#proxy-location-chips .lost-chip').forEach(c => c.classList.remove('active'));
+    const locCat = document.getElementById('proxy-location-category');
+    if (locCat) locCat.value = '';
+
+    // 서브 필드 초기화
+    document.querySelectorAll('.proxy-sub-fields').forEach(el => el.style.display = 'none');
+
+    // 상태 메시지 초기화
+    const statusDiv = document.getElementById('proxy-status');
+    if (statusDiv) { statusDiv.innerHTML = ''; statusDiv.style.display = 'none'; }
+
+    const submitBtn = document.getElementById('proxy-submit-btn');
+    if (submitBtn) submitBtn.disabled = false;
+
+    currentProxyStep = 1;
+    updateProxyStepView();
+};
+
 window.nextProxyStep = function() {
     const lang = localStorage.getItem('jeju_lang') || 'zh';
     
@@ -1406,6 +1479,12 @@ window.nextProxyStep = function() {
         const loc = document.getElementById('proxy-location-category')?.value;
         if (!loc) {
             alert(lang === 'ko' ? '보관 장소를 선택해주세요.' : (lang === 'en' ? 'Please select a location.' : '请选择保管场所。'));
+            return;
+        }
+
+        const itemPhoto = document.getElementById('proxy-item-photo')?.files[0];
+        if (!itemPhoto) {
+            alert(lang === 'ko' ? '물건 사진을 첨부해주세요.' : (lang === 'en' ? 'Please upload an item photo.' : '请上传物品照片。'));
             return;
         }
     } else if (currentProxyStep === 2) {
@@ -1486,16 +1565,32 @@ function updateProxyStepView() {
     }
 }
 
-/** 파일 읽기를 Promise로 감싸는 유틸 */
-function readAsBase64(file) {
+/** 파일을 canvas로 리사이징하여 base64로 변환 (용량 제한 없음) */
+function readAsBase64(file, maxPx = 1600, quality = 0.82) {
     return new Promise((resolve, reject) => {
         if (!file) return resolve(null);
         const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = error => reject(error);
+        reader.onerror = reject;
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onerror = reject;
+            img.onload = () => {
+                let { width, height } = img;
+                if (width > maxPx || height > maxPx) {
+                    if (width > height) { height = Math.round(height * maxPx / width); width = maxPx; }
+                    else { width = Math.round(width * maxPx / height); height = maxPx; }
+                }
+                const canvas = document.createElement('canvas');
+                canvas.width = width; canvas.height = height;
+                canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                resolve(canvas.toDataURL('image/jpeg', quality));
+            };
+            img.src = e.target.result;
+        };
         reader.readAsDataURL(file);
     });
 }
+
 
 /** 대리수령 신청 제출 */
 window.submitProxyPickup = async function() {
@@ -1540,8 +1635,7 @@ window.submitProxyPickup = async function() {
     if (!address) return showError(lang === 'ko' ? '최종 배송 주소를 입력해주세요.' : '请输入最终收货地址。');
     if (!privacyCheck?.checked) return showError(lang === 'ko' ? '개인정보 수집 및 이용에 동의해주세요.' : '请同意个人信息收集及使用。');
 
-    // HEIC 및 용량 제한 검사
-    const MAX_SIZE = 2 * 1024 * 1024;
+    // HEIC 포맷 검사만 유지 (용량 제한은 canvas 압쳙으로 해결)
     const isHeic = (f) => {
         if (!f) return false;
         const ext = f.name.toLowerCase().split('.').pop();
@@ -1550,9 +1644,7 @@ window.submitProxyPickup = async function() {
     if (isHeic(passportFile) || isHeic(itemFile) || (loc === '호텔' && isHeic(reservationFile))) {
         return showError(lang === 'ko' ? '아이폰 고효율(HEIC) 사진은 지원하지 않습니다. 캡처본(JPEG/PNG)으로 올려주세요.' : '不支持苹果高效(HEIC)照片格式，请上传截图(JPEG/PNG)。');
     }
-    if (passportFile && passportFile.size > MAX_SIZE) return showError(lang === 'ko' ? '여권 사진은 2MB 이하로 첨부해주세요.' : '护照照片大小不能超过2MB。');
-    if (itemFile && itemFile.size > MAX_SIZE) return showError(lang === 'ko' ? '물건 사진은 2MB 이하로 첨부해주세요.' : '物品照片大小不能超过2MB。');
-    if (loc === '호텔' && reservationFile && reservationFile.size > MAX_SIZE) return showError(lang === 'ko' ? '호텔 예약내역은 2MB 이하로 첨부해주세요.' : '酒店预订记录大小不能超过2MB。');
+
 
     // ── 제출 ──
     if (statusDiv) { statusDiv.innerHTML = ''; statusDiv.style.display = 'none'; }

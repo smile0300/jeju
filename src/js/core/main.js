@@ -198,6 +198,15 @@ window.initReward = initReward;
 window.fetchFlights = fetchFlights;
 
 window.backToLostMenu = () => {
+    // 현재 활성 섹션이 폼 입력 페이지라면 폼 초기화
+    const activeSection = document.querySelector('.app-section.active');
+    if (activeSection) {
+        if (activeSection.id === 'lost-report') {
+            window._resetLostReportForm && window._resetLostReportForm();
+        } else if (activeSection.id === 'pickup') {
+            window._resetProxyForm && window._resetProxyForm();
+        }
+    }
     window.keepLostMenuOpen = true;
     if (history.length > 1) {
         window.history.back();
@@ -206,6 +215,7 @@ window.backToLostMenu = () => {
         if (window.expandLostGrid) window.expandLostGrid();
     }
 };
+
 
 window.toggleLostGuide = () => {
     const guide = document.getElementById('inline-lost-guide');
