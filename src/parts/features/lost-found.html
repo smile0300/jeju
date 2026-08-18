@@ -19,6 +19,7 @@
                         <select id="lostRegionCd" class="filter-select" onchange="fetchFoundGoodsManual()" style="flex:1;">
                             <option value="LCP000" data-i18n="lost.region.jeju" selected>제주</option>
                             <option value="LCA000" data-i18n="lost.region.seoul">서울</option>
+                            <option value="LCD000" data-i18n="lost.region.incheon">인천공항</option>
                             <option value="LCT000" data-i18n="lost.region.busan">부산</option>
                         </select>
                         <select id="pkupCmdtyLclsfCd" class="filter-select" onchange="fetchFoundGoodsManual()" style="flex:2;">
@@ -260,6 +261,7 @@
                 <div class="chip-group" id="city-category-chips">
                     <button type="button" class="lost-chip" data-value="제주" data-i18n="modal.lost.city.jeju">🌴 제주</button>
                     <button type="button" class="lost-chip" data-value="서울" data-i18n="modal.lost.city.seoul">🏙️ 서울</button>
+                    <button type="button" class="lost-chip" data-value="인천" data-i18n="modal.lost.city.incheon">✈️ 인천공항</button>
                     <button type="button" class="lost-chip" data-value="부산" data-i18n="modal.lost.city.busan">🌊 부산</button>
                 </div>
                 <input type="hidden" id="lost-report-city-category">
@@ -486,7 +488,7 @@
                 <!-- Sub: Other -->
                 <div class="proxy-sub-fields" id="proxy-sub-other" style="display: none;">
                     <div class="lost-form-group">
-                        <label class="lost-form-label"><span class="required-field" data-i18n="proxy.modal.loc_detail">보관 장소 상세</span></label>
+                        <label class="lost-form-label"><span class="required-field" data-i18n="proxy.modal.location_detail">보관 장소 상세</span></label>
                         <input type="text" id="proxy-location-detail" class="lost-form-input" data-i18n="proxy.modal.location_detail.ph" placeholder="상세히 적어주세요">
                     </div>
                 </div>
