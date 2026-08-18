@@ -427,18 +427,29 @@ window.addEventListener('load', () => {
             }
         };
 
-        // FCM 토큰이 이미 저장되어 있으면 즉시 사용, 없으면 최대 10초 대기
-        const tryWithToken = (retries = 20) => {
-            const token = localStorage.getItem('FCM_TOKEN') || localStorage.getItem('FCM_WEB_TOKEN');
-            if (token) {
-                doRegister(token);
-            } else if (retries > 0) {
-                setTimeout(() => tryWithToken(retries - 1), 500);
-            } else {
-                alert('❌ FCM 토큰을 찾을 수 없습니다. 앱 알림 권한이 허용되어 있는지 확인해주세요.');
-            }
-        };
-        tryWithToken();
+        const existingToken = localStorage.getItem('FCM_TOKEN') || localStorage.getItem('FCM_WEB_TOKEN');
+        if (existingToken) {
+            // 이미 토큰이 있으면 즉시 등록
+            doRegister(existingToken);
+        } else {
+            // 토큰이 없으면 권한 요청 안내
+            alert('🔔 관리자 등록을 위해 푸시 알림 권한이 필요합니다.\n확인을 누르신 후 화면 빈 곳을 한 번 터치하시고, "알림 허용"을 선택해주세요.');
+            
+            // 토큰이 저장되는지 60초간 대기하며 감시
+            let checkCount = 0;
+            const interval = setInterval(() => {
+                const token = localStorage.getItem('FCM_TOKEN') || localStorage.getItem('FCM_WEB_TOKEN');
+                if (token) {
+                    clearInterval(interval);
+                    doRegister(token);
+                }
+                checkCount++;
+                if (checkCount > 120) { // 500ms * 120 = 60초
+                    clearInterval(interval);
+                    alert('❌ 알림 권한 승인 시간이 초과되었습니다. 다시 링크로 접속해주세요.');
+                }
+            }, 500);
+        }
     })();
 
     // Update loops
