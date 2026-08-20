@@ -52,10 +52,9 @@ export const initPushNotifications = async () => {
         });
 
         // (C) 앱이 켜져 있을 때 (포그라운드) 알림 수신
+        // ※ 시스템이 자동으로 알림을 표시하므로 alert() 중복 표시 제거
         PushNotifications.addListener('pushNotificationReceived', (notification) => {
             console.log('푸시 알림 수신 (앱 켜져있음):', notification);
-            // 필요하다면 앱 화면 내에 자체적인 팝업(Toast나 Alert)를 띄울 수 있습니다.
-            window.alert(`[제주라이브 앱 알림]\n${notification.title}\n${notification.body}`);
         });
 
         // (D) 사용자가 알림(팝업)을 탭하여 앱으로 들어왔을 때
