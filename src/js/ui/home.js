@@ -155,10 +155,12 @@
             // 서브 버튼을 원래 버튼 바로 앞에 이동 (같은 그리드 위치)
             orig.parentNode.insertBefore(sub, orig);
             orig.style.display = 'none';
+            sub.style.display = '';
+            sub.style.visibility = 'hidden';
 
             // 딜레이 등장 대신 거의 동시에 가운데에서 퍼져나가게 처리
             setTimeout(function() {
-                sub.style.display = '';
+                sub.style.visibility = '';
                 sub.classList.add(item.animClass);
             }, i * 30); // 딜레이를 약간 줄여서 역동적으로
         });
@@ -200,6 +202,7 @@
             // 애니메이션 종료(250ms) 후 원위치 복원
             setTimeout(function() {
                 sub.style.display = 'none';
+                sub.style.visibility = '';
                 sub.classList.remove(item.outClass);
                 orig.style.display = '';
             }, 250);
@@ -285,9 +288,11 @@
             // 서브 버튼을 원래 버튼 바로 앞에 이동 (같은 그리드 위치)
             orig.parentNode.insertBefore(sub, orig);
             orig.style.display = 'none';
+            sub.style.display = '';
+            sub.style.visibility = 'hidden';
 
             setTimeout(function() {
-                sub.style.display = '';
+                sub.style.visibility = '';
                 sub.classList.add(item.animClass);
             }, i * 30);
         });
@@ -321,6 +326,7 @@
 
             setTimeout(function() {
                 sub.style.display = 'none';
+                sub.style.visibility = '';
                 sub.classList.remove(item.outClass);
                 orig.style.display = '';
             }, 250);
@@ -332,17 +338,16 @@
             resBtn.classList.remove('reservation-active');
             var icon  = resBtn.querySelector('.item-icon i');
             var label = resBtn.querySelector('.item-label');
-            if (icon)  icon.className = 'ph-duotone ph-calendar-check color-reservation';
+            if (icon) icon.className = 'ph-duotone ph-calendar-check color-reservation';
             if (label) label.setAttribute('data-i18n', 'nav.reservation');
         }
 
-        // 번역 재적용
         if (window.applyTranslations) window.applyTranslations();
     };
 
-    // 각 예약 서브버튼 클릭 → 유형 설정 후 예약 폼으로 이동
+    // 예약 서브 버튼 동작 (기본값 설정 후 페이지 이동)
     window.goToReservation = function(type) {
         window.currentReservationType = type;
         window.collapseReservationGrid();
         if (window.showSection) window.showSection('reservation');
-    };
+    };
