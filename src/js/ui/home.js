@@ -256,14 +256,14 @@
 
     // 서브버튼 id → 원래 버튼 id 매핑 (나머지 8칸 전체 대체)
     const RES_REPLACE_MAP = [
-        { origId: 'home-weather-btn',   subId: 'res-sub-beauty',     animClass: 'res-sub-in-00', outClass: 'res-sub-out-00' },
-        { origId: 'home-hallasan-btn',  subId: 'res-sub-restaurant', animClass: 'res-sub-in-10', outClass: 'res-sub-out-10' },
-        { origId: 'home-airport-btn',   subId: 'res-sub-activity',   animClass: 'res-sub-in-20', outClass: 'res-sub-out-20' },
-        { origId: 'home-festival-btn',  subId: 'res-sub-skin',       animClass: 'res-sub-in-01', outClass: 'res-sub-out-01' },
-        { origId: 'home-lost-btn',      subId: 'res-sub-cloth',      animClass: 'res-sub-in-11', outClass: 'res-sub-out-11' },
-        { origId: 'home-reward-btn',    subId: 'res-sub-snap',       animClass: 'res-sub-in-21', outClass: 'res-sub-out-21' },
-        { origId: 'home-food-btn',      subId: 'res-sub-rental',     animClass: 'res-sub-in-02', outClass: 'res-sub-out-02' },
-        { origId: 'home-course-btn',    subId: 'res-sub-other',      animClass: 'res-sub-in-12', outClass: 'res-sub-out-12' },
+        { origId: 'home-weather-btn',   subId: 'res-sub-beauty',     animClass: 'lost-sub-in-top',    outClass: 'lost-sub-out-top' },
+        { origId: 'home-hallasan-btn',  subId: 'res-sub-restaurant', animClass: 'lost-sub-in-top',    outClass: 'lost-sub-out-top' },
+        { origId: 'home-airport-btn',   subId: 'res-sub-activity',   animClass: 'lost-sub-in-top',    outClass: 'lost-sub-out-top' },
+        { origId: 'home-festival-btn',  subId: 'res-sub-skin',       animClass: 'lost-sub-in-left',   outClass: 'lost-sub-out-left' },
+        { origId: 'home-lost-btn',      subId: 'res-sub-cloth',      animClass: 'lost-sub-in-right',  outClass: 'lost-sub-out-right' },
+        { origId: 'home-reward-btn',    subId: 'res-sub-snap',       animClass: 'lost-sub-in-right',  outClass: 'lost-sub-out-right' },
+        { origId: 'home-food-btn',      subId: 'res-sub-rental',     animClass: 'lost-sub-in-bottom', outClass: 'lost-sub-out-bottom' },
+        { origId: 'home-course-btn',    subId: 'res-sub-other',      animClass: 'lost-sub-in-bottom', outClass: 'lost-sub-out-bottom' },
     ];
 
     window.toggleReservationExpand = function() {
