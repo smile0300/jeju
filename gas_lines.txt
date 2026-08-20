@@ -1,0 +1,2 @@
+144:         return ContentService.createTextOutput(JSON.stringify({ "result": "success", "caseId": newCaseId }))
+307:       return ContentService.createTextOutput(JSON.stringify({ "result": "success", "status": "success" }))

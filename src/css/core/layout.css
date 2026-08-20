@@ -600,4 +600,243 @@
     }
 }
 
+/* ===== 예약신청 버튼 색상 ===== */
+.color-reservation { color: #0891B2; } /* Cyan-600 */
 
+/* 예약신청 활성(뒤로가기) 상태 */
+.home-item.reservation-active {
+    background: linear-gradient(135deg, #ecfeff 0%, #cffafe 100%);
+    border: 1px solid rgba(8, 145, 178, 0.4);
+    box-shadow: 0 4px 12px rgba(8, 145, 178, 0.2), inset 0 1px 0 rgba(255,255,255,0.9);
+}
+
+/* 예약 서브버튼 공통 */
+.home-item.item-res-sub {
+    cursor: pointer;
+}
+
+/* ===== 준비중 페이지 공통 스타일 ===== */
+.coming-soon-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+    text-align: center;
+    gap: 16px;
+}
+
+.coming-soon-icon {
+    font-size: 64px;
+    line-height: 1;
+}
+
+.coming-soon-title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--label-primary);
+    margin: 0;
+}
+
+.coming-soon-desc {
+    font-size: 0.95rem;
+    color: var(--label-secondary);
+    line-height: 1.7;
+    margin: 0;
+}
+
+.coming-soon-badge-large {
+    display: inline-block;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    padding: 6px 16px;
+    border-radius: 999px;
+}
+
+.coming-soon-wechat-box {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.coming-soon-wechat-box p {
+    font-size: 0.9rem;
+    color: var(--label-tertiary);
+    margin: 0;
+}
+
+.wechat-contact-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #07C160, #06AD56);
+    color: white;
+    border: none;
+    border-radius: 999px;
+    padding: 12px 24px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(7, 193, 96, 0.35);
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+.wechat-contact-btn:active {
+    transform: scale(0.97);
+}
+
+/* ===== 예약 폼 스타일 ===== */
+.res-type-badge {
+    display: inline-flex;
+    align-items: center;
+    background: linear-gradient(135deg, #ecfeff, #cffafe);
+    color: #0e7490;
+    border: 1px solid rgba(8,145,178,0.3);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.res-type-change-hint {
+    font-size: 0.8rem;
+    color: var(--label-tertiary);
+}
+
+.res-notice-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #f0f9ff, #e0f7fa);
+    border: 1px solid rgba(8, 145, 178, 0.2);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    color: var(--label-secondary);
+    font-weight: 500;
+}
+
+.reservation-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-label {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--label-primary);
+}
+
+.form-label.required::after {
+    content: ' *';
+    color: #EF4444;
+}
+
+.form-input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--separator);
+    border-radius: 10px;
+    font-size: 0.95rem;
+    background: var(--fill-primary);
+    color: var(--label-primary);
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.15s;
+    -webkit-appearance: none;
+}
+
+.form-input:focus {
+    border-color: #0891B2;
+    box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.15);
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.res-party-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.party-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1.5px solid var(--separator);
+    background: var(--fill-secondary);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--label-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+    flex-shrink: 0;
+}
+.party-btn:active { background: var(--fill-tertiary); }
+
+.party-input {
+    text-align: center;
+    width: 60px;
+    flex: none;
+}
+
+.res-submit-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #0891B2, #0e7490);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(8, 145, 178, 0.35);
+    transition: transform 0.15s, box-shadow 0.15s;
+    margin-top: 8px;
+}
+.res-submit-btn:active { transform: scale(0.98); }
+.res-submit-btn:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.form-status {
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    background: var(--fill-secondary);
+    color: var(--label-secondary);
+}
+.form-status.success {
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+.form-status.error {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}

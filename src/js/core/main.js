@@ -12,6 +12,7 @@ import { renderHallasanDashboard } from '../features/hallasan-dashboard.js';
 import { fetchFlights, switchFlightTab } from '../features/airport.js';
 import { fetchFoundGoods, switchLostView, openLostDetailModalByIndex, openLostReportModal, handleLostImageChange, submitLostReport, showWechatQR, fetchSuccessStories } from '../features/lost-found.v1.js';
 import { fetchFestivals, selectFestivalMonth, initMonthFilter } from '../features/festival.js';
+import { initReservationSection, adjustParty, submitReservation } from '../features/reservation.js';
 import { initReward } from '../features/reward.js';
 import { showSection, openWechatQR, closeWechatQR, openFeatureModal, closeFeatureModal, submitFeatureRequest, openCSModal, closeCSModal, submitCSFeedback, copyWechatId, openWeatherSummaryModal, closeWeatherSummaryModal, openShareModal, closeShareModal, shareToPlatform } from '../ui/ui.js';
 import '../ui/home.js';
@@ -196,6 +197,9 @@ window.fetchHallasanStatus = fetchHallasanStatus;
 window.fetchFestivals = fetchFestivals;
 window.initReward = initReward;
 window.fetchFlights = fetchFlights;
+window.initReservationSection = initReservationSection;
+window.adjustParty = adjustParty;
+window.submitReservation = submitReservation;
 
 window.backToLostMenu = () => {
     // 현재 활성 섹션이 폼 입력 페이지라면 폼 초기화
@@ -313,7 +317,10 @@ const ROUTE_MAP = {
     '/terms': 'terms',
     '/privacy': 'privacy',
     '/lost-report': 'lost-report',
-    '/lost-status': 'lost-status'
+    '/lost-status': 'lost-status',
+    '/food': 'food',
+    '/course': 'course',
+    '/reservation': 'reservation',
 };
 
 function handleRouting() {

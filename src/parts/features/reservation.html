@@ -1,0 +1,85 @@
+﻿<!-- ===== Reservation Section ===== -->
+<section id="reservation" class="app-section">
+    <header class="app-bar">
+        <button class="back-btn" onclick="showSection('home')">←</button>
+        <h2 class="bar-title" id="reservation-header-title">
+            <i class="ph-duotone ph-calendar-check"></i>
+            <span data-i18n="nav.reservation">预约申请</span>
+        </h2>
+    </header>
+    <h1 class="visually-hidden">Jeju Island Reservation Service - Beauty, Restaurant, Activity | 济州岛预约申请 제주 예약신청</h1>
+    <div class="section">
+        <div class="container">
+
+            <!-- 예약 유형 표시 배지 -->
+            <div id="res-type-badge-wrap" style="margin-bottom:16px; display:flex; align-items:center; gap:10px;">
+                <span id="res-type-badge" class="res-type-badge"></span>
+                <span class="res-type-change-hint" data-i18n="res.type.change_hint">点击首页返回可更换类型</span>
+            </div>
+
+            <!-- 안내 문구 -->
+            <div class="res-notice-card">
+                <i class="ph-duotone ph-chats-circle" style="font-size:1.4rem; color:var(--color-reservation);"></i>
+                <p data-i18n="res.notice">填写后，我们将通过微信与您联系 📩</p>
+            </div>
+
+            <!-- 예약신청 폼 -->
+            <form id="reservation-form" class="reservation-form" onsubmit="event.preventDefault(); window.submitReservation();">
+
+                <!-- 위챗 ID -->
+                <div class="form-group">
+                    <label class="form-label required" data-i18n="res.wechat.label">微信ID</label>
+                    <input type="text" id="res-wechat" class="form-input"
+                           data-i18n-placeholder="res.wechat.placeholder"
+                           placeholder="请输入您的微信ID" required autocomplete="off">
+                </div>
+
+                <!-- 원하는 매장 -->
+                <div class="form-group">
+                    <label class="form-label" data-i18n="res.store.label">想去的店铺（可选）</label>
+                    <input type="text" id="res-store" class="form-input"
+                           data-i18n-placeholder="res.store.placeholder"
+                           placeholder="如有特定店铺请填写（可不填）" autocomplete="off">
+                </div>
+
+                <!-- 방문 희망 날짜 -->
+                <div class="form-group">
+                    <label class="form-label required" data-i18n="res.date.label">期望到访日期</label>
+                    <input type="text" id="res-visit-date" class="date-input form-input"
+                           data-i18n-placeholder="res.date.placeholder"
+                           placeholder="请选择日期" readonly required>
+                </div>
+
+                <!-- 인원 수 -->
+                <div class="form-group">
+                    <label class="form-label required" data-i18n="res.party.label">人数</label>
+                    <div class="res-party-row">
+                        <button type="button" class="party-btn" onclick="window.adjustParty(-1)">−</button>
+                        <input type="number" id="res-party" class="form-input party-input"
+                               value="2" min="1" max="20" readonly>
+                        <button type="button" class="party-btn" onclick="window.adjustParty(1)">+</button>
+                    </div>
+                </div>
+
+                <!-- 요청 사항 -->
+                <div class="form-group">
+                    <label class="form-label" data-i18n="res.note.label">备注事项</label>
+                    <textarea id="res-note" class="form-input form-textarea"
+                              data-i18n-placeholder="res.note.placeholder"
+                              placeholder="如有特殊要求请在此说明（语言偏好、过敏等）" rows="4"></textarea>
+                </div>
+
+                <!-- 제출 상태 -->
+                <div id="res-status" class="form-status" style="display:none;"></div>
+
+                <!-- 제출 버튼 -->
+                <button type="submit" id="res-submit-btn" class="res-submit-btn">
+                    <i class="ph-duotone ph-paper-plane-tilt"></i>
+                    <span data-i18n="res.submit">提交申请</span>
+                </button>
+
+            </form>
+
+        </div>
+    </div>
+</section>

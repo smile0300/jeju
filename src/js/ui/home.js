@@ -247,3 +247,100 @@
         if (window.openProxyPickupModal) window.openProxyPickupModal();
         else if (window.showSection) window.showSection('pickup');
     };
+
+    // ===== 예약신청 홈버튼 → 8개 서브버튼 토글 =====
+
+    let reservationExpanded = false;
+
+    // 서브버튼 id → 원래 버튼 id 매핑 (나머지 8칸 전체 대체)
+    const RES_REPLACE_MAP = [
+        { origId: 'home-weather-btn',   subId: 'res-sub-beauty',     animClass: 'lost-sub-in-top',    outClass: 'lost-sub-out-top' },
+        { origId: 'home-hallasan-btn',  subId: 'res-sub-restaurant', animClass: 'lost-sub-in-top',    outClass: 'lost-sub-out-top' },
+        { origId: 'home-airport-btn',   subId: 'res-sub-activity',   animClass: 'lost-sub-in-top',    outClass: 'lost-sub-out-top' },
+        { origId: 'home-festival-btn',  subId: 'res-sub-skin',       animClass: 'lost-sub-in-left',   outClass: 'lost-sub-out-left' },
+        { origId: 'home-lost-btn',      subId: 'res-sub-cloth',      animClass: 'lost-sub-in-right',  outClass: 'lost-sub-out-right' },
+        { origId: 'home-reward-btn',    subId: 'res-sub-snap',       animClass: 'lost-sub-in-right',  outClass: 'lost-sub-out-right' },
+        { origId: 'home-food-btn',      subId: 'res-sub-rental',     animClass: 'lost-sub-in-bottom', outClass: 'lost-sub-out-bottom' },
+        { origId: 'home-course-btn',    subId: 'res-sub-other',      animClass: 'lost-sub-in-bottom', outClass: 'lost-sub-out-bottom' },
+    ];
+
+    window.toggleReservationExpand = function() {
+        reservationExpanded ? window.collapseReservationGrid() : window.expandReservationGrid();
+    };
+
+    window.expandReservationGrid = function() {
+        // 분실물이 열려있으면 먼저 닫기
+        if (window.collapseLostGrid) window.collapseLostGrid();
+
+        reservationExpanded = true;
+        document.querySelector('.home-grid').classList.add('res-expanded-grid');
+
+        RES_REPLACE_MAP.forEach(function(item, i) {
+            var orig = document.getElementById(item.origId);
+            var sub  = document.getElementById(item.subId);
+            if (!orig || !sub) return;
+
+            // 서브 버튼을 원래 버튼 바로 앞에 이동 (같은 그리드 위치)
+            orig.parentNode.insertBefore(sub, orig);
+            orig.style.display = 'none';
+
+            setTimeout(function() {
+                sub.style.display = '';
+                sub.classList.add(item.animClass);
+            }, i * 30);
+        });
+
+        // 예약신청 버튼 강조 및 뒤로가기로 변경
+        var resBtn = document.getElementById('home-reservation-btn');
+        if (resBtn) {
+            resBtn.classList.add('reservation-active');
+            var icon  = resBtn.querySelector('.item-icon i');
+            var label = resBtn.querySelector('.item-label');
+            if (icon)  icon.className = 'ph-bold ph-arrow-left color-reservation';
+            if (label) label.setAttribute('data-i18n', 'res.back');
+        }
+
+        // 번역 재적용 (서브 버튼 라벨)
+        if (window.applyTranslations) window.applyTranslations();
+    };
+
+    window.collapseReservationGrid = function() {
+        if (!reservationExpanded) return;
+        reservationExpanded = false;
+        document.querySelector('.home-grid').classList.remove('res-expanded-grid');
+
+        RES_REPLACE_MAP.forEach(function(item) {
+            var orig = document.getElementById(item.origId);
+            var sub  = document.getElementById(item.subId);
+            if (!orig || !sub) return;
+
+            sub.classList.remove(item.animClass);
+            sub.classList.add(item.outClass);
+
+            setTimeout(function() {
+                sub.style.display = 'none';
+                sub.classList.remove(item.outClass);
+                orig.style.display = '';
+            }, 250);
+        });
+
+        // 예약신청 버튼 원래대로 복구
+        var resBtn = document.getElementById('home-reservation-btn');
+        if (resBtn) {
+            resBtn.classList.remove('reservation-active');
+            var icon  = resBtn.querySelector('.item-icon i');
+            var label = resBtn.querySelector('.item-label');
+            if (icon)  icon.className = 'ph-duotone ph-calendar-check color-reservation';
+            if (label) label.setAttribute('data-i18n', 'nav.reservation');
+        }
+
+        // 번역 재적용
+        if (window.applyTranslations) window.applyTranslations();
+    };
+
+    // 각 예약 서브버튼 클릭 → 유형 설정 후 예약 폼으로 이동
+    window.goToReservation = function(type) {
+        window.currentReservationType = type;
+        window.collapseReservationGrid();
+        if (window.showSection) window.showSection('reservation');
+    };

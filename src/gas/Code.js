@@ -322,6 +322,41 @@ function doPost(e) {
       return ContentService.createTextOutput(JSON.stringify({ "result": "success", "status": "success" }))
         .setMimeType(ContentService.MimeType.JSON);
 
+    } else if (data.type === 'reservation') {
+      var ss = SpreadsheetApp.openById(SHEET_ID);
+      var resSheet = ss.getSheetByName('Reservation');
+      if (!resSheet) {
+        resSheet = ss.insertSheet('Reservation');
+        resSheet.appendRow([
+          'Timestamp', 'ReservationType', 'WechatId',
+          'PreferredStore', 'VisitDate', 'PartySize', 'RequestNote', 'UserAgent'
+        ]);
+      }
+      var timestamp = new Date();
+      resSheet.appendRow([
+        timestamp,
+        data.reservationType || '',
+        data.wechatId        || '',
+        data.preferredStore  || '',
+        data.visitDate       || '',
+        data.partySize       || '',
+        data.requestNote     || '',
+        data.userAgent       || ''
+      ]);
+
+      // 관리자 알림 전송
+      notifyAdmin(
+        '📅 예약신청 접수',
+        '[유형] ' + (data.reservationType || '') +
+        '  [매장] ' + (data.preferredStore || '-') +
+        '  [날짜] ' + (data.visitDate || '') +
+        '  [인원] ' + (data.partySize || '') +
+        '  [위챗] ' + (data.wechatId || '')
+      );
+
+      return ContentService.createTextOutput(JSON.stringify({ "result": "success" }))
+        .setMimeType(ContentService.MimeType.JSON);
+
     } else {
       return ContentService.createTextOutput(JSON.stringify({ "result": "error", "message": "Unknown type" }))
         .setMimeType(ContentService.MimeType.JSON);

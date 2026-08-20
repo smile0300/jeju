@@ -79,17 +79,23 @@
                 <span class="item-icon"><i class="ph-duotone ph-money color-reward"></i></span>
                 <span class="item-label" data-i18n="nav.reward">红　包</span>
             </a>
-            <!-- 맛집 & 여행 코스 준비 중 -->
-            <button class="home-item item-disabled" id="home-food-btn" disabled type="button">
+            <!-- 맛집 & 여행 코스 (SOON 표시, 클릭 가능) -->
+            <a href="/food" class="home-item item-food" id="home-food-btn" onclick="event.preventDefault(); showSection('food')">
                 <span class="item-icon"><i class="ph-duotone ph-hamburger color-food"></i></span>
                 <span class="item-label" data-i18n="nav.food">济州美食</span>
                 <span class="coming-soon-badge">SOON</span>
-            </button>
-            <button class="home-item item-disabled" id="home-course-btn" disabled type="button">
+            </a>
+            <a href="/course" class="home-item item-course" id="home-course-btn" onclick="event.preventDefault(); showSection('course')">
                 <span class="item-icon"><i class="ph-duotone ph-map-trifold color-course"></i></span>
                 <span class="item-label" data-i18n="nav.course">推荐路线</span>
                 <span class="coming-soon-badge">SOON</span>
-            </button>
+            </a>
+            <!-- 예약신청 버튼 -->
+            <a href="/reservation" class="home-item item-reservation" id="home-reservation-btn" onclick="event.preventDefault(); window.toggleReservationExpand()">
+                <span class="item-icon"><i class="ph-duotone ph-calendar-check color-reservation"></i></span>
+                <span class="item-label" data-i18n="nav.reservation">预约申请</span>
+                <span class="coming-soon-badge">SOON</span>
+            </a>
             <!-- ===== 분실물 서브 버튼 (평소 숨김, 분실물 클릭 시 해당 자리에 삽입) ===== -->
             <!-- 조회: 날씨예보 자리 대체 -->
             <div class="home-item item-lost-sub" id="lost-sub-search"
@@ -114,6 +120,55 @@
                  style="display:none" onclick="window.goToLostProxy()">
                 <span class="item-icon"><i class="ph-duotone ph-package color-lost"></i></span>
                 <span class="item-label" data-i18n="lost.home.proxy">代领服务</span>
+            </div>
+            <!-- ===== 예약신청 서브 버튼 (평소 숨김, 예약신청 클릭 시 해당 자리에 삽입) ===== -->
+            <!-- 미용실/네일: 날씨예보 자리 대체 -->
+            <div class="home-item item-res-sub" id="res-sub-beauty"
+                 style="display:none" onclick="window.goToReservation('beauty')">
+                <span class="item-icon"><i class="ph-duotone ph-scissors color-reservation"></i></span>
+                <span class="item-label" data-i18n="res.type.beauty">美发/美甲</span>
+            </div>
+            <!-- 식당: 한라산 자리 대체 -->
+            <div class="home-item item-res-sub" id="res-sub-restaurant"
+                 style="display:none" onclick="window.goToReservation('restaurant')">
+                <span class="item-icon"><i class="ph-duotone ph-fork-knife color-reservation"></i></span>
+                <span class="item-label" data-i18n="res.type.restaurant">餐厅</span>
+            </div>
+            <!-- 액티비티: 공항 자리 대체 -->
+            <div class="home-item item-res-sub" id="res-sub-activity"
+                 style="display:none" onclick="window.goToReservation('activity')">
+                <span class="item-icon"><i class="ph-duotone ph-person-simple-run color-reservation"></i></span>
+                <span class="item-label" data-i18n="res.type.activity">休闲活动</span>
+            </div>
+            <!-- 피부과: 축제 자리 대체 -->
+            <div class="home-item item-res-sub" id="res-sub-skin"
+                 style="display:none" onclick="window.goToReservation('skin')">
+                <span class="item-icon"><i class="ph-duotone ph-first-aid color-reservation"></i></span>
+                <span class="item-label" data-i18n="res.type.skin">皮肤科</span>
+            </div>
+            <!-- 의류대여: 분실물(홍바오 아래) 자리 대체 -->
+            <div class="home-item item-res-sub" id="res-sub-cloth"
+                 style="display:none" onclick="window.goToReservation('cloth')">
+                <span class="item-icon"><i class="ph-duotone ph-t-shirt color-reservation"></i></span>
+                <span class="item-label" data-i18n="res.type.cloth">服装租赁</span>
+            </div>
+            <!-- 스냅사진: 홍바오 자리 대체 -->
+            <div class="home-item item-res-sub" id="res-sub-snap"
+                 style="display:none" onclick="window.goToReservation('snap')">
+                <span class="item-icon"><i class="ph-duotone ph-camera color-reservation"></i></span>
+                <span class="item-label" data-i18n="res.type.snap">快照摄影</span>
+            </div>
+            <!-- 물품대여: 맛집 자리 대체 -->
+            <div class="home-item item-res-sub" id="res-sub-rental"
+                 style="display:none" onclick="window.goToReservation('rental')">
+                <span class="item-icon"><i class="ph-duotone ph-package color-reservation"></i></span>
+                <span class="item-label" data-i18n="res.type.rental">物品租借</span>
+            </div>
+            <!-- 기타: 코스 자리 대체 -->
+            <div class="home-item item-res-sub" id="res-sub-other"
+                 style="display:none" onclick="window.goToReservation('other')">
+                <span class="item-icon"><i class="ph-duotone ph-dots-three-circle color-reservation"></i></span>
+                <span class="item-label" data-i18n="res.type.other">其他</span>
             </div>
         </div>
     </div>
