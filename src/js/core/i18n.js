@@ -173,15 +173,13 @@ const TRANSLATIONS = {
         'res.success':         '✅ 申请已提交！我们将尽快通过微信与您联系。',
         'res.error':           '❌ 提交失败，请稍后再试。',
 
-        // ── 맛집/코스 준비중 ──
-        'food.soon.title':      '济州美食地图',
-        'food.soon.desc':       '精心筛选的济州岛美食地图即将上线！<br>为您推荐当地人气餐厅、特色美食体验。',
-        'food.soon.wechat_hint': '餐厅预约请通过微信联系我们 😊',
-        'food.soon.wechat_btn': '微信联系',
-        'course.soon.title':    '济州推荐路线',
-        'course.soon.desc':     '专为中国游客定制的济州岛精品旅游路线即将上线！<br>告别迷路，轻松玩转济州。',
-        'course.soon.wechat_hint': '定制行程请通过微信联系我们 😊',
-        'course.soon.wechat_btn': '微信联系',
+        // ── 맛집/코스 폼 ──
+        'food.form.notice':     '填写您想去的餐厅或区域，我们将通过微信为您提供推荐及预约服务 📩',
+        'food.form.region':     '想去的区域或店铺',
+        'food.form.region_ph':  '例如：涯月海岸道路，黑猪肉餐厅等',
+        'course.form.notice':   '填写您的旅行偏好，我们将通过微信为您定制专属行程 📩',
+        'course.form.theme':    '旅行主题/偏好',
+        'course.form.theme_ph': '例如：家庭游，网红打卡，休闲度假等',
 
         // ── 공항 동적 텍스트 ──
         'airport.badge.register_close': '登记截止',
@@ -839,15 +837,13 @@ const TRANSLATIONS = {
         'res.success':         '✅ 신청이 접수되었습니다! 위챗으로 연락드리겠습니다.',
         'res.error':           '❌ 제출 실패. 잠시 후 다시 시도해주세요.',
 
-        // ── 맛집/코스 준비중 ──
-        'food.soon.title':      '제주 맛집 지도',
-        'food.soon.desc':       '정성껏 엄선한 제주 맛집 지도가 곧 오픈됩니다!<br>현지 인기 식당과 특별한 맛집 경험을 소개해드릴게요.',
-        'food.soon.wechat_hint': '식당 예약은 위챗으로 문의해주세요 😊',
-        'food.soon.wechat_btn': '위챗 문의',
-        'course.soon.title':    '제주 추천 코스',
-        'course.soon.desc':     '외국인 관광객을 위한 제주 맞춤 여행 코스가 곧 오픈됩니다!<br>헷갈리지 않고 제주를 즐기세요.',
-        'course.soon.wechat_hint': '맞춤 일정은 위챗으로 문의해주세요 😊',
-        'course.soon.wechat_btn': '위챗 문의',
+        // ── 맛집/코스 폼 ──
+        'food.form.notice':     '원하시는 맛집 정보(지역, 메뉴 등)를 알려주시면 위챗으로 맞춤 추천 및 예약을 도와드립니다 📩',
+        'food.form.region':     '원하는 지역 또는 매장',
+        'food.form.region_ph':  '예: 애월해안도로, 흑돼지 식당 등',
+        'course.form.notice':   '원하시는 여행 스타일을 알려주시면 위챗으로 맞춤형 추천 코스를 보내드립니다 📩',
+        'course.form.theme':    '여행 테마/취향',
+        'course.form.theme_ph': '예: 가족여행, 액티비티, 휴양, 핫플 등',
 
         // ── 공항 동적 텍스트 ──
         'airport.badge.register_close': '수속마감',
@@ -1435,15 +1431,13 @@ const TRANSLATIONS = {
         'res.success':         '✅ Request submitted! We will contact you via WeChat shortly.',
         'res.error':           '❌ Submission failed. Please try again later.',
 
-        // ── 맛집/코스 준비중 ──
-        'food.soon.title':      'Jeju Food Map',
-        'food.soon.desc':       'Our curated Jeju restaurant map is coming soon!<br>We will recommend popular local restaurants and unique food experiences.',
-        'food.soon.wechat_hint': 'For restaurant reservations, contact us via WeChat 😊',
-        'food.soon.wechat_btn': 'WeChat',
-        'course.soon.title':    'Recommended Courses',
-        'course.soon.desc':     'Custom Jeju travel itineraries for foreign tourists coming soon!<br>Explore Jeju with ease.',
-        'course.soon.wechat_hint': 'For custom itineraries, contact us via WeChat 😊',
-        'course.soon.wechat_btn': 'WeChat',
+        // ── 맛집/코스 폼 ──
+        'food.form.notice':     'Tell us what kind of food or region you prefer, and we will recommend and book restaurants for you via WeChat 📩',
+        'food.form.region':     'Preferred Region or Restaurant',
+        'food.form.region_ph':  'e.g. Aewol coast, Black Pork BBQ, etc.',
+        'course.form.notice':   'Tell us your travel preferences, and we will create a customized itinerary for you via WeChat 📩',
+        'course.form.theme':    'Travel Theme / Preferences',
+        'course.form.theme_ph': 'e.g. Family trip, Activities, Relaxing, etc.',
 
         // ── 공항 동적 텍스트 ──
         'airport.badge.register_close': 'Gate Closed',

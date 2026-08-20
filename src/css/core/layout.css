@@ -601,6 +601,43 @@
     }
 }
 
+/* 예약신청 서브버튼 애니메이션 (우측 하단에서 뻗어나옴) */
+@keyframes resSubIn00 { from { transform: translate(calc(200% + 32px), calc(200% + 32px)) scale(0.1); opacity: 0; } to { transform: translate(0,0) scale(1); opacity: 1; } }
+@keyframes resSubIn10 { from { transform: translate(calc(100% + 16px), calc(200% + 32px)) scale(0.1); opacity: 0; } to { transform: translate(0,0) scale(1); opacity: 1; } }
+@keyframes resSubIn20 { from { transform: translate(0, calc(200% + 32px)) scale(0.1); opacity: 0; } to { transform: translate(0,0) scale(1); opacity: 1; } }
+@keyframes resSubIn01 { from { transform: translate(calc(200% + 32px), calc(100% + 16px)) scale(0.1); opacity: 0; } to { transform: translate(0,0) scale(1); opacity: 1; } }
+@keyframes resSubIn11 { from { transform: translate(calc(100% + 16px), calc(100% + 16px)) scale(0.1); opacity: 0; } to { transform: translate(0,0) scale(1); opacity: 1; } }
+@keyframes resSubIn21 { from { transform: translate(0, calc(100% + 16px)) scale(0.1); opacity: 0; } to { transform: translate(0,0) scale(1); opacity: 1; } }
+@keyframes resSubIn02 { from { transform: translate(calc(200% + 32px), 0) scale(0.1); opacity: 0; } to { transform: translate(0,0) scale(1); opacity: 1; } }
+@keyframes resSubIn12 { from { transform: translate(calc(100% + 16px), 0) scale(0.1); opacity: 0; } to { transform: translate(0,0) scale(1); opacity: 1; } }
+
+@keyframes resSubOut00 { from { transform: translate(0,0) scale(1); opacity: 1; } to { transform: translate(calc(200% + 32px), calc(200% + 32px)) scale(0.1); opacity: 0; } }
+@keyframes resSubOut10 { from { transform: translate(0,0) scale(1); opacity: 1; } to { transform: translate(calc(100% + 16px), calc(200% + 32px)) scale(0.1); opacity: 0; } }
+@keyframes resSubOut20 { from { transform: translate(0,0) scale(1); opacity: 1; } to { transform: translate(0, calc(200% + 32px)) scale(0.1); opacity: 0; } }
+@keyframes resSubOut01 { from { transform: translate(0,0) scale(1); opacity: 1; } to { transform: translate(calc(200% + 32px), calc(100% + 16px)) scale(0.1); opacity: 0; } }
+@keyframes resSubOut11 { from { transform: translate(0,0) scale(1); opacity: 1; } to { transform: translate(calc(100% + 16px), calc(100% + 16px)) scale(0.1); opacity: 0; } }
+@keyframes resSubOut21 { from { transform: translate(0,0) scale(1); opacity: 1; } to { transform: translate(0, calc(100% + 16px)) scale(0.1); opacity: 0; } }
+@keyframes resSubOut02 { from { transform: translate(0,0) scale(1); opacity: 1; } to { transform: translate(calc(200% + 32px), 0) scale(0.1); opacity: 0; } }
+@keyframes resSubOut12 { from { transform: translate(0,0) scale(1); opacity: 1; } to { transform: translate(calc(100% + 16px), 0) scale(0.1); opacity: 0; } }
+
+.res-sub-in-00 { animation: resSubIn00 0.4s var(--ease-spring) both; }
+.res-sub-in-10 { animation: resSubIn10 0.4s var(--ease-spring) both; }
+.res-sub-in-20 { animation: resSubIn20 0.4s var(--ease-spring) both; }
+.res-sub-in-01 { animation: resSubIn01 0.4s var(--ease-spring) both; }
+.res-sub-in-11 { animation: resSubIn11 0.4s var(--ease-spring) both; }
+.res-sub-in-21 { animation: resSubIn21 0.4s var(--ease-spring) both; }
+.res-sub-in-02 { animation: resSubIn02 0.4s var(--ease-spring) both; }
+.res-sub-in-12 { animation: resSubIn12 0.4s var(--ease-spring) both; }
+
+.res-sub-out-00 { animation: resSubOut00 0.3s var(--ease-in-out) both; }
+.res-sub-out-10 { animation: resSubOut10 0.3s var(--ease-in-out) both; }
+.res-sub-out-20 { animation: resSubOut20 0.3s var(--ease-in-out) both; }
+.res-sub-out-01 { animation: resSubOut01 0.3s var(--ease-in-out) both; }
+.res-sub-out-11 { animation: resSubOut11 0.3s var(--ease-in-out) both; }
+.res-sub-out-21 { animation: resSubOut21 0.3s var(--ease-in-out) both; }
+.res-sub-out-02 { animation: resSubOut02 0.3s var(--ease-in-out) both; }
+.res-sub-out-12 { animation: resSubOut12 0.3s var(--ease-in-out) both; }
+
 /* ===== 예약신청 버튼 색상 ===== */
 .color-reservation { color: #0891B2; } /* Cyan-600 */
 

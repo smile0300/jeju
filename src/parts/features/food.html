@@ -4,22 +4,43 @@
         <button class="back-btn" onclick="showSection('home')">←</button>
         <h2 class="bar-title"><i class="ph-duotone ph-hamburger"></i> <span data-i18n="nav.food">济州美食</span></h2>
     </header>
-    <h1 class="visually-hidden">Jeju Island Food Map - Best Restaurants & Local Food | 济州岛美食地图 제주 맛집</h1>
     <div class="section">
         <div class="container">
-            <div class="coming-soon-page">
-                <div class="coming-soon-icon">🍜</div>
-                <h2 class="coming-soon-title" data-i18n="food.soon.title">济州美食地图</h2>
-                <p class="coming-soon-desc" data-i18n="food.soon.desc">精心筛选的济州岛美食地图即将上线！<br>为您推荐当地人气餐厅、特色美食体验。</p>
-                <div class="coming-soon-badge-large">COMING SOON</div>
-                <div class="coming-soon-wechat-box">
-                    <p data-i18n="food.soon.wechat_hint">餐厅预约请通过微信联系我们 😊</p>
-                    <button class="wechat-contact-btn" onclick="openWechatQR()">
-                        <i class="ph-duotone ph-chats"></i>
-                        <span data-i18n="food.soon.wechat_btn">微信联系</span>
-                    </button>
-                </div>
+            <div class="res-notice-card">
+                <i class="ph-duotone ph-hamburger" style="font-size:1.4rem; color:var(--color-food);"></i>
+                <p data-i18n="food.form.notice">填写您想去的餐厅或区域，我们将通过微信为您提供推荐及预约服务 📩</p>
             </div>
+            <form id="food-form" class="reservation-form" onsubmit="event.preventDefault(); window.submitReservation('food');">
+                <div class="form-group">
+                    <label class="form-label required" data-i18n="res.wechat.label">微信ID</label>
+                    <input type="text" id="food-wechat" class="form-input" data-i18n-placeholder="res.wechat.placeholder" placeholder="请输入您的微信ID" required autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label class="form-label required" data-i18n="food.form.region">想去的区域或店铺</label>
+                    <input type="text" id="food-store" class="form-input" data-i18n-placeholder="food.form.region_ph" placeholder="例如：涯月海岸道路，黑猪肉餐厅等" required autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label class="form-label required" data-i18n="res.date.label">期望到访日期</label>
+                    <input type="text" id="food-visit-date" class="date-input form-input" data-i18n-placeholder="res.date.placeholder" placeholder="请选择日期" readonly required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label required" data-i18n="res.party.label">人数</label>
+                    <div class="res-party-row">
+                        <button type="button" class="party-btn" onclick="window.adjustParty(-1, 'food')">−</button>
+                        <input type="number" id="food-party" class="form-input party-input" value="2" min="1" max="20" readonly>
+                        <button type="button" class="party-btn" onclick="window.adjustParty(1, 'food')">+</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" data-i18n="res.note.label">备注事项</label>
+                    <textarea id="food-note" class="form-input form-textarea" data-i18n-placeholder="res.note.placeholder" placeholder="如有特殊要求请在此说明" rows="4"></textarea>
+                </div>
+                <div id="food-status" class="form-status" style="display:none;"></div>
+                <button type="submit" id="food-submit-btn" class="res-submit-btn">
+                    <i class="ph-duotone ph-paper-plane-tilt"></i>
+                    <span data-i18n="res.submit">提交申请</span>
+                </button>
+            </form>
         </div>
     </div>
 </section>

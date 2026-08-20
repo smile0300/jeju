@@ -1,4 +1,4 @@
-﻿import { CONFIG } from '../core/config.js';
+import { CONFIG } from '../core/config.js';
 
 // 예약 유형 라벨 맵 (i18n key → fallback 텍스트)
 const RES_TYPE_MAP = {
@@ -31,24 +31,27 @@ function updateTypeBadge() {
 
 /** flatpickr 날짜 선택기 초기화 */
 function initDatePicker() {
-    const dateInput = document.getElementById('res-visit-date');
-    if (!dateInput) return;
+    const dateInputs = document.querySelectorAll('.date-input');
+    if (!dateInputs.length) return;
     if (typeof flatpickr === 'undefined') return;
-    if (dateInput._flatpickr) return; // 이미 초기화된 경우 skip
 
     const lang = window.getLang ? window.getLang() : 'zh';
     const locale = lang === 'ko' ? 'ko' : (lang === 'en' ? 'en' : 'zh');
 
-    flatpickr(dateInput, {
-        locale: locale,
-        minDate: 'today',
-        dateFormat: 'Y-m-d',
+    dateInputs.forEach(input => {
+        if (!input._flatpickr) {
+            flatpickr(input, {
+                locale: locale,
+                minDate: 'today',
+                dateFormat: 'Y-m-d',
+            });
+        }
     });
 }
 
 /** 인원 수 조절 */
-export function adjustParty(delta) {
-    const input = document.getElementById('res-party');
+export function adjustParty(delta, prefix = 'res') {
+    const input = document.getElementById(`${prefix}-party`);
     if (!input) return;
     let val = parseInt(input.value, 10) + delta;
     if (val < 1) val = 1;
@@ -57,21 +60,24 @@ export function adjustParty(delta) {
 }
 
 /** 폼 제출 */
-export async function submitReservation() {
-    const wechatEl   = document.getElementById('res-wechat');
-    const storeEl    = document.getElementById('res-store');
-    const dateEl     = document.getElementById('res-visit-date');
-    const partyEl    = document.getElementById('res-party');
-    const noteEl     = document.getElementById('res-note');
-    const statusEl   = document.getElementById('res-status');
-    const submitBtn  = document.getElementById('res-submit-btn');
+export async function submitReservation(prefix = 'res') {
+    const wechatEl   = document.getElementById(`${prefix}-wechat`);
+    const storeEl    = document.getElementById(`${prefix}-store`);
+    const dateEl     = document.getElementById(`${prefix}-visit-date`);
+    const partyEl    = document.getElementById(`${prefix}-party`);
+    const noteEl     = document.getElementById(`${prefix}-note`);
+    const statusEl   = document.getElementById(`${prefix}-status`);
+    const submitBtn  = document.getElementById(`${prefix}-submit-btn`);
 
     const wechatId    = wechatEl  ? wechatEl.value.trim()  : '';
     const visitDate   = dateEl    ? dateEl.value.trim()    : '';
     const partySize   = partyEl   ? partyEl.value          : '1';
     const store       = storeEl   ? storeEl.value.trim()   : '';
     const note        = noteEl    ? noteEl.value.trim()    : '';
-    const resType     = window.currentReservationType || 'other';
+    
+    let resType = window.currentReservationType || 'other';
+    if (prefix === 'food') resType = 'food';
+    else if (prefix === 'course') resType = 'course';
 
     // 유효성 검사
     if (!wechatId || !visitDate) {

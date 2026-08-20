@@ -4,22 +4,43 @@
         <button class="back-btn" onclick="showSection('home')">←</button>
         <h2 class="bar-title"><i class="ph-duotone ph-map-trifold"></i> <span data-i18n="nav.course">推荐路线</span></h2>
     </header>
-    <h1 class="visually-hidden">Jeju Island Recommended Travel Courses & Itineraries | 济州岛推荐旅游路线 제주 추천 코스</h1>
     <div class="section">
         <div class="container">
-            <div class="coming-soon-page">
-                <div class="coming-soon-icon">🗺️</div>
-                <h2 class="coming-soon-title" data-i18n="course.soon.title">济州推荐路线</h2>
-                <p class="coming-soon-desc" data-i18n="course.soon.desc">专为中国游客定制的济州岛精品旅游路线即将上线！<br>告别迷路，轻松玩转济州。</p>
-                <div class="coming-soon-badge-large">COMING SOON</div>
-                <div class="coming-soon-wechat-box">
-                    <p data-i18n="course.soon.wechat_hint">定制行程请通过微信联系我们 😊</p>
-                    <button class="wechat-contact-btn" onclick="openWechatQR()">
-                        <i class="ph-duotone ph-chats"></i>
-                        <span data-i18n="course.soon.wechat_btn">微信联系</span>
-                    </button>
-                </div>
+            <div class="res-notice-card">
+                <i class="ph-duotone ph-map-trifold" style="font-size:1.4rem; color:var(--color-course);"></i>
+                <p data-i18n="course.form.notice">填写您的旅行偏好，我们将通过微信为您定制专属行程 📩</p>
             </div>
+            <form id="course-form" class="reservation-form" onsubmit="event.preventDefault(); window.submitReservation('course');">
+                <div class="form-group">
+                    <label class="form-label required" data-i18n="res.wechat.label">微信ID</label>
+                    <input type="text" id="course-wechat" class="form-input" data-i18n-placeholder="res.wechat.placeholder" placeholder="请输入您的微信ID" required autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label class="form-label required" data-i18n="course.form.theme">旅行主题/偏好</label>
+                    <input type="text" id="course-store" class="form-input" data-i18n-placeholder="course.form.theme_ph" placeholder="例如：家庭游，网红打卡，休闲度假等" required autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label class="form-label required" data-i18n="course.form.date">旅行日期</label>
+                    <input type="text" id="course-visit-date" class="date-input form-input" data-i18n-placeholder="res.date.placeholder" placeholder="请选择日期" readonly required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label required" data-i18n="res.party.label">人数</label>
+                    <div class="res-party-row">
+                        <button type="button" class="party-btn" onclick="window.adjustParty(-1, 'course')">−</button>
+                        <input type="number" id="course-party" class="form-input party-input" value="2" min="1" max="20" readonly>
+                        <button type="button" class="party-btn" onclick="window.adjustParty(1, 'course')">+</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" data-i18n="res.note.label">备注事项</label>
+                    <textarea id="course-note" class="form-input form-textarea" data-i18n-placeholder="res.note.placeholder" placeholder="如有特殊要求请在此说明" rows="4"></textarea>
+                </div>
+                <div id="course-status" class="form-status" style="display:none;"></div>
+                <button type="submit" id="course-submit-btn" class="res-submit-btn">
+                    <i class="ph-duotone ph-paper-plane-tilt"></i>
+                    <span data-i18n="res.submit">提交申请</span>
+                </button>
+            </form>
         </div>
     </div>
 </section>

@@ -127,7 +127,7 @@ export function showSection(sectionId, pushHistory = true) {
         }
         if (sectionId === 'festival' && window.fetchFestivals) window.fetchFestivals();
         if (sectionId === 'reward' && window.initReward) window.initReward();
-        if (sectionId === 'reservation' && window.initReservationSection) window.initReservationSection();
+        if (['reservation', 'food', 'course'].includes(sectionId) && window.initReservationSection) window.initReservationSection();
     }
 
     if (sectionId === 'lost') {
