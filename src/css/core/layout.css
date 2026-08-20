@@ -148,6 +148,7 @@
 
 /* 토스 스타일 카드 */
 .home-item {
+    position: relative;
     background: var(--bg-primary); /* 흰 카드 */
     border-radius: var(--radius-xl); /* 24px — 토스 라운드 */
     padding: var(--space-5) var(--space-3);
