@@ -467,6 +467,14 @@ document.addEventListener('DOMContentLoaded', () => {
             this.classList.add('active');
             const hiddenInput = document.getElementById('lost-report-city-category');
             if (hiddenInput) hiddenInput.value = this.dataset.value;
+
+            // 인천 선택 시 상세장소 '공항' 자동 선택
+            if (this.dataset.value === '인천') {
+                const airportChip = document.querySelector('#region-category-chips .lost-chip[data-value="공항"]');
+                if (airportChip) {
+                    airportChip.click();
+                }
+            }
         });
     });
 
@@ -644,11 +652,23 @@ export async function submitLostReport() {
         return;
     }
 
+    let progressInterval;
     try {
         if (statusEl) {
-            statusEl.textContent = window.t ? window.t('lost.report.submitting') : '접수 중...';
+            const baseText = window.t ? window.t('lost.report.submitting') : '접수 중...';
+            statusEl.textContent = `${baseText} 0%`;
             statusEl.className = 'form-status';
             statusEl.style.display = 'block';
+            
+            let progress = 0;
+            progressInterval = setInterval(() => {
+                if (progress < 95) {
+                    // 점진적으로 퍼센트 증가 (최대 95%까지)
+                    progress += Math.floor(Math.random() * 3) + 1;
+                    if (progress > 95) progress = 95;
+                    statusEl.textContent = `${baseText} ${progress}%`;
+                }
+            }, 100);
         }
         if (submitBtn) submitBtn.disabled = true;
 
@@ -656,6 +676,11 @@ export async function submitLostReport() {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
+        
+        if (statusEl) {
+            const baseText = window.t ? window.t('lost.report.submitting') : '접수 중...';
+            statusEl.textContent = `${baseText} 100%`;
+        }
         
         let result = { result: 'error', message: 'Unknown error' };
         const rawText = await res.text();
@@ -724,6 +749,7 @@ export async function submitLostReport() {
             alert(`오류 발생: ${e.message}`);
         }
     } finally {
+        if (progressInterval) clearInterval(progressInterval);
         if (submitBtn) submitBtn.disabled = false;
     }
 }
@@ -1650,6 +1676,7 @@ window.submitProxyPickup = async function() {
     if (statusDiv) { statusDiv.innerHTML = ''; statusDiv.style.display = 'none'; }
     if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = '...'; }
 
+    let proxyProgressInterval;
     try {
         const { CONFIG } = await import('../core/config.js');
         const apiUrl = `${CONFIG.PROXY_URL}/api/lost-report`;
@@ -1662,7 +1689,19 @@ window.submitProxyPickup = async function() {
         const itemBase64 = await readAsBase64(itemFile);
         const reservationBase64 = await readAsBase64(reservationFile);
 
-        statusDiv.innerHTML = `<span style="color: var(--label-secondary);">${lang === 'ko' ? '처리 중...' : '处理中...'}</span>`;
+        const baseText = lang === 'ko' ? '처리 중...' : '处理中...';
+        statusDiv.innerHTML = `<span style="color: var(--label-secondary);">${baseText} 0%</span>`;
+        
+        let progress = 0;
+        proxyProgressInterval = setInterval(() => {
+            if (progress < 95) {
+                progress += Math.floor(Math.random() * 3) + 1;
+                if (progress > 95) progress = 95;
+                if (statusDiv) {
+                    statusDiv.innerHTML = `<span style="color: var(--label-secondary);">${baseText} ${progress}%</span>`;
+                }
+            }
+        }, 100);
 
         const payload = {
             type: 'proxy_pickup',
@@ -1697,6 +1736,12 @@ window.submitProxyPickup = async function() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
+        
+        if (statusDiv) {
+            const baseText = lang === 'ko' ? '처리 중...' : '处理中...';
+            statusDiv.innerHTML = `<span style="color: var(--label-secondary);">${baseText} 100%</span>`;
+        }
+        
         const result = await res.json();
 
         if (result.result === 'success') {
@@ -1734,6 +1779,8 @@ window.submitProxyPickup = async function() {
             submitBtn.textContent = submitLabel;
         }
         console.error('[ProxyPickup] submit error:', err);
+    } finally {
+        if (proxyProgressInterval) clearInterval(proxyProgressInterval);
     }
 };
 

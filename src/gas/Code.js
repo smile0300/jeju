@@ -49,6 +49,7 @@ function doPost(e) {
       }
 
       var lock = LockService.getScriptLock();
+      var newCaseId = '';
       try {
         lock.waitLock(10000); // 최대 10초 대기
         
@@ -64,7 +65,7 @@ function doPost(e) {
           }
         }
         var newNum = maxNum + 1;
-        var newCaseId = 'jeju-' + String(newNum).padStart(4, '0');
+        newCaseId = 'jeju-' + String(newNum).padStart(4, '0');
         var today = Utilities.formatDate(timestamp, 'Asia/Seoul', 'yyyy-MM-dd');
 
         // 이미지 처리
@@ -141,6 +142,12 @@ function doPost(e) {
         }
         successSheet.appendRow(row);
 
+        // ✅ 관리자 알림 전송 (시트 기록 성공 후, lock 해제 전에 호출)
+        notifyAdmin(
+          '📦 대리수령 신청 접수',
+          '[케이스] ' + newCaseId + '  [상품] ' + (data.itemName || '(unknown)') + '  [어디] ' + (data.proxyLocationType || '') + (data.hotelName ? ' - ' + data.hotelName : '') + '  [위챗] ' + (data.contact || data.originalWechat || '')
+        );
+
         return ContentService.createTextOutput(JSON.stringify({ "result": "success", "caseId": newCaseId }))
           .setMimeType(ContentService.MimeType.JSON);
       } catch (e) {
@@ -149,12 +156,6 @@ function doPost(e) {
       } finally {
         lock.releaseLock();
       }
-
-      // 관리자 알림 전송 (라억 후 실행 – lock 해제 후라서 실패해도 시트 기록에는 영향 없음)
-      notifyAdmin(
-        '📦 대리수령 신청 접수',
-        '[케이스] ' + newCaseId + '  [상품] ' + (data.itemName || '(unknown)') + '  [어디] ' + (data.proxyLocationType || '') + (data.hotelName ? ' - ' + data.hotelName : '') + '  [위챗] ' + (data.contact || data.originalWechat || '')
-      );
 
     } else if (data.type === 'lost_report' || data.type === 'feature' || data.type === 'cctv_apply') {
       var ss = SpreadsheetApp.openById(SHEET_ID);
