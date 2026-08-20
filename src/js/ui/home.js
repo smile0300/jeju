@@ -135,13 +135,15 @@
         { origId: 'home-course-btn',   subId: 'lost-sub-proxy',    animClass: 'lost-sub-in-bottom', outClass: 'lost-sub-out-bottom' },
     ];
 
-    const CORNER_BTN_IDS = ['home-weather-btn', 'home-airport-btn', 'home-food-btn'];
+    const CORNER_BTN_IDS = ['home-weather-btn', 'home-airport-btn', 'home-food-btn', 'home-reservation-btn'];
 
     window.toggleLostExpand = function() {
         lostExpanded ? window.collapseLostGrid() : window.expandLostGrid();
     };
 
     window.expandLostGrid = function() {
+        if (window.collapseReservationGrid) window.collapseReservationGrid();
+        
         lostExpanded = true;
         document.querySelector('.home-grid').classList.add('lost-expanded-grid');
 
