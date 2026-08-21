@@ -483,3 +483,153 @@ DevTools 진단: **"no origins were preconnected"**. 외부 오리진마다 DNS 
 ---
 
 *측정 한계: 스로틀링 없는 데스크톱 유선 환경이며 실제 모바일 로밍에서는 수치가 더 나쁩니다. 이미지 전송 바이트는 `minwon24.police.go.kr`에 `Timing-Allow-Origin` 헤더가 없어 정확한 크기 측정이 불가하여, 원본 해상도(최대 3060×4080)로부터 추정한 값입니다. `/lost` 목록 데이터는 검색 버튼 실행 시점에 로드되며 초기 진입만으로는 호출되지 않음을 확인했습니다.*
+
+---
+
+# 부록 B. 보안 점검 (2026-08-21 추가 확인)
+
+> **범위 한정 고지**: 본 부록은 **정식 보안 감사가 아닙니다.** 성능 측정 중 관찰된 사항과, 그중 비파괴적으로 검증 가능한 항목만 확인한 결과입니다. 인증·인가, 폼 제출 처리, 파일 업로드 검증 등 **쓰기 동작이 필요한 영역은 프로덕션 레코드 생성 및 타인 데이터 접근 우려로 점검하지 않았습니다**(B-3 참조).
+
+## B-0. 요약
+
+| 구분 | 건수 |
+|---|---|
+| ✅ 검증 통과 | 2 |
+| 🔴 조치 필요 | 2 |
+| 🟠 권장 | 3 |
+| ❌ **미점검(잔여 리스크)** | **6** |
+
+---
+
+## B-1. ✅ 검증 통과
+
+### (1) 프록시 SSRF — 화이트리스트 정상 동작
+
+`/api/public-data?endpoint=<URL>` 구조는 전형적인 **오픈 프록시 / SSRF** 위험 형태이나, 도메인 화이트리스트가 올바르게 구현되어 있음을 확인했습니다.
+
+| 시도한 우회 기법 | 요청 | 결과 |
+|---|---|---|
+| 임의 외부 도메인 | `https://example.com/` | **403** `Forbidden: Target domain (example.com) not in whitelist` |
+| 쿼리스트링에 허용 도메인 삽입 | `https://example.com/?x=apis.data.go.kr` | **403** (차단) |
+| 서브도메인 접미사 위장 | `https://apis.data.go.kr.example.com/` | **403** `Target domain (apis.data.go.kr.example.com) not in whitelist` |
+| 경로에 허용 도메인 삽입 | `https://example.com/apis.data.go.kr` | **403** (차단) |
+
+에러 메시지가 위장 도메인의 **전체 호스트명을 정확히 추출**해 보여주는 점으로 미루어, `String.includes()` 방식의 문자열 매칭이 아니라 **URL 파싱 후 호스트 정확 비교**로 구현되어 있습니다. 이 계열에서 가장 흔한 우회 버그가 없습니다.
+
+> 단, 내부망/클라우드 메타데이터(`169.254.169.254` 등) 대상 프로브는 **의도적으로 시도하지 않았습니다.** 화이트리스트가 정상 동작하므로 도달 불가로 판단되나, 화이트리스트 항목 자체에 리다이렉트를 허용하는 도메인이 포함돼 있는지는 별도 확인 대상입니다.
+
+### (2) 레이트리밋 적용됨
+
+`/api/public-data` 응답 헤더에 레이트리밋이 노출됩니다.
+
+```
+x-ratelimit-limit: 100000
+x-ratelimit-remaining: 96659
+x-ratelimit-requested: 1
+```
+
+제한이 걸려 있다는 점은 긍정적입니다. 다만 **부록 A-2 기준 사용자 1명이 `/weather` 1회 진입에 약 70건을 소비**하므로, 실효 한도는 10만이 아니라 **약 1,400 페이지뷰**입니다. 부록 A-1의 엣지 캐시를 적용하면 이 소모가 사실상 사라지므로, **성능 개선이 곧 가용성 방어**가 됩니다.
+
+---
+
+## B-2. 조치 필요 사항
+
+### 🔴 B-2-1. CDN 스크립트가 버전 고정도 SRI도 없음 (공급망 리스크)
+
+`/lost` 문서 원본에서 확인:
+
+```html
+<script src="https://unpkg.com/@phosphor-icons/web" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ko.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/zh.js"></script>
+```
+
+문제는 두 가지가 겹친다는 점입니다.
+
+1. **버전 미고정** — `@phosphor-icons/web`, `flatpickr` 모두 버전 지정이 없어 CDN이 그때그때 최신 배포본을 내려줍니다. (실제로 `unpkg.com/@phosphor-icons/web` 요청은 **302 리다이렉트**로 `@2.1.2`로 넘어갑니다 — 버전이 언제든 바뀔 수 있다는 뜻입니다.)
+2. **SRI(`integrity`) 부재** — 내려받은 내용이 기대한 것과 같은지 검증하지 않습니다.
+
+즉 **CDN 또는 npm 패키지가 탈취되면 임의 스크립트가 즉시 전 사용자에게 실행**됩니다. 이 사이트는 **WeChat ID·연락처를 입력받고 개인정보 수집·이용 동의를 받는 폼**을 운영하므로 영향도가 큽니다.
+
+**보완방법**
+- 최소 조치: 버전 고정 + SRI 해시 추가
+  ```html
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"
+          integrity="sha384-..." crossorigin="anonymous"></script>
+  ```
+- 권장 조치: **셀프 호스팅으로 전환**. 부록 A-5(b)에서 아이콘 웨이트 축소·A-5(a)에서 flatpickr 지연 로드를 권고했는데, 번들에 포함시켜 자체 서빙하면 **성능 개선과 공급망 리스크 제거가 한 번에 해결**됩니다. 외부 CDN 왕복도 사라집니다.
+
+### 🔴 B-2-2. Content-Security-Policy 부재
+
+문서 응답 헤더 실측 (`GET https://jeju-live.com/lost`, Service Worker 미경유):
+
+| 헤더 | 상태 | 영향 |
+|---|---|---|
+| `content-security-policy` | **없음** | XSS 방어선 없음, 외부 스크립트 출처 제한 없음 |
+| `x-frame-options` / `frame-ancestors` | **없음** | **클릭재킹 가능** — 분실물 등록 폼이 대상이 될 수 있음 |
+| `strict-transport-security` | **문서에 없음** | `/api/*` 응답에는 `max-age=31536000; includeSubDomains` 존재 → **설정 불일치** |
+| `access-control-allow-origin` | `*` | HTML 문서에 와일드카드 CORS. 공개 콘텐츠라 심각도는 낮으나 불필요 |
+| `permissions-policy` | 없음 | 권장 |
+| `x-content-type-options` | `nosniff` ✅ | |
+| `referrer-policy` | `strict-origin-when-cross-origin` ✅ | |
+
+CSP 부재가 특히 중요한 이유는 이 사이트의 **데이터 흐름** 때문입니다. LOST112 원본의 자유 텍스트(물품명·보관장소·업무 메모)와 사용자가 등록한 분실물 내용이 그대로 화면에 렌더링됩니다. 렌더링에 `innerHTML`을 사용하는 지점이 하나라도 있으면 저장형 XSS가 성립하며, **CSP가 없으면 완화 수단이 전혀 없습니다.**
+
+**보완방법**
+- Cloudflare Pages `_headers` 파일에 추가 (Report-Only로 먼저 배포해 오탐 확인 후 강제 적용 권장):
+  ```
+  /*
+    Content-Security-Policy-Report-Only: default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://www.googletagmanager.com https://pagead2.googlesyndication.com; img-src 'self' data: https:; frame-ancestors 'none'
+    X-Frame-Options: DENY
+    Strict-Transport-Security: max-age=31536000; includeSubDomains
+    Permissions-Policy: geolocation=(), microphone=(), camera=()
+  ```
+- 현재 GTM/AdSense를 쓰고 있어 `script-src`에 `'unsafe-inline'`이 필요할 수 있습니다. nonce 기반으로 가면 더 안전하나 GTM 구성 변경이 수반됩니다.
+- HTML 문서의 `access-control-allow-origin: *`는 제거 검토.
+
+---
+
+## B-3. ❌ 미점검 영역 (잔여 리스크)
+
+아래는 **확인하지 않았습니다.** 검증하려면 실제 폼 제출·ID 조작이 필요해 프로덕션에 레코드를 생성하거나 타인 데이터에 접근할 소지가 있기 때문입니다. **스테이징 환경에서의 점검을 강력히 권장합니다.**
+
+| # | 항목 | 왜 중요한가 | 우선순위 |
+|---|---|---|---|
+| 1 | **진도조회(`goToLostStatus`) IDOR** | 조회 키가 순번·추측 가능한 값이면 **타인의 분실물 신고 내역(이름·연락처·WeChat ID)이 그대로 열람**됩니다. 미점검 항목 중 가장 우려됨 | **최상** |
+| 2 | 등록 폼 제출 엔드포인트의 인증/인가 | 클라이언트 검증만 있고 서버측 검증이 없으면 임의 데이터 주입 가능 | 상 |
+| 3 | 사진 업로드 검증 | MIME 위조, 크기 제한, 저장 경로 탈출, 저장소 공개 여부 | 상 |
+| 4 | XSS 실증 (`innerHTML` 사용처) | B-2-2의 전제 조건 확인 필요 | 상 |
+| 5 | 제출 엔드포인트 레이트리밋 / 스팸 방어 | 대량 허위 신고 등록 가능성 | 중 |
+| 6 | Firebase 보안 규칙 | `sw.js`의 Firebase 설정 노출 자체는 **정상**(클라이언트 공개 전제 값). 다만 Firestore/Storage 규칙이 열려 있으면 설정값만으로 직접 접근 가능 | 중 |
+
+---
+
+## B-4. 기존 리포트 항목의 보안·개인정보 재분류
+
+본문에서 기능 결함으로 분류했던 아래 두 건은 **보안/컴플라이언스 항목으로 함께 관리**해야 합니다.
+
+| 본문 # | 내용 | 재분류 사유 |
+|---|---|---|
+| **#4** | 등록 폼 Submit 시 Google Ads 폼 데이터 수집 엔드포인트 발동 | 개인정보 동의 폼의 입력값이 **제3자 광고 플랫폼으로 전송**됨. 동의 문구에 미명시 시 개인정보보호법 이슈 |
+| **#5** | 경찰 내부 업무 메모 노출 (`*연락완료*`, `국제/휴대폰/삼성/고객확인중`) | 번역 결함이 아니라 **공개되면 안 되는 내부 운영 정보의 노출**. 상류 API가 내려주더라도 프론트에서 필터링 책임 있음 |
+
+---
+
+## B-5. 권장 조치 순서
+
+| # | 조치 | 난이도 | 비고 |
+|---|---|---|---|
+| **1** | **진도조회 IDOR 점검** (스테이징) | 중 | 미점검 항목 중 영향도 최대. 취약 시 개인정보 유출 |
+| **2** | CDN 스크립트 **버전 고정 + SRI**, 또는 셀프 호스팅 | **하** | 부록 A-5와 동일 조치로 성능·보안 동시 해결 |
+| **3** | `X-Frame-Options: DENY` + `Strict-Transport-Security` 추가 | **하** | `_headers` 두 줄. 즉시 적용 가능 |
+| **4** | **CSP Report-Only 배포** → 오탐 정리 후 강제 적용 | 중 | GTM/AdSense 때문에 단계적 접근 필요 |
+| **5** | 등록 폼 서버측 검증 / 업로드 검증 점검 | 중 | 스테이징 필요 |
+| **6** | #4 Google Ads 폼 수집 법무 검토 (본문) | 중 | 동의 문구 보강 또는 수집 비활성화 |
+| **7** | 내부 업무 메모 정규식 필터링 (본문 #5) | 하 | |
+| **8** | Firebase Firestore/Storage 규칙 확인 | 하 | 콘솔에서 확인 가능 |
+
+---
+
+*점검 방법 고지: 화이트리스트 검증은 IANA 예약 도메인(`example.com`)만 사용한 비파괴적 GET 요청으로 수행했으며, 내부망 주소·클라우드 메타데이터 엔드포인트 프로브 및 실제 익스플로잇 시도는 하지 않았습니다. 문서 응답 헤더는 Service Worker를 우회한 실제 네트워크 응답 기준입니다. `/api/success-list` 응답 필드 점검은 재요청 시 HTML 폴백이 반환되어 완료하지 못했습니다.*
