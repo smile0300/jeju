@@ -20,9 +20,20 @@
                     </button>
                 </div>
                 
-                <!-- 월별 축제 필터 -->
-                <div class="festival-month-filter" id="month-filter" style="margin-bottom: 0;">
-                    <!-- script.js에서 동적으로 생성됩니다 -->
+                <!-- 3탭 IA 구조 -->
+                <div class="festival-tabs" style="display:flex; gap: 8px; margin-top: 15px; border-bottom: 2px solid #f1f3f5; padding-bottom: 5px;">
+                    <button class="ftab-btn active" data-tab="recent" onclick="window.festivalApp.switchTab('recent')" style="background:none; border:none; padding: 5px 10px; font-weight:700; color:#495057; border-bottom:3px solid transparent; cursor:pointer;" data-i18n="festival.tab.recent">오늘/이번주</button>
+                    <button class="ftab-btn" data-tab="highlight" onclick="window.festivalApp.switchTab('highlight')" style="background:none; border:none; padding: 5px 10px; font-weight:700; color:#495057; border-bottom:3px solid transparent; cursor:pointer;" data-i18n="festival.tab.highlight">시즌 하이라이트</button>
+                    <button class="ftab-btn" data-tab="permanent" onclick="window.festivalApp.switchTab('permanent')" style="background:none; border:none; padding: 5px 10px; font-weight:700; color:#495057; border-bottom:3px solid transparent; cursor:pointer;" data-i18n="festival.tab.permanent">상설 전시</button>
+                </div>
+
+                <!-- 지역 필터 -->
+                <div class="festival-region-filter" style="display:flex; gap:6px; margin-top: 15px; flex-wrap: wrap;">
+                    <button class="fregion-btn active" data-region="all" onclick="window.festivalApp.filterRegion('all')" style="padding: 4px 12px; border-radius: 20px; border:1px solid #dee2e6; background:#fff; font-size:0.85rem; color:#495057; cursor:pointer;" data-i18n="festival.region.all">전체</button>
+                    <button class="fregion-btn" data-region="jeju" onclick="window.festivalApp.filterRegion('jeju')" style="padding: 4px 12px; border-radius: 20px; border:1px solid #dee2e6; background:#fff; font-size:0.85rem; color:#495057; cursor:pointer;" data-i18n="festival.region.jeju">제주시</button>
+                    <button class="fregion-btn" data-region="seogwipo" onclick="window.festivalApp.filterRegion('seogwipo')" style="padding: 4px 12px; border-radius: 20px; border:1px solid #dee2e6; background:#fff; font-size:0.85rem; color:#495057; cursor:pointer;" data-i18n="festival.region.seogwipo">서귀포시</button>
+                    <button class="fregion-btn" data-region="east" onclick="window.festivalApp.filterRegion('east')" style="padding: 4px 12px; border-radius: 20px; border:1px solid #dee2e6; background:#fff; font-size:0.85rem; color:#495057; cursor:pointer;" data-i18n="festival.region.east">동부</button>
+                    <button class="fregion-btn" data-region="west" onclick="window.festivalApp.filterRegion('west')" style="padding: 4px 12px; border-radius: 20px; border:1px solid #dee2e6; background:#fff; font-size:0.85rem; color:#495057; cursor:pointer;" data-i18n="festival.region.west">서부</button>
                 </div>
             </div>
 

@@ -374,6 +374,15 @@ const TRANSLATIONS = {
         'festival.status.upcoming': '即将开始',
         'festival.result.count': '共查询到 <span class="highlight">{count}</span> 个活动。',
         'festival.date_range': '选择期间',
+        'festival.empty.date': '未找到符合所选期间的活动。',
+        'festival.tab.recent': '今日/本周',
+        'festival.tab.highlight': '当季精选',
+        'festival.tab.permanent': '常设展览',
+        'festival.region.all': '全部',
+        'festival.region.jeju': '济州市',
+        'festival.region.seogwipo': '西归浦市',
+        'festival.region.east': '东部',
+        'festival.region.west': '西部',
 
         // ── 공항 ──
         'airport.err.failed': 'Error: API Request Failed (API请求失败)',
@@ -1002,6 +1011,15 @@ const TRANSLATIONS = {
         'festival.status.upcoming': '예정',
         'festival.result.count': '총 <span class="highlight">{count}</span>건이 검색되었습니다.',
         'festival.date_range': '기간 선택',
+        'festival.empty.date': '선택하신 기간에 맞는 축제가 없습니다.',
+        'festival.tab.recent': '오늘/이번주',
+        'festival.tab.highlight': '시즌 하이라이트',
+        'festival.tab.permanent': '상설 전시',
+        'festival.region.all': '전체',
+        'festival.region.jeju': '제주시',
+        'festival.region.seogwipo': '서귀포시',
+        'festival.region.east': '동부',
+        'festival.region.west': '서부',
 
         'airport.err.failed': '공항 API 호출에 실패했습니다.',
         'airport.title':    '제주 실시간 항공편',
@@ -1591,6 +1609,15 @@ const TRANSLATIONS = {
         'festival.status.upcoming': 'Upcoming',
         'festival.result.count': 'Found <span class="highlight">{count}</span> festivals.',
         'festival.date_range': 'Select Period',
+        'festival.empty.date': 'No festivals found for the selected period.',
+        'festival.tab.recent': 'Today/This Week',
+        'festival.tab.highlight': 'Seasonal Highlights',
+        'festival.tab.permanent': 'Permanent Exhibits',
+        'festival.region.all': 'All',
+        'festival.region.jeju': 'Jeju City',
+        'festival.region.seogwipo': 'Seogwipo City',
+        'festival.region.east': 'East',
+        'festival.region.west': 'West',
 
         'airport.err.failed': 'Error: API Request Failed',
         'airport.title':    'Jeju Live Flights',
@@ -1934,8 +1961,8 @@ export function setLanguage(lang) {
             window.hallasanApp.fetchStatus(false, true);
         }
         // 축제 탭 재렌더링
-        if (window.festivalApp && window.festivalApp.initMonthFilter) {
-            window.festivalApp.initMonthFilter();
+        if (window.festivalApp && window.festivalApp.initFestivalFilters) {
+            window.festivalApp.initFestivalFilters();
             window.festivalApp.fetchFestivals();
         }
         // 공항 탭 재렌더링

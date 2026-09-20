@@ -11,7 +11,7 @@ import { fetchHallasanStatus } from '../features/hallasan.js';
 import { renderHallasanDashboard } from '../features/hallasan-dashboard.js';
 import { fetchFlights, switchFlightTab } from '../features/airport.js';
 import { fetchFoundGoods, switchLostView, openLostDetailModalByIndex, openLostReportModal, handleLostImageChange, submitLostReport, showWechatQR, fetchSuccessStories } from '../features/lost-found.v1.js';
-import { fetchFestivals, selectFestivalMonth, initMonthFilter } from '../features/festival.js';
+import { fetchFestivals, initFestivalFilters } from '../features/festival.js';
 import { initReservationSection, adjustParty, submitReservation } from '../features/reservation.js';
 import { initReward } from '../features/reward.js';
 import { showSection, openWechatQR, closeWechatQR, openFeatureModal, closeFeatureModal, submitFeatureRequest, openCSModal, closeCSModal, submitCSFeedback, copyWechatId, openWeatherSummaryModal, closeWeatherSummaryModal, openShareModal, closeShareModal, shareToPlatform } from '../ui/ui.js';
@@ -177,7 +177,6 @@ window.fetchFoundGoodsManual = () => {
     fetchFoundGoods();
 };
 window.showWechatQR = showWechatQR;
-window.selectFestivalMonth = selectFestivalMonth;
 window.openWechatQR = openWechatQR;
 window.closeWechatQR = closeWechatQR;
 window.openFeatureModal = openFeatureModal;
@@ -387,7 +386,7 @@ window.addEventListener('load', () => {
     
     // 데이터 Fetch가 필요 없는 UI 초기화
     renderHallasanDashboard();
-    initMonthFilter();
+    initFestivalFilters();
     initPastWeatherSelects();
     
     // 초기 로딩 시 URL에 맞는 페이지 열기

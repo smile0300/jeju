@@ -1,25 +1,9 @@
 import { CONFIG } from '../core/config.js';
 
-let currentFestivalMonth = '';
+let currentTab = 'recent'; // 'recent', 'highlight', 'permanent'
+let currentRegion = 'all';
 
-export function initMonthFilter() {
-    const filterContainer = document.getElementById('month-filter');
-    if (!filterContainer) return;
-
-    const now = new Date();
-    const months = [];
-    for (let i = 0; i < 6; i++) {
-        const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
-        const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-        months.push({ ym, label: `${d.getMonth() + 1}${window.t('festival.month_suffix')}` });
-    }
-
-    if (!currentFestivalMonth) currentFestivalMonth = months[0].ym;
-
-    filterContainer.innerHTML = months.map(m => `
-        <div class="month-tab ${m.ym === currentFestivalMonth ? 'active' : ''}" 
-             onclick="selectFestivalMonth('${m.ym}')" data-ym="${m.ym}">${m.label}</div>`).join('');
-
+export function initFestivalFilters() {
     const rangeInput = document.getElementById('festival-date-range');
     if (rangeInput && typeof flatpickr !== 'undefined' && !rangeInput._flatpickr) {
         const lang = window.getLang ? window.getLang() : 'ko';
@@ -47,11 +31,28 @@ export function initMonthFilter() {
     }
 }
 
-export function selectFestivalMonth(ym) {
-    console.log('Selecting festival month:', ym);
-    currentFestivalMonth = ym;
-    document.querySelectorAll('.month-tab').forEach(tab => {
-        tab.classList.toggle('active', tab.dataset.ym === ym);
+export function switchTab(tab) {
+    currentTab = tab;
+    document.querySelectorAll('.ftab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tab);
+    });
+    
+    // 탭 변경 시 기간 검색 초기화
+    const startDateInput = document.getElementById('festival-date-start');
+    const endDateInput = document.getElementById('festival-date-end');
+    const rangeInput = document.getElementById('festival-date-range');
+    if (startDateInput) startDateInput.value = '';
+    if (endDateInput) endDateInput.value = '';
+    if (rangeInput && rangeInput._flatpickr) {
+        rangeInput._flatpickr.clear();
+    }
+    fetchFestivals();
+}
+
+export function filterRegion(region) {
+    currentRegion = region;
+    document.querySelectorAll('.fregion-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.region === region);
     });
     fetchFestivals();
 }
@@ -75,38 +76,77 @@ export async function fetchFestivals() {
 
     let activeItems = [];
     
-    if (hasDateSearch) {
-        for (const month in window.FESTIVAL_DATA.months) {
-            const items = window.FESTIVAL_DATA.months[month];
-            items.forEach(item => {
-                if (isPeriodOverlap(startDateStr, endDateStr, item.period)) {
-                    if (!activeItems.find(a => a.title === item.title)) {
-                        activeItems.push(item);
-                    }
-                }
-            });
-        }
-    } else {
-        const monthData = window.FESTIVAL_DATA.months[currentFestivalMonth] || [];
-        activeItems = monthData.filter(item => {
-            if (!item.period || !item.period.includes('~')) return true;
-            const endPart = item.period.split('~')[1].trim();
-            const endDate = endPart.replace(/\./g, '-');
-            return new Date(endDate) >= new Date(today);
-        });
+    // 모든 월의 데이터를 병합
+    let allItems = [];
+    for (const month in window.FESTIVAL_DATA.months) {
+        allItems = allItems.concat(window.FESTIVAL_DATA.months[month]);
     }
 
-    if (activeItems.length === 0) {
-        const monthNum = currentFestivalMonth.split('-')[1];
-        const monthSuffix = window.t ? window.t('festival.month_suffix') : '월';
-        const monthStr = `${parseInt(monthNum)}${monthSuffix}`;
-        
-        let msg = '';
-        if (hasDateSearch) {
-            msg = window.t ? window.t('festival.empty.date') || '해당 기간에 진행되는 축제가 없습니다.' : '해당 기간에 진행되는 축제가 없습니다.';
-        } else {
-            msg = window.t ? window.t('festival.empty.list').replace('{month}', monthStr) : `${monthStr}에 진행중인 축제가 없습니다.`;
+    // 기본 점수 및 메타데이터 세팅
+    let scoredItems = [];
+    allItems.forEach(item => {
+        const score = getTouristScore(item);
+        if (score !== -1) {
+            scoredItems.push({ ...item, _score: score });
         }
+    });
+
+    // 중복 제거
+    const uniqueMap = new Map();
+    scoredItems.forEach(item => {
+        if (!uniqueMap.has(item.title) || uniqueMap.get(item.title)._score < item._score) {
+            uniqueMap.set(item.title, item);
+        }
+    });
+    let filteredItems = Array.from(uniqueMap.values());
+
+    // 1. 기간 검색 필터 (우선 적용)
+    if (hasDateSearch) {
+        filteredItems = filteredItems.filter(item => isPeriodOverlap(startDateStr, endDateStr, item.period));
+    } else {
+        // 2. 탭 필터 (기간 검색이 없을 때만 동작)
+        if (currentTab === 'recent') {
+            const nextWeek = new Date(today);
+            nextWeek.setDate(nextWeek.getDate() + 7);
+            filteredItems = filteredItems.filter(item => {
+                if (!item.period || !item.period.includes('~')) return true;
+                const parts = item.period.split('~');
+                const startDate = new Date(parts[0].trim().replace(/\./g, '-'));
+                const endDate = new Date(parts[1].trim().replace(/\./g, '-'));
+                // 이미 진행중이거나, 7일 내로 시작하는 행사
+                return endDate >= new Date(today) && startDate <= nextWeek;
+            });
+        } else if (currentTab === 'highlight') {
+            filteredItems = filteredItems.filter(item => {
+                const endDate = item.period && item.period.includes('~') ? new Date(item.period.split('~')[1].trim().replace(/\./g, '-')) : new Date(today);
+                return item._score >= 90 && endDate >= new Date(today);
+            });
+        } else if (currentTab === 'permanent') {
+            filteredItems = filteredItems.filter(item => {
+                const days = getFestivalDurationDays(item.period);
+                return days > 300;
+            });
+        }
+    }
+
+    // 3. 지역 필터
+    if (currentRegion !== 'all') {
+        filteredItems = filteredItems.filter(item => {
+            const addr = item.address || item.addr || '';
+            if (currentRegion === 'jeju') return addr.includes('제주시') || addr.includes('济州市');
+            if (currentRegion === 'seogwipo') return addr.includes('서귀포시') || addr.includes('西归浦市');
+            if (currentRegion === 'east') return addr.includes('구좌') || addr.includes('조천') || addr.includes('성산') || addr.includes('표선');
+            if (currentRegion === 'west') return addr.includes('한림') || addr.includes('애월') || addr.includes('한경') || addr.includes('대정') || addr.includes('안덕');
+            return true; // 매칭되지 않는 경우 일단 노출
+        });
+    }
+    
+    // 4. 정렬
+    filteredItems.sort((a, b) => b._score - a._score);
+    activeItems = filteredItems;
+
+    if (activeItems.length === 0) {
+        let msg = window.t ? window.t('festival.empty.date') || '조건에 맞는 축제가 없습니다.' : '조건에 맞는 축제가 없습니다.';
         
         listContainer.innerHTML = `
             <div style="text-align:center;padding:40px;color:var(--text-muted)">
@@ -607,7 +647,6 @@ function getFestivalImage(title, originalImg) {
 
 export function renderFestivalItems(container, items) {
     const today = new Date().toISOString().split('T')[0];
-    const noImg = 'https://images.unsplash.com/photo-1518005020251-582c7edff267?auto=format&fit=crop&w=500&q=80';
     const lang = window.getLang ? window.getLang() : 'zh';
 
     container.innerHTML = items.map(item => {
@@ -621,7 +660,7 @@ export function renderFestivalItems(container, items) {
             displayTitle = FESTIVAL_TRANSLATIONS[rawTitle] || rawTitle;
         }
         const rawImg = item.thumbnail || item.imgpath || item.img || '';
-        const img = getFestivalImage(rawTitle, rawImg) || noImg;
+        const img = getFestivalImage(rawTitle, rawImg) || '';
         
         const rawDate = item.period || item.date || '';
         let displayDate = rawDate;
@@ -647,6 +686,7 @@ export function renderFestivalItems(container, items) {
             if (lang === 'zh') langPath = 'cn';
             else if (lang === 'en') langPath = 'en';
             link = link.replace('/kr/', `/${langPath}/`);
+            link = link.replace(/[?&]menuId=undefined/g, ''); // 버그 URL 수정
         } else {
             const yearParts = currentFestivalMonth.split('-');
             const yearStr = yearParts[0] || '2026';
@@ -655,32 +695,26 @@ export function renderFestivalItems(container, items) {
             link = `https://visitjeju.net/${langPath}/festival/list#p1&year=${yearStr}&month=${monthStr}&state=all`;
         }
         
-        let statusText = window.t('festival.status.ing');
-        let statusClass = 'ing';
-        
-        // Priority status from data
-        if (item.status === 'upcoming') {
-            statusText = window.t('festival.status.upcoming');
-            statusClass = 'upcoming';
-        } else if (date.includes('~')) {
-            const startPart = date.split('~')[0].trim();
-            const startDate = startPart.replace(/\./g, '-');
-            if (new Date(startDate) > new Date(today)) {
-                statusText = window.t('festival.status.upcoming');
-                statusClass = 'upcoming';
-            }
+        // 우선순위가 높은 하이라이트 이벤트인 경우에만 핫 배지 노출
+        let badgeHtml = '';
+        if (item._score >= 90) {
+            badgeHtml = `<span class="tag upcoming" style="background:#ff6b6b; color:white; border:none;">HOT</span>`;
         }
         
+        const imgHtml = img 
+            ? `<img src="${img}" alt="${displayTitle}" loading="lazy" onerror="this.onerror=null; this.src=''; this.parentElement.classList.add('no-img'); this.style.display='none';" />`
+            : `<div class="festival-noimg-icon"><i class="ph-duotone ph-calendar-star"></i></div>`;
+
         return `
             <div class="festival-card" onclick="window.open('${link}', '_blank')">
-                <div class="festival-img">
-                    <img src="${img}" alt="${displayTitle}" loading="lazy" onerror="this.onerror=null; this.src='${noImg}';" />
-                    <span class="tag ${statusClass}">${statusText}</span>
+                <div class="festival-img ${!img ? 'no-img' : ''}">
+                    ${imgHtml}
+                    ${badgeHtml}
                 </div>
                 <div class="festival-info">
                     <h3 class="festival-title">${displayTitle}</h3>
-                    <div class="festival-date">
-                        ${displayDate}
+                    <div class="festival-date" style="color:var(--text-muted); font-size:0.85rem; margin-top:5px;">
+                        <i class="ph-duotone ph-calendar-blank"></i> ${displayDate}
                     </div>
                 </div>
             </div>`;
@@ -688,8 +722,53 @@ export function renderFestivalItems(container, items) {
 }
 
 window.festivalApp = {
-    initMonthFilter: initMonthFilter,
+    initFestivalFilters: initFestivalFilters,
     fetchFestivals: fetchFestivals,
     handleDateChange: handleDateChange,
-    clearDateSearch: clearDateSearch
+    clearDateSearch: clearDateSearch,
+    switchTab: switchTab,
+    filterRegion: filterRegion
 };
+
+// --- Festival Sprint 0 Helpers ---
+
+function getFestivalDurationDays(periodStr) {
+    if (!periodStr || !periodStr.includes('~')) return 1;
+    try {
+        const parts = periodStr.split('~');
+        let startStr = parts[0].trim().replace(/\./g, '-');
+        let endStr = parts[1].trim().replace(/\./g, '-');
+        if (endStr.length <= 5 && startStr.length >= 4) {
+            endStr = `${startStr.substring(0, 4)}-${endStr}`;
+        }
+        const start = new Date(startStr);
+        const end = new Date(endStr);
+        if (isNaN(start) || isNaN(end)) return 1;
+        return (end - start) / (1000 * 60 * 60 * 24);
+    } catch (e) {
+        return 1;
+    }
+}
+
+const FESTIVAL_EXCLUDE = /지원사업|공모|모집\s*안내|캠페인|공개강좌|워크숍|수업|교육|세미나|참여자\s*모집|신청\s*접수|설명회|간담회/;
+const FESTIVAL_KOREAN_REQ = /강좌|낭독|독서|글쓰기|인문학|토크|해설/;
+const FESTIVAL_BOOST_IP = /지브리|吉卜力|원피스|海贼王|팝업|快闪|스투시|디즈니|산리오/;
+const FESTIVAL_BOOST_TYPE = /전시|展|공연|演出|불꽃|야시장|夜市|축제|节|분수|喷泉|야간개장|夜间|행사|페스티벌|쇼|개장/;
+
+function getTouristScore(item) {
+    const t = item.title || '';
+    if (FESTIVAL_EXCLUDE.test(t)) return -1; // 완벽 제외 대상
+
+    let score = 50;
+    if (FESTIVAL_BOOST_IP.test(t)) score += 40;
+    if (FESTIVAL_BOOST_TYPE.test(t)) score += 20;
+    if (FESTIVAL_KOREAN_REQ.test(t)) score -= 30;
+
+    const days = getFestivalDurationDays(item.period);
+    
+    // 이상 날짜 (2033년 등) 또는 300일 이상 상설 행사는 최하단 배치 (-100점 감점)
+    if (item.period && item.period.includes('2033')) score -= 100;
+    else if (days > 300) score -= 100;
+
+    return score;
+}

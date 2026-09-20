@@ -1730,7 +1730,7 @@
 
 @media (min-width: 768px) {
     .festival-list {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
         gap: 20px;
     }
 }
@@ -1766,7 +1766,20 @@
 }
 
 .festival-card:hover .festival-img img {
-    transform: scale(1.05);
+    transform: scale(1.03);
+}
+
+.festival-img.no-img {
+    background: linear-gradient(135deg, #f1f3f5, #e9ecef);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.festival-noimg-icon {
+    font-size: 3rem;
+    color: #adb5bd;
+    opacity: 0.6;
 }
 
 .festival-img .tag {
