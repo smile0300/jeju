@@ -136,8 +136,12 @@ const TRANSLATIONS = {
         'res.back':            '返回',
         'res.type.change_hint': '点击返回可更换类型',
         'res.type.label':      '申请类型',
-        'res.qr.title':        '请扫码添加我的微信',
+        'res.qr.title':        '请扫码添加微信后支付',
         'res.qr.hint':         '长按图片保存二维码',
+        'res.fee.label':       '代预约服务费',
+        'res.fee.amount':      '10元',
+        'res.fee.note':        '支付时请在备注栏填写您的微信ID。',
+        'res.fee.warn':        '确认收款后，我们将立即为您联系店铺。',
         'res.notice':          '填写后，我们将通过微信与您联系 📩',
         'res.wechat.label':    '微信ID',
         'res.wechat.placeholder': '请输入您的微信ID',
@@ -151,7 +155,7 @@ const TRANSLATIONS = {
         'res.note.label':      '备注事项',
         'res.note.placeholder': '如有特殊要求请在此说明（语言偏好、过敏等）',
         'res.submit':          '提交申请',
-        'res.success':         '✅ 申请已提交！我们将尽快通过微信与您联系。',
+        'res.success':         '✅ 申请已提交！请按下方指引支付代预约服务费。',
         'res.error':           '❌ 提交失败，请稍后再试。',
 
         // ── 맛집/코스 폼 ──
@@ -792,8 +796,12 @@ const TRANSLATIONS = {
         'res.back':            '뒤로',
         'res.type.change_hint': '돌아가서 유형 변경 가능',
         'res.type.label':      '신청 유형',
-        'res.qr.title':        'QR을 스캔해서 위챗 친구 추가해 주세요',
+        'res.qr.title':        'QR을 스캔해 위챗 추가 후 결제해 주세요',
         'res.qr.hint':         '이미지를 길게 눌러 저장할 수 있습니다',
+        'res.fee.label':       '예약 대행 수수료',
+        'res.fee.amount':      '10위안',
+        'res.fee.note':        '결제 시 비고란에 위챗 ID를 남겨주세요.',
+        'res.fee.warn':        '입금 확인 후 바로 매장에 연락드립니다.',
         'res.notice':          '내용 입력 후 위챗으로 연락드리겠습니다 📩',
         'res.wechat.label':    '위챗 ID',
         'res.wechat.placeholder': '위챗 ID를 입력해주세요',
@@ -807,7 +815,7 @@ const TRANSLATIONS = {
         'res.note.label':      '요청 사항',
         'res.note.placeholder': '특별 요청 사항이 있으면 입력해주세요 (선호 언어, 알레르기 등)',
         'res.submit':          '신청하기',
-        'res.success':         '✅ 신청이 접수되었습니다! 위챗으로 연락드리겠습니다.',
+        'res.success':         '✅ 신청이 접수되었습니다! 아래 안내에 따라 대행 수수료를 결제해 주세요.',
         'res.error':           '❌ 제출 실패. 잠시 후 다시 시도해주세요.',
 
         // ── 맛집/코스 폼 ──
@@ -1383,8 +1391,12 @@ const TRANSLATIONS = {
         'res.back':            'Back',
         'res.type.change_hint': 'Go back to change type',
         'res.type.label':      'Request Type',
-        'res.qr.title':        'Scan to add me on WeChat',
+        'res.qr.title':        'Scan to add us on WeChat, then pay',
         'res.qr.hint':         'Press and hold the image to save it',
+        'res.fee.label':       'Booking Service Fee',
+        'res.fee.amount':      '10 RMB',
+        'res.fee.note':        'Please include your WeChat ID in the payment remarks.',
+        'res.fee.warn':        'We will contact the venue as soon as payment is confirmed.',
         'res.notice':          'We will contact you via WeChat after reviewing your request 📩',
         'res.wechat.label':    'WeChat ID',
         'res.wechat.placeholder': 'Enter your WeChat ID',
@@ -1398,7 +1410,7 @@ const TRANSLATIONS = {
         'res.note.label':      'Special Requests',
         'res.note.placeholder': 'Any special requests (language preference, allergies, etc.)',
         'res.submit':          'Submit Request',
-        'res.success':         '✅ Request submitted! We will contact you via WeChat shortly.',
+        'res.success':         '✅ Request submitted! Please pay the booking service fee as shown below.',
         'res.error':           '❌ Submission failed. Please try again later.',
 
         // ── 맛집/코스 폼 ──
@@ -1963,6 +1975,17 @@ export function applyTranslations() {
     document.querySelectorAll('[data-i18n-html]').forEach(el => {
         const key = el.getAttribute('data-i18n-html');
         el.innerHTML = t(key).replace(/\n/g, '<br>');
+    });
+
+    // data-i18n-placeholder: placeholder 속성 치환
+    // (label 옆에 두는 용도라 data-i18n과 달리 textContent를 건드리면 안 된다)
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        el.placeholder = t(el.getAttribute('data-i18n-placeholder'));
+    });
+
+    // data-i18n-aria: aria-label 속성 치환
+    document.querySelectorAll('[data-i18n-aria]').forEach(el => {
+        el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria')));
     });
 }
 

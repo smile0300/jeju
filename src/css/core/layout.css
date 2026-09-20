@@ -754,15 +754,45 @@ select.res-type-badge {
     background-size: 12px 12px, auto;
 }
 
-/* 제출 완료 후 위챗 QR 안내 */
+/* 제출 완료 후 예약 대행 수수료 결제 안내 */
 .res-wechat-qr {
     display: none;
     margin-top: 16px;
     padding: 18px 16px;
     border-radius: 14px;
-    border: 1px solid var(--separator);
+    border: 1.5px solid var(--color-orange, #fd7e14);
     background: var(--bg-primary);
     text-align: center;
+}
+
+.res-fee-label {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--label-secondary);
+}
+
+.res-fee-amount {
+    margin: 2px 0 14px;
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--color-orange, #fd7e14);
+}
+
+.res-fee-note,
+.res-fee-warn {
+    margin: 8px 0 0;
+    font-size: 0.8rem;
+    line-height: 1.5;
+}
+
+.res-fee-note {
+    color: var(--label-secondary);
+    font-weight: 600;
+}
+
+.res-fee-warn {
+    color: var(--label-tertiary);
 }
 
 .res-wechat-qr-title {

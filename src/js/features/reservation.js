@@ -158,9 +158,9 @@ export async function submitReservation(prefix = 'res') {
 }
 
 /**
- * 제출 성공 시 위챗 QR 안내를 상태 메시지 아래에 노출.
- * 위챗 ID 검색이 차단된 사용자에게는 이쪽에서 먼저 추가하는 경로가 막히므로,
- * 상대가 우리를 추가하도록 방향을 뒤집는다.
+ * 제출 성공 시 예약 대행 수수료(10위안) 결제 안내를 상태 메시지 아래에 노출.
+ * 결제 수단은 위챗이고, QR은 분실물 업셀과 동일한 친구추가 QR을 쓴다.
+ * (스캔 → 위챗 추가 → 대화방에서 결제) 라서 문구도 그 순서를 그대로 따른다.
  */
 function showWechatQr(prefix) {
     const statusEl = document.getElementById(`${prefix}-status`);
@@ -174,12 +174,15 @@ function showWechatQr(prefix) {
         statusEl.insertAdjacentElement('afterend', qrBox);
     }
 
-    const title = window.t ? window.t('res.qr.title') : '请扫码添加我的微信';
-    const hint  = window.t ? window.t('res.qr.hint')  : '长按图片保存二维码';
+    const tr = (key, fallback) => (window.t ? window.t(key) : fallback);
     qrBox.innerHTML = `
-        <p class="res-wechat-qr-title">${title}</p>
+        <p class="res-fee-label">${tr('res.fee.label', '代预约服务费')}</p>
+        <p class="res-fee-amount">${tr('res.fee.amount', '10元')}</p>
+        <p class="res-wechat-qr-title">${tr('res.qr.title', '请扫码添加微信后支付')}</p>
         <img src="/assets/wechat_qr.png" alt="WeChat QR" class="res-wechat-qr-img" loading="lazy">
-        <p class="res-wechat-qr-hint">${hint}</p>
+        <p class="res-wechat-qr-hint">${tr('res.qr.hint', '长按图片保存二维码')}</p>
+        <p class="res-fee-note">${tr('res.fee.note', '支付时请在备注栏填写您的微信ID。')}</p>
+        <p class="res-fee-warn">${tr('res.fee.warn', '确认收款后，我们将立即为您联系店铺。')}</p>
     `;
     qrBox.style.display = 'block';
     qrBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
