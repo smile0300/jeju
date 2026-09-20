@@ -733,6 +733,26 @@
 }
 
 
+@keyframes alertPulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 36, 66, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 36, 66, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 36, 66, 0); }
+}
+
+.weather-alert-card.alert-danger {
+    background: #fff0f2;
+    border: 1px solid #ff2442;
+    animation: alertPulse 2s infinite;
+}
+
+.weather-alert-card.alert-warn {
+    background: #fff8f0;
+    border: 1px solid #f08c00;
+}
+.weather-alert-card.alert-warn .alert-type-badge {
+    background: #f08c00;
+}
+
 .weather-alert-card {
     background: rgba(255, 36, 66, 0.08);
     /* ??𥔱?賳???𪆓儢??隢㓻�篥?*/

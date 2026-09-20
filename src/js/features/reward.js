@@ -66,8 +66,8 @@ function resolveImageUrl(item) {
         if (driveMatch && driveMatch[1]) {
             const fileId = driveMatch[1];
             return {
-                primary: `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`,
-                fallback: `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`,
+                primary: `/api/image-proxy?id=${fileId}`,
+                fallback: `/api/image-proxy?id=${fileId}`,
                 id: fileId
             };
         }

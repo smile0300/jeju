@@ -44,8 +44,9 @@ export async function onRequest(context) {
     const resultText = await gasResponse.text();
     
     // Check if the response is valid JSON. If GAS returns an HTML error page, this will throw.
+    let data;
     try {
-      JSON.parse(resultText);
+      data = JSON.parse(resultText);
     } catch (parseError) {
       return new Response(JSON.stringify({ error: 'Invalid JSON from Google Sheets', details: resultText.substring(0, 100) }), {
         status: 502,
@@ -53,7 +54,21 @@ export async function onRequest(context) {
       });
     }
 
-    return new Response(resultText, { headers: NO_CACHE_HEADERS });
+    // [보안] WeChat ID 마스킹 및 Note(내부 메모) 삭제
+    if (Array.isArray(data)) {
+        data = data.map(item => {
+            if (item.WeChatId) {
+                const id = String(item.WeChatId);
+                item.WeChatId = id.length > 4 ? id.substring(0,2) + '***' + id.substring(id.length-2) : '***';
+            }
+            if (item.Note) {
+                delete item.Note; 
+            }
+            return item;
+        });
+    }
+
+    return new Response(JSON.stringify(data), { headers: NO_CACHE_HEADERS });
   } catch (e) {
     return new Response(JSON.stringify({ error: e.message }), {
       status: 500,

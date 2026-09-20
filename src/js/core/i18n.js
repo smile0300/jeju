@@ -70,6 +70,7 @@ const TRANSLATIONS = {
         'weather.past.tip.freeze_m1': '<strong>穿衣提示:</strong> 1月的济州岛遭遇严寒和刺骨寒风，天气冷得彻骨。<br>保暖内衣、厚毛衣、挡风的厚重羽绒服、防寒手套和毛线帽，一样都不能少。<br>请尽量避免长时间在户外逗留，随身携带几个暖宝宝会帮上大忙。',
         'weather.past.tip.freeze_m2': '<strong>穿衣提示:</strong> 2月中上旬仍是强冷空气和暴雪频发的严寒期。<br>在多层轻薄衣物叠穿的基础上，再套上一件厚实的长款羽绒服，别忘了带上暖宝宝。<br>雪天驾驶非常危险，建议您考虑乘坐公共交通工具，或优先安排室内游览行程。',
         'weather.summary':    '汇总一览',
+        'weather.best':       '推荐(最晴朗)',
         'weather.alert.checking': '正在检查气象特报...',
         'weather.loading':    '正在加载...',
         'weather.group.north': '北线',
@@ -134,6 +135,9 @@ const TRANSLATIONS = {
         'res.type.other':      '其他',
         'res.back':            '返回',
         'res.type.change_hint': '点击返回可更换类型',
+        'res.type.label':      '申请类型',
+        'res.qr.title':        '请扫码添加我的微信',
+        'res.qr.hint':         '长按图片保存二维码',
         'res.notice':          '填写后，我们将通过微信与您联系 📩',
         'res.wechat.label':    '微信ID',
         'res.wechat.placeholder': '请输入您的微信ID',
@@ -141,6 +145,8 @@ const TRANSLATIONS = {
         'res.store.placeholder': '如有特定店铺请填写（可不填）',
         'res.date.label':      '期望到访日期',
         'res.date.placeholder': '请选择日期',
+        'res.time.label':      '期望到访时间',
+        'res.time.placeholder': '请选择时间（可不填）',
         'res.party.label':     '人数',
         'res.note.label':      '备注事项',
         'res.note.placeholder': '如有特殊要求请在此说明（语言偏好、过敏等）',
@@ -155,6 +161,7 @@ const TRANSLATIONS = {
         'course.form.notice':   '填写您的旅行偏好，我们将通过微信为您定制专属行程 📩',
         'course.form.theme':    '旅行主题/偏好',
         'course.form.theme_ph': '例如：家庭游，网红打卡，休闲度假等',
+        'course.form.date':     '旅行日期',
 
         // ── 공항 동적 텍스트 ──
         'airport.badge.register_close': '登记截止',
@@ -715,10 +722,12 @@ const TRANSLATIONS = {
         'weather.past.tip.cold_m1': '<strong>옷차림 팁:</strong> 1월은 일 년 중 가장 춥고 눈도 자주 내리는 제주도의 겨울입니다.<br>찬 바람을 완벽히 차단할 수 있는 두꺼운 롱패딩과 장갑, 머플러를 필수적으로 챙기세요.<br>산간 지역을 방문하신다면 눈길에 대비한 든든한 방한화나 등산화 착용을 권장합니다.',
         'weather.past.tip.cold_m2': '<strong>옷차림 팁:</strong> 2월은 아직 겨울의 추위가 맹위를 떨치며 찬 바람이 강하게 붑니다.<br>체온을 보호해 줄 두꺼운 외투와 보온 내복을 든든하게 입고 따뜻하게 여행하세요.<br>따뜻한 카페 투어나 실내 전시관람 등으로 동선을 유연하게 짜는 것을 추천해 드립니다.',
         'weather.past.tip.cold_m11': '<strong>옷차림 팁:</strong> 11월 말부터는 기온이 급감하며 겨울의 한기가 본격적으로 느껴집니다.<br>두꺼운 겨울용 외투를 준비하시고, 내층 보온을 위한 가벼운 경량 패딩이나 조끼를 챙기세요.<br>바람이 많이 부는 해안가 방문 시 모자나 귀마개를 활용하시면 체감 온도를 높일 수 있습니다.',
+        'weather.past.tip.cold_m12': '<strong>옷차림 팁:</strong> 12월은 한파와 칼바람이 몰아치는 본격적인 한겨울입니다.<br>두꺼운 패딩과 모자, 장갑, 목도리로 머리부터 발끝까지 든든하게 무장하세요.<br>따뜻한 국물 요리나 온천을 일정에 넣으면 몸을 녹이며 여행하기 좋습니다.',
         // 혹한
         'weather.past.tip.freeze_m1': '<strong>옷차림 팁:</strong> 1월 제주는 매서운 한파와 칼바람이 불어 뼛속까지 시린 날씨입니다.<br>보온 내복, 두툼한 스웨터, 바람을 막는 두꺼운 헤비 패딩, 방한 장갑과 털모자는 필수예요.<br>오랜 시간 야외에 머무는 것은 피하시고, 휴대용 핫팩을 챙기시면 큰 도움이 됩니다.',
         'weather.past.tip.freeze_m2': '<strong>옷차림 팁:</strong> 2월 초중순까지는 살을 에이는 강추위와 폭설이 잦은 혹한기입니다.<br>얇은 옷을 여러 겹 껴입는 레이어드 착장 위에 두꺼운 롱패딩을 덧입고 핫팩도 챙기세요.<br>눈길 운전이 위험할 수 있으니 대중교통 이용을 고려하거나 실내 일정을 우선시하세요.',
         'weather.summary':    '모아보기',
+        'weather.best':       '추천(가장 맑음)',
         'weather.alert.checking': '기상특보 확인 중...',
         'weather.loading':    '불러오는 중...',
         'weather.group.north': '북부',
@@ -782,6 +791,9 @@ const TRANSLATIONS = {
         'res.type.other':      '기타',
         'res.back':            '뒤로',
         'res.type.change_hint': '돌아가서 유형 변경 가능',
+        'res.type.label':      '신청 유형',
+        'res.qr.title':        'QR을 스캔해서 위챗 친구 추가해 주세요',
+        'res.qr.hint':         '이미지를 길게 눌러 저장할 수 있습니다',
         'res.notice':          '내용 입력 후 위챗으로 연락드리겠습니다 📩',
         'res.wechat.label':    '위챗 ID',
         'res.wechat.placeholder': '위챗 ID를 입력해주세요',
@@ -789,6 +801,8 @@ const TRANSLATIONS = {
         'res.store.placeholder': '가고 싶은 가게가 있으면 입력해주세요',
         'res.date.label':      '방문 희망 날짜',
         'res.date.placeholder': '날짜를 선택해주세요',
+        'res.time.label':      '방문 희망 시간',
+        'res.time.placeholder': '시간을 선택해주세요 (선택)',
         'res.party.label':     '인원 수',
         'res.note.label':      '요청 사항',
         'res.note.placeholder': '특별 요청 사항이 있으면 입력해주세요 (선호 언어, 알레르기 등)',
@@ -803,6 +817,7 @@ const TRANSLATIONS = {
         'course.form.notice':   '원하시는 여행 스타일을 알려주시면 위챗으로 맞춤형 추천 코스를 보내드립니다 📩',
         'course.form.theme':    '여행 테마/취향',
         'course.form.theme_ph': '예: 가족여행, 액티비티, 휴양, 핫플 등',
+        'course.form.date':     '여행 일정 (일자)',
 
         // ── 공항 동적 텍스트 ──
         'airport.badge.register_close': '수속마감',
@@ -1303,6 +1318,7 @@ const TRANSLATIONS = {
         'weather.past.tip.freeze_m1': '<strong>Outfit Tip:</strong> January in Jeju features severe cold waves and bone-chilling winds.<br>Thermal wear, thick sweaters, heavy wind-blocking down jackets, winter gloves, and hats are musts.<br>Avoid staying outdoors for long periods and bring portable hand warmers for extra help.',
         'weather.past.tip.freeze_m2': '<strong>Outfit Tip:</strong> Early to mid-February is a freezing period with severe cold and heavy snow.<br>Layer multiple thin clothes, top it with a thick long padded jacket, and carry hand warmers.<br>Driving in snow can be dangerous, so consider public transit or prioritize indoor activities.',
         'weather.summary':    'Overview',
+        'weather.best':       'Best (Clearest)',
         'weather.alert.checking': 'Checking weather alerts...',
         'weather.loading':    'Loading...',
         'weather.group.north': 'North',
@@ -1366,6 +1382,9 @@ const TRANSLATIONS = {
         'res.type.other':      'Other',
         'res.back':            'Back',
         'res.type.change_hint': 'Go back to change type',
+        'res.type.label':      'Request Type',
+        'res.qr.title':        'Scan to add me on WeChat',
+        'res.qr.hint':         'Press and hold the image to save it',
         'res.notice':          'We will contact you via WeChat after reviewing your request 📩',
         'res.wechat.label':    'WeChat ID',
         'res.wechat.placeholder': 'Enter your WeChat ID',
@@ -1373,6 +1392,8 @@ const TRANSLATIONS = {
         'res.store.placeholder': 'Enter store name if you have a preference',
         'res.date.label':      'Preferred Visit Date',
         'res.date.placeholder': 'Select a date',
+        'res.time.label':      'Preferred Visit Time',
+        'res.time.placeholder': 'Select a time (optional)',
         'res.party.label':     'Party Size',
         'res.note.label':      'Special Requests',
         'res.note.placeholder': 'Any special requests (language preference, allergies, etc.)',
@@ -1387,6 +1408,7 @@ const TRANSLATIONS = {
         'course.form.notice':   'Tell us your travel preferences, and we will create a customized itinerary for you via WeChat 📩',
         'course.form.theme':    'Travel Theme / Preferences',
         'course.form.theme_ph': 'e.g. Family trip, Activities, Relaxing, etc.',
+        'course.form.date':     'Travel Date',
 
         // ── 공항 동적 텍스트 ──
         'airport.badge.register_close': 'Gate Closed',
@@ -1411,6 +1433,7 @@ const TRANSLATIONS = {
         'weather.error.title': 'Failed to load weather info',
         'weather.error.desc': 'There might be a temporary connection issue.<br>Please try again later.',
         'common.retry': 'Retry',
+        'common.load_more': 'Load More',
 
         // ── 날씨 동적 텍스트 ──
         'weather.humidity': 'Humidity',
@@ -1497,6 +1520,7 @@ const TRANSLATIONS = {
         'lost.detail.cs': 'Support',
         'lost.detail.wechat_guide': 'Scan the QR code to contact us on WeChat',
         'lost.report.size_err': 'Photo size cannot exceed 2MB.',
+        'lost.report.heic_err': 'iPhone High Efficiency (HEIC) photos are not supported.\nPlease take a screenshot in your gallery and upload the screenshot (JPEG/PNG) instead!',
         'lost.report.fill_err': 'Please fill in all details.',
         'lost.report.photo_err': 'Please upload item photo (Required).',
         'lost.report.submitting': 'Submitting...',
@@ -1643,6 +1667,7 @@ const TRANSLATIONS = {
         'modal.lost.cancel':     'Cancel',
         'modal.lost.privacy.agree': 'I agree to the collection and use of personal information',
         'modal.lost.privacy.detail': 'View Details',
+        'modal.lost.privacy.err': 'Please agree to the collection and use of personal information.',
         'modal.lost.submit':     'Submit Registration',
         'modal.lost.btn_prev':   'Back',
         'modal.lost.btn_next':   'Next',
@@ -1895,6 +1920,10 @@ export function setLanguage(lang) {
         if (window.festivalApp && window.festivalApp.initFestivalFilters) {
             window.festivalApp.initFestivalFilters();
             window.festivalApp.fetchFestivals();
+        }
+        // 예약 유형 드롭다운 재렌더링 (옵션 라벨이 언어별로 바뀜)
+        if (window.initReservationSection) {
+            window.initReservationSection();
         }
         // 공항 탭 재렌더링
         if (window.airportApp && window.airportApp.fetchFlights) {

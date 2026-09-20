@@ -18,32 +18,59 @@ export function initReservationSection() {
     initDatePicker();
 }
 
-/** 유형 배지 텍스트 갱신 */
+/** 유형 선택 드롭다운 갱신 — 옵션 목록 재구성 + 현재 유형 반영 */
 function updateTypeBadge() {
-    const type = window.currentReservationType || 'other';
-    const info = RES_TYPE_MAP[type] || RES_TYPE_MAP.other;
-    const badge = document.getElementById('res-type-badge');
-    if (!badge) return;
-    const label = window.t ? window.t(info.key) : info.key;
-    badge.textContent = info.icon + ' ' + label;
-    badge.dataset.type = type;
+    const select = document.getElementById('res-type-select');
+    if (!select) return;
+
+    // 홈 서브버튼을 거치지 않고 들어온 경우 대비 (알 수 없는 값이면 '기타')
+    const type = RES_TYPE_MAP[window.currentReservationType] ? window.currentReservationType : 'other';
+    window.currentReservationType = type;
+
+    select.innerHTML = Object.keys(RES_TYPE_MAP).map(key => {
+        const info = RES_TYPE_MAP[key];
+        const label = window.t ? window.t(info.key) : info.key;
+        return `<option value="${key}">${info.icon} ${label}</option>`;
+    }).join('');
+    select.value = type;
+    select.dataset.type = type;
 }
 
-/** flatpickr 날짜 선택기 초기화 */
+/** 드롭다운에서 유형 변경 */
+export function changeReservationType(type) {
+    window.currentReservationType = RES_TYPE_MAP[type] ? type : 'other';
+    const select = document.getElementById('res-type-select');
+    if (select) select.dataset.type = window.currentReservationType;
+}
+
+/** flatpickr 날짜·시간 선택기 초기화 */
 function initDatePicker() {
-    const dateInputs = document.querySelectorAll('.date-input');
-    if (!dateInputs.length) return;
     if (typeof flatpickr === 'undefined') return;
 
     const lang = window.getLang ? window.getLang() : 'zh';
     const locale = lang === 'ko' ? 'ko' : (lang === 'en' ? 'en' : 'zh');
 
-    dateInputs.forEach(input => {
+    document.querySelectorAll('.date-input').forEach(input => {
+        if (input.classList.contains('time-input')) return; // 시간 입력은 아래에서 따로 처리
         if (!input._flatpickr) {
             flatpickr(input, {
                 locale: locale,
                 minDate: 'today',
                 dateFormat: 'Y-m-d',
+            });
+        }
+    });
+
+    document.querySelectorAll('.time-input').forEach(input => {
+        if (!input._flatpickr) {
+            flatpickr(input, {
+                locale: locale,
+                enableTime: true,
+                noCalendar: true,
+                dateFormat: 'H:i',
+                time_24hr: true,
+                minuteIncrement: 10,
+                defaultHour: 12,
             });
         }
     });
@@ -64,6 +91,7 @@ export async function submitReservation(prefix = 'res') {
     const wechatEl   = document.getElementById(`${prefix}-wechat`);
     const storeEl    = document.getElementById(`${prefix}-store`);
     const dateEl     = document.getElementById(`${prefix}-visit-date`);
+    const timeEl     = document.getElementById(`${prefix}-visit-time`);
     const partyEl    = document.getElementById(`${prefix}-party`);
     const noteEl     = document.getElementById(`${prefix}-note`);
     const statusEl   = document.getElementById(`${prefix}-status`);
@@ -71,7 +99,11 @@ export async function submitReservation(prefix = 'res') {
 
     const wechatId    = wechatEl  ? wechatEl.value.trim()  : '';
     const visitDate   = dateEl    ? dateEl.value.trim()    : '';
+    const visitTime   = timeEl    ? timeEl.value.trim()    : '';
     const partySize   = partyEl   ? partyEl.value          : '1';
+
+    // 시트에는 날짜 셀 하나에 "YYYY-MM-DD HH:mm" 형태로 합쳐서 기록
+    const visitDateTime = visitTime ? `${visitDate} ${visitTime}` : visitDate;
     const store       = storeEl   ? storeEl.value.trim()   : '';
     const note        = noteEl    ? noteEl.value.trim()    : '';
     
@@ -87,6 +119,7 @@ export async function submitReservation(prefix = 'res') {
 
     try {
         if (submitBtn) submitBtn.disabled = true;
+        hideWechatQr(prefix);
         showStatus(statusEl, window.t ? window.t('alert.submitting') : '提交中...', '');
 
         const res = await fetch(`${CONFIG.PROXY_URL || ''}/api/feature-request`, {
@@ -97,7 +130,7 @@ export async function submitReservation(prefix = 'res') {
                 reservationType: resType,
                 wechatId: wechatId,
                 preferredStore: store,
-                visitDate: visitDate,
+                visitDate: visitDateTime,
                 partySize: partySize,
                 requestNote: note,
                 userAgent: navigator.userAgent,
@@ -106,10 +139,12 @@ export async function submitReservation(prefix = 'res') {
 
         if (res.ok) {
             showStatus(statusEl, window.t ? window.t('res.success') : '✅ 申请已提交！我们将尽快通过微信与您联系。', 'success');
+            showWechatQr(prefix);
             // 폼 초기화
             if (wechatEl) wechatEl.value = '';
             if (storeEl) storeEl.value = '';
             if (dateEl && dateEl._flatpickr) dateEl._flatpickr.clear();
+            if (timeEl && timeEl._flatpickr) timeEl._flatpickr.clear();
             if (partyEl) partyEl.value = '2';
             if (noteEl) noteEl.value = '';
         } else {
@@ -120,6 +155,39 @@ export async function submitReservation(prefix = 'res') {
     } finally {
         if (submitBtn) submitBtn.disabled = false;
     }
+}
+
+/**
+ * 제출 성공 시 위챗 QR 안내를 상태 메시지 아래에 노출.
+ * 위챗 ID 검색이 차단된 사용자에게는 이쪽에서 먼저 추가하는 경로가 막히므로,
+ * 상대가 우리를 추가하도록 방향을 뒤집는다.
+ */
+function showWechatQr(prefix) {
+    const statusEl = document.getElementById(`${prefix}-status`);
+    if (!statusEl) return;
+
+    let qrBox = document.getElementById(`${prefix}-wechat-qr`);
+    if (!qrBox) {
+        qrBox = document.createElement('div');
+        qrBox.id = `${prefix}-wechat-qr`;
+        qrBox.className = 'res-wechat-qr';
+        statusEl.insertAdjacentElement('afterend', qrBox);
+    }
+
+    const title = window.t ? window.t('res.qr.title') : '请扫码添加我的微信';
+    const hint  = window.t ? window.t('res.qr.hint')  : '长按图片保存二维码';
+    qrBox.innerHTML = `
+        <p class="res-wechat-qr-title">${title}</p>
+        <img src="/assets/wechat_qr.png" alt="WeChat QR" class="res-wechat-qr-img" loading="lazy">
+        <p class="res-wechat-qr-hint">${hint}</p>
+    `;
+    qrBox.style.display = 'block';
+    qrBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function hideWechatQr(prefix) {
+    const qrBox = document.getElementById(`${prefix}-wechat-qr`);
+    if (qrBox) qrBox.style.display = 'none';
 }
 
 function showStatus(el, msg, type) {

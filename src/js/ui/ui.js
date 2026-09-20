@@ -356,6 +356,37 @@ function _buildSummaryHTML(targetYmd) {
     const isToday = displayYmd === todayYmd;
     const titleText = `${parseInt(displayYmd.slice(4,6))}月 ${parseInt(displayYmd.slice(6,8))}日`;
 
+    let bestLocKey = null;
+    let bestScore = -99999;
+    // 09:00 ~ 19:00 사이의 강수확률과 풍속을 비교하여 최적의 1개 지역 도출 (Sprint 1-1)
+    for (const [locKey, meta] of Object.entries(LOC_META)) {
+        const state = WEATHER_STATE[locKey];
+        if (state) {
+            const daytimeKeys = state.sortedKeys.filter(k => {
+                if(!k.startsWith(displayYmd)) return false;
+                const h = parseInt(k.slice(8, 10));
+                return h >= 9 && h <= 19; 
+            });
+            if (daytimeKeys.length > 0) {
+                let totalPop = 0;
+                let totalWsd = 0;
+                daytimeKeys.forEach(k => {
+                    const d = state.items[k];
+                    totalPop += parseInt(d?.POP || '0', 10);
+                    totalWsd += parseFloat(d?.WSD || '0');
+                });
+                const avgPop = totalPop / daytimeKeys.length;
+                const avgWsd = totalWsd / daytimeKeys.length;
+                // 강수확률 감점 크게, 풍속 감점 적용 (값이 작을수록 점수가 높음)
+                const score = -(avgPop * 2) - (avgWsd * 5);
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestLocKey = locKey;
+                }
+            }
+        }
+    }
+
     let content = '';
     for (const [locKey, meta] of Object.entries(LOC_META)) {
         const state = WEATHER_STATE[locKey];
@@ -395,10 +426,18 @@ function _buildSummaryHTML(targetYmd) {
         }
         if (!itemsHTML) itemsHTML = `<div class="wsm-nodata">加载中...</div>`;
 
+        let crownHtml = '';
+        let borderStyle = '';
+        if (locKey === bestLocKey) {
+            const bestTxt = window.t ? window.t('weather.best') : '推荐(最晴朗)';
+            crownHtml = `<span style="font-size: 0.8em; margin-left: 8px; color: #e67700; background: #fff3bf; padding: 2px 6px; border-radius: 4px; font-weight: bold;">👑 ${bestTxt}</span>`;
+            borderStyle = 'border: 2px solid #fcc419; background-color: #fffcf0;';
+        }
+
         content += `
-        <div class="wsm-loc-block" data-locname="${meta.title}" data-lockey="${locKey}">
+        <div class="wsm-loc-block" data-locname="${meta.title}" data-lockey="${locKey}" style="${borderStyle}">
             <div class="wsm-card-watermark">JEJU-LIVE.COM</div>
-            <h3 class="wsm-loc-title">${meta.title} <span class="wsm-loc-sub">${meta.sub}</span></h3>
+            <h3 class="wsm-loc-title">${meta.title} <span class="wsm-loc-sub">${meta.sub}</span>${crownHtml}</h3>
             <div class="wsm-hourly-grid">${itemsHTML}</div>
         </div>`;
     }

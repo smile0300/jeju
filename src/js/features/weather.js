@@ -272,6 +272,9 @@ export async function fetchWeatherData(locKey) {
 }
 
 export async function fetchMountainWeather(obsid) {
+    // [Phase 1] 산악기상 API 상류 폐기로 인해 임시 차단 (무한 400 에러 방지)
+    return null;
+    
     const endpoint = 'https://apis.data.go.kr/1400377/mtweather';
     const params = {
         obsid: obsid,
@@ -377,6 +380,16 @@ export function parseAndRenderWeather(locKey, items, midData, mountainData) {
         const w = parseFloat(current.WSD || 0);
         const feelsLike = Math.round(t - (2 * w * 0.1));
 
+        const lang = window.getLang ? window.getLang() : (localStorage.getItem('jeju_lang') || 'zh');
+        
+        // [Task 1] 강수 타임라인 배너
+        const timelineText = generatePrecipitationTimeline(sortedKeys, grouped, lang);
+        const timelineHtml = timelineText ? `<div class="precip-timeline-banner" style="background: rgba(49, 130, 246, 0.1); color: #1c7ed6; padding: 12px; border-radius: 8px; margin-top: 15px; font-weight: 600; font-size: 0.9rem; text-align: center;">${timelineText}</div>` : '';
+
+        // [Task 3] 현재 날씨 종합 해석 및 활동 적합도
+        const interpretationText = generateOverallInterpretation(current, timelineText, lang);
+        const interpretationHtml = `<div class="overall-interpretation" style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--separator); font-size: 0.9rem; color: var(--text-secondary);">${interpretationText}</div>`;
+
         currentCard.className = "naver-card current-weather-main";
         currentCard.innerHTML = `
             <div class="current-weather-box">
@@ -389,12 +402,15 @@ export function parseAndRenderWeather(locKey, items, midData, mountainData) {
                 <div class="cw-right">
                     <ul class="cw-details-list">
                         <li><span class="cwi"><i class="ph-duotone ph-wind color-cloud"></i></span> <span style="color: ${getWindColor(current.WSD)}; font-weight: 800;">${getWindDesc(current.WSD)}</span> ${current.WSD}m/s</li>
-                        <li><span class="cwi"><i class="ph-duotone ph-drop color-rain"></i></span> ${window.t('weather.humidity')} ${current.REH}%</li>
-                        <li><span class="cwi"><i class="ph-duotone ph-thermometer color-cctv"></i></span> ${window.t('weather.feelslike')} ${feelsLike}°</li>
-                        <li id="top-air-${locKey}"><span class="cwi"><i class="ph-duotone ph-face-mask color-lost"></i></span> ${window.t('weather.aq')} <span class="val">--</span></li>
+                        <li><span class="cwi"><i class="ph-duotone ph-drop color-rain"></i></span> ${window.t ? window.t('weather.humidity') : '湿度'} ${current.REH}%</li>
+                        <li><span class="cwi"><i class="ph-duotone ph-thermometer color-cctv"></i></span> ${window.t ? window.t('weather.feelslike') : '体感'} ${feelsLike}°</li>
+                        <li id="top-air-${locKey}"><span class="cwi"><i class="ph-duotone ph-face-mask color-lost"></i></span> ${window.t ? window.t('weather.aq') : '空气质量'} <span class="val">--</span></li>
                     </ul>
                 </div>
-            </div>`;
+            </div>
+            ${interpretationHtml}
+            ${timelineHtml}
+        `;
     }
 
     renderWeeklyList(locKey, grouped, sortedKeys, midData);
@@ -1006,13 +1022,19 @@ export async function fetchWeatherAlerts() {
                 const translatedTitle = translateWeatherAlert(titleToTranslate).replace(/\(\*\)/g, '').trim();
                 
                 let alertTypeKey = 'weather.alert.badge';
-                if (item.type.includes('주의보')) alertTypeKey = 'weather.alert.badge.warn';
-                else if (item.type.includes('경보')) alertTypeKey = 'weather.alert.badge.danger';
+                let alertLevelClass = '';
+                if (item.type.includes('주의보')) {
+                    alertTypeKey = 'weather.alert.badge.warn';
+                    alertLevelClass = 'alert-warn';
+                } else if (item.type.includes('경보')) {
+                    alertTypeKey = 'weather.alert.badge.danger';
+                    alertLevelClass = 'alert-danger';
+                }
 
-                const alertType = window.t(alertTypeKey);
+                const alertType = window.t ? window.t(alertTypeKey) : item.type;
 
                 const html = `
-                    <div class="weather-alert-card animate-slide-up" onclick="window.showWeatherSectionWithAlert()" style="cursor: pointer;">
+                    <div class="weather-alert-card animate-slide-up ${alertLevelClass}" onclick="window.showWeatherSectionWithAlert()" style="cursor: pointer;">
                         <div class="alert-type-badge">${alertType} ${activeItems.length > 1 ? `(${idx + 1}/${activeItems.length})` : ''}</div>
                         <div class="alert-msg"><i class="ph-duotone ph-warning-circle"></i> ${translatedTitle}</div>
                     </div>`;
@@ -1475,3 +1497,87 @@ function generateTipKey(month, avgTemp, wetDays, maxTemp, minTemp, totalDays) {
 document.addEventListener('DOMContentLoaded', () => {});
 
 
+// --- Helper Functions for Sprint 1-1 ---
+
+function generatePrecipitationTimeline(sortedKeys, grouped, lang = 'zh') {
+    let startIdx = -1;
+    let endIdx = -1;
+    
+    const now = new Date();
+    const limitMs = now.getTime() + (24 * 60 * 60 * 1000); // 24시간 내
+    
+    for (let i = 0; i < sortedKeys.length; i++) {
+        const k = sortedKeys[i];
+        const year = k.slice(0,4);
+        const month = k.slice(4,6) - 1;
+        const day = k.slice(6,8);
+        const hour = k.slice(8,10);
+        
+        const fcstDate = new Date(year, month, day, hour);
+        if (fcstDate.getTime() < now.getTime() - (60 * 60 * 1000)) continue; 
+        if (fcstDate.getTime() > limitMs) break; 
+        
+        const pop = parseInt(grouped[k].POP || '0', 10);
+        if (pop >= 50) { 
+            if (startIdx === -1) startIdx = i;
+            endIdx = i;
+        } else {
+            if (startIdx !== -1) break; 
+        }
+    }
+    
+    if (startIdx === -1) return null; 
+    
+    const startHour = parseInt(sortedKeys[startIdx].slice(8,10), 10);
+    let endHour = parseInt(sortedKeys[endIdx].slice(8,10), 10);
+    if (endHour === startHour) endHour = startHour + 1; // 최소 1시간 구간
+    
+    if (lang === 'ko') {
+        return `☔ 오늘 ${startHour}시부터 ${endHour}시까지 비가 올 확률이 높습니다. 우산을 챙기세요.`;
+    } else if (lang === 'en') {
+        return `☔ High chance of rain from ${startHour}:00 to ${endHour}:00. Bring an umbrella.`;
+    } else {
+        return `☔ 今天 ${startHour}:00 至 ${endHour}:00 降雨概率较高，请带伞。`;
+    }
+}
+
+function generateOverallInterpretation(current, timelineText, lang = 'zh') {
+    const w = parseFloat(current.WSD || 0);
+    const pop = parseInt(current.POP || '0', 10);
+    
+    let activity = '좋음 (适合户外)';
+    let activityColor = '#2b8a3e';
+    let windText = '바람이 잔잔합니다 (风力较弱)';
+    
+    if (w >= 14) {
+        activity = '위험 (不宜户外)';
+        activityColor = '#c92a2a';
+        windText = '강풍이 붑니다 (有强风)';
+    } else if (w >= 9) {
+        activity = '주의 (户外需注意)';
+        activityColor = '#e67700';
+        windText = '바람이 다소 강합니다 (风稍大)';
+    }
+    
+    if (pop >= 50 || timelineText) {
+        if (activity === '좋음 (适合户外)') {
+            activity = '보통 (适中)';
+            activityColor = '#e67700';
+        }
+        windText += ', 비 예정 (将有雨)';
+    } else if (w < 9) {
+        windText = '날씨가 대체로 양호합니다 (天气整体良好)';
+    }
+
+    if (lang === 'ko') {
+        return `<span style="font-weight: 700;">총평:</span> ${windText.split(' (')[0]}. &nbsp;&nbsp;<span style="font-weight: 700;">활동 적합도:</span> <span style="color: ${activityColor}; font-weight: 800;">${activity.split(' ')[0]}</span>`;
+    } else if (lang === 'en') {
+        return `<span style="font-weight: 700;">Summary:</span> ${windText.split(' (')[0]}. &nbsp;&nbsp;<span style="font-weight: 700;">Suitability:</span> <span style="color: ${activityColor}; font-weight: 800;">${activity.split(' ')[0]}</span>`;
+    } else {
+        const cnWindMatch = windText.match(/\((.*?)\)/);
+        const cnActMatch = activity.match(/\((.*?)\)/);
+        const cnWind = cnWindMatch ? cnWindMatch[1] : '';
+        const cnAct = cnActMatch ? cnActMatch[1] : '';
+        return `<span style="font-weight: 700;">总评:</span> ${cnWind}。 &nbsp;&nbsp;<span style="font-weight: 700;">户外适宜度:</span> <span style="color: ${activityColor}; font-weight: 800;">${cnAct}</span>`;
+    }
+}

@@ -296,7 +296,7 @@ export async function onRequest(context) {
           headers: { 
             'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
             'Content-Type': 'application/json; charset=utf-8',
-            'Cache-Control': 'public, max-age=1800' // 30분 캐싱 설정
+            'Cache-Control': 'public, max-age=14400' // 4시간 캐싱 설정
           }
         });
       }

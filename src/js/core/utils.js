@@ -15,11 +15,14 @@ export function getSkyInfo(pty, sky, hour) {
 
 export function getWindDesc(ws) {
     const v = parseFloat(ws);
-    if (isNaN(v)) return window.t ? window.t('weather.wind.unknown') : '未知';
-    if (v < 4) return window.t ? window.t('weather.wind.light') : '微风';
-    if (v < 9) return window.t ? window.t('weather.wind.moderate') : '和风';
-    if (v < 14) return window.t ? window.t('weather.wind.fresh') : '清劲风';
-    return window.t ? window.t('weather.wind.strong') : '强风';
+    const lang = window.getLang ? window.getLang() : (localStorage.getItem('jeju_lang') || 'zh');
+    
+    if (isNaN(v)) return lang === 'ko' ? '알 수 없음' : (lang === 'en' ? 'Unknown' : '未知');
+    
+    if (v < 4) return lang === 'ko' ? '바람 약함' : (lang === 'en' ? 'Light wind' : '微风');
+    if (v < 9) return lang === 'ko' ? '🍃 모자 날아감 주의' : (lang === 'en' ? '🍃 Hold your hat' : '🍃 小心帽子吹跑');
+    if (v < 14) return lang === 'ko' ? '☂️ 우산 뒤집힘 주의' : (lang === 'en' ? '☂️ Umbrella may flip' : '☂️ 小心伞被吹翻');
+    return lang === 'ko' ? '⚠️ 야외활동 자제 (강풍)' : (lang === 'en' ? '⚠️ Avoid outdoor activities' : '⚠️ 尽量避免户外活动 (强风)');
 }
 
 export function getWindColor(ws) {

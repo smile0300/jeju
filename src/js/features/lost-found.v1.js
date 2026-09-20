@@ -999,7 +999,7 @@ window.openSuccessModal = function(index) {
                            imgUrl.match(/[?&]id=([a-zA-Z0-9_-]{25,})/) ||
                            imgUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
         if (driveMatch && driveMatch[1]) {
-            imgUrl = `https://drive.google.com/thumbnail?id=${driveMatch[1]}&sz=w800`;
+            imgUrl = `/api/image-proxy?id=${driveMatch[1]}`;
         }
     }
 
@@ -1195,7 +1195,7 @@ export function renderSuccessGoodsView(isLoadMore = false) {
                                imgUrl.match(/[?&]id=([a-zA-Z0-9_-]{25,})/) ||
                                imgUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
             if (driveMatch && driveMatch[1]) {
-                imgUrl = `https://drive.google.com/thumbnail?id=${driveMatch[1]}&sz=w800`;
+                imgUrl = `/api/image-proxy?id=${driveMatch[1]}`;
             }
         }
 

@@ -11,10 +11,11 @@
     <div class="section">
         <div class="container">
 
-            <!-- 예약 유형 표시 배지 -->
+            <!-- 예약 유형 선택 -->
             <div id="res-type-badge-wrap" style="margin-bottom:16px; display:flex; align-items:center; gap:10px;">
-                <span id="res-type-badge" class="res-type-badge"></span>
-                <span class="res-type-change-hint" data-i18n="res.type.change_hint">点击首页返回可更换类型</span>
+                <select id="res-type-select" class="res-type-badge"
+                        data-i18n-aria="res.type.label" aria-label="申请类型"
+                        onchange="window.changeReservationType(this.value)"></select>
             </div>
 
             <!-- 안내 문구 -->
@@ -48,6 +49,14 @@
                     <input type="text" id="res-visit-date" class="date-input form-input"
                            data-i18n-placeholder="res.date.placeholder"
                            placeholder="请选择日期" readonly required>
+                </div>
+
+                <!-- 방문 희망 시간 -->
+                <div class="form-group">
+                    <label class="form-label" data-i18n="res.time.label">期望到访时间</label>
+                    <input type="text" id="res-visit-time" class="date-input time-input form-input"
+                           data-i18n-placeholder="res.time.placeholder"
+                           placeholder="请选择时间（可不填）" readonly>
                 </div>
 
                 <!-- 인원 수 -->

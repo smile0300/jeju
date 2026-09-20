@@ -31,6 +31,19 @@ export async function onRequest(context) {
     for (const [key, value] of url.searchParams) if (key !== 'endpoint' && key !== 'url' && key !== '_') targetUrl.searchParams.set(key, value);
 
     const hostname = targetUrl.hostname;
+    const isFlight = hostname.includes('openapi.airport.co.kr');
+
+    // Edge Caching (항공편 제외)
+    const cache = caches.default;
+    const cacheKey = new Request(request.url, request);
+
+    if (!isFlight) {
+      let cachedResponse = await cache.match(cacheKey);
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+    }
+
     if (hostname.includes('apis.data.go.kr') || hostname.includes('openapi.airport.co.kr') || hostname.includes('api.visitjeju.net') || hostname.includes('api.jejuits.go.kr')) {
       let serviceKey = env.SECRET_PUBLIC_DATA_KEY || env.PUBLIC_DATA_KEY;
       if (hostname.includes('api.visitjeju.net') && (env.VISIT_JEJU_KEY || env.SECRET_VIS_JEJU_KEY)) serviceKey = env.VISIT_JEJU_KEY || env.SECRET_VIS_JEJU_KEY;
@@ -78,7 +91,14 @@ export async function onRequest(context) {
       return new Response(rewrittenLines.join('\n'), { status: res.status, headers: newHeaders });
     }
 
-    return new Response(res.body, { status: res.status, headers: newHeaders });
+    const finalResponse = new Response(res.body, { status: res.status, headers: newHeaders });
+    
+    // 에러가 아니고 HLS 스트림이 아닌 경우 캐시 저장 (항공편 제외)
+    if (!isFlight && res.ok && !targetUrlString.toLowerCase().includes('.m3u8')) {
+      context.waitUntil(cache.put(cacheKey, finalResponse.clone()));
+    }
+    
+    return finalResponse;
   } catch (e) {
     return new Response(`Proxy Error: ${e.message}`, { status: 500, headers: { 'Access-Control-Allow-Origin': ALLOWED_ORIGIN } });
   }

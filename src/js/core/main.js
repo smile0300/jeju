@@ -12,7 +12,7 @@ import { renderHallasanDashboard } from '../features/hallasan-dashboard.js';
 import { fetchFlights, switchFlightTab } from '../features/airport.js';
 import { fetchFoundGoods, switchLostView, openLostDetailModalByIndex, openLostReportModal, handleLostImageChange, submitLostReport, showWechatQR, fetchSuccessStories } from '../features/lost-found.v1.js';
 import { fetchFestivals, initFestivalFilters } from '../features/festival.js';
-import { initReservationSection, adjustParty, submitReservation } from '../features/reservation.js';
+import { initReservationSection, adjustParty, submitReservation, changeReservationType } from '../features/reservation.js';
 import { initReward } from '../features/reward.js';
 import { showSection, openWechatQR, closeWechatQR, openFeatureModal, closeFeatureModal, submitFeatureRequest, openCSModal, closeCSModal, submitCSFeedback, copyWechatId, openWeatherSummaryModal, closeWeatherSummaryModal, openShareModal, closeShareModal, shareToPlatform } from '../ui/ui.js';
 import '../ui/home.js';
@@ -197,6 +197,7 @@ window.fetchFlights = fetchFlights;
 window.initReservationSection = initReservationSection;
 window.adjustParty = adjustParty;
 window.submitReservation = submitReservation;
+window.changeReservationType = changeReservationType;
 
 window.backToLostMenu = () => {
     // 현재 활성 섹션이 폼 입력 페이지라면 폼 초기화
@@ -451,12 +452,19 @@ window.addEventListener('load', () => {
     // Update loops
     if (window.flightIntervalId) clearInterval(window.flightIntervalId);
     window.flightIntervalId = setInterval(() => {
+        const airportSection = document.getElementById('airport');
+        if (airportSection && !airportSection.classList.contains('active')) return;
         const activeTab = document.querySelector('.flight-tab.active');
         fetchFlights(activeTab?.id === 'tab-depart' ? 'depart' : 'arrive');
     }, 60000);
 
     if (window.weatherIntervalId) clearInterval(window.weatherIntervalId);
     window.weatherIntervalId = setInterval(() => {
+        const homeActive = document.getElementById('home')?.classList.contains('active');
+        const weatherActive = document.getElementById('weather')?.classList.contains('active');
+        const hallasanActive = document.getElementById('hallasan')?.classList.contains('active');
+        if (!homeActive && !weatherActive && !hallasanActive) return;
+
         Object.keys(CONFIG.WEATHER_LOCATIONS).forEach(loc => fetchWeatherData(loc));
         fetchWeatherAlerts();
         renderHallasanDashboard(); 

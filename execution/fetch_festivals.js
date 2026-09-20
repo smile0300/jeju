@@ -2,12 +2,7 @@ const puppeteer = require('puppeteer');
 const fs = require('fs');
 const path = require('path');
 
-// 비짓제주 축제 크롤러 v4 (2026-05-25)
-// 핵심 수정:
-// 1. ElementHandle.click()으로 실제 마우스 이벤트 발생 (isTrusted: true)
-// 2. DOM 변경 감지를 전체 목록 해시 비교 방식으로 강화
-// 3. 각 월마다 페이지를 새로 로드하는 방식으로 안정성 확보
-
+// 비짓제주 축제 크롤러 v5 (이중 크롤링: KR + CN 병합)
 async function fetchFestivals() {
     const months = [];
     const now = new Date();
@@ -35,55 +30,38 @@ async function fetchFestivals() {
         ]
     });
 
-    for (const m of months) {
-        console.log(`\n[${m.ym}] 크롤링 시작...`);
-        const page = await browser.newPage();
-        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36');
-
+    // Helper to crawl a specific language page for a month
+    async function crawlMonth(page, lang, monthData) {
+        console.log(`\n[${monthData.ym}] ${lang} 크롤링 시작...`);
         try {
-            // 각 월마다 페이지를 새로 로드 (가장 안정적인 방식)
-            await page.goto('https://visitjeju.net/kr/festival/list?state=all', {
+            await page.goto(`https://visitjeju.net/${lang}/festival/list?state=all`, {
                 waitUntil: 'networkidle2',
                 timeout: 60000
             });
             await new Promise(r => setTimeout(r, 4000));
 
-            // ElementHandle을 통한 네이티브 마우스 클릭 (핵심 수정)
-            // Puppeteer의 ElementHandle.click()은 실제 마우스 이벤트를 발생시켜
-            // isTrusted: true가 되므로 비짓제주의 이벤트 핸들러가 정상 반응함
             const monthAnchors = await page.$$('a');
             let clicked = false;
             for (const anchor of monthAnchors) {
                 const text = await page.evaluate(el => el.innerText.trim(), anchor);
-                if (text === `${m.month}월`) {
-                    // 요소가 뷰포트에 보이도록 스크롤
+                if (text === `${monthData.month}월` || text === `${monthData.month}月`) {
                     await page.evaluate(el => el.scrollIntoView({ block: 'center' }), anchor);
                     await new Promise(r => setTimeout(r, 500));
                     await anchor.click();
                     clicked = true;
-                    console.log(`  ✅ ${m.month}월 탭 네이티브 클릭 성공`);
+                    console.log(`  ✅ ${monthData.month}월(${lang}) 탭 클릭 성공`);
                     break;
                 }
             }
 
             if (!clicked) {
-                console.log(`  ⚠️ ${m.month}월 탭을 찾을 수 없음, 해당 월 건너뜀`);
-                festivalData.months[m.ym] = [];
-                continue;
+                console.log(`  ⚠️ 탭 없음`);
+                return [];
             }
 
-            // AJAX 콘텐츠 로딩 대기 (네트워크 활동이 멈출 때까지)
-            try {
-                await page.waitForNetworkIdle({ idleTime: 1500, timeout: 10000 });
-                console.log('  네트워크 유휴 감지');
-            } catch {
-                console.log('  네트워크 유휴 대기 타임아웃');
-            }
-
-            // 추가 안전 대기
+            try { await page.waitForNetworkIdle({ idleTime: 1500, timeout: 10000 }); } catch (e) {}
             await new Promise(r => setTimeout(r, 2000));
 
-            // 스크롤 다운: 레이지 로드 콘텐츠 강제 렌더링
             await page.evaluate(async () => {
                 for (let i = 0; i < 5; i++) {
                     window.scrollBy(0, 500);
@@ -93,7 +71,6 @@ async function fetchFestivals() {
             });
             await new Promise(r => setTimeout(r, 1000));
 
-            // 데이터 수집
             const result = await page.evaluate(() => {
                 const results = [];
                 const festivalLinks = document.querySelectorAll('a[href*="/festival/view"]');
@@ -101,91 +78,96 @@ async function fetchFestivals() {
                 festivalLinks.forEach(a => {
                     const href = a.href || '';
                     if (!href) return;
+                    
+                    const urlParams = new URL(href).searchParams;
+                    const contentsid = urlParams.get('contentsid') || href;
 
                     const titleEl = a.querySelector('strong');
                     const spanEls = a.querySelectorAll('span');
-                    const statusEl = a.querySelector('i');
                     const imgEl = a.querySelector('img');
 
                     if (!titleEl) return;
-
                     let title = titleEl.innerText.trim();
                     title = title.replace(/진행중|종료|예정|진행예정|D-\d+/g, '').replace(/\n/g, ' ').trim();
                     if (title.length < 2) return;
 
-                    // 기간 추출
                     let period = '';
+                    let tags = [];
                     spanEls.forEach(span => {
                         const text = span.innerText.trim();
                         if (/\d{4}\.\d{2}\.\d{2}/.test(text)) {
                             period = text;
+                        } else if (text.startsWith('#')) {
+                            tags.push(text);
                         }
                     });
-                    if (!period) return;
-
-                    // 상태 판별
-                    const statusText = statusEl ? statusEl.innerText.trim() : '';
-                    const fullCardText = a.innerText || '';
-                    let status = 'ongoing';
-                    if (statusText.includes('예정') || statusText.includes('D-') || fullCardText.includes('D-')) {
-                        status = 'upcoming';
-                    } else if (statusText.includes('종료')) {
-                        status = 'ended';
-                    }
-                    if (status === 'ended') return;
+                    
+                    // 주소 및 카테고리 정보가 텍스트로 있을 수 있으므로 태그 병합하여 주소 필드로 활용
+                    const address = tags.join(' ');
 
                     const thumbnail = imgEl ? (imgEl.src || imgEl.dataset.src || '') : '';
                     const fullLink = href.startsWith('http') ? href : `https://visitjeju.net${href}`;
 
-                    results.push({ title, period, thumbnail, link: fullLink, status });
+                    results.push({ contentsid, title, period, thumbnail, link: fullLink, address });
                 });
-
                 return results;
             });
 
-            // 중복 제거
-            const unique = [];
+            // 필터 중복 제거 (DOM 상의 중복)
+            const uniqueResults = [];
             const seen = new Set();
-            result.forEach(item => {
-                if (!seen.has(item.title)) {
-                    seen.add(item.title);
-                    unique.push(item);
+            for (const item of result) {
+                if (!seen.has(item.contentsid)) {
+                    seen.add(item.contentsid);
+                    uniqueResults.push(item);
                 }
-            });
-
-            festivalData.months[m.ym] = unique;
-            console.log(`  📋 ${m.ym}: ${unique.length}개 수집`);
-            if (unique.length > 0) {
-                // 처음 5개 제목 출력 (월별 차이 확인용)
-                unique.slice(0, 5).forEach((item, i) => {
-                    console.log(`    ${i + 1}. ${item.title} (${item.period})`);
-                });
             }
 
-        } catch (error) {
-            console.error(`  ❌ ${m.ym} 크롤링 오류:`, error.message);
-            festivalData.months[m.ym] = [];
-        } finally {
-            await page.close();
+            console.log(`  ✅ ${uniqueResults.length}개 항목 수집 완료`);
+            return uniqueResults;
+        } catch (e) {
+            console.error(`  ❌ 크롤링 에러:`, e.message);
+            return [];
         }
+    }
+
+    const page = await browser.newPage();
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36');
+
+    for (const m of months) {
+        const krData = await crawlMonth(page, 'kr', m);
+        const cnData = await crawlMonth(page, 'cn', m);
+
+        // 데이터 병합: KR 기준으로 하되, CN에 매칭되는 contentsid가 있으면 title과 address를 교체
+        const cnMap = new Map();
+        for (const item of cnData) {
+            cnMap.set(item.contentsid, item);
+        }
+
+        const mergedData = [];
+        for (const item of krData) {
+            const cnItem = cnMap.get(item.contentsid);
+            if (cnItem) {
+                // 중문 데이터가 있으면 제목을 중문으로 덮어씀. (국문 주소 정보가 필터링에 유용할 수 있으므로 주소는 병합)
+                item.title = cnItem.title;
+                item.link = cnItem.link;
+                item.address = `${item.address} ${cnItem.address}`;
+            }
+            // ID 속성은 프론트에서 불필요하므로 제거해도 무방하지만 남겨둠
+            mergedData.push(item);
+        }
+
+        festivalData.months[m.ym] = mergedData;
     }
 
     await browser.close();
 
-    // public/assets 디렉토리에 저장
-    const assetsDir = path.join(__dirname, '..', 'public', 'assets');
-    if (!fs.existsSync(assetsDir)) {
-        fs.mkdirSync(assetsDir, { recursive: true });
-    }
-    const outputPath = path.join(assetsDir, 'curated_festivals.js');
-    fs.writeFileSync(outputPath, `window.FESTIVAL_DATA = ${JSON.stringify(festivalData, null, 2)};`, 'utf8');
+    const outputJsPath = path.join(__dirname, '../public/assets/curated_festivals.js');
+    const jsonStr = JSON.stringify(festivalData, null, 4);
+    const jsContent = `window.FESTIVAL_DATA = ${jsonStr};`;
 
-    console.log(`\n✅ 저장 완료: ${outputPath}`);
-    console.log(`   업데이트 시각: ${festivalData.updated_at}`);
-    console.log('\n📊 수집 결과 요약:');
-    Object.entries(festivalData.months).forEach(([ym, items]) => {
-        console.log(`  ${ym}: ${items.length}개`);
-    });
+    fs.writeFileSync(outputJsPath, jsContent, 'utf-8');
+    console.log(`\n🎉 모든 크롤링 완료. ${outputJsPath}에 저장되었습니다.`);
 }
 
 fetchFestivals();

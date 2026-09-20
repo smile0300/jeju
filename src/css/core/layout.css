@@ -739,6 +739,54 @@
     color: var(--label-tertiary);
 }
 
+/* 유형 배지를 드롭다운으로 쓸 때 — 알약 모양은 유지하고 화살표만 덧붙임 */
+select.res-type-badge {
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 34px;
+    font-family: inherit;
+    cursor: pointer;
+    background-image:
+        url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4.5L6 8.5L10 4.5' stroke='%230e7490' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"),
+        linear-gradient(135deg, #ecfeff, #cffafe);
+    background-repeat: no-repeat, no-repeat;
+    background-position: right 13px center, center;
+    background-size: 12px 12px, auto;
+}
+
+/* 제출 완료 후 위챗 QR 안내 */
+.res-wechat-qr {
+    display: none;
+    margin-top: 16px;
+    padding: 18px 16px;
+    border-radius: 14px;
+    border: 1px solid var(--separator);
+    background: var(--bg-primary);
+    text-align: center;
+}
+
+.res-wechat-qr-title {
+    margin: 0 0 12px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--label-primary);
+}
+
+.res-wechat-qr-img {
+    width: 180px;
+    max-width: 70%;
+    height: auto;
+    border-radius: 8px;
+    border: 1px solid #eee;
+    background: #fff;
+}
+
+.res-wechat-qr-hint {
+    margin: 10px 0 0;
+    font-size: 0.8rem;
+    color: var(--label-tertiary);
+}
+
 .res-notice-card {
     display: flex;
     align-items: center;

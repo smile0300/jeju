@@ -1,4 +1,4 @@
-﻿<!-- ===== Course Section ===== -->
+<!-- ===== Course Section ===== -->
 <section id="course" class="app-section">
     <header class="app-bar">
         <button class="back-btn" onclick="showSection('home')">←</button>
@@ -20,8 +20,12 @@
                     <input type="text" id="course-store" class="form-input" data-i18n-placeholder="course.form.theme_ph" placeholder="例如：家庭游，网红打卡，休闲度假等" required autocomplete="off">
                 </div>
                 <div class="form-group">
-                    <label class="form-label required" data-i18n="course.form.date">旅行日期</label>
+                    <label class="form-label required" data-i18n="course.form.date">여행 일정 (일자)</label>
                     <input type="text" id="course-visit-date" class="date-input form-input" data-i18n-placeholder="res.date.placeholder" placeholder="请选择日期" readonly required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" data-i18n="res.time.label">期望到访时间</label>
+                    <input type="text" id="course-visit-time" class="date-input time-input form-input" data-i18n-placeholder="res.time.placeholder" placeholder="请选择时间（可不填）" readonly>
                 </div>
                 <div class="form-group">
                     <label class="form-label required" data-i18n="res.party.label">人数</label>
