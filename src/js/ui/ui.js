@@ -37,11 +37,6 @@ const SEO_META = {
         desc: 'Discover current and upcoming festivals, cultural events, and seasonal highlights in Jeju Island. Updated monthly. 济州岛精彩节庆活动一览。',
         keywords: 'Jeju festivals 2026, 济州岛节日活动, Jeju Island events, 제주 축제, Jeju seasonal events'
     },
-    'cctv': {
-        title: 'Jeju Live CCTV - Real-time Traffic & Beach Cameras | 济州实时监控',
-        desc: 'Watch live CCTV cameras from Jeju tourist spots, beaches, and roads. Real-time conditions for planning your trip. 济州岛景区实时监控画面。',
-        keywords: 'Jeju live camera, 济州实时摄像头, Jeju beach CCTV, 제주 실시간 CCTV'
-    },
     'reward': {
         title: 'Jeju Live Bounty Missions & Rewards | 济州红包任务',
         desc: 'Earn rewards by helping deliver lost items to China. Jeju Live bounty missions connect travelers returning to China with lost item owners. 顺路赚零花钱，帮忙带失物回中国。',
@@ -109,7 +104,6 @@ export function showSection(sectionId, pushHistory = true) {
     if (!_initialized[sectionId]) {
         _initialized[sectionId] = true;
 
-        if (sectionId === 'cctv' && window.initCCTV) window.initCCTV();
         if (sectionId === 'weather' && window.fetchWeatherData) {
             const activeLoc = document.querySelector('.location-tab.active')?.dataset.loc || 'jeju';
             window.fetchWeatherData(activeLoc);

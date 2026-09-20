@@ -71,14 +71,4 @@
     <xhtml:link rel="alternate" hreflang="zh-CN" href="https://jeju-live.com/reward"/>
     <xhtml:link rel="alternate" hreflang="ko"    href="https://jeju-live.com/reward"/>
   </url>
-  <!-- CCTV -->
-  <url>
-    <loc>https://jeju-live.com/cctv</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-    <xhtml:link rel="alternate" hreflang="en"    href="https://jeju-live.com/cctv"/>
-    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://jeju-live.com/cctv"/>
-    <xhtml:link rel="alternate" hreflang="ko"    href="https://jeju-live.com/cctv"/>
-  </url>
 </urlset>

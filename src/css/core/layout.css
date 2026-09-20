@@ -220,12 +220,6 @@
     pointer-events: none;
 }
 
-/* VIP 카드는 불투명하게 — 프리미엄 존재감 강조 */
-.home-item.item-cctv.item-disabled {
-    opacity: 0.85;
-    filter: none;
-}
-
 .coming-soon-badge {
     position: absolute;
     top: var(--space-2);

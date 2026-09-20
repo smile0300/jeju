@@ -10,14 +10,25 @@
 .DS_Store
 Thumbs.db
 
-# 3. 환경 변수 (배포 시 Worker Secret 권장)
+# 3. 환경 변수 및 자격증명 (배포 시 Worker Secret 권장 — 절대 커밋 금지)
 .env
+.env.*
+.dev.vars
+.dev.vars.*
 secret.json
+# Firebase / Google 서비스 계정 키
+*adminsdk*.json
+*service-account*.json
+*-key.json
+
+# 3-1. 로컬 테스트 스크립트 (자격증명 인라인 위험)
+scratch/
 
 # 4. 의존성 및 용량 최적화
 node_modules/
 package-lock.json
 dist/
+.wrangler/
 
 # 5. 디버그 및 임시 스크립트 (자동화 작업 중 생성됨)
 debug_*

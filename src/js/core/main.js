@@ -5,7 +5,7 @@ import { initWebPushNotifications } from './web-push.js';
 import { initPushNotifications } from './push.js';
 import { Capacitor } from '@capacitor/core';
 
-import { initCCTV, openCctvModalById, openCctvModal, initHlsPlayer } from '../features/cctv.js';
+import { initHlsPlayer } from '../features/cctv.js';
 import { fetchWeatherData, switchWeatherLocation, updateHourlyWeather, fetchWeatherAlerts, fetchPastWeather } from '../features/weather.js';
 import { fetchHallasanStatus } from '../features/hallasan.js';
 import { renderHallasanDashboard } from '../features/hallasan-dashboard.js';
@@ -21,8 +21,6 @@ import '../ui/home.js';
 
 // Global function assignments for HTML event handlers
 window.showSection = showSection;
-window.openCctvModalById = openCctvModalById;
-window.openCctvModal = openCctvModal;
 window.initHlsPlayer = initHlsPlayer;
 window.toggleFullscreen = function(videoId) {
     const video = document.getElementById(videoId);
@@ -258,7 +256,7 @@ window.toggleLostGuide = () => {
 
 // Modals closing
 const closeAllModals = () => {
-    const modals = document.querySelectorAll('.wsm-overlay, #cctv-detail-card, #cctv-modal, #lost-detail-modal, #lost-report-modal, #feature-request-modal, #cs-modal, #wechat-qr-modal, #share-modal, #cctv-apply-modal, #lost-upsell-modal');
+    const modals = document.querySelectorAll('.wsm-overlay, #lost-detail-modal, #lost-report-modal, #feature-request-modal, #cs-modal, #wechat-qr-modal, #share-modal, #lost-upsell-modal');
     let wasOpen = false;
     modals.forEach(m => {
         if (m.style.display === 'block' || m.style.display === 'flex' || m.classList.contains('show')) {
@@ -267,10 +265,8 @@ const closeAllModals = () => {
             m.classList.remove('show');
         }
     });
-    
+
     // 특정 모달들의 잔여물 지우기 (비디오 중지 및 전체화면 해제 등)
-    if (window.closeCctvCard) window.closeCctvCard(true); // true means skip history.back()
-    if (window.closeCctvModal) window.closeCctvModal(true);
     if (window.closeLostDetailModal) window.closeLostDetailModal(true);
     if (window.exitWeatherFullscreen) window.exitWeatherFullscreen();
     
@@ -284,12 +280,7 @@ window.pushModalState = () => {
     }
 };
 
-window.closeCctvModal = (fromPopState = false) => { 
-    document.getElementById('cctv-modal').style.display = 'none'; 
-    document.getElementById('modal-body').innerHTML = ''; 
-    if (!fromPopState && window.location.hash === '#modal') window.history.back();
-};
-window.closeLostDetailModal = (fromPopState = false) => { 
+window.closeLostDetailModal = (fromPopState = false) => {
     document.getElementById('lost-detail-modal').style.display = 'none'; 
     document.body.style.overflow = 'auto'; 
     if (!fromPopState && window.location.hash === '#modal') window.history.back();
@@ -312,7 +303,6 @@ const ROUTE_MAP = {
     '/lost': 'lost',
     '/reward': 'reward',
     '/pickup': 'pickup',
-    '/cctv': 'cctv',
     '/terms': 'terms',
     '/privacy': 'privacy',
     '/lost-report': 'lost-report',

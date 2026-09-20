@@ -1,1 +1,0 @@
-document.addEventListener('click', function(e) { if(!e.target.closest('.lang-selector')) { const langSelector = document.querySelector('.lang-selector'); if (langSelector) langSelector.classList.remove('show'); } });

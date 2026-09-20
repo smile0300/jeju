@@ -139,93 +139,6 @@
 }
 
 
-/* ==================== CCTV ==================== */
-.cctv-apply-modal-content {
-    max-width: 400px;
-    padding: 32px 24px 24px 24px;
-    text-align: center;
-    max-height: 90vh; /* svh is better but vh is safer for old browsers */
-    max-height: 90svh; 
-    display: flex;
-    flex-direction: column;
-    box-sizing: border-box;
-}
-
-.cctv-apply-body {
-    flex: 1;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    padding: 4px 4px 16px 4px;
-    margin: 0 -4px; /* compensate for padding to avoid clipping focus rings */
-}
-
-.cctv-apply-header {
-    margin-bottom: 20px;
-    flex-shrink: 0;
-}
-
-.cctv-apply-modal-content .lost-form-actions {
-    flex-shrink: 0;
-    margin-top: 8px;
-}
-
-.cctv-apply-icon {
-    font-size: 2.8rem;
-    color: var(--accent);
-    margin-bottom: 16px;
-    display: inline-block;
-}
-
-.cctv-apply-header h3 {
-    font-size: 1.25rem;
-    color: var(--label-primary);
-    margin-bottom: 8px;
-    font-weight: 700;
-}
-
-.cctv-apply-header p {
-    font-size: 0.9rem;
-    color: var(--label-secondary);
-    line-height: 1.5;
-    margin: 0;
-}
-
-.cctv-apply-form-group {
-    margin-bottom: 20px;
-    text-align: left;
-}
-
-.cctv-apply-label {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--label-primary);
-    margin-bottom: 8px;
-}
-
-.cctv-apply-label i {
-    font-size: 1.1rem;
-    color: var(--accent);
-}
-
-.cctv-apply-benefits {
-    margin: 24px 0;
-    text-align: left;
-    background: var(--fill-secondary);
-    padding: 16px 20px;
-    border-radius: 16px;
-}
-
-.date-range-wrap {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-    box-sizing: border-box;
-}
-
 .date-input {
     flex: 1;
     min-width: 0;
@@ -237,66 +150,6 @@
     font-size: 0.85rem;
     font-family: inherit;
     box-sizing: border-box;
-}
-
-.date-separator {
-    color: var(--label-secondary);
-    font-weight: 600;
-}
-
-.cctv-apply-label {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--label-primary);
-    margin-bottom: 8px;
-}
-
-.cctv-price-badge {
-    margin-left: auto;
-    background: #fff3cd;
-    color: #d97706;
-    padding: 3px 8px;
-    border-radius: 12px;
-    font-size: 0.75rem;
-    font-weight: 800;
-}
-
-.cctv-price-preview {
-    margin-top: 10px;
-    font-size: 0.95rem;
-    color: var(--label-primary);
-    text-align: right;
-    background: rgba(217, 119, 6, 0.08);
-    padding: 10px 14px;
-    border-radius: 10px;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 8px;
-    font-weight: 500;
-}
-
-.cctv-price-preview .total-price {
-    color: #d97706;
-    font-size: 1.25rem;
-    font-weight: 800;
-}
-
-.benefit-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 0.85rem;
-    color: var(--label-primary);
-    margin-bottom: 12px;
-    font-weight: 500;
-}
-
-.benefit-item:last-child {
-    margin-bottom: 0;
 }
 
 .cctv-grid {
@@ -336,28 +189,6 @@
     display: block;
     object-fit: cover;
     /* ??𥔱�????𥔱�??隢𥕞鐤??????𥔱?赬?皝舂�????cover, ??𥔱�???contain */
-}
-
-/* Modal specific CCTV styles */
-.cctv-modal-body {
-    width: 100%;
-    aspect-ratio: 16/9;
-    background: #000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.cctv-modal-video {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    /* ????𥔱�???𥔱�篚??慦𥟇縑?佲蔬????儔????𥔱�?? 瘝�黢??*/
-}
-
-.cctv-modal-info {
-    padding: 20px;
-    background: #111;
 }
 
 /* ===== AdSense Styling (Festival Only) ===== */
@@ -440,12 +271,6 @@
     font-size: 0.95rem;
     font-weight: 700;
     color: var(--text-primary);
-}
-
-.cctv-name-cn {
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: var(--text-muted);
 }
 
 /* ==================== Weather System ==================== */
@@ -2903,36 +2728,6 @@
     flex: 1;
 }
 
-/* CCTV Map Marker Premium Styles */
-.cctv-marker {
-    cursor: pointer;
-    transition: none;
-    transform: none;
-}
-
-.marker-dot {
-    fill: #ef4444;
-    stroke: #ffffff;
-    stroke-width: 4px;
-    filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.8));
-    transition: none;
-}
-
-.marker-label {
-    font-family: "Outfit", sans-serif;
-    pointer-events: none;
-    opacity: 0.9;
-    transition: none;
-}
-
-.jeju-region {
-    pointer-events: auto;
-}
-
-.jeju-region.active {
-    filter: url(#region-outline);
-}
-
 /* Lost & Found Status Tag */
 .lost-status-tag {
     display: inline-block;
@@ -4642,35 +4437,6 @@
     opacity: 0.75;
 }
 
-/* CCTV ?鮈橓� 慦??頦國儐??(disabled慦??篨刺訜 頦國儔?? */
-.home-item.item-cctv-apply {
-    cursor: pointer;
-    opacity: 1;
-    position: relative;
-    background: var(--bg-tertiary);
-    border: none;
-    border-radius: var(--radius-lg);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    padding: var(--space-4) var(--space-2);
-    transition: transform 0.2s var(--ease-out), background 0.2s, box-shadow 0.2s;
-    box-shadow: 0 1px 4px rgba(245, 158, 11, 0.12);
-    border: 1px solid rgba(245, 158, 11, 0.25);
-}
-
-.home-item.item-cctv-apply:hover {
-    transform: translateY(-2px) scale(1.02);
-    background: rgba(245, 158, 11, 0.08);
-    box-shadow: 0 4px 14px rgba(245, 158, 11, 0.22);
-}
-
-.home-item.item-cctv-apply:active {
-    transform: scale(0.97);
-}
-
 /* ==================== ?篨拖� ???�??頦國儐??==================== */
 .wechat-float-btn {
     position: fixed;
@@ -4711,108 +4477,6 @@
 /* ??𥇣�鴽𤩥�???篨刺𤊄 ?????�??頦國儐????�旭皝?*/
 body:not(.page-home) .wechat-float-btn {
     display: none;
-}
-
-/* ==================== CCTV ?鮈橓� 鴽謿𪈠??==================== */
-.cctv-apply-modal-content {
-    background: var(--bg-primary);
-    border-radius: 20px;
-    padding: 0;
-    max-width: 380px;
-    width: 92%;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
-    overflow: hidden;
-    animation: modalSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.cctv-apply-header {
-    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #3b82f6 100%);
-    padding: 32px 24px 28px;
-    text-align: center;
-    position: relative;
-}
-
-.cctv-apply-icon {
-    width: 64px;
-    height: 64px;
-    background: rgba(255, 255, 255, 0.15);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 16px;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    backdrop-filter: blur(4px);
-}
-
-.cctv-apply-icon i {
-    font-size: 2.2rem;
-    color: #ffffff;
-}
-
-.cctv-apply-header h3 {
-    font-size: 1.25rem;
-    font-weight: 800;
-    color: white;
-    margin: 0 0 10px;
-    letter-spacing: -0.5px;
-}
-
-.cctv-apply-header p {
-    font-size: 0.92rem;
-    color: rgba(255, 255, 255, 0.85);
-    margin: 0;
-    line-height: 1.5;
-}
-
-.cctv-apply-body {
-    padding: 24px 20px 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.cctv-apply-form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.cctv-apply-label {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: var(--label-primary);
-}
-
-.cctv-apply-label i {
-    color: var(--accent);
-    font-size: 1.05rem;
-}
-
-.cctv-apply-benefits {
-    background: var(--bg-secondary);
-    border-radius: 12px;
-    padding: 14px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.benefit-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--label-primary);
-}
-
-.benefit-item i {
-    font-size: 1.1rem;
-    flex-shrink: 0;
 }
 
 /* ===== WeChat Float Button ===== */
