@@ -178,6 +178,7 @@ function showWechatQr(prefix) {
     qrBox.innerHTML = `
         <p class="res-fee-label">${tr('res.fee.label', '代预约服务费')}</p>
         <p class="res-fee-amount">${tr('res.fee.amount', '10元')}</p>
+        <p class="res-fee-refund">${tr('res.fee.refund', '🛡️ 如无法预约成功，全额退款')}</p>
         <p class="res-wechat-qr-title">${tr('res.qr.title', '请扫码添加微信后支付')}</p>
         <img src="/assets/wechat_qr.png" alt="WeChat QR" class="res-wechat-qr-img" loading="lazy">
         <p class="res-wechat-qr-hint">${tr('res.qr.hint', '长按图片保存二维码')}</p>
