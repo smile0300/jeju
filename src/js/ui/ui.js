@@ -121,8 +121,11 @@ export function showSection(sectionId, pushHistory = true) {
         }
         if (sectionId === 'festival' && window.fetchFestivals) window.fetchFestivals();
         if (sectionId === 'reward' && window.initReward) window.initReward();
-        if (['reservation', 'food', 'course'].includes(sectionId) && window.initReservationSection) window.initReservationSection();
     }
+
+    // 예약 유형 드롭다운은 진입할 때마다 현재 유형(currentReservationType)으로 갱신해야 한다.
+    // 최초 1회 가드 안에 두면 두 번째 진입부터 이전 유형이 그대로 남는다.
+    if (['reservation', 'food', 'course'].includes(sectionId) && window.initReservationSection) window.initReservationSection();
 
     if (sectionId === 'lost') {
         if (window.toggleLostGuide) {
