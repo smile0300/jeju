@@ -211,22 +211,6 @@ export function handleDateChange() {
     const startDateStr = startDateInput && startDateInput.value ? startDateInput.value : null;
     const endDateStr = endDateInput && endDateInput.value ? endDateInput.value : null;
     
-    const targetDateStr = startDateStr || endDateStr;
-    
-    if (targetDateStr) {
-        const selectedDate = new Date(targetDateStr);
-        if (!isNaN(selectedDate.getTime())) {
-            const ym = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}`;
-            
-            if (currentFestivalMonth !== ym) {
-                currentFestivalMonth = ym;
-                document.querySelectorAll('.month-tab').forEach(tab => {
-                    tab.classList.toggle('active', tab.dataset.ym === ym);
-                });
-            }
-        }
-    }
-    
     fetchFestivals();
 }
 
@@ -688,9 +672,8 @@ export function renderFestivalItems(container, items) {
             link = link.replace('/kr/', `/${langPath}/`);
             link = link.replace(/[?&]menuId=undefined/g, ''); // 버그 URL 수정
         } else {
-            const yearParts = currentFestivalMonth.split('-');
-            const yearStr = yearParts[0] || '2026';
-            const monthStr = yearParts[1] || '04';
+            const yearStr = today.substring(0, 4);
+            const monthStr = today.substring(5, 7);
             const langPath = lang === 'zh' ? 'cn' : (lang === 'en' ? 'en' : 'kr');
             link = `https://visitjeju.net/${langPath}/festival/list#p1&year=${yearStr}&month=${monthStr}&state=all`;
         }
