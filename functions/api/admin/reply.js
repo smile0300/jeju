@@ -75,7 +75,9 @@ async function lookupSheet(env, wechat, caseId) {
 }
 
 async function draftWithClaude(env, userContent) {
-  const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY });
+  const apiKey = String(env.ANTHROPIC_API_KEY || '').trim();
+  if (!apiKey) throw new Error('서버에 ANTHROPIC_API_KEY가 설정되지 않았습니다. (Production 환경 Secret 확인 후 재배포)');
+  const client = new Anthropic({ apiKey });
   const response = await client.messages.create({
     model: 'claude-sonnet-5',
     max_tokens: 4000,
@@ -90,10 +92,12 @@ async function draftWithClaude(env, userContent) {
 }
 
 async function draftWithGemini(env, userContent) {
-  const model = env.GEMINI_MODEL || 'gemini-2.5-pro';
+  const apiKey = String(env.GEMINI_API_KEY || '').trim();
+  if (!apiKey) throw new Error('서버에 GEMINI_API_KEY가 설정되지 않았습니다. (Production 환경 Secret 확인 후 재배포)');
+  const model = String(env.GEMINI_MODEL || '').trim() || 'gemini-2.5-pro';
   const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY },
+    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
     body: JSON.stringify({
       systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
       contents: [{ role: 'user', parts: [{ text: userContent }] }],
