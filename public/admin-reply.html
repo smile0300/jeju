@@ -55,11 +55,8 @@
     <label for="message">고객 메시지 (위챗에서 복사해서 붙여넣기)</label>
     <textarea id="message"></textarea>
 
-    <label for="engine">AI</label>
-    <select id="engine">
-      <option value="claude">Claude Sonnet 5</option>
-      <option value="gemini">Gemini Pro</option>
-    </select>
+    <!-- Gemini를 다시 쓰려면 select로 바꾸고 GEMINI_API_KEY 등록 -->
+    <input id="engine" type="hidden" value="claude">
 
     <div style="margin-top:14px"><button id="go">답변 초안 만들기</button></div>
     <p id="error" class="error" hidden></p>
@@ -90,7 +87,6 @@
   // 비밀번호와 AI 선택은 이 기기에만 기억
   try {
     $('key').value = localStorage.getItem('adminReplyKey') || '';
-    $('engine').value = localStorage.getItem('adminReplyEngine') || 'claude';
   } catch (e) {}
 
   function showError(msg) { $('error').textContent = msg; $('error').hidden = !msg; }
@@ -102,7 +98,6 @@
     if (!$('message').value.trim()) return showError('고객 메시지를 붙여넣으세요.');
     try {
       localStorage.setItem('adminReplyKey', key);
-      localStorage.setItem('adminReplyEngine', $('engine').value);
     } catch (e) {}
 
     var btn = $('go');
