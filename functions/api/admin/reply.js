@@ -6,13 +6,11 @@
  * 필요한 환경변수 (Cloudflare Pages → Settings → Variables and Secrets):
  *   ADMIN_REPLY_KEY    관리자 페이지 비밀번호
  *   ADMIN_LOOKUP_SECRET  GAS 스크립트 속성과 같은 값
- *   ADMIN_GAS_URL      답변 도우미 전용 GAS 배포 URL (…/exec)
+ *   ADMIN_GAS_URL      답변 도우미 전용 GAS 배포 URL (…/exec) — 필수
  *   ANTHROPIC_API_KEY  Claude 사용 시
  *   GEMINI_API_KEY     Gemini 사용 시 (선택: GEMINI_MODEL)
  */
 import Anthropic from '@anthropic-ai/sdk';
-
-const LATEST_GAS_URL = 'https://script.google.com/macros/s/AKfycbyKQiffY5B8SsbMJkXAHrLHFSsUqohXpBc9xq2BdPV1rY8zGMOZal9cP4EM2Wu02Z4/exec';
 
 // 서비스 안내 사실 — 요금·정책이 바뀌면 여기만 고치면 됨
 const SERVICE_FACTS = `
@@ -62,8 +60,11 @@ function safeEqual(a, b) {
 }
 
 async function lookupSheet(env, wechat, caseId) {
-  // ADMIN_GAS_URL: adminLookup이 포함된 답변 도우미 전용 GAS 배포 (기존 사이트 배포와 분리)
-  const url = new URL(env.ADMIN_GAS_URL || env.GAS_URL || env.SECRET_GAS_URL || LATEST_GAS_URL);
+  // ADMIN_GAS_URL: adminLookup이 포함된 답변 도우미 전용 GAS 배포
+  // 사이트용 GAS_URL로 폴백하지 않음 — 구버전 배포는 action을 무시하고 RewardList 전체를 돌려주기 때문
+  const gasUrl = String(env.ADMIN_GAS_URL || '').trim();
+  if (!gasUrl) throw new Error('서버에 ADMIN_GAS_URL이 설정되지 않았습니다. (Production 환경 Secret 확인 후 재배포)');
+  const url = new URL(gasUrl);
   url.searchParams.set('action', 'admin_lookup');
   url.searchParams.set('key', env.ADMIN_LOOKUP_SECRET || '');
   if (wechat) url.searchParams.set('wechat', wechat);
@@ -71,6 +72,7 @@ async function lookupSheet(env, wechat, caseId) {
   const res = await fetch(url.toString(), { cf: { cacheTtl: 0 } });
   const data = JSON.parse(await res.text());
   if (data.error) throw new Error('시트 조회 실패: ' + data.error);
+  if (!data || Array.isArray(data) || !('LostReport' in data)) throw new Error('시트 조회 실패: ADMIN_GAS_URL이 답변 도우미용 배포가 아닙니다.');
   return data;
 }
 
