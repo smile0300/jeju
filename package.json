@@ -5,6 +5,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.128.0",
     "@capacitor/push-notifications": "^8.1.2",
     "firebase": "^12.17.0"
   },

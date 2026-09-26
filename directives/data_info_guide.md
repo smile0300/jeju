@@ -102,3 +102,11 @@
 ### 11.02 API 키 이중 인코딩 이슈
 - **원인**: Worker의 `URL.searchParams.set()`이 이미 인코딩된 키를 재인코딩함.
 - **해결**: 주입 전 `decodeURIComponent()`를 사용하여 최종 인코딩이 1회가 되도록 처리.
+
+## 12. 위챗 답변 도우미 (반자동, 2026-09-27)
+- **목적**: 개인 위챗으로 오는 분실물·예약 문의에 대해 시트 기록 기반 중국어 답변 초안 생성. **자동 발송 없음** (개인 계정 정지 위험 → 사람이 복사해서 전송).
+- **흐름**: `/admin-reply` (public/admin-reply.html) → `POST /api/admin/reply` (functions/api/admin/reply.js) → GAS `doGet?action=admin_lookup` (Code.js `adminLookup`) → Claude Sonnet 5 또는 Gemini Pro.
+- **조회 기준**: 위챗ID 정확 일치 또는 CaseId(jeju-0000) 일치. 메시지 안의 CaseId는 자동 추출. 시트당 최신 5건.
+- **개인정보**: 여권·예약 사진, 전화번호, 주소, UserAgent, 사진 URL은 AI로 보내지 않음.
+- **환경변수 (Pages Secret)**: `ADMIN_REPLY_KEY`, `ADMIN_LOOKUP_SECRET`, `ADMIN_GAS_URL`(전용 GAS 배포), `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, (선택) `GEMINI_MODEL`. GAS 스크립트 속성 `ADMIN_LOOKUP_SECRET`은 Pages와 같은 값.
+- **요금·정책 변경 시**: reply.js의 `SERVICE_FACTS`만 수정.

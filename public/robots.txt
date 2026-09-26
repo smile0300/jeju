@@ -15,6 +15,7 @@ Disallow: /.venv/
 Disallow: /execution/
 Disallow: /directives/
 Disallow: /tmp/
+Disallow: /admin-reply
 
 # Sitemap 위치 명시
 Sitemap: https://jeju-live.com/sitemap.xml

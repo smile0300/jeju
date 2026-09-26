@@ -390,6 +390,7 @@ function saveBase64ImageToDrive(base64Data, fileNamePrefix) {
 function doGet(e) {
   try {
     var action = (e.parameter && e.parameter.action) ? e.parameter.action : '';
+    if (action === 'admin_lookup') return adminLookup(e.parameter);
     var ss = SpreadsheetApp.openById(SHEET_ID);
     var sheetName = (action === 'success') ? 'SuccessStories' : 'RewardList';
     var sheet = ss.getSheetByName(sheetName);
@@ -433,6 +434,59 @@ function doGet(e) {
   } catch (err) {
     return ContentService.createTextOutput(JSON.stringify({ "error": err.toString() })).setMimeType(ContentService.MimeType.JSON);
   }
+}
+
+/**
+ * [관리자 전용] 위챗 답변 도우미용 조회 — functions/api/admin/reply.js 에서만 호출
+ * 스크립트 속성 ADMIN_LOOKUP_SECRET 과 일치하는 key 가 있어야 응답함
+ * 파라미터: key, wechat(위챗ID), caseId(jeju-0001 형식)
+ */
+function adminLookup(params) {
+  var json = function (obj) {
+    return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+  };
+  var secret = PropertiesService.getScriptProperties().getProperty('ADMIN_LOOKUP_SECRET');
+  if (!secret || params.key !== secret) return json({ error: 'unauthorized' });
+
+  var wechat = String(params.wechat || '').trim().toLowerCase();
+  var caseId = String(params.caseId || '').trim().toLowerCase();
+  if (!wechat && !caseId) return json({ LostReport: [], SuccessStories: [], Reservation: [] });
+
+  // AI에 넘길 필요 없는 개인정보·대용량 컬럼은 제외
+  var EXCLUDE = ['PassportPhoto', 'ReservationPhoto', 'UserAgent', 'Contact', 'Address', 'PhotoURL', 'ItemImg'];
+  var WECHAT_COLS = ['WeChatId', 'WechatId', 'wechatId'];
+  var ss = SpreadsheetApp.openById(SHEET_ID);
+  var result = {};
+
+  ['LostReport', 'SuccessStories', 'Reservation'].forEach(function (name) {
+    result[name] = [];
+    var sheet = ss.getSheetByName(name);
+    if (!sheet) return;
+    var data = sheet.getDataRange().getValues();
+    if (data.length <= 1) return;
+    var headers = data[0].map(function (h) { return h ? h.toString().trim() : ''; });
+
+    // 최신 행부터 탐색, 시트당 최대 5건
+    for (var i = data.length - 1; i >= 1 && result[name].length < 5; i--) {
+      var row = data[i];
+      var hit = false;
+      for (var j = 0; j < headers.length; j++) {
+        var cell = String(row[j] || '').trim().toLowerCase();
+        if (!cell) continue;
+        if (wechat && WECHAT_COLS.indexOf(headers[j]) !== -1 && cell === wechat) hit = true;
+        if (caseId && headers[j] === 'CaseId' && cell === caseId) hit = true;
+      }
+      if (!hit) continue;
+      var obj = {};
+      for (var k = 0; k < headers.length; k++) {
+        if (!headers[k] || EXCLUDE.indexOf(headers[k]) !== -1) continue;
+        if (row[k] === '' || row[k] === null) continue;
+        obj[headers[k]] = row[k];
+      }
+      result[name].push(obj);
+    }
+  });
+  return json(result);
 }
 
 // MY_DEEPL 함수는 deepl.js에 정의되어 있습니다. (중복 정의 방지)
