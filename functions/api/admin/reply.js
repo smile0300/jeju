@@ -107,7 +107,11 @@ async function draftWithGemini(env, userContent) {
 }
 
 export async function onRequestPost({ request, env }) {
-  if (!env.ADMIN_REPLY_KEY || !safeEqual(request.headers.get('X-Admin-Key') || '', env.ADMIN_REPLY_KEY)) {
+  const adminKey = String(env.ADMIN_REPLY_KEY || '').trim();
+  if (!adminKey) {
+    return respond({ error: '서버에 ADMIN_REPLY_KEY가 설정되지 않았습니다. (Production 환경 Secret 확인 후 재배포)' }, 500);
+  }
+  if (!safeEqual((request.headers.get('X-Admin-Key') || '').trim(), adminKey)) {
     return respond({ error: '비밀번호가 올바르지 않습니다.' }, 401);
   }
 
