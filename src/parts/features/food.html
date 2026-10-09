@@ -16,6 +16,10 @@
                     <input type="text" id="food-wechat" class="form-input" data-i18n-placeholder="res.wechat.placeholder" placeholder="请输入您的微信ID" required autocomplete="off">
                 </div>
                 <div class="form-group">
+                    <label class="form-label required" data-i18n="res.name.label">预约人姓名</label>
+                    <input type="text" id="food-name" class="form-input" data-i18n-placeholder="res.name.placeholder" placeholder="预约用姓名（拼音/英文，船票请与护照一致）" required autocomplete="off">
+                </div>
+                <div class="form-group">
                     <label class="form-label required" data-i18n="food.form.region">想去的区域或店铺</label>
                     <input type="text" id="food-store" class="form-input" data-i18n-placeholder="food.form.region_ph" placeholder="例如：涯月海岸道路，黑猪肉餐厅等" required autocomplete="off">
                 </div>
@@ -26,6 +30,10 @@
                 <div class="form-group">
                     <label class="form-label" data-i18n="res.time.label">期望到访时间</label>
                     <input type="text" id="food-visit-time" class="date-input time-input form-input" data-i18n-placeholder="res.time.placeholder" placeholder="请选择时间（可不填）" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" data-i18n="res.alt_time.label">备选时间（韩国时间）</label>
+                    <input type="text" id="food-alt-time" class="date-input time-input form-input" data-i18n-placeholder="res.alt_time.placeholder" placeholder="首选时间约满时的备选（可不填）" readonly>
                 </div>
                 <div class="form-group">
                     <label class="form-label required" data-i18n="res.party.label">人数</label>

@@ -97,22 +97,35 @@ export async function submitReservation(prefix = 'res') {
     const statusEl   = document.getElementById(`${prefix}-status`);
     const submitBtn  = document.getElementById(`${prefix}-submit-btn`);
 
+    // 예약자 이름·대체 시간은 예약/맛집 양식에만 있다 (코스 추천 양식에는 없음)
+    const nameEl     = document.getElementById(`${prefix}-name`);
+    const altTimeEl  = document.getElementById(`${prefix}-alt-time`);
+
     const wechatId    = wechatEl  ? wechatEl.value.trim()  : '';
     const visitDate   = dateEl    ? dateEl.value.trim()    : '';
     const visitTime   = timeEl    ? timeEl.value.trim()    : '';
     const partySize   = partyEl   ? partyEl.value          : '1';
+    const bookerName  = nameEl    ? nameEl.value.trim()    : '';
+    const altTime     = altTimeEl ? altTimeEl.value.trim() : '';
 
     // 시트에는 날짜 셀 하나에 "YYYY-MM-DD HH:mm" 형태로 합쳐서 기록
     const visitDateTime = visitTime ? `${visitDate} ${visitTime}` : visitDate;
     const store       = storeEl   ? storeEl.value.trim()   : '';
-    const note        = noteEl    ? noteEl.value.trim()    : '';
-    
+    const userNote    = noteEl    ? noteEl.value.trim()    : '';
+
+    // GAS 시트 컬럼을 늘리지 않도록 새 항목은 요청사항 앞에 구조화해서 합친다
+    const note = [
+        bookerName ? `[예약자] ${bookerName}` : '',
+        altTime    ? `[대체시간(KST)] ${altTime}` : '',
+        userNote,
+    ].filter(Boolean).join(' | ');
+
     let resType = window.currentReservationType || 'other';
     if (prefix === 'food') resType = 'food';
     else if (prefix === 'course') resType = 'course';
 
-    // 유효성 검사
-    if (!wechatId || !visitDate) {
+    // 유효성 검사 (이름 입력란이 있는 양식은 이름도 필수)
+    if (!wechatId || !visitDate || (nameEl && !bookerName)) {
         showStatus(statusEl, window.t ? window.t('lost.report.fill_err') : '请填写必填项', 'error');
         return;
     }
@@ -142,9 +155,11 @@ export async function submitReservation(prefix = 'res') {
             showWechatQr(prefix);
             // 폼 초기화
             if (wechatEl) wechatEl.value = '';
+            if (nameEl) nameEl.value = '';
             if (storeEl) storeEl.value = '';
             if (dateEl && dateEl._flatpickr) dateEl._flatpickr.clear();
             if (timeEl && timeEl._flatpickr) timeEl._flatpickr.clear();
+            if (altTimeEl && altTimeEl._flatpickr) altTimeEl._flatpickr.clear();
             if (partyEl) partyEl.value = '2';
             if (noteEl) noteEl.value = '';
         } else {

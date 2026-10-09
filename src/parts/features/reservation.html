@@ -35,6 +35,14 @@
                            placeholder="请输入您的微信ID" required autocomplete="off">
                 </div>
 
+                <!-- 예약자 이름 (매장·선박 예약에 사용) -->
+                <div class="form-group">
+                    <label class="form-label required" data-i18n="res.name.label">预约人姓名</label>
+                    <input type="text" id="res-name" class="form-input"
+                           data-i18n-placeholder="res.name.placeholder"
+                           placeholder="预约用姓名（拼音/英文，船票请与护照一致）" required autocomplete="off">
+                </div>
+
                 <!-- 원하는 매장 -->
                 <div class="form-group">
                     <label class="form-label" data-i18n="res.store.label">想去的店铺（可选）</label>
@@ -57,6 +65,14 @@
                     <input type="text" id="res-visit-time" class="date-input time-input form-input"
                            data-i18n-placeholder="res.time.placeholder"
                            placeholder="请选择时间（可不填）" readonly>
+                </div>
+
+                <!-- 대체 시간 (희망 시간이 마감일 때) -->
+                <div class="form-group">
+                    <label class="form-label" data-i18n="res.alt_time.label">备选时间（韩国时间）</label>
+                    <input type="text" id="res-alt-time" class="date-input time-input form-input"
+                           data-i18n-placeholder="res.alt_time.placeholder"
+                           placeholder="首选时间约满时的备选（可不填）" readonly>
                 </div>
 
                 <!-- 인원 수 -->
