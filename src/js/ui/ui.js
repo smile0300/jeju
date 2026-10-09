@@ -62,6 +62,10 @@ export function showSection(sectionId, pushHistory = true) {
         window.scrollTo(0, 0);
     }
 
+    // 한라산 CCTV는 한라산 화면에서만 스트리밍
+    if (sectionId === 'hallasan') window.hallasanApp?.startCCTV?.();
+    else window.hallasanApp?.stopCCTV?.();
+
     // 플로팅 위챗 버튼: 홈화면에서만 표시
     if (sectionId === 'home') {
         document.body.classList.add('page-home');

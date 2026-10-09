@@ -333,19 +333,47 @@ export function renderHallasanCCTV() {
         </div>`;
     }).join('');
 
-    setTimeout(() => {
-        HALLASAN_CCTV.forEach((cam, index) => {
-            if (cam.isRepair) return; // 수리 중인 경우 초기화 건너뜀
-            setTimeout(() => {
-                if (document.getElementById(`hallasan-video-${cam.id}`)) {
-                    initHlsPlayer(cam.url, `hallasan-video-${cam.id}`);
-                }
-            }, index * 50);
-        });
-    }, 150);
+    // 날씨 화면 등에서 백그라운드로 렌더링될 때는 스트림을 열지 않는다 (데이터·배터리 절약)
+    setTimeout(startHallasanCCTV, 150);
+}
+
+function isHallasanActive() {
+    return document.getElementById('hallasan')?.classList.contains('active');
+}
+
+// 한라산 섹션이 보일 때만 재생. 이미 재생 중인 영상은 건너뛴다.
+export function startHallasanCCTV() {
+    if (!isHallasanActive()) return;
+    HALLASAN_CCTV.forEach((cam, index) => {
+        if (cam.isRepair) return; // 수리 중인 경우 초기화 건너뜀
+        setTimeout(() => {
+            const videoEl = document.getElementById(`hallasan-video-${cam.id}`);
+            if (videoEl && !videoEl.hls && !videoEl.getAttribute('src')) {
+                initHlsPlayer(cam.url, `hallasan-video-${cam.id}`);
+            }
+        }, index * 50);
+    });
+}
+
+// 섹션을 떠나면 스트림 다운로드를 완전히 중단
+export function stopHallasanCCTV() {
+    HALLASAN_CCTV.forEach(cam => {
+        const videoEl = document.getElementById(`hallasan-video-${cam.id}`);
+        if (!videoEl) return;
+        if (videoEl.hls) {
+            videoEl.hls.destroy();
+            videoEl.hls = null;
+        }
+        if (videoEl.getAttribute('src')) {
+            videoEl.removeAttribute('src');
+            videoEl.load();
+        }
+    });
 }
 
 // Global exposure for HTML event handlers
 window.hallasanApp = {
-    fetchStatus: fetchHallasanStatus
+    fetchStatus: fetchHallasanStatus,
+    startCCTV: startHallasanCCTV,
+    stopCCTV: stopHallasanCCTV
 };

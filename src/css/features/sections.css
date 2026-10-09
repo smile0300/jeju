@@ -3622,6 +3622,8 @@
 .current-weather-main {
     padding: 24px;
     display: flex;
+    /* 총평·강수 배너가 옆 칸으로 밀려 글자가 세로로 깨지지 않도록 아래로 쌓음 */
+    flex-direction: column;
     justify-content: center;
     min-height: 100px;
     /* Ensure space is reserved */
