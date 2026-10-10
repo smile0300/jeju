@@ -56,12 +56,15 @@ function buildItems() {
         next.push({ kind: 'flight', text: '✈️ ' + parts.join(' · ') });
     }
 
-    // 날씨는 제주·서귀포를 지역별로 한 줄씩 (한 줄에 둘을 넣으면 좁은 화면에서 강수확률이 잘린다)
+    // 날씨는 제주·서귀포를 한 소식에 두 줄로 함께 보여준다
     [['today', today], ['tomorrow', tomorrow]].forEach(([kind, date]) => {
-        WEATHER_LOCS.forEach(loc => {
-            const fc = (forecast[loc] || {})[toYmd(date)];
-            if (fc) next.push({ kind, text: tr('banner.weather_loc', { loc: tr(`banner.loc.${loc}`), ...fc }) });
-        });
+        const parts = WEATHER_LOCS
+            .map(loc => {
+                const fc = (forecast[loc] || {})[toYmd(date)];
+                return fc ? tr('banner.weather_loc', { loc: tr(`banner.loc.${loc}`), ...fc }) : null;
+            })
+            .filter(Boolean);
+        if (parts.length) next.push({ kind, text: parts.join('\n'), compact: true });
     });
 
     const weekEnd = new Date(today);
@@ -82,7 +85,13 @@ function paint() {
     const badge = document.getElementById('home-info-badge');
     const icon = document.getElementById('home-info-icon');
     const badgeBox = badge ? badge.closest('.alert-type-badge') : null;
-    if (msg) msg.textContent = item.text;
+    if (msg) {
+        msg.textContent = item.text;
+        // 제주·서귀포를 두 줄로 쌓아 좁은 화면에서도 잘리지 않게 한다
+        msg.style.fontSize = item.compact ? '0.8rem' : '0.9rem';
+        msg.style.whiteSpace = item.compact ? 'pre-line' : 'nowrap';
+        msg.style.lineHeight = item.compact ? '1.25' : '';
+    }
     if (badge) badge.textContent = tr(kind.badge);
     if (icon) icon.className = `ph-duotone ${kind.icon}`;
     if (badgeBox) badgeBox.style.background = kind.color;
