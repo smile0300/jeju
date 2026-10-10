@@ -1,12 +1,14 @@
 import { tr } from '../features/planner/strings.js';
 import { getShortTermDays, getFestivalsBetween, getHallasanClosedCount, toYmd } from '../features/planner/forecast.js';
 import { getFestivalDisplayTitle } from '../features/festival.js';
+import { getCityName } from '../features/airport.js';
 
 // 홈 배너의 정보 칸: 오늘·내일 날씨, 진행 중인 축제, (발생했을 때만) 한라산 통제·항공편 지연/결항을 한 줄씩 번갈아 보여준다.
 // 소식 종류에 따라 배지 문구와 아이콘이 바뀐다.
 // 배너 순환(main.js)이 이 칸을 보여줄 차례마다 advance()를 호출해 다음 소식으로 넘긴다.
 
 const FESTIVAL_MAX_DAYS = 30;   // 연중 상시 전시는 "소식"이 아니므로 제외
+const FESTIVAL_SHOW_MAX = 4;    // 한 줄에 이어 보여줄 축제 수
 const LOAD_DELAY_MS = 1500;     // 첫 화면 표시를 방해하지 않도록 늦게 요청
 const FLIGHT_MIN_CANCELLED = 1;  // 결항은 1편만 있어도 알린다
 const FLIGHT_MIN_DELAYED = 3;    // 지연은 3편 이상일 때만 (1~2편은 기상 탓이 아닐 수 있다)
@@ -27,14 +29,25 @@ let index = -1;
 let forecast = {};
 let hallasanClosed = 0;
 
-/** 공항 화면이 분류해 둔 오늘 항공편(제주↔중화권)에서 지연·결항 건수를 센다 */
+/** 항공편 한 건을 "상하이→제주 MU5001" 형태로 줄인다 (도착편은 출발지, 출발편은 도착지를 표시) */
+function flightLabel(f, type) {
+    const jeju = tr('banner.loc.jeju');
+    const other = getCityName(type === 'arrive' ? f.dep_airport : f.arr_airport);
+    const route = type === 'arrive' ? `${other}→${jeju}` : `${jeju}→${other}`;
+    return `${route} ${f.flight_id}`;
+}
+
+/** 공항 화면이 분류해 둔 오늘 항공편(제주↔중화권)에서 지연·결항 편을 모은다 */
 function flightDisruptions() {
-    const all = Object.values(window.jejuFlights || {}).flat();
     const has = (f, ...words) => words.some(w => String(f.status || '').includes(w));
-    return {
-        delayed: all.filter(f => has(f, '지연', 'Delayed')).length,
-        cancelled: all.filter(f => has(f, '결항', 'Canceled', 'Cancelled')).length,
-    };
+    const found = { delayed: [], cancelled: [] };
+    Object.entries(window.jejuFlights || {}).forEach(([type, list]) => {
+        (list || []).forEach(f => {
+            if (has(f, '결항', 'Canceled', 'Cancelled')) found.cancelled.push(flightLabel(f, type));
+            else if (has(f, '지연', 'Delayed')) found.delayed.push(flightLabel(f, type));
+        });
+    });
+    return found;
 }
 
 function buildItems() {
@@ -48,15 +61,16 @@ function buildItems() {
     if (hallasanClosed > 0) next.push({ kind: 'hallasan', text: tr('banner.hallasan', { n: hallasanClosed }) });
 
     // 항공편 지연·결항도 발생했을 때만
+    // 결항과 지연은 소식을 따로 만들고, 어느 노선인지 편명과 함께 한 줄로 보여준다 (넘치면 ...)
     const { delayed, cancelled } = flightDisruptions();
-    if (cancelled >= FLIGHT_MIN_CANCELLED || delayed >= FLIGHT_MIN_DELAYED) {
-        const parts = [];
-        if (cancelled) parts.push(tr('banner.flight.cancelled', { n: cancelled }));
-        if (delayed) parts.push(tr('banner.flight.delayed', { n: delayed }));
-        next.push({ kind: 'flight', text: '✈️ ' + parts.join(' · ') });
+    if (cancelled.length >= FLIGHT_MIN_CANCELLED) {
+        next.push({ kind: 'flight', text: `${tr('banner.flight.cancelled', { n: cancelled.length })} · ${cancelled.join(' · ')}` });
+    }
+    if (delayed.length >= FLIGHT_MIN_DELAYED) {
+        next.push({ kind: 'flight', text: `${tr('banner.flight.delayed', { n: delayed.length })} · ${delayed.join(' · ')}` });
     }
 
-    // 날씨는 제주·서귀포를 한 소식에 두 줄로 함께 보여준다
+    // 날씨는 제주·서귀포를 한 소식에 한 줄로 함께 보여준다 (넘치면 ...)
     [['today', today], ['tomorrow', tomorrow]].forEach(([kind, date]) => {
         const parts = WEATHER_LOCS
             .map(loc => {
@@ -64,13 +78,16 @@ function buildItems() {
                 return fc ? tr('banner.weather_loc', { loc: tr(`banner.loc.${loc}`), ...fc }) : null;
             })
             .filter(Boolean);
-        if (parts.length) next.push({ kind, text: parts.join('\n'), compact: true });
+        if (parts.length) next.push({ kind, text: parts.join('  ') });
     });
 
     const weekEnd = new Date(today);
     weekEnd.setDate(today.getDate() + 6);
-    const festival = getFestivalsBetween(today, weekEnd, 10).find(f => f.days <= FESTIVAL_MAX_DAYS);
-    if (festival) next.push({ kind: 'festival', text: getFestivalDisplayTitle(festival.title, festival.title_zh) });
+    // 이번 주 축제는 하나만 고르지 않고 여러 개를 한 줄에 이어서 보여준다 (넘치면 ...)
+    const festivals = getFestivalsBetween(today, weekEnd, 10).filter(f => f.days <= FESTIVAL_MAX_DAYS).slice(0, FESTIVAL_SHOW_MAX);
+    if (festivals.length) {
+        next.push({ kind: 'festival', text: festivals.map(f => getFestivalDisplayTitle(f.title, f.title_zh)).join(' · ') });
+    }
 
     items = next;
 }
@@ -85,13 +102,7 @@ function paint() {
     const badge = document.getElementById('home-info-badge');
     const icon = document.getElementById('home-info-icon');
     const badgeBox = badge ? badge.closest('.alert-type-badge') : null;
-    if (msg) {
-        msg.textContent = item.text;
-        // 제주·서귀포를 두 줄로 쌓아 좁은 화면에서도 잘리지 않게 한다
-        msg.style.fontSize = item.compact ? '0.8rem' : '0.9rem';
-        msg.style.whiteSpace = item.compact ? 'pre-line' : 'nowrap';
-        msg.style.lineHeight = item.compact ? '1.25' : '';
-    }
+    if (msg) msg.textContent = item.text;
     if (badge) badge.textContent = tr(kind.badge);
     if (icon) icon.className = `ph-duotone ${kind.icon}`;
     if (badgeBox) badgeBox.style.background = kind.color;

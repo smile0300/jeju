@@ -139,7 +139,7 @@ window.FESTIVAL_DATA = {
                 "thumbnail": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202604/06/c3972179-59e5-43e2-bfde-5c5b631cb003.webp",
                 "link": "https://visitjeju.net/kr/festival/view?contentsid=CNTS_300000000014207&menuId=undefined#p1",
                 "address": " ",
-                "title_zh": "2026新缘桥周末文化演出 『周五六五六表演』",
+                "title_zh": "2026新缘桥周末文化演出『周五·周六新缘秀』",
                 "link_zh": "https://visitjeju.net/cn/festival/view?contentsid=CNTS_300000000014207&menuId=undefined#p1"
             },
             {
@@ -587,7 +587,7 @@ window.FESTIVAL_DATA = {
                 "thumbnail": "https://api.cdn.visitjeju.net/photomng/thumbnailpath/202610/01/c74fe9c9-1649-4cc5-b739-74cde368bd2a.webp",
                 "link": "https://visitjeju.net/kr/festival/view?contentsid=CNTS_300000000015011&menuId=undefined#p1",
                 "address": " ",
-                "title_zh": "2026年啤酒花园周五至周六周五至周六Saeyeon秀",
+                "title_zh": "2026年啤酒花园 in 周五·周六新缘秀",
                 "link_zh": "https://visitjeju.net/cn/festival/view?contentsid=CNTS_300000000015011&menuId=undefined#p1"
             },
             {

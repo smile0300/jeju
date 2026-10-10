@@ -131,6 +131,12 @@ async function fetchFestivals() {
         }
     }
 
+    // 금토금토 새연쇼 = 금·토요일 새연교 공연. 공식 번역이 "周五六五六"처럼 깨져 나온다.
+    const TITLE_ZH_OVERRIDES = {
+        'CNTS_300000000014207': '2026新缘桥周末文化演出『周五·周六新缘秀』',
+        'CNTS_300000000015011': '2026年啤酒花园 in 周五·周六新缘秀',
+    };
+
     const page = await browser.newPage();
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36');
 
@@ -150,7 +156,8 @@ async function fetchFestivals() {
             if (cnItem) {
                 // 한국어 제목은 그대로 둔다 (한국어 화면, 관광객 적합도 점수, 포스터 매칭이 한국어 제목 기준).
                 // 중국어 제목·링크는 별도 필드로 저장해 중국어 화면에서만 쓴다.
-                item.title_zh = cnItem.title;
+                // 공식 중국어 페이지의 기계번역이 어색한 제목은 직접 고친 번역을 우선한다
+                item.title_zh = TITLE_ZH_OVERRIDES[item.contentsid] || cnItem.title;
                 item.link_zh = cnItem.link;
                 item.address = `${item.address} ${cnItem.address}`;
             }
