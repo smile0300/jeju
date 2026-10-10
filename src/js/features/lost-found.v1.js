@@ -1115,6 +1115,7 @@ export function renderSuccessGoodsView(isLoadMore = false) {
                 <p style="font-size: 0.9rem; margin: 0;" data-i18n="lost.loading">${loadingText}</p>
             </div>
             <div style="text-align: center; margin-top: 10px;">
+                <p class="lost-cta-hint" style="font-size: 0.8rem; color: var(--text-secondary); margin: 0 0 8px;" data-i18n="lost.modal.cta_hint">${window.t ? window.t('lost.modal.cta_hint') : ''}</p>
                 <div style="display: flex; gap: 10px; justify-content: center; width: 100%;">
                     <button class="btn btn-primary btn-cta-success" style="flex: 1; padding: 12px 0;" onclick="openLostReportModal();" data-i18n="lost.modal.cta_report">
                         ${ctaReportText}
@@ -1152,6 +1153,7 @@ export function renderSuccessGoodsView(isLoadMore = false) {
                 <p style="font-size: 0.9rem; margin: 0;">${emptyText}</p>
             </div>
             <div style="text-align: center; margin-top: 10px;">
+                <p class="lost-cta-hint" style="font-size: 0.8rem; color: var(--text-secondary); margin: 0 0 8px;" data-i18n="lost.modal.cta_hint">${window.t ? window.t('lost.modal.cta_hint') : ''}</p>
                 <div style="display: flex; gap: 10px; justify-content: center; width: 100%;">
                     <button class="btn btn-primary btn-cta-success" style="flex: 1; padding: 12px 0;" onclick="openLostReportModal();" data-i18n="lost.modal.cta_report">
                         ${ctaReportText}
@@ -1320,6 +1322,7 @@ export function renderSuccessGoodsView(isLoadMore = false) {
         <div class="success-all-grid">${cardsHtml}</div>
         ${loadMoreHtml}
         <div style="text-align: center; margin-top: 16px; margin-bottom: 24px;">
+        <p class="lost-cta-hint" style="font-size: 0.8rem; color: var(--text-secondary); margin: 0 0 8px;" data-i18n="lost.modal.cta_hint">${window.t ? window.t('lost.modal.cta_hint') : ''}</p>
         <div style="display: flex; gap: 10px; justify-content: center; width: 100%;">
             <button class="btn btn-primary btn-cta-success" style="flex: 1; padding: 12px 0;" onclick="openLostReportModal();" data-i18n="lost.modal.cta_report">
                 ${window.t ? window.t('lost.modal.cta_report') : '분실신고신청'}
