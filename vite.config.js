@@ -24,8 +24,10 @@ export default defineConfig({
     open: true,
     proxy: {
       // API 요청을 wrangler pages dev 서버로 전달 (기본 8788 포트)
+      // 공공데이터 키 없이 화면만 볼 때: API_TARGET=https://jeju-live.com npm run dev
+      // (주의: 이 경우 양식 제출도 운영 시트에 그대로 기록된다)
       '/api': {
-        target: 'http://127.0.0.1:8788',
+        target: process.env.API_TARGET || 'http://127.0.0.1:8788',
         changeOrigin: true,
       },
     },

@@ -40,6 +40,21 @@ const SEO_META = {
         desc: 'Discover current and upcoming festivals, cultural events, and seasonal highlights in Jeju Island. Updated monthly. 济州岛精彩节庆活动一览。',
         keywords: 'Jeju festivals 2026, 济州岛节日活动, Jeju Island events, 제주 축제, Jeju seasonal events'
     },
+    'trip': {
+        title: 'Jeju Trip Planner: Weather & Festivals for Your Dates - Jeju Live | 济州行程助手',
+        desc: 'Enter your Jeju travel dates to see the forecast or typical weather, what to wear, and festivals during your trip. 输入旅行日期，查看济州天气、穿衣建议和节庆活动。',
+        keywords: 'Jeju trip planner, Jeju weather by date, 济州行程, 济州天气穿衣, 제주 여행 일정 날씨'
+    },
+    'course': {
+        title: 'Jeju Travel Routes: Day Trips to 6 Days - Jeju Live | 济州推荐路线',
+        desc: 'Jeju Island routes by duration and area — east, west, south, north, inland and rainy-day options. 济州岛东线、西线、南线推荐路线，从当日到6天5晚。',
+        keywords: 'Jeju itinerary, Jeju east west route, 济州路线, 济州东线西线, 제주 추천 코스'
+    },
+    'charter': {
+        title: 'Jeju Private Car Hire & Ride Share Guide - Jeju Live | 济州包车拼车',
+        desc: 'Reference prices for hiring a car with a driver in Jeju, how to pick a legal operator, and ride-share matching. 济州包车参考价格、挑选方法和拼车对接。',
+        keywords: 'Jeju private car hire, Jeju driver, 济州包车, 济州拼车, 제주 차량 대절'
+    },
     'reward': {
         title: 'Jeju Live Bounty Missions & Rewards | 济州红包任务',
         desc: 'Earn rewards by helping deliver lost items to China. Jeju Live bounty missions connect travelers returning to China with lost item owners. 顺路赚零花钱，帮忙带失物回中国。',
@@ -53,6 +68,9 @@ const routes = [
     'hallasan',
     'airport',
     'festival',
+    'trip',
+    'course',
+    'charter',
     'reward'
 ];
 

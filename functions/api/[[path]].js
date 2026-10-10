@@ -316,6 +316,32 @@ export async function onRequest(context) {
     }
   }
 
+  // 3.0 /api/planner (POST) — 동승 달력(모집글·댓글 읽기/쓰기)
+  //     전용 GAS 배포(PLANNER_GAS_URL)가 있으면 그쪽으로, 없으면 기본 GAS로 보낸다.
+  if (pathname === '/api/planner' && request.method === 'POST') {
+    const json = (obj, status = 200) => new Response(JSON.stringify(obj), {
+      status, headers: { 'Access-Control-Allow-Origin': ALLOWED_ORIGIN, 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' }
+    });
+    try {
+      const gasUrl = env.PLANNER_GAS_URL || env.GAS_URL || env.SECRET_GAS_URL;
+      if (!gasUrl) return json({ result: 'error', message: 'GAS_URL NOT CONFIGURED' }, 500);
+
+      const bodyText = await request.text();
+      if (bodyText.length > 4000) return json({ result: 'error', message: 'Payload too large' }, 413);
+      let type = '';
+      try { type = String(JSON.parse(bodyText).type || ''); } catch (e) { return json({ result: 'error', message: 'Invalid JSON' }, 400); }
+      // 이 경로로는 동승 관련 요청만 허용한다
+      if (!type.startsWith('carpool_')) return json({ result: 'error', message: 'Unsupported type' }, 400);
+
+      const gasResponse = await fetch(gasUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: bodyText });
+      return new Response(await gasResponse.text(), {
+        headers: { 'Access-Control-Allow-Origin': ALLOWED_ORIGIN, 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' }
+      });
+    } catch (e) {
+      return json({ result: 'error', message: e.message }, 500);
+    }
+  }
+
   // 3. /api/feature-request 및 /api/lost-report (POST)
   if ((pathname === '/api/feature-request' || pathname === '/api/lost-report') && request.method === 'POST') {
     try {

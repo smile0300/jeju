@@ -16,6 +16,10 @@ import { initReservationSection, adjustParty, submitReservation, changeReservati
 import { initReward } from '../features/reward.js';
 import { showSection, openWechatQR, closeWechatQR, openFeatureModal, closeFeatureModal, submitFeatureRequest, openCSModal, closeCSModal, submitCSFeedback, copyWechatId, openWeatherSummaryModal, closeWeatherSummaryModal, openShareModal, closeShareModal, shareToPlatform } from '../ui/ui.js';
 import '../ui/home.js';
+import '../ui/home-info-banner.js';
+import '../features/trip.js';
+import '../features/course.js';
+import '../features/charter.js';
 
 
 
@@ -308,8 +312,10 @@ const ROUTE_MAP = {
     '/privacy': 'privacy',
     '/lost-report': 'lost-report',
     '/lost-status': 'lost-status',
-    '/food': 'food',
+    '/food': 'charter', // 맛집 타일이 차량 대절/동승으로 바뀜 — 예전 링크 호환
+    '/charter': 'charter',
     '/course': 'course',
+    '/trip': 'trip',
     '/reservation': 'reservation',
 };
 
@@ -495,15 +501,19 @@ window.addEventListener('load', () => {
         const alertEl = document.getElementById('home-alerts-container');
         const marqueeEl = document.getElementById('home-marquee-container');
         const noticeEl = document.getElementById('home-notice-container');
+        const infoEl = document.getElementById('home-info-container');
         if (!alertEl || !marqueeEl || !noticeEl) return;
+        const allBanners = [alertEl, marqueeEl, noticeEl, infoEl].filter(Boolean);
 
         const hasAlert = alertEl.innerHTML.trim().length > 0 && !alertEl.querySelector('.no-alerts');
         const marqueeContentEl = document.getElementById('home-success-marquee-content');
         const hasMarquee = marqueeContentEl && marqueeContentEl.innerHTML.trim().length > 0;
         const hasNotice = true;
+        const hasInfo = !!(infoEl && window.homeInfoBanner && window.homeInfoBanner.hasContent());
 
         const validBanners = [];
         if (hasAlert) validBanners.push(alertEl);
+        if (hasInfo) validBanners.push(infoEl);
         if (hasMarquee) validBanners.push(marqueeEl);
         if (hasNotice) validBanners.push(noticeEl);
 
@@ -520,7 +530,7 @@ window.addEventListener('load', () => {
             singleEl.style.pointerEvents = 'auto';
             singleEl.style.zIndex = '2';
             
-            [alertEl, marqueeEl, noticeEl].forEach(el => {
+            allBanners.forEach(el => {
                 if (el !== singleEl) {
                     el.style.opacity = '0';
                     el.style.pointerEvents = 'none';
@@ -546,6 +556,8 @@ window.addEventListener('load', () => {
         }
         
         if (nextEl) {
+            // "오늘의 제주" 칸은 보여줄 차례마다 다음 소식(날씨 → 축제 …)으로 넘긴다
+            if (nextEl === infoEl) window.homeInfoBanner.advance();
             if (nextEl.style.opacity === '0') {
                 nextEl.style.transform = 'translateY(10px) scale(0.98)';
             }
@@ -557,7 +569,7 @@ window.addEventListener('load', () => {
             }, 50);
         }
         
-        [alertEl, marqueeEl, noticeEl].forEach(el => {
+        allBanners.forEach(el => {
             if (el !== currentEl && el !== nextEl) {
                 el.style.opacity = '0';
                 el.style.pointerEvents = 'none';

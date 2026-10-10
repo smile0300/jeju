@@ -52,6 +52,12 @@
                 <div class="alert-msg" style="margin-left: 12px; font-size: 0.95rem;" data-i18n="notice.app_download">JEJU LIVE APP사용 확대</div>
             </div>
 
+            <!-- 4. 오늘의 제주 (날씨 전망·축제 — 내용이 준비되면 순환에 포함, src/js/ui/home-info-banner.js) -->
+            <div id="home-info-container" class="weather-alert-card notice-alert-card" style="display: none; opacity: 0; transform: translateY(-10px) scale(0.98); pointer-events: none; z-index: 1;" onclick="window.homeInfoBanner && window.homeInfoBanner.open()">
+                <div class="alert-type-badge" style="background: var(--color-weather, var(--color-blue)); color: white; border-radius: 8px; padding: 4px 8px; font-weight: 800; font-size: 0.75rem; white-space: nowrap; flex-shrink: 0;"><i id="home-info-icon" class="ph-duotone ph-sun"></i> <span id="home-info-badge">今日天气</span></div>
+                <div class="alert-msg" id="home-info-msg" style="margin-left: 12px; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></div>
+            </div>
+
         </div>
 
         <div class="home-grid">
@@ -79,14 +85,16 @@
                 <span class="item-icon"><i class="ph-duotone ph-money color-reward"></i></span>
                 <span class="item-label" data-i18n="nav.reward">红　包</span>
             </a>
-            <!-- 맛집 & 여행 코스 -->
-            <a href="/food" class="home-item item-food" id="home-food-btn" onclick="event.preventDefault(); showSection('food')">
-                <span class="item-icon"><i class="ph-duotone ph-hamburger color-food"></i></span>
-                <span class="item-label" data-i18n="nav.food">济州美食</span>
+            <!-- 차량 대절/동승 & 여행 코스 (id·class는 홈 그리드 전환 로직이 참조하므로 유지) -->
+            <a href="/charter" class="home-item item-food" id="home-food-btn" onclick="event.preventDefault(); showSection('charter')">
+                <span class="item-icon"><i class="ph-duotone ph-van color-food"></i></span>
+                <span class="item-label" data-i18n="nav.charter">包车/拼车</span>
+                <span class="coming-soon-badge">TEST</span>
             </a>
             <a href="/course" class="home-item item-course" id="home-course-btn" onclick="event.preventDefault(); showSection('course')">
                 <span class="item-icon"><i class="ph-duotone ph-map-trifold color-course"></i></span>
                 <span class="item-label" data-i18n="nav.course">推荐路线</span>
+                <span class="coming-soon-badge">TEST</span>
             </a>
             <!-- 예약신청 버튼 -->
             <a href="/reservation" class="home-item item-reservation" id="home-reservation-btn" onclick="event.preventDefault(); window.toggleReservationExpand()">

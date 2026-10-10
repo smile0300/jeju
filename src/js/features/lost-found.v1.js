@@ -897,7 +897,14 @@ function renderSuccessMarquee(data) {
 
     containers.forEach(c => {
         if (c) {
-            c.innerHTML = itemsHtml + firstClone;
+            if (c.id === 'home-success-marquee-content') {
+                // 홈 배너는 다른 소식과 번갈아 나오므로 가장 최근 1건만 고정 표시
+                c.innerHTML = slots[0];
+                c.style.animation = 'none';
+                c.style.transform = 'none';
+            } else {
+                c.innerHTML = itemsHtml + firstClone;
+            }
             const parent = c.closest('.marquee-container');
             if (parent) parent.style.display = '';
         }

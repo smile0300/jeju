@@ -1,0 +1,479 @@
+/* ===== 여행 일정 · 추천 코스 · 차량 대절 공용 스타일 =====
+   기존 스타일과 섞이지 않도록 모든 클래스에 pl- 접두어를 쓴다. */
+
+.pl-root {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding-top: var(--space-3); /* 고정 헤더에 첫 카드가 붙어 보이지 않게 */
+    padding-bottom: var(--space-8);
+    color: var(--label-primary);
+}
+
+.pl-intro {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.pl-h {
+    margin: var(--space-4) 0 0;
+    font-size: 1.05rem;
+    font-weight: 800;
+}
+
+.pl-card {
+    background: var(--bg-card);
+    border: 1px solid var(--separator);
+    border-radius: 16px;
+    padding: var(--space-4);
+}
+
+.pl-muted {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--label-secondary);
+}
+
+.pl-hint { font-size: 0.8rem; }
+.pl-mt { margin-top: var(--space-3); }
+.pl-center { align-self: center; }
+
+.pl-link {
+    background: none;
+    border: none;
+    padding: var(--space-3) 0;
+    min-height: 44px;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--accent);
+    cursor: pointer;
+    text-align: left;
+}
+
+.pl-btn-ghost {
+    min-height: 40px;
+    padding: 0 var(--space-3);
+    border: 1px solid var(--separator);
+    border-radius: 10px;
+    background: var(--bg-card);
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--label-primary);
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+/* ── 선택 칩 ── */
+.pl-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+.pl-chip {
+    min-height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--separator);
+    border-radius: 999px;
+    background: var(--bg-card);
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--label-primary);
+    cursor: pointer;
+}
+
+.pl-chip.active {
+    border-color: var(--accent);
+    background: var(--accent-subtle);
+    color: var(--accent-active);
+    font-weight: 800;
+}
+
+/* 필터 줄은 한 줄로 두고 좌우로 넘긴다 (줄바꿈으로 화면이 밀리지 않게) */
+.pl-filter {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+.pl-filter::-webkit-scrollbar { display: none; }
+.pl-filter .pl-chips { flex-wrap: nowrap; }
+.pl-filter .pl-chip { flex-shrink: 0; white-space: nowrap; }
+
+/* ── 배지 ── */
+.pl-badge,
+.pl-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    line-height: 1.5;
+    white-space: nowrap;
+}
+.pl-badge { margin-left: var(--space-2); }
+.pl-badge.forecast { background: var(--accent-subtle); color: var(--accent-active); }
+.pl-badge.history { background: var(--fill-secondary); color: #4E5968; }
+.pl-badge.none { background: var(--fill-secondary); color: var(--label-secondary); }
+.pl-badge.sample { background: #FFF4E6; color: #D9480F; }
+.pl-tag { align-self: flex-start; background: var(--accent-subtle); color: var(--accent-active); }
+
+/* ── 여행 일정: 요약 ── */
+.pl-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+}
+.pl-summary-range { font-size: 1.1rem; font-weight: 800; }
+.pl-summary-sub { font-size: 0.85rem; color: var(--label-secondary); }
+.pl-summary-actions { display: flex; gap: var(--space-2); }
+
+/* ── 여행 일정: 날짜별 날씨 (날씨 화면의 .weekly-grid / .weekly-card 재사용) ── */
+.pl-wx { margin-bottom: 0; }
+.pl-wx .weekly-grid { margin-top: 0; }
+.pl-wcard { cursor: default; }
+.pl-wcard:hover,
+.pl-wcard:active { transform: none; background: #ffffff; border-color: #f1f3f5; }
+/* 예보가 아닌 예년 평균은 점선 테두리로 구분 */
+.pl-wcard-hist,
+.pl-wcard-hist:hover { border-style: dashed; border-color: var(--separator); background: var(--fill-tertiary); }
+.pl-wcard-tag {
+    padding: 1px 5px;
+    border-radius: 6px;
+    background: var(--fill-primary);
+    font-size: 0.6rem;
+    color: #4E5968;
+}
+.pl-wx .pl-hint { margin-top: var(--space-3); }
+
+.pl-outfit { align-items: flex-start; margin: 0; }
+.pl-outfit strong { font-size: 0.9rem; }
+.pl-outfit ul { margin: 4px 0 0; padding-left: 18px; font-size: 0.875rem; line-height: 1.6; }
+
+.pl-festivals { padding-bottom: 0; }
+
+/* ── 목록 (축제, 동승 모집) ── */
+.pl-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.pl-list li {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid var(--separator);
+}
+.pl-list li:last-child { border-bottom: none; }
+.pl-list-title { font-size: 0.95rem; font-weight: 700; }
+.pl-list-sub { font-size: 0.8rem; color: var(--label-secondary); }
+
+/* ── 추천 코스: 목록 ── */
+.pl-plan {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    width: 100%;
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    background: var(--accent-subtle);
+    border-color: transparent;
+}
+.pl-plan-text { display: flex; flex-direction: column; gap: 2px; }
+.pl-plan-text strong { font-size: 1rem; }
+.pl-plan-text span { font-size: 0.85rem; color: #4E5968; }
+.pl-plan-go { font-size: 0.9rem; font-weight: 800; color: var(--accent-active); }
+
+.pl-draft {
+    margin: 0;
+    padding: var(--space-2) var(--space-3);
+    border-radius: 10px;
+    background: #FFF4E6;
+    color: #D9480F;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.pl-course-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.pl-course-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    width: 100%;
+    padding: var(--space-4);
+    border: 1px solid var(--separator);
+    border-radius: 16px;
+    background: var(--bg-card);
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+.pl-course-card:active { background: var(--bg-card-hover); }
+.pl-course-title { font-size: 1rem; font-weight: 800; line-height: 1.4; }
+.pl-course-sub { font-size: 0.875rem; line-height: 1.5; color: #4E5968; }
+.pl-course-meta { font-size: 0.8rem; color: var(--label-secondary); }
+.pl-course-days { display: flex; flex-wrap: wrap; gap: 6px; margin-top: var(--space-1); }
+.pl-daychip {
+    padding: 2px 8px;
+    border-radius: 8px;
+    background: var(--fill-secondary);
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #4E5968;
+}
+
+/* ── 추천 코스: 상세 타임라인 ── */
+.pl-detail-title { margin: 0; font-size: 1.2rem; font-weight: 800; line-height: 1.4; }
+.pl-detail-sub { margin: 0; font-size: 0.9rem; color: #4E5968; }
+
+.pl-timeline {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.pl-stop {
+    position: relative;
+    padding-left: 40px;
+    padding-bottom: var(--space-4);
+}
+/* 장소를 잇는 세로선 */
+.pl-stop::before {
+    content: '';
+    position: absolute;
+    left: 13px;
+    top: 28px;
+    bottom: 0;
+    width: 2px;
+    background: var(--separator);
+}
+.pl-stop:last-child::before { display: none; }
+
+.pl-stop-head { display: flex; align-items: center; min-height: 28px; }
+.pl-stop-no {
+    position: absolute;
+    left: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--accent-on);
+    font-size: 0.85rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.pl-stop-name { font-size: 1rem; font-weight: 800; }
+
+.pl-stop-body {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    margin-top: var(--space-1);
+}
+.pl-stop-ko { font-size: 0.85rem; color: #4E5968; }
+.pl-stop-stay { font-size: 0.8rem; color: var(--label-secondary); }
+.pl-stop-tip { flex-basis: 100%; margin: 0; font-size: 0.875rem; line-height: 1.5; color: #4E5968; }
+
+.pl-copy {
+    min-height: 32px;
+    padding: 0 10px;
+    border: 1px solid var(--separator);
+    border-radius: 8px;
+    background: var(--fill-tertiary);
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--label-primary);
+    cursor: pointer;
+}
+
+.pl-leg {
+    margin-top: var(--space-3);
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--label-secondary);
+}
+
+/* ── 차량 대절 ── */
+.pl-price {
+    list-style: none;
+    margin: 0 0 var(--space-2);
+    padding: 0;
+}
+.pl-price li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid var(--separator);
+}
+.pl-price li:last-child { border-bottom: none; }
+.pl-price-name { font-size: 0.95rem; font-weight: 700; }
+.pl-price-name small { display: block; font-size: 0.8rem; font-weight: 400; color: var(--label-secondary); }
+.pl-price-val { font-size: 1.05rem; font-weight: 800; white-space: nowrap; text-align: right; }
+.pl-price-val small { display: block; font-size: 0.75rem; font-weight: 400; color: var(--label-secondary); }
+
+.pl-checklist {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+.pl-checklist li { display: flex; gap: var(--space-2); font-size: 0.9rem; line-height: 1.6; }
+.pl-checklist i { flex-shrink: 0; margin-top: 3px; font-size: 1.1rem; color: var(--color-green); }
+
+.pl-check {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 44px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+.pl-check input { width: 20px; height: 20px; flex-shrink: 0; }
+
+.pl-root .reservation-form { margin-top: var(--space-3); }
+
+/* ── 차량 대절: 이용 방법(접힘) · 동승 달력 ── */
+.pl-guide summary {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 44px;
+    font-size: 0.95rem;
+    font-weight: 800;
+    cursor: pointer;
+    list-style: none;
+}
+.pl-guide summary::-webkit-details-marker { display: none; }
+.pl-guide summary::after { content: '▾'; margin-left: auto; color: var(--label-secondary); }
+.pl-guide[open] summary::after { content: '▴'; }
+.pl-h4 { margin: var(--space-4) 0 var(--space-2); font-size: 0.95rem; font-weight: 800; }
+
+.pl-cal { padding: var(--space-3) var(--space-2); overflow: hidden; }
+.pl-cal > input { display: none !important; }
+/* flatpickr 기본 폭(307px 고정)을 풀어 카드 폭에 맞춘다 — 좁은 폰에서도 잘리지 않고, 넓은 화면에서는 420px까지만 */
+.pl-cal .flatpickr-calendar {
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
+    box-shadow: none;
+}
+.pl-cal .flatpickr-innerContainer,
+.pl-cal .flatpickr-rContainer,
+.pl-cal .flatpickr-days,
+.pl-cal .dayContainer {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+}
+.pl-cal .flatpickr-day {
+    position: relative;
+    flex-basis: 14.2857%;
+    max-width: 14.2857%;
+    height: 44px;
+    line-height: 44px;
+    border-radius: 12px;
+}
+.pl-cal .flatpickr-current-month { font-size: 1.05rem; }
+/* 모집글이 있는 날짜: 오른쪽 위에 건수 */
+.pl-cal .flatpickr-day.pl-has-post { font-weight: 800; color: var(--accent-active); }
+.pl-cal .flatpickr-day.pl-has-post.selected { color: #ffffff; }
+.pl-cal-dot {
+    position: absolute;
+    top: 1px;
+    right: 1px;
+    min-width: 15px;
+    height: 15px;
+    padding: 0 3px;
+    border-radius: 8px;
+    background: var(--color-red);
+    color: #ffffff;
+    font-size: 0.6rem;
+    font-weight: 800;
+    line-height: 15px;
+    text-align: center;
+}
+
+.pl-list li.pl-post {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+}
+.pl-post-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+/* 팝업용 말풍선 꼬리는 화면에 고정된 달력에서는 필요 없다 */
+.pl-cal .flatpickr-calendar::before,
+.pl-cal .flatpickr-calendar::after { display: none; }
+
+/* ── 동승 달력: 모집글 · 댓글 ── */
+/* 지난 날짜는 누를 수 있지만 흐리게 (이력 열람용) */
+.pl-cal .flatpickr-day.pl-past { color: var(--label-tertiary); }
+.pl-cal .flatpickr-day.pl-past.pl-has-post { color: var(--label-secondary); }
+.pl-cal .flatpickr-day.pl-past .pl-cal-dot { background: var(--label-tertiary); }
+.pl-cal .flatpickr-day.pl-past.selected { color: #ffffff; }
+
+.pl-posts {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+.pl-post {
+    background: var(--bg-card);
+    border: 1px solid var(--separator);
+    border-radius: 16px;
+    padding: var(--space-4);
+}
+.pl-post-route { font-size: 1rem; font-weight: 800; line-height: 1.5; overflow-wrap: anywhere; }
+.pl-post-route i { color: var(--accent); vertical-align: -2px; }
+.pl-post-meta { margin-top: 2px; font-size: 0.875rem; color: #4E5968; }
+.pl-post-contact {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+    font-size: 0.9rem;
+    overflow-wrap: anywhere;
+}
+/* 종료된 글: 지우지 않고 흐리게 남긴다 */
+.pl-post-ended { background: var(--fill-tertiary); }
+.pl-post-ended .pl-post-route,
+.pl-post-ended .pl-post-contact { color: var(--label-secondary); }
+.pl-post-ended .pl-post-route i { color: var(--label-tertiary); }
+
+.pl-comments { margin-top: var(--space-3); padding-top: var(--space-3); border-top: 1px dashed var(--separator); }
+.pl-comments-title { font-size: 0.8rem; font-weight: 800; color: var(--label-secondary); }
+.pl-comment-list { list-style: none; margin: var(--space-2) 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.pl-comment-list li { font-size: 0.875rem; line-height: 1.5; overflow-wrap: anywhere; }
+.pl-comment-list strong { margin-right: 4px; }
+.pl-comment-form { display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-2); }
+.pl-comment-name { max-width: 180px; }
+.pl-comment-row { display: flex; gap: var(--space-2); }
+.pl-comment-row .form-input { flex: 1; min-width: 0; }
+.pl-comment-row .pl-btn-ghost { min-height: 44px; }

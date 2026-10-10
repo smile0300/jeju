@@ -363,6 +363,9 @@ export async function fetchFlights(type) {
                 return directionMatch && oppositeCode && (f.is_intl || !DOMESTIC_AIRPORTS.has(oppositeCode)) && REGION_AIRPORTS.has(oppositeCode);
             });
             renderFlightList(container, filteredFlights, type);
+            // 홈 배너가 지연·결항 여부를 읽을 수 있도록 결과를 공개한다
+            window.jejuFlights = { ...(window.jejuFlights || {}), [type]: filteredFlights };
+            window.dispatchEvent(new Event('jeju:flights'));
         } else {
              container.innerHTML = `<div style="text-align:center;padding:20px;color:var(--text-muted)">${window.t('airport.empty')}</div>`;
         }

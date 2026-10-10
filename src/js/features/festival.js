@@ -629,6 +629,14 @@ function getFestivalImage(title, originalImg) {
     return '';
 }
 
+/** 현재 언어의 축제 제목 (번역 사전에 없으면 원문 그대로) — 홈 배너 등 다른 화면에서 재사용 */
+export function getFestivalDisplayTitle(rawTitle, titleZh) {
+    const lang = window.getLang ? window.getLang() : 'zh';
+    if (lang === 'ko') return rawTitle;
+    if (lang === 'en') return FESTIVAL_TRANSLATIONS_EN[rawTitle] || rawTitle;
+    return titleZh || FESTIVAL_TRANSLATIONS[rawTitle] || rawTitle;
+}
+
 export function renderFestivalItems(container, items) {
     const today = new Date().toISOString().split('T')[0];
     const lang = window.getLang ? window.getLang() : 'zh';
@@ -641,7 +649,7 @@ export function renderFestivalItems(container, items) {
         } else if (lang === 'en') {
             displayTitle = FESTIVAL_TRANSLATIONS_EN[rawTitle] || rawTitle;
         } else { // 'zh'
-            displayTitle = FESTIVAL_TRANSLATIONS[rawTitle] || rawTitle;
+            displayTitle = item.title_zh || FESTIVAL_TRANSLATIONS[rawTitle] || rawTitle;
         }
         const rawImg = item.thumbnail || item.imgpath || item.img || '';
         const img = getFestivalImage(rawTitle, rawImg) || '';
@@ -738,7 +746,7 @@ const FESTIVAL_KOREAN_REQ = /강좌|낭독|독서|글쓰기|인문학|토크|해
 const FESTIVAL_BOOST_IP = /지브리|吉卜力|원피스|海贼王|팝업|快闪|스투시|디즈니|산리오/;
 const FESTIVAL_BOOST_TYPE = /전시|展|공연|演出|불꽃|야시장|夜市|축제|节|분수|喷泉|야간개장|夜间|행사|페스티벌|쇼|개장/;
 
-function getTouristScore(item) {
+export function getTouristScore(item) {
     const t = item.title || '';
     if (FESTIVAL_EXCLUDE.test(t)) return -1; // 완벽 제외 대상
 

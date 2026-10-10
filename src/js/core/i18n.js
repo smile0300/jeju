@@ -120,6 +120,7 @@ const TRANSLATIONS = {
         'nav.festival':   '节日活动',
         'nav.reward':     '红　包',
         'nav.food':       '济州美食',
+        'nav.charter':    '包车/拼车',
         'nav.course':     '推荐路线',
         'nav.reservation': '预约申请',
         'badge.maintenance': '维护中',
@@ -786,6 +787,7 @@ const TRANSLATIONS = {
         'nav.festival':   '축제/행사',
         'nav.reward':     '용　돈',
         'nav.food':       '제주 맛집',
+        'nav.charter':    '차량 대절/동승',
         'nav.course':     '추천 코스',
         'nav.reservation': '예약신청',
         'badge.maintenance': '점검중',
@@ -1387,6 +1389,7 @@ const TRANSLATIONS = {
         'nav.festival':   'Festivals',
         'nav.reward':     'Bounty',
         'nav.food':       'Food Map',
+        'nav.charter':    'Car Hire',
         'nav.course':     'Course',
         'nav.reservation': 'Book Now',
         'badge.maintenance': 'Maintenance',
@@ -1955,6 +1958,8 @@ export function setLanguage(lang) {
         if (window.initReservationSection) {
             window.initReservationSection();
         }
+        // 별도 모듈(여행 일정 · 추천 코스 · 차량 대절 · 홈 배너)에 언어 변경을 알린다
+        window.dispatchEvent(new Event('jeju:langchange'));
         // 공항 탭 재렌더링
         if (window.airportApp && window.airportApp.fetchFlights) {
             const activeTab = document.querySelector('.flight-tab.active');

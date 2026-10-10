@@ -138,7 +138,7 @@ async function fetchFestivals() {
         const krData = await crawlMonth(page, 'kr', m);
         const cnData = await crawlMonth(page, 'cn', m);
 
-        // 데이터 병합: KR 기준으로 하되, CN에 매칭되는 contentsid가 있으면 title과 address를 교체
+        // 데이터 병합: KR 기준으로 하되, CN에 매칭되는 contentsid가 있으면 중국어 제목(title_zh)을 덧붙임
         const cnMap = new Map();
         for (const item of cnData) {
             cnMap.set(item.contentsid, item);
@@ -148,9 +148,10 @@ async function fetchFestivals() {
         for (const item of krData) {
             const cnItem = cnMap.get(item.contentsid);
             if (cnItem) {
-                // 중문 데이터가 있으면 제목을 중문으로 덮어씀. (국문 주소 정보가 필터링에 유용할 수 있으므로 주소는 병합)
-                item.title = cnItem.title;
-                item.link = cnItem.link;
+                // 한국어 제목은 그대로 둔다 (한국어 화면, 관광객 적합도 점수, 포스터 매칭이 한국어 제목 기준).
+                // 중국어 제목·링크는 별도 필드로 저장해 중국어 화면에서만 쓴다.
+                item.title_zh = cnItem.title;
+                item.link_zh = cnItem.link;
                 item.address = `${item.address} ${cnItem.address}`;
             }
             // ID 속성은 프론트에서 불필요하므로 제거해도 무방하지만 남겨둠

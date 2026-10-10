@@ -31,7 +31,12 @@ function notifyAdmin(title, body) {
 function doPost(e) {
   try {
     var data = JSON.parse(e.postData.contents);
-    
+
+    // 동승 달력 · 코스/대절 시트 준비 (planner.js)
+    if (data.type === 'planner_setup' || String(data.type || '').indexOf('carpool_') === 0) {
+      return handlePlanner(data);
+    }
+
     if (data.type === 'proxy_pickup') {
       var ss = SpreadsheetApp.openById(SHEET_ID);
       var timestamp = new Date();
