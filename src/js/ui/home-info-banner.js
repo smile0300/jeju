@@ -24,29 +24,28 @@ const KINDS = {
     flight:   { badge: 'banner.badge.flight',   icon: 'ph-airplane-tilt', color: 'var(--color-orange)', target: 'airport' },
 };
 
+const KIND_ORDER = ['today', 'tomorrow', 'festival', 'flight', 'hallasan'];
+
 let items = [];
 let index = -1;
 let forecast = {};
 let hallasanClosed = 0;
 
-/** 항공편 한 건을 "상하이→제주 MU5001" 형태로 줄인다 (도착편은 출발지, 출발편은 도착지를 표시) */
-function flightLabel(f, type) {
-    const jeju = tr('banner.loc.jeju');
-    const other = getCityName(type === 'arrive' ? f.dep_airport : f.arr_airport);
-    const route = type === 'arrive' ? `${other}→${jeju}` : `${jeju}→${other}`;
-    return `${route} ${f.flight_id}`;
-}
-
-/** 공항 화면이 분류해 둔 오늘 항공편(제주↔중화권)에서 지연·결항 편을 모은다 */
+/** 공항 화면이 분류해 둔 오늘 항공편(제주↔중화권)에서 지연·결항 건수와 해당 지역(제주 제외)을 모은다 */
 function flightDisruptions() {
     const has = (f, ...words) => words.some(w => String(f.status || '').includes(w));
-    const found = { delayed: [], cancelled: [] };
+    const found = { delayed: 0, cancelled: 0, regions: [] };
+    const addRegion = (name) => { if (name && name !== '-' && !found.regions.includes(name)) found.regions.push(name); };
+    // 결항 지역을 먼저 모아 줄임표에 잘려도 중요한 쪽이 보이게 한다
+    const rows = [];
     Object.entries(window.jejuFlights || {}).forEach(([type, list]) => {
         (list || []).forEach(f => {
-            if (has(f, '결항', 'Canceled', 'Cancelled')) found.cancelled.push(flightLabel(f, type));
-            else if (has(f, '지연', 'Delayed')) found.delayed.push(flightLabel(f, type));
+            const region = getCityName(type === 'arrive' ? f.dep_airport : f.arr_airport);
+            if (has(f, '결항', 'Canceled', 'Cancelled')) { found.cancelled++; rows.push([0, region]); }
+            else if (has(f, '지연', 'Delayed')) { found.delayed++; rows.push([1, region]); }
         });
     });
+    rows.sort((a, b) => a[0] - b[0]).forEach(([, region]) => addRegion(region));
     return found;
 }
 
@@ -60,14 +59,11 @@ function buildItems() {
     // 통제는 발생했을 때만, 가장 먼저
     if (hallasanClosed > 0) next.push({ kind: 'hallasan', text: tr('banner.hallasan', { n: hallasanClosed }) });
 
-    // 항공편 지연·결항도 발생했을 때만
-    // 결항과 지연은 소식을 따로 만들고, 어느 노선인지 편명과 함께 한 줄로 보여준다 (넘치면 ...)
-    const { delayed, cancelled } = flightDisruptions();
-    if (cancelled.length >= FLIGHT_MIN_CANCELLED) {
-        next.push({ kind: 'flight', text: `${tr('banner.flight.cancelled', { n: cancelled.length })} · ${cancelled.join(' · ')}` });
-    }
-    if (delayed.length >= FLIGHT_MIN_DELAYED) {
-        next.push({ kind: 'flight', text: `${tr('banner.flight.delayed', { n: delayed.length })} · ${delayed.join(' · ')}` });
+    // 항공편 지연·결항도 발생했을 때만. 건수와 해당 지역을 한 줄로 보여준다 (넘치면 ...)
+    const { delayed, cancelled, regions } = flightDisruptions();
+    if (cancelled >= FLIGHT_MIN_CANCELLED || delayed >= FLIGHT_MIN_DELAYED) {
+        const counts = [tr('banner.flight.cancelled', { n: cancelled }), tr('banner.flight.delayed', { n: delayed })].join(' · ');
+        next.push({ kind: 'flight', text: `${counts} | ${regions.join(', ')}` });
     }
 
     // 날씨는 제주·서귀포를 한 소식에 한 줄로 함께 보여준다 (넘치면 ...)
@@ -89,7 +85,8 @@ function buildItems() {
         next.push({ kind: 'festival', text: festivals.map(f => getFestivalDisplayTitle(f.title, f.title_zh)).join(' · ') });
     }
 
-    items = next;
+    // 돌아가는 순서: 날씨(오늘·내일) → 축제 → 항공 → 한라산 통제
+    items = next.sort((x, y) => KIND_ORDER.indexOf(x.kind) - KIND_ORDER.indexOf(y.kind));
 }
 
 const current = () => (items.length ? items[Math.max(index, 0) % items.length] : null);
@@ -110,6 +107,13 @@ function paint() {
 
 window.homeInfoBanner = {
     hasContent: () => items.length > 0,
+    count: () => items.length,
+    /** 배너 순환이 정해 준 차례(i번째 소식)를 그대로 보여준다 */
+    show(i) {
+        if (!items.length) return;
+        index = Math.min(Math.max(i, 0), items.length - 1);
+        paint();
+    },
     advance() {
         if (!items.length) return;
         index = (index + 1) % items.length;

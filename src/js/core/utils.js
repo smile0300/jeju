@@ -25,6 +25,17 @@ export function getWindDesc(ws) {
     return lang === 'ko' ? '⚠️ 야외활동 자제 (강풍)' : (lang === 'en' ? '⚠️ Avoid outdoor activities' : '⚠️ 尽量避免户外活动 (强风)');
 }
 
+/** 풍속 등급만 짧게 (조심 문구는 날씨 카드의 한눈에 보기 배너에서 보여준다) */
+export function getWindLevel(ws) {
+    const v = parseFloat(ws);
+    const t = (k) => (window.t ? window.t(k) : k);
+    if (isNaN(v)) return t('weather.wind.unknown');
+    if (v < 4) return t('weather.wind.light');
+    if (v < 9) return t('weather.wind.moderate');
+    if (v < 14) return t('weather.wind.fresh');
+    return t('weather.wind.strong');
+}
+
 export function getWindColor(ws) {
     const v = parseFloat(ws);
     if (isNaN(v)) return '#adb5bd';

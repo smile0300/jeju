@@ -14,7 +14,7 @@ const HISTORY_DAYS = 90;                   // 달력에서 되돌아볼 수 있�
 const MOCK_KEY = 'jeju_carpool_mock';
 const IS_LOCAL = ['localhost', '127.0.0.1'].includes(window.location.hostname);
 
-const state = { posts: [], comments: {}, selected: null, loaded: false, mock: false, failed: false };
+const state = { posts: [], comments: {}, selected: null, loaded: false, mock: false, failed: false, formOpen: false };
 
 const pad = (n) => String(n).padStart(2, '0');
 const toIso = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -160,7 +160,8 @@ function renderDay(root, notice) {
         <h3 class="pl-h">${tr('carpool.day_title', { d: dayLabel(iso) })}</h3>
         ${notice ? `<div class="form-status success" style="display:block;">${escapeHtml(notice)}</div>` : ''}
         ${list.length ? `<ul class="pl-posts">${list.map(postHtml).join('')}</ul>` : `<div class="pl-card"><p class="pl-muted">${tr(past ? 'carpool.past_closed' : 'carpool.none')}</p></div>`}
-        ${past ? (list.length ? `<p class="pl-muted pl-hint">${tr('carpool.past_closed')}</p>` : '') : formHtml(iso)}`;
+        ${past ? (list.length ? `<p class="pl-muted pl-hint">${tr('carpool.past_closed')}</p>` : '') : (state.formOpen ? formHtml(iso) : '')}`;
+    updateAddButton(root);
 
     const timeInput = box.querySelector('#carpool-time');
     if (timeInput && typeof flatpickr !== 'undefined') {
@@ -168,6 +169,25 @@ function renderDay(root, notice) {
         // 폰의 기본 시간 선택기 대신 사이트의 다른 양식과 같은 선택기를 쓴다
         flatpickr(timeInput, { enableTime: true, noCalendar: true, dateFormat: 'H:i', time_24hr: true, minuteIncrement: 10, defaultHour: 9, disableMobile: true, locale: l === 'en' ? 'default' : l });
     }
+}
+
+/** "등록하기" 버튼: 선택한 날짜의 등록 양식을 열고 닫는다 */
+function updateAddButton(root) {
+    const btn = root.querySelector('#carpool-add-btn');
+    if (!btn) return;
+    btn.querySelector('span').textContent = tr(state.formOpen ? 'carpool.close_btn' : 'carpool.add_btn');
+    btn.setAttribute('aria-expanded', state.formOpen ? 'true' : 'false');
+}
+
+function toggleForm(root) {
+    state.formOpen = !state.formOpen;
+    if (state.formOpen && !state.selected) {
+        // 날짜를 아직 고르지 않았으면 오늘로 시작한다
+        state.selected = todayIso();
+        root.querySelector('#charter-cal')?._flatpickr?.setDate(state.selected, false);
+    }
+    renderDay(root);
+    if (state.formOpen) root.querySelector('#carpool-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 async function submitPost(root) {
@@ -184,6 +204,7 @@ async function submitPost(root) {
         else await api({ type: 'carpool_post', ...post });
         await loadPosts();
         refreshCalendar(root);
+        state.formOpen = false;
         renderDay(root, tr('carpool.done'));
     } catch (e) {
         showStatus(statusEl, tr('common.submit_fail'), 'error');
@@ -252,6 +273,7 @@ async function render() {
 
     const titleEl = document.getElementById('charter-title');
     if (titleEl) titleEl.textContent = tr('charter.title');
+    state.formOpen = false;
     window.charterPresetRoute = null; // 추천 코스에서 넘어온 코스 선택은 새 양식(출발지·도착지 직접 입력)에서는 쓰지 않는다
 
     if (!root.dataset.charterBound) {
@@ -262,6 +284,7 @@ async function render() {
             else if (e.target.matches('.pl-comment-form')) submitComment(root, e.target);
         });
         root.addEventListener('click', async (e) => {
+            if (e.target.closest('#carpool-add-btn')) { toggleForm(root); return; }
             const copy = e.target.closest('[data-copy]');
             if (copy && await copyText(copy.dataset.copy)) flashLabel(copy, tr('common.copied'));
         });
@@ -269,11 +292,14 @@ async function render() {
 
     root.innerHTML = `
         <p class="pl-intro">${tr('carpool.intro')}</p>
-        ${guideHtml()}
-        <h3 class="pl-h">${tr('charter.cal.title')}</h3>
+        <div class="pl-head-row">
+            <h3 class="pl-h">${tr('charter.cal.title')}</h3>
+            <button type="button" id="carpool-add-btn" class="pl-btn-add" aria-expanded="false"><i class="ph-duotone ph-plus-circle"></i> <span>${tr('carpool.add_btn')}</span></button>
+        </div>
         <div id="charter-mode"></div>
         <div class="pl-card pl-cal"><div id="charter-cal"></div></div>
-        <div id="charter-day"><p class="pl-muted"><i class="ph-duotone ph-circle-notch spin"></i></p></div>`;
+        <div id="charter-day"><p class="pl-muted"><i class="ph-duotone ph-circle-notch spin"></i></p></div>
+        ${guideHtml()}`;
 
     await loadPosts();
     if (!document.getElementById('charter-cal')) return; // 불러오는 사이 화면이 바뀐 경우

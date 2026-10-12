@@ -1,14 +1,19 @@
-// 현재 날씨 카드 아래의 "오늘 여행 시간대(08~20시) 한눈에 보기" 배너.
+// 현재 날씨 카드 아래의 "지금부터 오늘 20시까지 한눈에 보기" 배너. 실시간 안내라서 내일 예보는 다루지 않는다.
 // 강수(시간대·강도·양), 바람, 기온, 미세먼지를 한곳에서 판단해 야외 활동 적합도와 함께 보여준다.
 // 기상청 단기예보 값(POP 강수확률, PCP 1시간 강수량, PTY 강수형태, WSD 풍속, TMP 기온)을 그대로 사용한다.
 
 const DAY_START = 8;   // 여행 활동 시간대
 const DAY_END = 20;
+const MIN_HOURS = 3;   // 20시가 가깝거나 지났을 때 앞으로 살펴볼 시간
+const NIGHT_FROM = 18; // 이 시각부터는 '오늘 밤'으로 부른다
 
 // 야외 활동 판단 기준
 const T = {
     peakModerate: 3,     // 시간당 3mm 이상: 중간 비 (우산 필수, 활동 영향)
     peakHeavy: 15,       // 시간당 15mm 이상: 강한 비 (일정 조정)
+    rainLongHours: 4,    // 비가 이어지는 시간(시간 수) — 약한 비라도 이 이상이면 '보통'
+    rainTotalFair: 5,    // 합계 강수량(mm) — 이 이상이면 '보통'
+    windHat: 4,          // m/s — 모자·가벼운 소지품 주의 (적합도에는 영향 없음)
     windCaution: 9,      // m/s — 바람 주의
     windDanger: 14,      // m/s — 강풍
     tempHot: 30, tempVeryHot: 33, tempDanger: 35,
@@ -19,7 +24,7 @@ const T = {
 
 const TEXT = {
     zh: {
-        today: '今天', tomorrow: '明天',
+        today: '今天', tonight: '今晚', tomorrow: '明天',
         suit: '户外适宜度', good: '适合', fair: '一般', bad: '不宜',
         none: (d, a, b) => `☀️ ${d} ${a}:00–${b}:00 无明显降水`,
         chanceOnly: (d, a, b, pop) => `🌦 ${d} ${a}:00–${b}:00 降雨概率最高 ${pop}%，但预计雨量极小（每小时不足 1mm）`,
@@ -34,8 +39,9 @@ const TEXT = {
         adviceHeavy: '雨势较强，建议调整户外行程',
         noun: { rain: '降雨', snow: '降雪', sleet: '雨夹雪' },
         snowAdvice: '路面湿滑，请注意保暖和安全',
-        windStrong: (w) => `💨 风很大（${w}m/s），不宜在海边和山区活动`,
-        windMid: (w) => `💨 风较大（${w}m/s），海边活动请注意安全`,
+        windHat: (w) => `🍃 小心帽子吹跑（${w}m/s）`,
+        windMid: (w) => `☂️ 小心伞被吹翻（${w}m/s），海边活动请注意安全`,
+        windStrong: (w) => `⚠️ 尽量避免户外活动（强风 ${w}m/s），不宜去海边和山区`,
         hot: (t) => `🌡 最高 ${t}°，较热，请注意补水防晒`,
         veryHot: (t) => `🌡 最高 ${t}°，酷热，请注意防暑补水`,
         cold: (t) => `🥶 最低 ${t}°，较冷，建议带外套`,
@@ -44,7 +50,7 @@ const TEXT = {
         dustSevere: '😷 空气质量很差，建议减少户外活动并戴口罩',
     },
     ko: {
-        today: '오늘', tomorrow: '내일',
+        today: '오늘', tonight: '오늘 밤', tomorrow: '내일',
         suit: '야외 활동', good: '좋음', fair: '보통', bad: '주의',
         none: (d, a, b) => `☀️ ${d} ${a}~${b}시 뚜렷한 강수 없음`,
         chanceOnly: (d, a, b, pop) => `🌦 ${d} ${a}~${b}시 강수확률 최대 ${pop}%, 다만 강수량은 매우 적을 전망 (시간당 1mm 미만)`,
@@ -59,8 +65,9 @@ const TEXT = {
         adviceHeavy: '비가 강하니 야외 일정 조정을 권장합니다',
         noun: { rain: '비', snow: '눈', sleet: '진눈깨비' },
         snowAdvice: '길이 미끄러울 수 있으니 보온과 안전에 유의하세요',
-        windStrong: (w) => `💨 바람이 매우 강합니다 (${w}m/s). 해안·산지 활동은 피하세요`,
-        windMid: (w) => `💨 바람이 다소 강합니다 (${w}m/s). 해안 활동에 유의하세요`,
+        windHat: (w) => `🍃 모자 날아감 주의 (${w}m/s)`,
+        windMid: (w) => `☂️ 우산 뒤집힘 주의 (${w}m/s). 해안 활동에 유의하세요`,
+        windStrong: (w) => `⚠️ 야외활동 자제 (강풍 ${w}m/s). 해안·산지 활동은 피하세요`,
         hot: (t) => `🌡 최고 ${t}°, 더운 날씨입니다. 수분 보충과 자외선 차단`,
         veryHot: (t) => `🌡 최고 ${t}°, 매우 덥습니다. 온열질환에 유의하세요`,
         cold: (t) => `🥶 최저 ${t}°, 쌀쌀합니다. 겉옷을 챙기세요`,
@@ -69,7 +76,7 @@ const TEXT = {
         dustSevere: '😷 공기질이 매우 나쁩니다. 야외 활동을 줄이고 마스크를 착용하세요',
     },
     en: {
-        today: 'Today', tomorrow: 'Tomorrow',
+        today: 'Today', tonight: 'Tonight', tomorrow: 'Tomorrow',
         suit: 'Outdoor suitability', good: 'Good', fair: 'Fair', bad: 'Poor',
         none: (d, a, b) => `☀️ ${d} ${a}:00–${b}:00 no significant precipitation`,
         chanceOnly: (d, a, b, pop) => `🌦 ${d} ${a}:00–${b}:00 up to ${pop}% chance of rain, but very little expected (under 1mm/h)`,
@@ -84,8 +91,9 @@ const TEXT = {
         adviceHeavy: 'Heavy rain — consider changing outdoor plans.',
         noun: { rain: 'rain', snow: 'snow', sleet: 'sleet' },
         snowAdvice: 'Roads may be slippery — dress warmly and stay safe.',
-        windStrong: (w) => `💨 Very windy (${w}m/s). Avoid coast and mountain activities`,
-        windMid: (w) => `💨 Windy (${w}m/s). Be careful near the coast`,
+        windHat: (w) => `🍃 Hold your hat (${w}m/s)`,
+        windMid: (w) => `☂️ Umbrella may flip (${w}m/s). Be careful near the coast`,
+        windStrong: (w) => `⚠️ Avoid outdoor activities (strong wind ${w}m/s). Stay away from coast and mountains`,
         hot: (t) => `🌡 High ${t}°, hot. Drink water and use sunscreen`,
         veryHot: (t) => `🌡 High ${t}°, very hot. Watch for heat illness`,
         cold: (t) => `🥶 Low ${t}°, chilly. Bring a jacket`,
@@ -113,15 +121,23 @@ export function parsePcp(v) {
 const ymdOf = (d) => `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
 const round = (n) => Math.round(n);
 
-/** 활동 시간대(08~20시) 예보 시각만 골라낸다. 오늘 20시 이후면 내일 시간대를 쓴다. */
-function pickWindow(sortedKeys, now) {
-    const target = new Date(now);
-    let isTomorrow = false;
-    if (now.getHours() >= DAY_END) { target.setDate(target.getDate() + 1); isTomorrow = true; }
-    const ymd = ymdOf(target);
-    const from = isTomorrow ? DAY_START : Math.max(DAY_START, now.getHours());
-    const keys = sortedKeys.filter(k => k.startsWith(ymd) && parseInt(k.slice(8, 10), 10) >= from && parseInt(k.slice(8, 10), 10) < DAY_END);
-    return { keys, isTomorrow, from };
+const keyTime = (k) => new Date(+k.slice(0, 4), +k.slice(4, 6) - 1, +k.slice(6, 8), +k.slice(8, 10)).getTime();
+const HOUR = 60 * 60 * 1000;
+
+/**
+ * 지금부터 오늘 20시까지의 예보 시각을 골라낸다. 실시간 날씨 카드에 붙는 안내라서 내일로 넘어가지 않는다.
+ * 20시가 가까우면(또는 지났으면) 앞으로 MIN_HOURS시간을 본다.
+ */
+function pickWindow(sortedKeys, now, lookback = HOUR) {
+    const start = new Date(now);
+    start.setMinutes(0, 0, 0);
+    const dayEnd = new Date(start);
+    dayEnd.setHours(DAY_END);
+    const end = Math.max(dayEnd.getTime(), start.getTime() + MIN_HOURS * HOUR);
+    // 관측값(초단기실황)은 매시 40분에 나와 현재 시각보다 한 시간 앞선 키로 들어오므로 한 시간 앞에서부터 본다
+    const scanFrom = start.getTime() - lookback;
+    const keys = sortedKeys.filter(k => { const t = keyTime(k); return t >= scanFrom && t < end; });
+    return { keys, from: start.getHours(), to: new Date(end).getHours(), isNight: start.getHours() >= NIGHT_FROM };
 }
 
 /**
@@ -131,18 +147,21 @@ function pickWindow(sortedKeys, now) {
  * @param aq         { pm10Value, pm25Value } (없으면 미세먼지는 판단하지 않음)
  * @returns HTML 문자열 (판단할 시간대가 없으면 빈 문자열)
  */
-export function buildWeatherOutlook(sortedKeys, grouped, lang = 'zh', aq = null, now = new Date()) {
+export function buildWeatherOutlook(sortedKeys, grouped, lang = 'zh', aq = null, now = new Date(), opts = {}) {
     const tx = TEXT[lang] || TEXT.zh;
-    const { keys, isTomorrow, from } = pickWindow(sortedKeys, now);
+    // opts.day === 'tomorrow': now 에 내일 08시를 넘기면 내일 08~20시 전체를 본다 (지난 관측은 보지 않는다)
+    const { keys, from, to, isNight } = pickWindow(sortedKeys, now, opts.day === 'tomorrow' ? 0 : HOUR);
     if (!keys.length) return '';
 
-    const day = isTomorrow ? tx.tomorrow : tx.today;
-    const a = String(from).padStart(2, '0');
-    const b = DAY_END;
+    const pad2 = (h) => String(h % 24).padStart(2, '0');
+    const day = opts.day === 'tomorrow' ? tx.tomorrow : (isNight ? tx.tonight : tx.today);
+    const a = pad2(from);
+    const b = pad2(to);
 
     const rows = keys.map(k => {
         const g = grouped[k] || {};
         return {
+            t: keyTime(k),
             hour: parseInt(k.slice(8, 10), 10),
             pop: parseInt(g.POP || '0', 10) || 0,
             pty: parseInt(g.PTY || '0', 10) || 0,
@@ -169,8 +188,8 @@ export function buildWeatherOutlook(sortedKeys, grouped, lang = 'zh', aq = null,
     const lines = [];
     let rainAffects = 0; // 0: 영향 없음, 1: 약간, 2: 큼
     if (wet.length) {
-        const first = String(wet[0].hour).padStart(2, '0');
-        const last = wet[wet.length - 1].hour + 1;
+        const first = pad2(wet[0].hour);
+        const last = pad2(wet[wet.length - 1].hour + 1);
         const kind = snowy ? 'snow' : (sleety ? 'sleet' : 'rain');
         let amt, advice;
         if (kind !== 'rain') {
@@ -180,13 +199,18 @@ export function buildWeatherOutlook(sortedKeys, grouped, lang = 'zh', aq = null,
         } else if (peak < 1) {
             amt = tx.amtLight;
             advice = tx.adviceLight;
+            // 약한 비라도 반나절 가까이 이어지면 야외 일정에 영향이 있다
+            if (wet.length >= T.rainLongHours) rainAffects = 1;
         } else {
             const idx = peak >= 30 ? 3 : (peak >= T.peakHeavy ? 2 : (peak >= T.peakModerate ? 1 : 0));
             amt = tx.amtPeak(round(peak), tx.label[idx]);
             if (total >= 2) amt += `${lang === 'zh' ? '，' : ', '}${tx.total(round(total))}`;
             advice = idx >= 2 ? tx.adviceHeavy : (idx === 1 ? tx.adviceMid : tx.adviceSmall);
-            rainAffects = idx >= 2 ? 2 : (idx === 1 || (peak >= 1 && wet.length >= 3) ? 1 : 0);
+            rainAffects = idx >= 2 ? 2 : (idx === 1 || (peak >= 1 && wet.length >= 3) || wet.length >= T.rainLongHours || total >= T.rainTotalFair ? 1 : 0);
         }
+        // 지금 비가 오고 있으면(관측 또는 현재 시각 예보) 약한 비라도 '좋음'으로 두지 않는다
+        const nowHour = new Date(now).setMinutes(0, 0, 0);
+        if (opts.day !== 'tomorrow' && wet.some(r => r.t <= nowHour)) rainAffects = Math.max(rainAffects, 1);
         lines.push(tx.rain(day, first, last, tx.noun[kind], Math.max(maxPop, ...wet.map(r => r.pop)), amt, advice));
     } else if (maxPop >= 60) {
         lines.push(tx.chanceOnly(day, a, b, maxPop));
@@ -199,6 +223,7 @@ export function buildWeatherOutlook(sortedKeys, grouped, lang = 'zh', aq = null,
 
     if (maxWind >= T.windDanger) { lines.push(tx.windStrong(maxWind)); bump(2); }
     else if (maxWind >= T.windCaution) { lines.push(tx.windMid(maxWind)); bump(1); }
+    else if (maxWind >= T.windHat) { lines.push(tx.windHat(maxWind)); }
 
     if (tMax !== null) {
         if (tMax >= T.tempDanger) { lines.push(tx.veryHot(round(tMax))); bump(2); }

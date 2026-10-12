@@ -7,6 +7,7 @@ const TRANSLATIONS = {
         // ── 날씨 ──
         'weather.title':      '天气预报',
         'weather.view.current': '实时天气',
+        'weather.view.tomorrow': '明日天气',
         'weather.view.past':    '历史天气',
         'weather.past.title':   '{loc}',
         'weather.past.avg_temp': '平均气温',
@@ -650,6 +651,7 @@ const TRANSLATIONS = {
         // ── 날씨 ──
         'weather.title':      '날씨예보',
         'weather.view.current': '실시간 날씨',
+        'weather.view.tomorrow': '내일 날씨',
         'weather.view.past':    '과거 날씨',
         'weather.past.title':   '{loc}',
         'weather.past.avg_temp': '평균 기온',
@@ -1277,6 +1279,7 @@ const TRANSLATIONS = {
         // ── Weather ──
         'weather.title':      'Weather Forecast',
         'weather.view.current': 'Real-time Weather',
+        'weather.view.tomorrow': "Tomorrow's Weather",
         'weather.view.past':    'Past Weather',
         'weather.past.title':   '{loc}',
         'weather.past.avg_temp': 'Avg Temp',

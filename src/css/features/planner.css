@@ -22,6 +22,37 @@
     font-weight: 800;
 }
 
+.pl-head-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    margin-top: var(--space-4);
+}
+.pl-head-row .pl-h { margin: 0; }
+
+.pl-btn-add {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 40px;
+    padding: 0 var(--space-3);
+    border: none;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #fff;
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 800;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.pl-btn-add[aria-expanded="true"] {
+    background: var(--bg-card);
+    color: var(--label-primary);
+    border: 1px solid var(--separator);
+}
+
 .pl-card {
     background: var(--bg-card);
     border: 1px solid var(--separator);
@@ -477,3 +508,18 @@
 .pl-comment-row { display: flex; gap: var(--space-2); }
 .pl-comment-row .form-input { flex: 1; min-width: 0; }
 .pl-comment-row .pl-btn-ghost { min-height: 44px; }
+
+/* ── 날씨 '내일' 탭: 08~20시 최고·최저 ── */
+.tmr-range {
+    margin-bottom: var(--space-2);
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: var(--label-secondary);
+}
+.tmr-low {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #1c7ed6;
+}

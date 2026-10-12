@@ -1,7 +1,8 @@
 import { CONFIG } from '../core/config.js';
-import { getSkyInfo, getWindDesc, getWindColor, formatPrecip, formatBaseTime, translateMidWf, getMidTempVal, getSunTimes, showToast } from '../core/utils.js';
+import { getSkyInfo, getWindLevel, getWindColor, formatPrecip, formatBaseTime, translateMidWf, getMidTempVal, getSunTimes, showToast } from '../core/utils.js';
 import { fetchPublicDataJson } from '../core/api.js';
-import { buildWeatherOutlook } from './weather-outlook.js';
+import { buildWeatherOutlook, parsePcp } from './weather-outlook.js';
+import { tr as trPlan } from './planner/strings.js';
 
 
 // 날씨 데이터 전역 상태 관리 (지역별 데이터 캐싱)
@@ -346,6 +347,130 @@ function getDailySummary(grouped, ymd, midData) {
     return { amIcon, pmIcon, amPop, pmPop };
 }
 
+// 실시간 / 내일 카드 모드 ('current' | 'tomorrow'). 탭이 바뀌면 setWeatherMode 가 모든 지역 카드를 다시 그린다.
+let WEATHER_MODE = 'current';
+
+const pad2 = (n) => String(n).padStart(2, '0');
+const ymdOfDate = (d) => `${d.getFullYear()}${pad2(d.getMonth() + 1)}${pad2(d.getDate())}`;
+
+/** 내일 08~20시의 최고·최저·대표 하늘·바람·습도·강수 요약 */
+function summarizeTomorrow(state) {
+    const t = new Date();
+    t.setDate(t.getDate() + 1);
+    const ymd = ymdOfDate(t);
+    const keys = state.sortedKeys.filter(k => k.startsWith(ymd) && +k.slice(8, 10) >= 8 && +k.slice(8, 10) <= 20);
+    if (!keys.length) return null;
+    const rows = keys.map(k => ({ k, hour: +k.slice(8, 10), g: state.items[k] }));
+    const temps = rows.map(r => parseFloat(r.g.TMP)).filter(n => !isNaN(n));
+    const winds = rows.map(r => parseFloat(r.g.WSD)).filter(n => !isNaN(n));
+    const humids = rows.map(r => parseFloat(r.g.REH)).filter(n => !isNaN(n));
+    const wet = rows.filter(r => (parseInt(r.g.PTY || '0', 10) || 0) > 0);
+    // 대표 하늘: 비·눈이 예보된 시각이 있으면 그 시각, 없으면 낮 12시(없으면 첫 시각)
+    const rep = wet[0] || rows.find(r => r.hour === 12) || rows[0];
+    return {
+        t, ymd,
+        max: temps.length ? Math.round(Math.max(...temps)) : null,
+        min: temps.length ? Math.round(Math.min(...temps)) : null,
+        sky: getSkyInfo(rep.g.PTY, rep.g.SKY, rep.hour),
+        wind: winds.length ? Math.max(...winds) : null,
+        humidity: humids.length ? Math.round(humids.reduce((a, b) => a + b, 0) / humids.length) : null,
+        pop: Math.max(0, ...rows.map(r => parseInt(r.g.POP || '0', 10) || 0)),
+        rain: Math.round(wet.reduce((sum, r) => sum + parsePcp(r.g.PCP), 0)),
+    };
+}
+
+/** 지역 상단 카드: 실시간(현재 기온) 또는 내일(08~20시 최고·최저) */
+function renderTopCard(locKey) {
+    const card = document.getElementById(`current-card-${locKey}`);
+    const state = WEATHER_STATE[locKey];
+    if (!card || !state) return;
+    const { items: grouped, sortedKeys } = state;
+    const lang = window.getLang ? window.getLang() : (localStorage.getItem('jeju_lang') || 'zh');
+
+    if (WEATHER_MODE === 'tomorrow') {
+        const sum = summarizeTomorrow(state);
+        card.className = 'naver-card current-weather-main';
+        if (!sum) {
+            card.innerHTML = `<p class="pl-muted" style="text-align:center;">${trPlan('wx.tmr.none')}</p>`;
+            return;
+        }
+        const tmrNow = new Date(sum.t);
+        tmrNow.setHours(8, 0, 0, 0);
+        const outlookHtml = buildWeatherOutlook(sortedKeys, grouped, lang, null, tmrNow, { day: 'tomorrow' });
+        const dateLabel = new Intl.DateTimeFormat(lang === 'zh' ? 'zh-CN' : (lang === 'ko' ? 'ko-KR' : 'en-US'), { month: 'numeric', day: 'numeric', weekday: 'short' }).format(sum.t);
+        card.innerHTML = `
+            <div class="tmr-range">${trPlan('wx.tmr.range', { d: dateLabel })}</div>
+            <div class="current-weather-box">
+                <div class="cw-left">
+                    <div class="main-icon">${sum.sky.icon}</div>
+                    <div class="main-temp">
+                        <span class="current-val">${sum.max ?? '--'}<span class="unit">°</span></span>
+                        <span class="tmr-low">${trPlan('wx.tmr.low')} ${sum.min ?? '--'}°</span>
+                    </div>
+                </div>
+                <div class="cw-right">
+                    <ul class="cw-details-list">
+                        <li><span class="cwi"><i class="ph-duotone ph-wind color-cloud"></i></span> <span style="color: ${getWindColor(sum.wind)}; font-weight: 800;">${getWindLevel(sum.wind)}</span> ${sum.wind ?? '--'}m/s</li>
+                        <li><span class="cwi"><i class="ph-duotone ph-drop color-rain"></i></span> ${window.t ? window.t('weather.humidity') : '湿度'} ${sum.humidity ?? '--'}%</li>
+                        <li><span class="cwi"><i class="ph-duotone ph-umbrella color-rain"></i></span> ${trPlan('wx.tmr.pop')} ${sum.pop}%</li>
+                        <li><span class="cwi"><i class="ph-duotone ph-cloud-rain color-rain"></i></span> ${trPlan('wx.tmr.precip')} ${sum.rain > 0 ? `${sum.rain}mm` : '0'}</li>
+                    </ul>
+                </div>
+            </div>
+            <div id="weather-outlook-${locKey}">${outlookHtml}</div>`;
+        return;
+    }
+
+    const current = grouped[sortedKeys[0]];
+    const sky = getSkyInfo(current.PTY, current.SKY, parseInt(String(current.time || '').slice(0, 2) || 12));
+    const t = parseFloat(current.TMP ?? current.T1H ?? 20);
+    const w = parseFloat(current.WSD || 0);
+    const feelsLike = Math.round(t - (2 * w * 0.1));
+
+    // 지금부터 오늘 20시까지 강수·바람·기온·공기질을 합친 한눈에 보기 (공기질은 도착하면 갱신)
+    const outlookHtml = buildWeatherOutlook(sortedKeys, grouped, lang, AIR_QUALITY_CACHE[locKey]?.data);
+
+    card.className = "naver-card current-weather-main";
+    card.innerHTML = `
+        <div class="current-weather-box">
+            <div class="cw-left">
+                <div class="main-icon">${sky.icon}</div>
+                <div class="main-temp">
+                    <span class="current-val">${current.TMP ?? current.T1H ?? '--'}<span class="unit">°c</span></span>
+                </div>
+            </div>
+            <div class="cw-right">
+                <ul class="cw-details-list">
+                    <li><span class="cwi"><i class="ph-duotone ph-wind color-cloud"></i></span> <span style="color: ${getWindColor(current.WSD)}; font-weight: 800;">${getWindLevel(current.WSD)}</span> ${current.WSD}m/s</li>
+                    <li><span class="cwi"><i class="ph-duotone ph-drop color-rain"></i></span> ${window.t ? window.t('weather.humidity') : '湿度'} ${current.REH}%</li>
+                    <li><span class="cwi"><i class="ph-duotone ph-thermometer color-cctv"></i></span> ${window.t ? window.t('weather.feelslike') : '体感'} ${feelsLike}°</li>
+                    <li id="top-air-${locKey}"><span class="cwi"><i class="ph-duotone ph-face-mask color-lost"></i></span> ${window.t ? window.t('weather.aq') : '空气质量'} <span class="val">--</span></li>
+                </ul>
+            </div>
+        </div>
+        <div id="weather-outlook-${locKey}">${outlookHtml}</div>
+    `;
+    // 카드를 다시 그리면 공기질 칸이 비므로, 이미 받아 둔 값이 있으면 바로 채운다
+    const cachedAir = AIR_QUALITY_CACHE[locKey]?.data;
+    if (cachedAir) renderAirQuality(locKey, cachedAir);
+}
+
+/** 실시간 ↔ 내일 탭 전환: 모든 지역 카드를 해당 모드로 다시 그리고 시간별 표를 맞춘다 */
+export function setWeatherMode(mode) {
+    WEATHER_MODE = mode === 'tomorrow' ? 'tomorrow' : 'current';
+    Object.keys(WEATHER_STATE).forEach(locKey => {
+        renderTopCard(locKey);
+        const table = document.querySelector(`#hourly-table-${locKey} .hourly-table`);
+        if (!table) return;
+        if (WEATHER_MODE === 'tomorrow') {
+            const col = document.getElementById(`h-${locKey}-${ymdOfDate(new Date(Date.now() + 86400000))}`);
+            if (col) table.scrollLeft = Math.max(0, col.offsetLeft - 8);
+        } else {
+            table.scrollLeft = 0;
+        }
+    });
+}
+
 export function parseAndRenderWeather(locKey, items, midData, mountainData) {
     const grouped = {};
     items.forEach(it => {
@@ -373,40 +498,7 @@ export function parseAndRenderWeather(locKey, items, midData, mountainData) {
     //     }
     // }
 
-    const currentCard = document.getElementById(`current-card-${locKey}`);
-    if (currentCard) {
-        const current = grouped[sortedKeys[0]];
-        const sky = getSkyInfo(current.PTY, current.SKY, parseInt(String(current.time || '').slice(0, 2) || 12));
-        const t = parseFloat(current.TMP ?? current.T1H ?? 20);
-        const w = parseFloat(current.WSD || 0);
-        const feelsLike = Math.round(t - (2 * w * 0.1));
-
-        const lang = window.getLang ? window.getLang() : (localStorage.getItem('jeju_lang') || 'zh');
-        
-        // 08~20시 강수·바람·기온·공기질을 합친 한눈에 보기 (공기질은 도착하면 갱신)
-        const outlookHtml = buildWeatherOutlook(sortedKeys, grouped, lang, AIR_QUALITY_CACHE[locKey]?.data);
-
-        currentCard.className = "naver-card current-weather-main";
-        currentCard.innerHTML = `
-            <div class="current-weather-box">
-                <div class="cw-left">
-                    <div class="main-icon">${sky.icon}</div>
-                    <div class="main-temp">
-                        <span class="current-val">${current.TMP ?? current.T1H ?? '--'}<span class="unit">°c</span></span>
-                    </div>
-                </div>
-                <div class="cw-right">
-                    <ul class="cw-details-list">
-                        <li><span class="cwi"><i class="ph-duotone ph-wind color-cloud"></i></span> <span style="color: ${getWindColor(current.WSD)}; font-weight: 800;">${getWindDesc(current.WSD)}</span> ${current.WSD}m/s</li>
-                        <li><span class="cwi"><i class="ph-duotone ph-drop color-rain"></i></span> ${window.t ? window.t('weather.humidity') : '湿度'} ${current.REH}%</li>
-                        <li><span class="cwi"><i class="ph-duotone ph-thermometer color-cctv"></i></span> ${window.t ? window.t('weather.feelslike') : '体感'} ${feelsLike}°</li>
-                        <li id="top-air-${locKey}"><span class="cwi"><i class="ph-duotone ph-face-mask color-lost"></i></span> ${window.t ? window.t('weather.aq') : '空气质量'} <span class="val">--</span></li>
-                    </ul>
-                </div>
-            </div>
-            <div id="weather-outlook-${locKey}">${outlookHtml}</div>
-        `;
-    }
+    renderTopCard(locKey);
 
     renderWeeklyList(locKey, grouped, sortedKeys, midData);
     updateHourlyWeather(locKey);
@@ -878,7 +970,7 @@ function getAirQualityInfo(val, type) {
 function refreshOutlook(locKey, aqItem) {
     const el = document.getElementById(`weather-outlook-${locKey}`);
     const st = WEATHER_STATE[locKey];
-    if (!el || !st) return;
+    if (!el || !st || WEATHER_MODE === 'tomorrow') return; // 내일 탭은 공기질을 쓰지 않는다
     const lang = window.getLang ? window.getLang() : (localStorage.getItem('jeju_lang') || 'zh');
     el.innerHTML = buildWeatherOutlook(st.sortedKeys, st.items, lang, aqItem);
 }
@@ -1214,6 +1306,7 @@ window.closeWeatherAlertModal = function() {
 };
 
 window.weatherApp = {
+    setWeatherMode: setWeatherMode,
     fetchWeatherData: fetchWeatherData,
     fetchPastWeather: fetchPastWeather,
     retryFetch: (locKey) => { renderWeatherLoading(locKey); fetchWeatherData(locKey); },

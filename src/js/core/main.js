@@ -79,7 +79,10 @@ window.switchWeatherView = function(viewType) {
     const globalSumBtn = document.getElementById('global-summary-btn');
     const pwsFilters = document.getElementById('pws-filters');
     
-    if(viewType === 'current') {
+    // 실시간·내일 탭은 같은 화면을 쓰고 상단 카드만 바뀐다. 과거 탭만 별도 화면.
+    if (window.weatherApp && window.weatherApp.setWeatherMode) window.weatherApp.setWeatherMode(viewType === 'tomorrow' ? 'tomorrow' : 'current');
+
+    if(viewType === 'current' || viewType === 'tomorrow') {
         pastView.style.display = 'none';
         currentView.style.display = 'block';
         if (globalSumBtn) globalSumBtn.style.display = 'inline-flex';
@@ -511,11 +514,16 @@ window.addEventListener('load', () => {
         const hasNotice = true;
         const hasInfo = !!(infoEl && window.homeInfoBanner && window.homeInfoBanner.hasContent());
 
-        const validBanners = [];
-        if (hasAlert) validBanners.push(alertEl);
-        if (hasInfo) validBanners.push(infoEl);
-        if (hasMarquee) validBanners.push(marqueeEl);
-        if (hasNotice) validBanners.push(noticeEl);
+        // 배너는 정해진 순서로 돌아간다: 기상특보(있을 때) → 분실물 → 날씨 → 축제 → 항공 → 한라산 통제(있을 때) → 앱 공지
+        // "오늘의 제주" 칸은 소식(날씨·축제·항공…) 하나가 한 번씩 차례를 가진다.
+        const slots = [];
+        if (hasAlert) slots.push({ el: alertEl });
+        if (hasMarquee) slots.push({ el: marqueeEl });
+        if (hasInfo) {
+            for (let n = 0; n < window.homeInfoBanner.count(); n++) slots.push({ el: infoEl, info: n });
+        }
+        if (hasNotice) slots.push({ el: noticeEl });
+        const validBanners = [...new Set(slots.map(slot => slot.el))];
 
         if (validBanners.length === 0) return;
 
@@ -541,34 +549,39 @@ window.addEventListener('load', () => {
             return;
         }
 
-        let currentIndex = validBanners.findIndex(el => el.style.opacity === '1');
-        if (currentIndex === -1) currentIndex = 0;
+        const currentEl = allBanners.find(el => el.style.opacity === '1') || slots[0].el;
+        window.bannerSlot = ((window.bannerSlot ?? -1) + 1) % slots.length;
+        const next = slots[window.bannerSlot];
+        const nextEl = next.el;
 
-        const nextIndex = (currentIndex + 1) % validBanners.length;
-        const currentEl = validBanners[currentIndex];
-        const nextEl = validBanners[nextIndex];
-
-        if (currentEl) {
-            currentEl.style.opacity = '0';
-            currentEl.style.transform = 'translateY(-10px) scale(0.98)';
-            currentEl.style.pointerEvents = 'none';
-            currentEl.style.zIndex = '1';
-        }
-        
-        if (nextEl) {
-            // "오늘의 제주" 칸은 보여줄 차례마다 다음 소식(날씨 → 축제 …)으로 넘긴다
-            if (nextEl === infoEl) window.homeInfoBanner.advance();
-            if (nextEl.style.opacity === '0') {
-                nextEl.style.transform = 'translateY(10px) scale(0.98)';
+        if (nextEl === currentEl) {
+            // 같은 칸에서 다음 소식으로 넘어갈 때는 칸은 두고 글만 살짝 사라졌다 나타나게 한다
+            if (nextEl === infoEl && next.info !== undefined) {
+                infoEl.style.opacity = '0';
+                setTimeout(() => {
+                    window.homeInfoBanner.show(next.info);
+                    infoEl.style.opacity = '1';
+                }, 300);
             }
-            setTimeout(() => {
-                nextEl.style.opacity = '1';
-                nextEl.style.transform = 'translateY(0) scale(1)';
-                nextEl.style.pointerEvents = 'auto';
-                nextEl.style.zIndex = '2';
-            }, 50);
+            return;
         }
-        
+
+        currentEl.style.opacity = '0';
+        currentEl.style.transform = 'translateY(-10px) scale(0.98)';
+        currentEl.style.pointerEvents = 'none';
+        currentEl.style.zIndex = '1';
+
+        if (nextEl === infoEl && next.info !== undefined) window.homeInfoBanner.show(next.info);
+        if (nextEl.style.opacity === '0') {
+            nextEl.style.transform = 'translateY(10px) scale(0.98)';
+        }
+        setTimeout(() => {
+            nextEl.style.opacity = '1';
+            nextEl.style.transform = 'translateY(0) scale(1)';
+            nextEl.style.pointerEvents = 'auto';
+            nextEl.style.zIndex = '2';
+        }, 50);
+
         allBanners.forEach(el => {
             if (el !== currentEl && el !== nextEl) {
                 el.style.opacity = '0';
