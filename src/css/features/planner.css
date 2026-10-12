@@ -519,8 +519,10 @@
     color: #1c7ed6;
 }
 
-/* 실시간·내일 카드의 왼쪽(아이콘+기온) 폭을 고정해 두 탭에서 칸 크기가 같게 한다 (기온 글자 수와 무관) */
+/* 실시간·내일 카드의 왼쪽(아이콘+기온) 폭을 같게 맞춘다.
+   기온 칸의 최소 폭을 글자 크기(rem)에 맞춰 잡아, 기온 글자 수가 달라도(22.7°c / 25°) 칸 크기가 같고 구분선과 겹치지 않는다. */
 @media screen and (max-width: 500px) {
-    .current-weather-main .current-weather-box .cw-left { flex: 0 0 42%; min-width: 0; }
+    .current-weather-main .current-weather-box .cw-left { flex: 0 0 auto; }
+    .current-weather-main .current-weather-box .cw-left .main-temp { min-width: 7.5rem; }
     .current-weather-main .current-weather-box .cw-right { flex: 1 1 0; }
 }
