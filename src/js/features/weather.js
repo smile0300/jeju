@@ -397,15 +397,13 @@ function renderTopCard(locKey) {
         const tmrNow = new Date(sum.t);
         tmrNow.setHours(8, 0, 0, 0);
         const outlookHtml = buildWeatherOutlook(sortedKeys, grouped, lang, null, tmrNow, { day: 'tomorrow' });
-        const dateLabel = new Intl.DateTimeFormat(lang === 'zh' ? 'zh-CN' : (lang === 'ko' ? 'ko-KR' : 'en-US'), { month: 'numeric', day: 'numeric', weekday: 'short' }).format(sum.t);
         card.innerHTML = `
-            <div class="tmr-range">${trPlan('wx.tmr.range', { d: dateLabel })}</div>
             <div class="current-weather-box">
                 <div class="cw-left">
                     <div class="main-icon">${sum.sky.icon}</div>
                     <div class="main-temp">
-                        <span class="current-val">${sum.max ?? '--'}<span class="unit">°</span></span>
-                        <span class="tmr-low">${trPlan('wx.tmr.low')} ${sum.min ?? '--'}°</span>
+                        <span class="current-val tmr-hi">${sum.max ?? '--'}<span class="unit">°</span></span>
+                        <span class="tmr-lo">${sum.min ?? '--'}°</span>
                     </div>
                 </div>
                 <div class="cw-right">
@@ -413,7 +411,7 @@ function renderTopCard(locKey) {
                         <li><span class="cwi"><i class="ph-duotone ph-wind color-cloud"></i></span> <span style="color: ${getWindColor(sum.wind)}; font-weight: 800;">${getWindLevel(sum.wind)}</span> ${sum.wind ?? '--'}m/s</li>
                         <li><span class="cwi"><i class="ph-duotone ph-drop color-rain"></i></span> ${window.t ? window.t('weather.humidity') : '湿度'} ${sum.humidity ?? '--'}%</li>
                         <li><span class="cwi"><i class="ph-duotone ph-umbrella color-rain"></i></span> ${trPlan('wx.tmr.pop')} ${sum.pop}%</li>
-                        <li><span class="cwi"><i class="ph-duotone ph-cloud-rain color-rain"></i></span> ${trPlan('wx.tmr.precip')} ${sum.rain > 0 ? `${sum.rain}mm` : '0'}</li>
+                        <li><span class="cwi"><i class="ph-duotone ph-cloud-rain color-rain"></i></span> ${trPlan('wx.tmr.precip')} ${sum.rain}mm</li>
                     </ul>
                 </div>
             </div>

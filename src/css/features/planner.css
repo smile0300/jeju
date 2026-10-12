@@ -509,17 +509,18 @@
 .pl-comment-row .form-input { flex: 1; min-width: 0; }
 .pl-comment-row .pl-btn-ghost { min-height: 44px; }
 
-/* ── 날씨 '내일' 탭: 08~20시 최고·최저 ── */
-.tmr-range {
-    margin-bottom: var(--space-2);
-    font-size: 0.8rem;
+/* ── 날씨 '내일' 탭: 08~20시 최고(빨강)·최저(파랑). 실시간 카드와 같은 크기로 맞춘다 ── */
+.cw-left .current-val.tmr-hi { color: #e03131; }
+.cw-left .tmr-lo {
+    margin-top: 4px;
+    font-size: 1.15rem;
     font-weight: 800;
-    color: var(--label-secondary);
-}
-.tmr-low {
-    display: block;
-    margin-top: 2px;
-    font-size: 0.95rem;
-    font-weight: 800;
+    line-height: 1;
     color: #1c7ed6;
+}
+
+/* 실시간·내일 카드의 왼쪽(아이콘+기온) 폭을 고정해 두 탭에서 칸 크기가 같게 한다 (기온 글자 수와 무관) */
+@media screen and (max-width: 500px) {
+    .current-weather-main .current-weather-box .cw-left { flex: 0 0 42%; min-width: 0; }
+    .current-weather-main .current-weather-box .cw-right { flex: 1 1 0; }
 }

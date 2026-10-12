@@ -62,7 +62,11 @@ function buildItems() {
     // 항공편 지연·결항도 발생했을 때만. 건수와 해당 지역을 한 줄로 보여준다 (넘치면 ...)
     const { delayed, cancelled, regions } = flightDisruptions();
     if (cancelled >= FLIGHT_MIN_CANCELLED || delayed >= FLIGHT_MIN_DELAYED) {
-        const counts = [tr('banner.flight.cancelled', { n: cancelled }), tr('banner.flight.delayed', { n: delayed })].join(' · ');
+        // 0건인 항목은 빼고 있는 것만 보여준다
+        const counts = [
+            cancelled > 0 ? tr('banner.flight.cancelled', { n: cancelled }) : null,
+            delayed > 0 ? tr('banner.flight.delayed', { n: delayed }) : null,
+        ].filter(Boolean).join(' · ');
         next.push({ kind: 'flight', text: `${counts} | ${regions.join(', ')}` });
     }
 
