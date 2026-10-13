@@ -72,7 +72,7 @@ export const BLOCKS = {
     },
     mid: {
         region: 'mid',
-        title: { zh: '中山间：森林与火山口', ko: '중산간: 숲과 분화구', en: 'Inland: Forests and Craters' },
+        title: { zh: '中部山区：森林与火山口', ko: '중산간: 숲과 분화구', en: 'Inland: Forests and Craters' },
         summary: { zh: '离开海边，走进济州的森林', ko: '바다를 벗어나 제주의 숲으로', en: 'Leave the coast for Jeju\'s forests' },
         stops: [
             { name: { ko: '사려니숲길', zh: '思连伊林荫道', en: 'Saryeoni Forest Path' }, stayMin: 70, driveMin: 15,

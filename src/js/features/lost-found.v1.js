@@ -980,7 +980,7 @@ window.openSuccessModal = function(index) {
     // Translations for Place
     const placeTranslations = {
         '호텔': { en: 'Hotel', zh: '酒店', ko: '호텔' },
-        '여객터미널': { en: 'Passenger Terminal', zh: '客运枢纽', ko: '여객터미널' },
+        '여객터미널': { en: 'Passenger Terminal', zh: '客运码头', ko: '여객터미널' },
         '찜질방': { en: 'Jjimjilbang (Sauna)', zh: '汗蒸房', ko: '찜질방' },
         '옷가게': { en: 'Clothing Store', zh: '服装店', ko: '옷가게' },
         '택시': { en: 'Taxi', zh: '出租车', ko: '택시' },
@@ -1169,7 +1169,7 @@ export function renderSuccessGoodsView(isLoadMore = false) {
 
     // 데이터 없음 상태 (fetch 완료되었으나 데이터가 0개)
     if (data.length === 0) {
-        const emptyText = lang === 'ko' ? '등록된 진행상황이 없습니다.' : (lang === 'en' ? 'No progress updates available.' : '暂无进展状况。');
+        const emptyText = lang === 'ko' ? '등록된 진행상황이 없습니다.' : (lang === 'en' ? 'No progress updates available.' : '暂无进度更新。');
         container.innerHTML = `
             <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 48px 16px; gap: 12px; color: var(--label-secondary);">
                 <i class="ph-duotone ph-folder-open" style="font-size: 2.5rem; color: var(--label-tertiary);"></i>
@@ -1550,7 +1550,7 @@ window.nextProxyStep = function() {
             if (!res) { alert(lang === 'ko' ? '호텔 예약내역을 첨부해주세요.' : '请上传酒店预订记录。'); return; }
         } else if (loc === '공항' || loc === '경찰서') {
             const mgmt = document.getElementById('proxy-mgmt-num')?.value.trim();
-            if (!mgmt) { alert(lang === 'ko' ? '접수/관리번호를 입력해주세요.' : '请输入管理号码。'); return; }
+            if (!mgmt) { alert(lang === 'ko' ? '접수/관리번호를 입력해주세요.' : '请输入管理编号。'); return; }
         } else if (loc === '택시' || loc === '버스') {
             const vInfo = document.getElementById('proxy-vehicle-info')?.value.trim();
             if (!vInfo) { alert(lang === 'ko' ? '차량 번호 또는 기사님 연락처를 입력해주세요.' : '请输入车牌号或司机联系方式。'); return; }

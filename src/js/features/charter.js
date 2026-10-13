@@ -51,7 +51,7 @@ const mock = {
         return {
             posts: [
                 { id: 'demo1', date: at(2), from: '济州市 莲洞', to: '城山日出峰 · 牛岛', time: '08:30', party: '2', wechat: 'demo_traveler01' },
-                { id: 'demo2', date: at(2), from: '中文观光区', to: '挟才 · 雪绿茶博物馆', time: '09:00', party: '3', wechat: 'demo_jeju_trip' },
+                { id: 'demo2', date: at(2), from: '中文旅游区', to: '挟才 · 雪绿茶博物馆', time: '09:00', party: '3', wechat: 'demo_jeju_trip' },
                 { id: 'demo3', date: at(-3), from: '济州市', to: '西归浦瀑布', time: '09:30', party: '2', wechat: 'd*****r' },
             ],
             comments: { demo1: [{ name: '小林', text: '我们2个人，可以一起吗？', createdAt: '' }] },

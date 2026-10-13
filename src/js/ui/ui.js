@@ -44,7 +44,7 @@ const SEO_META = {
     },
     'course': {
         title: 'Jeju Travel Routes: Day Trips to 6 Days - Jeju Live | 济州推荐路线',
-        desc: 'Jeju Island routes by duration and area — east, west, south, north, inland and rainy-day options. 济州岛东线、西线、南线推荐路线，从当日到6天5晚。',
+        desc: 'Jeju Island routes by duration and area — east, west, south, north, inland and rainy-day options. 济州岛东线、西线、南线推荐路线，从一日游到6天5晚。',
         keywords: 'Jeju itinerary, Jeju east west route, 济州路线, 济州东线西线, 제주 추천 코스'
     },
     'charter': {
@@ -365,7 +365,7 @@ const LOC_META = {
     jeju:     { title: '济州市 (莲洞)', sub: 'Yeon-dong' },
     aewol:    { title: '涯月 (汉潭)', sub: 'Aewol' },
     hyeopjae: { title: '挟才', sub: 'Hyeopjae' },
-    seogwipo: { title: '西归浦 (中文)', sub: 'Jungmun' },
+    seogwipo: { title: '西归浦 (中文旅游区)', sub: 'Jungmun' },
     hallasan: { title: '汉拿山 (御里牧)', sub: 'Halla Mountain' },
     hamdeok:  { title: '咸德', sub: 'Hamdeok' },
     woljeong: { title: '月汀', sub: 'Woljeong' },

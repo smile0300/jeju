@@ -140,8 +140,8 @@ export async function fetchHallasanStatus(isAutoRetry = false, forceRefresh = fa
                 const isTimeout = e.name === 'TimeoutError' || e.message.includes('timeout') || e.message.includes('signal');
                 const lang = window.getLang ? window.getLang() : 'zh';
                 const toastMsg = isTimeout
-                    ? (lang === 'ko' ? '한라산 서버 응답 지연 - 캐시 표시 중' : lang === 'en' ? 'Hallasan server slow - showing cache' : '汉拿山服务器迟缓，显示缓存数据')
-                    : (lang === 'ko' ? '한라산 업데이트 실패 - 캐시 표시 중' : lang === 'en' ? 'Update failed - showing cache' : '更新失败，显示缓存数据');
+                    ? (lang === 'ko' ? '한라산 서버 응답 지연 - 캐시 표시 중' : lang === 'en' ? 'Hallasan server slow - showing cache' : '汉拿山服务器响应较慢，显示的是稍早的数据')
+                    : (lang === 'ko' ? '한라산 업데이트 실패 - 캐시 표시 중' : lang === 'en' ? 'Update failed - showing cache' : '更新失败，显示的是稍早的数据');
                 showToast(toastMsg, 'warn', 4000);
             }
         }
