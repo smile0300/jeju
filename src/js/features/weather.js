@@ -157,7 +157,8 @@ export async function fetchMidTermWeather(loc) {
                 console.warn(`[Weather] 중기예보 ${missing} 데이터 부재 (Result: ${landJson?.response?.header?.resultCode}/${tempJson?.response?.header?.resultCode})`);
                 return { fail: true, landJson, tempJson };
             }
-            return { landItem, tempItem };
+            // 응답에 발표시각(tmFc)이 없어, 요청한 발표시각을 붙여 둔다 (taMax5 = 발표일 + 5일 계산용)
+            return { landItem, tempItem: { ...tempItem, tmFc: tempItem.tmFc || targetTmFc } };
         } catch (e) {
             console.error('[Weather] 중기예보 fetch 실패:', e);
             return null;
@@ -204,9 +205,23 @@ export async function fetchWeatherData(locKey) {
     const ufcstParams = { pageNo: 1, numOfRows: 60, dataType: 'JSON', base_date: ultraFcstDate, base_time: ultraFcstTime, nx: loc.nx, ny: loc.ny };
     const ncstParams = { pageNo: 1, numOfRows: 20, dataType: 'JSON', base_date: ultraNcstDate, base_time: ultraNcstTime, nx: loc.nx, ny: loc.ny };
 
+    // 최신 발표분이 일부 격자에서 NO_DATA 로 오는 경우가 있어, 비어 있으면 이전 발표분(3시간 간격)으로 최대 3번 거슬러 올라간다
+    const fetchVilage = async () => {
+        const hasItems = (json) => (json?.response?.body?.items?.item || []).length > 0;
+        const latest = await fetchPublicDataJson(endpoint, params).catch(e => { console.error('[Weather] 단기예보 로드 실패:', e); return null; });
+        if (hasItems(latest)) return latest;
+        for (let step = 1; step <= 3; step++) {
+            const prev = formatBaseTime(new Date(Date.now() - step * 3 * 60 * 60 * 1000));
+            console.warn(`[Weather] ${locKey} 단기예보 비어 있음, ${prev.baseDate} ${prev.baseTime} 발표분으로 재시도`);
+            const fallback = await fetchPublicDataJson(endpoint, { ...params, base_date: prev.baseDate, base_time: prev.baseTime }).catch(e => { console.error('[Weather] 단기예보 재시도 실패:', e); return null; });
+            if (hasItems(fallback)) return fallback;
+        }
+        return latest;
+    };
+
     try {
         const [vilageJson, ufcstJson, ncstJson, midData, mountainData] = await Promise.all([
-            fetchPublicDataJson(endpoint, params).catch(e => { console.error('[Weather] 단기예보 로드 실패:', e); return null; }),
+            fetchVilage(),
             fetchPublicDataJson(ufcstEndpoint, ufcstParams).catch(e => { console.error('[Weather] 초단기예보 로드 실패:', e); return null; }),
             fetchPublicDataJson(ncstEndpoint, ncstParams).catch(e => { console.error('[Weather] 초단기실황 로드 실패:', e); return null; }),
             fetchMidTermWeather(loc).catch(e => { console.error('[Weather] 중기예보 로드 실패:', e); return null; }),
@@ -787,11 +802,21 @@ export function updateHourlyWeather(locKey) {
 
     const { landItem, tempItem } = state.midData || {};
     if (landItem && tempItem) {
-        for (let i = 1; i <= 10; i++) {
+        // 중기예보 칸 번호는 발표일 기준이라, 발표일이 어제면(자정~새벽) 하루를 더한다
+        let midOffset = 0;
+        const midBaseStr = String(tempItem.tmFc || '').slice(0, 8);
+        if (/^\d{8}$/.test(midBaseStr)) {
+            const midBaseD = new Date(+midBaseStr.slice(0, 4), +midBaseStr.slice(4, 6) - 1, +midBaseStr.slice(6, 8));
+            const todayD = new Date(today);
+            todayD.setHours(0, 0, 0, 0);
+            midOffset = Math.round((todayD.getTime() - midBaseD.getTime()) / (1000 * 60 * 60 * 24));
+        }
+        for (let n = 1; n <= 10; n++) {
             const nextD = new Date(today);
-            nextD.setDate(today.getDate() + i);
+            nextD.setDate(today.getDate() + n);
             const ymd = `${nextD.getFullYear()}${String(nextD.getMonth() + 1).padStart(2, '0')}${String(nextD.getDate()).padStart(2, '0')}`;
             if ((ymdCounts[ymd] || 0) >= 8) continue;
+            const i = n + midOffset;
             html += renderDateSummaryCol(locKey, ymd, state.items, state.midData);
             if (i >= 3 && i <= 7) {
                 const amWf = landItem[`wf${i}Am`];
