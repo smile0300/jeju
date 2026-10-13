@@ -180,6 +180,18 @@ window.loadMoreLostGoods = function() {
     }
 };
 
+// 목록 하단 CTA: 분실 신고 / 대리수령 신청 (성공사례 모달과 같은 문구·동작)
+function lostListCtaHtml() {
+    const t = (k, fb) => (window.t ? window.t(k) : fb);
+    return `<div style="text-align: center; margin-top: 16px; margin-bottom: 8px;">
+        <p class="lost-cta-hint" style="font-size: 0.8rem; color: var(--text-secondary); margin: 0 0 8px; text-wrap: balance; word-break: keep-all;" data-i18n="lost.modal.cta_hint">${t('lost.modal.cta_hint', '')}</p>
+        <div style="display: flex; gap: 10px; justify-content: center; width: 100%;">
+            <button class="btn btn-primary btn-cta-success" style="flex: 1; padding: 12px 0;" onclick="openLostReportModal();" data-i18n="lost.modal.cta_report">${t('lost.modal.cta_report', '분실신고신청')}</button>
+            <button class="btn btn-primary btn-cta-success" style="flex: 1; background: var(--color-orange, #f59e0b); border: none; padding: 12px 0;" onclick="openProxyPickupModal();" data-i18n="lost.modal.cta_proxy">${t('lost.modal.cta_proxy', '대리수령신청')}</button>
+        </div>
+    </div>`;
+}
+
 export function renderLostGoods(grid, items, isLoadMore = false) {
     if (!grid) return;
 
@@ -214,7 +226,9 @@ export function renderLostGoods(grid, items, isLoadMore = false) {
            </div>`
         : '';
 
-    grid.innerHTML = cardsHtml + loadMoreHtml;
+    const ctaHtml = `<div style="grid-column: 1 / -1; padding: 0 16px; width: 100%;">${lostListCtaHtml()}</div>`;
+
+    grid.innerHTML = cardsHtml + loadMoreHtml + ctaHtml;
 }
 
 export function renderLostGoodsTable(items, isLoadMore = false) {
@@ -257,7 +271,9 @@ export function renderLostGoodsTable(items, isLoadMore = false) {
            </td></tr>`
         : '';
     
-    tableBody.innerHTML = rowsHtml + loadMoreHtml;
+    const ctaHtml = `<tr><td colspan="7" style="padding: 0 16px;">${lostListCtaHtml()}</td></tr>`;
+
+    tableBody.innerHTML = rowsHtml + loadMoreHtml + ctaHtml;
 }
 
 export function openLostDetailModalByIndex(index) {
