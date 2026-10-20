@@ -2,10 +2,9 @@
   "slug": "jeju-places",
   "order": 10,
   "verified": "2026-10",
-  "_notes": "성산포항 종합여객터미널 064-782-5671은 비공식 출처 2곳 일치(여행사이트·블로그) — 분실물 담당 여부 미확인이라 '터미널 문의'로만 표기. 관광경찰 제주 운영 미확인 → 미기재.",
+  "_notes": "우도 도항선 선착장 064-782-5670은 운영자 확인(2026-10-20). 120 콜센터 064 국번·운영시간은 공식 출처 미확인이라 미기재. 관광경찰 제주 운영 미확인 → 미기재.",
   "sources": [
     { "label": "Jeju 120 Mandeok Call Center (Seoul Shinmun, 2025)", "url": "https://m.seoul.co.kr/news/2025/07/01/20250701500239" },
-    { "label": "Udo ferry times & Seongsan Port terminal", "url": "https://www.trvlogue.com/ko/udo-island-ferry-times" },
     { "label": "Police Minwon24 (formerly LOST112)", "url": "https://minwon24.police.go.kr" }
   ],
   "en": {
@@ -24,11 +23,11 @@
       },
       {
         "h": "Attractions, beaches and parks",
-        "body": "<p>Paid attractions (museums, theme parks, observatories) usually have a ticket office or information center that keeps lost items. At beaches and public parks, items are often handed to a lifeguard station, the local community office or the nearest police box. If you don't know who to call, Jeju's <b>120 Mandeok Call Center</b> (<a href=\"tel:+8264120\">064-120</a>, 07:00–22:00) can point you to the right office.</p>"
+        "body": "<p>Paid attractions (museums, theme parks, observatories) usually have a ticket office or information center that keeps lost items. At beaches and public parks, items are often handed to a lifeguard station, the local community office or the nearest police box. If you don't know who to call, Jeju's <b>120 Mandeok Call Center</b> (dial 120 from a Korean phone) can point you to the right office.</p>"
       },
       {
         "h": "Udo ferry",
-        "body": "<p>For items left on the Udo ferry or at the port, contact the Seongsan Port passenger terminal (064-782-5671) and give the sailing time and direction.</p>"
+        "body": "<p>For items left on the Udo ferry or at the port, contact the Udo ferry dock (<a href=\"tel:+82647825670\">064-782-5670</a>) and give the sailing time and direction.</p>"
       },
       {
         "h": "Check the police database",
@@ -56,11 +55,11 @@
       },
       {
         "h": "景点、海水浴场和公园",
-        "body": "<p>收费景点（博物馆、主题乐园、观景台）一般由售票处或游客中心保管遗失物。海水浴场和公园的物品常被交到救生站、当地社区办公室或附近派出所。不知道该找谁时，拨打济州<b>120万德咨询中心</b>（<a href=\"tel:+8264120\">064-120</a>，07:00–22:00），他们会告诉你该联系哪个部门。</p>"
+        "body": "<p>收费景点（博物馆、主题乐园、观景台）一般由售票处或游客中心保管遗失物。海水浴场和公园的物品常被交到救生站、当地社区办公室或附近派出所。不知道该找谁时，拨打济州<b>120万德咨询中心</b>（用韩国手机拨打120），他们会告诉你该联系哪个部门。</p>"
       },
       {
         "h": "牛岛渡轮",
-        "body": "<p>落在牛岛渡轮或码头的物品，请联系城山港综合客运码头（064-782-5671），说明乘船时间和方向。</p>"
+        "body": "<p>落在牛岛渡轮或码头的物品，请请联系牛岛渡轮码头（<a href=\"tel:+82647825670\">064-782-5670</a>），说明乘船时间和方向。</p>"
       },
       {
         "h": "查询警方数据库",

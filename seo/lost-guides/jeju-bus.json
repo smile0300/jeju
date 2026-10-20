@@ -2,7 +2,7 @@
   "slug": "jeju-bus",
   "order": 3,
   "verified": "2026-10",
-  "_notes": "제주 버스회사별 번호·공항리무진 번호는 공식 출처 미확인 → 120 콜센터가 노선 확인 후 회사 연결(서울신문 2025 사례). 보관기간(7일 후 경찰 이관)은 서울 기준이라 미기재.",
+  "_notes": "제주 버스회사별 번호·공항리무진 번호, 120 콜센터 064 국번·운영시간은 공식 출처 미확인 → 120 콜센터가 노선 확인 후 회사 연결(서울신문 2025 사례). 보관기간(7일 후 경찰 이관)은 서울 기준이라 미기재.",
   "sources": [
     { "label": "Jeju 120 Mandeok Call Center (Seoul Shinmun, 2025)", "url": "https://m.seoul.co.kr/news/2025/07/01/20250701500239" },
     { "label": "Seoul Media Hub — Left a bag on the bus", "url": "https://mediahub.seoul.go.kr/archives/169198" },
@@ -13,7 +13,7 @@
     "desc": "Left your bag or phone on a bus in Jeju? How to find which bus company has it through Jeju's 120 call center, what details to give, and how to get it back after you leave.",
     "h1": "Lost Something on a Jeju Bus",
     "summary": [
-      "Call the <b>Jeju 120 Mandeok Call Center</b>: <a href=\"tel:+8264120\">064-120</a> (07:00–22:00). Give the bus number, the stop and the time — they'll tell you which bus company to contact.",
+      "Call the <b>Jeju 120 Mandeok Call Center</b>: dial 120 from a Korean phone. Give the bus number, the stop and the time — they'll tell you which bus company to contact.",
       "Items are collected at the depot after the bus finishes its run, so the bus number and time matter more than anything else.",
       "Unclaimed items go to the police and then show up in the police lost-property database."
     ],
@@ -36,7 +36,7 @@
       }
     ],
     "faq": [
-      { "q": "Is there one lost & found office for all Jeju buses?", "a": "No. Each bus company keeps its own items. The 120 call center (064-120) can tell you which company runs your route." },
+      { "q": "Is there one lost & found office for all Jeju buses?", "a": "No. Each bus company keeps its own items. The 120 call center can tell you which company runs your route." },
       { "q": "I left something on the airport limousine bus.", "a": "Treat it like any other bus: give the route number, time and stops to the 120 call center. If you lost it inside the airport instead, contact Jeju Airport Lost & Found." },
       { "q": "How long do bus companies keep lost items?", "a": "Only for a short time before passing them to the police. Call as soon as possible." }
     ]
@@ -46,7 +46,7 @@
     "desc": "在济州坐公交把包或手机落在车上？通过济州120咨询中心找到负责的公交公司、需要提供哪些信息，以及回国后如何取回。",
     "h1": "济州公交车遗失物品",
     "summary": [
-      "拨打<b>济州120万德咨询中心</b>：<a href=\"tel:+8264120\">064-120</a>（07:00–22:00）。提供公交线路号、车站和时间，他们会告诉你该联系哪家公交公司。",
+      "拨打<b>济州120万德咨询中心</b>：用韩国手机拨打120。提供公交线路号、车站和时间，他们会告诉你该联系哪家公交公司。",
       "公交车跑完一趟后才会在车场回收遗失物，所以线路号和时间最关键。",
       "无人认领的物品会移交警察，之后可以在警方失物数据库中查到。"
     ],
@@ -69,7 +69,7 @@
       }
     ],
     "faq": [
-      { "q": "济州所有公交有统一的失物招领处吗？", "a": "没有，各公交公司分别保管。拨打120（064-120）可以查到你坐的线路属于哪家公司。" },
+      { "q": "济州所有公交有统一的失物招领处吗？", "a": "没有，各公交公司分别保管。拨打120可以查到你坐的线路属于哪家公司。" },
       { "q": "东西落在机场大巴上了。", "a": "和普通公交一样处理：把线路号、时间和站点告诉120咨询中心。如果是在机场里丢的，请联系济州机场失物招领处。" },
       { "q": "公交公司会保管多久？", "a": "只保管很短时间就会移交警察，请尽快联系。" }
     ]

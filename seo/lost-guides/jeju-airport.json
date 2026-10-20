@@ -2,8 +2,9 @@
   "slug": "jeju-airport",
   "order": 1,
   "verified": "2026-10",
-  "_notes": "운영시간·정확한 보관일수는 공식 출처 미확인 → 본문에서 단정하지 말 것. 전화 064-797-2521은 제주항공 공식 안내와 교차 확인. 위치(1층 5번 게이트 부근)는 민간 출처 2곳 일치.",
+  "_notes": "운영시간·정확한 보관일수는 공식 출처 미확인 → 본문에서 단정하지 말 것. 전화 064-797-2521은 아시아나·제주항공 공식 안내로 확인. 위치(1층 5번 게이트 부근)는 운영자 현장 확인(2026-10-20). 공항공사 콜센터 번호는 공식 출처 없어 제외.",
   "sources": [
+    { "label": "Asiana Airlines — In-flight lost and found (lists Jeju Airport Lost & Found)", "url": "https://flyasiana.com/C/US/EN/travel/cabin/lost-lookup/list" },
     { "label": "Jeju Air — Cabin lost items", "url": "https://www.jejuair.net/ko/customerService/cabinLost/cabinLost.do" },
     { "label": "DHL Express × Jeju International Airport (2024)", "url": "https://www.dhl.com/kr-en/home/press/press-archive/2024/dhl-express-partners-with-jeju-international-airport-to-provide-international-delivery-of-lost-items.html" },
     { "label": "Police Minwon24 (formerly LOST112)", "url": "https://minwon24.police.go.kr" },
@@ -25,7 +26,7 @@
       },
       {
         "h": "Jeju Airport Lost & Found desk",
-        "body": "<ul><li><b>Phone:</b> <a href=\"tel:+82647972521\">+82-64-797-2521</a> (from inside Korea: 064-797-2521)</li><li><b>Location:</b> Jeju International Airport, 1st floor, near Gate 5</li><li><b>Korea Airports Corporation call center:</b> 1661-2626</li><li><b>Opening hours:</b> not published online — call before you go.</li></ul><p>When you call, have ready: when and where you lost it, your flight number, and a clear description (brand, colour, phone lock-screen image, anything written on it).</p>"
+        "body": "<ul><li><b>Phone:</b> <a href=\"tel:+82647972521\">+82-64-797-2521</a> (from inside Korea: 064-797-2521)</li><li><b>Location:</b> Jeju International Airport, 1st floor, near Gate 5</li><li><b>Opening hours:</b> not published online — call before you go.</li></ul><p>When you call, have ready: when and where you lost it, your flight number, and a clear description (brand, colour, phone lock-screen image, anything written on it).</p>"
       },
       {
         "h": "What happens to unclaimed items",
@@ -63,7 +64,7 @@
       },
       {
         "h": "济州机场失物招领处",
-        "body": "<ul><li><b>电话：</b><a href=\"tel:+82647972521\">+82-64-797-2521</a>（韩国境内拨打：064-797-2521）</li><li><b>位置：</b>济州国际机场 1楼 5号门附近</li><li><b>韩国机场公社客服：</b>1661-2626</li><li><b>开放时间：</b>官网未公布，前往前请先电话确认。</li></ul><p>打电话前请准备好：丢失的时间和地点、航班号、物品特征（品牌、颜色、手机锁屏图片、上面写的字等）。</p>"
+        "body": "<ul><li><b>电话：</b><a href=\"tel:+82647972521\">+82-64-797-2521</a>（韩国境内拨打：064-797-2521）</li><li><b>位置：</b>济州国际机场 1楼 5号门附近</li><li><b>开放时间：</b>官网未公布，前往前请先电话确认。</li></ul><p>打电话前请准备好：丢失的时间和地点、航班号、物品特征（品牌、颜色、手机锁屏图片、上面写的字等）。</p>"
       },
       {
         "h": "无人认领的物品会去哪里",

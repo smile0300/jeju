@@ -22,6 +22,11 @@ const UI = {
         ctaTitle: 'Find it with Jeju Live',
         ctaSearch: 'Search live lost & found (Jeju)', ctaProxy: 'Request proxy pickup', ctaReport: 'Not listed? Report it to us',
         faq: 'Frequently asked questions', related: 'Related guides', sources: 'Sources', other: '中文',
+        casesTitle: 'Real cases handled by Jeju Live',
+        casesLead: (n, since) => `Jeju Live has handled ${n} case${n > 1 ? 's' : ''} like this since ${since}. Most recent:`,
+        caseLine: c => `${c.item.en.charAt(0).toUpperCase() + c.item.en.slice(1)} — collected at ${c.place.en}, ${c.dest ? `sent to ${c.dest.en}` : 'handed over in Jeju'}`,
+        hubCases: (n, since) => `Since ${since}, Jeju Live has recovered ${n} items for travelers — from hotels, Jeju Airport, taxis, police stations and more.`,
+        month: m => new Date(m + '-01T00:00:00Z').toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' }),
         hubTitle: 'Jeju Lost and Found Guides — What to Do and Who to Call',
         hubDesc: 'Lost something in Jeju? Step-by-step guides for the airport, taxis, buses, hotels and more, with phone numbers and how to get items back after you leave Korea.',
         hubIntro: 'Pick where you lost it. Each guide lists who holds the item, how to contact them, and what to do if you have already left Korea.',
@@ -32,12 +37,21 @@ const UI = {
         ctaTitle: '用 Jeju Live 找回失物',
         ctaSearch: '实时查询济州失物', ctaProxy: '申请代领', ctaReport: '没查到？向我们申报遗失',
         faq: '常见问题', related: '相关指南', sources: '信息来源', other: 'English',
+        casesTitle: 'Jeju Live 真实处理案例',
+        casesLead: (n, since) => `自${since}起，Jeju Live 已处理此类案例 ${n} 件。最近的案例：`,
+        caseLine: c => `${ITEM_ZH_FIX[c.item.zh] || c.item.zh}——${c.place.zh}取回，${c.dest ? `寄往${c.dest.zh}` : '在济州交付'}`,
+        hubCases: (n, since) => `自${since}起，Jeju Live 已为游客找回 ${n} 件物品——来自酒店、济州机场、出租车、警察局等。`,
+        month: m => `${m.slice(0, 4)}年${Number(m.slice(5, 7))}月`,
         hubTitle: '济州失物招领指南——丢了东西该找谁、怎么办',
         hubDesc: '在济州岛丢了东西？机场、出租车、公交、酒店等场景的找回步骤、联系电话，以及回国后如何把东西寄回来。',
         hubIntro: '选择你丢东西的地方。每篇指南都写明物品由谁保管、怎么联系，以及已经回国时该怎么办。',
         footer: '面向游客的济州实时旅行信息'
     }
 };
+
+// 실제 처리 사례 스냅샷 (seo/update-cases.js로 갱신)
+const CASES = JSON.parse(fs.readFileSync(path.join(__dirname, 'cases.json'), 'utf-8'));
+const ITEM_ZH_FIX = { Tumblr: '保温杯' };
 
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const stripTags = s => String(s).replace(/<[^>]+>/g, '');
@@ -142,6 +156,10 @@ function renderGuide(guide, lang, guides) {
 <a class="btn btn-2" href="/lost?action=proxy" data-lang-link>${esc(t.ctaProxy)}</a>
 <a class="btn btn-3" href="/lost#report" data-lang-link>${esc(t.ctaReport)}</a></section>`;
     const faq = `<section class="card"><h2>${esc(t.faq)}</h2>${c.faq.map(f => `<details><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`).join('')}</section>`;
+    // 실제 사례: 해당 주제 건수 + 최근 6건 (cases.json은 최신순 정렬)
+    const myCases = CASES.cases.filter(cs => cs.guides.includes(guide.slug));
+    const casesHtml = myCases.length ? `<section class="card"><h2>${esc(t.casesTitle)}</h2><p>${esc(t.casesLead(myCases.length, t.month(myCases[myCases.length - 1].month)))}</p><ul>${myCases.slice(0, 6).map(cs => `<li><b>${esc(t.month(cs.month))}</b> · ${esc(t.caseLine(cs))}</li>`).join('')}</ul></section>` : '';
+
     const related = guides.filter(g => g.slug !== guide.slug);
     const relatedHtml = related.length ? `<section class="card list"><h2>${esc(t.related)}</h2>${related.map(g => `<a href="/${lang}/lost/${g.slug}"><b>${esc(g[lang].h1)}</b></a>`).join('')}</section>` : '';
     const sources = `<section class="src">${esc(t.sources)}<ul>${guide.sources.map(s => `<li><a href="${esc(s.url)}" rel="nofollow noopener" target="_blank">${esc(s.label)}</a></li>`).join('')}</ul></section>`;
@@ -155,6 +173,7 @@ function renderGuide(guide, lang, guides) {
 <p class="meta">${esc(t.verified)}: ${esc(guide.verified)}</p>
 ${summary}
 ${sectionHtml.join('\n')}
+${casesHtml}
 ${faq}
 ${relatedHtml}
 ${sources}`;
@@ -202,6 +221,7 @@ function renderHub(guides, lang) {
     const body = `<p class="crumb"><a href="/" data-lang-link>${esc(t.home)}</a></p>
 <h1>${esc(t.hub)}</h1>
 <p class="meta">${esc(t.hubIntro)}</p>
+${CASES.cases.length ? `<section class="card summary"><p>${esc(t.hubCases(CASES.cases.length, t.month(CASES.cases[CASES.cases.length - 1].month)))}</p></section>` : ''}
 <section class="card list">${list}</section>
 <section class="card cta"><h2>${esc(t.ctaTitle)}</h2>
 <a class="btn btn-1" href="/lost" data-lang-link>${esc(t.ctaSearch)}</a>

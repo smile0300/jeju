@@ -1,0 +1,1096 @@
+{
+  "updated": "2026-10-20",
+  "cases": [
+    {
+      "id": "JEJU-0057",
+      "month": "2026-10",
+      "item": {
+        "en": "Tumbler",
+        "zh": "Tumblr"
+      },
+      "place": {
+        "type": "airport",
+        "en": "Jeju Airport",
+        "zh": "济州机场"
+      },
+      "dest": {
+        "en": "Haidian District, Beijing",
+        "zh": "北京市海淀区"
+      },
+      "guides": [
+        "jeju-airport"
+      ]
+    },
+    {
+      "id": "JEJU-0056",
+      "month": "2026-10",
+      "item": {
+        "en": "Chanel sunglasses",
+        "zh": "香奈儿太阳镜"
+      },
+      "place": {
+        "type": "police",
+        "en": "Western Police Station",
+        "zh": "西部警局"
+      },
+      "dest": {
+        "en": "Suzhou City, Jiangsu Province",
+        "zh": "江苏省苏州市"
+      },
+      "guides": [
+        "jeju-places"
+      ]
+    },
+    {
+      "id": "JEJU-0055",
+      "month": "2026-10",
+      "item": {
+        "en": "Miumiu black sunglasses",
+        "zh": "Miumiu 黑色墨镜"
+      },
+      "place": {
+        "type": "taxi",
+        "en": "Taxi",
+        "zh": "出租车"
+      },
+      "dest": {
+        "en": "Shenzhen, Guangdong Province",
+        "zh": "广东省深圳市"
+      },
+      "guides": [
+        "jeju-taxi"
+      ]
+    },
+    {
+      "id": "JEJU-0054",
+      "month": "2026-10",
+      "item": {
+        "en": "Passport bag",
+        "zh": "护照包"
+      },
+      "place": {
+        "type": "airport",
+        "en": "Jeju Airport",
+        "zh": "济州机场"
+      },
+      "dest": {
+        "en": "Pudong, Shanghai",
+        "zh": "上海市浦东"
+      },
+      "guides": [
+        "jeju-airport",
+        "jeju-passport"
+      ]
+    },
+    {
+      "id": "JEJU-0053",
+      "month": "2026-10",
+      "item": {
+        "en": "windproof jacket",
+        "zh": "冲锋衣"
+      },
+      "place": {
+        "type": "hotel",
+        "en": "Hotel",
+        "zh": "酒店"
+      },
+      "dest": {
+        "en": "Tongzhou District, Beijing",
+        "zh": "北京通州区"
+      },
+      "guides": [
+        "jeju-hotel"
+      ]
+    },
+    {
+      "id": "JEJU-0052",
+      "month": "2026-10",
+      "item": {
+        "en": "DJI POCKET 4",
+        "zh": "DJI POCKET 4"
+      },
+      "place": {
+        "type": "police",
+        "en": "Dongbu Police Station",
+        "zh": "东部派出所"
+      },
+      "dest": {
+        "en": "busan",
+        "zh": "釜山"
+      },
+      "guides": [
+        "jeju-places"
+      ]
+    },
+    {
+      "id": "JEJU-0051",
+      "month": "2026-08",
+      "item": {
+        "en": "microphone",
+        "zh": "麦克风"
+      },
+      "place": {
+        "type": "hotel",
+        "en": "Hotel",
+        "zh": "酒店"
+      },
+      "dest": {
+        "en": "Hefei City, Anhui Province",
+        "zh": "安徽省合肥市"
+      },
+      "guides": [
+        "jeju-hotel",
+        "jeju-phone"
+      ]
+    },
+    {
+      "id": "JEJU-0050",
+      "month": "2026-08",
+      "item": {
+        "en": "Chanel sunglasses",
+        "zh": "香奈儿太阳镜"
+      },
+      "place": {
+        "type": "taxi",
+        "en": "Taxi",
+        "zh": "出租车"
+      },
+      "dest": {
+        "en": "Guangzhou",
+        "zh": "广州"
+      },
+      "guides": [
+        "jeju-taxi"
+      ]
+    },
+    {
+      "id": "JEJU-0049",
+      "month": "2026-08",
+      "item": {
+        "en": "ipad",
+        "zh": "iPad"
+      },
+      "place": {
+        "type": "hotel",
+        "en": "Hotel",
+        "zh": "酒店"
+      },
+      "dest": null,
+      "guides": [
+        "jeju-hotel"
+      ]
+    },
+    {
+      "id": "JEJU-0048",
+      "month": "2026-08",
+      "item": {
+        "en": "AirPods",
+        "zh": "AirPods"
+      },
+      "place": {
+        "type": "hotel",
+        "en": "Hotel",
+        "zh": "酒店"
+      },
+      "dest": null,
+      "guides": [
+        "jeju-hotel"
+      ]
+    },
+    {
+      "id": "JEJU-0047",
+      "month": "2026-08",
+      "item": {
+        "en": "glasses",
+        "zh": "眼镜"
+      },
+      "place": {
+        "type": "hotel",
+        "en": "Hotel",
+        "zh": "酒店"
+      },
+      "dest": {
+        "en": "Huai'an City",
+        "zh": "淮安市"
+      },
+      "guides": [
+        "jeju-hotel"
+      ]
+    },
+    {
+      "id": "JEJU-0046",
+      "month": "2026-08",
+      "item": {
+        "en": "cosmetics",
+        "zh": "化妆品"
+      },
+      "place": {
+        "type": "dutyfree",
+        "en": "Duty-free store",
+        "zh": "免税店"
+      },
+      "dest": {
+        "en": "Wuxi City, Jiangsu Province",
+        "zh": "江苏省无锡市"
+      },
+      "guides": [
+        "jeju-duty-free"
+      ]
+    },
+    {
+      "id": "JEJU-0045",
+      "month": "2026-08",
+      "item": {
+        "en": "necklace",
+        "zh": "项链"
+      },
+      "place": {
+        "type": "hotel",
+        "en": "Hotel",
+        "zh": "酒店"
+      },
+      "dest": {
+        "en": "Hubei Wuhan",
+        "zh": "湖北 武汉"
+      },
+      "guides": [
+        "jeju-hotel"
+      ]
+    },
+    {
+      "id": "JEJU-0044",
+      "month": "2026-08",
+      "item": {
+        "en": "necklace",
+        "zh": "项链"
+      },
+      "place": {
+        "type": "hotel",
+        "en": "Hotel",
+        "zh": "酒店"
+      },
+      "dest": null,
+      "guides": [
+        "jeju-hotel"
+      ]
+    },
+    {
+      "id": "JEJU-0043",
+      "month": "2026-08",
+      "item": {
+        "en": "ipad",
+        "zh": "iPad"
+      },
+      "place": {
+        "type": "hotel",
+        "en": "Hotel",
+        "zh": "酒店"
+      },
+      "dest": {
+        "en": "Suzhou City",
+        "zh": "苏州市"
+      },
+      "guides": [
+        "jeju-hotel"
+      ]
+    },
+    {
+      "id": "JEJU-0042",
+      "month": "2026-08",
+      "item": {
+        "en": "Nintendo Switch 2",
+        "zh": "任天堂switch2"
+      },
+      "place": {
+        "type": "police",
+        "en": "Western Police Station",
+        "zh": "西部警局"
+      },
+      "dest": {
+        "en": "Shanghai",
+        "zh": "上海"
+      },
+      "guides": [
+        "jeju-places"
+      ]
+    },
+    {
+      "id": "JEJU-0041",
+      "month": "2026-08",
+      "item": {
+        "en": "A pair of shoes",
+        "zh": "一双鞋子"
+      },
+      "place": {
+        "type": "hotel",
+        "en": "Hotel",
+        "zh": "酒店"
+      },
+      "dest": null,
+      "guides": [
+        "jeju-hotel"
+      ]
+    },
+    {
+      "id": "JEJU-0040",
+      "month": "2026-08",
+      "item": {
+        "en": "3 suitcases",
+        "zh": "3个行李箱"
+      },
+      "place": {
+        "type": "hotel",
+        "en": "Hotel",
+        "zh": "酒店"
+      },
+      "dest": null,
+      "guides": [
+        "jeju-hotel"
+      ]
+    },
+    {
+      "id": "JEJU-0039",
+      "month": "2026-08",
+      "item": {
+        "en": "Bag, camera, mobile phone",
+        "zh": "包、相机、手机"
+      },
+      "place": {
+        "type": "airport",
+        "en": "Jeju Airport",
+        "zh": "济州机场"
+      },
+      "dest": null,
+      "guides": [
+        "jeju-airport",
+        "jeju-phone"
+      ]
+    },
+    {
+      "id": "JEJU-0038",
+      "month": "2026-07",
+      "item": {
+        "en": "airpods",
+        "zh": "AirPods"
+      },
+      "place": {
+        "type": "hotel",
+        "en": "Hotel",
+        "zh": "酒店"
+      },
+      "dest": {
+        "en": "Ruili City, Yunnan Province",
+        "zh": "云南省瑞丽市"
+      },
+      "guides": [
+        "jeju-hotel"
+      ]
+    },
+    {
+      "id": "JEJU-0037",
+      "month": "2026-07",
+      "item": {
+        "en": "Wallet",
+        "zh": "钱包"
+      },
+      "place": {
+        "type": "taxi",
+        "en": "Taxi",
+        "zh": "出租车"
+      },
+      "dest": null,
+      "guides": [
+        "jeju-taxi"
+      ]
+    },
+    {
+      "id": "JEJU-0036",
+      "month": "2026-07",
+      "item": {
+        "en": "Clothing",
+        "zh": "服装"
+      },
+      "place": {
+        "type": "hotel",
+        "en": "Hotel",
+        "zh": "酒店"
+      },
+      "dest": {
+        "en": "Shanghai",
+        "zh": "上海"
+      },
+      "guides": [
+        "jeju-hotel"
+      ]
+    },
+    {
+      "id": "JEJU-0035",
+      "month": "2026-07",
+      "item": {
+        "en": "DJI Pocket 4",
+        "zh": "DJI Pocket 4"
+      },
+      "place": {
+        "type": "hotel",
+        "en": "Hotel",
+        "zh": "酒店"
+      },
+      "dest": null,
+      "guides": [
+        "jeju-hotel"
+      ]
+    },
+    {
+      "id": "JEJU-0034",
+      "month": "2026-07",
+      "item": {
+        "en": "Souvenirs",
+        "zh": "纪念品"
+      },
+      "place": {
+        "type": "shop",
+        "en": "Shop",
+        "zh": "商店"
+      },
+      "dest": {
+        "en": "Tongxiang City",
+        "zh": "桐乡市"
+      },
+      "guides": [
+        "jeju-places"
+      ]
+    },
+    {
+      "id": "JEJU-0033",
+      "month": "2026-07",
+      "item": {
+        "en": "MLB cap",
+        "zh": "MLB棒球帽"
+      },
+      "place": {
+        "type": "bus",
+        "en": "Bus company",
+        "zh": "公交公司"
+      },
+      "dest": null,
+      "guides": [
+        "jeju-bus"
+      ]
+    },
+    {
+      "id": "JEJU-0032",
+      "month": "2026-07",
+      "item": {
+        "en": "Charger",
+        "zh": "充电器"
+      },
+      "place": {
+        "type": "hotel",
+        "en": "Hotel",
+        "zh": "酒店"
+      },
+      "dest": null,
+      "guides": [
+        "jeju-hotel"
+      ]
+    },
+    {
+      "id": "JEJU-0031",
+      "month": "2026-07",
+      "item": {
+        "en": "Shirts, Pants",
+        "zh": "衬衫、裤子"
+      },
+      "place": {
+        "type": "hotel",
+        "en": "Hotel",
+        "zh": "酒店"
+      },
+      "dest": {
+        "en": "Shaoxing City, Zhejiang Province",
+        "zh": "浙江省绍兴市"
+      },
+      "guides": [
+        "jeju-hotel"
+      ]
+    },
+    {
+      "id": "JEJU-0030",
+      "month": "2026-07",
+      "item": {
+        "en": "Fuji Camera",
+        "zh": "富士相机"
+      },
+      "place": {
+        "type": "airport",
+        "en": "Jeju Airport",
+        "zh": "济州机场"
+      },
+      "dest": {
+        "en": "Wuhu, Anhui Province",
+        "zh": "安徽省芜湖市"
+      },
+      "guides": [
+        "jeju-airport"
+      ]
+    },
+    {
+      "id": "JEJU-0029",
+      "month": "2026-07",
+      "item": {
+        "en": "MLB Shoes",
+        "zh": "MLB运动鞋"
+      },
+      "place": {
+        "type": "restaurant",
+        "en": "Restaurant",
+        "zh": "餐厅"
+      },
+      "dest": null,
+      "guides": [
+        "jeju-places"
+      ]
+    },
+    {
+      "id": "JEJU-0028",
+      "month": "2026-07",
+      "item": {
+        "en": "Duty-Free Bag",
+        "zh": "免税店购物袋"
+      },
+      "place": {
+        "type": "hotel",
+        "en": "Hotel",
+        "zh": "酒店"
+      },
+      "dest": {
+        "en": "Wuhan, Hubei",
+        "zh": "湖北省武汉市"
+      },
+      "guides": [
+        "jeju-hotel"
+      ]
+    },
+    {
+      "id": "JEJU-0027",
+      "month": "2026-07",
+      "item": {
+        "en": "Olive Young Bag",
+        "zh": "Olive Young 手提袋"
+      },
+      "place": {
+        "type": "hotel",
+        "en": "Hotel",
+        "zh": "酒店"
+      },
+      "dest": {
+        "en": "Beijing",
+        "zh": "北京"
+      },
+      "guides": [
+        "jeju-hotel"
+      ]
+    },
+    {
+      "id": "JEJU-0026",
+      "month": "2026-07",
+      "item": {
+        "en": "Brown Wallet",
+        "zh": "棕色钱包"
+      },
+      "place": {
+        "type": "port",
+        "en": "Seongsan Port (Udo Ferry Terminal)",
+        "zh": "城山港（牛岛渡轮码头）"
+      },
+      "dest": null,
+      "guides": [
+        "jeju-places"
+      ]
+    },
+    {
+      "id": "JEJU-0025",
+      "month": "2026-07",
+      "item": {
+        "en": "Matin Kim Bag",
+        "zh": "matin kim 包包"
+      },
+      "place": {
+        "type": "police",
+        "en": "Ara Police Station",
+        "zh": "阿拉警察局"
+      },
+      "dest": {
+        "en": "Ningbo",
+        "zh": "宁波"
+      },
+      "guides": [
+        "jeju-places"
+      ]
+    },
+    {
+      "id": "JEJU-0024",
+      "month": "2026-07",
+      "item": {
+        "en": "Digital Watch",
+        "zh": "电子表"
+      },
+      "place": {
+        "type": "airport",
+        "en": "Jeju Airport",
+        "zh": "济州机场"
+      },
+      "dest": null,
+      "guides": [
+        "jeju-airport"
+      ]
+    },
+    {
+      "id": "JEJU-0023",
+      "month": "2026-07",
+      "item": {
+        "en": "Carrier",
+        "zh": "行李箱"
+      },
+      "place": {
+        "type": "airport",
+        "en": "Jeju Airport",
+        "zh": "济州机场"
+      },
+      "dest": null,
+      "guides": [
+        "jeju-airport"
+      ]
+    },
+    {
+      "id": "JEJU-0022",
+      "month": "2026-07",
+      "item": {
+        "en": "Phone",
+        "zh": "手机"
+      },
+      "place": {
+        "type": "police",
+        "en": "Eastern Police Station",
+        "zh": "东部警察局"
+      },
+      "dest": {
+        "en": "Incheon",
+        "zh": "仁川"
+      },
+      "guides": [
+        "jeju-places",
+        "jeju-phone"
+      ]
+    },
+    {
+      "id": "JEJU-0021",
+      "month": "2026-07",
+      "item": {
+        "en": "Phone",
+        "zh": "手机"
+      },
+      "place": {
+        "type": "hotel",
+        "en": "Hotel",
+        "zh": "酒店"
+      },
+      "dest": {
+        "en": "Nanjing",
+        "zh": "南京"
+      },
+      "guides": [
+        "jeju-hotel",
+        "jeju-phone"
+      ]
+    },
+    {
+      "id": "JEJU-0020",
+      "month": "2026-07",
+      "item": {
+        "en": "Puma shoes",
+        "zh": "彪马运动鞋"
+      },
+      "place": {
+        "type": "hotel",
+        "en": "Hotel",
+        "zh": "酒店"
+      },
+      "dest": {
+        "en": "Anhui Huangshan",
+        "zh": "安徽黄山"
+      },
+      "guides": [
+        "jeju-hotel"
+      ]
+    },
+    {
+      "id": "JEJU-0019",
+      "month": "2026-07",
+      "item": {
+        "en": "DJI Pocket 4",
+        "zh": "DJI Pocket 4"
+      },
+      "place": {
+        "type": "police",
+        "en": "Western Police Station",
+        "zh": "西部警察局"
+      },
+      "dest": {
+        "en": "Nanchang",
+        "zh": "南昌"
+      },
+      "guides": [
+        "jeju-places"
+      ]
+    },
+    {
+      "id": "JEJU-0018",
+      "month": "2026-07",
+      "item": {
+        "en": "Passport",
+        "zh": "护照"
+      },
+      "place": {
+        "type": "venue",
+        "en": "Leisure facility",
+        "zh": "休闲场所"
+      },
+      "dest": null,
+      "guides": [
+        "jeju-places",
+        "jeju-passport"
+      ]
+    },
+    {
+      "id": "JEJU-0017",
+      "month": "2026-07",
+      "item": {
+        "en": "Sunglasses",
+        "zh": "太阳镜"
+      },
+      "place": {
+        "type": "hotel",
+        "en": "Hotel",
+        "zh": "酒店"
+      },
+      "dest": {
+        "en": "Nanjing",
+        "zh": "南京"
+      },
+      "guides": [
+        "jeju-hotel"
+      ]
+    },
+    {
+      "id": "JEJU-0016",
+      "month": "2026-07",
+      "item": {
+        "en": "Tote Bag",
+        "zh": "托特包"
+      },
+      "place": {
+        "type": "police",
+        "en": "Western Police Station",
+        "zh": "西部警察局"
+      },
+      "dest": {
+        "en": "Hangzhou",
+        "zh": "杭州"
+      },
+      "guides": [
+        "jeju-places"
+      ]
+    },
+    {
+      "id": "JEJU-0015",
+      "month": "2026-07",
+      "item": {
+        "en": "ID, wallet",
+        "zh": "身份证、钱包"
+      },
+      "place": {
+        "type": "airport",
+        "en": "Jeju Airport",
+        "zh": "济州机场"
+      },
+      "dest": {
+        "en": "Suzhou",
+        "zh": "苏州"
+      },
+      "guides": [
+        "jeju-airport",
+        "jeju-passport"
+      ]
+    },
+    {
+      "id": "JEJU-0014",
+      "month": "2026-07",
+      "item": {
+        "en": "MLB cap",
+        "zh": "MLB棒球帽"
+      },
+      "place": {
+        "type": "hotel",
+        "en": "Hotel",
+        "zh": "酒店"
+      },
+      "dest": {
+        "en": "Hangzhou",
+        "zh": "杭州"
+      },
+      "guides": [
+        "jeju-hotel"
+      ]
+    },
+    {
+      "id": "JEJU-0013",
+      "month": "2026-07",
+      "item": {
+        "en": "Smartphone",
+        "zh": "智能手机"
+      },
+      "place": {
+        "type": "police",
+        "en": "Police Station",
+        "zh": "警察局"
+      },
+      "dest": {
+        "en": "Wenzhou",
+        "zh": "温州"
+      },
+      "guides": [
+        "jeju-places",
+        "jeju-phone"
+      ]
+    },
+    {
+      "id": "JEJU-0012",
+      "month": "2026-06",
+      "item": {
+        "en": "Olive Young Products",
+        "zh": "Olive Young商品"
+      },
+      "place": {
+        "type": "taxi",
+        "en": "Taxi",
+        "zh": "出租车"
+      },
+      "dest": null,
+      "guides": [
+        "jeju-taxi"
+      ]
+    },
+    {
+      "id": "JEJU-0011",
+      "month": "2026-06",
+      "item": {
+        "en": "DJI Pocket 3",
+        "zh": "DJI Pocket 3"
+      },
+      "place": {
+        "type": "police",
+        "en": "Police Station",
+        "zh": "警察局"
+      },
+      "dest": null,
+      "guides": [
+        "jeju-places"
+      ]
+    },
+    {
+      "id": "JEJU-0010",
+      "month": "2026-06",
+      "item": {
+        "en": "Orthodontic Appliance",
+        "zh": "牙齿矫正器"
+      },
+      "place": {
+        "type": "hotel",
+        "en": "Hotel",
+        "zh": "酒店"
+      },
+      "dest": {
+        "en": "Seoul",
+        "zh": "首尔"
+      },
+      "guides": [
+        "jeju-hotel"
+      ]
+    },
+    {
+      "id": "JEJU-0009",
+      "month": "2026-06",
+      "item": {
+        "en": "iPad",
+        "zh": "iPad"
+      },
+      "place": {
+        "type": "airport",
+        "en": "Jeju Airport",
+        "zh": "济州机场"
+      },
+      "dest": null,
+      "guides": [
+        "jeju-airport"
+      ]
+    },
+    {
+      "id": "JEJU-0008",
+      "month": "2026-06",
+      "item": {
+        "en": "Carry-on Bag",
+        "zh": "旅行箱"
+      },
+      "place": {
+        "type": "taxi",
+        "en": "Taxi",
+        "zh": "出租车"
+      },
+      "dest": {
+        "en": "Heilongjiang",
+        "zh": "黑龙江"
+      },
+      "guides": [
+        "jeju-taxi"
+      ]
+    },
+    {
+      "id": "JEJU-0007",
+      "month": "2026-06",
+      "item": {
+        "en": "Balenciaga Wallet",
+        "zh": "Balenciaga 钱包"
+      },
+      "place": {
+        "type": "airport",
+        "en": "Jeju Airport",
+        "zh": "济州机场"
+      },
+      "dest": {
+        "en": "Zhejiang Province",
+        "zh": "浙江省"
+      },
+      "guides": [
+        "jeju-airport"
+      ]
+    },
+    {
+      "id": "JEJU-0006",
+      "month": "2026-06",
+      "item": {
+        "en": "bolon Sunglasses",
+        "zh": "bolon 太阳镜"
+      },
+      "place": {
+        "type": "hotel",
+        "en": "Hotel",
+        "zh": "酒店"
+      },
+      "dest": {
+        "en": "Shanghai",
+        "zh": "上海"
+      },
+      "guides": [
+        "jeju-hotel"
+      ]
+    },
+    {
+      "id": "JEJU-0005",
+      "month": "2026-06",
+      "item": {
+        "en": "Wallet",
+        "zh": "钱包"
+      },
+      "place": {
+        "type": "taxi",
+        "en": "Taxi",
+        "zh": "出租车"
+      },
+      "dest": {
+        "en": "Shanghai",
+        "zh": "上海"
+      },
+      "guides": [
+        "jeju-taxi"
+      ]
+    },
+    {
+      "id": "JEJU-0004",
+      "month": "2026-06",
+      "item": {
+        "en": "Short-Sleeve T-Shirt",
+        "zh": "短袖T恤"
+      },
+      "place": {
+        "type": "shop",
+        "en": "Shop",
+        "zh": "商店"
+      },
+      "dest": null,
+      "guides": [
+        "jeju-places"
+      ]
+    },
+    {
+      "id": "JEJU-0003",
+      "month": "2026-06",
+      "item": {
+        "en": "Clothes",
+        "zh": "衣服"
+      },
+      "place": {
+        "type": "venue",
+        "en": "Leisure facility",
+        "zh": "休闲场所"
+      },
+      "dest": {
+        "en": "Shanghai",
+        "zh": "上海"
+      },
+      "guides": [
+        "jeju-places"
+      ]
+    },
+    {
+      "id": "JEJU-0002",
+      "month": "2026-06",
+      "item": {
+        "en": "Bag",
+        "zh": "包"
+      },
+      "place": {
+        "type": "airport",
+        "en": "Jeju Airport",
+        "zh": "济州机场"
+      },
+      "dest": {
+        "en": "Chongqing",
+        "zh": "重庆"
+      },
+      "guides": [
+        "jeju-airport"
+      ]
+    },
+    {
+      "id": "JEJU-0001",
+      "month": "2026-06",
+      "item": {
+        "en": "night wear",
+        "zh": "睡衣"
+      },
+      "place": {
+        "type": "hotel",
+        "en": "Hotel",
+        "zh": "酒店"
+      },
+      "dest": {
+        "en": "Sichuan",
+        "zh": "四川"
+      },
+      "guides": [
+        "jeju-hotel"
+      ]
+    }
+  ]
+}
