@@ -1,0 +1,69 @@
+{
+  "slug": "jeju-duty-free",
+  "order": 4,
+  "verified": "2026-10",
+  "_notes": "시내면세점 구매품은 출국 인도장에서만 수령(신라 FAQ). 신라 온라인 미수령 10일 취소(신라 e스토어). 신라 고객센터 1688-1110(신라 공식). 롯데 번호는 미확인 → 영수증 안내.",
+  "sources": [
+    { "label": "The Shilla Duty Free — FAQ", "url": "https://m.shilladfs.com/comm/kr/ko/faqList" },
+    { "label": "The Shilla Duty Free — Customer center guide", "url": "https://m.shilladfs.com/estore/kr/ko/shilladfscustomercenter/static/centerguidemanual" },
+    { "label": "Police Minwon24 (formerly LOST112)", "url": "https://minwon24.police.go.kr" }
+  ],
+  "en": {
+    "title": "Jeju Duty Free Lost Items & Uncollected Purchases (Lotte, Shilla, Airport Pickup)",
+    "desc": "Left a bag in a Jeju duty-free store, or missed collecting your duty-free order at the airport? Who to contact and what happens to uncollected goods.",
+    "h1": "Lost Items and Uncollected Purchases at Jeju Duty Free",
+    "summary": [
+      "Left something <b>inside a downtown duty-free store</b> (Lotte, Shilla)? Contact that store's information desk or customer center — the number is on your receipt.",
+      "<b>Didn't collect your purchase</b> at the airport pickup counter? Contact the store you bought from right away; uncollected orders can be cancelled after a deadline.",
+      "Goods bought at downtown duty-free stores can only be handed over at the departure pickup counter — not delivered to your home."
+    ],
+    "sections": [
+      {
+        "h": "Lost something in the store",
+        "body": "<p>Shopping bags, phones and passports left at a counter are usually kept by the store's information desk first. Call the store with the time, floor or brand counter, and a description. The customer center number is printed on your receipt and on the store's website (The Shilla Duty Free: 1688-1110).</p><p>Items that stay unclaimed may later be handed to the police and appear in the police lost-property database.</p>"
+      },
+      {
+        "h": "Missed the airport pickup",
+        "body": "<p>Downtown duty-free purchases are handed over only at the departure pickup counter on the day you leave, after checking your passport and flight. If you missed it:</p><ul><li>Contact the store's customer center as soon as possible with your receipt or order number.</li><li>Ask whether the order can be moved to a later departure or must be refunded. For example, The Shilla Duty Free says unclaimed online orders may be cancelled 10 days after the original departure date.</li><li>Check that your passport number matches the order — a mismatch can stop the handover.</li></ul>"
+      },
+      {
+        "h": "Left purchases behind after the pickup counter",
+        "body": "<p>If you collected your goods and then left the bag in the departure area or on the plane, it's no longer the store's responsibility. Contact Jeju Airport Lost &amp; Found (terminal) or your airline (on board).</p>"
+      }
+    ],
+    "faq": [
+      { "q": "Can the duty-free store send my uncollected purchase to China?", "a": "Downtown duty-free purchases are generally handed over only at departure. Ask the store's customer center about a refund or a later pickup." },
+      { "q": "I left my passport at a duty-free counter.", "a": "Call the store immediately — passports are often kept at the information desk. If it isn't there, report the loss to the police and contact your consulate." },
+      { "q": "Can Jeju Live help?", "a": "For items lost in a store, yes: we can contact the store in Korean, collect the item and send it to you. Uncollected duty-free purchases must be handled by the store itself." }
+    ]
+  },
+  "zh": {
+    "title": "济州免税店丢东西、没提到免税品怎么办（乐天、新罗、机场提货点）",
+    "desc": "在济州市内免税店把购物袋落下了，或者在机场忘了提免税品？该联系谁、未提货的商品会怎么处理。",
+    "h1": "济州免税店遗失物品和未提货商品",
+    "summary": [
+      "东西落在<b>市内免税店</b>（乐天、新罗）？联系该店的服务台或客服中心，电话印在购物小票上。",
+      "<b>在机场提货点没提货？</b>请马上联系购买的免税店，超过期限的未提货订单可能会被取消。",
+      "市内免税店购买的商品只能在出境提货点领取，不能寄到家里。"
+    ],
+    "sections": [
+      {
+        "h": "东西落在店里",
+        "body": "<p>落在柜台的购物袋、手机、护照，一般先由免税店服务台保管。打电话时说明时间、楼层或品牌柜台以及物品特征。客服电话印在小票和官网上（新罗免税店：1688-1110）。</p><p>长期无人认领的物品之后可能会移交警察，可在警方失物数据库中查询。</p>"
+      },
+      {
+        "h": "没在机场提货点提货",
+        "body": "<p>市内免税店的商品只在出境当天、核对护照和航班后，在出境提货点交付。如果错过了：</p><ul><li>带上小票或订单号，尽快联系免税店客服中心。</li><li>询问能否改到下次出境提货，还是只能退款。例如新罗免税店说明：网上订单自原出境日起10天未提货可能被取消。</li><li>确认护照号码与订单一致——不一致会导致无法提货。</li></ul>"
+      },
+      {
+        "h": "提货后又把东西落下了",
+        "body": "<p>如果已经提了货，又把袋子落在出境区或飞机上，就不归免税店管了。请联系济州机场失物招领处（航站楼内）或航空公司（飞机上）。</p>"
+      }
+    ],
+    "faq": [
+      { "q": "免税店能把没提的商品寄到中国吗？", "a": "市内免税店的商品一般只能在出境时交付。请向免税店客服咨询退款或下次提货。" },
+      { "q": "护照落在免税店柜台了。", "a": "马上给免税店打电话，护照通常会交到服务台。如果没有，请报警并联系中国驻济州总领事馆。" },
+      { "q": "Jeju Live 能帮忙吗？", "a": "落在店里的物品可以：我们用韩语联系免税店，取回后寄给你，可通过微信沟通。未提货的免税商品只能由免税店处理。" }
+    ]
+  }
+}

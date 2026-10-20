@@ -1,0 +1,78 @@
+{
+  "slug": "jeju-taxi",
+  "order": 2,
+  "verified": "2026-10",
+  "_notes": "카카오T 고객센터 전화번호는 출처마다 달라 미기재(앱 내 문의로 안내). 티머니 1644-1188·캐시비 1644-1472는 카드 단말기 기준 조회 번호. 제주 택시조합 번호는 공식 출처 미확인 → 120 콜센터로 안내.",
+  "sources": [
+    { "label": "Seoul Media Hub — Lost items in taxis and buses", "url": "https://mediahub.seoul.go.kr/archives/2002840" },
+    { "label": "Korea Taxi Association — Lost & found", "url": "https://www.taxi.or.kr" },
+    { "label": "Jeju 120 Mandeok Call Center (Seoul Shinmun, 2025)", "url": "https://m.seoul.co.kr/news/2025/07/01/20250701500239" },
+    { "label": "Police Minwon24 (formerly LOST112)", "url": "https://minwon24.police.go.kr" }
+  ],
+  "en": {
+    "title": "Left Something in a Jeju Taxi? How to Find the Driver (Kakao T & Street Taxis)",
+    "desc": "Lost your phone, wallet or bag in a taxi in Jeju? How to reach the driver through Kakao T, your card payment or receipt, and what to do if you've already left Korea.",
+    "h1": "Lost Something in a Jeju Taxi",
+    "summary": [
+      "Booked with <b>Kakao T</b>? Open the app → ride history → select the ride and contact the driver or report a lost item. This is the fastest route.",
+      "Hailed a taxi on the street? Your <b>receipt</b> or <b>card payment record</b> can identify the car. Paid by card at the meter: call T-money 1644-1188 or Cashbee 1644-1472.",
+      "Nothing works? Call Jeju's 120 call center (<a href=\"tel:+8264120\">064-120</a>) or report it to the police. Already left Korea? Jeju Live can collect it from the driver for you."
+    ],
+    "sections": [
+      {
+        "h": "If you used Kakao T",
+        "body": "<p>App rides are the easiest to trace because the app keeps the car number and the driver's contact.</p><ol><li>Open Kakao T → <b>ride history</b> (이용기록).</li><li>Select the ride. Call or message the driver, or choose the lost-item report option.</li><li>If you can't reach the driver, use the in-app customer support chat and give the date, time and route.</li></ol><p>Act within the same day if you can — drivers often find items when the next passenger gets in.</p>"
+      },
+      {
+        "h": "If you hailed a taxi on the street",
+        "body": "<ul><li><b>Receipt:</b> it usually shows the car number and the company's or driver's phone number.</li><li><b>Paid by card at the meter:</b> the card terminal operator can look up the car from your card number. T-money terminal: 1644-1188. Cashbee terminal: 1644-1472.</li><li><b>Paid by mobile wallet:</b> you may need the approval number from your payment app's history.</li><li><b>Paid cash, no receipt:</b> note where and when you got in and out, and the taxi's colour.</li></ul>"
+      },
+      {
+        "h": "Still can't find the driver?",
+        "body": "<ul><li><b>Jeju 120 Mandeok Call Center</b> — <a href=\"tel:+8264120\">064-120</a> (07:00–22:00). Jeju's public information line; tell them the pickup/drop-off place and time.</li><li><b>Korea Taxi Association lost & found</b> — online report at taxi.or.kr.</li><li><b>Police</b> — drivers and passengers often hand items to the nearest police box. Once registered, they appear in the police lost-property database, which <a href=\"/lost\" data-lang-link>Jeju Live's live search</a> shows for Jeju.</li><li><b>1330</b> — the free 24-hour travel helpline can interpret your call with the driver or call center.</li></ul>"
+      },
+      {
+        "h": "Already left Jeju?",
+        "body": "<p>If the driver has your item but you're no longer in Jeju, someone has to meet the driver and send it on. Jeju Live's proxy pickup does exactly that: we arrange a meeting with the driver or the police box, collect the item and ship it to you.</p><p>A small thank-you payment to the driver is common in Korea but not required.</p>"
+      }
+    ],
+    "faq": [
+      { "q": "I don't remember the taxi number. Can I still find it?", "a": "Often yes. Kakao T ride history, your card payment record or your receipt can identify the car. Without any of those, give the pickup and drop-off place and time to the 120 call center or police." },
+      { "q": "Does Kakao T have English support?", "a": "The app has limited English and automatic translation for chat with drivers. If language is a problem, call 1330 for free interpretation." },
+      { "q": "The driver found my phone but I've left Jeju. What now?", "a": "Submit a Jeju Live proxy pickup request with the driver's contact. We collect it in Jeju and arrange delivery to you." }
+    ]
+  },
+  "zh": {
+    "title": "济州出租车丢东西怎么办？找司机的方法（Kakao T 及路边打车）",
+    "desc": "在济州打车把手机、钱包、包落在车上？通过 Kakao T、刷卡记录或小票找到司机的方法，以及回国后怎么把东西拿回来。",
+    "h1": "济州出租车遗失物品",
+    "summary": [
+      "用 <b>Kakao T</b> 叫的车？打开 App → 行程记录 → 选择该行程，直接联系司机或提交遗失物登记，这是最快的办法。",
+      "路边拦的车？<b>小票</b>或<b>刷卡记录</b>可以查到车辆。在计价器上刷卡的，可致电 T-money 1644-1188 或 Cashbee 1644-1472 查询。",
+      "都不行？拨打济州120咨询中心（<a href=\"tel:+8264120\">064-120</a>）或报警。已经回国？Jeju Live 可以替你向司机取回。"
+    ],
+    "sections": [
+      {
+        "h": "用 Kakao T 叫的车",
+        "body": "<p>App 叫车最好找，因为 App 会保存车牌号和司机联系方式。</p><ol><li>打开 Kakao T → <b>行程记录</b>（이용기록）。</li><li>选择这次行程，给司机打电话或发消息，或选择遗失物登记。</li><li>联系不上司机时，用 App 内客服聊天，提供日期、时间和路线。</li></ol><p>尽量当天处理——下一位乘客上车时，司机往往就会发现落下的东西。</p>"
+      },
+      {
+        "h": "路边拦的出租车",
+        "body": "<ul><li><b>小票：</b>通常印有车牌号和出租车公司或司机的电话。</li><li><b>在计价器上刷卡：</b>刷卡终端公司可以用卡号查到车辆。T-money 终端：1644-1188；Cashbee 终端：1644-1472。</li><li><b>用手机支付：</b>可能需要支付记录里的授权号码。</li><li><b>付现金且没拿小票：</b>记下上下车地点、时间和出租车颜色。</li></ul>"
+      },
+      {
+        "h": "还是找不到司机？",
+        "body": "<ul><li><b>济州120万德咨询中心</b>——<a href=\"tel:+8264120\">064-120</a>（07:00–22:00），济州公共咨询热线，告诉他们上下车地点和时间。</li><li><b>韩国出租车联合会失物中心</b>——可在 taxi.or.kr 网上登记。</li><li><b>警察</b>——司机或乘客常把物品交到附近派出所。登记后会进入警方失物数据库，<a href=\"/lost\" data-lang-link>Jeju Live 实时失物查询</a>可以用中文查看济州的数据。</li><li><b>1330</b>——免费24小时旅游热线，可以提供中文翻译，帮你和司机或客服沟通。</li></ul>"
+      },
+      {
+        "h": "已经离开济州了？",
+        "body": "<p>东西在司机手上，但你已经不在济州，就需要有人去和司机碰面再寄给你。Jeju Live 代领服务就是做这件事：我们联系司机或派出所，取回物品后寄给你，可通过微信沟通。</p><p>在韩国给司机一点谢礼很常见，但不是必须的。</p>"
+      }
+    ],
+    "faq": [
+      { "q": "不记得车牌号还能找到吗？", "a": "通常可以。Kakao T 行程记录、刷卡记录或小票都能查到车辆。都没有的话，把上下车地点和时间告诉120咨询中心或警察。" },
+      { "q": "Kakao T 有中文吗？", "a": "App 支持有限，和司机聊天有自动翻译。语言不通时，拨打1330可获得免费中文翻译。" },
+      { "q": "司机找到了手机，但我已经回国了怎么办？", "a": "提交 Jeju Live 代领申请并附上司机联系方式，我们在济州取回后安排寄送。" }
+    ]
+  }
+}

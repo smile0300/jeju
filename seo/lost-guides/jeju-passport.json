@@ -1,0 +1,77 @@
+{
+  "slug": "jeju-passport",
+  "order": 8,
+  "verified": "2026-10",
+  "_notes": "주제주 중국 총영사관 주소·전화는 중국 외교부 공식 목록(2024-07). 여행증 발급 세부 절차·출국 시 출입국 절차는 미확인 → 영사관 확인으로 안내.",
+  "sources": [
+    { "label": "Ministry of Foreign Affairs of China — Consulate-General in Jeju", "url": "https://www.mfa.gov.cn/ara/wjb/zwjg_/zwlg_/yz_/202407/t20240717_11455414.html" },
+    { "label": "Consulate-General of China in Jeju", "url": "http://jeju.china-consulate.gov.cn" },
+    { "label": "Police Minwon24 (formerly LOST112)", "url": "https://minwon24.police.go.kr" }
+  ],
+  "en": {
+    "title": "Lost Your Passport in Jeju? Police Report, Consulate and Getting Home",
+    "desc": "What to do if you lose your passport in Jeju: check lost & found, file a police report, contact your embassy or consulate for an emergency travel document — with Chinese Consulate-General in Jeju contacts.",
+    "h1": "Lost Passport in Jeju",
+    "summary": [
+      "First retrace your steps: call the hotel, taxi, airport or shop where you might have left it. Found passports are often handed to the police.",
+      "Report the loss to the police (dial <b>112</b> or visit a police station) and ask for a <b>police report</b> — your embassy or consulate will need it.",
+      "Contact your embassy or consulate for an emergency travel document. Chinese citizens: Consulate-General in Jeju, <a href=\"tel:+82649008830\">+82-64-900-8830</a>, 24-hour duty line <a href=\"tel:+82647228802\">+82-64-722-8802</a>."
+    ],
+    "sections": [
+      {
+        "h": "1. Check whether someone has handed it in",
+        "body": "<ul><li><b>Hotel</b> front desk, <b>taxi</b> (Kakao T ride history), <b>airport</b> Lost &amp; Found (+82-64-797-2521), <b>duty-free</b> information desk.</li><li>Passports handed to the police appear in the police lost-property database. <a href=\"/lost\" data-lang-link>Jeju Live's live search</a> shows it for Jeju — choose the ID/passport category.</li></ul>"
+      },
+      {
+        "h": "2. File a police report",
+        "body": "<p>Go to the nearest police station or police box, or call 112. Ask for a written <b>loss report / police report</b>. Bring another form of ID if you have one, and your accommodation address. Call <b>1330</b> if you need interpretation.</p>"
+      },
+      {
+        "h": "3. Contact your embassy or consulate",
+        "body": "<p>Your embassy or consulate issues a new passport or an emergency travel document so you can leave Korea. Requirements (photos, police report, copy of the old passport, flight ticket) vary — check with them before you go.</p><p><b>Consulate-General of the People's Republic of China in Jeju</b></p><ul><li>Address: 568-1 Donam-dong, Jeju-si, Jeju-do</li><li>Phone: +82-64-900-8830 / 8840</li><li>24-hour duty line: +82-64-722-8802</li><li>Email: jeju@csm.mfa.gov.cn</li></ul><p>Most other countries' embassies are in Seoul; call them first to ask whether they can help remotely.</p>"
+      },
+      {
+        "h": "If the passport turns up after you've gone home",
+        "body": "<p>A passport you've reported lost is usually invalidated, but you may still want it back (visas, stamps). Jeju Live proxy pickup can collect it from the police or the venue and send it to you.</p>"
+      }
+    ],
+    "faq": [
+      { "q": "Can I fly home without a passport?", "a": "Not without an emergency travel document from your embassy or consulate. Contact them as soon as you know the passport is lost." },
+      { "q": "Should I still look for the passport after reporting it lost?", "a": "Yes. It may contain personal information, and a found passport goes to the police — check the police database." },
+      { "q": "Why does the consulate need a police report?", "a": "It proves the loss was reported in Korea. Ask the police for the written report when you file it." }
+    ]
+  },
+  "zh": {
+    "title": "在济州丢了护照怎么办？报警、联系总领事馆、办旅行证回国",
+    "desc": "在济州岛丢失护照：先查失物、再报警开证明、联系中国驻济州总领事馆办理旅行证，附领事馆地址和24小时值班电话。",
+    "h1": "在济州丢失护照",
+    "summary": [
+      "先回想去过的地方：给酒店、出租车、机场、免税店打电话。别人捡到的护照常会交给警察。",
+      "向警察报案（拨打<b>112</b>或去派出所），并索取<b>报案证明</b>——领事馆办证时需要。",
+      "联系<b>中国驻济州总领事馆</b>办理旅行证：<a href=\"tel:+82649008830\">+82-64-900-8830</a>，24小时值班电话 <a href=\"tel:+82647228802\">+82-64-722-8802</a>。"
+    ],
+    "sections": [
+      {
+        "h": "第一步：看看是否有人上交",
+        "body": "<ul><li><b>酒店</b>前台、<b>出租车</b>（Kakao T 行程记录）、<b>机场</b>失物招领处（+82-64-797-2521）、<b>免税店</b>服务台。</li><li>交到警察那里的护照会出现在警方失物数据库中。<a href=\"/lost\" data-lang-link>Jeju Live 实时失物查询</a>可以中文查看济州的数据，分类选择证件类。</li></ul>"
+      },
+      {
+        "h": "第二步：报警并开具证明",
+        "body": "<p>去最近的警察署或派出所，或拨打112。请求开具书面<b>遗失报案证明</b>。如有其他身份证件请一并带上，并告知住宿地址。语言不通可以拨打 <b>1330</b> 请求中文翻译。</p>"
+      },
+      {
+        "h": "第三步：联系中国驻济州总领事馆",
+        "body": "<p>总领事馆可以办理新护照或旅行证，让你顺利回国。所需材料（照片、报案证明、旧护照复印件、机票等）请先电话确认。</p><p><b>中华人民共和国驻济州总领事馆</b></p><ul><li>地址：济州市道南洞 568-1（568-1, Donam-dong, Jeju-si）</li><li>咨询电话：+82-64-900-8830 / 8840</li><li>24小时值班电话：+82-64-722-8802</li><li>邮箱：jeju@csm.mfa.gov.cn</li></ul>"
+      },
+      {
+        "h": "回国后护照又找到了",
+        "body": "<p>挂失后的护照一般会作废，但你可能仍想拿回来（签证、出入境章等）。Jeju Live 代领可以去警察署或相关场所取回并寄给你，可通过微信沟通。</p>"
+      }
+    ],
+    "faq": [
+      { "q": "没有护照能坐飞机回国吗？", "a": "需要领事馆签发的旅行证。确认护照丢失后请尽快联系总领事馆。" },
+      { "q": "挂失后还要继续找护照吗？", "a": "要。护照含有个人信息，被捡到后会交给警察，可以在警方数据库中查询。" },
+      { "q": "领事馆为什么要报案证明？", "a": "证明护照遗失已在韩国报案。报警时请向警察索取书面证明。" }
+    ]
+  }
+}

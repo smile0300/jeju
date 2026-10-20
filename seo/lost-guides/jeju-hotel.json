@@ -1,0 +1,68 @@
+{
+  "slug": "jeju-hotel",
+  "order": 5,
+  "verified": "2026-10",
+  "_notes": "호텔별 보관기간·배송 정책은 제각각 → 일반 절차만. 대리수령 모달의 호텔 필드(호텔명·예약자 영문명·객실번호·예약번호)와 맞춤.",
+  "sources": [
+    { "label": "Police Minwon24 (formerly LOST112)", "url": "https://minwon24.police.go.kr" },
+    { "label": "Korea Tourism Organization — 1330 Travel Helpline", "url": "https://english.visitkorea.or.kr" }
+  ],
+  "en": {
+    "title": "Left Something at a Jeju Hotel After Check-out? How to Get It Back",
+    "desc": "Forgot something in your Jeju hotel room? How to contact the hotel, what details to give, and how to get the item sent to you after you've left Korea.",
+    "h1": "Left Something at a Jeju Hotel",
+    "summary": [
+      "Contact the hotel <b>front desk</b> directly — by phone, email, or the booking app's message function. Give your name, room number and dates.",
+      "Hotels keep forgotten items for a limited period set by each hotel, so get in touch quickly.",
+      "Most hotels won't ship abroad themselves, or charge express rates. Jeju Live can collect it from the hotel and send it to you."
+    ],
+    "sections": [
+      {
+        "h": "What to tell the hotel",
+        "body": "<ul><li><b>Name on the booking</b> (in English, as on your passport)</li><li><b>Room number</b> and check-in / check-out dates</li><li><b>Booking number</b> and the site you booked on (Trip.com, Agoda, Booking.com, etc.)</li><li><b>Where you left it</b> — safe, wardrobe, bathroom, under the bed — and what it looks like</li></ul><p>Housekeeping logs items found during cleaning, so the room number and check-out date are usually enough to find it.</p>"
+      },
+      {
+        "h": "If the hotel doesn't reply",
+        "body": "<ul><li>Message through your booking platform — the platform can contact the hotel for you.</li><li>Call <b>1330</b>, the free 24-hour travel helpline, which can interpret a call to the hotel in English, Chinese or Japanese.</li><li>If you suspect theft rather than loss, report it to the police.</li></ul>"
+      },
+      {
+        "h": "Getting it back after you've left",
+        "body": "<p>Options, in order of cost:</p><ol><li><b>Collect it on a future trip</b> — ask the hotel how long they'll keep it.</li><li><b>Jeju Live proxy pickup</b> — we collect it from the hotel with your authorization and ship it to you. The hotel will usually ask for the booking name and room number, and sometimes a copy of your passport.</li><li><b>Hotel ships it</b> — some hotels will, usually by express courier at your cost.</li></ol>"
+      }
+    ],
+    "faq": [
+      { "q": "How long do Jeju hotels keep forgotten items?", "a": "Each hotel sets its own period. Contact them within a few days to be safe." },
+      { "q": "Why does the proxy pickup ask for my passport?", "a": "Hotels and police stations need to confirm the item is released to the owner's authorized representative. The copy is used only for the pickup and deleted afterwards." },
+      { "q": "I left something in the room safe.", "a": "Tell the hotel immediately. Safes are checked at check-out cleaning, and the contents are usually kept by the front office." }
+    ]
+  },
+  "zh": {
+    "title": "济州酒店退房后落了东西？怎么拿回来",
+    "desc": "在济州酒店房间里落了东西？如何联系酒店、需要提供哪些信息，以及回国后怎么把东西寄回来。",
+    "h1": "济州酒店遗失物品",
+    "summary": [
+      "直接联系酒店<b>前台</b>——电话、邮件或预订 App 的消息功能都可以。提供姓名、房号和入住日期。",
+      "各酒店保管遗留物品的期限不同，请尽快联系。",
+      "大多数酒店不提供国际寄送，或按国际快递收费。Jeju Live 可以替你去酒店取回再寄给你。"
+    ],
+    "sections": [
+      {
+        "h": "联系酒店时要说明",
+        "body": "<ul><li><b>预订人姓名</b>（与护照一致的拼音）</li><li><b>房号</b>和入住、退房日期</li><li><b>订单号</b>和预订平台（携程、Agoda、Booking.com 等）</li><li><b>落在哪里</b>——保险箱、衣柜、卫生间、床底——以及物品特征</li></ul><p>客房清洁时发现的物品会登记，所以一般有房号和退房日期就能找到。</p>"
+      },
+      {
+        "h": "酒店不回复怎么办",
+        "body": "<ul><li>通过预订平台发消息，平台客服可以代你联系酒店。</li><li>拨打 <b>1330</b> 免费24小时旅游热线，可以提供中文翻译帮你给酒店打电话。</li><li>如果怀疑是被偷而不是遗失，请报警。</li></ul>"
+      },
+      {
+        "h": "回国后怎么拿回来",
+        "body": "<p>按费用从低到高：</p><ol><li><b>下次来济州时领取</b>——问清酒店能保管多久。</li><li><b>Jeju Live 代领</b>——凭你的委托去酒店取回并寄给你。酒店通常需要预订人姓名和房号，有时还需要护照复印件。可通过微信沟通。</li><li><b>酒店代寄</b>——部分酒店可以，一般走国际快递，费用自理。</li></ol>"
+      }
+    ],
+    "faq": [
+      { "q": "济州酒店会保管遗留物品多久？", "a": "各酒店规定不同，建议几天内联系。" },
+      { "q": "代领为什么需要护照照片？", "a": "酒店和派出所需要确认物品交给的是失主委托的人。照片只用于领取，完成后删除。" },
+      { "q": "东西落在房间保险箱里了。", "a": "马上告诉酒店。退房清洁时会检查保险箱，里面的物品通常由前台保管。" }
+    ]
+  }
+}

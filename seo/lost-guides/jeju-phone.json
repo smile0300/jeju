@@ -1,0 +1,79 @@
+{
+  "slug": "jeju-phone",
+  "order": 9,
+  "verified": "2026-10",
+  "_notes": "위치찾기 서비스 URL은 각 제조사 공식(icloud.com/find, cloud.huawei.com, i.mi.com, google.com/android/find).",
+  "sources": [
+    { "label": "Apple — Find My (iCloud)", "url": "https://www.icloud.com/find" },
+    { "label": "Huawei — Find Device", "url": "https://cloud.huawei.com" },
+    { "label": "Xiaomi — Find Device", "url": "https://i.mi.com" },
+    { "label": "Google — Find My Device", "url": "https://www.google.com/android/find" },
+    { "label": "Police Minwon24 (formerly LOST112)", "url": "https://minwon24.police.go.kr" }
+  ],
+  "en": {
+    "title": "Lost Your Phone in Jeju? Track It, Lock It and Get It Back",
+    "desc": "Lost your iPhone or Android phone in Jeju? Locate and lock it with Find My, check the taxi or venue, search police lost property, and get it sent home after you leave.",
+    "h1": "Lost Phone in Jeju",
+    "summary": [
+      "From another device, open your phone's <b>find-my-device</b> service, check the location and turn on <b>Lost Mode</b> with a contact number on the lock screen.",
+      "Phones are the most commonly handed-in item. Check the taxi (Kakao T ride history), the venue, and the police lost-property database.",
+      "Found it but already home? Jeju Live can collect it in Jeju and ship it to you."
+    ],
+    "sections": [
+      {
+        "h": "1. Locate and lock it",
+        "body": "<ul><li><b>iPhone:</b> icloud.com/find or the Find My app on another Apple device.</li><li><b>Huawei:</b> cloud.huawei.com → Find Device.</li><li><b>Xiaomi:</b> i.mi.com → Find Device.</li><li><b>Other Android:</b> google.com/android/find.</li></ul><p>Turn on Lost Mode and show a contact number (a travel companion's phone or WeChat ID). Don't erase the phone yet — you'll lose the ability to track it.</p>"
+      },
+      {
+        "h": "2. Check where you last had it",
+        "body": "<ul><li><b>Taxi:</b> Kakao T ride history → contact the driver. See our <a href=\"/en/lost/jeju-taxi\">Jeju taxi guide</a>.</li><li><b>Restaurant, café, attraction:</b> call the venue — the number is on Kakao Map or Naver Map.</li><li><b>Airport, bus, hotel:</b> see the related guides below.</li><li>If the map shows it at a police box, go there or call 1330 for help talking to the police.</li></ul>"
+      },
+      {
+        "h": "3. Search police lost property",
+        "body": "<p>Phones handed in to the police are registered with the brand and colour, often with a photo. <a href=\"/lost\" data-lang-link>Jeju Live's live search</a> shows Jeju police lost property in English and Chinese — choose the phone category. Check daily for the first week.</p>"
+      },
+      {
+        "h": "Watch out for scams",
+        "body": "<p>Never send money in advance to someone who messages you claiming to have your phone, and never share your Apple ID or Huawei/Xiaomi account password or verification codes. Real finders and the police don't ask for these.</p>"
+      }
+    ],
+    "faq": [
+      { "q": "My phone is off. Can I still find it?", "a": "The last known location is often still shown. Keep Lost Mode on — it activates when the phone reconnects." },
+      { "q": "The police have my phone but I've left Korea.", "a": "Submit a Jeju Live proxy pickup request. We collect it from the police station with your authorization and ship it to you. Note that some carriers restrict shipping phones with lithium batteries." },
+      { "q": "Should I block my SIM?", "a": "If you use mobile payments or banking on the phone, contact your carrier to suspend the SIM, but keep Lost Mode on so you can still track the device." }
+    ]
+  },
+  "zh": {
+    "title": "在济州丢了手机？定位、锁定和找回方法",
+    "desc": "在济州岛丢了 iPhone、华为、小米手机？用查找设备定位并锁定、联系出租车或店家、查询警方失物，回国后如何寄回。",
+    "h1": "在济州丢失手机",
+    "summary": [
+      "用另一台设备打开<b>查找设备</b>服务，查看位置并开启<b>丢失模式</b>，在锁屏上显示联系方式。",
+      "手机是最常被上交的物品。查一下出租车（Kakao T 行程记录）、去过的店，以及警方失物数据库。",
+      "找到了但人已经回国？Jeju Live 可以在济州替你取回再寄给你。"
+    ],
+    "sections": [
+      {
+        "h": "第一步：定位并锁定",
+        "body": "<ul><li><b>iPhone：</b>icloud.com/find，或在其他苹果设备上用「查找」App。</li><li><b>华为：</b>cloud.huawei.com → 查找设备。</li><li><b>小米：</b>i.mi.com → 查找设备。</li><li><b>其他安卓：</b>google.com/android/find（国内网络可能无法访问）。</li></ul><p>开启丢失模式并显示联系方式（同行人手机号或微信号）。先不要抹除数据，否则就无法继续定位。</p>"
+      },
+      {
+        "h": "第二步：回到最后用手机的地方找",
+        "body": "<ul><li><b>出租车：</b>Kakao T 行程记录 → 联系司机。详见<a href=\"/zh/lost/jeju-taxi\">济州出租车指南</a>。</li><li><b>餐厅、咖啡店、景点：</b>给店家打电话，电话可以在 Kakao 地图或 Naver 地图上查到。</li><li><b>机场、公交、酒店：</b>见下方相关指南。</li><li>如果定位显示在派出所，可以直接去，或拨打1330请求中文翻译帮你和警察沟通。</li></ul>"
+      },
+      {
+        "h": "第三步：查询警方失物",
+        "body": "<p>交到警察那里的手机会登记品牌和颜色，很多还有照片。<a href=\"/lost\" data-lang-link>Jeju Live 实时失物查询</a>用中文显示济州警方失物数据，分类选择手机。头一周每天查一次。</p>"
+      },
+      {
+        "h": "小心诈骗",
+        "body": "<p>有人发消息说捡到你的手机、要求先转账的，不要理会；也绝不要透露 Apple ID、华为或小米账号密码和验证码。真正的拾得者和警察都不会要这些。</p>"
+      }
+    ],
+    "faq": [
+      { "q": "手机关机了还能找到吗？", "a": "通常还能看到最后的位置。保持丢失模式开启，手机重新联网时就会生效。" },
+      { "q": "手机在警察那里，但我已经回国了。", "a": "提交 Jeju Live 代领申请，我们凭你的委托去警察署取回并寄给你，可通过微信沟通。注意部分快递对含锂电池的手机寄送有限制。" },
+      { "q": "要不要停机？", "a": "如果手机上有移动支付或网银，可以联系运营商暂停 SIM 卡，但请保持丢失模式开启，以便继续定位设备。" }
+    ]
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "slug": "jeju-airport",
+  "order": 1,
+  "verified": "2026-10",
+  "_notes": "운영시간·정확한 보관일수는 공식 출처 미확인 → 본문에서 단정하지 말 것. 전화 064-797-2521은 제주항공 공식 안내와 교차 확인. 위치(1층 5번 게이트 부근)는 민간 출처 2곳 일치.",
+  "sources": [
+    { "label": "Jeju Air — Cabin lost items", "url": "https://www.jejuair.net/ko/customerService/cabinLost/cabinLost.do" },
+    { "label": "DHL Express × Jeju International Airport (2024)", "url": "https://www.dhl.com/kr-en/home/press/press-archive/2024/dhl-express-partners-with-jeju-international-airport-to-provide-international-delivery-of-lost-items.html" },
+    { "label": "Police Minwon24 (formerly LOST112)", "url": "https://minwon24.police.go.kr" },
+    { "label": "Incheon Airport — Lost & found rules", "url": "https://airport.kr/ap_ko/1016/subview.do" }
+  ],
+  "en": {
+    "title": "Jeju Airport Lost and Found (CJU): Phone, Location & Overseas Delivery",
+    "desc": "Lost something at Jeju International Airport? Where the lost & found desk is, the phone number, what to do if you left it on the plane, and how to get it back after you've left Korea.",
+    "h1": "Jeju Airport Lost and Found",
+    "summary": [
+      "Left it in the terminal? Call Jeju Airport Lost & Found: <a href=\"tel:+82647972521\">+82-64-797-2521</a> (1st floor, near Gate 5).",
+      "Left it on the plane? Contact your <b>airline</b> — cabin items are held by the airline, not the airport.",
+      "Already left Korea? The airport offers paid overseas delivery by express courier, or Jeju Live can pick it up for you in Jeju."
+    ],
+    "sections": [
+      {
+        "h": "On the plane or in the terminal?",
+        "body": "<p>This decides who has your item.</p><ul><li><b>Terminal</b> (check-in, security, gate area, restrooms, baggage claim): the airport's Lost &amp; Found desk.</li><li><b>On board</b> (seat pocket, overhead bin): the airline. Each airline keeps its own records, separate from the airport.</li></ul><p>If you're not sure, call the airport desk first and give your flight number — they can tell you where to try next.</p>"
+      },
+      {
+        "h": "Jeju Airport Lost & Found desk",
+        "body": "<ul><li><b>Phone:</b> <a href=\"tel:+82647972521\">+82-64-797-2521</a> (from inside Korea: 064-797-2521)</li><li><b>Location:</b> Jeju International Airport, 1st floor, near Gate 5</li><li><b>Korea Airports Corporation call center:</b> 1661-2626</li><li><b>Opening hours:</b> not published online — call before you go.</li></ul><p>When you call, have ready: when and where you lost it, your flight number, and a clear description (brand, colour, phone lock-screen image, anything written on it).</p>"
+      },
+      {
+        "h": "What happens to unclaimed items",
+        "body": "<p>The airport holds found items for a limited time, then hands them to the police. Valuables with personal information — passports, wallets, phones — can be handed over sooner.</p><p>Once an item is with the police, it appears in the national police lost-property database (Police Minwon24, formerly LOST112). <a href=\"/lost\" data-lang-link>Jeju Live's live search</a> shows that same police data for Jeju in English and Chinese. It can take a few days after the item is handed in before it shows up online.</p><p>Under Korea's Lost Property Act the overall claim period is about six months, but the item moves between offices during that time, so contact the airport as early as possible.</p>"
+      },
+      {
+        "h": "Already left Korea?",
+        "body": "<p>You can't collect it in person, so you have three options:</p><ol><li><b>Airport overseas delivery.</b> Since April 2024, Jeju Airport has worked with DHL Express to ship lost items abroad. Confirm the item with the Lost &amp; Found desk first; the courier then quotes a price. Express rates are high for small items, and once the courier picks it up it can't be cancelled.</li><li><b>Jeju Live proxy pickup.</b> We collect the item in Jeju on your behalf and arrange delivery to you. Useful when the item is not at the airport (taxi, hotel, police station) or when you need help in Chinese or English.</li><li><b>A friend in Korea.</b> Someone else can usually collect it with a signed authorization letter and a copy of your ID — check with the desk what they require.</li></ol><p>Lithium batteries (power banks), liquids, cash and food may not be accepted for international shipping.</p>"
+      },
+      {
+        "h": "Need help in your language?",
+        "body": "<p>Call <b>1330</b> (from abroad +82-2-1330), the Korea Tourism Organization's travel helpline. It's free, open 24 hours and can interpret your call with the airport. It does not hold or ship items.</p>"
+      }
+    ],
+    "faq": [
+      { "q": "Can I search Jeju Airport lost items online?", "a": "Only after the item has been handed to the police. Items still at the airport desk are not online — call +82-64-797-2521. For items already with the police, use Jeju Live's live lost & found search and choose Jeju." },
+      { "q": "I lost my passport at Jeju Airport. What should I do?", "a": "Call the airport Lost & Found desk and report the loss to the police. If it isn't found before your flight, contact your country's embassy or consulate for an emergency travel document." },
+      { "q": "How long does Jeju Airport keep lost items?", "a": "The exact holding period at the airport isn't published. Items are held for a limited time and then transferred to the police, where the legal claim period is about six months in total. Act early." },
+      { "q": "Can Jeju Live collect my item if I've already gone home?", "a": "Yes. Use the proxy pickup request: tell us where the item is, and we collect it in Jeju and arrange delivery." }
+    ]
+  },
+  "zh": {
+    "title": "济州机场失物招领（CJU）：电话、位置及寄回国内方法",
+    "desc": "在济州国际机场丢了东西？失物招领处位置和电话、落在飞机上怎么办、回国后如何把东西寄回来，一页说清楚。",
+    "h1": "济州机场失物招领",
+    "summary": [
+      "落在航站楼里？致电济州机场失物招领处：<a href=\"tel:+82647972521\">+82-64-797-2521</a>（1楼5号门附近）。",
+      "落在飞机上？请联系<b>航空公司</b>——机舱内遗失物由航空公司保管，不归机场管。",
+      "已经回国了？机场提供付费国际快递寄送，也可以委托 Jeju Live 在济州代领。"
+    ],
+    "sections": [
+      {
+        "h": "落在飞机上，还是航站楼里？",
+        "body": "<p>这决定了东西在谁手里。</p><ul><li><b>航站楼</b>（值机柜台、安检、登机口、洗手间、行李提取处）：机场失物招领处保管。</li><li><b>飞机上</b>（座椅口袋、行李架）：航空公司保管，与机场系统分开。</li></ul><p>不确定的话，先打机场电话并报上航班号，工作人员会告诉你下一步该找谁。</p>"
+      },
+      {
+        "h": "济州机场失物招领处",
+        "body": "<ul><li><b>电话：</b><a href=\"tel:+82647972521\">+82-64-797-2521</a>（韩国境内拨打：064-797-2521）</li><li><b>位置：</b>济州国际机场 1楼 5号门附近</li><li><b>韩国机场公社客服：</b>1661-2626</li><li><b>开放时间：</b>官网未公布，前往前请先电话确认。</li></ul><p>打电话前请准备好：丢失的时间和地点、航班号、物品特征（品牌、颜色、手机锁屏图片、上面写的字等）。</p>"
+      },
+      {
+        "h": "无人认领的物品会去哪里",
+        "body": "<p>机场会保管一段时间，之后移交警察。护照、钱包、手机等含个人信息的贵重物品可能会更早移交。</p><p>移交警察后，物品会出现在韩国警察厅失物数据库（警察民愿24，原 LOST112）中。<a href=\"/lost\" data-lang-link>Jeju Live 实时失物查询</a>用中文显示同一份济州警方数据。物品上交后通常要过几天才能在网上查到。</p><p>按照韩国《遗失物法》，整体认领期限约为6个月，但期间物品会在不同机构之间流转，越早联系越好。</p>"
+      },
+      {
+        "h": "已经回国了怎么办？",
+        "body": "<p>无法本人领取时，有三种办法：</p><ol><li><b>机场国际快递。</b>自2024年4月起，济州机场与 DHL 合作把遗失物寄往海外。需先与失物招领处确认物品，再由快递公司报价。小件物品的国际快递费用较高，取件后不能取消。</li><li><b>Jeju Live 代领。</b>我们在济州替你领取并安排寄送。适合物品不在机场（出租车、酒店、派出所）或需要中文沟通的情况，可通过微信联系。</li><li><b>拜托在韩国的朋友。</b>一般需要你亲笔签名的委托书和证件复印件，具体要求请向失物招领处确认。</li></ol><p>锂电池（充电宝）、液体、现金、食品可能无法国际寄送。</p>"
+      },
+      {
+        "h": "需要中文帮助？",
+        "body": "<p>拨打 <b>1330</b>（从海外拨打 +82-2-1330），韩国观光公社旅游咨询热线，免费、24小时，可提供中文三方通话翻译，帮你和机场沟通。热线本身不保管、不寄送物品。</p>"
+      }
+    ],
+    "faq": [
+      { "q": "可以在网上查济州机场的失物吗？", "a": "物品移交警察后才能在网上查到。还在机场失物招领处的物品不会公开，请直接致电 +82-64-797-2521。已移交警察的物品，可以在 Jeju Live 实时失物查询中选择济州地区查看。" },
+      { "q": "护照丢在济州机场了怎么办？", "a": "先联系机场失物招领处，同时向警察报案。如果登机前仍未找到，请联系中华人民共和国驻济州总领事馆办理旅行证。" },
+      { "q": "济州机场会保管失物多久？", "a": "机场的具体保管天数未公开。物品保管一段时间后会移交警察，法定认领期限总计约6个月。请尽早处理。" },
+      { "q": "人已经回国，Jeju Live 能帮我领吗？", "a": "可以。提交代领申请，告诉我们物品在哪里，我们在济州替你领取并安排寄送。" }
+    ]
+  }
+}

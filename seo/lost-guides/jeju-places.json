@@ -1,0 +1,75 @@
+{
+  "slug": "jeju-places",
+  "order": 10,
+  "verified": "2026-10",
+  "_notes": "성산포항 종합여객터미널 064-782-5671은 비공식 출처 2곳 일치(여행사이트·블로그) — 분실물 담당 여부 미확인이라 '터미널 문의'로만 표기. 관광경찰 제주 운영 미확인 → 미기재.",
+  "sources": [
+    { "label": "Jeju 120 Mandeok Call Center (Seoul Shinmun, 2025)", "url": "https://m.seoul.co.kr/news/2025/07/01/20250701500239" },
+    { "label": "Udo ferry times & Seongsan Port terminal", "url": "https://www.trvlogue.com/ko/udo-island-ferry-times" },
+    { "label": "Police Minwon24 (formerly LOST112)", "url": "https://minwon24.police.go.kr" }
+  ],
+  "en": {
+    "title": "Lost Something at a Jeju Restaurant, Café, Beach or Attraction? What to Do",
+    "desc": "Left something at a restaurant, café, beach, attraction or on the Udo ferry in Jeju? How to contact the place in Korean, when it goes to the police, and how to get it back after you leave.",
+    "h1": "Lost Something at a Jeju Restaurant, Café or Attraction",
+    "summary": [
+      "Call the place directly. The phone number is on <b>Kakao Map</b> or <b>Naver Map</b>. If you don't speak Korean, call <b>1330</b> for free interpretation.",
+      "Small businesses keep items for a short time and may hand valuables to the nearest police box, after which they show up in the police lost-property database.",
+      "Not in Jeju anymore? Jeju Live can contact the place in Korean, collect the item and send it to you."
+    ],
+    "sections": [
+      {
+        "h": "Restaurants and cafés",
+        "body": "<p>Search the place on Kakao Map or Naver Map and call. Give the date, time, table or seat, and a description. Many small places can also be reached by Instagram or KakaoTalk channel. If you paid by card, your card statement shows the exact business name.</p>"
+      },
+      {
+        "h": "Attractions, beaches and parks",
+        "body": "<p>Paid attractions (museums, theme parks, observatories) usually have a ticket office or information center that keeps lost items. At beaches and public parks, items are often handed to a lifeguard station, the local community office or the nearest police box. If you don't know who to call, Jeju's <b>120 Mandeok Call Center</b> (<a href=\"tel:+8264120\">064-120</a>, 07:00–22:00) can point you to the right office.</p>"
+      },
+      {
+        "h": "Udo ferry",
+        "body": "<p>For items left on the Udo ferry or at the port, contact the Seongsan Port passenger terminal (064-782-5671) and give the sailing time and direction.</p>"
+      },
+      {
+        "h": "Check the police database",
+        "body": "<p>Phones, wallets, IDs and cash are often handed to the police. <a href=\"/lost\" data-lang-link>Jeju Live's live search</a> shows Jeju police lost property in English and Chinese; search a few days after the loss.</p>"
+      }
+    ],
+    "faq": [
+      { "q": "The place doesn't answer the phone.", "a": "Small shops close on fixed days. Try again during opening hours, message them via Kakao Map or Instagram, or ask Jeju Live to contact them for you." },
+      { "q": "Can Jeju Live collect from a restaurant or café?", "a": "Yes. Submit a proxy pickup request with the place name and what you left. We contact the place in Korean, collect it and arrange delivery." }
+    ]
+  },
+  "zh": {
+    "title": "在济州餐厅、咖啡店、海边或景点落了东西怎么办",
+    "desc": "在济州的餐厅、咖啡店、海水浴场、景点或牛岛渡轮上落了东西？如何用韩语联系店家、什么时候会交给警察、回国后怎么取回。",
+    "h1": "在济州餐厅、咖啡店、景点遗失物品",
+    "summary": [
+      "直接给店家打电话，电话可以在 <b>Kakao 地图</b>或 <b>Naver 地图</b>上查到。不会韩语可以拨打 <b>1330</b> 获得免费中文翻译。",
+      "小店保管时间较短，贵重物品可能会交给附近派出所，之后可以在警方失物数据库中查到。",
+      "已经离开济州？Jeju Live 可以用韩语联系店家，取回后寄给你。"
+    ],
+    "sections": [
+      {
+        "h": "餐厅和咖啡店",
+        "body": "<p>在 Kakao 地图或 Naver 地图上搜索店名并打电话，说明日期、时间、座位和物品特征。很多小店也可以通过 Instagram 或 KakaoTalk 频道联系。刷卡付款的，信用卡账单上会显示准确的商户名称。</p>"
+      },
+      {
+        "h": "景点、海水浴场和公园",
+        "body": "<p>收费景点（博物馆、主题乐园、观景台）一般由售票处或游客中心保管遗失物。海水浴场和公园的物品常被交到救生站、当地社区办公室或附近派出所。不知道该找谁时，拨打济州<b>120万德咨询中心</b>（<a href=\"tel:+8264120\">064-120</a>，07:00–22:00），他们会告诉你该联系哪个部门。</p>"
+      },
+      {
+        "h": "牛岛渡轮",
+        "body": "<p>落在牛岛渡轮或码头的物品，请联系城山港综合客运码头（064-782-5671），说明乘船时间和方向。</p>"
+      },
+      {
+        "h": "查询警方数据库",
+        "body": "<p>手机、钱包、证件、现金常会交给警察。<a href=\"/lost\" data-lang-link>Jeju Live 实时失物查询</a>用中文显示济州警方失物数据，丢失几天后去查一下。</p>"
+      }
+    ],
+    "faq": [
+      { "q": "店家不接电话怎么办？", "a": "小店有固定休息日。营业时间再打，或通过 Kakao 地图、Instagram 留言，也可以请 Jeju Live 代为联系。" },
+      { "q": "Jeju Live 能去餐厅、咖啡店代领吗？", "a": "可以。提交代领申请，写明店名和落下的物品。我们用韩语联系店家，取回后安排寄送，可通过微信沟通。" }
+    ]
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "slug": "jeju-rental-car",
+  "order": 6,
+  "verified": "2026-10",
+  "_notes": "제주공항 렌터카하우스는 2016년 폐쇄, 이후 업체 차고지 반납+셔틀(경향 2016). 업체 번호는 계약서·바우처로 안내(DiscoverCars). zh는 중국 면허 국내 운전 불가 고려해 包车(대절) 중심.",
+  "sources": [
+    { "label": "Kyunghyang Shinmun — Jeju Airport rental car house closed (2016)", "url": "https://www.khan.co.kr/article/201606211201001" },
+    { "label": "DiscoverCars — I left something in the car", "url": "https://www.discovercars.com/ko/help/articles/after-your-rental/issues-after-rental/i-left-something-in-the-car-how-to-get-it-back" }
+  ],
+  "en": {
+    "title": "Left Something in a Jeju Rental Car or Hired Car? How to Get It Back",
+    "desc": "Returned your Jeju rental car and forgot something inside? Who to call, what to say, and how to get it shipped after you've flown home.",
+    "h1": "Left Something in a Jeju Rental Car",
+    "summary": [
+      "Call the <b>rental company's branch where you returned the car</b> — the number is on your rental agreement or booking voucher. Phone is faster than email.",
+      "Jeju rental cars are returned at each company's own lot near the airport, so the item is with that company, not the airport.",
+      "Booked through a site (Trip.com, Klook, DiscoverCars)? Its customer service can contact the company for you."
+    ],
+    "sections": [
+      {
+        "h": "What to tell the rental company",
+        "body": "<ul><li>Your <b>name and booking number</b></li><li>The <b>car's plate number</b> and model, and when you returned it</li><li><b>Where in the car</b> — glove box, under the seats, door pocket, trunk — and what the item looks like</li></ul><p>Call before the car is rented out again. Jeju cars turn around quickly in peak season.</p>"
+      },
+      {
+        "h": "Private car with a driver (charter)",
+        "body": "<p>If you hired a car with a driver, contact the driver or the agency that arranged it. Keep the driver's phone number or chat until the trip is over.</p>"
+      },
+      {
+        "h": "Getting it sent to you",
+        "body": "<p>Rental companies generally treat forgotten items as a courtesy and expect you to pay for shipping. If they won't ship abroad, Jeju Live proxy pickup can collect it from the company's lot and send it to you.</p>"
+      }
+    ],
+    "faq": [
+      { "q": "Is there a central rental car lost & found at Jeju Airport?", "a": "No. Each company handles returns at its own lot, so contact the company you rented from." },
+      { "q": "The company says they found it. What next?", "a": "Ask them to hold it, then either collect it, ask them to ship it, or submit a Jeju Live proxy pickup request." }
+    ]
+  },
+  "zh": {
+    "title": "济州租车、包车落了东西？怎么找回",
+    "desc": "在济州包车或租车把东西落在车上？该联系谁、怎么说，以及回国后如何寄回。",
+    "h1": "济州包车、租车遗失物品",
+    "summary": [
+      "<b>包车</b>：直接联系司机或安排包车的旅行社，行程结束前请保留司机电话或微信。",
+      "<b>租车</b>：联系还车的租车公司门店，电话在租车合同或预订确认单上。",
+      "通过携程、Klook 等平台预订的，可以请平台客服帮忙联系。"
+    ],
+    "sections": [
+      {
+        "h": "包车落了东西",
+        "body": "<p>包车司机一般能很快确认车内物品。请告诉司机或旅行社：用车日期、上下车地点、物品放在车里哪个位置。</p><p>司机下一单可能马上就要出发，越早联系越好。</p>"
+      },
+      {
+        "h": "租车落了东西",
+        "body": "<ul><li>提供<b>姓名和订单号</b></li><li><b>车牌号</b>、车型和还车时间</li><li><b>放在车里哪里</b>——手套箱、座椅下、车门储物格、后备厢——以及物品特征</li></ul><p>济州租车是在各公司自己的停车场还车，所以东西在租车公司，不在机场。</p>"
+      },
+      {
+        "h": "怎么寄回来",
+        "body": "<p>租车公司和包车司机通常把遗留物品当作额外帮忙，寄送费用需要自己承担。对方不方便寄往国外时，Jeju Live 代领可以去取回并寄给你，可通过微信沟通。</p>"
+      }
+    ],
+    "faq": [
+      { "q": "济州机场有统一的租车失物招领处吗？", "a": "没有，各租车公司在自己的停车场处理还车，请联系你租车的公司。" },
+      { "q": "对方说找到了，接下来怎么办？", "a": "请对方先保管，然后选择自己领取、请对方寄送，或提交 Jeju Live 代领申请。" }
+    ]
+  }
+}

@@ -42,11 +42,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <!-- ═══ SEO: Canonical URL (JS로 페이지 전환 시 동적 업데이트) ═══ -->
     <link rel="canonical" href="https://jeju-live.com/" id="canonical-tag">
 
-    <!-- ═══ SEO: hreflang (다국어 SEO — 구글에게 언어별 대상 독자 알림) ═══ -->
-    <link rel="alternate" hreflang="en"    href="https://jeju-live.com/">
-    <link rel="alternate" hreflang="zh-CN" href="https://jeju-live.com/">
-    <link rel="alternate" hreflang="ko"    href="https://jeju-live.com/">
-    <link rel="alternate" hreflang="x-default" href="https://jeju-live.com/">
+    <!-- ═══ SEO: hreflang 없음 — SPA는 한 URL에서 JS로 언어를 바꾸므로 언어별 URL이 없음.
+         언어별 신호는 seo/build-seo.js가 만드는 /en/·/zh/ 가이드 페이지가 담당 ═══ -->
 
     <!-- ═══ SEO: Open Graph (SNS 공유 — WeChat, Line, 카카오 등) ═══ -->
     <meta property="og:type"               content="website">

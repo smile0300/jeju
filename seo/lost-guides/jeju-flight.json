@@ -1,0 +1,69 @@
+{
+  "slug": "jeju-flight",
+  "order": 7,
+  "verified": "2026-10",
+  "_notes": "아시아나: 기내 유실물은 도착 공항으로 인계, 제주공항 064-797-2521 명시(아시아나 공식). 제주항공 기내 유실물 페이지 공식. 대한항공 제주 전용 번호 미확인 → 고객센터 안내. 중국 항공사 번호 미기재.",
+  "sources": [
+    { "label": "Asiana Airlines — In-flight lost and found", "url": "https://flyasiana.com/C/US/EN/travel/cabin/lost-lookup/list" },
+    { "label": "Jeju Air — Cabin lost items", "url": "https://www.jejuair.net/ko/customerService/cabinLost/cabinLost.do" },
+    { "label": "Incheon Airport — Lost or damaged baggage", "url": "https://airport.kr/ap_en/1451/subview.do" }
+  ],
+  "en": {
+    "title": "Left Something on a Flight to or from Jeju? Airline Lost and Found Guide",
+    "desc": "Left your phone, passport or bag on the plane on a Jeju flight? Who holds items left on board, how to contact Jeju Air, Asiana, Korean Air and other airlines, and what details to give.",
+    "h1": "Left Something on a Jeju Flight",
+    "summary": [
+      "Items left <b>on board</b> are the airline's responsibility. Report to the airline as soon as possible with your flight number, date and seat.",
+      "Many airlines hand on-board items to the <b>arrival airport</b>. For flights that landed in Jeju, also call Jeju Airport Lost & Found: <a href=\"tel:+82647972521\">+82-64-797-2521</a>.",
+      "Airlines' reporting deadlines are short — often between 7 and 30 days."
+    ],
+    "sections": [
+      {
+        "h": "What to have ready",
+        "body": "<ul><li><b>Airline, flight number and date</b></li><li><b>Seat number</b> (on your boarding pass or in the airline app)</li><li><b>Where you left it</b> — seat pocket, overhead bin, under the seat</li><li><b>Description</b> — brand, colour, phone lock-screen, anything written on it</li></ul>"
+      },
+      {
+        "h": "By airline",
+        "body": "<ul><li><b>Jeju Air</b> — has an online cabin lost-item service on its website (Customer service → cabin lost items).</li><li><b>Asiana Airlines</b> — items left on board are handed to the arrival airport; Asiana lists Jeju Airport Lost &amp; Found (064-797-2521) for Jeju. It also has an online in-flight lost item lookup.</li><li><b>Korean Air</b> — contact Korean Air customer service with your flight details; for Jeju arrivals also check with Jeju Airport Lost &amp; Found.</li><li><b>Chinese and other foreign airlines</b> — contact the airline's customer service or its counter at Jeju Airport. The airport desk can tell you which ground handler serves the airline.</li></ul>"
+      },
+      {
+        "h": "Already home?",
+        "body": "<p>If the airline or the airport has your item in Jeju but you've left Korea, you can ask about the airport's overseas delivery (via an express courier) or use Jeju Live proxy pickup, which can collect it in Jeju and send it on.</p>"
+      }
+    ],
+    "faq": [
+      { "q": "Is it the airline or the airport that has my item?", "a": "On board: the airline (often passed to the arrival airport). In the terminal: the airport. If unsure, call Jeju Airport Lost & Found first with your flight number." },
+      { "q": "What about checked baggage that didn't arrive?", "a": "That's delayed or lost baggage, not lost property. Report it at the airline's baggage counter in the arrivals hall before you leave the airport." },
+      { "q": "Can Jeju Live collect items from an airline?", "a": "Yes, where the airline allows an authorized representative. Submit a proxy pickup request with your flight details." }
+    ]
+  },
+  "zh": {
+    "title": "济州航班上落了东西？航空公司失物招领指南",
+    "desc": "乘坐往返济州的航班把手机、护照或包落在飞机上？机上遗失物归谁管、如何联系济州航空、韩亚航空、大韩航空及中国航空公司，需要提供哪些信息。",
+    "h1": "济州航班上遗失物品",
+    "summary": [
+      "落在<b>飞机上</b>的东西由航空公司负责。请尽快联系航空公司，提供航班号、日期和座位号。",
+      "很多航空公司会把机上遗失物交给<b>到达机场</b>。降落在济州的航班，也请致电济州机场失物招领处：<a href=\"tel:+82647972521\">+82-64-797-2521</a>。",
+      "航空公司受理期限较短，通常在7到30天之间。"
+    ],
+    "sections": [
+      {
+        "h": "需要准备的信息",
+        "body": "<ul><li><b>航空公司、航班号和日期</b></li><li><b>座位号</b>（登机牌或航空公司 App 里可以查到）</li><li><b>落在哪里</b>——座椅口袋、行李架、座位下面</li><li><b>物品特征</b>——品牌、颜色、手机锁屏图片、上面写的字</li></ul>"
+      },
+      {
+        "h": "各航空公司",
+        "body": "<ul><li><b>济州航空</b>——官网有机上遗失物在线服务（客户服务 → 机内遗失物）。</li><li><b>韩亚航空</b>——机上遗失物会移交到达机场；韩亚官网列明济州的联系方式为济州机场失物招领处（064-797-2521），也提供机上遗失物在线查询。</li><li><b>大韩航空</b>——带上航班信息联系大韩航空客服；到达济州的航班也请向济州机场失物招领处确认。</li><li><b>中国及其他外国航空公司</b>——联系该航空公司客服或其在济州机场的柜台。机场失物招领处可以告诉你由哪家地勤公司负责。</li></ul>"
+      },
+      {
+        "h": "已经回国了？",
+        "body": "<p>如果东西在济州的航空公司或机场，但你已经离开韩国，可以咨询机场的国际快递寄送服务，或者使用 Jeju Live 代领：我们在济州取回后寄给你，可通过微信沟通。</p>"
+      }
+    ],
+    "faq": [
+      { "q": "东西在航空公司还是机场？", "a": "飞机上：航空公司（常会转交到达机场）。航站楼里：机场。不确定的话，先带着航班号打济州机场失物招领处电话。" },
+      { "q": "托运行李没到怎么办？", "a": "这属于行李延误或丢失，不是遗失物。离开机场前到到达大厅的航空公司行李柜台登记。" },
+      { "q": "Jeju Live 能去航空公司代领吗？", "a": "航空公司允许委托代领的情况下可以。请提交代领申请并附上航班信息。" }
+    ]
+  }
+}
