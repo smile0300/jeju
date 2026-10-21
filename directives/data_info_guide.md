@@ -122,3 +122,18 @@
   - 수식 열(순수익 등)은 수정 불가. 새 행은 '일자'가 채워진 마지막 행 바로 아래에 추가하며, 그 행의 서식·수식(R1C1)을 복사.
   - 행 번호로 수정하므로 저장 직전 해당 행 표시값이 화면에서 본 값과 다르면 거부(정렬·삽입으로 행이 밀린 경우 보호).
   - 시트 열 구성을 바꿔도 화면은 자동으로 따라가지만, '일자'·'항목'·'순수익'·'비고' 헤더 이름은 화면 배치에 사용됨.
+
+## 14. 구글 시트 연동 정비 (2026-10-21)
+- **공용 전달 모듈**: `lib/gas.js` — 경로별 허용 type, 본문 크기 제한, `GAS_SHARED_SECRET` 주입, GET 엣지 캐시.
+  - `/api/lost-report` (lost_report·proxy_pickup, 15MB) · `/api/feature-request` (feature·customer_service·cctv_apply·reservation, 20KB) · `/api/reservation` (신규) · `/api/planner` (carpool_*, 4000B).
+  - `/api/success-list` 90초, `/api/reward-list` 300초 캐시 (Cache API는 데이터센터별 → 시트 수정 후 최대 그 시간만큼 예전 값).
+- **라우팅 함정**: `functions/api/xxx.js` 전용 파일이 `[[path]].js` catch-all보다 우선한다. catch-all에 있던 success/reward 1시간 캐시·lost-report·image-proxy 분기는 한 번도 실행되지 않던 죽은 코드였음 → 삭제.
+- **비밀값**: Pages 환경변수 `GAS_SHARED_SECRET` = GAS 스크립트 속성 `GAS_SHARED_SECRET`. GAS 속성이 비어 있으면 검사 생략(배포 순서 맞추는 동안). 관리자 type(admin_update 등)은 기존 `ADMIN_LOOKUP_SECRET`으로 따로 인증.
+- **개인정보**: 진행상황 공개 목록의 WeChatId는 GAS에서부터 가림(GAS 주소 직접 호출 대비). 여권·호텔 예약 사진은 링크 공유를 켜지 않음(관리자는 구글 로그인 상태로 링크 열람). 기존 파일의 공유 설정은 자동으로 바뀌지 않음.
+- **사진(중국 접근성)**: image-proxy가 lh3.googleusercontent.com 리디렉트 대신 GAS `doGet?action=image`(링크 공유된 파일만)로 받아 jeju-live.com 주소로 30일 캐시. 실패 시 lh3 리디렉트로 폴백.
+- **쓰기 정합성**: LostReport·FeatureRequest·CustomerService·VIP는 잠금 안에서 'A열 기준 빈 행 찾기 + 한 줄 setValues'(동시 접수 덮어쓰기 방지). 대리수령은 잠금 안에서 CaseId 발급(A열만 읽음)+자리 행 추가만 하고 사진·번역은 잠금 밖에서 처리 후 그 행을 채움.
+- **열 위치 → 헤더 이름**: LostReport 번역 칸은 헤더 `Desc_ko`/`Desc_src`가 있으면 그 열, 없으면 예전 V/W(22/23). 시트 V1·W1에 이 이름을 적어 두면 이후 열을 끼워 넣어도 안전. SuccessStories 번역 트리거도 `Item`→`Item_zh` 식으로 헤더로 찾음.
+- **Reservation**: `BookerName`, `AltTime` 열이 없으면 GAS가 헤더 오른쪽에 자동 추가. (이전 데이터는 RequestNote 안에 `[예약자] …` 형태로 남아 있음)
+- **고친 버그**: 기능 제안 내용이 빈 칸으로 저장되던 문제(content↔feature), 고객센터 문의(customer_service)가 GAS에서 Unknown type으로 버려지던 문제, 화면이 GAS 오류를 '성공'으로 표시하던 문제(`gasSucceeded`로 result 확인).
+- **기타 스크립트 속성**: `PHOTO_FOLDER_ID`(자동 저장), `LEDGER_SHEET_ID`(정산표를 별도 스프레드시트로 옮길 때).
+- **배포 순서**: GAS(`clasp push` → 모든 배포 ID에 `clasp deploy -i`) → Pages 환경변수 `GAS_SHARED_SECRET` → GAS 스크립트 속성 `GAS_SHARED_SECRET` → 사이트 push. 하드코딩돼 있던 GAS 주소(success-list.js)는 제거됨 — `GAS_URL` 환경변수 필수.
