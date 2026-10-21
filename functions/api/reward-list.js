@@ -1,36 +1,11 @@
+// 홍바오(현상금) 목록 — RewardList 시트
+import { corsPreflight, cachedGasGet } from '../../lib/gas.js';
+
 export async function onRequest(context) {
-  const { request, env } = context;
-  const ALLOWED_ORIGIN = '*';
-  
-  if (request.method === 'OPTIONS') {
-    return new Response(null, {
-      headers: {
-        'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
-        'Access-Control-Max-Age': '86400',
-      }
-    });
-  }
-
-  try {
-    const gasUrl = env.GAS_URL || env.SECRET_GAS_URL;
-    if (!gasUrl) {
-      return new Response(JSON.stringify([]), {
-        headers: { 'Access-Control-Allow-Origin': ALLOWED_ORIGIN, 'Content-Type': 'application/json' }
-      });
-    }
-
-    const gasResponse = await fetch(gasUrl, {
-      method: 'GET',
-      headers: { 'Accept': 'application/json' }
-    });
-
-    const result = await gasResponse.text();
-    return new Response(result, {
-      headers: { 'Access-Control-Allow-Origin': ALLOWED_ORIGIN, 'Content-Type': 'application/json' }
-    });
-  } catch (e) {
-    return new Response(JSON.stringify({ error: e.message }), { status: 500 });
-  }
+  if (context.request.method === 'OPTIONS') return corsPreflight();
+  return cachedGasGet(context, {
+    cacheKey: 'https://jeju-live.com/api/reward-list',
+    gasParams: {},
+    ttl: 300,
+  });
 }

@@ -1,78 +1,21 @@
+// 분실물 진행상황(SuccessStories) 공개 목록
+// 위챗 ID는 GAS에서 이미 가려서 오지만, 구버전 GAS 배포가 남아 있을 때를 대비해 여기서도 한 번 더 가린다.
+import { corsPreflight, cachedGasGet } from '../../lib/gas.js';
+
+const mask = v => {
+  const id = String(v || '');
+  if (!id || id.includes('***')) return id;
+  return id.length > 4 ? id.substring(0, 2) + '***' + id.substring(id.length - 2) : '***';
+};
+
 export async function onRequest(context) {
-  const { request, env } = context;
-  const ALLOWED_ORIGIN = '*';
-
-  // 캐시 방지 헤더 — 시트 수정이 즉시 반영되도록
-  const NO_CACHE_HEADERS = {
-    'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
-    'Content-Type': 'application/json',
-    'Cache-Control': 'no-store, no-cache, must-revalidate',
-    'Pragma': 'no-cache',
-  };
-  
-  if (request.method === 'OPTIONS') {
-    return new Response(null, {
-      headers: {
-        'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
-        'Access-Control-Max-Age': '86400',
-      }
-    });
-  }
-
-  try {
-    const LATEST_GAS_URL = 'https://script.google.com/macros/s/AKfycbyKQiffY5B8SsbMJkXAHrLHFSsUqohXpBc9xq2BdPV1rY8zGMOZal9cP4EM2Wu02Z4/exec';
-    const gasUrl = env.GAS_URL || env.SECRET_GAS_URL || LATEST_GAS_URL;
-    
-    if (!gasUrl) {
-      return new Response(JSON.stringify([]), { headers: NO_CACHE_HEADERS });
-    }
-
-    // Append ?action=success to query the SuccessStories tab
-    const fetchUrl = new URL(gasUrl);
-    fetchUrl.searchParams.append('action', 'success');
-    fetchUrl.searchParams.append('t', Date.now().toString());
-
-    const gasResponse = await fetch(fetchUrl.toString(), {
-      method: 'GET',
-      headers: { 'Accept': 'application/json' },
-      // Cloudflare Workers가 GAS 응답을 캐시하지 않도록
-      cf: { cacheEverything: false, cacheTtl: 0 },
-    });
-
-    const resultText = await gasResponse.text();
-    
-    // Check if the response is valid JSON. If GAS returns an HTML error page, this will throw.
-    let data;
-    try {
-      data = JSON.parse(resultText);
-    } catch (parseError) {
-      return new Response(JSON.stringify({ error: 'Invalid JSON from Google Sheets', details: resultText.substring(0, 100) }), {
-        status: 502,
-        headers: NO_CACHE_HEADERS,
-      });
-    }
-
-    // [보안] WeChat ID 마스킹 및 Note(내부 메모) 삭제
-    if (Array.isArray(data)) {
-        data = data.map(item => {
-            if (item.WeChatId) {
-                const id = String(item.WeChatId);
-                item.WeChatId = id.length > 4 ? id.substring(0,2) + '***' + id.substring(id.length-2) : '***';
-            }
-            if (item.Note) {
-                delete item.Note; 
-            }
-            return item;
-        });
-    }
-
-    return new Response(JSON.stringify(data), { headers: NO_CACHE_HEADERS });
-  } catch (e) {
-    return new Response(JSON.stringify({ error: e.message }), {
-      status: 500,
-      headers: NO_CACHE_HEADERS,
-    });
-  }
+  if (context.request.method === 'OPTIONS') return corsPreflight();
+  return cachedGasGet(context, {
+    cacheKey: 'https://jeju-live.com/api/success-list',
+    gasParams: { action: 'success' },
+    ttl: 90, // 관리자가 단계를 바꾸면 1~2분 안에 반영
+    transform: data => Array.isArray(data)
+      ? data.map(item => { const o = { ...item, WeChatId: mask(item.WeChatId) }; delete o.Note; return o; })
+      : data,
+  });
 }

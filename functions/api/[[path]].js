@@ -3,6 +3,8 @@
  * This replaces the standalone worker to provide same-origin API access.
  */
 
+import { forwardToGas } from '../../lib/gas.js';
+
 export async function onRequest(context) {
   const { request, env } = context;
   const url = new URL(request.url);
@@ -318,158 +320,13 @@ export async function onRequest(context) {
 
   // 3.0 /api/planner (POST) — 동승 달력(모집글·댓글 읽기/쓰기)
   //     전용 GAS 배포(PLANNER_GAS_URL)가 있으면 그쪽으로, 없으면 기본 GAS로 보낸다.
-  if (pathname === '/api/planner' && request.method === 'POST') {
-    const json = (obj, status = 200) => new Response(JSON.stringify(obj), {
-      status, headers: { 'Access-Control-Allow-Origin': ALLOWED_ORIGIN, 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' }
-    });
-    try {
-      const gasUrl = env.PLANNER_GAS_URL || env.GAS_URL || env.SECRET_GAS_URL;
-      if (!gasUrl) return json({ result: 'error', message: 'GAS_URL NOT CONFIGURED' }, 500);
-
-      const bodyText = await request.text();
-      if (bodyText.length > 4000) return json({ result: 'error', message: 'Payload too large' }, 413);
-      let type = '';
-      try { type = String(JSON.parse(bodyText).type || ''); } catch (e) { return json({ result: 'error', message: 'Invalid JSON' }, 400); }
-      // 이 경로로는 동승 관련 요청만 허용한다
-      if (!type.startsWith('carpool_')) return json({ result: 'error', message: 'Unsupported type' }, 400);
-
-      const gasResponse = await fetch(gasUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: bodyText });
-      return new Response(await gasResponse.text(), {
-        headers: { 'Access-Control-Allow-Origin': ALLOWED_ORIGIN, 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' }
-      });
-    } catch (e) {
-      return json({ result: 'error', message: e.message }, 500);
-    }
-  }
-
-  // 3. /api/feature-request 및 /api/lost-report (POST)
-  if ((pathname === '/api/feature-request' || pathname === '/api/lost-report') && request.method === 'POST') {
-    try {
-      const gasUrl = env.GAS_URL || env.SECRET_GAS_URL;
-      if (!gasUrl) {
-        return new Response(JSON.stringify({ error: 'GAS_URL NOT CONFIGURED' }), { status: 500 });
-      }
-
-      const bodyText = await request.text();
-      const gasResponse = await fetch(gasUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: bodyText
-      });
-
-      const result = await gasResponse.text();
-      return new Response(result, {
-        headers: { 'Access-Control-Allow-Origin': ALLOWED_ORIGIN, 'Content-Type': 'application/json' }
-      });
-    } catch (e) {
-      return new Response(JSON.stringify({ error: e.message }), { status: 500 });
-    }
-  }
-
-  // 3.1 /api/reward-list 및 /api/success-list (GET) [캐싱 1시간 적용]
-  if ((pathname === '/api/reward-list' || pathname === '/api/success-list') && request.method === 'GET') {
-    const cacheUrl = new URL(request.url);
-    const cacheKey = new Request(cacheUrl.toString(), request);
-    const cache = caches.default;
-
-    try {
-      // 1. 캐시 확인
-      let cachedResponse = await cache.match(cacheKey);
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-
-      const gasUrl = env.GAS_URL || env.SECRET_GAS_URL;
-      if (!gasUrl) {
-        // GAS_URL이 설정되지 않은 경우 빈 배열 반환 (기본값 대응)
-        return new Response(JSON.stringify([]), {
-          headers: { 'Access-Control-Allow-Origin': ALLOWED_ORIGIN, 'Content-Type': 'application/json' }
-        });
-      }
-
-      // 파라미터 구성 (success-list인 경우 action=success 추가)
-      let targetUrl = gasUrl;
-      if (pathname === '/api/success-list') {
-        // GAS_URL에 이미 파라미터가 있는지 확인 (보통은 기본 주소임)
-        targetUrl += targetUrl.includes('?') ? '&action=success' : '?action=success';
-      }
-
-      // GAS Script로 GET 요청
-      const gasResponse = await fetch(targetUrl, {
-        method: 'GET',
-        headers: { 'Accept': 'application/json' }
-      });
-
-      const result = await gasResponse.text();
-      const finalResponse = new Response(result, {
-        status: 200,
-        headers: { 
-          'Access-Control-Allow-Origin': ALLOWED_ORIGIN, 
-          'Content-Type': 'application/json; charset=utf-8',
-          'Cache-Control': 'public, max-age=3600' // 1시간 캐싱
-        }
-      });
-
-      // 3. 캐시 저장
-      context.waitUntil(cache.put(cacheKey, finalResponse.clone()));
-      return finalResponse;
-
-    } catch (e) {
-      return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: { 'Access-Control-Allow-Origin': ALLOWED_ORIGIN, 'Content-Type': 'application/json' } });
-    }
-  }
-
-  // 4. /api/image-proxy (GET) — 구글 드라이브 이미지를 서버사이드에서 가져와 브라우저 호환성 보장
-  if (pathname === '/api/image-proxy') {
-    const fileId = url.searchParams.get('id');
-    if (!fileId || !/^[a-zA-Z0-9_-]{10,100}$/.test(fileId)) {
-      return new Response('Missing or invalid Google Drive file ID', { 
-        status: 400,
-        headers: { 'Access-Control-Allow-Origin': ALLOWED_ORIGIN }
-      });
-    }
-
-    // 1순위: 직접 다운로드 링크, 실패 시 썸네일로 폴백
-    const driveUrls = [
-      `https://drive.google.com/uc?export=view&id=${fileId}`,
-      `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`
-    ];
-
-    for (const driveUrl of driveUrls) {
-      try {
-        const imageResponse = await fetch(driveUrl, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (compatible; JejuLiveBot/1.0)',
-            'Accept': 'image/*,*/*'
-          },
-          redirect: 'follow'
-        });
-
-        if (!imageResponse.ok) continue;
-
-        const contentType = imageResponse.headers.get('content-type') || '';
-        // Google이 HTML(로그인 페이지)을 반환하는 경우 다음 URL로 시도
-        if (contentType.includes('text/html')) continue;
-
-        const resHeaders = new Headers();
-        resHeaders.set('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
-        resHeaders.set('Content-Type', contentType || 'image/jpeg');
-        // 6시간 캐시 → Cloudflare 엣지에서 캐싱하여 반복 호출 최소화
-        resHeaders.set('Cache-Control', 'public, max-age=21600, stale-while-revalidate=3600');
-
-        return new Response(imageResponse.body, { 
-          status: 200, 
-          headers: resHeaders 
-        });
-      } catch (e) {
-        console.warn('[ImageProxy] Drive fetch failed:', e.message);
-      }
-    }
-
-    // 모두 실패 시 404
-    return new Response('Image not found or not public', { 
-      status: 404,
-      headers: { 'Access-Control-Allow-Origin': ALLOWED_ORIGIN }
+  //     (/api/lost-report · feature-request · reservation · success-list · reward-list · image-proxy는
+  //      같은 이름의 전용 파일이 이 catch-all보다 우선하므로 여기서 처리하지 않는다)
+  if (pathname === '/api/planner') {
+    return forwardToGas(request, env, {
+      types: t => t.startsWith('carpool_'),
+      maxBytes: 4000,
+      url: String(env.PLANNER_GAS_URL || '').trim() || undefined,
     });
   }
 
