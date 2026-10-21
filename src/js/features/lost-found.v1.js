@@ -708,6 +708,8 @@ export async function submitLostReport() {
         }
 
         if (result.result === 'success' || result.status === 'success') {
+            const catChip = Array.from(document.querySelectorAll('.lost-chip[data-value]')).find(c => c.dataset.value === data.itemCategory);
+            saveMyCase({ type: 'report', caseId: result.caseId || '', labelKey: catChip?.dataset.i18n || '', itemName: data.itemCategory });
             if (statusEl) {
                 statusEl.textContent = window.t ? window.t('lost.report.success') : '접수 완료';
                 statusEl.className = 'form-status success';
@@ -777,6 +779,56 @@ const getValidTranslation = (original, translated) => {
     if (lower.includes('번역오류') || lower.includes('error')) return original;
     return translated;
 };
+
+// ===== 내 접수 내역 (이 기기에 저장) =====
+// 접수번호가 토스트로 잠깐 떴다 사라지면 고객이 자기 건을 다시 찾을 방법이 없어서,
+// 이 기기에 남겨 두고 진행상황 화면 맨 위에 보여준다.
+const MY_CASES_KEY = 'jeju_my_cases';
+
+function loadMyCases() {
+    try { return JSON.parse(localStorage.getItem(MY_CASES_KEY)) || []; } catch (e) { return []; }
+}
+
+export function saveMyCase(entry) {
+    try {
+        const list = loadMyCases().filter(c => !(entry.caseId && c.caseId === entry.caseId));
+        list.unshift({ ...entry, at: Date.now() });
+        localStorage.setItem(MY_CASES_KEY, JSON.stringify(list.slice(0, 10)));
+    } catch (e) { /* 저장 불가 환경은 무시 */ }
+}
+
+export function renderMyCases() {
+    const container = document.getElementById('my-cases-container');
+    if (!container) return;
+    const cases = loadMyCases();
+    if (!cases.length) { container.innerHTML = ''; return; }
+
+    const t = window.t || (k => k);
+    const stories = window.successStoriesData || [];
+    const rows = cases.map(c => {
+        const name = c.labelKey ? t(c.labelKey) : (c.itemName || t('lost.my.item_unknown'));
+        const date = new Date(c.at).toLocaleDateString();
+        const idx = c.caseId
+            ? stories.findIndex(s => String(s.CaseId || '').trim().toLowerCase() === String(c.caseId).toLowerCase())
+            : -1;
+        let status = c.type === 'report' ? t('lost.my.report_pending') : t('lost.my.pending');
+        if (idx !== -1) {
+            const step = parseInt(stories[idx].Step, 10) || 1;
+            status = t('lost.my.step' + Math.min(Math.max(step, 1), 5));
+        }
+        const caseHtml = c.caseId ? `<span class="my-case-id"># ${escapeHTML(c.caseId)}</span>` : '';
+        const click = idx !== -1 ? ` onclick="openSuccessModal(${idx})" style="cursor:pointer;"` : '';
+        return `<div class="my-case-row"${click}>
+                <div class="my-case-main"><span class="my-case-name">${escapeHTML(name)}</span>${caseHtml}</div>
+                <div class="my-case-sub"><span>${date}</span><span class="my-case-status">${escapeHTML(status)}</span></div>
+            </div>`;
+    }).join('');
+
+    container.innerHTML = `<div class="my-cases-card">
+            <h4 class="my-cases-title"><i class="ph-duotone ph-bookmark-simple"></i> ${t('lost.my.title')}</h4>
+            ${rows}
+        </div>`;
+}
 
 export async function fetchSuccessStories() {
     let data = [];
@@ -1120,6 +1172,7 @@ export function renderSuccessGoodsView(isLoadMore = false) {
 
     const container = document.getElementById('lost-success-container');
     if (!container) return;
+    renderMyCases();
 
     if (!isLoadMore) {
         window.successVisibleCount = 5;
@@ -1773,7 +1826,8 @@ window.submitProxyPickup = async function() {
         if (result.result === 'success') {
             window.backToLostMenu();
             // 성공 토스트 메시지 (케이스번호 포함)
-            const assignedCaseId = result.caseId || '';
+            const assignedCaseId = result.caseId || caseId || '';
+            saveMyCase({ type: 'proxy', caseId: assignedCaseId, itemName });
             const caseIdStr = assignedCaseId
                 ? (lang === 'ko' ? ` (케이스번호: ${assignedCaseId})` : lang === 'en' ? ` (Case: ${assignedCaseId})` : ` (案件号: ${assignedCaseId})`)
                 : '';
@@ -1811,6 +1865,7 @@ window.submitProxyPickup = async function() {
 };
 
 window.lostApp = {
+    renderMyCases,
     fetchFoundGoods,
     switchLostView,
     renderLostGoods,

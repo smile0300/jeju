@@ -153,6 +153,9 @@ export function showSection(sectionId, pushHistory = true) {
     if (sectionId === 'course') window.courseApp?.enter();
     if (sectionId === 'charter') window.charterApp?.enter();
 
+    // 진행상황 화면엔 이 기기에서 접수한 내 건을 맨 위에 다시 그린다
+    if (sectionId === 'lost-status') window.lostApp?.renderMyCases?.();
+
     if (sectionId === 'lost') {
         if (window.toggleLostGuide) {
             const guide = document.getElementById('inline-lost-guide');

@@ -1349,3 +1349,46 @@ i.ph-duotone.hover-scale:hover {
     cursor: pointer;
 }
 
+/* 분실물 진행상황: 이 기기에서 접수한 내 건 */
+.my-cases-card {
+    margin-bottom: 16px;
+    padding: 14px 16px;
+    border: 1px solid rgba(49, 130, 246, 0.25);
+    border-radius: 8px;
+    background: var(--bg-card, #fff);
+}
+.my-cases-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 8px;
+    font-size: 15px;
+    color: var(--label-primary);
+}
+.my-case-row {
+    padding: 10px 0;
+    border-top: 1px solid var(--separator);
+}
+.my-case-row:first-of-type { border-top: none; }
+.my-case-main {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-weight: 700;
+    color: var(--label-primary);
+}
+.my-case-id {
+    flex-shrink: 0;
+    color: var(--color-blue);
+    font-variant-numeric: tabular-nums;
+    user-select: all;
+}
+.my-case-sub {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 2px;
+    font-size: 0.8rem;
+    color: var(--label-secondary);
+}
+.my-case-status { color: var(--color-blue); font-weight: 600; }
+
