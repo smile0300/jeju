@@ -1,4 +1,5 @@
 import { CONFIG } from '../../core/config.js';
+import { gasSucceeded } from '../../core/api.js';
 import { tr, escapeHtml } from './strings.js';
 
 // 여행 일정 · 추천 코스 · 차량 대절 화면이 함께 쓰는 UI 조각과 접수 전송
@@ -83,7 +84,7 @@ export function showStatus(el, msg, type) {
  * reservationType으로 종류를 구분한다 → 시트·GAS 변경이 필요 없다.
  */
 export async function submitRequest({ reservationType, wechatId = '', preferredStore = '', visitDate = '', partySize = '', note = '' }) {
-    const res = await fetch(`${CONFIG.PROXY_URL || ''}/api/feature-request`, {
+    const res = await fetch(`${CONFIG.PROXY_URL || ''}/api/reservation`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -97,7 +98,7 @@ export async function submitRequest({ reservationType, wechatId = '', preferredS
             userAgent: navigator.userAgent,
         }),
     });
-    if (!res.ok) throw new Error('Server Error');
+    if (!(await gasSucceeded(res))) throw new Error('Server Error');
     return res;
 }
 

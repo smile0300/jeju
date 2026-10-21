@@ -856,7 +856,7 @@ export async function fetchSuccessStories() {
     } catch(e) {}
 
     try {
-        const response = await fetch(`/api/success-list?t=${Date.now()}`);
+        const response = await fetch('/api/success-list') // 서버가 90초 캐시 — 요청마다 주소를 바꾸면 캐시를 못 씀;
         if (response.ok) {
             const result = await response.json();
             // 배열이고 Date가 있는 행만 유효 데이터로 인정

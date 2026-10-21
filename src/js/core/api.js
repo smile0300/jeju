@@ -90,3 +90,17 @@ export async function fetchPublicDataJson(endpoint, params = {}) {
         }
     }
 }
+
+/**
+ * GAS 접수 결과 확인. GAS는 실패해도 HTTP 200에 { result: 'error' }로 답하므로
+ * res.ok만 보면 실패가 "신청 완료"로 보인다 — 본문의 result까지 확인한다.
+ */
+export async function gasSucceeded(res) {
+    if (!res.ok) return false;
+    try {
+        const body = await res.json();
+        return body && (body.result === 'success' || body.status === 'success');
+    } catch (e) {
+        return false;
+    }
+}

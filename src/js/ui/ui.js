@@ -1,4 +1,5 @@
 import { CONFIG } from '../core/config.js';
+import { gasSucceeded } from '../core/api.js';
 import { t } from '../core/i18n.js';
 
 import { getSkyInfo, getWindColor } from '../core/utils.js';
@@ -258,7 +259,7 @@ export async function submitFeatureRequest() {
             })
         });
 
-        if (res.ok) {
+        if (await gasSucceeded(res)) {
             statusEl.textContent = t('alert.success');
             contentEl.value = '';
             
@@ -335,7 +336,7 @@ export async function submitCSFeedback() {
             })
         });
 
-        if (res.ok) {
+        if (await gasSucceeded(res)) {
             statusEl.style.color = '#07c160';
             statusEl.textContent = t('alert.success');
             contentEl.value = '';

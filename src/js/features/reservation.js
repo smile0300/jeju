@@ -1,4 +1,5 @@
 import { CONFIG } from '../core/config.js';
+import { gasSucceeded } from '../core/api.js';
 
 // 예약 유형 라벨 맵 (i18n key → fallback 텍스트)
 const RES_TYPE_MAP = {
@@ -113,12 +114,6 @@ export async function submitReservation(prefix = 'res') {
     const store       = storeEl   ? storeEl.value.trim()   : '';
     const userNote    = noteEl    ? noteEl.value.trim()    : '';
 
-    // GAS 시트 컬럼을 늘리지 않도록 새 항목은 요청사항 앞에 구조화해서 합친다
-    const note = [
-        bookerName ? `[예약자] ${bookerName}` : '',
-        altTime    ? `[대체시간(KST)] ${altTime}` : '',
-        userNote,
-    ].filter(Boolean).join(' | ');
 
     let resType = window.currentReservationType || 'other';
     if (prefix === 'food') resType = 'food';
@@ -135,7 +130,8 @@ export async function submitReservation(prefix = 'res') {
         hideWechatQr(prefix);
         showStatus(statusEl, window.t ? window.t('alert.submitting') : '提交中...', '');
 
-        const res = await fetch(`${CONFIG.PROXY_URL || ''}/api/feature-request`, {
+        // 예약자 이름·대체 시간은 시트의 BookerName·AltTime 열로 따로 간다 (예전엔 요청사항에 합쳐 넣었음)
+        const res = await fetch(`${CONFIG.PROXY_URL || ''}/api/reservation`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -145,12 +141,14 @@ export async function submitReservation(prefix = 'res') {
                 preferredStore: store,
                 visitDate: visitDateTime,
                 partySize: partySize,
-                requestNote: note,
+                requestNote: userNote,
+                bookerName: bookerName,
+                altTime: altTime,
                 userAgent: navigator.userAgent,
             })
         });
 
-        if (res.ok) {
+        if (await gasSucceeded(res)) {
             showStatus(statusEl, window.t ? window.t('res.success') : '✅ 申请已提交！我们将尽快通过微信与您联系。', 'success');
             showWechatQr(prefix);
             // 폼 초기화
