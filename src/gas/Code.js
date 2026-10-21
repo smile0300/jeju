@@ -881,3 +881,32 @@ function backfillLostReport() {
   Logger.log('완료! 처리: ' + processedCount + '행 / 건너뜀: ' + skippedCount + '행');
   SpreadsheetApp.getUi().alert('소급 적용 완료!\n처리: ' + processedCount + '행\n건너뜀: ' + skippedCount + '행');
 }
+
+/**
+ * [1회 실행용] 이미 올라가 있는 여권·호텔 예약 사진의 '링크 공유'를 끈다.
+ * (새로 올라오는 사진은 처음부터 비공개 — saveBase64ImageToDrive isPublic=false)
+ * Apps Script 편집기에서 이 함수를 선택하고 [▶ 실행]. 여러 번 실행해도 안전하다.
+ */
+function unsharePrivatePhotos() {
+  var sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName('SuccessStories');
+  if (!sheet) return;
+  var data = sheet.getDataRange().getValues();
+  var headers = data[0].map(function (h) { return h ? h.toString().trim() : ''; });
+  var cols = ['PassportPhoto', 'ReservationPhoto'].map(function (h) { return headers.indexOf(h); }).filter(function (c) { return c !== -1; });
+  var changed = 0, failed = 0;
+  for (var i = 1; i < data.length; i++) {
+    cols.forEach(function (c) {
+      var m = String(data[i][c] || '').match(/\/d\/([a-zA-Z0-9_-]{10,})|[?&]id=([a-zA-Z0-9_-]{10,})/);
+      if (!m) return;
+      try {
+        var file = DriveApp.getFileById(m[1] || m[2]);
+        if (file.getSharingAccess() !== DriveApp.Access.PRIVATE) {
+          file.setSharing(DriveApp.Access.PRIVATE, DriveApp.Permission.NONE);
+          changed++;
+        }
+      } catch (e) { failed++; }
+    });
+  }
+  Logger.log('비공개 전환: ' + changed + '개 / 실패: ' + failed + '개');
+  SpreadsheetApp.getUi().alert('여권·예약 사진 비공개 전환: ' + changed + '개 (실패 ' + failed + '개)');
+}
