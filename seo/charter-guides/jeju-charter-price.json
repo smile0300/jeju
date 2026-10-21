@@ -1,0 +1,107 @@
+{
+  "slug": "jeju-charter-price",
+  "order": 1,
+  "verified": "2026-10",
+  "_notes": "요금표·업체 비교는 src/data/charter.js를 그대로 렌더링(render: charterPrices/charterCompare) — 앱 화면과 항상 같은 값. 샤오홍슈 공개 게시물 2026-10-21 수집, 글로벌 플랫폼 가격 제외. 중국 면허 불가는 제네바·비엔나 협약 미가입(서울신문 2026-05 자치경찰 인용).",
+  "sources": [
+    { "label": "Public Xiaohongshu posts by Jeju charter operators (collected Oct 2026, compiled by Jeju Live)", "url": "https://jeju-live.com/charter" },
+    { "label": "Seoul Shinmun (May 2026) — Jeju police on illegal tour transport", "url": "https://m.seoul.co.kr/news/2026/05/18/20260518500048" },
+    { "label": "Road Traffic Act (Korea Law Information Center)", "url": "https://www.law.go.kr/법령/도로교통법" }
+  ],
+  "en": {
+    "title": "Jeju Private Car Hire Prices 2026 — 5 to 11 Seats, with Driver",
+    "desc": "How much a car with driver costs in Jeju in 2026: day rates for 5, 7, 9 and 11-seat vehicles, airport transfers, overtime and what is included, compared across operators.",
+    "h1": "How much does a private car with driver cost in Jeju? (2026 prices)",
+    "summary": [
+      "A 9-hour day from Jeju City costs about <b>600–900 CNY</b> for a 5-seat car and <b>700–1,300 CNY</b> for a 7 to 11-seat van.",
+      "Going to the east, west or south side usually adds about <b>+300 CNY</b>; overtime is around <b>150 CNY per hour</b>.",
+      "Airport ⇄ Jeju City transfers are about <b>126–280 CNY</b> one way; to Jungmun, Seogwipo or Seongsan about <b>398–515 CNY</b>.",
+      "Always ask what is included: fuel, tolls, parking and the driver's meals vary by operator.",
+      "Before paying, check that the car is legal — see <a href=\"/en/charter/jeju-charter-legal\">how to tell a licensed car</a>."
+    ],
+    "sections": [
+      {
+        "h": "Day rates by vehicle size",
+        "body": "<p>These are the ranges operators advertised in public Xiaohongshu (RedNote) posts in October 2026. The base is <b>9 hours, starting in Jeju City</b>, priced per car, not per person.</p>",
+        "render": "charterPrices",
+        "after": "<p class=\"lead\">Rough market rates only. The operator's quote is what you pay.</p>"
+      },
+      {
+        "h": "Prices compared across operators",
+        "body": "<p>Advertised day rates (CNY, 9 hours) from operators active on Xiaohongshu. Names are partly hidden: this is for comparing prices, not a recommendation.</p>",
+        "render": "charterCompare"
+      },
+      {
+        "h": "What is and isn't in the price",
+        "body": "<ul><li><b>Base hours</b>: most quotes are for 9 hours. Some count anything over 20 minutes as a full extra hour, and charge more after 20:00.</li><li><b>Fuel, tolls, parking</b>: included by some operators, extra with others. Ask for it in writing.</li><li><b>Driver's meals</b>: often included, but not always.</li><li><b>Routes</b>: a quote for \"one route\" (e.g. east only) can be cheaper than a full island loop, which several operators price at 1,000–1,200 CNY.</li><li><b>Udo Island</b>: taking the car onto the ferry is priced per person (about 190–470 CNY), and smaller groups pay more each.</li><li><b>Duty-free stops</b>: some operators advertise duty-free shopping stops. If you don't want them, say so before you book.</li></ul>"
+      },
+      {
+        "h": "Which vehicle size to choose",
+        "body": "<ul><li><b>5-seat car</b>: 2–3 people with light luggage.</li><li><b>7 or 9-seat van</b>: families and groups of 4–6, or fewer people with large suitcases. Several operators charge the same for 7 and 9 seats, so compare.</li><li><b>11-seat van and up</b>: groups of 7 or more. In Korea, renting an 11 to 15-seat van with a driver for tourism has its own legal rules, so check how the operator provides it.</li></ul><p>Tell the operator the number of people <b>and</b> suitcases; luggage, not seats, is usually what runs out first.</p>"
+      },
+      {
+        "h": "Why many visitors hire a driver instead of renting",
+        "body": "<p>Korea only accepts foreign licences issued under the Geneva (1949) or Vienna (1968) road traffic conventions. Mainland China has joined neither, so <b>a Chinese driving licence cannot be used to rent and drive a car in Jeju</b>. Visitors from China therefore choose between buses, taxis, tourist taxis and a hired car with driver.</p><p>That demand is also why unlicensed operators are common in Jeju. Jeju police reported in 2026 that groups were recruiting tourists on Chinese social media and driving them in ordinary rental cars.</p>"
+      },
+      {
+        "h": "Before you pay",
+        "body": "<ol><li>Get the full quote in the chat: hours, vehicle, route, and what is included.</li><li>Ask for the <b>vehicle's plate number</b> and check it against the rules in our <a href=\"/en/charter/jeju-charter-legal\">legal car guide</a>.</li><li>Confirm the cancellation policy and keep the chat history.</li><li>Travelling as two or three? Look for people to share a car on the same day in the <a href=\"/charter?view=pinche\" data-lang-link>Jeju Live ride-share calendar</a>.</li></ol>"
+      }
+    ],
+    "faq": [
+      { "q": "Is the price per car or per person?", "a": "Day hire is priced per car. Only shared rides and Udo ferry packages are usually priced per person." },
+      { "q": "How is overtime charged?", "a": "Usually about 150 CNY per hour after the base 9 hours. Some operators round anything over 20 minutes up to a full hour and charge more after 20:00." },
+      { "q": "Can I drive myself with a Chinese licence?", "a": "No. Korea accepts licences from countries in the Geneva or Vienna conventions, and mainland China is in neither, so you cannot rent a self-drive car with a Chinese licence." },
+      { "q": "Why are the prices in CNY?", "a": "The operators compared here advertise to Chinese-speaking travellers on Xiaohongshu and quote in yuan. Ask for a KRW price if you prefer to pay in won." },
+      { "q": "How often are these prices updated?", "a": "We recheck public posts regularly. The date on the Jeju Live charter page shows the last update." }
+    ]
+  },
+  "zh": {
+    "title": "济州包车多少钱？2026年价格行情（5座到11座，带司机）",
+    "desc": "2026年济州包车一天多少钱：5座、7座、9座、11座车型日价，机场接送、超时费、包含哪些费用，以及各商家报价对比。",
+    "h1": "济州包车一天多少钱？（2026年价格行情）",
+    "summary": [
+      "济州市出发、9小时：<b>5座轿车约600–900元</b>，<b>7–11座商务车约700–1,300元</b>。",
+      "去东线、西线、南线通常<b>加价约300元</b>；超时约<b>150元/小时</b>。",
+      "机场⇄济州市区单程约<b>126–280元</b>；到中文、西归浦、城山约<b>398–515元</b>。",
+      "一定问清包含哪些费用：油费、过路费、停车费、司机餐费，各家不一样。",
+      "付款前先确认车辆是否合法——见<a href=\"/zh/charter/jeju-charter-legal\">如何分辨合法包车与黑车</a>。"
+    ],
+    "sections": [
+      {
+        "h": "各车型一天的价格",
+        "body": "<p>以下是2026年10月商家在小红书公开报价的区间。基准为<b>济州市出发、9小时</b>，按车计价，不是按人。</p>",
+        "render": "charterPrices",
+        "after": "<p class=\"lead\">仅为大致行情，实际以商家报价为准。</p>"
+      },
+      {
+        "h": "各商家报价对比",
+        "body": "<p>小红书上活跃商家公开的日价（元，9小时）。店名已部分隐藏，仅供比价，不代表推荐。</p>",
+        "render": "charterCompare"
+      },
+      {
+        "h": "价格包含什么、不包含什么",
+        "body": "<ul><li><b>基础时长</b>：多数报价为9小时。有的商家超过20分钟就按1小时计，20:00以后另外加价。</li><li><b>油费、过路费、停车费</b>：有的含，有的另算，请让商家在聊天里写清楚。</li><li><b>司机餐费</b>：多数包含，但不是全部。</li><li><b>路线</b>：「单线」（如只走东线）比环岛便宜，不少商家环岛报价在1,000–1,200元。</li><li><b>牛岛</b>：带车上牛岛按人数计价（约190–470元/人，含船票），人越少每人越贵。</li><li><b>免税店</b>：有的商家宣传带去免税店。如果不想去，下单前说清楚。</li></ul>"
+      },
+      {
+        "h": "怎么选车型",
+        "body": "<ul><li><b>5座轿车</b>：2–3人、行李不多。</li><li><b>7座 / 9座商务车</b>：4–6人的家庭或朋友，或人少但带大行李箱。不少商家7座和9座同价，可以比较。</li><li><b>11座及以上</b>：7人以上团体。在韩国，11–15座商务车带司机用于旅游有专门的法律规定，请确认商家是怎么安排的。</li></ul><p>联系商家时请同时告知<b>人数和行李箱数量</b>——通常先不够的是行李空间，而不是座位。</p>"
+      },
+      {
+        "h": "为什么中国游客大多选择包车",
+        "body": "<p>韩国只承认《日内瓦公约》（1949）或《维也纳公约》（1968）缔约国签发的驾照。中国大陆没有加入这两个公约，所以<b>持中国驾照不能在济州租车自驾</b>。中国游客只能在公交、出租车、观光出租车和包车之间选择。</p><p>也正因为需求大，济州的无资质包车很多。济州自治警察2026年通报，有团伙通过中国社交平台招揽游客，用普通租赁车载客收费。</p>"
+      },
+      {
+        "h": "付款之前",
+        "body": "<ol><li>在聊天里拿到完整报价：时长、车型、路线、包含的费用。</li><li>要到<b>车牌号</b>，对照<a href=\"/zh/charter/jeju-charter-legal\">合法车辆指南</a>里的规则确认。</li><li>确认取消规则，并保留聊天记录。</li><li>只有两三个人？可以在 <a href=\"/charter?view=pinche\" data-lang-link>Jeju Live 拼车日历</a>里找同一天出行的人一起拼车。</li></ol>"
+      }
+    ],
+    "faq": [
+      { "q": "包车价格是按车还是按人？", "a": "包车按车计价。通常只有拼车和牛岛套餐按人计价。" },
+      { "q": "超时怎么收费？", "a": "超过9小时后一般约150元/小时。有的商家超过20分钟就按1小时算，20:00以后价格更高。" },
+      { "q": "我有中国驾照，可以自己租车开吗？", "a": "不可以。韩国只承认《日内瓦公约》或《维也纳公约》缔约国的驾照，中国大陆都没有加入，所以持中国驾照无法在韩国租车自驾。" },
+      { "q": "可以用人民币付款吗？", "a": "这里对比的商家都在小红书上以人民币报价。具体付款方式请直接和商家确认。" },
+      { "q": "这些价格多久更新一次？", "a": "我们会定期重新整理公开报价，Jeju Live 包车页面上的日期就是最近更新日期。" }
+    ]
+  }
+}

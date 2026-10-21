@@ -329,9 +329,11 @@ async function render() {
         });
     }
 
-    // 홈의 包车/拼车 버튼으로 들어오면 해당 탭을 연다 (한 번만 적용). 그 밖에는 마지막에 보던 탭을 유지
+    // 홈의 包车/拼车 버튼(charterFocus)이나 정적 가이드 링크(?view=pinche)로 들어오면 해당 탭을 연다. 그 밖에는 마지막에 보던 탭을 유지
+    const viewParam = new URLSearchParams(location.search).get('view');
     if (window.charterFocus === 'guide') state.view = 'baoche';
     else if (window.charterFocus === 'carpool') state.view = 'pinche';
+    else if (viewParam === 'baoche' || viewParam === 'pinche') state.view = viewParam;
     window.charterFocus = null;
 
     root.innerHTML = `${tabsHtml()}<div id="charter-view"></div>`;

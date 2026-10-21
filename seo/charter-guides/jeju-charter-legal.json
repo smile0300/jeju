@@ -1,0 +1,94 @@
+{
+  "slug": "jeju-charter-legal",
+  "order": 2,
+  "verified": "2026-10",
+  "_notes": "여객자동차 운수사업법 제34조(렌터카 유상운송 금지·운전자 알선 금지와 예외: 외국인 등, 11~15인승 관광 6시간 이상/공항·항만), 제81조(자가용 유상운송 금지). 시행령 18조는 2021.4.6 삭제되어 예외가 법률로 이동. 처벌(2년/2천만, 무등록 여행업 3년/3천만)은 언론 보도 인용. 미확인: 여행사가 관광객 명의로 대신 예약하는 방식의 적법성, 기사 자격요건 → 본문에서 단정하지 않음. 승객 처벌 여부도 단정하지 않음.",
+  "sources": [
+    { "label": "Passenger Transport Service Act, Art. 34 and 81 (Korea Law Information Center)", "url": "https://www.law.go.kr/법령/여객자동차운수사업법" },
+    { "label": "Tourism Promotion Act (Korea Law Information Center)", "url": "https://www.law.go.kr/법령/관광진흥법" },
+    { "label": "Seoul Shinmun (May 2026) — Jeju police crack down on illegal tour transport", "url": "https://m.seoul.co.kr/news/2026/05/18/20260518500048" },
+    { "label": "Seoul Shinmun / Twig24 (Jun 2025) — penalties for unregistered tour operators", "url": "https://www.twig24.com/news/travel-news/2025/06/22/20250622500029" }
+  ],
+  "en": {
+    "title": "Jeju Private Car Hire: How to Tell a Legal Car from an Illegal One",
+    "desc": "Licence plates, rental contracts and travel agencies: how Korean law treats paid rides in Jeju, what makes a hired car illegal, and what to check before you book.",
+    "h1": "Is my Jeju private car legal? Plates, rentals and travel agencies explained",
+    "summary": [
+      "<b>Yellow plate</b> with the Korean letter 바, 사, 아 or 자 = licensed commercial vehicle.",
+      "<b>White plate with 하, 허 or 호</b> = rental car. It is only legal if <b>you</b> signed the rental contract and the rental company arranged the driver.",
+      "<b>Any other white plate</b> = private car. Carrying paying passengers in it is illegal, even if they say \"the car is free, you only pay the guide\".",
+      "A travel agency that rents a car in its own name and charges you for the ride is also breaking the law.",
+      "Illegal operators face up to 2 years in prison or a 20 million KRW fine; the bigger risk for you is that <b>insurance may not cover you in an accident</b>."
+    ],
+    "sections": [
+      {
+        "h": "Step 1: read the licence plate",
+        "body": "<p>Korean plates show the vehicle's use in the Korean letter in the middle (for example <b>12하 3456</b>).</p><ul><li><b>Yellow plate, letter 바 / 사 / 아 / 자</b>: a commercial passenger vehicle (taxi, licensed charter). These are allowed to carry paying passengers.</li><li><b>White plate, letter 하 / 허 / 호</b>: a rental car. Whether the ride is legal depends on who rented it — see step 2.</li><li><b>White plate, any other letter</b>: a private car. Paid passenger transport in a private car is banned (Passenger Transport Service Act, Art. 81).</li></ul><p>Ask the operator for the plate number before the trip, and check it again when the car arrives.</p>"
+      },
+      {
+        "h": "Step 2: rental car with a driver — when is it legal?",
+        "body": "<p>Korean law does not let rental cars be used to carry paying passengers, and normally bans rental companies from supplying drivers (Art. 34). There is an exception: a rental company <b>may arrange a driver</b> for certain renters, and <b>foreign visitors are one of them</b>. Separate rules allow drivers for 11 to 15-seat vans rented for tourism (6 hours or more, or to and from an airport or port).</p><p>So a legal set-up looks like this:</p><ul><li>The <b>rental contract is in your name</b> (or your group's), signed with a licensed rental company.</li><li>The <b>driver is arranged by that rental company</b>.</li></ul><p>It is <b>illegal</b> when the operator or driver rents the car in their own name and then charges you for the ride, or when a rental company carries paying passengers itself.</p>"
+      },
+      {
+        "h": "Step 3: booking through a travel agency",
+        "body": "<p>Many Jeju charters are sold by travel agencies on Xiaohongshu or WeChat. The agency itself must be a <b>registered travel business</b> (Tourism Promotion Act). Then check the car:</p><ul><li><b>Agency rents a car in its own name, adds a driver and charges you</b>: illegal.</li><li><b>Agency uses a private car</b>: illegal — including the common line \"the car is free, you only pay for the guide\".</li><li><b>Legal options</b>: a yellow-plate licensed vehicle, or a rental contract in your own name with the driver arranged by the rental company.</li></ul><p>If the agency can't show you which of these it is, treat it as a risk.</p>"
+      },
+      {
+        "h": "Why it matters to you",
+        "body": "<ul><li><b>Insurance</b>: ordinary private or rental car insurance may not cover paid passenger transport. In an accident, you could be left without compensation.</li><li><b>Trips cut short</b>: Jeju police and city officials run joint checks at tourist spots. If the car is stopped, your day can end there.</li><li><b>Penalties for operators</b>: illegal paid transport can bring up to 2 years in prison or a 20 million KRW fine, and running an unregistered travel business up to 3 years or 30 million KRW (as reported by Korean media).</li></ul><p>In May 2026 Jeju police reported a group that recruited tourists on Chinese social media and drove them in ordinary rental cars, charging 20,000–30,000 KRW per person.</p>"
+      },
+      {
+        "h": "Checklist before you book",
+        "body": "<ol><li><b>Plate</b>: yellow 바/사/아/자, or white 하/허/호 with a contract in your name.</li><li><b>Paperwork</b>: business registration or travel agency registration.</li><li><b>Insurance</b>: ask whether it covers paid passenger transport.</li><li><b>Price</b>: base hours, overtime, fuel, tolls, parking, driver's meals.</li><li><b>Cancellation</b>: get it in writing and keep the chat.</li></ol><p>For current price ranges, see <a href=\"/en/charter/jeju-charter-price\">Jeju private car prices 2026</a>.</p>"
+      }
+    ],
+    "faq": [
+      { "q": "What does the letter 허 on a white plate mean?", "a": "하, 허 and 호 are used for rental cars. The ride is only legal if the rental contract is in your name and the rental company arranged the driver." },
+      { "q": "The agency says the car is free and I only pay for the guide. Is that legal?", "a": "No. Calling the payment a guide fee does not change it: carrying paying customers in a private car, or in a car the agency rented in its own name, is illegal." },
+      { "q": "Are tourist taxis legal?", "a": "Yes. Taxis carry yellow commercial plates and are licensed to carry paying passengers, including hourly or day hire." },
+      { "q": "Can a rental company provide a driver for foreigners?", "a": "Yes. Foreign visitors are one of the cases where Korean law lets a rental company arrange a driver for the renter. The contract should be in your name." },
+      { "q": "Will I be fined for riding in an illegal car?", "a": "The penalties described here are aimed at the operators. The main risk for passengers is having no insurance cover if something goes wrong." }
+    ]
+  },
+  "zh": {
+    "title": "济州包车怎么分辨合法车和黑车？看车牌、租车合同和旅行社",
+    "desc": "车牌颜色和字母、租车合同、旅行社资质：韩国法律如何规定济州收费载客，哪些包车属于违法，下单前要确认什么。",
+    "h1": "济州包车合法吗？车牌、租车和旅行社一次讲清楚",
+    "summary": [
+      "<b>黄色车牌</b>，中间韩文是「바、사、아、자」＝ 营运车辆，可以合法收费载客。",
+      "<b>白色车牌，韩文是「하、허、호」</b>＝ 租赁车。只有<b>以您本人名义</b>签租车合同、司机由租车公司安排，才合法。",
+      "<b>其他白色车牌</b>＝ 私家车。收费载客违法，即使对方说「车费免费，只收导游费」。",
+      "旅行社以自己名义租车、再向您收车费，同样违法。",
+      "经营者最高可处2年有期徒刑或2,000万韩元罚款；对您来说更大的风险是<b>出事故时保险可能不赔</b>。"
+    ],
+    "sections": [
+      {
+        "h": "第一步：看车牌",
+        "body": "<p>韩国车牌中间的韩文字母表示车辆用途（例如 <b>12하 3456</b>）。</p><ul><li><b>黄色车牌，字母 바 / 사 / 아 / 자</b>：营运客车（出租车、正规包车公司）。可以合法收费载客。</li><li><b>白色车牌，字母 하 / 허 / 호</b>：租赁车。是否合法取决于是谁租的车——见第二步。</li><li><b>白色车牌，其他字母</b>：私家车。私家车收费载客被法律禁止（《旅客汽车运输事业法》第81条）。</li></ul><p>出发前向商家要车牌号，车到了再核对一次。</p>"
+      },
+      {
+        "h": "第二步：租赁车带司机，什么情况下合法？",
+        "body": "<p>韩国法律禁止用租赁车收费载客，原则上也禁止租车公司给租车人安排司机（第34条）。但有例外：租车公司<b>可以为特定租车人安排司机</b>，<b>外国游客就是其中之一</b>。另外，以旅游为目的租用11–15座商务车（6小时以上，或往返机场、港口）也可以配司机。</p><p>所以合法的做法是：</p><ul><li><b>租车合同以您本人（或同行人）名义</b>与正规租车公司签订；</li><li><b>司机由该租车公司安排</b>。</li></ul><p>如果是商家或司机以自己名义租车、再向您收车费，或者租车公司自己拿租赁车载客收费，都属于<b>违法</b>。</p>"
+      },
+      {
+        "h": "第三步：通过旅行社订车",
+        "body": "<p>济州很多包车是旅行社在小红书、微信上卖的。旅行社本身必须是<b>依法登记的旅行社</b>（《观光振兴法》）。然后再看车：</p><ul><li><b>旅行社以自己名义租车、派司机、向您收费</b>：违法。</li><li><b>旅行社用私家车载客</b>：违法——包括常见的「车费免费，只收导游费」。</li><li><b>合法的方式</b>：黄色车牌营运车辆；或租车合同以您本人名义签订、司机由租车公司安排。</li></ul><p>如果旅行社说不清是哪一种，就当作有风险。</p>"
+      },
+      {
+        "h": "为什么这和您有关",
+        "body": "<ul><li><b>保险</b>：普通私家车或租赁车保险可能不涵盖收费载客。一旦出事故，您可能得不到赔偿。</li><li><b>行程中断</b>：济州警察和市政府会在景点联合检查，车被拦下，当天行程可能就结束了。</li><li><b>经营者的处罚</b>：非法收费载客最高可处2年有期徒刑或2,000万韩元罚款；无登记经营旅行社最高3年或3,000万韩元（据韩国媒体报道）。</li></ul><p>2026年5月，济州自治警察通报了一个团伙：在中国社交平台招揽游客，用普通租赁车载客，每人收2万–3万韩元。</p>"
+      },
+      {
+        "h": "下单前的检查清单",
+        "body": "<ol><li><b>车牌</b>：黄色 바/사/아/자，或白色 하/허/호 且合同以您本人名义。</li><li><b>资质</b>：营业执照或旅行社登记证。</li><li><b>保险</b>：问清是否涵盖收费载客。</li><li><b>费用</b>：基础时长、超时费、油费、过路费、停车费、司机餐费。</li><li><b>取消规则</b>：写在聊天里并保留记录。</li></ol><p>价格行情见<a href=\"/zh/charter/jeju-charter-price\">济州包车多少钱（2026）</a>。</p>"
+      }
+    ],
+    "faq": [
+      { "q": "白色车牌上的「허」是什么意思？", "a": "하、허、호 是租赁车专用字母。只有租车合同以您本人名义、司机由租车公司安排时才合法。" },
+      { "q": "旅行社说车免费，只收导游费，这样合法吗？", "a": "不合法。把费用叫作导游费并不能改变性质：用私家车或旅行社自己名义租的车载客收费，都属于违法。" },
+      { "q": "观光出租车包车合法吗？", "a": "合法。出租车是黄色营运车牌，可以合法收费载客，包括按小时或按天包车。" },
+      { "q": "租车公司可以给外国人配司机吗？", "a": "可以。韩国法律规定外国游客属于租车公司可以安排司机的情形之一，但租车合同应以您本人名义签订。" },
+      { "q": "坐了黑车，乘客会被罚款吗？", "a": "这里提到的处罚针对经营者。对乘客来说，主要风险是出事时没有保险保障。" }
+    ]
+  }
+}

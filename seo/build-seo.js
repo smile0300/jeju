@@ -1,26 +1,25 @@
 // ============================================================
 // SEO 정적 페이지 빌드 (postbuild.js 다음에 실행)
-// - seo/lost-guides/*.json → dist/{lang}/lost/{slug}.html (JS 없이 본문 완성)
-// - 언어별 허브 → dist/{lang}/lost/index.html
+// - seo/{category}-guides/*.json → dist/{lang}/{category}/{slug}.html (JS 없이 본문 완성)
+// - 카테고리·언어별 허브 → dist/{lang}/{category}/index.html
 // - dist/sitemap.xml 자동 생성 (SPA 라우트 + 가이드)
 // 기존 SPA 화면에는 영향 없음. 새 가이드는 JSON 파일 하나만 추가하면 됨.
+// 새 카테고리는 CATEGORIES에 항목(허브 문구·CTA) 추가 + seo/{key}-guides/ 폴더.
 // ============================================================
 const fs = require('fs');
 const path = require('path');
+const { pathToFileURL } = require('url');
 
 const SITE = 'https://jeju-live.com';
 const ROOT = path.join(__dirname, '..');
 const DIST = path.join(ROOT, 'dist');
-const GUIDE_DIR = path.join(__dirname, 'lost-guides');
 const LANGS = ['en', 'zh'];
 const HREFLANG = { en: 'en', zh: 'zh-CN' };
 const TODAY = new Date().toISOString().slice(0, 10);
 
 const UI = {
     en: {
-        home: 'Home', hub: 'Jeju Lost & Found Guides', verified: 'Last verified',
-        ctaTitle: 'Find it with Jeju Live',
-        ctaSearch: 'Search live lost & found (Jeju)', ctaProxy: 'Request proxy pickup', ctaReport: 'Not listed? Report it to us',
+        home: 'Home', verified: 'Last verified',
         faq: 'Frequently asked questions', related: 'Related guides', sources: 'Sources', other: '中文',
         casesTitle: 'Real cases handled by Jeju Live',
         casesLead: (n, since) => `Jeju Live has handled ${n} case${n > 1 ? 's' : ''} like this since ${since}. Most recent:`,
@@ -33,15 +32,11 @@ const UI = {
         thanksLead: n => `Messages travelers sent us on WeChat and Xiaohongshu after getting their items back (${n} screenshots). Names, payments and addresses are hidden. Tap to enlarge.`,
         thanksAlt: 'Thank-you message screenshot',
         month: m => new Date(m + '-01T00:00:00Z').toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' }),
-        hubTitle: 'Jeju Lost and Found Guides — What to Do and Who to Call',
-        hubDesc: 'Lost something in Jeju? Step-by-step guides for the airport, taxis, buses, hotels and more, with phone numbers and how to get items back after you leave Korea.',
-        hubIntro: 'Pick where you lost it. Each guide lists who holds the item, how to contact them, and what to do if you have already left Korea.',
+        moreGuides: 'More Jeju guides',
         footer: 'Real-time Jeju travel info for visitors'
     },
     zh: {
-        home: '首页', hub: '济州失物招领指南', verified: '最后核实',
-        ctaTitle: '用 Jeju Live 找回失物',
-        ctaSearch: '实时查询济州失物', ctaProxy: '申请代领', ctaReport: '没查到？向我们申报遗失',
+        home: '首页', verified: '最后核实',
         faq: '常见问题', related: '相关指南', sources: '信息来源', other: 'English',
         casesTitle: 'Jeju Live 真实处理案例',
         casesLead: (n, since) => `自${since}起，Jeju Live 已处理此类案例 ${n} 件。最近的案例：`,
@@ -54,12 +49,52 @@ const UI = {
         thanksLead: n => `游客找回物品后通过微信、小红书私信发来的感谢（共 ${n} 张截图）。姓名、转账金额和地址已打码，点击可放大。`,
         thanksAlt: '感谢留言截图',
         month: m => `${m.slice(0, 4)}年${Number(m.slice(5, 7))}月`,
-        hubTitle: '济州失物招领指南——丢了东西该找谁、怎么办',
-        hubDesc: '在济州岛丢了东西？机场、出租车、公交、酒店等场景的找回步骤、联系电话，以及回国后如何把东西寄回来。',
-        hubIntro: '选择你丢东西的地方。每篇指南都写明物品由谁保管、怎么联系，以及已经回国时该怎么办。',
+        moreGuides: '更多济州指南',
         footer: '面向游客的济州实时旅行信息'
     }
 };
+
+// 카테고리: 허브 문구와 CTA 버튼(SPA 화면으로 연결). showcase: 허브에 처리 사례·후기·감사 캡처 표시
+const CATEGORIES = [
+    {
+        key: 'lost', showcase: true,
+        en: {
+            hub: 'Jeju Lost & Found Guides',
+            hubTitle: 'Jeju Lost and Found Guides — What to Do and Who to Call',
+            hubDesc: 'Lost something in Jeju? Step-by-step guides for the airport, taxis, buses, hotels and more, with phone numbers and how to get items back after you leave Korea.',
+            hubIntro: 'Pick where you lost it. Each guide lists who holds the item, how to contact them, and what to do if you have already left Korea.',
+            ctaTitle: 'Find it with Jeju Live',
+            ctas: [['/lost', 'Search live lost & found (Jeju)'], ['/lost?action=proxy', 'Request proxy pickup'], ['/lost#report', 'Not listed? Report it to us']]
+        },
+        zh: {
+            hub: '济州失物招领指南',
+            hubTitle: '济州失物招领指南——丢了东西该找谁、怎么办',
+            hubDesc: '在济州岛丢了东西？机场、出租车、公交、酒店等场景的找回步骤、联系电话，以及回国后如何把东西寄回来。',
+            hubIntro: '选择你丢东西的地方。每篇指南都写明物品由谁保管、怎么联系，以及已经回国时该怎么办。',
+            ctaTitle: '用 Jeju Live 找回失物',
+            ctas: [['/lost', '实时查询济州失物'], ['/lost?action=proxy', '申请代领'], ['/lost#report', '没查到？向我们申报遗失']]
+        }
+    },
+    {
+        key: 'charter',
+        en: {
+            hub: 'Jeju Private Car Guides',
+            hubTitle: 'Jeju Private Car Hire Guides — Prices and Legal Checks',
+            hubDesc: 'Hiring a car with a driver in Jeju: 2026 price ranges by vehicle size, and how to tell a licensed car from an illegal one.',
+            hubIntro: 'What a day with a driver costs in Jeju, and how to make sure the car you book is legal and insured.',
+            ctaTitle: 'Plan your ride on Jeju Live',
+            ctas: [['/charter', 'Compare reference prices'], ['/charter?view=pinche', 'Find travelers to share a car']]
+        },
+        zh: {
+            hub: '济州包车指南',
+            hubTitle: '济州包车指南——价格行情与合法车辆分辨',
+            hubDesc: '在济州岛包车：2026年各车型价格行情，以及如何分辨合法营运车辆和黑车。',
+            hubIntro: '济州包车一天大概多少钱，以及怎样确认你订的车合法、有保险。',
+            ctaTitle: '在 Jeju Live 安排用车',
+            ctas: [['/charter', '查看参考价格与商家对比'], ['/charter?view=pinche', '找人拼车']]
+        }
+    }
+];
 
 // 실제 처리 사례 스냅샷 (seo/update-cases.js로 갱신)
 const CASES = JSON.parse(fs.readFileSync(path.join(__dirname, 'cases.json'), 'utf-8'));
@@ -89,10 +124,38 @@ function renderThanks(lang) {
     return `<section class="card"><h2>${esc(t.thanksTitle)}</h2><p class="lead">${esc(t.thanksLead(list.length))}</p><div class="gallery">${shots}</div></section>`;
 }
 
+// 차량 참고 요금: SPA와 같은 데이터(src/data/charter.js)를 표로 렌더링
+// 가이드 JSON 섹션에 "render": "charterPrices" | "charterCompare" 를 넣으면 body 뒤에 표가 붙는다
+let CHARTER = null;
+const pickL = (o, lang) => (o && typeof o === 'object') ? (o[lang] ?? o.en) : o;
+const RENDERERS = {
+    charterPrices(lang) {
+        const rows = CHARTER.CHARTER_PRICES.map(p => `<tr><th scope="row">${esc(pickL(p.vehicle, lang))}<small>${esc(pickL(p.detail, lang))}</small></th><td>${esc(p.price)}<small>${esc(pickL(p.unit, lang))}</small></td></tr>`).join('');
+        return `<table class="tbl"><tbody>${rows}</tbody></table>`;
+    },
+    charterCompare(lang) {
+        const head = lang === 'zh' ? ['商家', '5座', '7座', '9座', '11座'] : ['Operator', '5-seat', '7-seat', '9-seat', '11-seat'];
+        const rows = CHARTER.CHARTER_COMPARE.map(r => `<tr><th scope="row">${esc(r.name)}<small>${esc(pickL(r.note, lang))}</small></th>${r.flat
+            ? `<td colspan="4">${esc(pickL(r.flat, lang))}</td>`
+            : r.prices.map(v => `<td>${esc(v).replace('~', '~<wbr>')}</td>`).join('')}</tr>`).join('');
+        return `<table class="tbl tbl-cmp"><thead><tr>${head.map(h => `<th scope="col">${h}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>`;
+    }
+};
+
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const stripTags = s => String(s).replace(/<[^>]+>/g, '');
-const guideUrl = (lang, slug) => `${SITE}/${lang}/lost/${slug}`;
-const hubUrl = lang => `${SITE}/${lang}/lost/`;
+const guideUrl = (cat, lang, slug) => `${SITE}/${lang}/${cat.key}/${slug}`;
+const hubUrl = (cat, lang) => `${SITE}/${lang}/${cat.key}/`;
+
+const ctaHtml = (cat, lang) => `<section class="card cta"><h2>${esc(cat[lang].ctaTitle)}</h2>
+${cat[lang].ctas.map(([href, label], i) => `<a class="btn btn-${Math.min(i + 1, 3)}" href="${href}" data-lang-link>${esc(label)}</a>`).join('\n')}</section>`;
+
+// 다른 카테고리 허브로 가는 링크 (가이드끼리 서로 이어지도록)
+function otherHubsHtml(cat, lang) {
+    const others = CATEGORIES.filter(c => c !== cat);
+    if (!others.length) return '';
+    return `<section class="card list"><h2>${esc(UI[lang].moreGuides)}</h2>${others.map(c => `<a href="/${lang}/${c.key}/"><b>${esc(c[lang].hub)}</b><span>${esc(c[lang].hubDesc)}</span></a>`).join('')}</section>`;
+}
 
 const CSS = `
 :root{--accent:#3182F6;--accent-hover:#1B6EE4;--accent-subtle:rgba(49,130,246,.10);--bg:#F8F9FA;--card:#FFF;--fill:#F2F4F6;--text:#191F28;--text-2:#4E5968;--text-3:#8B95A1;--sep:#E5E8EB}
@@ -118,9 +181,20 @@ h2{font-size:20px;line-height:1.35;margin:0 0 10px;overflow-wrap:anywhere}
 .card li{margin:4px 0}
 .cta h2{margin-bottom:14px}
 .btn{display:block;text-align:center;text-decoration:none;font-weight:700;padding:14px 16px;border-radius:12px;margin:0 0 10px;font-size:16px}
+.btn:last-child{margin-bottom:0}
 .btn-1{background:var(--accent);color:#fff}.btn-1:hover{background:var(--accent-hover)}
 .btn-2{background:var(--accent-subtle);color:var(--accent)}
-.btn-3{background:var(--fill);color:var(--text-2);margin:0}
+.btn-3{background:var(--fill);color:var(--text-2)}
+.tbl{width:100%;border-collapse:collapse;font-size:14px;margin:0 0 10px}
+.tbl th,.tbl td{padding:9px 4px;border-top:1px solid var(--sep);text-align:left;vertical-align:top}
+.tbl td{text-align:right;font-weight:700;white-space:nowrap}
+.tbl small{display:block;font-weight:400;color:var(--text-3);font-size:12px}
+.tbl-cmp{table-layout:fixed}
+.tbl-cmp thead th{font-size:12px;color:var(--text-3);text-align:right;border-top:0}
+.tbl-cmp thead th:first-child{text-align:left;width:34%}
+.tbl-cmp th[scope=row]{overflow-wrap:anywhere}
+.tbl-cmp td{white-space:normal;font-size:13px}
+.tbl-cmp td[colspan]{text-align:center}
 details{border-top:1px solid var(--sep);padding:12px 0}
 details:first-of-type{border-top:0;padding-top:0}
 summary{font-weight:700;cursor:pointer}
@@ -188,31 +262,29 @@ ${langScript(lang)}
 `;
 }
 
-function renderGuide(guide, lang, guides) {
+function renderGuide(cat, guide, lang, guides) {
     const t = UI[lang];
+    const ct = cat[lang];
     const c = guide[lang];
     const other = lang === 'en' ? 'zh' : 'en';
-    const canonical = guideUrl(lang, guide.slug);
+    const canonical = guideUrl(cat, lang, guide.slug);
 
     const summary = `<section class="card summary"><ul>${c.summary.map(s => `<li>${s}</li>`).join('')}</ul></section>`;
-    const cta = `<section class="card cta"><h2>${esc(t.ctaTitle)}</h2>
-<a class="btn btn-1" href="/lost" data-lang-link>${esc(t.ctaSearch)}</a>
-<a class="btn btn-2" href="/lost?action=proxy" data-lang-link>${esc(t.ctaProxy)}</a>
-<a class="btn btn-3" href="/lost#report" data-lang-link>${esc(t.ctaReport)}</a></section>`;
+    const cta = ctaHtml(cat, lang);
     const faq = `<section class="card"><h2>${esc(t.faq)}</h2>${c.faq.map(f => `<details><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`).join('')}</section>`;
     // 실제 사례: 해당 주제 건수 + 최근 6건 (cases.json은 최신순 정렬)
     const myCases = CASES.cases.filter(cs => cs.guides.includes(guide.slug));
     const casesHtml = myCases.length ? `<section class="card"><h2>${esc(t.casesTitle)}</h2><p>${esc(t.casesLead(myCases.length, t.month(myCases[myCases.length - 1].month)))}</p><ul>${myCases.slice(0, 6).map(cs => `<li><b>${esc(t.month(cs.month))}</b> · ${esc(t.caseLine(cs))}</li>`).join('')}</ul></section>` : '';
 
     const related = guides.filter(g => g.slug !== guide.slug);
-    const relatedHtml = related.length ? `<section class="card list"><h2>${esc(t.related)}</h2>${related.map(g => `<a href="/${lang}/lost/${g.slug}"><b>${esc(g[lang].h1)}</b></a>`).join('')}</section>` : '';
+    const relatedHtml = related.length ? `<section class="card list"><h2>${esc(t.related)}</h2>${related.map(g => `<a href="/${lang}/${cat.key}/${g.slug}"><b>${esc(g[lang].h1)}</b></a>`).join('')}</section>` : '';
     const sources = `<section class="src">${esc(t.sources)}<ul>${guide.sources.map(s => `<li><a href="${esc(s.url)}" rel="nofollow noopener" target="_blank">${esc(s.label)}</a></li>`).join('')}</ul></section>`;
 
     // CTA는 본문 중간(2번째 섹션 뒤)에 배치
-    const sectionHtml = c.sections.map(s => `<section class="card"><h2>${esc(s.h)}</h2>${s.body}</section>`);
+    const sectionHtml = c.sections.map(s => `<section class="card"><h2>${esc(s.h)}</h2>${s.body || ''}${s.render ? RENDERERS[s.render](lang) : ''}${s.after || ''}</section>`);
     sectionHtml.splice(Math.min(2, sectionHtml.length), 0, cta);
 
-    const body = `<p class="crumb"><a href="/" data-lang-link>${esc(t.home)}</a> › <a href="${hubUrl(lang)}">${esc(t.hub)}</a></p>
+    const body = `<p class="crumb"><a href="/" data-lang-link>${esc(t.home)}</a> › <a href="${hubUrl(cat, lang)}">${esc(ct.hub)}</a></p>
 <h1>${esc(c.h1)}</h1>
 <p class="meta">${esc(t.verified)}: ${esc(guide.verified)}</p>
 ${summary}
@@ -221,6 +293,7 @@ ${casesHtml}
 ${renderReviews(guide.slug, lang)}
 ${faq}
 ${relatedHtml}
+${otherHubsHtml(cat, lang)}
 ${sources}`;
 
     const jsonLd = {
@@ -239,7 +312,7 @@ ${sources}`;
                 '@type': 'BreadcrumbList',
                 itemListElement: [
                     { '@type': 'ListItem', position: 1, name: t.home, item: SITE + '/' },
-                    { '@type': 'ListItem', position: 2, name: t.hub, item: hubUrl(lang) },
+                    { '@type': 'ListItem', position: 2, name: ct.hub, item: hubUrl(cat, lang) },
                     { '@type': 'ListItem', position: 3, name: c.h1, item: canonical }
                 ]
             },
@@ -252,40 +325,41 @@ ${sources}`;
 
     return layout({
         lang, title: c.title, desc: c.desc, canonical,
-        alternates: Object.fromEntries(LANGS.map(l => [l, guideUrl(l, guide.slug)])),
-        otherHref: `/${other}/lost/${guide.slug}`,
+        alternates: Object.fromEntries(LANGS.map(l => [l, guideUrl(cat, l, guide.slug)])),
+        otherHref: `/${other}/${cat.key}/${guide.slug}`,
         jsonLd, body
     });
 }
 
-function renderHub(guides, lang) {
+function renderHub(cat, guides, lang) {
     const t = UI[lang];
+    const ct = cat[lang];
     const other = lang === 'en' ? 'zh' : 'en';
-    const canonical = hubUrl(lang);
-    const list = guides.map(g => `<a href="/${lang}/lost/${g.slug}"><b>${esc(g[lang].h1)}</b><span>${esc(g[lang].desc)}</span></a>`).join('');
+    const canonical = hubUrl(cat, lang);
+    const list = guides.map(g => `<a href="/${lang}/${cat.key}/${g.slug}"><b>${esc(g[lang].h1)}</b><span>${esc(g[lang].desc)}</span></a>`).join('');
+    const showcase = cat.showcase ? `${renderReviews('hub', lang)}\n${renderThanks(lang)}` : '';
+    const casesSummary = cat.showcase && CASES.cases.length
+        ? `<section class="card summary"><p>${esc(t.hubCases(CASES.cases.length, t.month(CASES.cases[CASES.cases.length - 1].month)))}</p></section>` : '';
     const body = `<p class="crumb"><a href="/" data-lang-link>${esc(t.home)}</a></p>
-<h1>${esc(t.hub)}</h1>
-<p class="meta">${esc(t.hubIntro)}</p>
-${CASES.cases.length ? `<section class="card summary"><p>${esc(t.hubCases(CASES.cases.length, t.month(CASES.cases[CASES.cases.length - 1].month)))}</p></section>` : ''}
+<h1>${esc(ct.hub)}</h1>
+<p class="meta">${esc(ct.hubIntro)}</p>
+${casesSummary}
 <section class="card list">${list}</section>
-${renderReviews('hub', lang)}
-${renderThanks(lang)}
-<section class="card cta"><h2>${esc(t.ctaTitle)}</h2>
-<a class="btn btn-1" href="/lost" data-lang-link>${esc(t.ctaSearch)}</a>
-<a class="btn btn-2" href="/lost?action=proxy" data-lang-link>${esc(t.ctaProxy)}</a>
-<a class="btn btn-3" href="/lost#report" data-lang-link>${esc(t.ctaReport)}</a></section>`;
+${showcase}
+${ctaHtml(cat, lang)}
+${otherHubsHtml(cat, lang)}`;
     const jsonLd = {
         '@context': 'https://schema.org',
         '@type': 'CollectionPage',
-        name: t.hubTitle,
-        description: t.hubDesc,
+        name: ct.hubTitle,
+        description: ct.hubDesc,
         inLanguage: HREFLANG[lang],
         url: canonical
     };
     return layout({
-        lang, title: t.hubTitle, desc: t.hubDesc, canonical,
-        alternates: Object.fromEntries(LANGS.map(l => [l, hubUrl(l)])),
-        otherHref: `/${other}/lost/`,
+        lang, title: ct.hubTitle, desc: ct.hubDesc, canonical,
+        alternates: Object.fromEntries(LANGS.map(l => [l, hubUrl(cat, l)])),
+        otherHref: `/${other}/${cat.key}/`,
         jsonLd, body
     });
 }
@@ -294,7 +368,7 @@ ${renderThanks(lang)}
 const ROUTE_PRIORITY = { '': ['1.0', 'daily'], lost: ['0.95', 'daily'], weather: ['0.9', 'hourly'], airport: ['0.85', 'hourly'], hallasan: ['0.8', 'daily'], festival: ['0.75', 'weekly'] };
 const SITEMAP_EXCLUDE = new Set(['index', '404', 'admin-reply']);
 
-function buildSitemap(guides) {
+function buildSitemap(groups) {
     const routes = [''].concat(
         fs.readdirSync(DIST).filter(f => f.endsWith('.html')).map(f => f.slice(0, -5)).filter(r => !SITEMAP_EXCLUDE.has(r)).sort()
     );
@@ -303,13 +377,14 @@ function buildSitemap(guides) {
         return `  <url><loc>${SITE}/${r}</loc><lastmod>${TODAY}</lastmod><changefreq>${freq}</changefreq><priority>${priority}</priority></url>`;
     });
     const altLinks = make => LANGS.map(l => `<xhtml:link rel="alternate" hreflang="${HREFLANG[l]}" href="${make(l)}"/>`).join('') + `<xhtml:link rel="alternate" hreflang="x-default" href="${make('en')}"/>`;
-    LANGS.forEach(lang => {
-        urls.push(`  <url><loc>${hubUrl(lang)}</loc><lastmod>${TODAY}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority>${altLinks(hubUrl)}</url>`);
+    groups.forEach(({ cat, guides }) => LANGS.forEach(lang => {
+        const hub = l => hubUrl(cat, l);
+        urls.push(`  <url><loc>${hub(lang)}</loc><lastmod>${TODAY}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority>${altLinks(hub)}</url>`);
         guides.forEach(g => {
-            const make = l => guideUrl(l, g.slug);
+            const make = l => guideUrl(cat, l, g.slug);
             urls.push(`  <url><loc>${make(lang)}</loc><lastmod>${TODAY}</lastmod><changefreq>monthly</changefreq><priority>0.8</priority>${altLinks(make)}</url>`);
         });
-    });
+    }));
     return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
 ${urls.join('\n')}
@@ -317,27 +392,36 @@ ${urls.join('\n')}
 `;
 }
 
-if (!fs.existsSync(DIST)) {
-    console.error('dist/ not found — run vite build first');
-    process.exit(1);
+async function main() {
+    if (!fs.existsSync(DIST)) {
+        console.error('dist/ not found — run vite build first');
+        process.exit(1);
+    }
+    CHARTER = await import(pathToFileURL(path.join(ROOT, 'src', 'data', 'charter.js')).href);
+
+    // 허브 목록 순서는 각 JSON의 order 필드 (없으면 맨 뒤)
+    const groups = CATEGORIES.map(cat => {
+        const dir = path.join(__dirname, `${cat.key}-guides`);
+        const guides = fs.readdirSync(dir).filter(f => f.endsWith('.json')).map(f => {
+            const g = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf-8'));
+            LANGS.forEach(l => { if (!g[l]) throw new Error(`${cat.key}-guides/${f}: missing "${l}" content`); });
+            return g;
+        }).sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
+        return { cat, guides };
+    });
+
+    groups.forEach(({ cat, guides }) => LANGS.forEach(lang => {
+        const out = path.join(DIST, lang, cat.key);
+        fs.mkdirSync(out, { recursive: true });
+        fs.writeFileSync(path.join(out, 'index.html'), renderHub(cat, guides, lang));
+        guides.forEach(g => {
+            fs.writeFileSync(path.join(out, `${g.slug}.html`), renderGuide(cat, g, lang, guides));
+            console.log(`Generated /${lang}/${cat.key}/${g.slug}`);
+        });
+    }));
+
+    fs.writeFileSync(path.join(DIST, 'sitemap.xml'), buildSitemap(groups));
+    console.log(`Generated sitemap.xml (${groups.map(g => `${g.cat.key} ${g.guides.length}`).join(', ')} guides × ${LANGS.length} langs)`);
 }
 
-// 허브 목록 순서는 각 JSON의 order 필드 (없으면 맨 뒤)
-const guides = fs.readdirSync(GUIDE_DIR).filter(f => f.endsWith('.json')).map(f => {
-    const g = JSON.parse(fs.readFileSync(path.join(GUIDE_DIR, f), 'utf-8'));
-    LANGS.forEach(l => { if (!g[l]) throw new Error(`${f}: missing "${l}" content`); });
-    return g;
-}).sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
-
-LANGS.forEach(lang => {
-    const dir = path.join(DIST, lang, 'lost');
-    fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(path.join(dir, 'index.html'), renderHub(guides, lang));
-    guides.forEach(g => {
-        fs.writeFileSync(path.join(dir, `${g.slug}.html`), renderGuide(g, lang, guides));
-        console.log(`Generated /${lang}/lost/${g.slug}`);
-    });
-});
-
-fs.writeFileSync(path.join(DIST, 'sitemap.xml'), buildSitemap(guides));
-console.log(`Generated sitemap.xml (${guides.length} guides × ${LANGS.length} langs)`);
+main().catch(e => { console.error(e); process.exit(1); });
