@@ -25,7 +25,7 @@
 
             <!-- 한라산 예약 및 공지사항 버튼 -->
             <div class="action-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 15px 0;">
-                <button class="hallasan-action-btn btn-sm" onclick="window.open('https://visithalla.jeju.go.kr/main/main.do?language=zh_CN', '_blank')">
+                <button class="hallasan-action-btn btn-sm" onclick="window.open('https://visithalla.jeju.go.kr/main/main.do?language=' + ({ ko: 'ko_KR', en: 'en_US' }[window.getLang && window.getLang()] || 'zh_CN'), '_blank')">
                     <i class="ph-duotone ph-calendar-check" style="font-size: 1.1rem;"></i> <span data-i18n="hallasan.reserve">한라산 예약</span>
                 </button>
                 <button class="hallasan-action-btn btn-sm" onclick="window.open('https://www.jeju.go.kr/hallasan/notice/notice.htm', '_blank')">

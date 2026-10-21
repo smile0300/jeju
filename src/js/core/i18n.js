@@ -1912,8 +1912,20 @@ const TRANSLATIONS = {
 
 };
 
-// 현재 언어 (기본값: zh)
-let currentLang = localStorage.getItem('jeju_lang') || 'zh';
+// 현재 언어: 저장된 선택 > 기기 언어(ko/en) > zh
+// 검색엔진 봇은 기기 언어가 en-US라도 기존처럼 zh로 렌더링한다(중국어 색인 유지)
+function detectLang() {
+    if (/bot|spider|crawl|slurp/i.test(navigator.userAgent)) return 'zh';
+    const langs = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || ''];
+    for (const l of langs) {
+        const code = String(l).toLowerCase();
+        if (code.startsWith('zh')) return 'zh';
+        if (code.startsWith('ko')) return 'ko';
+        if (code.startsWith('en')) return 'en';
+    }
+    return langs[0] ? 'en' : 'zh'; // 그 밖의 외국어 사용자는 영어가 가장 가깝다
+}
+let currentLang = localStorage.getItem('jeju_lang') || detectLang();
 
 /**
  * 번역 키에 해당하는 텍스트 반환
@@ -2058,6 +2070,26 @@ function updateLangSelector() {
     document.querySelectorAll('.lang-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.lang === currentLang);
     });
+    document.querySelectorAll('.lang-selector.show').forEach(el => el.classList.remove('show'));
+}
+
+// 하위 화면 상단바에도 언어 선택기를 붙인다 (검색으로 /airport 등에 바로 들어온 사람도 바꿀 수 있게)
+// 오른쪽에 이미 버튼이 있는 상단바(현상금 등록 등)는 건드리지 않는다
+function injectAppBarLangSelectors() {
+    document.querySelectorAll('.app-section .app-bar').forEach(bar => {
+        if (bar.querySelector('.lang-selector, .header-action-btn')) return;
+        bar.insertAdjacentHTML('beforeend', `
+            <div class="lang-selector app-bar-lang">
+                <button type="button" class="lang-icon-btn" aria-label="Language" onclick="this.closest('.lang-selector').classList.toggle('show')">
+                    <i class="ph-duotone ph-globe"></i>
+                </button>
+                <div class="lang-dropdown">
+                    <button type="button" class="lang-btn" data-lang="zh" onclick="setLanguage('zh')">CN</button>
+                    <button type="button" class="lang-btn" data-lang="ko" onclick="setLanguage('ko')">KR</button>
+                    <button type="button" class="lang-btn" data-lang="en" onclick="setLanguage('en')">EN</button>
+                </div>
+            </div>`);
+    });
 }
 
 /**
@@ -2090,11 +2122,13 @@ function _autoInit() {
     if (document.readyState === 'loading') {
         // DOMContentLoaded 이전 → 이벤트 등록 (window.load보다 훨씬 빠름)
         document.addEventListener('DOMContentLoaded', () => {
+            injectAppBarLangSelectors();
             applyTranslations();
             updateLangSelector();
         }, { once: true });
     } else {
         // DOMContentLoaded 이후 (또는 complete) → 즉시 실행
+        injectAppBarLangSelectors();
         applyTranslations();
         updateLangSelector();
     }

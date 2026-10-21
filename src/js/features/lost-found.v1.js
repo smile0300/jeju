@@ -764,7 +764,7 @@ export async function submitLostReport() {
             statusEl.textContent = `${window.t ? window.t('lost.report.failed') : '오류 발생: '}${e.message}`;
             statusEl.className = 'form-status error';
         } else {
-            alert(`오류 발생: ${e.message}`);
+            alert(`${window.t ? window.t('lost.report.failed') : 'Error: '}${e.message}`);
         }
     } finally {
         if (progressInterval) clearInterval(progressInterval);
@@ -1746,10 +1746,10 @@ window.submitProxyPickup = async function() {
         }
     };
 
-    if (!contact) return showError(lang === 'ko' ? '위챗 ID를 입력해주세요.' : '请输入微信 ID。');
-    if (!phone) return showError(lang === 'ko' ? '연락처(전화번호)를 입력해주세요.' : '请输入联系电话。');
-    if (!address) return showError(lang === 'ko' ? '최종 배송 주소를 입력해주세요.' : '请输入最终收货地址。');
-    if (!privacyCheck?.checked) return showError(lang === 'ko' ? '개인정보 수집 및 이용에 동의해주세요.' : '请同意个人信息收集及使用。');
+    if (!contact) return showError(lang === 'ko' ? '위챗 ID를 입력해주세요.' : lang === 'en' ? 'Please enter your WeChat ID.' : '请输入微信 ID。');
+    if (!phone) return showError(lang === 'ko' ? '연락처(전화번호)를 입력해주세요.' : lang === 'en' ? 'Please enter your phone number.' : '请输入联系电话。');
+    if (!address) return showError(lang === 'ko' ? '최종 배송 주소를 입력해주세요.' : lang === 'en' ? 'Please enter the delivery address.' : '请输入最终收货地址。');
+    if (!privacyCheck?.checked) return showError(lang === 'ko' ? '개인정보 수집 및 이용에 동의해주세요.' : lang === 'en' ? 'Please agree to the collection and use of personal information.' : '请同意个人信息收集及使用。');
 
     // HEIC는 이 브라우저가 못 여는 경우에만 막는다 (열리면 canvas에서 JPEG로 변환됨)
     const isHeic = (f) => {
@@ -1774,14 +1774,14 @@ window.submitProxyPickup = async function() {
         const apiUrl = `${CONFIG.PROXY_URL}/api/lost-report`;
 
         // 파일 인코딩 대기 (1~2초 소요)
-        statusDiv.innerHTML = `<span style="color: var(--label-secondary);">${lang === 'ko' ? '파일 업로드 중...' : '正在上传文件...'}</span>`;
+        statusDiv.innerHTML = `<span style="color: var(--label-secondary);">${lang === 'ko' ? '파일 업로드 중...' : lang === 'en' ? 'Uploading files...' : '正在上传文件...'}</span>`;
         statusDiv.style.display = 'block';
         
         const passportBase64 = await readAsBase64(passportFile);
         const itemBase64 = await readAsBase64(itemFile);
         const reservationBase64 = await readAsBase64(reservationFile);
 
-        const baseText = lang === 'ko' ? '처리 중...' : '处理中...';
+        const baseText = lang === 'ko' ? '처리 중...' : lang === 'en' ? 'Processing...' : '处理中...';
         statusDiv.innerHTML = `<span style="color: var(--label-secondary);">${baseText} 0%</span>`;
         
         let progress = 0;
@@ -1830,7 +1830,7 @@ window.submitProxyPickup = async function() {
         });
         
         if (statusDiv) {
-            const baseText = lang === 'ko' ? '처리 중...' : '处理中...';
+            const baseText = lang === 'ko' ? '처리 중...' : lang === 'en' ? 'Processing...' : '处理中...';
             statusDiv.innerHTML = `<span style="color: var(--label-secondary);">${baseText} 100%</span>`;
         }
         

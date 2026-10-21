@@ -962,3 +962,21 @@ select.res-type-badge {
     color: #991b1b;
     border: 1px solid #fecaca;
 }
+
+/* 하위 화면 상단바 언어 선택기 (i18n.js injectAppBarLangSelectors) */
+.app-bar .app-bar-lang {
+    position: absolute;
+    right: var(--space-4); /* 16px */
+    z-index: 2001;
+}
+.app-bar .app-bar-lang .lang-icon-btn {
+    width: var(--touch-target);
+    height: var(--touch-target);
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+.app-bar .app-bar-lang .lang-dropdown {
+    top: 4px;
+    right: 44px;
+}

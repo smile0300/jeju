@@ -5,7 +5,7 @@
         <div class="top-controls">
             <!-- 언어 선택기 (우측 상단) -->
             <div class="lang-selector">
-                <button class="lang-icon-btn" onclick="document.querySelector('.lang-selector').classList.toggle('show')">
+                <button class="lang-icon-btn" onclick="this.closest('.lang-selector').classList.toggle('show')">
                     <i class="ph-duotone ph-globe"></i>
                 </button>
                 <div class="lang-dropdown">

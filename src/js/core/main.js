@@ -383,10 +383,10 @@ window.addEventListener('popstate', (event) => {
 
 // Close lang selector when clicking outside
 document.addEventListener('click', function(e) {
-    const langSelector = document.querySelector('.lang-selector');
-    if (langSelector && !e.target.closest('.lang-selector')) {
-        langSelector.classList.remove('show');
-    }
+    const openSelector = e.target.closest('.lang-selector');
+    document.querySelectorAll('.lang-selector.show').forEach(el => {
+        if (el !== openSelector) el.classList.remove('show');
+    });
 });
 
 window.addEventListener('load', () => {
