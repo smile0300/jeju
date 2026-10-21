@@ -18,7 +18,8 @@ export async function onRequest(context) {
   }
 
   const cache = caches.default;
-  const cacheKey = new Request(`https://jeju-live.com/api/image-proxy?id=${fileId}`);
+  // v=2: 원본 대신 1000px 축소본으로 바뀜 (예전 원본 캐시를 쓰지 않도록)
+  const cacheKey = new Request(`https://jeju-live.com/api/image-proxy?id=${fileId}&v=2`);
   const hit = await cache.match(cacheKey);
   if (hit) return hit;
 

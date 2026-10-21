@@ -408,7 +408,16 @@ function publicImage_(id) {
   try {
     var file = DriveApp.getFileById(id);
     if (file.getSharingAccess() !== DriveApp.Access.ANYONE_WITH_LINK) return json_({ error: 'not public' });
-    var blob = file.getBlob();
+    // 원본(휴대폰 사진은 수 MB) 대신 드라이브가 만들어 주는 폭 1000px 축소본 — 실패하면 원본
+    var blob = null;
+    try {
+      var thumb = UrlFetchApp.fetch('https://drive.google.com/thumbnail?sz=w1000&id=' + id, {
+        headers: { Authorization: 'Bearer ' + ScriptApp.getOAuthToken() },
+        muteHttpExceptions: true
+      });
+      if (thumb.getResponseCode() === 200 && /^image\//.test(thumb.getHeaders()['Content-Type'] || '')) blob = thumb.getBlob();
+    } catch (e) { /* 원본으로 */ }
+    if (!blob) blob = file.getBlob();
     if (blob.getBytes().length > 8 * 1024 * 1024) return json_({ error: 'too large' });
     return json_({ mime: blob.getContentType(), data: Utilities.base64Encode(blob.getBytes()) });
   } catch (e) {
