@@ -647,6 +647,22 @@
     cursor: pointer;
 }
 
+/* ===== 차량 홈 확장 (좌우 包车 / 拼车) ===== */
+.home-item.item-food.charter-active {
+    background: rgba(230, 119, 0, 0.10);
+    border-color: rgba(230, 119, 0, 0.50);
+    box-shadow:
+        0 0 0 2px rgba(230, 119, 0, 0.18),
+        var(--shadow-sm);
+    transform: scale(1); /* hover scale 방지 */
+}
+.home-item.item-food.charter-active .coming-soon-badge { visibility: hidden; } /* 뒤로 버튼에는 BETA 표시 안 함 */
+.home-item.item-charter-sub {
+    cursor: pointer;
+    background: linear-gradient(135deg, #fffaf0 0%, #ffedd5 100%);
+    border: 1px solid rgba(230, 119, 0, 0.35);
+}
+
 /* ===== 준비중 페이지 공통 스타일 ===== */
 .coming-soon-page {
     display: flex;

@@ -7,10 +7,10 @@
         { origId: 'home-hallasan-btn', subId: 'lost-sub-search',   animClass: 'lost-sub-in-top',    outClass: 'lost-sub-out-top' },
         { origId: 'home-festival-btn', subId: 'lost-sub-status',   animClass: 'lost-sub-in-left',   outClass: 'lost-sub-out-left' },
         { origId: 'home-reward-btn',   subId: 'lost-sub-register', animClass: 'lost-sub-in-right',  outClass: 'lost-sub-out-right' },
-        { origId: 'home-course-btn',   subId: 'lost-sub-proxy',    animClass: 'lost-sub-in-bottom', outClass: 'lost-sub-out-bottom' },
+        { origId: 'home-food-btn',     subId: 'lost-sub-proxy',    animClass: 'lost-sub-in-bottom', outClass: 'lost-sub-out-bottom' }, // 가운데 아래 칸 = 차량
     ];
 
-    const CORNER_BTN_IDS = ['home-weather-btn', 'home-airport-btn', 'home-food-btn', 'home-reservation-btn'];
+    const CORNER_BTN_IDS = ['home-weather-btn', 'home-airport-btn', 'home-course-btn', 'home-reservation-btn'];
 
     // 펼침도 기록 한 칸으로 남겨, 휴대폰 뒤로가기가 사이트를 떠나지 않고 메뉴를 접게 한다
     function pushHomeExpand(kind) {
@@ -32,6 +32,7 @@
     window.expandLostGrid = function() {
         if (lostExpanded) return;
         if (window.collapseReservationGrid) window.collapseReservationGrid();
+        if (window.collapseCharterGrid) window.collapseCharterGrid();
         
         lostExpanded = true;
         document.querySelector('.home-grid').classList.add('lost-expanded-grid');
@@ -172,16 +173,19 @@
     window.syncHomeExpand = function(kind) {
         if (kind === 'lost') { if (!lostExpanded) window.expandLostGrid(); }
         else if (kind === 'res') { if (!reservationExpanded) window.expandReservationGrid(); }
+        else if (kind === 'charter') { if (!charterExpanded) window.expandCharterGrid(); }
         else if (!window.keepLostMenuOpen) {
             window.collapseLostGrid();
             window.collapseReservationGrid();
+            window.collapseCharterGrid();
         }
     };
 
     window.expandReservationGrid = function() {
         if (reservationExpanded) return;
-        // 분실물이 열려있으면 먼저 닫기
+        // 분실물·차량이 열려있으면 먼저 닫기
         if (window.collapseLostGrid) window.collapseLostGrid();
+        if (window.collapseCharterGrid) window.collapseCharterGrid();
 
         reservationExpanded = true;
         document.querySelector('.home-grid').classList.add('res-expanded-grid');
@@ -256,4 +260,114 @@
         window.currentReservationType = type;
         window.collapseReservationGrid();
         if (window.showSection) window.showSection('reservation');
+    };
+
+    // ===== 차량 홈버튼 → 좌우 包车 / 拼车 토글 =====
+
+    let charterExpanded = false;
+
+    // 차량 버튼(가운데 아래)의 왼쪽·오른쪽 칸을 서브 버튼으로 대체
+    const CHARTER_REPLACE_MAP = [
+        { origId: 'home-course-btn',      subId: 'charter-sub-baoche', animClass: 'lost-sub-in-left',  outClass: 'lost-sub-out-left' },
+        { origId: 'home-reservation-btn', subId: 'charter-sub-pinche', animClass: 'lost-sub-in-right', outClass: 'lost-sub-out-right' },
+    ];
+
+    // 펼친 동안 숨길 나머지 버튼 (그리드 자리 유지를 위해 visibility 사용)
+    const CHARTER_HIDE_IDS = ['home-weather-btn', 'home-hallasan-btn', 'home-airport-btn', 'home-festival-btn', 'home-lost-btn', 'home-reward-btn'];
+
+    window.toggleCharterExpand = function() {
+        if (charterExpanded) {
+            if (history.state && history.state.homeExpand === 'charter') history.back(); // popstate가 접는다
+            else window.collapseCharterGrid();
+        } else {
+            window.expandCharterGrid();
+            pushHomeExpand('charter');
+        }
+    };
+
+    window.expandCharterGrid = function() {
+        if (charterExpanded) return;
+        if (window.collapseLostGrid) window.collapseLostGrid();
+        if (window.collapseReservationGrid) window.collapseReservationGrid();
+
+        charterExpanded = true;
+
+        CHARTER_REPLACE_MAP.forEach(function(item, i) {
+            var orig = document.getElementById(item.origId);
+            var sub  = document.getElementById(item.subId);
+            if (!orig || !sub) return;
+
+            orig.parentNode.insertBefore(sub, orig);
+            orig.style.display = 'none';
+            sub.style.display = '';
+            sub.style.visibility = 'hidden';
+
+            setTimeout(function() {
+                sub.style.visibility = '';
+                sub.classList.add(item.animClass);
+            }, i * 30);
+        });
+
+        CHARTER_HIDE_IDS.forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.style.visibility = 'hidden';
+        });
+
+        // 차량 버튼 강조 및 뒤로가기로 변경
+        var btn = document.getElementById('home-food-btn');
+        if (btn) {
+            btn.classList.add('charter-active');
+            var icon  = btn.querySelector('.item-icon i');
+            var label = btn.querySelector('.item-label');
+            if (icon)  icon.className = 'ph-bold ph-arrow-left color-food';
+            if (label) label.setAttribute('data-i18n', 'lost.home.back');
+        }
+
+        if (window.applyTranslations) window.applyTranslations();
+    };
+
+    window.collapseCharterGrid = function() {
+        if (!charterExpanded) return;
+        charterExpanded = false;
+
+        CHARTER_REPLACE_MAP.forEach(function(item) {
+            var orig = document.getElementById(item.origId);
+            var sub  = document.getElementById(item.subId);
+            if (!orig || !sub) return;
+
+            sub.classList.remove(item.animClass);
+            sub.classList.add(item.outClass);
+
+            setTimeout(function() {
+                sub.style.display = 'none';
+                sub.style.visibility = '';
+                sub.classList.remove(item.outClass);
+                orig.style.display = '';
+            }, 250);
+        });
+
+        var btn = document.getElementById('home-food-btn');
+        if (btn) {
+            btn.classList.remove('charter-active');
+            var icon  = btn.querySelector('.item-icon i');
+            var label = btn.querySelector('.item-label');
+            if (icon)  icon.className = 'ph-duotone ph-van color-food';
+            if (label) label.setAttribute('data-i18n', 'nav.charter');
+        }
+
+        if (window.applyTranslations) window.applyTranslations();
+
+        setTimeout(function() {
+            CHARTER_HIDE_IDS.forEach(function(id) {
+                var el = document.getElementById(id);
+                if (el) el.style.visibility = '';
+            });
+        }, 250);
+    };
+
+    // 차량 서브 버튼 동작: 'guide' = 包车 안내를 펼쳐 맨 위에, 'carpool' = 拼车 달력 (기본 화면)
+    window.goToCharter = function(focus) {
+        window.charterFocus = focus;
+        window.collapseCharterGrid();
+        if (window.showSection) window.showSection('charter');
     };

@@ -97,8 +97,8 @@ function compareHtml() {
         <p class="pl-muted pl-hint">${tr('charter.compare.note')}</p>`;
 }
 
-function guideHtml() {
-    return `<details class="pl-card pl-guide">
+function guideHtml(open = false) {
+    return `<details class="pl-card pl-guide"${open ? ' open' : ''}>
         <summary><i class="ph-duotone ph-info"></i> ${tr('charter.guide.toggle')}</summary>
         <h4 class="pl-h4">${tr('charter.sec.price')}</h4>
         <ul class="pl-price">${CHARTER_PRICES.map(p => `
@@ -307,7 +307,12 @@ async function render() {
         });
     }
 
+    // 홈의 包车 버튼으로 들어오면 대절 안내를 펼쳐 맨 위에 둔다 (한 번만 적용)
+    const guideFirst = window.charterFocus === 'guide';
+    window.charterFocus = null;
+
     root.innerHTML = `
+        ${guideFirst ? guideHtml(true) : ''}
         <p class="pl-intro">${tr('carpool.intro')}</p>
         <div class="pl-head-row">
             <h3 class="pl-h">${tr('charter.cal.title')}</h3>
@@ -316,7 +321,7 @@ async function render() {
         <div id="charter-mode"></div>
         <div class="pl-card pl-cal"><div id="charter-cal"></div></div>
         <div id="charter-day"><p class="pl-muted"><i class="ph-duotone ph-circle-notch spin"></i></p></div>
-        ${guideHtml()}`;
+        ${guideFirst ? '' : guideHtml()}`;
 
     await loadPosts();
     if (!document.getElementById('charter-cal')) return; // 불러오는 사이 화면이 바뀐 경우
