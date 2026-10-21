@@ -381,6 +381,27 @@ window.addEventListener('popstate', (event) => {
     }
 });
 
+// 오프라인 배너: 신호가 끊겼거나 서비스워커가 마지막 저장 데이터를 돌려준 경우 화면 하단에 표시
+function setOfflineBanner(show) {
+    let el = document.getElementById('offline-banner');
+    if (!el && !show) return;
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'offline-banner';
+        el.className = 'offline-banner';
+        el.setAttribute('role', 'status');
+        el.innerHTML = '<i class="ph-duotone ph-wifi-slash"></i> <span data-i18n="offline.banner"></span>';
+        document.body.appendChild(el);
+    }
+    el.querySelector('span').textContent = t('offline.banner');
+    el.classList.toggle('show', show);
+}
+window.addEventListener('offline', () => setOfflineBanner(true));
+window.addEventListener('online', () => setOfflineBanner(false));
+window.addEventListener('jeju:offline-data', () => setOfflineBanner(true));
+window.addEventListener('jeju:online-data', () => { if (navigator.onLine) setOfflineBanner(false); });
+if (!navigator.onLine) setOfflineBanner(true);
+
 // Close lang selector when clicking outside
 document.addEventListener('click', function(e) {
     const openSelector = e.target.closest('.lang-selector');

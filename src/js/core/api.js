@@ -14,6 +14,8 @@ export async function fetchPublicData(endpoint, params = {}) {
     if (!res.ok) {
         throw new Error(`API Request Failed: ${res.status}`);
     }
+    // 서비스워커가 네트워크 대신 마지막 저장 응답을 돌려줬는지 화면에 알린다 (main.js 오프라인 배너)
+    window.dispatchEvent(new Event(res.headers.get('X-Jeju-Offline') ? 'jeju:offline-data' : 'jeju:online-data'));
     return res;
 }
 

@@ -1462,3 +1462,29 @@ i.ph-duotone.hover-scale:hover {
     color: var(--label-secondary);
 }
 
+/* 오프라인 배너 (main.js setOfflineBanner) */
+.offline-banner {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+    background: #4E5968;
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-align: center;
+    transform: translateY(100%);
+    visibility: hidden;
+    transition: transform 0.25s ease, visibility 0.25s;
+}
+.offline-banner.show {
+    transform: translateY(0);
+    visibility: visible;
+}
+
