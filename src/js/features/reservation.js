@@ -154,6 +154,7 @@ export async function submitReservation(prefix = 'res') {
             showStatus(statusEl, window.t ? window.t('res.success') : '✅ 申请已提交！我们将尽快通过微信与您联系。', 'success');
             showWechatQr(prefix);
             // 폼 초기화
+            window.clearFormDraft?.('draft_reservation');
             if (wechatEl) wechatEl.value = '';
             if (nameEl) nameEl.value = '';
             if (storeEl) storeEl.value = '';

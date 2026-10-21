@@ -2,6 +2,7 @@
 import { CONFIG } from './config.js';
 import { initI18n, t } from './i18n.js';
 import { showToast } from './utils.js';
+import { attachFormDraft } from './form-draft.js';
 import { initWebPushNotifications, getWebPushState } from './web-push.js';
 import { initPushNotifications } from './push.js';
 import { Capacitor } from '@capacitor/core';
@@ -226,6 +227,7 @@ window.backToLostMenu = () => {
     const activeSection = document.querySelector('.app-section.active');
     if (activeSection) {
         if (activeSection.id === 'lost-report') {
+            window.clearFormDraft?.('draft_lost_report'); // 스스로 나간 경우엔 임시 저장도 버린다
             window._resetLostReportForm && window._resetLostReportForm();
         } else if (activeSection.id === 'pickup') {
             window._resetProxyForm && window._resetProxyForm();
@@ -430,6 +432,10 @@ window.addEventListener('load', () => {
     }
     window.updatePushOptin();
 
+    // 신청서 임시 저장 (탭이 새로 고쳐져도 입력 유지)
+    attachFormDraft('reservation', 'draft_reservation');
+    attachFormDraft('lost-report', 'draft_lost_report');
+    attachFormDraft('pickup', 'draft_proxy');
 
     // 홈 화면 동적 배너를 위한 필수 호출
     fetchWeatherAlerts(); 

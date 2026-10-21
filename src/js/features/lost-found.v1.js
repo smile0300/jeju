@@ -337,6 +337,8 @@ export function showWechatQR() {
 export function openLostReportModal() {
     showSection('lost-report');
     resetLostReportForm();
+    // 새로 고침 전에 쓰던 내용이 있으면 되살린다 (form-draft.js)
+    window.restoreFormDraft?.('lost-report', 'draft_lost_report');
 }
 
 /** 분실물 등록 폼 완전 초기화 */
@@ -730,6 +732,7 @@ export async function submitLostReport() {
             // else if (typeof closeLostReportModal === 'function') closeLostReportModal(true);
             
             // 폼 초기화
+            window.clearFormDraft?.('draft_lost_report');
             const form = document.querySelector('.lost-report-form-content');
             if (form) {
                 const inputs = form.querySelectorAll('input, textarea');
@@ -1545,6 +1548,7 @@ window.openProxyPickupModal = function(caseId, itemName, originalWechat, region,
 
 /** 대리수령 폼 완전 초기화 (페이지에서 나갈 때 호출) */
 window._resetProxyForm = function() {
+    window.clearFormDraft?.('draft_proxy');
     [
         'proxy-name', 'proxy-contact', 'proxy-phone', 'proxy-address',
         'proxy-hotel-name', 'proxy-hotel-booker', 'proxy-room-num',
