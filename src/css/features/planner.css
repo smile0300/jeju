@@ -398,20 +398,35 @@
 
 .pl-root .reservation-form { margin-top: var(--space-3); }
 
-/* ── 차량 대절: 이용 방법(접힘) · 동승 달력 ── */
-.pl-guide summary {
-    display: flex;
+/* ── 차량 대절: 包车/拼车 탭 · 동승 달력 ── */
+.pl-seg {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    padding: 4px;
+    margin-bottom: var(--space-4);
+    border-radius: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--separator);
+}
+.pl-seg-btn {
+    display: inline-flex;
     align-items: center;
-    gap: var(--space-2);
+    justify-content: center;
+    gap: 6px;
     min-height: 44px;
+    border: none;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--label-secondary);
+    font: inherit;
     font-size: 0.95rem;
     font-weight: 800;
     cursor: pointer;
-    list-style: none;
 }
-.pl-guide summary::-webkit-details-marker { display: none; }
-.pl-guide summary::after { content: '▾'; margin-left: auto; color: var(--label-secondary); }
-.pl-guide[open] summary::after { content: '▴'; }
+.pl-seg-btn[aria-selected="true"] { background: var(--accent); color: #fff; }
+.pl-guide { margin-top: var(--space-4); }
+.pl-guide > .pl-h4:first-child { margin-top: 0; }
 .pl-h4 { margin: var(--space-4) 0 var(--space-2); font-size: 0.95rem; font-weight: 800; }
 
 .pl-cal { padding: var(--space-3) var(--space-2); overflow: hidden; }

@@ -6,7 +6,8 @@ import { CHARTER_PRICES, CHARTER_COMPARE, CHARTER_UPDATED } from '../../data/cha
 // 차량 대절/동승: 달력에서 날짜를 골라 그날의 동승 모집을 보고, 자기 일정을 올리고, 댓글로 협의한다.
 // - 모집글은 올리는 즉시 공개된다 (운영자는 시트의 Hidden 칸에 Y를 넣어 숨길 수 있다).
 // - 지난 날짜의 글은 지우지 않고 "종료"로 남긴다 (이력이 쌓여야 다음 사람이 믿고 쓴다).
-// - 이 사이트는 차량을 운영하지 않는다. 참고 요금·업체 고르는 법은 "이용 방법"을 눌러야 펼쳐진다.
+// - 이 사이트는 차량을 운영하지 않는다.
+// - 화면은 위쪽 탭으로 나뉜다: 包车(참고 요금·업체 비교·고르는 법) / 拼车(동승 달력).
 
 const CHECKS = ['plate', 'agency', 'insurance', 'license', 'price', 'cancel'];
 const LOCALES = { zh: 'zh-CN', ko: 'ko-KR', en: 'en-US' };
@@ -14,7 +15,7 @@ const HISTORY_DAYS = 90;                   // 달력에서 되돌아볼 수 있�
 const MOCK_KEY = 'jeju_carpool_mock';
 const IS_LOCAL = ['localhost', '127.0.0.1'].includes(window.location.hostname);
 
-const state = { posts: [], comments: {}, selected: null, loaded: false, mock: false, failed: false, formOpen: false };
+const state = { posts: [], comments: {}, selected: null, loaded: false, mock: false, failed: false, formOpen: false, view: 'baoche' };
 
 const pad = (n) => String(n).padStart(2, '0');
 const toIso = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -97,10 +98,17 @@ function compareHtml() {
         <p class="pl-muted pl-hint">${tr('charter.compare.note')}</p>`;
 }
 
-function guideHtml(open = false) {
-    return `<details class="pl-card pl-guide"${open ? ' open' : ''}>
-        <summary><i class="ph-duotone ph-info"></i> ${tr('charter.guide.toggle')}</summary>
-        <h4 class="pl-h4">${tr('charter.sec.price')}</h4>
+function tabsHtml() {
+    return `<div class="pl-seg" role="tablist">${['baoche', 'pinche'].map(v => `
+        <button type="button" role="tab" class="pl-seg-btn" data-view="${v}" aria-selected="${state.view === v}">
+            <i class="ph-duotone ${v === 'baoche' ? 'ph-van' : 'ph-users-three'}"></i> ${tr(`charter.tab.${v}`)}</button>`).join('')}
+    </div>`;
+}
+
+// 包车: 참고 요금 · 업체별 비교 · 고르는 법
+function baocheHtml() {
+    return `<p class="pl-intro">${tr('charter.baoche.intro')}</p>
+        <div class="pl-card pl-guide"><h4 class="pl-h4">${tr('charter.sec.price')}</h4>
         <ul class="pl-price">${CHARTER_PRICES.map(p => `
             <li><span class="pl-price-name">${escapeHtml(pick(p.vehicle))}${p.sample ? `<span class="pl-badge sample">${tr('charter.price.sample')}</span>` : ''}
                     <small>${escapeHtml(pick(p.detail))}</small></span>
@@ -109,7 +117,19 @@ function guideHtml(open = false) {
         ${compareHtml()}
         <h4 class="pl-h4">${tr('charter.sec.check')}</h4>
         <ul class="pl-checklist">${CHECKS.map(c => `<li><i class="ph-duotone ph-check-circle"></i><span>${tr(`charter.check.${c}`)}</span></li>`).join('')}</ul>
-    </details>`;
+    </div>`;
+}
+
+// 拼车: 동승 달력
+function pincheHtml() {
+    return `<p class="pl-intro">${tr('carpool.intro')}</p>
+        <div class="pl-head-row">
+            <h3 class="pl-h">${tr('charter.cal.title')}</h3>
+            <button type="button" id="carpool-add-btn" class="pl-btn-add" aria-expanded="false"><i class="ph-duotone ph-plus-circle"></i> <span>${tr('carpool.add_btn')}</span></button>
+        </div>
+        <div id="charter-mode"></div>
+        <div class="pl-card pl-cal"><div id="charter-cal"></div></div>
+        <div id="charter-day"><p class="pl-muted"><i class="ph-duotone ph-circle-notch spin"></i></p></div>`;
 }
 
 function commentsHtml(post, ended) {
@@ -301,30 +321,31 @@ async function render() {
             else if (e.target.matches('.pl-comment-form')) submitComment(root, e.target);
         });
         root.addEventListener('click', async (e) => {
+            const tab = e.target.closest('.pl-seg-btn');
+            if (tab) { if (tab.dataset.view !== state.view) { state.view = tab.dataset.view; state.formOpen = false; renderView(root); } return; }
             if (e.target.closest('#carpool-add-btn')) { toggleForm(root); return; }
             const copy = e.target.closest('[data-copy]');
             if (copy && await copyText(copy.dataset.copy)) flashLabel(copy, tr('common.copied'));
         });
     }
 
-    // 홈의 包车 버튼으로 들어오면 대절 안내를 펼쳐 맨 위에 둔다 (한 번만 적용)
-    const guideFirst = window.charterFocus === 'guide';
+    // 홈의 包车/拼车 버튼으로 들어오면 해당 탭을 연다 (한 번만 적용). 그 밖에는 마지막에 보던 탭을 유지
+    if (window.charterFocus === 'guide') state.view = 'baoche';
+    else if (window.charterFocus === 'carpool') state.view = 'pinche';
     window.charterFocus = null;
 
-    root.innerHTML = `
-        ${guideFirst ? guideHtml(true) : ''}
-        <p class="pl-intro">${tr('carpool.intro')}</p>
-        <div class="pl-head-row">
-            <h3 class="pl-h">${tr('charter.cal.title')}</h3>
-            <button type="button" id="carpool-add-btn" class="pl-btn-add" aria-expanded="false"><i class="ph-duotone ph-plus-circle"></i> <span>${tr('carpool.add_btn')}</span></button>
-        </div>
-        <div id="charter-mode"></div>
-        <div class="pl-card pl-cal"><div id="charter-cal"></div></div>
-        <div id="charter-day"><p class="pl-muted"><i class="ph-duotone ph-circle-notch spin"></i></p></div>
-        ${guideFirst ? '' : guideHtml()}`;
+    root.innerHTML = `${tabsHtml()}<div id="charter-view"></div>`;
+    await renderView(root);
+}
 
+async function renderView(root) {
+    root.querySelectorAll('.pl-seg-btn').forEach(b => b.setAttribute('aria-selected', String(b.dataset.view === state.view)));
+    const view = root.querySelector('#charter-view');
+    if (state.view === 'baoche') { view.innerHTML = baocheHtml(); return; }
+
+    view.innerHTML = pincheHtml();
     await loadPosts();
-    if (!document.getElementById('charter-cal')) return; // 불러오는 사이 화면이 바뀐 경우
+    if (!document.getElementById('charter-cal')) return; // 불러오는 사이 화면·탭이 바뀐 경우
 
     if (state.mock) root.querySelector('#charter-mode').innerHTML = `<p class="pl-draft"><i class="ph-duotone ph-warning"></i> ${tr('carpool.local_mode')}</p>`;
     initCalendar(root);
