@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>제주라이브 관리자</title>
+<style>
+  :root { --bg:#f4f6f8; --card:#fff; --text:#1c2430; --muted:#6b7684; --line:#dde2e8; --accent:#07c160; --warn:#b54708; --warn-bg:#fff4e5; --info-bg:#eef4ff; --info:#2e5aac; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#12161b; --card:#1c222a; --text:#e6eaef; --muted:#9aa4b0; --line:#2e3640; --warn:#fdb022; --warn-bg:#2d2310; --info-bg:#18243a; --info:#8fb3ff; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.5 -apple-system, "Segoe UI", "Malgun Gothic", sans-serif; }
+  main { max-width:720px; margin:0 auto; padding:16px; }
+  header { display:flex; align-items:center; justify-content:space-between; gap:8px; margin:4px 0 12px; }
+  h1 { font-size:20px; margin:0; }
+  header a { font-size:14px; color:var(--muted); }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px; margin-bottom:12px; }
+  label { display:block; font-size:13px; color:var(--muted); margin:10px 0 4px; }
+  input, textarea, select { width:100%; font:inherit; color:inherit; background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:9px 10px; }
+  textarea { resize:vertical; min-height:60px; }
+  .row { display:flex; gap:8px; }
+  .row > * { flex:1; min-width:0; }
+  button { font:inherit; font-weight:600; border:0; border-radius:10px; padding:11px 14px; background:var(--accent); color:#fff; cursor:pointer; }
+  button:disabled { opacity:.5; }
+  button.sub { background:transparent; color:var(--text); border:1px solid var(--line); font-weight:500; padding:7px 12px; font-size:14px; }
+  .tabs { display:flex; gap:6px; margin-bottom:12px; }
+  .tabs button { flex:1; background:var(--card); color:var(--text); border:1px solid var(--line); }
+  .tabs button.on { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .toolbar { display:flex; gap:8px; margin-bottom:8px; }
+  .toolbar input { flex:2; }
+  .toolbar select { flex:1; }
+  .count { font-size:13px; color:var(--muted); margin:0 2px 10px; display:flex; justify-content:space-between; }
+  .badge { display:inline-block; font-size:12px; padding:2px 8px; border-radius:99px; background:var(--bg); border:1px solid var(--line); margin:0 4px 4px 0; }
+  .badge.strong { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
+  .item-head { display:flex; justify-content:space-between; gap:8px; align-items:flex-start; }
+  .time { font-size:12px; color:var(--muted); white-space:nowrap; }
+  .title { font-weight:600; margin:2px 0 6px; word-break:break-word; }
+  dl { display:grid; grid-template-columns:auto 1fr; gap:3px 10px; margin:6px 0 0; font-size:14px; }
+  dt { color:var(--muted); white-space:nowrap; }
+  dd { margin:0; word-break:break-word; white-space:pre-wrap; }
+  .ko { background:var(--info-bg); color:var(--info); border-radius:8px; padding:8px 10px; font-size:14px; margin-top:8px; white-space:pre-wrap; word-break:break-word; }
+  .photo { display:block; margin-top:10px; color:var(--info); font-size:14px; }
+  .photo img { max-width:100%; max-height:240px; border-radius:8px; border:1px solid var(--line); background:var(--bg); }
+  .actions { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+  .actions a { font-size:14px; color:var(--info); padding:7px 0; margin-right:6px; }
+  .hint { font-size:12px; color:var(--muted); margin-top:4px; }
+  .notes { background:var(--warn-bg); color:var(--warn); border-radius:8px; padding:8px 10px; font-size:13px; }
+  .error { color:#d92d20; font-size:14px; white-space:pre-wrap; }
+  .ok { color:var(--accent); font-size:14px; }
+  form.edit { border-top:1px dashed var(--line); margin-top:12px; padding-top:4px; }
+  form.edit .save { width:100%; margin-top:14px; }
+  details summary { cursor:pointer; font-size:13px; color:var(--muted); margin-top:8px; }
+  .more { width:100%; }
+  [hidden] { display:none !important; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>제주라이브 관리자</h1>
+    <a href="/admin-reply.html">위챗 답변 도우미 →</a>
+  </header>
+
+  <div class="card" id="login">
+    <label for="key" style="margin-top:0">관리자 비밀번호</label>
+    <div class="row">
+      <input id="key" type="password" autocomplete="current-password">
+      <button id="loginBtn" style="flex:0 0 auto">불러오기</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button data-sheet="LostReport" class="on">🔍 분실신고</button>
+    <button data-sheet="SuccessStories">📦 대리수령</button>
+  </div>
+
+  <div class="toolbar">
+    <input id="q" type="search" placeholder="검색 (위챗ID, 물건, 장소…)" autocomplete="off">
+    <select id="filter"></select>
+  </div>
+  <div class="count"><span id="count"></span><button id="reload" class="sub" type="button">↻ 새로고침</button></div>
+  <p id="error" class="error" hidden></p>
+
+  <div id="list"></div>
+  <button id="more" class="sub more" hidden>더 보기</button>
+</main>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var PAGE = 30;
+  var STEPS = { 1: '1 접수', 2: '2 물품확인중', 3: '3 수령완료', 4: '4 발송완료', 5: '5 고객 직접수령' };
+  // 대리수령 수정 폼에 먼저 보일 열 (나머지 열은 아래 '기타 열'로)
+  var SS_MAIN = ['Step', 'Date', 'Item', 'Region', 'Place', 'Note', 'AdminNote', 'MgmtNumber', 'WeChatId', 'RequesterName', 'Contact', 'Address'];
+  var SS_HIDDEN = ['CaseId', 'Timestamp', 'UserAgent'];
+  var LONG = ['Note', 'AdminNote', 'Address'];
+
+  var state = { sheet: 'LostReport', data: {}, shown: PAGE };
+
+  try { $('key').value = localStorage.getItem('adminReplyKey') || ''; } catch (e) {}
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text !== undefined && text !== null) n.textContent = String(text);
+    return n;
+  }
+  function str(v) { return v === undefined || v === null ? '' : String(v).trim(); }
+  function showError(msg) { $('error').textContent = msg || ''; $('error').hidden = !msg; }
+  function safeUrl(u) { u = str(u); return /^https:\/\//i.test(u) ? u : ''; }
+  function driveThumb(u) {
+    var m = str(u).match(/\/d\/([\w-]{20,})/) || str(u).match(/[?&]id=([\w-]{20,})/);
+    return m ? 'https://drive.google.com/thumbnail?id=' + m[1] + '&sz=w600' : '';
+  }
+
+  async function api(method, body, query) {
+    var key = $('key').value.trim();
+    if (!key) throw new Error('비밀번호를 입력하세요.');
+    var res = await fetch('/api/admin/sheet' + (query || ''), {
+      method: method,
+      headers: { 'Content-Type': 'application/json', 'X-Admin-Key': key },
+      body: body ? JSON.stringify(body) : undefined
+    });
+    var data = await res.json().catch(function () { return { error: '서버 응답을 읽을 수 없습니다 (' + res.status + ')' }; });
+    if (!res.ok || data.error) throw new Error(data.error || res.status);
+    try { localStorage.setItem('adminReplyKey', key); } catch (e) {}
+    return data;
+  }
+
+  async function load(force) {
+    showError('');
+    var sheet = state.sheet;
+    if (state.data[sheet] && !force) return render();
+    $('list').innerHTML = '';
+    $('count').textContent = '불러오는 중…';
+    $('more').hidden = true;
+    try {
+      state.data[sheet] = await api('GET', null, '?sheet=' + sheet);
+      $('login').hidden = true;
+      buildFilter();
+      render();
+    } catch (e) {
+      $('count').textContent = '';
+      showError(e.message);
+      if (/비밀번호/.test(e.message)) $('login').hidden = false;
+    }
+  }
+
+  function buildFilter() {
+    var sel = $('filter');
+    var rows = (state.data[state.sheet] || {}).rows || [];
+    var prev = sel.value;
+    sel.innerHTML = '';
+    var opts = [['', '전체']];
+    if (state.sheet === 'LostReport') {
+      var cats = {};
+      rows.forEach(function (r) { var c = str(r.ItemCategory); if (c) cats[c] = (cats[c] || 0) + 1; });
+      Object.keys(cats).sort().forEach(function (c) { opts.push([c, c + ' (' + cats[c] + ')']); });
+    } else {
+      Object.keys(STEPS).forEach(function (s) {
+        var n = rows.filter(function (r) { return str(r.Step) === s; }).length;
+        opts.push([s, STEPS[s] + ' (' + n + ')']);
+      });
+    }
+    opts.forEach(function (o) { var op = el('option', '', o[1]); op.value = o[0]; sel.appendChild(op); });
+    sel.value = opts.some(function (o) { return o[0] === prev; }) ? prev : '';
+  }
+
+  function filtered() {
+    var rows = (state.data[state.sheet] || {}).rows || [];
+    var q = $('q').value.trim().toLowerCase();
+    var f = $('filter').value;
+    return rows.filter(function (r) {
+      if (f && str(state.sheet === 'LostReport' ? r.ItemCategory : r.Step) !== f) return false;
+      if (!q) return true;
+      return Object.keys(r).some(function (k) { return str(r[k]).toLowerCase().indexOf(q) !== -1; });
+    });
+  }
+
+  function render() {
+    var rows = filtered();
+    var list = $('list');
+    list.innerHTML = '';
+    var total = ((state.data[state.sheet] || {}).rows || []).length;
+    $('count').textContent = rows.length === total ? '총 ' + total + '건' : rows.length + '건 / 전체 ' + total + '건';
+    rows.slice(0, state.shown).forEach(function (r) {
+      list.appendChild(state.sheet === 'LostReport' ? lostCard(r) : successCard(r));
+    });
+    $('more').hidden = rows.length <= state.shown;
+  }
+
+  function addPairs(dl, pairs) {
+    pairs.forEach(function (p) {
+      if (!str(p[1])) return;
+      dl.appendChild(el('dt', '', p[0]));
+      dl.appendChild(el('dd', '', p[1]));
+    });
+  }
+  function joinNonEmpty(arr, sep) { return arr.map(str).filter(Boolean).join(sep); }
+
+  function copyBtn(label, text) {
+    var b = el('button', 'sub', label);
+    b.type = 'button';
+    b.addEventListener('click', async function () {
+      try { await navigator.clipboard.writeText(text); } catch (e) { window.prompt('복사하세요', text); return; }
+      b.textContent = '✅ 복사됨';
+      setTimeout(function () { b.textContent = label; }, 1500);
+    });
+    return b;
+  }
+
+  function rawDetails(r) {
+    var d = el('details');
+    d.appendChild(el('summary', '', '시트 원본 전체 보기 (' + r._row + '행)'));
+    var dl = el('dl');
+    addPairs(dl, Object.keys(r).filter(function (k) { return k.charAt(0) !== '_'; }).map(function (k) { return [k, r[k]]; }));
+    d.appendChild(dl);
+    return d;
+  }
+
+  function lostCard(r) {
+    var c = el('div', 'card');
+    var head = el('div', 'item-head');
+    var badges = el('div');
+    [r.ItemCategory, r.City, r.RegionCategory].forEach(function (t, i) {
+      if (str(t)) badges.appendChild(el('span', i === 0 ? 'badge strong' : 'badge', t));
+    });
+    head.appendChild(badges);
+    head.appendChild(el('span', 'time', r.Timestamp));
+    c.appendChild(head);
+    if (str(r.Specifics)) c.appendChild(el('div', 'title', r.Specifics));
+
+    var dl = el('dl');
+    addPairs(dl, [
+      ['분실 일시', joinNonEmpty([r.Date, r.Time], ' ')],
+      ['장소', r.DetailLocation],
+      ['호텔', joinNonEmpty([r.HotelName, r.hotelRoom && r.hotelRoom + '호', r.HotelDates], ' · ')],
+      ['예약자', r.HotelBooker],
+      ['차량', r.CarNumber],
+      ['탑승', joinNonEmpty([r.BoardLoc, r.BoardTime], ' ')],
+      ['하차', joinNonEmpty([r.AlightLoc, r.AlightTime], ' ')],
+      ['위챗', r.WechatId]
+    ]);
+    c.appendChild(dl);
+    if (str(r._ko)) c.appendChild(el('div', 'ko', '🇰🇷 ' + str(r._ko)));
+
+    var photo = safeUrl(r.PhotoURL);
+    if (photo) {
+      var a = el('a', 'photo');
+      a.href = photo; a.target = '_blank'; a.rel = 'noopener';
+      var img = el('img');
+      img.loading = 'lazy'; img.alt = '분실물 사진';
+      img.src = driveThumb(photo) || photo;
+      img.onerror = function () { a.textContent = '📷 사진 열기'; };
+      a.appendChild(img);
+      c.appendChild(a);
+    }
+
+    var act = el('div', 'actions');
+    if (str(r.WechatId)) act.appendChild(copyBtn('위챗ID 복사', str(r.WechatId)));
+    c.appendChild(act);
+    c.appendChild(rawDetails(r));
+    return c;
+  }
+
+  function successCard(r) {
+    var c = el('div', 'card');
+    var head = el('div', 'item-head');
+    var badges = el('div');
+    badges.appendChild(el('span', 'badge strong', r.CaseId));
+    badges.appendChild(el('span', 'badge', STEPS[str(r.Step)] || ('Step ' + str(r.Step))));
+    if (!str(r.Date)) badges.appendChild(el('span', 'badge', '사이트 비공개'));
+    head.appendChild(badges);
+    head.appendChild(el('span', 'time', r.Date || r.Timestamp));
+    c.appendChild(head);
+    c.appendChild(el('div', 'title', joinNonEmpty([r.Item, r.Place], ' · ') || '(물건 미입력)'));
+
+    var dl = el('dl');
+    addPairs(dl, [['지역', r.Region], ['위챗', r.WeChatId], ['신청자', r.RequesterName], ['관리번호', r.MgmtNumber], ['메모', r.AdminNote], ['공개 노트', r.Note]]);
+    c.appendChild(dl);
+
+    var act = el('div', 'actions');
+    var editBtn = el('button', 'sub', '✏️ 수정');
+    editBtn.type = 'button';
+    act.appendChild(editBtn);
+    if (str(r.WeChatId)) act.appendChild(copyBtn('위챗ID 복사', str(r.WeChatId)));
+    [['ItemImg', '물건 사진'], ['PassportPhoto', '여권'], ['ReservationPhoto', '예약 캡처']].forEach(function (p) {
+      var u = safeUrl(r[p[0]]);
+      if (!u) return;
+      var a = el('a', '', '📷 ' + p[1]);
+      a.href = u; a.target = '_blank'; a.rel = 'noopener';
+      act.appendChild(a);
+    });
+    c.appendChild(act);
+
+    editBtn.addEventListener('click', function () {
+      var f = c.querySelector('form.edit');
+      if (f) { f.remove(); editBtn.textContent = '✏️ 수정'; return; }
+      c.appendChild(editForm(r));
+      editBtn.textContent = '닫기';
+    });
+    return c;
+  }
+
+  function field(name, value) {
+    var wrap = el('div');
+    var id = 'f_' + Math.random().toString(36).slice(2);
+    var lab = el('label', '', name);
+    lab.htmlFor = id;
+    wrap.appendChild(lab);
+    var input;
+    if (name === 'Step') {
+      input = el('select');
+      Object.keys(STEPS).forEach(function (s) { var o = el('option', '', STEPS[s]); o.value = s; input.appendChild(o); });
+      if (!STEPS[str(value)]) { var o = el('option', '', str(value) || '(비어 있음)'); o.value = str(value); input.appendChild(o); }
+    } else if (LONG.indexOf(name) !== -1) {
+      input = el('textarea');
+    } else {
+      input = el('input');
+      if (name === 'Date' && (!str(value) || /^\d{4}-\d{2}-\d{2}$/.test(str(value)))) input.type = 'date';
+    }
+    input.id = id;
+    input.name = name;
+    input.value = str(value);
+    input.dataset.orig = str(value);
+    wrap.appendChild(input);
+    if (name === 'Date') wrap.appendChild(el('div', 'hint', '비워 두면 사이트 대리수령 목록에 표시되지 않습니다.'));
+    return wrap;
+  }
+
+  function editForm(r) {
+    var form = el('form', 'edit');
+    var headers = (state.data.SuccessStories || {}).headers || [];
+    var main = SS_MAIN.filter(function (h) { return headers.indexOf(h) !== -1; });
+    var rest = headers.filter(function (h) { return main.indexOf(h) === -1 && SS_HIDDEN.indexOf(h) === -1; });
+
+    var row1 = el('div', 'row');
+    ['Step', 'Date'].forEach(function (h) { if (main.indexOf(h) !== -1) row1.appendChild(field(h, r[h])); });
+    form.appendChild(row1);
+    main.filter(function (h) { return h !== 'Step' && h !== 'Date'; }).forEach(function (h) { form.appendChild(field(h, r[h])); });
+    form.appendChild(el('div', 'notes', 'Item·Region·Place(한국어)를 고치면 zh/en 번역은 저장할 때 자동으로 다시 만듭니다. 번역을 직접 고치려면 아래 \'기타 열\'에서 수정하세요.'));
+
+    if (rest.length) {
+      var d = el('details');
+      d.appendChild(el('summary', '', '기타 열 (번역·사진 링크 등 ' + rest.length + '개)'));
+      rest.forEach(function (h) { d.appendChild(field(h, r[h])); });
+      form.appendChild(d);
+    }
+
+    var msg = el('p', 'error');
+    msg.hidden = true;
+    var save = el('button', 'save', '저장');
+    save.type = 'submit';
+    form.appendChild(save);
+    form.appendChild(msg);
+
+    form.addEventListener('submit', async function (ev) {
+      ev.preventDefault();
+      var fields = {};
+      form.querySelectorAll('[name]').forEach(function (inp) {
+        if (inp.value.trim() !== inp.dataset.orig) fields[inp.name] = inp.value.trim();
+      });
+      msg.hidden = true;
+      if (!Object.keys(fields).length) { msg.className = 'error'; msg.textContent = '바뀐 내용이 없습니다.'; msg.hidden = false; return; }
+      save.disabled = true;
+      save.textContent = '저장 중…';
+      try {
+        var data = await api('POST', { caseId: r.CaseId, fields: fields });
+        var rows = state.data.SuccessStories.rows;
+        var i = rows.indexOf(r);
+        if (i !== -1) rows[i] = data.row;
+        buildFilter();
+        var card = form.parentNode;
+        var fresh = successCard(data.row);
+        card.replaceWith(fresh);
+        var ok = el('p', 'ok', '✅ 저장됨: ' + data.written.join(', '));
+        fresh.appendChild(ok);
+        setTimeout(function () { ok.remove(); }, 4000);
+      } catch (e) {
+        msg.className = 'error';
+        msg.textContent = e.message;
+        msg.hidden = false;
+        save.disabled = false;
+        save.textContent = '저장';
+      }
+    });
+    return form;
+  }
+
+  document.querySelectorAll('.tabs button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.querySelectorAll('.tabs button').forEach(function (x) { x.classList.toggle('on', x === b); });
+      state.sheet = b.dataset.sheet;
+      state.shown = PAGE;
+      $('q').value = '';
+      $('filter').innerHTML = '';
+      if (state.data[state.sheet]) buildFilter();
+      load();
+    });
+  });
+  $('q').addEventListener('input', function () { state.shown = PAGE; render(); });
+  $('filter').addEventListener('change', function () { state.shown = PAGE; render(); });
+  $('more').addEventListener('click', function () { state.shown += PAGE; render(); });
+  $('reload').addEventListener('click', function () { load(true); });
+  $('loginBtn').addEventListener('click', function () { load(true); });
+  $('key').addEventListener('keydown', function (e) { if (e.key === 'Enter') load(true); });
+
+  if ($('key').value) load(); else $('login').hidden = false;
+})();
+</script>
+</body>
+</html>

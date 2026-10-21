@@ -37,6 +37,9 @@ function doPost(e) {
       return handlePlanner(data);
     }
 
+    // 관리자 페이지 수정 (functions/api/admin/sheet.js)
+    if (data.type === 'admin_update') return adminUpdate(data);
+
     if (data.type === 'proxy_pickup') {
       var ss = SpreadsheetApp.openById(SHEET_ID);
       var timestamp = new Date();
@@ -396,6 +399,7 @@ function doGet(e) {
   try {
     var action = (e.parameter && e.parameter.action) ? e.parameter.action : '';
     if (action === 'admin_lookup') return adminLookup(e.parameter);
+    if (action === 'admin_list') return adminList(e.parameter);
     var ss = SpreadsheetApp.openById(SHEET_ID);
     var sheetName = (action === 'success') ? 'SuccessStories' : 'RewardList';
     var sheet = ss.getSheetByName(sheetName);
@@ -492,6 +496,117 @@ function adminLookup(params) {
     }
   });
   return json(result);
+}
+
+/**
+ * [관리자 전용] 관리자 페이지(public/admin.html) — functions/api/admin/sheet.js 에서만 호출
+ * adminLookup 과 같은 ADMIN_LOOKUP_SECRET 사용
+ */
+var ADMIN_SHEETS = ['LostReport', 'SuccessStories'];
+var ADMIN_READONLY_COLS = ['CaseId', 'Timestamp'];
+
+function adminJson_(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+}
+
+function adminAuthorized_(key) {
+  var secret = PropertiesService.getScriptProperties().getProperty('ADMIN_LOOKUP_SECRET');
+  return !!secret && key === secret;
+}
+
+// 시트의 Date 객체를 화면용 문자열로 (시간이 00:00이면 날짜만)
+function adminCell_(v) {
+  if (v instanceof Date) {
+    return Utilities.formatDate(v, 'Asia/Seoul', 'yyyy-MM-dd HH:mm').replace(/ 00:00$/, '');
+  }
+  return v === null ? '' : v;
+}
+
+/** 시트 전체를 최신순으로. 파라미터: key, sheet */
+function adminList(params) {
+  if (!adminAuthorized_(params.key)) return adminJson_({ error: 'unauthorized' });
+  var name = String(params.sheet || '');
+  if (ADMIN_SHEETS.indexOf(name) === -1) return adminJson_({ error: 'unknown sheet' });
+
+  var sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(name);
+  if (!sheet) return adminJson_({ headers: [], rows: [] });
+  var data = sheet.getDataRange().getValues();
+  if (data.length <= 1) return adminJson_({ headers: [], rows: [] });
+  var headers = data[0].map(function (h) { return h ? h.toString().trim() : ''; });
+
+  var rows = [];
+  for (var i = data.length - 1; i >= 1; i--) {
+    var row = data[i];
+    if (row.every(function (c) { return c === '' || c === null; })) continue;
+    var obj = { _row: i + 1 };
+    for (var j = 0; j < headers.length; j++) {
+      if (headers[j]) obj[headers[j]] = adminCell_(row[j]);
+    }
+    // LostReport V열(22) = 한국어 번역 — 헤더가 비어 있어도 읽히도록 위치로 가져옴
+    if (name === 'LostReport') obj._ko = adminCell_(row[21] !== undefined ? row[21] : '');
+    rows.push(obj);
+  }
+  return adminJson_({ headers: headers.filter(Boolean), rows: rows });
+}
+
+/**
+ * SuccessStories 한 건 수정. data: { key, caseId, fields: { 헤더명: 값 } }
+ * 스크립트로 쓴 값에는 translateOnEdit 트리거가 돌지 않으므로,
+ * Item/Region/Place 를 고치고 zh/en 을 직접 지정하지 않았으면 여기서 번역함
+ */
+function adminUpdate(data) {
+  if (!adminAuthorized_(data.key)) return adminJson_({ result: 'error', message: 'unauthorized' });
+  var caseId = String(data.caseId || '').trim().toLowerCase();
+  var fields = data.fields || {};
+  if (!caseId) return adminJson_({ result: 'error', message: 'caseId 없음' });
+
+  var lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+    var sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName('SuccessStories');
+    if (!sheet) return adminJson_({ result: 'error', message: 'SuccessStories 시트 없음' });
+    var values = sheet.getDataRange().getValues();
+    var headers = values[0].map(function (h) { return h ? h.toString().trim() : ''; });
+    var idCol = headers.indexOf('CaseId');
+
+    var rowIdx = -1;
+    for (var i = 1; i < values.length; i++) {
+      if (String(values[i][idCol] || '').trim().toLowerCase() === caseId) { rowIdx = i; break; }
+    }
+    if (rowIdx === -1) return adminJson_({ result: 'error', message: caseId + ' 를 찾을 수 없음' });
+
+    ['Item', 'Region', 'Place'].forEach(function (base) {
+      if (fields[base] === undefined) return;
+      var text = String(fields[base]).trim();
+      if (fields[base + '_zh'] === undefined && headers.indexOf(base + '_zh') !== -1) {
+        fields[base + '_zh'] = text ? MY_DEEPL(text, 'ZH') : '';
+      }
+      if (fields[base + '_en'] === undefined && headers.indexOf(base + '_en') !== -1) {
+        fields[base + '_en'] = text ? MY_DEEPL(text, 'EN-US') : '';
+      }
+    });
+
+    var written = [];
+    Object.keys(fields).forEach(function (h) {
+      var col = headers.indexOf(h);
+      if (col === -1 || ADMIN_READONLY_COLS.indexOf(h) !== -1) return;
+      var v = fields[h];
+      if (h === 'Step' && v !== '' && !isNaN(v)) v = Number(v);
+      sheet.getRange(rowIdx + 1, col + 1).setValue(v);
+      written.push(h);
+    });
+
+    var updated = { _row: rowIdx + 1 };
+    var newRow = sheet.getRange(rowIdx + 1, 1, 1, headers.length).getValues()[0];
+    for (var k = 0; k < headers.length; k++) {
+      if (headers[k]) updated[headers[k]] = adminCell_(newRow[k]);
+    }
+    return adminJson_({ result: 'success', written: written, row: updated });
+  } catch (err) {
+    return adminJson_({ result: 'error', message: err.toString() });
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 // MY_DEEPL 함수는 deepl.js에 정의되어 있습니다. (중복 정의 방지)

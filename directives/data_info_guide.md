@@ -110,3 +110,10 @@
 - **개인정보**: 여권·예약 사진, 전화번호, 주소, UserAgent, 사진 URL은 AI로 보내지 않음.
 - **환경변수 (Pages Secret)**: `ADMIN_REPLY_KEY`, `ADMIN_LOOKUP_SECRET`, `ADMIN_GAS_URL`(전용 GAS 배포), `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, (선택) `GEMINI_MODEL`. GAS 스크립트 속성 `ADMIN_LOOKUP_SECRET`은 Pages와 같은 값.
 - **요금·정책 변경 시**: reply.js의 `SERVICE_FACTS`만 수정.
+
+## 13. 관리자 페이지 — 분실신고 보기·대리수령 수정 (2026-10-21)
+- **흐름**: `/admin.html` (public/admin.html) → `GET|POST /api/admin/sheet` (functions/api/admin/sheet.js) → GAS `doGet?action=admin_list` (`adminList`) / `doPost type=admin_update` (`adminUpdate`).
+- **범위**: LostReport는 보기 전용(V열 한국어 번역은 위치로 읽어 `_ko`로 전달). SuccessStories는 CaseId로 행을 찾아 바뀐 칸만 수정. CaseId·Timestamp는 수정 불가.
+- **번역**: 스크립트가 쓴 값에는 설치형 `translateOnEdit` 트리거가 돌지 않음 → `adminUpdate`에서 Item/Region/Place 변경 시 zh/en을 직접 다시 번역 (zh/en을 함께 보낸 경우는 그 값 유지).
+- **인증**: 답변 도우미와 같은 `ADMIN_REPLY_KEY`(브라우저→Pages), `ADMIN_LOOKUP_SECRET`(Pages→GAS), `ADMIN_GAS_URL` 사용. 새 환경변수 없음.
+- **GAS 배포**: adminLookup이 들어 있던 배포 2개(`AKfycbysgIKJ…` @55→@57, `AKfycbxv3CIA…` @56→@58)를 같은 주소로 새 버전 갱신. 이후 GAS 수정 시에도 `clasp push` 후 `clasp deploy -i <배포ID>`로 두 배포 모두 갱신할 것.
