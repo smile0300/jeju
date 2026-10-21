@@ -14,7 +14,7 @@ import { fetchFoundGoods, switchLostView, openLostDetailModalByIndex, openLostRe
 import { fetchFestivals, initFestivalFilters } from '../features/festival.js';
 import { initReservationSection, adjustParty, submitReservation, changeReservationType } from '../features/reservation.js';
 import { initReward } from '../features/reward.js';
-import { showSection, openWechatQR, closeWechatQR, openFeatureModal, closeFeatureModal, submitFeatureRequest, openCSModal, closeCSModal, submitCSFeedback, copyWechatId, openWeatherSummaryModal, closeWeatherSummaryModal, openShareModal, closeShareModal, shareToPlatform } from '../ui/ui.js';
+import { showSection, goBack, openWechatQR, closeWechatQR, openFeatureModal, closeFeatureModal, submitFeatureRequest, openCSModal, closeCSModal, submitCSFeedback, copyWechatId, openWeatherSummaryModal, closeWeatherSummaryModal, openShareModal, closeShareModal, shareToPlatform } from '../ui/ui.js';
 import '../ui/home.js';
 import '../ui/home-info-banner.js';
 import '../features/trip.js';
@@ -25,6 +25,7 @@ import '../features/charter.js';
 
 // Global function assignments for HTML event handlers
 window.showSection = showSection;
+window.goBack = goBack;
 window.initHlsPlayer = initHlsPlayer;
 window.toggleFullscreen = function(videoId) {
     const video = document.getElementById(videoId);
@@ -217,11 +218,11 @@ window.backToLostMenu = () => {
         }
     }
     window.keepLostMenuOpen = true;
-    if (history.length > 1) {
+    // history.length는 다른 사이트에서 넘어온 기록까지 세므로 사이트 안 이동 여부로 판단한다
+    if (history.state && history.state.inApp) {
         window.history.back();
     } else {
-        showSection('home');
-        if (window.expandLostGrid) window.expandLostGrid();
+        window.goBack('home');
     }
 };
 
@@ -341,6 +342,11 @@ function handleRouting() {
 window.addEventListener('popstate', (event) => {
     // 1. 모달 닫기
     closeAllModals();
+
+    // 홈 그리드(분실물·예약 서브메뉴) 펼침 상태도 기록을 따라간다
+    if ((ROUTE_MAP[window.location.pathname] || 'home') === 'home' && window.syncHomeExpand) {
+        window.syncHomeExpand(event.state && event.state.homeExpand);
+    }
 
     // 2. 뒤로가기로 인해 해시만 변경된 경우(모달만 닫힌 거라면) 라우팅 중단
     const path = window.location.pathname;

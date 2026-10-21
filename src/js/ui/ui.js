@@ -62,6 +62,8 @@ const SEO_META = {
 export function showSection(sectionId, pushHistory = true) {
     // 홈으로 이동 시 분실물 확장 상태 관리
     if (sectionId === 'home') {
+        // 펼친 채로 남겨둔 기록(뒤로가기로 도착)도 열린 상태를 유지한다
+        if (history.state && history.state.homeExpand === 'lost') window.keepLostMenuOpen = true;
         if (window.keepLostMenuOpen && window.expandLostGrid) {
             window.expandLostGrid();
         } else if (window.collapseLostGrid && !window.keepLostMenuOpen) {
@@ -163,7 +165,7 @@ export function showSection(sectionId, pushHistory = true) {
     if (pushHistory) {
         const path = sectionId === 'home' ? '/' : `/${sectionId}`;
         if (window.location.pathname !== path) {
-            history.pushState({ section: sectionId }, '', path);
+            history.pushState({ section: sectionId, inApp: true }, '', path);
         }
     }
 
@@ -184,6 +186,18 @@ export function showSection(sectionId, pushHistory = true) {
             page_path: sectionId === 'home' ? '/' : `/${sectionId}`
         });
     }
+}
+
+// 화면 상단 ← 버튼: 사이트 안에서 이동해 온 경우 브라우저 기록을 한 칸 되돌린다.
+// 새 기록을 쌓으면 휴대폰 뒤로가기가 방금 나온 화면으로 다시 들어가 버린다.
+// 외부에서 바로 들어온 경우(검색·공유 링크)엔 기록을 덮어써서 사이트 밖으로 튕기지 않게 한다.
+export function goBack(fallback = 'home') {
+    if (history.state && history.state.inApp) {
+        history.back();
+        return;
+    }
+    showSection(fallback, false);
+    history.replaceState({ section: fallback }, '', fallback === 'home' ? '/' : `/${fallback}`);
 }
 
 export function openWechatQR() {

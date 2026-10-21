@@ -12,11 +12,25 @@
 
     const CORNER_BTN_IDS = ['home-weather-btn', 'home-airport-btn', 'home-food-btn', 'home-reservation-btn'];
 
+    // 펼침도 기록 한 칸으로 남겨, 휴대폰 뒤로가기가 사이트를 떠나지 않고 메뉴를 접게 한다
+    function pushHomeExpand(kind) {
+        const state = { section: 'home', inApp: true, homeExpand: kind };
+        if (history.state && history.state.homeExpand) history.replaceState(state, '', '/');
+        else history.pushState(state, '', '/');
+    }
+
     window.toggleLostExpand = function() {
-        lostExpanded ? window.collapseLostGrid() : window.expandLostGrid();
+        if (lostExpanded) {
+            if (history.state && history.state.homeExpand === 'lost') history.back(); // popstate가 접는다
+            else window.collapseLostGrid();
+        } else {
+            window.expandLostGrid();
+            pushHomeExpand('lost');
+        }
     };
 
     window.expandLostGrid = function() {
+        if (lostExpanded) return;
         if (window.collapseReservationGrid) window.collapseReservationGrid();
         
         lostExpanded = true;
@@ -145,10 +159,27 @@
     ];
 
     window.toggleReservationExpand = function() {
-        reservationExpanded ? window.collapseReservationGrid() : window.expandReservationGrid();
+        if (reservationExpanded) {
+            if (history.state && history.state.homeExpand === 'res') history.back();
+            else window.collapseReservationGrid();
+        } else {
+            window.expandReservationGrid();
+            pushHomeExpand('res');
+        }
+    };
+
+    // 뒤로/앞으로 가기로 홈 기록에 도착했을 때 그 기록의 펼침 상태로 맞춘다
+    window.syncHomeExpand = function(kind) {
+        if (kind === 'lost') { if (!lostExpanded) window.expandLostGrid(); }
+        else if (kind === 'res') { if (!reservationExpanded) window.expandReservationGrid(); }
+        else if (!window.keepLostMenuOpen) {
+            window.collapseLostGrid();
+            window.collapseReservationGrid();
+        }
     };
 
     window.expandReservationGrid = function() {
+        if (reservationExpanded) return;
         // 분실물이 열려있으면 먼저 닫기
         if (window.collapseLostGrid) window.collapseLostGrid();
 
