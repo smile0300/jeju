@@ -1,0 +1,91 @@
+{
+  "_notes": "샤오훙수 공개 게시글·댓글에서 발췌 (원본 캡처: Google Drive '후기' 폴더). 닉네임은 가운데를 가린 형태로만 저장. 이미지는 public/img/reviews/ — 닉네임·프로필·타인 문의 댓글·여권 사진 모자이크 처리본. 비공개 위챗 대화는 사용하지 않음.",
+  "privateThanks": 9,
+  "_privateThanksNote": "위챗·샤오훙수 DM 감사 메시지 대화 수 (2026-10-21 기준, 같은 고객 캡처는 1건). 비공개라 문장은 싣지 않고 숫자만 표시.",
+  "reviews": [
+    {
+      "guides": ["jeju-airport"],
+      "nick": "不**孩", "region": null, "month": "2026-04",
+      "img": "review-airport-pocket.jpg",
+      "zh": "我在@济州本地人_正敬 发布的小红书内容中看到可以查询网站：jeju-live.com/lost-found，打开之后选择3.30，我的pocket就在图片中……立马微信和小红书联系了博主，正敬欧巴真的太棒了，人狠话不多，直接就是第二天给我联系失物招领处，得知需要去现场确认，和我确认之后亲自跑了一趟确认真的是我的！",
+      "en": "In a Xiaohongshu post by @济州本地人_正敬 I found a site I could search: jeju-live.com/lost-found. I picked March 30 and there was my Pocket in the photos… I messaged him right away. 正敬 was amazing — no fuss, he contacted the lost & found desk the very next day, learned it had to be confirmed in person, checked with me and went there himself to confirm it was mine!"
+    },
+    {
+      "guides": ["jeju-bus"],
+      "nick": "I**🐟", "region": { "en": "Korea", "zh": "韩国" }, "month": "2026-10",
+      "img": "review-bus-pocket4.jpg",
+      "zh": "本人在韩留子，中秋假期和同学去济州岛旅游，刚入手1个月的pocket 4被我丢在了公交上。报案被警察找到，但是警方无法邮寄，小红书找的正敬代拿。服务非常好非常有耐心！！本来觉得没有希望找到，韩国警察也很有耐心很热心，相机失而复得的感觉真太开心了。",
+      "en": "I'm a student in Korea and went to Jeju with classmates over the Mid-Autumn holiday. I left my month-old Pocket 4 on a bus. The police found it after I reported it, but they couldn't post it, so I found 正敬 on Xiaohongshu to collect it. Great, very patient service! I thought there was no hope. The Korean police were patient and kind too — so happy to have my camera back."
+    },
+    {
+      "guides": ["jeju-hotel"],
+      "nick": "F**n", "region": null, "month": "2026-07",
+      "img": "review-hotel-charger.jpg",
+      "zh": "失而复得，好开心！在济州旅游把充电线和插头丢在酒店了，路上通过翻译软件跟酒店发了几次邮件交流，试图酒店能找人帮我送到城里的新酒店来，我来付取费用，结果酒店只负责保管不给叫跑腿快递，因为语言障碍各种本已打算就此放弃。偶然在小红书上刷到@济州本地人_正敬 可以找回在济州丢失东西的帖子，我又重燃了希望！经过沟通，在今早八点多顺利的拿到了东西。",
+      "en": "Lost and found — so happy! I left my charging cable and plug at a hotel in Jeju. I emailed the hotel several times through a translation app, hoping they could send it to my new hotel in town at my cost. But the hotel would only keep it, not arrange a courier, and with the language barrier I was ready to give up. Then I saw a Xiaohongshu post by @济州本地人_正敬 about recovering items lost in Jeju and got my hopes back! After a quick chat, I had my things just after 8 this morning."
+    },
+    {
+      "guides": ["jeju-hotel"],
+      "nick": "咿**哟", "region": { "en": "Zhejiang", "zh": "浙江" }, "month": "2026-07",
+      "zh": "非常感谢博主，物品遗失在酒店，帮忙取，帮忙邮寄。人真的很好很好。谢谢你虽素未谋面，但是不辜信任。",
+      "en": "Thank you so much! I left something at a hotel — he collected it and posted it to me. Such a kind person. We've never met, but he lived up to my trust."
+    },
+    {
+      "guides": ["jeju-hotel"],
+      "nick": "F**o", "region": { "en": "Korea", "zh": "韩国" }, "month": "2026-07",
+      "zh": "非常感谢您！如此速度地回复并找到并顺利送到了我的酒店，行程一点没受影响。感激不尽。",
+      "en": "Thank you so much! You replied so fast, found it and delivered it to my hotel — my trip wasn't affected at all. So grateful."
+    },
+    {
+      "guides": ["jeju-passport"],
+      "nick": "s**x", "region": { "en": "Guangdong", "zh": "广东" }, "month": "2026-08",
+      "img": "review-passport-holder.jpg",
+      "zh": "（求助帖）昨晚的行程就是机场直接打车去酒店，护照夹里面还有身份证……\n更新：已找到，多谢@济州本地人_正敬",
+      "en": "(Help post) Last night I took a taxi straight from the airport to the hotel. My passport holder had my ID card inside too…\nUpdate: Found it! Many thanks to @济州本地人_正敬"
+    },
+    {
+      "guides": ["jeju-places"],
+      "nick": "桃**林", "region": { "en": "Shanghai", "zh": "上海" }, "month": "2026-06",
+      "img": "review-police-wallet.jpg",
+      "zh": "小哥哥人很好，真的很热心，很快就帮忙去了警察局帮忙领钱包，然后送到快递站寄回来啦，非常感谢！",
+      "en": "He's really nice and so helpful — he went to the police station to collect my wallet straight away, then sent it back from the courier office. Thank you so much!"
+    },
+    {
+      "guides": ["jeju-phone"],
+      "nick": "l**y", "region": { "en": "Chongqing", "zh": "重庆" }, "month": "2026-06",
+      "img": "review-phone-bag.jpg",
+      "zh": "5月31日丢的包包，里面有手机还有身份证银行卡，本来已经放弃了，但是还是舍不得手机里的资料照片，几次找正敬大哥帮忙寻找，最终在6.8号找到了，太牛了，经历9天，终于找回手机！特别感谢博主大大，有他真好啊！",
+      "en": "I lost my bag on May 31 with my phone, ID and bank cards inside. I'd already given up, but I couldn't let go of the photos and files on my phone. I asked 正敬 for help several times and it was finally found on June 8 — amazing, 9 days, and I got my phone back! Special thanks — so glad he's there!"
+    },
+    {
+      "guides": ["jeju-phone"],
+      "nick": "z**o", "region": { "en": "Zhejiang", "zh": "浙江" }, "month": "2026-07",
+      "zh": "太感谢帮忙代取手机和邮寄啦，效率高又靠谱人超好！顺利找回手机，满分好评！",
+      "en": "Thank you so much for collecting and posting my phone! Fast, reliable and super nice. Got my phone back — five stars!"
+    },
+    {
+      "guides": ["hub"],
+      "nick": "我**鱼", "region": { "en": "Zhejiang", "zh": "浙江" }, "month": "2026-06",
+      "zh": "谢谢正敬，相机不小心遗失在济州岛，因为有正敬的帮助，我的相机已成功找到，目前正在回国的路上，全程非常耐心，非常非常好，很热心，一直帮我联系快递服务，非常感谢。",
+      "en": "Thanks 正敬! I lost my camera in Jeju, and thanks to his help it was found and is now on its way home. Very patient the whole way, so kind and helpful, and he kept arranging the courier for me. Thank you!"
+    },
+    {
+      "guides": ["hub"],
+      "nick": "摇**先", "region": { "en": "Korea", "zh": "韩国" }, "month": "2026-07",
+      "zh": "济州岛丢的钱包找到了！找到了济州岛本地博主帮忙沟通！太好了！而且费用也是小偿！",
+      "en": "Found the wallet I lost in Jeju! A local Jeju blogger helped me communicate with everyone — wonderful! And the fee was small too!"
+    },
+    {
+      "guides": ["hub"],
+      "nick": "好**呀", "region": { "en": "Hong Kong", "zh": "香港" }, "month": "2026-07",
+      "zh": "感谢帮忙代取，已经收到啦。",
+      "en": "Thanks for collecting it for me — received!"
+    },
+    {
+      "guides": ["hub"],
+      "nick": "我**o", "region": { "en": "Singapore", "zh": "新加坡" }, "month": "2026-03",
+      "zh": "已经收到包裹了，非常感谢。",
+      "en": "Got my parcel — thank you so much!"
+    }
+  ]
+}

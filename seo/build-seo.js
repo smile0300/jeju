@@ -26,6 +26,10 @@ const UI = {
         casesLead: (n, since) => `Jeju Live has handled ${n} case${n > 1 ? 's' : ''} like this since ${since}. Most recent:`,
         caseLine: c => `${c.item.en.charAt(0).toUpperCase() + c.item.en.slice(1)} — collected at ${c.place.en}, ${c.dest ? `sent to ${c.dest.en}` : 'handed over in Jeju'}`,
         hubCases: (n, since) => `Since ${since}, Jeju Live has recovered ${n} items for travelers — from hotels, Jeju Airport, taxis, police stations and more.`,
+        reviewsTitle: 'What travelers say',
+        reviewsLead: 'From public posts and comments on Xiaohongshu (RedNote), translated from Chinese. Tap a thumbnail to see the original screenshot (personal details hidden).',
+        shotAlt: 'Original Xiaohongshu screenshot',
+        privateThanks: n => `Plus ${n} more thank-you messages received privately on WeChat and Xiaohongshu — not published, to protect privacy.`,
         month: m => new Date(m + '-01T00:00:00Z').toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' }),
         hubTitle: 'Jeju Lost and Found Guides — What to Do and Who to Call',
         hubDesc: 'Lost something in Jeju? Step-by-step guides for the airport, taxis, buses, hotels and more, with phone numbers and how to get items back after you leave Korea.',
@@ -41,6 +45,10 @@ const UI = {
         casesLead: (n, since) => `自${since}起，Jeju Live 已处理此类案例 ${n} 件。最近的案例：`,
         caseLine: c => `${ITEM_ZH_FIX[c.item.zh] || c.item.zh}——${c.place.zh}取回，${c.dest ? `寄往${c.dest.zh}` : '在济州交付'}`,
         hubCases: (n, since) => `自${since}起，Jeju Live 已为游客找回 ${n} 件物品——来自酒店、济州机场、出租车、警察局等。`,
+        reviewsTitle: '游客评价',
+        reviewsLead: '摘自小红书公开笔记和评论。点击缩略图可查看原截图（个人信息已打码）。',
+        shotAlt: '小红书原截图',
+        privateThanks: n => `此外还有 ${n} 位游客通过微信、小红书私信发来感谢，为保护隐私不公开内容。`,
         month: m => `${m.slice(0, 4)}年${Number(m.slice(5, 7))}月`,
         hubTitle: '济州失物招领指南——丢了东西该找谁、怎么办',
         hubDesc: '在济州岛丢了东西？机场、出租车、公交、酒店等场景的找回步骤、联系电话，以及回国后如何把东西寄回来。',
@@ -52,6 +60,23 @@ const UI = {
 // 실제 처리 사례 스냅샷 (seo/update-cases.js로 갱신)
 const CASES = JSON.parse(fs.readFileSync(path.join(__dirname, 'cases.json'), 'utf-8'));
 const ITEM_ZH_FIX = { Tumblr: '保温杯' };
+// 고객 후기 (샤오훙수 공개 글·댓글, 닉네임은 가린 형태로 저장)
+const REVIEWS_DATA = JSON.parse(fs.readFileSync(path.join(__dirname, 'reviews.json'), 'utf-8'));
+const REVIEWS = REVIEWS_DATA.reviews;
+
+function renderReviews(key, lang) {
+    const t = UI[lang];
+    const list = REVIEWS.filter(r => r.guides.includes(key));
+    if (!list.length) return '';
+    const items = list.map(r => {
+        const cite = [r.nick, r.region && r.region[lang], t.month(r.month)].filter(Boolean).map(esc).join(' · ');
+        const shot = r.img ? `<a class="shot" href="/img/reviews/${esc(r.img)}" target="_blank" rel="noopener"><img src="/img/reviews/${esc(r.img)}" alt="${esc(t.shotAlt)}" width="72" height="156" loading="lazy"></a>` : '';
+        return `<blockquote class="review">${shot}<p>${esc(r[lang]).replace(/\n/g, '<br>')}</p><cite>${cite}</cite></blockquote>`;
+    }).join('');
+    // 허브에만: 비공개 감사 메시지는 문장 없이 건수만
+    const privateNote = key === 'hub' && REVIEWS_DATA.privateThanks ? `<p class="lead">${esc(t.privateThanks(REVIEWS_DATA.privateThanks))}</p>` : '';
+    return `<section class="card"><h2>${esc(t.reviewsTitle)}</h2><p class="lead">${esc(t.reviewsLead)}</p>${items}${privateNote}</section>`;
+}
 
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const stripTags = s => String(s).replace(/<[^>]+>/g, '');
@@ -92,6 +117,12 @@ details p{margin:8px 0 0;color:var(--text-2)}
 .src{font-size:13px;color:var(--text-3)}
 .src ul{padding-left:18px;margin:6px 0 0}
 .src a{color:var(--text-3)}
+.lead{font-size:14px;color:var(--text-3)}
+.review{margin:0;padding:14px 0;border-top:1px solid var(--sep);overflow:hidden}
+.review p{margin:0 0 6px}
+.review cite{display:block;font-size:13px;color:var(--text-3);font-style:normal}
+.shot{float:right;margin:0 0 8px 12px}
+.shot img{display:block;width:72px;height:auto;border-radius:8px;border:1px solid var(--sep)}
 .list a{display:block;text-decoration:none;color:var(--text);padding:14px 0;border-top:1px solid var(--sep)}
 .list a:first-child,.list h2+a{border-top:0;padding-top:0}
 .list b{display:block}.list span{font-size:14px;color:var(--text-3)}
@@ -174,6 +205,7 @@ function renderGuide(guide, lang, guides) {
 ${summary}
 ${sectionHtml.join('\n')}
 ${casesHtml}
+${renderReviews(guide.slug, lang)}
 ${faq}
 ${relatedHtml}
 ${sources}`;
@@ -223,6 +255,7 @@ function renderHub(guides, lang) {
 <p class="meta">${esc(t.hubIntro)}</p>
 ${CASES.cases.length ? `<section class="card summary"><p>${esc(t.hubCases(CASES.cases.length, t.month(CASES.cases[CASES.cases.length - 1].month)))}</p></section>` : ''}
 <section class="card list">${list}</section>
+${renderReviews('hub', lang)}
 <section class="card cta"><h2>${esc(t.ctaTitle)}</h2>
 <a class="btn btn-1" href="/lost" data-lang-link>${esc(t.ctaSearch)}</a>
 <a class="btn btn-2" href="/lost?action=proxy" data-lang-link>${esc(t.ctaProxy)}</a>
