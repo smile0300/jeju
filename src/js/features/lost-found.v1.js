@@ -389,24 +389,30 @@ window._resetLostReportForm = resetLostReportForm;
 
 
 let currentLostStep = 1;
+// 단계별 입력 누락 안내: 앱 안 브라우저의 도메인 찍힌 alert 대신 화면 하단 토스트로 (흐름을 막지 않음)
+function formAlert(msg) {
+    if (window.showToast) window.showToast(msg, 'error', 4000);
+    else alert(msg);
+}
+
 const MAX_LOST_STEP = 3;
 
 window.nextLostStep = function() {
     // Basic validation before moving next
     if (currentLostStep === 1) {
         const cat = document.getElementById('lost-report-item-category')?.value;
-        if (!cat) { alert(window.t ? window.t('lost.report.cat_err') : '물품 종류를 선택해주세요.'); return; }
-        if (!lostReportImageBase64) { alert(window.t ? window.t('lost.report.fill_err') : '필수 항목(사진 포함)을 모두 입력해주세요.'); return; }
+        if (!cat) { formAlert(window.t ? window.t('lost.report.cat_err') : '물품 종류를 선택해주세요.'); return; }
+        if (!lostReportImageBase64) { formAlert(window.t ? window.t('lost.report.fill_err') : '필수 항목(사진 포함)을 모두 입력해주세요.'); return; }
     } else if (currentLostStep === 2) {
         const city = document.getElementById('lost-report-city-category')?.value;
-        if (!city) { alert(window.t ? window.t('modal.lost.city_err') : '지역(도시)을 선택해주세요.'); return; }
+        if (!city) { formAlert(window.t ? window.t('modal.lost.city_err') : '지역(도시)을 선택해주세요.'); return; }
         const reg = document.getElementById('lost-report-region-category')?.value;
-        if (!reg) { alert(window.t ? window.t('lost.report.reg_err') : '장소를 선택해주세요.'); return; }
+        if (!reg) { formAlert(window.t ? window.t('lost.report.reg_err') : '장소를 선택해주세요.'); return; }
         
         if (reg === '버스') {
             const carNo = document.getElementById('lost-report-car-no')?.value.trim();
             if (!carNo) {
-                alert(window.t ? window.t('lost.report.car_no_err') : '버스 번호를 입력해주세요.');
+                formAlert(window.t ? window.t('lost.report.car_no_err') : '버스 번호를 입력해주세요.');
                 return;
             }
         } else if (reg === '호텔') {
@@ -415,7 +421,7 @@ window.nextLostStep = function() {
             const hCheckin = document.getElementById('lost-report-hotel-checkin')?.value.trim();
             const hCheckout = document.getElementById('lost-report-hotel-checkout')?.value.trim();
             if (!hName || !hBooker || !hCheckin || !hCheckout) {
-                alert(window.t ? window.t('lost.report.fill_err') : '호텔 정보(호텔명, 예약자명, 날짜)를 모두 입력해주세요.');
+                formAlert(window.t ? window.t('lost.report.fill_err') : '호텔 정보(호텔명, 예약자명, 날짜)를 모두 입력해주세요.');
                 return;
             }
         }
@@ -1587,33 +1593,33 @@ window.nextProxyStep = function() {
     if (currentProxyStep === 1) {
         const loc = document.getElementById('proxy-location-category')?.value;
         if (!loc) {
-            alert(lang === 'ko' ? '보관 장소를 선택해주세요.' : (lang === 'en' ? 'Please select a location.' : '请选择保管场所。'));
+            formAlert(lang === 'ko' ? '보관 장소를 선택해주세요.' : (lang === 'en' ? 'Please select a location.' : '请选择保管场所。'));
             return;
         }
 
         const itemPhoto = document.getElementById('proxy-item-photo')?.files[0];
         if (!itemPhoto) {
-            alert(lang === 'ko' ? '물건 사진을 첨부해주세요.' : (lang === 'en' ? 'Please upload an item photo.' : '请上传物品照片。'));
+            formAlert(lang === 'ko' ? '물건 사진을 첨부해주세요.' : (lang === 'en' ? 'Please upload an item photo.' : '请上传物品照片。'));
             return;
         }
     } else if (currentProxyStep === 2) {
         const loc = document.getElementById('proxy-location-category')?.value;
         const passport = document.getElementById('proxy-passport-photo')?.files[0];
         
-        if (!passport) { alert(lang === 'ko' ? '여권 사진을 첨부해주세요.' : '请上传护照照片。'); return; }
+        if (!passport) { formAlert(lang === 'ko' ? '여권 사진을 첨부해주세요.' : lang === 'en' ? 'Please upload a passport photo.' : '请上传护照照片。'); return; }
         
         if (loc === '호텔') {
             const res = document.getElementById('proxy-reservation-photo')?.files[0];
-            if (!res) { alert(lang === 'ko' ? '호텔 예약내역을 첨부해주세요.' : '请上传酒店预订记录。'); return; }
+            if (!res) { formAlert(lang === 'ko' ? '호텔 예약내역을 첨부해주세요.' : lang === 'en' ? 'Please upload your hotel booking record.' : '请上传酒店预订记录。'); return; }
         } else if (loc === '공항' || loc === '경찰서') {
             const mgmt = document.getElementById('proxy-mgmt-num')?.value.trim();
-            if (!mgmt) { alert(lang === 'ko' ? '접수/관리번호를 입력해주세요.' : '请输入管理编号。'); return; }
+            if (!mgmt) { formAlert(lang === 'ko' ? '접수/관리번호를 입력해주세요.' : lang === 'en' ? 'Please enter the management number.' : '请输入管理编号。'); return; }
         } else if (loc === '택시' || loc === '버스') {
             const vInfo = document.getElementById('proxy-vehicle-info')?.value.trim();
-            if (!vInfo) { alert(lang === 'ko' ? '차량 번호 또는 기사님 연락처를 입력해주세요.' : '请输入车牌号或司机联系方式。'); return; }
+            if (!vInfo) { formAlert(lang === 'ko' ? '차량 번호 또는 기사님 연락처를 입력해주세요.' : lang === 'en' ? "Please enter the vehicle number or driver's contact." : '请输入车牌号或司机联系方式。'); return; }
         } else if (loc === '기타') {
             const lDetail = document.getElementById('proxy-location-detail')?.value.trim();
-            if (!lDetail) { alert(lang === 'ko' ? '보관 장소 상세 설명을 입력해주세요.' : '请输入保管场所详细说明。'); return; }
+            if (!lDetail) { formAlert(lang === 'ko' ? '보관 장소 상세 설명을 입력해주세요.' : lang === 'en' ? 'Please describe where the item is kept.' : '请输入保管场所详细说明。'); return; }
         }
     }
     
