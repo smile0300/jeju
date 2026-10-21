@@ -29,7 +29,9 @@ const UI = {
         reviewsTitle: 'What travelers say',
         reviewsLead: 'From public posts and comments on Xiaohongshu (RedNote), translated from Chinese. Tap a thumbnail to see the original screenshot (personal details hidden).',
         shotAlt: 'Original Xiaohongshu screenshot',
-        privateThanks: n => `Plus ${n} more thank-you messages received privately on WeChat and Xiaohongshu — not published, to protect privacy.`,
+        thanksTitle: 'Thank-you messages',
+        thanksLead: n => `Messages travelers sent us on WeChat and Xiaohongshu after getting their items back (${n} screenshots). Names, payments and addresses are hidden. Tap to enlarge.`,
+        thanksAlt: 'Thank-you message screenshot',
         month: m => new Date(m + '-01T00:00:00Z').toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' }),
         hubTitle: 'Jeju Lost and Found Guides — What to Do and Who to Call',
         hubDesc: 'Lost something in Jeju? Step-by-step guides for the airport, taxis, buses, hotels and more, with phone numbers and how to get items back after you leave Korea.',
@@ -48,7 +50,9 @@ const UI = {
         reviewsTitle: '游客评价',
         reviewsLead: '摘自小红书公开笔记和评论。点击缩略图可查看原截图（个人信息已打码）。',
         shotAlt: '小红书原截图',
-        privateThanks: n => `此外还有 ${n} 位游客通过微信、小红书私信发来感谢，为保护隐私不公开内容。`,
+        thanksTitle: '客户感谢留言',
+        thanksLead: n => `游客找回物品后通过微信、小红书私信发来的感谢（共 ${n} 张截图）。姓名、转账金额和地址已打码，点击可放大。`,
+        thanksAlt: '感谢留言截图',
         month: m => `${m.slice(0, 4)}年${Number(m.slice(5, 7))}月`,
         hubTitle: '济州失物招领指南——丢了东西该找谁、怎么办',
         hubDesc: '在济州岛丢了东西？机场、出租车、公交、酒店等场景的找回步骤、联系电话，以及回国后如何把东西寄回来。',
@@ -73,9 +77,16 @@ function renderReviews(key, lang) {
         const shot = r.img ? `<a class="shot" href="/img/reviews/${esc(r.img)}" target="_blank" rel="noopener"><img src="/img/reviews/${esc(r.img)}" alt="${esc(t.shotAlt)}" width="72" height="156" loading="lazy"></a>` : '';
         return `<blockquote class="review">${shot}<p>${esc(r[lang]).replace(/\n/g, '<br>')}</p><cite>${cite}</cite></blockquote>`;
     }).join('');
-    // 허브에만: 비공개 감사 메시지는 문장 없이 건수만
-    const privateNote = key === 'hub' && REVIEWS_DATA.privateThanks ? `<p class="lead">${esc(t.privateThanks(REVIEWS_DATA.privateThanks))}</p>` : '';
-    return `<section class="card"><h2>${esc(t.reviewsTitle)}</h2><p class="lead">${esc(t.reviewsLead)}</p>${items}${privateNote}</section>`;
+    return `<section class="card"><h2>${esc(t.reviewsTitle)}</h2><p class="lead">${esc(t.reviewsLead)}</p>${items}</section>`;
+}
+
+// 허브 전용: 위챗·DM 감사 메시지 캡처 갤러리 (이미지에 개인정보 모자이크 처리됨)
+function renderThanks(lang) {
+    const t = UI[lang];
+    const list = REVIEWS_DATA.thanks || [];
+    if (!list.length) return '';
+    const shots = list.map(f => `<a href="/img/reviews/${esc(f)}" target="_blank" rel="noopener"><img src="/img/reviews/${esc(f)}" alt="${esc(t.thanksAlt)}" width="96" height="208" loading="lazy"></a>`).join('');
+    return `<section class="card"><h2>${esc(t.thanksTitle)}</h2><p class="lead">${esc(t.thanksLead(list.length))}</p><div class="gallery">${shots}</div></section>`;
 }
 
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -123,6 +134,8 @@ details p{margin:8px 0 0;color:var(--text-2)}
 .review cite{display:block;font-size:13px;color:var(--text-3);font-style:normal}
 .shot{float:right;margin:0 0 8px 12px}
 .shot img{display:block;width:72px;height:auto;border-radius:8px;border:1px solid var(--sep)}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px}
+.gallery img{display:block;width:100%;height:auto;aspect-ratio:9/19.5;object-fit:cover;object-position:top;border-radius:8px;border:1px solid var(--sep)}
 .list a{display:block;text-decoration:none;color:var(--text);padding:14px 0;border-top:1px solid var(--sep)}
 .list a:first-child,.list h2+a{border-top:0;padding-top:0}
 .list b{display:block}.list span{font-size:14px;color:var(--text-3)}
@@ -256,6 +269,7 @@ function renderHub(guides, lang) {
 ${CASES.cases.length ? `<section class="card summary"><p>${esc(t.hubCases(CASES.cases.length, t.month(CASES.cases[CASES.cases.length - 1].month)))}</p></section>` : ''}
 <section class="card list">${list}</section>
 ${renderReviews('hub', lang)}
+${renderThanks(lang)}
 <section class="card cta"><h2>${esc(t.ctaTitle)}</h2>
 <a class="btn btn-1" href="/lost" data-lang-link>${esc(t.ctaSearch)}</a>
 <a class="btn btn-2" href="/lost?action=proxy" data-lang-link>${esc(t.ctaProxy)}</a>
