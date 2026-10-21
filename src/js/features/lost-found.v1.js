@@ -547,15 +547,15 @@ document.addEventListener('DOMContentLoaded', () => {
 export function handleLostImageChange(event) {
     const file = event.target.files[0];
     if (!file) return;
-    const fileExt = file.name.toLowerCase().split('.').pop();
-    if (file.type === 'image/heic' || file.type === 'image/heif' || fileExt === 'heic' || fileExt === 'heif') {
-        alert(window.t ? window.t('lost.report.heic_err') : "아이폰 고효율(HEIC) 사진은 지원하지 않습니다. 캡처본(JPEG/PNG)으로 올려주세요.");
-        event.target.value = '';
-        return;
-    }
+    // HEIC도 일단 열어 본다(Safari 등은 디코딩 가능 → 아래 canvas에서 JPEG로 변환됨).
+    // 이 브라우저가 못 여는 경우에만 캡처본으로 올려 달라고 안내한다.
     const reader = new FileReader();
     reader.onload = (e) => {
         const img = new Image();
+        img.onerror = () => {
+            alert(window.t ? window.t('lost.report.heic_err') : "아이폰 고효율(HEIC) 사진은 지원하지 않습니다. 캡처본(JPEG/PNG)으로 올려주세요.");
+            event.target.value = '';
+        };
         img.onload = () => {
             let width = img.width;
             let height = img.height;
@@ -1670,6 +1670,17 @@ function updateProxyStepView() {
     }
 }
 
+/** 브라우저가 이 이미지 파일을 열 수 있는지 (HEIC는 Safari만 가능한 경우가 많다) */
+function canDecodeImage(file) {
+    return new Promise(resolve => {
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => { URL.revokeObjectURL(url); resolve(true); };
+        img.onerror = () => { URL.revokeObjectURL(url); resolve(false); };
+        img.src = url;
+    });
+}
+
 /** 파일을 canvas로 리사이징하여 base64로 변환 (용량 제한 없음) */
 function readAsBase64(file, maxPx = 1600, quality = 0.82) {
     return new Promise((resolve, reject) => {
@@ -1740,14 +1751,16 @@ window.submitProxyPickup = async function() {
     if (!address) return showError(lang === 'ko' ? '최종 배송 주소를 입력해주세요.' : '请输入最终收货地址。');
     if (!privacyCheck?.checked) return showError(lang === 'ko' ? '개인정보 수집 및 이용에 동의해주세요.' : '请同意个人信息收集及使用。');
 
-    // HEIC 포맷 검사만 유지 (용량 제한은 canvas 압쳙으로 해결)
+    // HEIC는 이 브라우저가 못 여는 경우에만 막는다 (열리면 canvas에서 JPEG로 변환됨)
     const isHeic = (f) => {
         if (!f) return false;
         const ext = f.name.toLowerCase().split('.').pop();
         return f.type === 'image/heic' || f.type === 'image/heif' || ext === 'heic' || ext === 'heif';
     };
-    if (isHeic(passportFile) || isHeic(itemFile) || (loc === '호텔' && isHeic(reservationFile))) {
-        return showError(lang === 'ko' ? '아이폰 고효율(HEIC) 사진은 지원하지 않습니다. 캡처본(JPEG/PNG)으로 올려주세요.' : '不支持苹果高效(HEIC)照片格式，请上传截图(JPEG/PNG)。');
+    const heicFiles = [passportFile, itemFile, loc === '호텔' ? reservationFile : null].filter(isHeic);
+    const undecodable = (await Promise.all(heicFiles.map(canDecodeImage))).includes(false);
+    if (undecodable) {
+        return showError(window.t('lost.report.heic_err'));
     }
 
 
