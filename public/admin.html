@@ -26,7 +26,7 @@
   button:disabled { opacity:.5; }
   button.sub { background:transparent; color:var(--text); border:1px solid var(--line); font-weight:500; padding:7px 12px; font-size:14px; }
   .tabs { display:flex; gap:6px; margin-bottom:12px; }
-  .tabs button { flex:1; background:var(--card); color:var(--text); border:1px solid var(--line); }
+  .tabs button { flex:1; background:var(--card); color:var(--text); border:1px solid var(--line); padding:11px 4px; font-size:15px; white-space:nowrap; }
   .tabs button.on { background:var(--accent); color:#fff; border-color:var(--accent); }
   .toolbar { display:flex; gap:8px; margin-bottom:8px; }
   .toolbar input { flex:2; }
@@ -53,6 +53,14 @@
   form.edit .save { width:100%; margin-top:14px; }
   details summary { cursor:pointer; font-size:13px; color:var(--muted); margin-top:8px; }
   .more { width:100%; }
+  .stats { display:flex; gap:8px; margin:4px 0 10px; }
+  .stat { flex:1; background:var(--bg); border-radius:10px; padding:8px 10px; }
+  .stat b { display:block; font-size:18px; }
+  .stat span { font-size:12px; color:var(--muted); }
+  .summary { font-size:13px; color:var(--muted); }
+  .profit { font-weight:700; white-space:nowrap; }
+  .profit.minus { color:#d92d20; }
+  .add { width:100%; }
   [hidden] { display:none !important; }
 </style>
 </head>
@@ -74,6 +82,7 @@
   <div class="tabs">
     <button data-sheet="LostReport" class="on">🔍 분실신고</button>
     <button data-sheet="SuccessStories">📦 대리수령</button>
+    <button data-sheet="Ledger">💰 정산</button>
   </div>
 
   <div class="toolbar">
@@ -153,7 +162,13 @@
     var prev = sel.value;
     sel.innerHTML = '';
     var opts = [['', '전체']];
-    if (state.sheet === 'LostReport') {
+    if (state.sheet === 'Ledger') {
+      var months = {};
+      rows.forEach(function (r) { var m = monthOf(r); if (m) months[m] = (months[m] || 0) + 1; });
+      Object.keys(months).sort().reverse().forEach(function (m) {
+        opts.push([m, m.slice(0, 4) + '년 ' + Number(m.slice(5)) + '월 (' + months[m] + ')']);
+      });
+    } else if (state.sheet === 'LostReport') {
       var cats = {};
       rows.forEach(function (r) { var c = str(r.ItemCategory); if (c) cats[c] = (cats[c] || 0) + 1; });
       Object.keys(cats).sort().forEach(function (c) { opts.push([c, c + ' (' + cats[c] + ')']); });
@@ -171,6 +186,15 @@
     var rows = (state.data[state.sheet] || {}).rows || [];
     var q = $('q').value.trim().toLowerCase();
     var f = $('filter').value;
+    if (state.sheet === 'Ledger') {
+      return rows.filter(function (r) {
+        if (f && monthOf(r) !== f) return false;
+        return !q || r.d.join(' ').toLowerCase().indexOf(q) !== -1;
+      }).sort(function (a, b) {
+        var x = ledgerDate(a), y = ledgerDate(b);
+        return x === y ? b._row - a._row : (x < y ? 1 : -1);
+      });
+    }
     return rows.filter(function (r) {
       if (f && str(state.sheet === 'LostReport' ? r.ItemCategory : r.Step) !== f) return false;
       if (!q) return true;
@@ -184,8 +208,9 @@
     list.innerHTML = '';
     var total = ((state.data[state.sheet] || {}).rows || []).length;
     $('count').textContent = rows.length === total ? '총 ' + total + '건' : rows.length + '건 / 전체 ' + total + '건';
+    if (state.sheet === 'Ledger') list.appendChild(ledgerTop(rows));
     rows.slice(0, state.shown).forEach(function (r) {
-      list.appendChild(state.sheet === 'LostReport' ? lostCard(r) : successCard(r));
+      list.appendChild(state.sheet === 'LostReport' ? lostCard(r) : state.sheet === 'Ledger' ? ledgerCard(r) : successCard(r));
     });
     $('more').hidden = rows.length <= state.shown;
   }
@@ -383,6 +408,167 @@
         msg.hidden = false;
         save.disabled = false;
         save.textContent = '저장';
+      }
+    });
+    return form;
+  }
+
+  // ── 정산표: 열 이름·수식은 GAS가 시트에서 읽어 headers 로 내려줌 (수식 열은 수정 불가)
+  function ledger() { return state.data.Ledger || { headers: [], summary: [], rows: [] }; }
+  function ledgerCol(name) {
+    var hs = ledger().headers;
+    for (var i = 0; i < hs.length; i++) if (hs[i].name.indexOf(name) !== -1) return i;
+    return -1;
+  }
+  function dateColIdx() {
+    var hs = ledger().headers;
+    for (var i = 0; i < hs.length; i++) if (hs[i].date) return i;
+    return -1;
+  }
+  // 정렬용 yyyy-MM-dd (시트에 '2026. 4. 5' 같은 글자로 들어간 날짜도 처리)
+  function ledgerDate(r) {
+    var c = dateColIdx();
+    if (c === -1) return '';
+    var m = str(r.v[c]).match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/) || str(r.d[c]).match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
+    return m ? m[1] + '-' + ('0' + m[2]).slice(-2) + '-' + ('0' + m[3]).slice(-2) : '';
+  }
+  function monthOf(r) { return ledgerDate(r).slice(0, 7); }
+  function num(v) {
+    if (typeof v === 'number') return v;
+    var n = parseFloat(str(v).replace(/[^\d.-]/g, ''));
+    return isNaN(n) ? 0 : n;
+  }
+  function won(n) { return (n < 0 ? '-₩' : '₩') + Math.abs(Math.round(n)).toLocaleString('ko-KR'); }
+  function todayKst() { return new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' }); }
+  function isEmptyCell(s) { s = str(s); return !s || s === '-' || /^[₩¥]?0(\.0+)?$/.test(s.replace(/,/g, '')); }
+
+  function ledgerTop(rows) {
+    var c = el('div', 'card');
+    ledger().summary.forEach(function (line) {
+      var t = line.map(str).filter(Boolean).join('  ');
+      if (t) c.appendChild(el('div', 'summary', t));
+    });
+    var pc = ledgerCol('순수익');
+    var month = todayKst().slice(0, 7);
+    var monthRows = ledger().rows.filter(function (r) { return monthOf(r) === month; });
+    var sum = function (rs) { return rs.reduce(function (s, r) { return s + (pc === -1 ? 0 : num(r.v[pc])); }, 0); };
+    var stats = el('div', 'stats');
+    [[won(sum(monthRows)), '이번 달 순수익 · ' + monthRows.length + '건'],
+     [won(sum(rows)), ($('filter').value || $('q').value.trim() ? '선택 결과' : '전체') + ' 순수익 · ' + rows.length + '건']
+    ].forEach(function (s) {
+      var d = el('div', 'stat');
+      d.appendChild(el('b', '', s[0]));
+      d.appendChild(el('span', '', s[1]));
+      stats.appendChild(d);
+    });
+    c.appendChild(stats);
+    var add = el('button', 'add', '+ 새 정산 입력');
+    add.type = 'button';
+    add.addEventListener('click', function () {
+      var f = c.querySelector('form.edit');
+      if (f) { f.remove(); add.textContent = '+ 새 정산 입력'; return; }
+      c.appendChild(ledgerForm(null));
+      add.textContent = '닫기';
+    });
+    c.appendChild(add);
+    return c;
+  }
+
+  function ledgerCard(r) {
+    var hs = ledger().headers;
+    var dc = dateColIdx(), ic = ledgerCol('항목'), pc = ledgerCol('순수익'), nc = ledgerCol('비고');
+    var c = el('div', 'card');
+    var head = el('div', 'item-head');
+    var left = el('div');
+    if (dc !== -1) left.appendChild(el('span', 'badge strong', r.d[dc]));
+    left.appendChild(el('div', 'title', ic !== -1 && !isEmptyCell(r.d[ic]) ? r.d[ic] : '(항목 없음)'));
+    head.appendChild(left);
+    if (pc !== -1) head.appendChild(el('span', 'profit' + (num(r.v[pc]) < 0 ? ' minus' : ''), r.d[pc]));
+    c.appendChild(head);
+
+    var dl = el('dl');
+    addPairs(dl, hs.map(function (h, i) {
+      if (i === dc || i === ic || i === pc || i === nc || isEmptyCell(r.d[i])) return ['', ''];
+      return [h.name, r.d[i]];
+    }));
+    c.appendChild(dl);
+    if (nc !== -1 && !isEmptyCell(r.d[nc])) c.appendChild(el('div', 'ko', r.d[nc]));
+
+    var act = el('div', 'actions');
+    var editBtn = el('button', 'sub', '✏️ 수정');
+    editBtn.type = 'button';
+    editBtn.addEventListener('click', function () {
+      var f = c.querySelector('form.edit');
+      if (f) { f.remove(); editBtn.textContent = '✏️ 수정'; return; }
+      c.appendChild(ledgerForm(r));
+      editBtn.textContent = '닫기';
+    });
+    act.appendChild(editBtn);
+    c.appendChild(act);
+    return c;
+  }
+
+  function ledgerForm(r) {
+    var hs = ledger().headers;
+    var form = el('form', 'edit');
+    var auto = [];
+    hs.forEach(function (h, i) {
+      if (h.formula) { auto.push(h.name); return; }
+      var wrap = el('div');
+      var id = 'l_' + Math.random().toString(36).slice(2);
+      var lab = el('label', '', h.name + (h.currency && h.name.indexOf(h.currency) === -1 ? ' ' + h.currency : ''));
+      lab.htmlFor = id;
+      wrap.appendChild(lab);
+      var input = el('input');
+      input.id = id;
+      input.dataset.col = i;
+      var v = r ? (h.number || h.date ? r.v[i] : r.d[i]) : (h.date ? todayKst() : '');
+      v = str(v);
+      if (h.date && (!v || /^\d{4}-\d{2}-\d{2}$/.test(v))) input.type = 'date';
+      if (h.number) { input.inputMode = 'decimal'; input.dataset.number = '1'; }
+      input.value = v;
+      input.dataset.orig = r ? v : '';
+      wrap.appendChild(input);
+      form.appendChild(wrap);
+    });
+    if (auto.length) form.appendChild(el('div', 'hint', '자동 계산(수식) 열: ' + auto.join(', ') + ' — 저장하면 시트 수식으로 다시 계산됩니다.'));
+
+    var msg = el('p', 'error');
+    msg.hidden = true;
+    var save = el('button', 'save', r ? '저장' : '추가');
+    save.type = 'submit';
+    form.appendChild(save);
+    form.appendChild(msg);
+
+    form.addEventListener('submit', async function (ev) {
+      ev.preventDefault();
+      var values = {};
+      form.querySelectorAll('input[data-col]').forEach(function (inp) {
+        var val = inp.value.trim();
+        if (val === inp.dataset.orig) return;
+        if (inp.dataset.number && val !== '') {
+          var n = Number(val.replace(/[₩¥,\s]/g, ''));
+          if (isNaN(n)) { values = null; msg.textContent = inp.previousSibling.textContent + ': 숫자만 입력하세요.'; return; }
+          val = n;
+        }
+        if (values) values[inp.dataset.col] = val;
+      });
+      if (!values) { msg.hidden = false; return; }
+      msg.hidden = true;
+      if (!Object.keys(values).length) { msg.textContent = r ? '바뀐 내용이 없습니다.' : '내용을 입력하세요.'; msg.hidden = false; return; }
+      save.disabled = true;
+      save.textContent = '저장 중…';
+      try {
+        var data = await api('POST', { sheet: 'Ledger', row: r ? r._row : null, orig: r ? r.d : null, values: values });
+        state.data.Ledger = data.ledger;
+        buildFilter();
+        render();
+        $('count').textContent += ' · ✅ ' + data.row + '행 ' + (r ? '수정됨' : '추가됨');
+      } catch (e) {
+        msg.textContent = e.message;
+        msg.hidden = false;
+        save.disabled = false;
+        save.textContent = r ? '저장' : '추가';
       }
     });
     return form;

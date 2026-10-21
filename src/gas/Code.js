@@ -39,6 +39,7 @@ function doPost(e) {
 
     // 관리자 페이지 수정 (functions/api/admin/sheet.js)
     if (data.type === 'admin_update') return adminUpdate(data);
+    if (data.type === 'admin_ledger_save') return adminLedgerSave(data);
 
     if (data.type === 'proxy_pickup') {
       var ss = SpreadsheetApp.openById(SHEET_ID);
@@ -400,6 +401,7 @@ function doGet(e) {
     var action = (e.parameter && e.parameter.action) ? e.parameter.action : '';
     if (action === 'admin_lookup') return adminLookup(e.parameter);
     if (action === 'admin_list') return adminList(e.parameter);
+    if (action === 'admin_ledger') return adminLedger(e.parameter);
     var ss = SpreadsheetApp.openById(SHEET_ID);
     var sheetName = (action === 'success') ? 'SuccessStories' : 'RewardList';
     var sheet = ss.getSheetByName(sheetName);
@@ -602,6 +604,150 @@ function adminUpdate(data) {
       if (headers[k]) updated[headers[k]] = adminCell_(newRow[k]);
     }
     return adminJson_({ result: 'success', written: written, row: updated });
+  } catch (err) {
+    return adminJson_({ result: 'error', message: err.toString() });
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/**
+ * [관리자 전용] 정산표 — 열 이름·수식을 고정하지 않고 시트에서 읽음
+ * - 헤더 = 위쪽 5행 안에서 '일자' 칸이 있는 행, 그 위 행들은 요약(환율·총수익)
+ * - 수식 칸은 수정 불가, 새 행은 마지막 행의 수식·서식을 복사
+ * - 행 번호로 수정하므로 저장 직전 행 내용(orig)이 화면과 같은지 확인
+ */
+var LEDGER_SHEET = '정산표';
+
+function ledgerLayout_(sheet) {
+  var lastRow = sheet.getLastRow();
+  var lastCol = sheet.getLastColumn();
+  if (!lastRow || !lastCol) throw new Error('정산표가 비어 있음');
+  var top = sheet.getRange(1, 1, Math.min(5, lastRow), lastCol).getDisplayValues();
+  var headerRow = -1;
+  for (var i = 0; i < top.length; i++) {
+    if (top[i].some(function (c) { return String(c).trim() === '일자'; })) { headerRow = i + 1; break; }
+  }
+  if (headerRow === -1) throw new Error("정산표에서 '일자' 헤더 행을 찾을 수 없음");
+  var headers = top[headerRow - 1].map(function (h) { return String(h).trim(); });
+  var dateCol = headers.indexOf('일자');
+
+  // 마지막 데이터 행 = 일자가 채워진 마지막 행 (아래에 미리 깔린 수식 행은 무시)
+  var lastData = headerRow;
+  if (lastRow > headerRow) {
+    var dates = sheet.getRange(headerRow + 1, dateCol + 1, lastRow - headerRow, 1).getDisplayValues();
+    for (var r = dates.length - 1; r >= 0; r--) {
+      if (String(dates[r][0]).trim()) { lastData = headerRow + 1 + r; break; }
+    }
+  }
+  return { headerRow: headerRow, lastCol: lastCol, lastData: lastData, headers: headers, dateCol: dateCol, top: top };
+}
+
+function ledgerValue_(v) {
+  return v instanceof Date ? Utilities.formatDate(v, 'Asia/Seoul', 'yyyy-MM-dd') : v;
+}
+
+function ledgerList_(sheet) {
+  var L = ledgerLayout_(sheet);
+  var n = L.lastData - L.headerRow;
+  var result = { headers: [], summary: L.top.slice(0, L.headerRow - 1), rows: [] };
+
+  // 열 정보는 마지막 데이터 행 기준 (수식 여부, 통화 서식, 숫자 여부)
+  var sample = L.lastData > L.headerRow ? L.lastData : L.headerRow + 1;
+  var sRange = sheet.getRange(sample, 1, 1, L.lastCol);
+  var sFormulas = sRange.getFormulas()[0];
+  var sFormats = sRange.getNumberFormats()[0];
+  var sValues = sRange.getValues()[0];
+  var seen = {};
+  L.headers.forEach(function (h, c) {
+    var currency = sFormats[c].indexOf('¥') !== -1 ? '¥' : (sFormats[c].indexOf('₩') !== -1 ? '₩' : '');
+    var label = h || ('열' + (c + 1));
+    seen[label] = (seen[label] || 0) + 1;
+    result.headers.push({
+      name: label,
+      currency: currency,
+      formula: !!sFormulas[c],
+      number: typeof sValues[c] === 'number' || !!currency,
+      date: c === L.dateCol
+    });
+  });
+  // 이름이 겹치는 열(배송비 ¥/₩)은 통화로 구분
+  result.headers.forEach(function (h) {
+    if (seen[h.name] > 1) h.name += h.currency ? '(' + h.currency + ')' : '';
+  });
+
+  if (n > 0) {
+    var range = sheet.getRange(L.headerRow + 1, 1, n, L.lastCol);
+    var values = range.getValues();
+    var display = range.getDisplayValues();
+    for (var i = 0; i < n; i++) {
+      if (!display[i].some(function (c) { return String(c).trim(); })) continue;
+      result.rows.push({ _row: L.headerRow + 1 + i, v: values[i].map(ledgerValue_), d: display[i] });
+    }
+  }
+  return result;
+}
+
+/** 파라미터: key */
+function adminLedger(params) {
+  if (!adminAuthorized_(params.key)) return adminJson_({ error: 'unauthorized' });
+  try {
+    var sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(LEDGER_SHEET);
+    if (!sheet) return adminJson_({ error: LEDGER_SHEET + ' 시트 없음' });
+    return adminJson_(ledgerList_(sheet));
+  } catch (err) {
+    return adminJson_({ error: err.toString() });
+  }
+}
+
+/**
+ * data: { key, row(없으면 새 행 추가), orig(수정 시 화면에 보이던 행 표시값), values: { 열번호(0부터): 값 } }
+ * 성공 시 정산표 전체를 다시 돌려줌
+ */
+function adminLedgerSave(data) {
+  if (!adminAuthorized_(data.key)) return adminJson_({ result: 'error', message: 'unauthorized' });
+  var values = data.values || {};
+  var lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+    var sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(LEDGER_SHEET);
+    if (!sheet) return adminJson_({ result: 'error', message: LEDGER_SHEET + ' 시트 없음' });
+    var L = ledgerLayout_(sheet);
+    var target;
+
+    if (data.row) {
+      target = Number(data.row);
+      if (!(target > L.headerRow && target <= L.lastData)) {
+        return adminJson_({ result: 'error', message: '잘못된 행 번호' });
+      }
+      var now = sheet.getRange(target, 1, 1, L.lastCol).getDisplayValues()[0];
+      if (JSON.stringify(now) !== JSON.stringify(data.orig || [])) {
+        return adminJson_({ result: 'error', message: '시트 내용이 바뀌었습니다. 새로고침 후 다시 수정하세요.' });
+      }
+    } else {
+      target = L.lastData + 1;
+      if (L.lastData > L.headerRow) {
+        var tpl = sheet.getRange(L.lastData, 1, 1, L.lastCol);
+        var dest = sheet.getRange(target, 1, 1, L.lastCol);
+        tpl.copyTo(dest, SpreadsheetApp.CopyPasteType.PASTE_FORMAT, false);
+        var tplF = tpl.getFormulasR1C1()[0];
+        var destF = dest.getFormulas()[0];
+        for (var c = 0; c < L.lastCol; c++) {
+          if (tplF[c] && !destF[c]) sheet.getRange(target, c + 1).setFormulaR1C1(tplF[c]);
+        }
+      }
+    }
+
+    var formulas = sheet.getRange(target, 1, 1, L.lastCol).getFormulas()[0];
+    var written = 0;
+    Object.keys(values).forEach(function (k) {
+      var c = Number(k);
+      if (!(c >= 0 && c < L.lastCol) || formulas[c]) return;
+      sheet.getRange(target, c + 1).setValue(values[k]);
+      written++;
+    });
+    SpreadsheetApp.flush();
+    return adminJson_({ result: 'success', row: target, written: written, ledger: ledgerList_(sheet) });
   } catch (err) {
     return adminJson_({ result: 'error', message: err.toString() });
   } finally {
