@@ -13,21 +13,23 @@ const firebaseConfig = {
 
 const VAPID_KEY = "BHvAAvF_g3Smd8GXZLkSL2pEXsXAR0EG3WERoB7JWPLcW4oybj9wvVIXNp7Cy4MBiJIh2QB1nfR-eH7wCv-lWyU";
 
+// 알림 받기 버튼을 보여줄지 판단: 'unsupported' | 'ios-browser' | 'default' | 'granted' | 'denied'
+export const getWebPushState = () => {
+    if (!('Notification' in window) || !('serviceWorker' in navigator)) return 'unsupported';
+    // iOS PWA 푸시 대응 여부 체크 (iOS 16.4+에서 '홈 화면에 추가'시에만 지원)
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+    if (isIOS && !isStandalone) return 'ios-browser';
+    return Notification.permission;
+};
+
 export const initWebPushNotifications = async () => {
     try {
         // 1. 알림 지원 여부 확인
-        if (!('Notification' in window) || !('serviceWorker' in navigator)) {
-            console.log('이 브라우저는 웹 푸시를 지원하지 않습니다.');
-            return;
-        }
-
-        // iOS PWA 푸시 대응 여부 체크 (iOS 16.4+에서 '홈 화면에 추가'시에만 지원)
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
-
-        if (isIOS && !isStandalone) {
-            console.log('iOS에서는 홈 화면에 추가(PWA)된 상태에서만 푸시 알림을 지원합니다.');
-            return;
+        const state = getWebPushState();
+        if (state === 'unsupported' || state === 'ios-browser') {
+            console.log('이 브라우저(또는 홈 화면에 추가하지 않은 iOS)는 웹 푸시를 지원하지 않습니다.');
+            return state;
         }
 
         // 2. 권한 요청
@@ -84,12 +86,14 @@ export const initWebPushNotifications = async () => {
             onMessage(messaging, (payload) => {
                 console.log('포그라운드 메시지 수신:', payload);
                 // 자체적인 UI 알림을 띄우기 (옵션)
-                window.alert(`[제주라이브 알림]\n${payload.notification?.title}\n${payload.notification?.body}`);
+                const text = [payload.notification?.title, payload.notification?.body].filter(Boolean).join(' · ');
+                if (window.showToast) window.showToast(text, 'warn', 6000);
             });
 
         } else {
             console.log('알림 권한이 거부되었거나 무시되었습니다.');
         }
+        return permission;
 
     } catch (error) {
         console.error('웹 푸시 초기화 중 오류 발생:', error);

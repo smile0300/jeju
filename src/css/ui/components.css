@@ -1329,3 +1329,23 @@ i.ph-duotone.hover-scale:hover {
 #home-success-marquee-content .marquee-item {
     text-align: left !important;
 }
+
+/* 기상특보·한라산 통제 알림 받기 버튼 (날씨·한라산 화면) */
+.push-optin-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    min-height: 44px;
+    margin: 0 0 12px;
+    padding: 10px 14px;
+    border: 1px solid rgba(49, 130, 246, 0.25);
+    border-radius: var(--radius-md, 12px);
+    background: rgba(49, 130, 246, 0.06);
+    color: var(--color-blue);
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+

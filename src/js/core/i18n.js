@@ -197,6 +197,9 @@ const TRANSLATIONS = {
         'weather.error.title': '未能加载天气信息',
         'weather.error.desc': '可能是暂时的连接问题。<br>请稍后再试。',
         'common.retry': '重试',
+        'push.optin': '接收气象预警·汉拿山管制通知',
+        'push.granted': '已开启通知，有预警时会第一时间提醒您',
+        'push.denied': '通知已被拒绝，可在浏览器设置中重新开启',
 
         // ── 날씨 동적 텍스트 ──
         'weather.humidity': '湿度',
@@ -865,6 +868,9 @@ const TRANSLATIONS = {
         'weather.error.title': '날씨 정보를 불러오지 못했어요',
         'weather.error.desc': '일시적인 연결 문제일 수 있어요.<br>잠시 후 다시 시도해주세요.',
         'common.retry': '다시 시도',
+        'push.optin': '기상특보·한라산 통제 알림 받기',
+        'push.granted': '알림이 켜졌어요. 특보가 나오면 바로 알려드릴게요',
+        'push.denied': '알림이 차단됐어요. 브라우저 설정에서 다시 켤 수 있어요',
 
         // ── 날씨 동적 텍스트 ──
         'weather.humidity': '습도',
@@ -1468,6 +1474,9 @@ const TRANSLATIONS = {
         'weather.error.title': 'Failed to load weather info',
         'weather.error.desc': 'There might be a temporary connection issue.<br>Please try again later.',
         'common.retry': 'Retry',
+        'push.optin': 'Get weather alerts & Hallasan closure notices',
+        'push.granted': 'Notifications on. We\'ll alert you as soon as a warning is issued',
+        'push.denied': 'Notifications blocked. You can re-enable them in browser settings',
         'common.load_more': 'Load More',
 
         // ── 날씨 동적 텍스트 ──

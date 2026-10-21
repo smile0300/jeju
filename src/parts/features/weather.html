@@ -16,6 +16,11 @@
                 </div>
             </div>
 
+            <!-- 기상특보·한라산 통제 알림 받기 (아직 묻지 않은 웹 브라우저에서만 표시, main.js updatePushOptin) -->
+            <button type="button" class="push-optin-btn" style="display:none;" onclick="window.requestAlertPush()">
+                <i class="ph-duotone ph-bell-ringing"></i> <span data-i18n="push.optin">接收气象预警·汉拿山管制通知</span>
+            </button>
+
             <!-- ② 지역 선택 (드롭다운 방식) -->
             <div class="weather-nav-wrapper" id="weather-nav-wrapper">
 

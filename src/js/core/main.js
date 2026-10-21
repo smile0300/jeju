@@ -1,7 +1,8 @@
 
 import { CONFIG } from './config.js';
-import { initI18n } from './i18n.js';
-import { initWebPushNotifications } from './web-push.js';
+import { initI18n, t } from './i18n.js';
+import { showToast } from './utils.js';
+import { initWebPushNotifications, getWebPushState } from './web-push.js';
 import { initPushNotifications } from './push.js';
 import { Capacitor } from '@capacitor/core';
 
@@ -26,6 +27,19 @@ import '../features/charter.js';
 // Global function assignments for HTML event handlers
 window.showSection = showSection;
 window.goBack = goBack;
+window.showToast = showToast;
+
+// 기상특보·한라산 통제 알림 받기 버튼 (.push-optin-btn): 아직 묻지 않은 웹 브라우저에서만 보인다
+window.updatePushOptin = () => {
+    const show = !Capacitor.isNativePlatform() && getWebPushState() === 'default';
+    document.querySelectorAll('.push-optin-btn').forEach(btn => { btn.style.display = show ? '' : 'none'; });
+};
+window.requestAlertPush = async () => {
+    const result = await initWebPushNotifications();
+    window.updatePushOptin();
+    if (result === 'granted') showToast(t('push.granted'), 'info');
+    else if (result === 'denied') showToast(t('push.denied'), 'warn', 5000);
+};
 window.initHlsPlayer = initHlsPlayer;
 window.toggleFullscreen = function(videoId) {
     const video = document.getElementById(videoId);
@@ -378,13 +392,23 @@ document.addEventListener('click', function(e) {
 window.addEventListener('load', () => {
     // 안드로이드 크롬 등 최신 브라우저는 접속하자마자 알림창을 띄우면 스팸으로 차단합니다.
     // 따라서 사용자가 화면을 한 번이라도 터치/클릭했을 때 권한을 요청하도록 변경합니다.
-    document.body.addEventListener('click', () => {
-        if (Capacitor.isNativePlatform()) {
-            initPushNotifications();
-        } else {
-            initWebPushNotifications();
-        }
-    }, { once: true }); // 한 번만 실행되도록
+    // 웹에서는 아무 데나 처음 누를 때 묻지 않는다(이유 모를 팝업은 거부되고, 거부하면 다시 못 묻는다).
+    // 날씨·한라산 화면의 "알림 받기" 버튼을 누를 때만 묻고, 이미 허용한 기기는 토큰만 조용히 갱신한다.
+    // 관리자 기기 등록 링크로 들어온 경우만 예전처럼 첫 터치에 묻는다.
+    const isAdminRegister = new URLSearchParams(window.location.search).has('admin_register');
+    if (Capacitor.isNativePlatform() || isAdminRegister) {
+        document.body.addEventListener('click', () => {
+            if (Capacitor.isNativePlatform()) {
+                initPushNotifications();
+            } else {
+                initWebPushNotifications();
+            }
+        }, { once: true }); // 한 번만 실행되도록
+    } else if (getWebPushState() === 'granted') {
+        initWebPushNotifications();
+    }
+    window.updatePushOptin();
+
 
     // 홈 화면 동적 배너를 위한 필수 호출
     fetchWeatherAlerts(); 
