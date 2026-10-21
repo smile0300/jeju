@@ -13,6 +13,19 @@
                 <button class="flight-tab active" id="tab-arrive" onclick="switchFlightTab('arrive')" data-i18n="airport.arrive">到达航班</button>
                 <button class="flight-tab" id="tab-depart" onclick="switchFlightTab('depart')" data-i18n="airport.depart">出发航班</button>
             </div>
+            <!-- 편명 검색 · 갱신 시각 (airport.js filterFlights / fetchFlights) -->
+            <div class="flight-tools">
+                <div class="flight-search-wrap">
+                    <i class="ph ph-magnifying-glass"></i>
+                    <input type="search" id="flight-search" class="flight-search-input" autocomplete="off"
+                           data-i18n-placeholder="airport.search.ph" placeholder="搜索航班号 / 城市 / 航空公司"
+                           oninput="window.airportApp.filterFlights()">
+                </div>
+                <div class="flight-meta">
+                    <span data-i18n="airport.pin_hint">点击航班即可置顶</span>
+                    <span id="flight-updated" class="flight-updated"></span>
+                </div>
+            </div>
             <div id="flight-content-arrive" class="flight-content active">
                 <div class="flight-table">
                     <div id="arrive-data"></div>

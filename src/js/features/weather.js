@@ -280,12 +280,31 @@ export async function fetchWeatherData(locKey) {
         }
 
         parseAndRenderWeather(locKey, items, midData, mountainData);
+        renderWeatherAsOf(locKey, ncstItems[0]?.baseTime);
         fetchAirQuality(locKey).catch(err => console.error(`[AirQuality] ${locKey} 로드 실패:`, err));
 
     } catch (e) {
         console.error(`날씨 API 오류(${locKey}):`, e);
         renderWeatherError(locKey);
     }
+}
+
+// 현재 날씨 카드 아래에 '몇 시 관측 기준'인지 표시 (실황이 없으면 불러온 시각)
+function renderWeatherAsOf(locKey, obsHHMM) {
+    const card = document.getElementById(`current-card-${locKey}`);
+    if (!card) return;
+    let el = document.getElementById(`weather-asof-${locKey}`);
+    if (!el) {
+        el = document.createElement('div');
+        el.id = `weather-asof-${locKey}`;
+        el.className = 'weather-asof';
+        card.insertAdjacentElement('afterend', el);
+    }
+    let time = obsHHMM && obsHHMM.length >= 4 ? `${obsHHMM.slice(0, 2)}:${obsHHMM.slice(2, 4)}` : '';
+    if (!time) {
+        time = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Seoul', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date());
+    }
+    el.textContent = window.t('weather.asof', { time });
 }
 
 export async function fetchMountainWeather(obsid) {

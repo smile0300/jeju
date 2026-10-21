@@ -1392,3 +1392,73 @@ i.ph-duotone.hover-scale:hover {
 }
 .my-case-status { color: var(--color-blue); font-weight: 600; }
 
+/* 공항: 편명 검색 · 갱신 시각 · 지금 구분선 · 고정한 편 */
+.flight-tools {
+    margin: -12px 0 12px;
+}
+.flight-search-wrap {
+    position: relative;
+}
+.flight-search-wrap > i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--label-secondary);
+    pointer-events: none;
+}
+.flight-search-input {
+    width: 100%;
+    min-height: 44px;
+    padding: 0 14px 0 38px;
+    border: 1px solid var(--separator);
+    border-radius: var(--radius-md, 12px);
+    background: var(--bg-primary);
+    color: var(--label-primary);
+    font-size: 16px; /* iOS 확대 방지 */
+    box-sizing: border-box;
+}
+.flight-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 6px;
+    padding: 0 4px;
+    font-size: 0.75rem;
+    color: var(--label-secondary);
+}
+.flight-now-divider {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: var(--accent-subtle, rgba(49, 130, 246, 0.08));
+    color: var(--accent, #3182F6);
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+.flight-now-divider::before,
+.flight-now-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: currentColor;
+    opacity: 0.4;
+}
+.flight-row.pinned {
+    background-color: var(--accent-subtle, rgba(49, 130, 246, 0.08));
+    border-left-color: var(--accent, #3182F6);
+}
+.flight-row.pinned .flight-col:first-child {
+    gap: 2px;
+    color: var(--accent, #3182F6);
+}
+
+/* 날씨: 관측 기준 시각 */
+.weather-asof {
+    margin: -4px 4px 8px;
+    text-align: right;
+    font-size: 0.72rem;
+    color: var(--label-secondary);
+}
+

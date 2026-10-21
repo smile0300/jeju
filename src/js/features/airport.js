@@ -223,8 +223,8 @@ export async function fetchFlights(type) {
     };
 
     try {
-        const today = new Date();
-        const ymd = today.getFullYear() + String(today.getMonth() + 1).padStart(2, '0') + String(today.getDate()).padStart(2, '0');
+        // 중국(UTC+8) 등 해외 기기 시계로 날짜를 잡으면 자정 전후로 하루가 어긋나므로 한국 날짜를 쓴다
+        const ymd = kstNow().ymd;
 
         // 사용자가 신청한 실제 엔드포인트(/arrival, /depart)로 다시 복구
         const operation = type === 'arrive' ? 'arrival' : 'depart';
@@ -363,6 +363,8 @@ export async function fetchFlights(type) {
                 return directionMatch && oppositeCode && (f.is_intl || !DOMESTIC_AIRPORTS.has(oppositeCode)) && REGION_AIRPORTS.has(oppositeCode);
             });
             renderFlightList(container, filteredFlights, type);
+            const updatedEl = document.getElementById('flight-updated');
+            if (updatedEl) updatedEl.textContent = window.t('airport.updated', { time: kstNow().label });
             // 홈 배너가 지연·결항 여부를 읽을 수 있도록 결과를 공개한다
             window.jejuFlights = { ...(window.jejuFlights || {}), [type]: filteredFlights };
             window.dispatchEvent(new Event('jeju:flights'));
@@ -384,7 +386,40 @@ export async function fetchFlights(type) {
     }
 }
 
+// 한국 시각 (항공편 시간은 모두 KST 기준)
+function kstNow() {
+    const parts = Object.fromEntries(new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', hourCycle: 'h23'
+    }).formatToParts(new Date()).map(p => [p.type, p.value]));
+    return { ymd: parts.year + parts.month + parts.day, hhmm: parts.hour + parts.minute, label: `${parts.hour}:${parts.minute}` };
+}
+
+// 내 항공편 고정: 행을 누르면 목록 맨 위에 고정된다 (이 기기에만 저장)
+const PIN_KEY = 'jeju_pinned_flights';
+function loadPinned() {
+    try { return JSON.parse(localStorage.getItem(PIN_KEY)) || []; } catch (e) { return []; }
+}
+function togglePinned(flightId) {
+    let list = loadPinned();
+    const pinned = !list.includes(flightId);
+    list = pinned ? [flightId, ...list].slice(0, 5) : list.filter(id => id !== flightId);
+    try { localStorage.setItem(PIN_KEY, JSON.stringify(list)); } catch (e) { /* 저장 불가 환경은 무시 */ }
+    return pinned;
+}
+
+// 편명·항공사·도시 검색 (입력창 #flight-search)
+export function filterFlights() {
+    const q = (document.getElementById('flight-search')?.value || '').trim().toLowerCase().replace(/\s+/g, '');
+    document.querySelectorAll('#arrive-data .flight-row:not(.flight-header), #depart-data .flight-row:not(.flight-header)').forEach(row => {
+        row.style.display = !q || (row.dataset.search || '').includes(q) ? '' : 'none';
+    });
+    document.querySelectorAll('.flight-now-divider').forEach(el => { el.style.display = q ? 'none' : ''; });
+}
+
 export function renderFlightList(container, items, type) {
+    const pinnedIds = loadPinned();
+    const now = kstNow();
 
     const headerTitle = (type === 'arrive') ? window.t('airport.header.origin') : window.t('airport.header.dest');
     let html = `<div class="flight-row flight-header">
@@ -400,7 +435,11 @@ export function renderFlightList(container, items, type) {
         return;
     }
 
-    html += items.map(f => {
+    // 고정한 편을 맨 위로, 나머지는 원래 순서 그대로 두고 '지금' 구분선을 끼운다
+    const sorted = [...items.filter(f => pinnedIds.includes(f.flight_id)), ...items.filter(f => !pinnedIds.includes(f.flight_id))];
+    let nowInserted = false;
+    html += sorted.map(f => {
+        const isPinned = pinnedIds.includes(f.flight_id);
         const schedTimeRaw = (f.plan_time || '').toString();
         const estTimeRaw = (f.est_time || '').toString();
         const schedStr = schedTimeRaw.length >= 4 ? `${schedTimeRaw.slice(0, 2)}:${schedTimeRaw.slice(2, 4)}` : '-';
@@ -412,8 +451,15 @@ export function renderFlightList(container, items, type) {
         const airlineName = getAirlineName(f.flight_id, f.airline);
         const statusSpan = getStatusBadge(f.status);
 
-        return `<div class="flight-row">
-            <div class="flight-col">${f.flight_id}</div>
+        const searchText = [f.flight_id, airlineName, rawCity, getCityName(rawCity)].join(' ').toLowerCase().replace(/\s+/g, '');
+        let divider = '';
+        if (!isPinned && !nowInserted && schedTimeRaw.length >= 4 && schedTimeRaw.slice(0, 4) >= now.hhmm) {
+            nowInserted = true;
+            divider = `<div class="flight-now-divider"><span>${window.t('airport.now', { time: now.label })}</span></div>`;
+        }
+
+        return `${divider}<div class="flight-row${isPinned ? ' pinned' : ''}" data-flight="${f.flight_id}" data-search="${searchText.replace(/"/g, '')}">
+            <div class="flight-col">${isPinned ? '<i class="ph-fill ph-push-pin"></i>' : ''}${f.flight_id}</div>
             <div class="flight-col">${airlineName}</div>
             <div class="flight-col" style="text-align:center;">${city}</div>
             <div class="flight-col" style="flex-direction: column; line-height: 1.2;">
@@ -425,15 +471,24 @@ export function renderFlightList(container, items, type) {
     }).join('');
 
     container.innerHTML = html;
+    filterFlights();
 
-    // v16.0: 행 선택 강조 기능 (이벤트 위임)
+    // 처음 열 때 한 번만 '지금' 위치로 스크롤 (고정한 편이 있으면 맨 위가 더 중요하므로 생략)
+    const divider = container.querySelector('.flight-now-divider');
+    if (divider && !container.dataset.scrolledToNow && !pinnedIds.some(id => items.some(f => f.flight_id === id))) {
+        container.dataset.scrolledToNow = 'true';
+        if (container.offsetParent) divider.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }
+
+    // 행을 누르면 내 항공편으로 고정/해제 (이벤트 위임)
     if (!container.dataset.listenerAttached) {
         container.addEventListener('click', (e) => {
             const row = e.target.closest('.flight-row');
-            if (row && !row.classList.contains('flight-header')) {
-                container.querySelectorAll('.flight-row').forEach(r => r.classList.remove('selected'));
-                row.classList.add('selected');
-            }
+            if (!row || row.classList.contains('flight-header') || !row.dataset.flight) return;
+            const pinned = togglePinned(row.dataset.flight);
+            const latest = (window.jejuFlights && window.jejuFlights[type]) || items;
+            renderFlightList(container, latest, type);
+            if (window.showToast) window.showToast(window.t(pinned ? 'airport.pinned' : 'airport.unpinned', { flight: row.dataset.flight }));
         });
         container.dataset.listenerAttached = 'true';
     }
@@ -449,5 +504,6 @@ export function switchFlightTab(type) {
 
 window.airportApp = {
     fetchFlights: fetchFlights,
+    filterFlights: filterFlights,
     switchFlightTab: switchFlightTab
 };
