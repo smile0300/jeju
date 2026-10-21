@@ -1,14 +1,14 @@
 import { CONFIG } from '../core/config.js';
 import { tr, pick, lang, escapeHtml } from './planner/strings.js';
 import { partyStepper, bindPartySteppers, showStatus, copyText, flashLabel } from './planner/shared.js';
-import { CHARTER_PRICES, CHARTER_UPDATED } from '../../data/charter.js';
+import { CHARTER_PRICES, CHARTER_COMPARE, CHARTER_UPDATED } from '../../data/charter.js';
 
 // 차량 대절/동승: 달력에서 날짜를 골라 그날의 동승 모집을 보고, 자기 일정을 올리고, 댓글로 협의한다.
 // - 모집글은 올리는 즉시 공개된다 (운영자는 시트의 Hidden 칸에 Y를 넣어 숨길 수 있다).
 // - 지난 날짜의 글은 지우지 않고 "종료"로 남긴다 (이력이 쌓여야 다음 사람이 믿고 쓴다).
 // - 이 사이트는 차량을 운영하지 않는다. 참고 요금·업체 고르는 법은 "이용 방법"을 눌러야 펼쳐진다.
 
-const CHECKS = ['plate', 'insurance', 'license', 'price', 'cancel'];
+const CHECKS = ['plate', 'agency', 'insurance', 'license', 'price', 'cancel'];
 const LOCALES = { zh: 'zh-CN', ko: 'ko-KR', en: 'en-US' };
 const HISTORY_DAYS = 90;                   // 달력에서 되돌아볼 수 있는 기간 (GAS의 CARPOOL_HISTORY_DAYS와 맞출 것)
 const MOCK_KEY = 'jeju_carpool_mock';
@@ -81,6 +81,22 @@ async function loadPosts() {
 }
 
 // ── 화면 조각 ───────────────────────────────────────────────────────
+// 업체별 비교표: 한 가지 가격만 내건 업체(flat)는 네 칸을 합쳐 표시
+function compareHtml() {
+    const cols = ['5', '7', '9', '11'];
+    const rows = CHARTER_COMPARE.map(r => `<tr>
+        <th scope="row">${escapeHtml(r.name)}<small>${escapeHtml(pick(r.note))}</small></th>
+        ${r.flat ? `<td colspan="4" class="pl-cmp-flat">${escapeHtml(pick(r.flat))}</td>`
+                 : r.prices.map(p => `<td>${escapeHtml(p).replace('~', '~<wbr>')}</td>`).join('')}
+    </tr>`).join('');
+    return `<h4 class="pl-h4">${tr('charter.sec.compare')}</h4>
+        <div class="pl-cmp-wrap"><table class="pl-cmp">
+            <thead><tr><th scope="col">${tr('charter.compare.col.name')}</th>${cols.map(c => `<th scope="col">${tr(`charter.compare.col.${c}`)}</th>`).join('')}</tr></thead>
+            <tbody>${rows}</tbody>
+        </table></div>
+        <p class="pl-muted pl-hint">${tr('charter.compare.note')}</p>`;
+}
+
 function guideHtml() {
     return `<details class="pl-card pl-guide">
         <summary><i class="ph-duotone ph-info"></i> ${tr('charter.guide.toggle')}</summary>
@@ -90,6 +106,7 @@ function guideHtml() {
                     <small>${escapeHtml(pick(p.detail))}</small></span>
                 <span class="pl-price-val">${escapeHtml(p.price)}<small>${escapeHtml(pick(p.unit))}</small></span></li>`).join('')}</ul>
         <p class="pl-muted pl-hint">${tr('charter.price.note')} ${tr('charter.price.updated', { d: CHARTER_UPDATED })}</p>
+        ${compareHtml()}
         <h4 class="pl-h4">${tr('charter.sec.check')}</h4>
         <ul class="pl-checklist">${CHECKS.map(c => `<li><i class="ph-duotone ph-check-circle"></i><span>${tr(`charter.check.${c}`)}</span></li>`).join('')}</ul>
     </details>`;

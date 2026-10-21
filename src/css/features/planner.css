@@ -363,6 +363,17 @@
 .pl-price-val { font-size: 1.05rem; font-weight: 800; white-space: nowrap; text-align: right; }
 .pl-price-val small { display: block; font-size: 0.75rem; font-weight: 400; color: var(--label-secondary); }
 
+/* 업체별 비교표 — 좁은 폭에서는 표 안에서만 가로 스크롤 (페이지는 넘치지 않음) */
+.pl-cmp-wrap { overflow-x: auto; margin: 0 0 var(--space-2); }
+.pl-cmp { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.pl-cmp th, .pl-cmp td { padding: var(--space-2) 3px; border-bottom: 1px solid var(--separator); text-align: right; }
+.pl-cmp thead th { font-size: 0.75rem; font-weight: 700; color: var(--label-secondary); white-space: nowrap; }
+.pl-cmp th[scope="row"], .pl-cmp thead th:first-child { text-align: left; font-weight: 700; width: 38%; }
+.pl-cmp th[scope="row"] small { display: block; font-size: 0.72rem; font-weight: 400; color: var(--label-secondary); }
+.pl-cmp td { font-weight: 700; }
+.pl-cmp td.pl-cmp-flat { text-align: center; white-space: normal; }
+.pl-cmp tbody tr:last-child th, .pl-cmp tbody tr:last-child td { border-bottom: none; }
+
 .pl-checklist {
     list-style: none;
     margin: 0;
