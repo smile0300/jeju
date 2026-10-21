@@ -1488,3 +1488,42 @@ i.ph-duotone.hover-scale:hover {
     visibility: visible;
 }
 
+/* 위챗 앱 안 브라우저 안내 (main.js showWechatBrowserTip) — 오른쪽 위 ··· 메뉴를 가리킨다 */
+.wechat-browser-tip {
+    position: fixed;
+    top: 8px;
+    right: 8px;
+    left: 8px;
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(30, 30, 40, 0.95);
+    color: #fff;
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.4;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+.wechat-browser-tip::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    right: 18px;
+    border: 6px solid transparent;
+    border-top: 0;
+    border-bottom-color: rgba(30, 30, 40, 0.95);
+}
+.wechat-browser-tip-text { flex: 1; }
+.wechat-browser-tip-close {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    cursor: pointer;
+}

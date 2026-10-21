@@ -404,6 +404,23 @@ window.addEventListener('jeju:offline-data', () => setOfflineBanner(true));
 window.addEventListener('jeju:online-data', () => { if (navigator.onLine) setOfflineBanner(false); });
 if (!navigator.onLine) setOfflineBanner(true);
 
+// 위챗 앱 안 브라우저: 알림·앱 설치·외부 링크가 막히는 경우가 많아 '브라우저에서 열기'를 안내한다 (닫으면 이 탭에선 다시 안 띄움)
+function showWechatBrowserTip() {
+    if (!/MicroMessenger/i.test(navigator.userAgent)) return;
+    try { if (sessionStorage.getItem('wechat_tip_closed')) return; } catch (e) { /* 무시 */ }
+    const el = document.createElement('div');
+    el.className = 'wechat-browser-tip';
+    el.setAttribute('role', 'note');
+    el.innerHTML = '<span class="wechat-browser-tip-text"></span><button type="button" class="wechat-browser-tip-close" aria-label="Close">✕</button>';
+    el.querySelector('.wechat-browser-tip-text').textContent = t('wechat.browser_tip');
+    el.querySelector('button').addEventListener('click', () => {
+        el.remove();
+        try { sessionStorage.setItem('wechat_tip_closed', '1'); } catch (e) { /* 무시 */ }
+    });
+    document.body.appendChild(el);
+}
+showWechatBrowserTip();
+
 // Close lang selector when clicking outside
 document.addEventListener('click', function(e) {
     const openSelector = e.target.closest('.lang-selector');
