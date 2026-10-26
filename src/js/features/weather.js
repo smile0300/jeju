@@ -219,11 +219,21 @@ export async function fetchWeatherData(locKey) {
         return latest;
     };
 
+    // 초단기실황: 이번 정시 관측이 아직 안 올라왔으면 한 시간 전 관측으로
+    const fetchNcst = async () => {
+        const hasItems = (json) => (json?.response?.body?.items?.item || []).length > 0;
+        const latest = await fetchPublicDataJson(ncstEndpoint, ncstParams).catch(e => { console.error('[Weather] 초단기실황 로드 실패:', e); return null; });
+        if (hasItems(latest)) return latest;
+        const prev = formatBaseTime(new Date(Date.now() - 60 * 60 * 1000));
+        const fallback = await fetchPublicDataJson(ncstEndpoint, { ...ncstParams, base_date: prev.ultraNcstDate, base_time: prev.ultraNcstTime }).catch(e => { console.error('[Weather] 초단기실황 재시도 실패:', e); return null; });
+        return hasItems(fallback) ? fallback : latest;
+    };
+
     try {
         const [vilageJson, ufcstJson, ncstJson, midData, mountainData] = await Promise.all([
             fetchVilage(),
             fetchPublicDataJson(ufcstEndpoint, ufcstParams).catch(e => { console.error('[Weather] 초단기예보 로드 실패:', e); return null; }),
-            fetchPublicDataJson(ncstEndpoint, ncstParams).catch(e => { console.error('[Weather] 초단기실황 로드 실패:', e); return null; }),
+            fetchNcst(),
             fetchMidTermWeather(loc).catch(e => { console.error('[Weather] 중기예보 로드 실패:', e); return null; }),
             (locKey === 'hallasan' && loc.obsid) ? fetchMountainWeather(loc.obsid).catch(e => { console.error('[Weather] 산악기상 로드 실패:', e); return null; }) : Promise.resolve(null)
         ]);

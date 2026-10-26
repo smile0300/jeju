@@ -54,7 +54,9 @@ export function formatPrecip(pcp) {
     return s;
 }
 
-export function formatBaseTime(date) {
+export function formatBaseTime(input) {
+    // 기상청 기준시각은 한국시간이다. 기기 시간대(중국 UTC+8 등)와 무관하게 KST 벽시계로 바꿔서 계산
+    const date = new Date(input.getTime() + (input.getTimezoneOffset() + 540) * 60000);
     const kstHour = date.getHours();
     const kstMin = date.getMinutes();
 
@@ -88,9 +90,9 @@ export function formatBaseTime(date) {
 
     const tmFc = `${targetDateForMid.getFullYear()}${String(targetDateForMid.getMonth() + 1).padStart(2, '0')}${String(targetDateForMid.getDate()).padStart(2, '0')}${String(midBase).padStart(2, '0')}00`;
 
-    // 3. 초단기실황 (getUltraSrtNcst) 기준 시간 (매시간 40분 발표, 기준시간: 정시)
+    // 3. 초단기실황 (getUltraSrtNcst) 기준 시간 (정시 관측, 매시 10분 무렵부터 제공 — 비어 있으면 호출부에서 한 시간 전으로 재시도)
     const ncstDateObj = new Date(date);
-    if (kstMin < 40) ncstDateObj.setHours(ncstDateObj.getHours() - 1);
+    if (kstMin < 10) ncstDateObj.setHours(ncstDateObj.getHours() - 1);
     const ultraNcstDate = `${ncstDateObj.getFullYear()}${String(ncstDateObj.getMonth() + 1).padStart(2, '0')}${String(ncstDateObj.getDate()).padStart(2, '0')}`;
     const ultraNcstTime = `${String(ncstDateObj.getHours()).padStart(2, '0')}00`;
 
