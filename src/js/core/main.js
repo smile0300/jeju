@@ -22,6 +22,7 @@ import '../ui/home-info-banner.js';
 import '../features/trip.js';
 import '../features/course.js';
 import '../features/charter.js';
+import '../features/brief-card.js';
 
 
 

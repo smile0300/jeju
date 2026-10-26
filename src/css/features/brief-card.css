@@ -1,0 +1,82 @@
+/* ==================== 오늘의 제주 브리핑 카드 (운영자 캡처용, brief-card.js) ==================== */
+/* 카드 폭에 맞춰 글자 크기가 함께 커지도록 em 단위로 통일 (폭 343px 기준 약 14px) */
+.bc-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10050;
+    background: #1f2937;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 16px;
+    overflow-y: auto;
+}
+.bc-stage { width: min(calc(100vw - 32px), 420px); }
+.bc-card {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    font-size: calc(min(100vw - 32px, 420px) / 24);
+    background: linear-gradient(180deg, #dbeafe 0%, #eff6ff 38%, #ffffff 100%);
+    color: #111827;
+    border-radius: 1.4em;
+    padding: 1.2em 1.1em 0.9em;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7em;
+    overflow: hidden;
+    font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+}
+.bc-loading { display: flex; align-items: center; justify-content: center; color: #6b7280; }
+
+.bc-head { display: flex; justify-content: space-between; align-items: flex-start; }
+.bc-title { font-size: 2em; font-weight: 900; line-height: 1.1; letter-spacing: 0.02em; }
+.bc-date { font-size: 0.95em; color: #374151; margin-top: 0.2em; font-weight: 600; }
+.bc-account { font-size: 0.75em; color: #2563eb; font-weight: 700; background: rgba(255, 255, 255, 0.8); padding: 0.3em 0.6em; border-radius: 999px; }
+
+.bc-regions { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5em; }
+.bc-region {
+    position: relative;
+    background: #ffffff;
+    border: 2px solid transparent;
+    border-radius: 1em;
+    padding: 0.55em 0.7em 0.5em;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06);
+}
+.bc-region.best { border-color: #fbbf24; background: #fffbeb; }
+.bc-best { position: absolute; top: 0.5em; right: 0.5em; font-size: 0.68em; font-weight: 800; color: #b45309; background: #fef3c7; padding: 0.15em 0.45em; border-radius: 0.4em; }
+.bc-rname { font-size: 1em; font-weight: 800; }
+.bc-rname small { font-size: 0.72em; color: #6b7280; font-weight: 600; margin-left: 0.3em; }
+.bc-rmain { display: flex; align-items: center; gap: 0.25em; margin: 0.2em 0 0.1em; }
+.bc-remoji { font-size: 1.6em; line-height: 1; }
+.bc-rtemp { font-size: 1.35em; font-weight: 900; }
+.bc-rmeta { font-size: 0.72em; color: #4b5563; font-weight: 600; }
+
+.bc-trail { background: #ffffff; border-radius: 1em; padding: 0.55em 0.7em; box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06); }
+.bc-trail-head { font-size: 0.88em; font-weight: 700; }
+.bc-trail-head b { color: #059669; }
+.bc-trail-head small { font-size: 0.8em; color: #9ca3af; font-weight: 500; margin-left: 0.2em; }
+.bc-chips { display: flex; flex-wrap: wrap; gap: 0.3em; margin-top: 0.4em; }
+.bc-chips span { font-size: 0.68em; font-weight: 700; padding: 0.15em 0.5em; border-radius: 999px; }
+.bc-chips .on { background: #d1fae5; color: #047857; }
+.bc-chips .off { background: #fee2e2; color: #b91c1c; }
+
+.bc-tips { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.25em; }
+.bc-tips li { font-size: 0.88em; font-weight: 700; color: #1f2937; }
+
+.bc-foot { margin-top: auto; font-size: 0.62em; color: #9ca3af; text-align: center; }
+
+.bc-controls { display: flex; gap: 8px; }
+.bc-controls button {
+    min-width: 72px;
+    min-height: 44px;
+    border: 1px solid #4b5563;
+    border-radius: 10px;
+    background: transparent;
+    color: #e5e7eb;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+.bc-controls button.on { background: #3b82f6; border-color: #3b82f6; color: #fff; }
