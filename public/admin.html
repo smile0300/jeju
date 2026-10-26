@@ -71,6 +71,30 @@
     <a href="/admin-reply.html">위챗 답변 도우미 →</a>
   </header>
 
+  <!-- 캡처 클린 모드: 이 기기(브라우저)에만 저장. 사이트에서 위챗 버튼·红包·包车·푸터를 숨긴다 -->
+  <div class="card">
+    <div class="item-head">
+      <div><b>📸 캡처 클린 모드</b> <span id="cleanState" class="badge"></span>
+        <p class="hint">샤오홍슈 캡처용. 이 기기에서만 위챗 버튼·红包·包车/拼车·푸터가 숨겨집니다.</p></div>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button id="cleanOn" type="button">클린 모드로 사이트 열기</button>
+      <button id="cleanOff" class="sub" type="button" style="flex:0 0 auto">끄기</button>
+    </div>
+  </div>
+  <script>
+  (function () {
+    var KEY = 'jeju_clean_mode';
+    var state = document.getElementById('cleanState');
+    function get() { try { return localStorage.getItem(KEY) === '1'; } catch (e) { return false; } }
+    function set(on) { try { on ? localStorage.setItem(KEY, '1') : localStorage.removeItem(KEY); } catch (e) {} paint(); }
+    function paint() { var on = get(); state.textContent = on ? '켜짐' : '꺼짐'; state.className = on ? 'badge strong' : 'badge'; }
+    document.getElementById('cleanOn').onclick = function () { set(true); location.href = '/'; };
+    document.getElementById('cleanOff').onclick = function () { set(false); };
+    paint();
+  })();
+  </script>
+
   <div class="card" id="login">
     <label for="key" style="margin-top:0">관리자 비밀번호</label>
     <div class="row">
