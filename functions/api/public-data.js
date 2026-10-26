@@ -58,10 +58,24 @@ export async function onRequest(context) {
       }
     }
 
-    const res = await fetch(targetUrl.toString(), {
+    // 공공데이터 API 서버가 가끔 느리거나 끊기므로 8초 제한 + 한 번 재시도 (CCTV 영상 스트림은 제외)
+    const isDataApi = hostname.includes('apis.data.go.kr');
+    const fetchOnce = () => fetch(targetUrl.toString(), {
       method: 'GET',
-      headers: { 'Accept': '*/*', 'User-Agent': 'Mozilla/5.0' }
+      headers: { 'Accept': '*/*', 'User-Agent': 'Mozilla/5.0' },
+      ...(isDataApi ? { signal: AbortSignal.timeout(8000) } : {})
     });
+    let res;
+    if (isDataApi) {
+      try {
+        res = await fetchOnce();
+        if (res.status >= 500) res = await fetchOnce();
+      } catch (e) {
+        res = await fetchOnce();
+      }
+    } else {
+      res = await fetchOnce();
+    }
 
     if (!res.ok) return new Response(await res.text(), { status: res.status, headers: { 'Access-Control-Allow-Origin': ALLOWED_ORIGIN } });
 
@@ -72,8 +86,17 @@ export async function onRequest(context) {
       if (lk !== 'content-encoding' && lk !== 'content-length' && lk !== 'transfer-encoding' && lk !== 'content-security-policy') newHeaders.set(key, value);
     }
 
-    if (hostname.includes('apis.data.go.kr')) {
-      newHeaders.set('Cache-Control', 'public, max-age=1800, s-maxage=1800');
+    // 공공데이터 API는 오류(키 오류·호출 한도·NO_DATA·발표 전 시각)도 HTTP 200으로 준다.
+    // 정상(00)은 그대로, NO_DATA(03)는 5분만(특보 없음처럼 정상인 경우도 있고, 발표 직전이라 비어 있는 경우도 있음), 그 밖의 오류는 캐시하지 않음
+    if (isDataApi) {
+      const text = await res.text();
+      const code = (text.slice(0, 600).match(/"resultCode"\s*:\s*"(\w+)"|<resultCode>(\w+)<\/resultCode>/) || []).slice(1).find(Boolean);
+      const baseTtl = targetUrlString.includes('getUltraSrt') ? 600 : 1800; // 초단기실황·예보는 매시 갱신이라 10분
+      const ttl = code === '00' ? baseTtl : code === '03' ? 300 : 0;
+      newHeaders.set('Cache-Control', ttl ? `public, max-age=${ttl}, s-maxage=${ttl}` : 'no-store');
+      const response = new Response(text, { status: res.status, headers: newHeaders });
+      if (ttl) context.waitUntil(cache.put(cacheKey, response.clone()));
+      return response;
     }
 
     const contentType = res.headers.get('content-type') || '';
