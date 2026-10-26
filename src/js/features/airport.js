@@ -140,6 +140,13 @@ const REGION_AIRPORTS = new Set([
 export function getStatusBadge(status) {
     if (!status || status.trim() === '-') return '-';
     const s = status.trim();
+    // 탑승마감은 '마감'보다 먼저 판별 (수속마감과 구분)
+    if (s.includes('탑승마감') || s.includes('Final Call') || s.includes('Gate Closed')) {
+        return `<span class="badge badge-danger">${window.t('airport.badge.board_close')}</span>`;
+    }
+    if (s.includes('탑승준비') || s.includes('탑승 준비')) {
+        return `<span class="badge badge-info">${window.t('airport.badge.board_ready')}</span>`;
+    }
     if (s.includes('무각') || s.includes('\uB9C8\uAC10') || s.includes('Closed')) {
         return `<span class="badge badge-danger">${window.t('airport.badge.register_close')}</span>`;
     }
@@ -167,7 +174,16 @@ export function getStatusBadge(status) {
     if (s.includes('착륙') || s.includes('\uCC29\uB959') || s.includes('Landed')) {
         return `<span class="badge badge-success">${window.t('airport.badge.landed')}</span>`;
     }
-    return `<span class="badge badge-info">${s}</span>`;
+    if (s.includes('수하물') || s.includes('Baggage')) {
+        return `<span class="badge badge-info">${window.t('airport.badge.baggage')}</span>`;
+    }
+    if (s.includes('게이트') || s.includes('Gate')) {
+        return `<span class="badge badge-warning">${window.t('airport.badge.gate_change')}</span>`;
+    }
+    // 처음 보는 상태값: 한국어 화면에서만 원문, 중·영문 화면에는 한국어가 섞이지 않게 '기타'로 (콘솔에 남겨 매핑 추가용)
+    console.info('[Airport] 미번역 상태값:', s);
+    const lang = window.getLang ? window.getLang() : 'zh';
+    return `<span class="badge badge-info">${lang === 'ko' ? s : window.t('airport.badge.other')}</span>`;
 }
 
 export function getAirlineName(flightId, rawAirline) {

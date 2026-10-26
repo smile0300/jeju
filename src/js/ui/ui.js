@@ -6,6 +6,8 @@ import { getSkyInfo, getWindColor } from '../core/utils.js';
 import { WEATHER_STATE, fetchWeatherData } from '../features/weather.js';
 
 const _initialized = {};
+// 날씨 요약·전체화면 캡처 워터마크: 도메인 대신 샤오홍슈 계정명 (이미지 속 외부 도메인은 샤오홍슈에서 引流로 감점됨)
+const WATERMARK = '济州本地人_正敬';
 
 const SEO_META = {
     'home': {
@@ -474,14 +476,15 @@ function _buildSummaryHTML(targetYmd) {
         let crownHtml = '';
         let borderStyle = '';
         if (locKey === bestLocKey) {
-            const bestTxt = window.t ? window.t('weather.best') : '推荐(最晴朗)';
-            crownHtml = `<span style="font-size: 0.8em; margin-left: 8px; color: #e67700; background: #fff3bf; padding: 2px 6px; border-radius: 4px; font-weight: bold;">👑 ${bestTxt}</span>`;
+            // 샤오홍슈 캡처 대비: 推荐·最 같은 광고성 표현 대신 중립적인 문구
+            const bestTxt = window.t ? window.t('weather.best') : '适合出游';
+            crownHtml = `<span style="font-size: 0.8em; margin-left: 8px; color: #e67700; background: #fff3bf; padding: 2px 6px; border-radius: 4px; font-weight: bold;">✨ ${bestTxt}</span>`;
             borderStyle = 'border: 2px solid #fcc419; background-color: #fffcf0;';
         }
 
         content += `
         <div class="wsm-loc-block" data-locname="${meta.title}" data-lockey="${locKey}" style="${borderStyle}">
-            <div class="wsm-card-watermark">JEJU-LIVE.COM</div>
+            <div class="wsm-card-watermark">${WATERMARK}</div>
             <h3 class="wsm-loc-title">${meta.title} <span class="wsm-loc-sub">${meta.sub}</span>${crownHtml}</h3>
             <div class="wsm-hourly-grid">${itemsHTML}</div>
         </div>`;
@@ -581,7 +584,7 @@ window.enterWeatherFullscreen = function() {
         hint = document.createElement('div');
         hint.id = 'wsm-fs-hint';
         hint.className = 'wsm-exit-hint';
-        hint.innerHTML = '<i class="ph-duotone ph-arrows-left-right"></i> 좌우로 밀어서 지역을 변경하세요';
+        hint.innerHTML = `<i class="ph-duotone ph-arrows-left-right"></i> ${t('weather.swipe_hint')}`;
         document.body.appendChild(hint);
     }
     
@@ -591,7 +594,7 @@ window.enterWeatherFullscreen = function() {
         watermark = document.createElement('div');
         watermark.id = 'wsm-watermark';
         watermark.className = 'wsm-watermark';
-        watermark.innerHTML = 'JEJU-LIVE.COM';
+        watermark.textContent = WATERMARK;
         document.body.appendChild(watermark);
     }
     
