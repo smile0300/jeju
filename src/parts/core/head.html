@@ -146,8 +146,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <script src="/vendor/flatpickr-4.6.13/l10n/ko.js"></script>
     <script src="/vendor/flatpickr-4.6.13/l10n/zh.js"></script>
     <script>
-        // 캡처 클린 모드 (운영자 전용, /admin에서 켜고 끔): 샤오홍슈 캡처용으로 위챗·红包·包车 버튼과 푸터를 숨긴다
-        try { if (localStorage.getItem('jeju_clean_mode') === '1') document.documentElement.classList.add('clean-mode'); } catch (e) { }
         // Global fallback stubs to prevent ReferenceError before modules load
         window.showSection = window.showSection || (() => { });
         window.switchWeatherLocation = window.switchWeatherLocation || (() => { });

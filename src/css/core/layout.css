@@ -307,16 +307,6 @@
     padding-right: var(--section-h-pad);
 }
 
-/* ==================== 캡처 클린 모드 (운영자 전용, head.html에서 html.clean-mode 부여) ==================== */
-/* 자리는 유지하고 보이지만 않게 (레이아웃 시프트 방지) */
-html.clean-mode #wechat-float-btn,
-html.clean-mode #home-reward-btn,
-html.clean-mode #home-food-btn,
-html.clean-mode .app-footer {
-    visibility: hidden !important;
-    pointer-events: none;
-}
-
 /* ==================== Footer ==================== */
 .app-footer {
     padding: var(--space-5) 0; /* 20px */
