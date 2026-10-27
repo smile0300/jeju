@@ -4,7 +4,7 @@ import { WEATHER_STATE, fetchWeatherData } from './weather.js';
 // 오늘의 제주 브리핑 카드 (운영자 전용, /admin → /?brief=1 로 연다)
 // - 샤오홍슈 업로드용 3:4 카드. 내용은 항상 중국어 (보는 사람이 중국 여행객)
 // - 도메인·위챗·红包·包车 같은 引流/광고 요소는 넣지 않고 계정명만 표시
-// - 카드 밖(아래)에 오늘/내일 전환·닫기 버튼 → 캡처 후 카드만 잘라 쓰면 된다
+// - 카드 밖(아래)에 오늘/내일 전환·저장·닫기 버튼. 저장은 1080×1440 PNG (캡처보다 선명하고 자를 필요 없음)
 
 const ACCOUNT = '济州本地人_正敬';
 const REGIONS = [
@@ -154,6 +154,37 @@ async function render(overlay) {
     overlay.querySelectorAll('[data-day]').forEach(b => b.classList.toggle('on', +b.dataset.day === day));
 }
 
+// 카드를 1080×1440으로 그려 저장. 휴대폰은 공유 시트(→ 사진에 저장), PC는 파일 다운로드
+async function save(btn) {
+    const card = document.getElementById('brief-card');
+    if (!card || card.classList.contains('bc-loading')) return;
+    const label = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '저장 중...';
+    try {
+        const { toBlob } = await import('html-to-image');
+        // 모서리 둥글림은 화면용. 이미지는 꽉 찬 직사각형이어야 샤오홍슈에서 흰 모서리가 안 생긴다
+        const blob = await toBlob(card, { pixelRatio: 1, canvasWidth: 1080, canvasHeight: 1440, style: { borderRadius: '0' } });
+        const name = `jeju-${day ? 'tomorrow' : 'today'}-${ymdOf(kst(day))}.png`;
+        const file = new File([blob], name, { type: 'image/png' });
+        if (navigator.canShare?.({ files: [file] })) {
+            await navigator.share({ files: [file] }).catch(() => {});
+        } else {
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = name;
+            a.click();
+            setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+        }
+    } catch (e) {
+        console.error('[brief-card] save failed', e);
+        alert('이미지 저장 실패 — 캡처로 대신해 주세요');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = label;
+    }
+}
+
 function open() {
     let overlay = document.getElementById('brief-overlay');
     if (!overlay) {
@@ -164,11 +195,14 @@ function open() {
             <div class="bc-controls">
                 <button type="button" data-day="0">오늘</button>
                 <button type="button" data-day="1">내일</button>
+                <button type="button" data-save>저장</button>
                 <button type="button" data-close>닫기</button>
             </div>`;
         overlay.addEventListener('click', e => {
             const btn = e.target.closest('[data-day]');
             if (btn) { day = +btn.dataset.day; render(overlay); return; }
+            const saveBtn = e.target.closest('[data-save]');
+            if (saveBtn) { save(saveBtn); return; }
             if (e.target.closest('[data-close]')) { overlay.remove(); document.body.style.overflow = ''; }
         });
         document.body.appendChild(overlay);

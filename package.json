@@ -7,7 +7,8 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.128.0",
     "@capacitor/push-notifications": "^8.1.2",
-    "firebase": "^12.17.0"
+    "firebase": "^12.17.0",
+    "html-to-image": "^1.11.11"
   },
   "devDependencies": {
     "@capacitor/android": "^8.4.2",
