@@ -1,10 +1,11 @@
 import { CONFIG } from '../core/config.js';
 import { WEATHER_STATE, fetchWeatherData } from './weather.js';
+import { getMidTempVal } from '../core/utils.js';
 
 // 오늘의 제주 브리핑 카드 (운영자 전용, /admin → /?brief=1 로 연다)
 // - 샤오홍슈 업로드용 3:4 카드. 내용은 항상 중국어 (보는 사람이 중국 여행객)
 // - 도메인·위챗·红包·包车 같은 引流/광고 요소는 넣지 않고 계정명만 표시
-// - 카드 밖(아래)에 오늘/내일 전환·저장·닫기 버튼. 저장은 1080×1440 PNG (캡처보다 선명하고 자를 필요 없음)
+// - 카드 밖(아래)에 오늘/내일/주간 전환·저장·닫기 버튼. 저장은 1080×1440 PNG (캡처보다 선명하고 자를 필요 없음)
 // - 그 아래 샤오홍슈 제목·본문·해시태그 자동 생성 + 복사
 
 const ACCOUNT = '济州本地人_正敬';
@@ -28,7 +29,11 @@ const kst = (offsetDays = 0) => new Date(Date.now() + 9 * 3600 * 1000 + offsetDa
 const ymdOf = d => d.toISOString().slice(0, 10).replace(/-/g, '');
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-let day = 0; // 0 오늘, 1 내일
+let day = 0; // 0 오늘, 1 내일, WEEK 주간
+const WEEK = 7;
+// 주간 카드는 기온이 갈리는 북(济州市)·남(西归浦)만 비교. 중기예보 기온도 이 두 구역 단위로 나온다
+const WEEK_REGIONS = [REGIONS[0], REGIONS[2]];
+const SKY_WORD = { '☀️': '晴', '⛅': '多云', '☁️': '阴', '🌧️': '雨', '🌦️': '阵雨', '🌨️': '雨雪', '❄️': '雪' };
 
 // ── 데이터 ─────────────────────────────────────────────────────────
 // 홈에서 아직 안 불러온 지역만 요청하고, 최대 10초 기다린다
@@ -88,6 +93,65 @@ async function loadTrails() {
     }).filter(Boolean);
 }
 
+// 단기예보가 하루치(8시간 이상) 있으면 그걸, 없으면 중기예보(오전·오후 날씨, 강수확률, 최저·최고)로
+function dayInfo(key, ymd) {
+    const st = WEATHER_STATE[key];
+    if (!st) return null;
+    if (st.sortedKeys.filter(k => k.startsWith(ymd)).length >= 8) {
+        const s = summarize(key, ymd);
+        if (s) return s;
+    }
+    const { landItem, tempItem } = st.midData || {};
+    if (!landItem || !tempItem?.tmFc) return null;
+    const base = String(tempItem.tmFc);
+    const idx = Math.round((Date.UTC(+ymd.slice(0, 4), +ymd.slice(4, 6) - 1, +ymd.slice(6, 8))
+        - Date.UTC(+base.slice(0, 4), +base.slice(4, 6) - 1, +base.slice(6, 8))) / 86400000);
+    const tmin = getMidTempVal(tempItem, 'min', idx), tmax = getMidTempVal(tempItem, 'max', idx);
+    const wf = [landItem[`wf${idx}Am`], landItem[`wf${idx}Pm`], landItem[`wf${idx}`]].filter(Boolean).join(' ');
+    if (tmin === null || tmax === null || !wf) return null;
+    const pop = Math.max(0, ...[landItem[`rnSt${idx}Am`], landItem[`rnSt${idx}Pm`], landItem[`rnSt${idx}`]].map(Number).filter(n => !isNaN(n)));
+    const emoji = wf.includes('비/눈') ? '🌨️' : wf.includes('눈') ? '❄️' : wf.includes('소나기') ? '🌦️'
+        : wf.includes('비') ? '🌧️' : wf.includes('흐림') ? '☁️' : wf.includes('구름많음') ? '⛅' : '☀️';
+    return { tmin: Math.round(tmin), tmax: Math.round(tmax), pop, emoji, mid: true };
+}
+
+const isWet = r => ['🌧️', '🌦️', '🌨️', '❄️'].includes(r.emoji);
+
+// 저녁에 올리면 내일부터, 낮에 올리면 오늘부터 7일
+function weekDays() {
+    const start = kst().getUTCHours() >= 18 ? 1 : 0;
+    return Array.from({ length: 7 }, (_, i) => {
+        const d = kst(start + i);
+        const ymd = ymdOf(d);
+        const rows = WEEK_REGIONS.map(r => dayInfo(r.key, ymd));
+        const ok = rows.filter(Boolean);
+        const pop = ok.length ? Math.max(...ok.map(r => r.pop)) : null;
+        const wet = ok.some(isWet) || pop >= 60;
+        const good = ok.length > 0 && !wet && pop < 40;
+        return { d, ymd, rows, pop, wet, good, mid: ok.some(r => r.mid) };
+    });
+}
+
+const mdOf = d => `${d.getUTCMonth() + 1}/${d.getUTCDate()}`;
+
+function clothes(tmax) {
+    if (tmax >= 27) return '👕 短袖 + 防晒';
+    if (tmax >= 20) return '👕 短袖或薄长袖，早晚加件外套';
+    if (tmax >= 12) return '🧥 长袖 + 外套';
+    return '🧣 厚外套，注意保暖';
+}
+
+function weekSummary(days) {
+    const good = days.filter(x => x.good).map(x => WEEKDAY[x.d.getUTCDay()]);
+    const wet = days.filter(x => x.wet).map(x => WEEKDAY[x.d.getUTCDay()]);
+    const highs = days.flatMap(x => x.rows.filter(Boolean).map(r => r.tmax));
+    const out = [];
+    if (good.length) out.push(`✨ 适合出游：${good.join('、')}`);
+    out.push(wet.length ? `☔ 带伞：${wet.join('、')}` : '☀️ 这周基本没雨');
+    if (highs.length) out.push(clothes(Math.round(highs.reduce((a, b) => a + b, 0) / highs.length)));
+    return out;
+}
+
 function tips(rows) {
     const ok = rows.filter(Boolean);
     if (!ok.length) return [];
@@ -101,10 +165,7 @@ function tips(rows) {
     else if (wind >= 9) out.push('☂️ 风大，小心伞被吹翻');
     else if (wind >= 4) out.push('🍃 有风，小心帽子吹跑');
     else out.push('🌤️ 风小，适合海边拍照');
-    if (tmax >= 27) out.push('👕 短袖 + 防晒');
-    else if (tmax >= 20) out.push('👕 短袖或薄长袖，早晚加件外套');
-    else if (tmax >= 12) out.push('🧥 长袖 + 外套');
-    else out.push('🧣 厚外套，注意保暖');
+    out.push(clothes(tmax));
     return out.slice(0, 3);
 }
 
@@ -150,6 +211,50 @@ function cardHtml(rows, trails) {
     </div>`;
 }
 
+function weekCardHtml(days) {
+    const now = kst();
+    const updated = `${String(now.getUTCHours()).padStart(2, '0')}:${String(now.getUTCMinutes()).padStart(2, '0')}`;
+    const rowHtml = days.map(x => {
+        const cells = x.rows.map(r => r
+            ? `<span class="bc-wcell"><span class="bc-wemoji">${r.emoji}</span>${r.tmin}°~${r.tmax}°</span>`
+            : '<span class="bc-wcell">--</span>').join('');
+        return `<div class="bc-wrow${x.good ? ' good' : ''}${x.wet ? ' wet' : ''}">
+            <span class="bc-wday"><b>${WEEKDAY[x.d.getUTCDay()]}</b>${mdOf(x.d)}</span>
+            ${cells}
+            <span class="bc-wpop">${x.pop === null ? '--' : `${x.pop}%`}</span>
+        </div>`;
+    }).join('');
+    return `<div class="bc-card bc-week" id="brief-card">
+        <div class="bc-head">
+            <div><div class="bc-title">济州一周天气</div><div class="bc-date">${mdOf(days[0].d)} - ${mdOf(days[6].d)}</div></div>
+            <div class="bc-account">@${ACCOUNT}</div>
+        </div>
+        <div class="bc-wtable">
+            <div class="bc-wrow bc-whead"><span class="bc-wday">日期</span>${WEEK_REGIONS.map(r => `<span class="bc-wcell">${r.name}<small>${r.dir}</small></span>`).join('')}<span class="bc-wpop">降水</span></div>
+            ${rowHtml}
+        </div>
+        <ul class="bc-tips">${weekSummary(days).map(t => `<li>${t}</li>`).join('')}</ul>
+        <div class="bc-ask">💬 ${ASK}</div>
+        <div class="bc-foot">数据：韩国气象厅 · ${updated} 更新${days.some(x => x.mid) ? ' · 4天后为中期预报，仅供参考' : '（韩国时间）'}</div>
+    </div>`;
+}
+
+function weekCaption(days) {
+    const [a, b] = [days[0].d, days[6].d];
+    const title = Array.from(`济州一周天气｜${a.getUTCMonth() + 1}.${a.getUTCDate()}-${b.getUTCMonth() + 1}.${b.getUTCDate()}`).slice(0, 20).join('');
+    const lines = [`📍济州一周天气（${mdOf(a)} - ${mdOf(b)}）`, '北部济州市 / 南部西归浦', ''];
+    days.forEach(x => {
+        const [n, s] = x.rows;
+        const temps = `${n ? `${n.tmin}~${n.tmax}°` : '--'} / ${s ? `${s.tmin}~${s.tmax}°` : '--'}`;
+        const sky = x.rows.find(Boolean);
+        lines.push(`${WEEKDAY[x.d.getUTCDay()]} ${mdOf(x.d)} ${sky ? `${sky.emoji}${SKY_WORD[sky.emoji] || ''}` : ''} ${temps}${x.pop === null ? '' : ` 降水${x.pop}%`}`);
+    });
+    lines.push('', ...weekSummary(days));
+    if (days.some(x => x.mid)) lines.push('※ 4天后为中期预报，出发前再看一下最新预报');
+    lines.push('', `💬 ${ASK}～`, '', [...TAGS, '济州岛一周天气', `${a.getUTCMonth() + 1}月济州`].map(t => `#${t}`).join(' '));
+    return { title, body: lines.join('\n') };
+}
+
 // 샤오홍슈 제목(20자 이내)·본문·해시태그. 推荐/最 같은 최상급 표현은 쓰지 않는다
 function caption(rows, trails) {
     const d = kst(day);
@@ -161,7 +266,6 @@ function caption(rows, trails) {
     const best = rows.reduce((b, r, i) => (r && (b < 0 || r.score > rows[b].score) ? i : b), -1);
 
     // 제목은 20자 제한이라 이모지 대신 한 글자 날씨, 날짜는 10.28 형식
-    const SKY_WORD = { '☀️': '晴', '⛅': '多云', '☁️': '阴', '🌧️': '雨', '🌦️': '阵雨', '🌨️': '雨雪', '❄️': '雪' };
     const sky = ok.length ? SKY_WORD[ok[0].emoji] || '' : '';
     const title = Array.from(`济州${when}天气｜${d.getUTCMonth() + 1}.${d.getUTCDate()}${sky}${lo !== null ? ` ${lo}~${hi}°` : ''}`).slice(0, 20).join('');
     const lines = [`📍济州${when}（${md} ${WEEKDAY[d.getUTCDay()]}）天气`, ''];
@@ -199,11 +303,18 @@ async function copy(text, btn) {
 async function render(overlay) {
     const stage = overlay.querySelector('.bc-stage');
     stage.innerHTML = '<div class="bc-card bc-loading">加载中...</div>';
-    const [, trails] = await Promise.all([ensureWeather(), loadTrails()]);
-    const ymd = ymdOf(kst(day));
-    const rows = REGIONS.map(r => summarize(r.key, ymd));
-    stage.innerHTML = cardHtml(rows, trails);
-    const cap = caption(rows, trails);
+    let cap;
+    if (day === WEEK) {
+        await ensureWeather();
+        const days = weekDays();
+        stage.innerHTML = weekCardHtml(days);
+        cap = weekCaption(days);
+    } else {
+        const [, trails] = await Promise.all([ensureWeather(), loadTrails()]);
+        const rows = REGIONS.map(r => summarize(r.key, ymdOf(kst(day))));
+        stage.innerHTML = cardHtml(rows, trails);
+        cap = caption(rows, trails);
+    }
     overlay.querySelector('[data-cap-title]').value = cap.title;
     overlay.querySelector('[data-cap-body]').value = cap.body;
     overlay.querySelectorAll('[data-day]').forEach(b => b.classList.toggle('on', +b.dataset.day === day));
@@ -220,7 +331,7 @@ async function save(btn) {
         const { toBlob } = await import('html-to-image');
         // 모서리 둥글림은 화면용. 이미지는 꽉 찬 직사각형이어야 샤오홍슈에서 흰 모서리가 안 생긴다
         const blob = await toBlob(card, { pixelRatio: 1, canvasWidth: 1080, canvasHeight: 1440, style: { borderRadius: '0' } });
-        const name = `jeju-${day ? 'tomorrow' : 'today'}-${ymdOf(kst(day))}.png`;
+        const name = day === WEEK ? `jeju-week-${ymdOf(kst())}.png` : `jeju-${day ? 'tomorrow' : 'today'}-${ymdOf(kst(day))}.png`;
         const file = new File([blob], name, { type: 'image/png' });
         if (navigator.canShare?.({ files: [file] })) {
             await navigator.share({ files: [file] }).catch(() => {});
@@ -250,6 +361,7 @@ function open() {
             <div class="bc-controls">
                 <button type="button" data-day="0">오늘</button>
                 <button type="button" data-day="1">내일</button>
+                <button type="button" data-day="7">주간</button>
                 <button type="button" data-save>저장</button>
                 <button type="button" data-close>닫기</button>
             </div>

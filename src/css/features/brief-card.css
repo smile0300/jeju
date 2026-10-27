@@ -69,9 +69,9 @@
 
 .bc-foot { margin-top: auto; font-size: 0.62em; color: #9ca3af; text-align: center; }
 
-.bc-controls { display: flex; gap: 8px; }
+.bc-controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
 .bc-controls button {
-    min-width: 72px;
+    min-width: 60px;
     min-height: 44px;
     border: 1px solid #4b5563;
     border-radius: 10px;
@@ -88,3 +88,19 @@
 .bc-caption input,
 .bc-caption textarea { width: 100%; box-sizing: border-box; padding: 8px 10px; border: 1px solid #4b5563; border-radius: 8px; background: #111827; color: #f9fafb; font: inherit; font-size: 14px; line-height: 1.5; }
 .bc-caption button { min-height: 44px; border: 1px solid #3b82f6; border-radius: 10px; background: transparent; color: #93c5fd; font: inherit; font-weight: 700; cursor: pointer; }
+
+/* 주간 카드: 요일 | 济州市 | 西归浦 | 降水 */
+.bc-wtable { background: #ffffff; border-radius: 1em; padding: 0.3em 0.5em; box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06); display: flex; flex-direction: column; }
+.bc-wrow { display: grid; grid-template-columns: 5em 1fr 1fr 2.8em; align-items: center; gap: 0.3em; padding: 0.36em 0.4em; border-radius: 0.6em; font-size: 0.95em; font-weight: 800; }
+.bc-wrow + .bc-wrow { border-top: 1px solid #f1f5f9; }
+.bc-wrow.good { background: #ecfdf5; }
+.bc-wrow.wet { background: #eff6ff; }
+.bc-whead { font-size: 0.72em; font-weight: 700; color: #6b7280; padding-top: 0.3em; padding-bottom: 0.3em; }
+.bc-whead small { font-size: 0.85em; margin-left: 0.2em; color: #9ca3af; }
+.bc-wday { display: flex; align-items: baseline; gap: 0.3em; white-space: nowrap; font-size: 0.8em; color: #6b7280; font-weight: 600; }
+.bc-wday b { font-size: 1.2em; color: #111827; font-weight: 800; }
+.bc-whead .bc-wday { font-size: 1em; }
+.bc-wcell { display: flex; align-items: center; gap: 0.25em; white-space: nowrap; }
+.bc-wemoji { font-size: 1.15em; line-height: 1; }
+.bc-wpop { text-align: right; font-size: 0.85em; color: #2563eb; }
+.bc-whead .bc-wpop { color: #6b7280; font-size: 1em; }
