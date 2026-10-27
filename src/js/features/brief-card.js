@@ -5,6 +5,7 @@ import { WEATHER_STATE, fetchWeatherData } from './weather.js';
 // - 샤오홍슈 업로드용 3:4 카드. 내용은 항상 중국어 (보는 사람이 중국 여행객)
 // - 도메인·위챗·红包·包车 같은 引流/광고 요소는 넣지 않고 계정명만 표시
 // - 카드 밖(아래)에 오늘/내일 전환·저장·닫기 버튼. 저장은 1080×1440 PNG (캡처보다 선명하고 자를 필요 없음)
+// - 그 아래 샤오홍슈 제목·본문·해시태그 자동 생성 + 복사
 
 const ACCOUNT = '济州本地人_正敬';
 const REGIONS = [
@@ -18,6 +19,9 @@ const TRAIL_ZH = {
     '석굴암': '石窟庵', '관음사': '观音寺', '성판악': '城板岳', '동능': '山顶(东陵)',
 };
 const OPEN_STATUS = ['정상운영'];
+// 댓글 유도 문구 (카드·본문 공통). 날짜를 남기면 운영자가 답글로 날씨를 알려준다
+const ASK = '几号来济州？评论区留日期，帮你看天气';
+const TAGS = ['济州岛', '济州岛天气', '济州岛旅游', '济州岛攻略', '韩国旅游', '济州'];
 const WEEKDAY = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
 
 const kst = (offsetDays = 0) => new Date(Date.now() + 9 * 3600 * 1000 + offsetDays * 86400 * 1000);
@@ -141,8 +145,55 @@ function cardHtml(rows, trails) {
         <div class="bc-regions">${regionHtml}</div>
         <div class="bc-trail">${trailHtml}</div>
         <ul class="bc-tips">${tips(rows).map(t => `<li>${t}</li>`).join('')}</ul>
+        <div class="bc-ask">💬 ${ASK}</div>
         <div class="bc-foot">数据：韩国气象厅 · 汉拿山国立公园 · ${updated} 更新（韩国时间）</div>
     </div>`;
+}
+
+// 샤오홍슈 제목(20자 이내)·본문·해시태그. 推荐/最 같은 최상급 표현은 쓰지 않는다
+function caption(rows, trails) {
+    const d = kst(day);
+    const md = `${d.getUTCMonth() + 1}月${d.getUTCDate()}日`;
+    const when = day ? '明天' : '今天';
+    const ok = rows.filter(Boolean);
+    const lo = ok.length ? Math.min(...ok.map(r => r.tmin)) : null;
+    const hi = ok.length ? Math.max(...ok.map(r => r.tmax)) : null;
+    const best = rows.reduce((b, r, i) => (r && (b < 0 || r.score > rows[b].score) ? i : b), -1);
+
+    // 제목은 20자 제한이라 이모지 대신 한 글자 날씨, 날짜는 10.28 형식
+    const SKY_WORD = { '☀️': '晴', '⛅': '多云', '☁️': '阴', '🌧️': '雨', '🌦️': '阵雨', '🌨️': '雨雪', '❄️': '雪' };
+    const sky = ok.length ? SKY_WORD[ok[0].emoji] || '' : '';
+    const title = Array.from(`济州${when}天气｜${d.getUTCMonth() + 1}.${d.getUTCDate()}${sky}${lo !== null ? ` ${lo}~${hi}°` : ''}`).slice(0, 20).join('');
+    const lines = [`📍济州${when}（${md} ${WEEKDAY[d.getUTCDay()]}）天气`, ''];
+    REGIONS.forEach((r, i) => {
+        const x = rows[i];
+        lines.push(x ? `${x.emoji} ${r.name}（${r.dir}）${x.tmin}~${x.tmax}° 降水${x.pop}% 风${Math.round(x.wind)}m/s` : `${r.name}（${r.dir}）暂无数据`);
+    });
+    if (best >= 0) lines.push('', `✨ ${when}适合出游：${REGIONS[best].name}（${REGIONS[best].dir}）`);
+    if (trails && trails.length) {
+        const open = trails.filter(t => t.open);
+        lines.push(open.length === trails.length
+            ? `⛰️ 汉拿山登山路 ${trails.length}条全部开放`
+            : `⛰️ 汉拿山登山路 ${open.length}条开放 · ${trails.length - open.length}条管制${open.length ? `（可走：${open.map(t => t.name).join('、')}）` : ''}`);
+    }
+    tips(rows).forEach(t => lines.push(t));
+    lines.push('', `💬 ${ASK}～`, '', [...TAGS, `${d.getUTCMonth() + 1}月济州`].map(t => `#${t}`).join(' '));
+    return { title, body: lines.join('\n') };
+}
+
+async function copy(text, btn) {
+    try { await navigator.clipboard.writeText(text); }
+    catch (e) {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        ta.remove();
+    }
+    const label = btn.textContent;
+    btn.textContent = '복사됨 ✓';
+    setTimeout(() => { btn.textContent = label; }, 1500);
 }
 
 async function render(overlay) {
@@ -150,7 +201,11 @@ async function render(overlay) {
     stage.innerHTML = '<div class="bc-card bc-loading">加载中...</div>';
     const [, trails] = await Promise.all([ensureWeather(), loadTrails()]);
     const ymd = ymdOf(kst(day));
-    stage.innerHTML = cardHtml(REGIONS.map(r => summarize(r.key, ymd)), trails);
+    const rows = REGIONS.map(r => summarize(r.key, ymd));
+    stage.innerHTML = cardHtml(rows, trails);
+    const cap = caption(rows, trails);
+    overlay.querySelector('[data-cap-title]').value = cap.title;
+    overlay.querySelector('[data-cap-body]').value = cap.body;
     overlay.querySelectorAll('[data-day]').forEach(b => b.classList.toggle('on', +b.dataset.day === day));
 }
 
@@ -197,12 +252,20 @@ function open() {
                 <button type="button" data-day="1">내일</button>
                 <button type="button" data-save>저장</button>
                 <button type="button" data-close>닫기</button>
+            </div>
+            <div class="bc-caption">
+                <label>제목 (20자 이내)<input type="text" data-cap-title maxlength="20"></label>
+                <button type="button" data-copy="title">제목 복사</button>
+                <label>본문 · 해시태그 (고쳐 쓴 뒤 복사해도 됨)<textarea data-cap-body rows="12"></textarea></label>
+                <button type="button" data-copy="body">본문 복사</button>
             </div>`;
         overlay.addEventListener('click', e => {
             const btn = e.target.closest('[data-day]');
             if (btn) { day = +btn.dataset.day; render(overlay); return; }
             const saveBtn = e.target.closest('[data-save]');
             if (saveBtn) { save(saveBtn); return; }
+            const copyBtn = e.target.closest('[data-copy]');
+            if (copyBtn) { copy(overlay.querySelector(`[data-cap-${copyBtn.dataset.copy}]`).value, copyBtn); return; }
             if (e.target.closest('[data-close]')) { overlay.remove(); document.body.style.overflow = ''; }
         });
         document.body.appendChild(overlay);

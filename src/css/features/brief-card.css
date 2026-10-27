@@ -8,7 +8,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start; /* 본문 칸까지 길어져 스크롤되므로 위에서부터 */
     gap: 16px;
     padding: 16px;
     overflow-y: auto;
@@ -21,27 +21,27 @@
     background: linear-gradient(180deg, #dbeafe 0%, #eff6ff 38%, #ffffff 100%);
     color: #111827;
     border-radius: 1.4em;
-    padding: 1.2em 1.1em 0.9em;
+    padding: 1em 1.1em 0.75em;
     display: flex;
     flex-direction: column;
-    gap: 0.7em;
+    gap: 0.4em;
     overflow: hidden;
     font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
 }
 .bc-loading { display: flex; align-items: center; justify-content: center; color: #6b7280; }
 
 .bc-head { display: flex; justify-content: space-between; align-items: flex-start; }
-.bc-title { font-size: 2em; font-weight: 900; line-height: 1.1; letter-spacing: 0.02em; }
+.bc-title { font-size: 1.8em; font-weight: 900; line-height: 1.1; letter-spacing: 0.02em; }
 .bc-date { font-size: 0.95em; color: #374151; margin-top: 0.2em; font-weight: 600; }
 .bc-account { font-size: 0.75em; color: #2563eb; font-weight: 700; background: rgba(255, 255, 255, 0.8); padding: 0.3em 0.6em; border-radius: 999px; }
 
-.bc-regions { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5em; }
+.bc-regions { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4em; }
 .bc-region {
     position: relative;
     background: #ffffff;
     border: 2px solid transparent;
     border-radius: 1em;
-    padding: 0.55em 0.7em 0.5em;
+    padding: 0.45em 0.7em 0.4em;
     box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06);
 }
 .bc-region.best { border-color: #fbbf24; background: #fffbeb; }
@@ -49,21 +49,23 @@
 .bc-rname { font-size: 1em; font-weight: 800; }
 .bc-rname small { font-size: 0.72em; color: #6b7280; font-weight: 600; margin-left: 0.3em; }
 .bc-rmain { display: flex; align-items: center; gap: 0.25em; margin: 0.2em 0 0.1em; }
-.bc-remoji { font-size: 1.6em; line-height: 1; }
+.bc-remoji { font-size: 1.4em; line-height: 1; }
 .bc-rtemp { font-size: 1.35em; font-weight: 900; }
 .bc-rmeta { font-size: 0.72em; color: #4b5563; font-weight: 600; }
 
-.bc-trail { background: #ffffff; border-radius: 1em; padding: 0.55em 0.7em; box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06); }
+.bc-trail { background: #ffffff; border-radius: 1em; padding: 0.45em 0.7em; box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06); }
 .bc-trail-head { font-size: 0.88em; font-weight: 700; }
 .bc-trail-head b { color: #059669; }
 .bc-trail-head small { font-size: 0.8em; color: #9ca3af; font-weight: 500; margin-left: 0.2em; }
-.bc-chips { display: flex; flex-wrap: wrap; gap: 0.3em; margin-top: 0.4em; }
+.bc-chips { display: flex; flex-wrap: wrap; gap: 0.3em; margin-top: 0.3em; }
 .bc-chips span { font-size: 0.68em; font-weight: 700; padding: 0.15em 0.5em; border-radius: 999px; }
 .bc-chips .on { background: #d1fae5; color: #047857; }
 .bc-chips .off { background: #fee2e2; color: #b91c1c; }
 
-.bc-tips { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.25em; }
+.bc-tips { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.15em; }
 .bc-tips li { font-size: 0.88em; font-weight: 700; color: #1f2937; }
+
+.bc-ask { font-size: 0.8em; font-weight: 700; color: #2563eb; background: rgba(219, 234, 254, 0.7); padding: 0.35em 0.7em; border-radius: 0.7em; }
 
 .bc-foot { margin-top: auto; font-size: 0.62em; color: #9ca3af; text-align: center; }
 
@@ -80,3 +82,9 @@
     cursor: pointer;
 }
 .bc-controls button.on { background: #3b82f6; border-color: #3b82f6; color: #fff; }
+
+.bc-caption { width: min(calc(100vw - 32px), 420px); display: flex; flex-direction: column; gap: 8px; color: #e5e7eb; font-size: 13px; }
+.bc-caption label { display: flex; flex-direction: column; gap: 4px; }
+.bc-caption input,
+.bc-caption textarea { width: 100%; box-sizing: border-box; padding: 8px 10px; border: 1px solid #4b5563; border-radius: 8px; background: #111827; color: #f9fafb; font: inherit; font-size: 14px; line-height: 1.5; }
+.bc-caption button { min-height: 44px; border: 1px solid #3b82f6; border-radius: 10px; background: transparent; color: #93c5fd; font: inherit; font-weight: 700; cursor: pointer; }
