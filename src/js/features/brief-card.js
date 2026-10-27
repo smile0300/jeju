@@ -1,6 +1,7 @@
 import { CONFIG } from '../core/config.js';
 import { WEATHER_STATE, fetchWeatherData } from './weather.js';
 import { getMidTempVal } from '../core/utils.js';
+import { fetchPublicDataJson } from '../core/api.js';
 
 // 오늘의 제주 브리핑 카드 (운영자 전용, /admin → /?brief=1 로 연다)
 // - 샤오홍슈 업로드용 3:4 카드. 내용은 항상 중국어 (보는 사람이 중국 여행객)
@@ -33,6 +34,11 @@ let day = 0; // 0 오늘, 1 내일, WEEK 주간
 const WEEK = 7;
 // 주간 카드는 기온이 갈리는 북(济州市)·남(西归浦)만 비교. 중기예보 기온도 이 두 구역 단위로 나온다
 const WEEK_REGIONS = [REGIONS[0], REGIONS[2]];
+const MONTH = 30;
+let month = 1; // 월별 카드 대상 월
+// 월별 카드: 지역별 ASOS 관측소 (weather.js getAsosStationId 와 같은 매핑)
+const ASOS_STN = { jeju: '184', hyeopjae: '185', seogwipo: '189', seongsan: '188' };
+const monthCache = {};
 const SKY_WORD = { '☀️': '晴', '⛅': '多云', '☁️': '阴', '🌧️': '雨', '🌦️': '阵雨', '🌨️': '雨雪', '❄️': '雪' };
 
 // ── 데이터 ─────────────────────────────────────────────────────────
@@ -150,6 +156,129 @@ function weekSummary(days) {
     out.push(wet.length ? `☔ 带伞：${wet.join('、')}` : '☀️ 这周基本没雨');
     if (highs.length) out.push(clothes(Math.round(highs.reduce((a, b) => a + b, 0) / highs.length)));
     return out;
+}
+
+// ── 월별 기후 (최근 5년 ASOS 일자료) ─────────────────────────────────
+// 그 달이 다 끝난 해만 센다. 예) 지금 10월이면 10월은 작년까지, 9월은 올해까지
+function monthYears(m) {
+    const now = kst();
+    const last = m < now.getUTCMonth() + 1 ? now.getUTCFullYear() : now.getUTCFullYear() - 1;
+    return Array.from({ length: 5 }, (_, i) => last - 4 + i);
+}
+
+async function fetchAsosMonth(stn, y, m) {
+    const mm = String(m).padStart(2, '0');
+    const last = new Date(Date.UTC(y, m, 0)).getUTCDate();
+    const json = await fetchPublicDataJson('https://apis.data.go.kr/1360000/AsosDalyInfoService/getWthrDataList', {
+        pageNo: 1, numOfRows: 31, dataType: 'JSON', dataCd: 'ASOS', dateCd: 'DAY',
+        startDt: `${y}${mm}01`, endDt: `${y}${mm}${last}`, stnIds: stn,
+    });
+    const item = json?.response?.body?.items?.item;
+    return Array.isArray(item) ? item : item ? [item] : [];
+}
+
+const mean = arr => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null;
+const numsOf = (items, f) => items.map(x => parseFloat(x[f])).filter(v => !isNaN(v));
+// 강수일: 하루 1mm 이상 (0.1mm 이슬비까지 세면 체감보다 너무 많이 나온다)
+const rainyCount = items => items.filter(x => parseFloat(x.sumRn) >= 1).length;
+
+// 지역별로 연도를 차례로 받는다 (동시 요청은 지역 4개까지)
+async function loadMonth(m) {
+    if (monthCache[m]) return monthCache[m];
+    const years = monthYears(m);
+    const perRegion = await Promise.all(REGIONS.map(async r => {
+        const byYear = [];
+        for (const y of years) {
+            try { byYear.push({ y, items: await fetchAsosMonth(ASOS_STN[r.key], y, m) }); }
+            catch (e) { console.warn('[brief-card] ASOS', r.key, y, e); byYear.push({ y, items: [] }); }
+        }
+        return byYear.filter(x => x.items.length >= 20);
+    }));
+    const regions = perRegion.map(byYear => {
+        const all = byYear.flatMap(x => x.items);
+        if (!all.length) return null;
+        return {
+            tmax: Math.round(mean(numsOf(all, 'maxTa'))),
+            tmin: Math.round(mean(numsOf(all, 'minTa'))),
+            rainDays: Math.round(mean(byYear.map(x => rainyCount(x.items)))),
+            wind: mean(numsOf(all, 'avgWs')),
+        };
+    });
+    // 연도별 표는 济州市 관측소 기준
+    const table = perRegion[0].map(({ y, items }) => ({
+        y,
+        avg: mean(numsOf(items, 'avgTa')),
+        hi: Math.max(...numsOf(items, 'maxTa')),
+        lo: Math.min(...numsOf(items, 'minTa')),
+        rainDays: rainyCount(items),
+        rain: Math.round(numsOf(items, 'sumRn').reduce((a, b) => a + b, 0)),
+    }));
+    const result = { m, years, regions, table };
+    if (regions.some(Boolean)) monthCache[m] = result;
+    return result;
+}
+
+function monthTips(data) {
+    const ok = data.regions.filter(Boolean);
+    if (!ok.length) return [];
+    const tmax = Math.round(mean(ok.map(r => r.tmax)));
+    const tmin = Math.round(mean(ok.map(r => r.tmin)));
+    const rainDays = Math.round(mean(ok.map(r => r.rainDays)));
+    const out = [clothes(tmax)];
+    if (tmax - tmin >= 7) out.push(`🌡️ 早晚温差约${tmax - tmin}°，洋葱式穿搭`);
+    if (rainDays >= 10) out.push(`☔ 平均每月下雨${rainDays}天，雨具必备`);
+    else if (rainDays >= 5) out.push(`🌂 大约每${Math.round(30 / rainDays)}天下一次雨，备折叠伞`);
+    else out.push('☀️ 雨天少，适合户外和海边');
+    const wind = data.regions[0]?.wind;
+    if (wind >= 4) out.push('🍃 风大的月份，防风外套很实用');
+    return out.slice(0, 3);
+}
+
+const monthAsk = m => `${m}月来济州？评论区留日期，帮你看天气`;
+
+function monthCardHtml(data) {
+    const { m, years, regions, table } = data;
+    const regionHtml = REGIONS.map((r, i) => {
+        const s = regions[i];
+        return `<div class="bc-region">
+            <div class="bc-rname">${r.name}<small>${r.dir}</small></div>
+            <div class="bc-rmain"><span class="bc-rtemp">${s ? `${s.tmin}°~${s.tmax}°` : '--'}</span></div>
+            <div class="bc-rmeta">${s ? `雨天${s.rainDays}天` : '暂无数据'}</div>
+        </div>`;
+    }).join('');
+    const f1 = v => (v === null || !isFinite(v) ? '--' : v.toFixed(1));
+    const rowHtml = table.map(x => `<div class="bc-mrow">
+            <span>${x.y}</span><span>${f1(x.avg)}°</span><span>${f1(x.hi)}° / ${f1(x.lo)}°</span><span>${x.rainDays}天</span><span>${x.rain}mm</span>
+        </div>`).join('');
+    return `<div class="bc-card bc-month" id="brief-card">
+        <div class="bc-head">
+            <div><div class="bc-title">济州${m}月天气</div><div class="bc-date">近5年实测（${years[0]}-${years[4]}）</div></div>
+            <div class="bc-account">@${ACCOUNT}</div>
+        </div>
+        <div class="bc-regions">${regionHtml}</div>
+        <div class="bc-mtable">
+            <div class="bc-mrow bc-mhead"><span>济州市</span><span>平均</span><span>最高 / 最低</span><span>雨天</span><span>降水</span></div>
+            ${rowHtml}
+        </div>
+        <ul class="bc-tips">${monthTips(data).map(t => `<li>${t}</li>`).join('')}</ul>
+        <div class="bc-ask">💬 ${monthAsk(m)}</div>
+        <div class="bc-foot">数据：韩国气象厅 地面观测（ASOS）· 雨天＝日降水1mm以上</div>
+    </div>`;
+}
+
+function monthCaption(data) {
+    const { m, years, regions, table } = data;
+    const f1 = v => (v === null || !isFinite(v) ? '--' : v.toFixed(1));
+    const lines = [`📍济州${m}月天气（近5年实测 ${years[0]}-${years[4]}）`, ''];
+    REGIONS.forEach((r, i) => {
+        const s = regions[i];
+        lines.push(s ? `${r.name}（${r.dir}）平均${s.tmin}~${s.tmax}° · 雨天${s.rainDays}天` : `${r.name}（${r.dir}）暂无数据`);
+    });
+    lines.push('', '📊 济州市历年：');
+    table.forEach(x => lines.push(`${x.y}年 平均${f1(x.avg)}° · 雨天${x.rainDays}天 · 降水${x.rain}mm`));
+    lines.push('', ...monthTips(data), '', `💬 ${monthAsk(m)}～`, '',
+        [...TAGS, `济州${m}月`, `${m}月济州天气`, '济州岛穿搭'].map(t => `#${t}`).join(' '));
+    return { title: `济州${m}月天气｜近5年实测数据`, body: lines.join('\n') };
 }
 
 function tips(rows) {
@@ -304,7 +433,12 @@ async function render(overlay) {
     const stage = overlay.querySelector('.bc-stage');
     stage.innerHTML = '<div class="bc-card bc-loading">加载中...</div>';
     let cap;
-    if (day === WEEK) {
+    if (day === MONTH) {
+        const data = await loadMonth(month);
+        if (day !== MONTH || data.m !== month) return; // 받는 사이 다른 탭·월을 골랐으면 그쪽이 그린다
+        stage.innerHTML = monthCardHtml(data);
+        cap = monthCaption(data);
+    } else if (day === WEEK) {
         await ensureWeather();
         const days = weekDays();
         stage.innerHTML = weekCardHtml(days);
@@ -318,6 +452,7 @@ async function render(overlay) {
     overlay.querySelector('[data-cap-title]').value = cap.title;
     overlay.querySelector('[data-cap-body]').value = cap.body;
     overlay.querySelectorAll('[data-day]').forEach(b => b.classList.toggle('on', +b.dataset.day === day));
+    overlay.querySelector('[data-month]').hidden = day !== MONTH;
 }
 
 // 카드를 1080×1440으로 그려 저장. 휴대폰은 공유 시트(→ 사진에 저장), PC는 파일 다운로드
@@ -331,7 +466,8 @@ async function save(btn) {
         const { toBlob } = await import('html-to-image');
         // 모서리 둥글림은 화면용. 이미지는 꽉 찬 직사각형이어야 샤오홍슈에서 흰 모서리가 안 생긴다
         const blob = await toBlob(card, { pixelRatio: 1, canvasWidth: 1080, canvasHeight: 1440, style: { borderRadius: '0' } });
-        const name = day === WEEK ? `jeju-week-${ymdOf(kst())}.png` : `jeju-${day ? 'tomorrow' : 'today'}-${ymdOf(kst(day))}.png`;
+        const name = day === MONTH ? `jeju-month-${String(month).padStart(2, '0')}.png`
+            : day === WEEK ? `jeju-week-${ymdOf(kst())}.png` : `jeju-${day ? 'tomorrow' : 'today'}-${ymdOf(kst(day))}.png`;
         const file = new File([blob], name, { type: 'image/png' });
         if (navigator.canShare?.({ files: [file] })) {
             await navigator.share({ files: [file] }).catch(() => {});
@@ -362,8 +498,10 @@ function open() {
                 <button type="button" data-day="0">오늘</button>
                 <button type="button" data-day="1">내일</button>
                 <button type="button" data-day="7">주간</button>
+                <button type="button" data-day="30">월별</button>
                 <button type="button" data-save>저장</button>
                 <button type="button" data-close>닫기</button>
+                <select data-month hidden>${Array.from({ length: 12 }, (_, i) => `<option value="${i + 1}">${i + 1}월</option>`).join('')}</select>
             </div>
             <div class="bc-caption">
                 <label>제목 (20자 이내)<input type="text" data-cap-title maxlength="20"></label>
@@ -380,7 +518,11 @@ function open() {
             if (copyBtn) { copy(overlay.querySelector(`[data-cap-${copyBtn.dataset.copy}]`).value, copyBtn); return; }
             if (e.target.closest('[data-close]')) { overlay.remove(); document.body.style.overflow = ''; }
         });
+        overlay.querySelector('[data-month]').addEventListener('change', e => { month = +e.target.value; render(overlay); });
         document.body.appendChild(overlay);
+        // 월별 카드는 보통 한 달 앞서 올리므로 다음 달로 시작
+        month = kst().getUTCMonth() + 2 > 12 ? 1 : kst().getUTCMonth() + 2;
+        overlay.querySelector('[data-month]').value = month;
     }
     // 저녁 6시 이후에는 오늘 낮 예보가 거의 지나갔으므로 내일 카드로 시작
     day = kst().getUTCHours() >= 18 ? 1 : 0;

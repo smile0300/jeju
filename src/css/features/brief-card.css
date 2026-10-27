@@ -104,3 +104,17 @@
 .bc-wemoji { font-size: 1.15em; line-height: 1; }
 .bc-wpop { text-align: right; font-size: 0.85em; color: #2563eb; }
 .bc-whead .bc-wpop { color: #6b7280; font-size: 1em; }
+
+/* 월별 카드: 지역 타일(기온·雨天) + 济州市 연도별 표 */
+.bc-month .bc-regions { grid-template-columns: repeat(4, 1fr); gap: 0.35em; }
+.bc-month .bc-region { padding: 0.5em 0.3em; text-align: center; }
+.bc-month .bc-rname { font-size: 0.9em; }
+.bc-month .bc-rname small { display: block; margin: 0; }
+.bc-month .bc-rmain { justify-content: center; margin: 0.25em 0; }
+.bc-month .bc-rtemp { font-size: 1.05em; }
+.bc-mtable { background: #ffffff; border-radius: 1em; padding: 0.35em 0.6em; box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06); }
+.bc-mrow { display: grid; grid-template-columns: 3em 3.4em 1fr 2.8em 3.6em; align-items: center; gap: 0.2em; padding: 0.32em 0; font-size: 0.82em; font-weight: 700; text-align: center; white-space: nowrap; }
+.bc-mrow + .bc-mrow { border-top: 1px solid #f1f5f9; }
+.bc-mrow span:first-child { text-align: left; }
+.bc-mhead { font-size: 0.68em; color: #6b7280; }
+.bc-controls select { min-height: 44px; padding: 0 10px; border: 1px solid #3b82f6; border-radius: 10px; background: #111827; color: #f9fafb; font: inherit; font-weight: 700; }
