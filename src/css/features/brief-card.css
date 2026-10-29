@@ -118,3 +118,15 @@
 .bc-mrow span:first-child { text-align: left; }
 .bc-mhead { font-size: 0.68em; color: #6b7280; }
 .bc-controls select { min-height: 44px; padding: 0 10px; border: 1px solid #3b82f6; border-radius: 10px; background: #111827; color: #f9fafb; font: inherit; font-weight: 700; }
+
+/* 특보 카드 */
+.bc-alerts { display: flex; flex-direction: column; gap: 0.45em; }
+.bc-alert { display: flex; flex-wrap: wrap; align-items: center; gap: 0.3em 0.6em; background: #fffbeb; border: 2px solid #fbbf24; border-radius: 1em; padding: 0.5em 0.8em; }
+.bc-alert .bc-chips { margin-top: 0; flex: 1; }
+.bc-alerts, .bc-alert { flex-shrink: 0; }
+.bc-trail-head b.bad { color: #dc2626; }
+.bc-alert.danger { background: #fef2f2; border-color: #ef4444; }
+.bc-alert.none { background: #ecfdf5; border-color: #34d399; }
+.bc-alert-name { font-size: 1.15em; font-weight: 900; }
+.bc-alert.danger .bc-alert-name { color: #b91c1c; }
+.bc-note { font-size: 0.7em; color: #6b7280; font-weight: 600; }

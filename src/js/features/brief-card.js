@@ -1,12 +1,12 @@
 import { CONFIG } from '../core/config.js';
 import { WEATHER_STATE, fetchWeatherData } from './weather.js';
 import { getMidTempVal } from '../core/utils.js';
-import { fetchPublicDataJson } from '../core/api.js';
+import { fetchPublicDataJson, fetchPublicDataText } from '../core/api.js';
 
 // 오늘의 제주 브리핑 카드 (운영자 전용, /admin → /?brief=1 로 연다)
 // - 샤오홍슈 업로드용 3:4 카드. 내용은 항상 중국어 (보는 사람이 중국 여행객)
 // - 도메인·위챗·红包·包车 같은 引流/광고 요소는 넣지 않고 계정명만 표시
-// - 카드 밖(아래)에 오늘/내일/주간 전환·저장·닫기 버튼. 저장은 1080×1440 PNG (캡처보다 선명하고 자를 필요 없음)
+// - 카드 밖(아래)에 오늘/내일/주간/월별/특보 전환·저장·닫기 버튼. 저장은 1080×1440 PNG (캡처보다 선명하고 자를 필요 없음)
 // - 그 아래 샤오홍슈 제목·본문·해시태그 자동 생성 + 복사
 
 const ACCOUNT = '济州本地人_正敬';
@@ -281,6 +281,137 @@ function monthCaption(data) {
     return { title: `济州${m}月天气｜近5年实测数据`, body: lines.join('\n') };
 }
 
+// ── 기상특보 (강풍·풍랑·호우·태풍 등 발효 중일 때) ───────────────────────
+const ALERT = 99;
+const ALERT_ZH = {
+    '강풍': '强风', '풍랑': '风浪', '호우': '暴雨', '대설': '大雪', '한파': '寒潮', '폭염': '高温',
+    '건조': '干燥', '태풍': '台风', '폭풍해일': '风暴潮', '황사': '沙尘', '안개': '大雾',
+};
+// 특보 종류별 여행자 행동 요령 (중복 없이 앞에서부터 최대 3개)
+const ALERT_TIPS = {
+    '태풍': '🌀 尽量待在室内，提前和航空公司确认航班',
+    '강풍': '✈️ 航班可能延误或取消，出发前查看航班状态',
+    '풍랑': '⛴️ 牛岛·加波岛等船班可能停航，出发前先确认',
+    '호우': '🌧️ 避开溪谷、海边步道和低洼地带',
+    '대설': '⛰️ 汉拿山可能封山，山路结冰注意安全',
+    '한파': '🧣 注意保暖，路面可能结冰',
+    '폭염': '💧 多补水，中午尽量避开户外活动',
+    '안개': '🚗 能见度低，自驾请减速慢行',
+};
+const AREA_ZH = [
+    ['산지', '山地'], ['북부', '北部'], ['남부', '南部'], ['동부', '东部'], ['서부', '西部'],
+    ['추자도', '楸子岛'], ['앞바다', '近海'], ['먼바다', '远海'],
+];
+
+// 기상청 특보 현황문(t3)의 "o 강풍주의보 : 제주도(제주도북부, ...)" 줄을 읽는다
+async function loadAlerts() {
+    const json = await fetchPublicDataJson('https://apis.data.go.kr/1360000/WthrWrnInfoService/getWthrWrnMsg',
+        { numOfRows: 10, pageNo: 1, dataType: 'JSON', stnId: 184 }).catch(() => null);
+    const raw = json?.response?.body?.items?.item;
+    const latest = Array.isArray(raw) ? raw[0] : raw;
+    if (!latest?.t3) return { tmFc: null, items: [] };
+    const items = [];
+    for (let line of String(latest.t3).split('\n')) {
+        line = line.trim();
+        if (!/^(o|○)\s/.test(line)) continue;
+        const [type, ...rest] = line.replace(/^(o|○)\s+/, '').split(':');
+        const desc = rest.join(':');
+        if (!/제주|추자/.test(desc)) continue;
+        const kind = Object.keys(ALERT_ZH).find(k => type.includes(k));
+        if (!kind) continue;
+        items.push({
+            kind,
+            name: `${ALERT_ZH[kind]}${type.includes('경보') ? '警报' : '注意报'}`,
+            danger: type.includes('경보'),
+            // "제주도" 단독(뒤에 세부 구역이 없음)은 섬 전체
+            areas: [...(/제주도(?![가-힣(])/.test(desc) ? ['全岛'] : []), ...AREA_ZH.filter(([ko]) => desc.includes(ko)).map(([, zh]) => zh)],
+        });
+    }
+    return { tmFc: String(latest.tmFc || ''), items };
+}
+
+// 오늘 제주 출발편 결항·지연 수. API가 전국 공항을 다 주므로 전부 받아 제주 출발만 센다
+async function loadDepartures() {
+    const endpoint = 'https://apis.data.go.kr/B551178/flight-status/depart';
+    const ymd = ymdOf(kst());
+    const base = { numOfRows: 100, searchday: ymd, schDate: ymd, schDeptCityCode: 'CJU', depAirportCode: 'CJU' };
+    const parse = text => Array.from(new DOMParser().parseFromString(text, 'text/xml').getElementsByTagName('item'))
+        .map(it => ({ dep: it.getElementsByTagName('depAirport')[0]?.textContent || '', rmk: it.getElementsByTagName('rmkKor')[0]?.textContent || '' }));
+    try {
+        const first = await fetchPublicDataText(endpoint, { ...base, pageNo: 1 });
+        const total = +(first.match(/<totalCount>(\d+)<\/totalCount>/i)?.[1] || 0);
+        const pages = Math.min(Math.ceil(total / 100), 15);
+        const rest = await Promise.all(Array.from({ length: Math.max(0, pages - 1) }, (_, i) =>
+            fetchPublicDataText(endpoint, { ...base, pageNo: i + 2 }).catch(() => '')));
+        const jeju = [first, ...rest].flatMap(parse).filter(f => f.dep === '제주');
+        if (!jeju.length) return null;
+        return {
+            total: jeju.length,
+            cancel: jeju.filter(f => f.rmk.includes('결항')).length,
+            delay: jeju.filter(f => f.rmk.includes('지연')).length,
+        };
+    } catch (e) {
+        console.warn('[brief-card] flights', e);
+        return null;
+    }
+}
+
+const alertAsk = '这几天在济州？评论区留航班或日期，帮你看看';
+
+function alertTimeOf(tmFc) {
+    if (!/^\d{12}/.test(tmFc)) return '';
+    return `${+tmFc.slice(4, 6)}月${+tmFc.slice(6, 8)}日 ${tmFc.slice(8, 10)}:${tmFc.slice(10, 12)} 发布`;
+}
+
+function alertTipsOf(items) {
+    const kinds = items.map(x => x.kind);
+    return Object.keys(ALERT_TIPS).filter(k => kinds.includes(k)).map(k => ALERT_TIPS[k]).slice(0, 3);
+}
+
+function alertCardHtml({ alerts, flights }) {
+    const now = kst();
+    const updated = `${String(now.getUTCHours()).padStart(2, '0')}:${String(now.getUTCMinutes()).padStart(2, '0')}`;
+    const list = alerts.items.length
+        ? alerts.items.map(x => `<div class="bc-alert${x.danger ? ' danger' : ''}">
+                <div class="bc-alert-name">⚠️ ${x.name}</div>
+                ${x.areas.length ? `<div class="bc-chips">${x.areas.map(a => `<span class="off">${a}</span>`).join('')}</div>` : ''}
+            </div>`).join('')
+        : '<div class="bc-alert none"><div class="bc-alert-name">✅ 目前济州没有天气预警</div></div>';
+    const flightHtml = flights
+        ? `<div class="bc-trail"><div class="bc-trail-head">✈️ 今天济州出发航班 <b${flights.cancel ? ' class="bad"' : ''}>${flights.cancel ? `取消 ${flights.cancel} 班` : '暂无取消'}</b></div>
+            <div class="bc-rmeta">共 ${flights.total} 班 · 延误 ${flights.delay} 班 · ${updated} 统计</div></div>`
+        : '';
+    const tipsList = alertTipsOf(alerts.items);
+    return `<div class="bc-card bc-alertcard" id="brief-card">
+        <div class="bc-head">
+            <div><div class="bc-title">济州天气预警</div><div class="bc-date">${alertTimeOf(alerts.tmFc) || `${now.getUTCMonth() + 1}月${now.getUTCDate()}日`}</div></div>
+            <div class="bc-account">@${ACCOUNT}</div>
+        </div>
+        <div class="bc-alerts">${list}</div>
+        ${flightHtml}
+        ${tipsList.length ? `<ul class="bc-tips">${tipsList.map(t => `<li>${t}</li>`).join('')}</ul>` : ''}
+        <div class="bc-note">注意报＝提醒级 · 警报＝危险级（韩国气象厅标准）</div>
+        <div class="bc-ask">💬 ${alertAsk}</div>
+        <div class="bc-foot">数据：韩国气象厅 · 韩国机场公社 · ${updated} 更新（韩国时间）</div>
+    </div>`;
+}
+
+function alertCaption({ alerts, flights }) {
+    const now = kst();
+    const md = `${now.getUTCMonth() + 1}月${now.getUTCDate()}日`;
+    const names = [...new Set(alerts.items.map(x => x.name))];
+    const title = Array.from(names.length ? `济州${names[0]}｜${md}航班影响` : `济州天气预警｜${md}`).slice(0, 20).join('');
+    const lines = [`📍济州天气预警（${alertTimeOf(alerts.tmFc) || md}）`, ''];
+    if (alerts.items.length) alerts.items.forEach(x => lines.push(`⚠️ ${x.name}${x.areas.length ? `：${x.areas.join('、')}` : ''}`));
+    else lines.push('✅ 目前济州没有天气预警');
+    if (flights) lines.push('', `✈️ 今天济州出发航班 共${flights.total}班 · 取消${flights.cancel}班 · 延误${flights.delay}班`);
+    const tipsList = alertTipsOf(alerts.items);
+    if (tipsList.length) lines.push('', ...tipsList);
+    lines.push('', '注意报＝提醒级 · 警报＝危险级', '', `💬 ${alertAsk}～`, '',
+        [...TAGS, '济州岛航班', '济州天气预警', ...names.slice(0, 2).map(n => `济州${n}`)].map(t => `#${t}`).join(' '));
+    return { title, body: lines.join('\n') };
+}
+
 function tips(rows) {
     const ok = rows.filter(Boolean);
     if (!ok.length) return [];
@@ -433,7 +564,12 @@ async function render(overlay) {
     const stage = overlay.querySelector('.bc-stage');
     stage.innerHTML = '<div class="bc-card bc-loading">加载中...</div>';
     let cap;
-    if (day === MONTH) {
+    if (day === ALERT) {
+        const [alerts, flights] = await Promise.all([loadAlerts(), loadDepartures()]);
+        if (day !== ALERT) return;
+        stage.innerHTML = alertCardHtml({ alerts, flights });
+        cap = alertCaption({ alerts, flights });
+    } else if (day === MONTH) {
         const data = await loadMonth(month);
         if (day !== MONTH || data.m !== month) return; // 받는 사이 다른 탭·월을 골랐으면 그쪽이 그린다
         stage.innerHTML = monthCardHtml(data);
@@ -466,7 +602,8 @@ async function save(btn) {
         const { toBlob } = await import('html-to-image');
         // 모서리 둥글림은 화면용. 이미지는 꽉 찬 직사각형이어야 샤오홍슈에서 흰 모서리가 안 생긴다
         const blob = await toBlob(card, { pixelRatio: 1, canvasWidth: 1080, canvasHeight: 1440, style: { borderRadius: '0' } });
-        const name = day === MONTH ? `jeju-month-${String(month).padStart(2, '0')}.png`
+        const name = day === ALERT ? `jeju-alert-${ymdOf(kst())}.png`
+            : day === MONTH ? `jeju-month-${String(month).padStart(2, '0')}.png`
             : day === WEEK ? `jeju-week-${ymdOf(kst())}.png` : `jeju-${day ? 'tomorrow' : 'today'}-${ymdOf(kst(day))}.png`;
         const file = new File([blob], name, { type: 'image/png' });
         if (navigator.canShare?.({ files: [file] })) {
@@ -499,6 +636,7 @@ function open() {
                 <button type="button" data-day="1">내일</button>
                 <button type="button" data-day="7">주간</button>
                 <button type="button" data-day="30">월별</button>
+                <button type="button" data-day="99">특보</button>
                 <button type="button" data-save>저장</button>
                 <button type="button" data-close>닫기</button>
                 <select data-month hidden>${Array.from({ length: 12 }, (_, i) => `<option value="${i + 1}">${i + 1}월</option>`).join('')}</select>
