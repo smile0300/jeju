@@ -324,6 +324,16 @@
 }
 .pl-map-legend .pl-type { margin-left: 0; }
 
+/* ── 추천 코스: 이동 방법 (택시 합계 vs 차량 대절) ── */
+.pl-move { display: flex; flex-direction: column; gap: var(--space-3); margin: 0; }
+.pl-move-title { margin: 0; font-size: 0.95rem; font-weight: 800; }
+.pl-move-row { display: flex; align-items: flex-start; gap: var(--space-3); }
+.pl-move-row > i { font-size: 1.4rem; color: var(--accent); flex-shrink: 0; }
+.pl-move-row > div { display: flex; flex-direction: column; gap: 2px; }
+.pl-move-row strong { font-size: 0.95rem; }
+.pl-move-row span { font-size: 0.8rem; color: var(--label-secondary); }
+.pl-move .pl-hint { margin: 0; }
+
 .pl-timeline {
     list-style: none;
     margin: 0;

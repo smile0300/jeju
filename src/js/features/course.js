@@ -2,6 +2,8 @@ import { tr, pick, escapeHtml } from './planner/strings.js';
 import { chipGroup, bindChips, copyText, flashLabel } from './planner/shared.js';
 import { BLOCKS, COMBOS, REGIONS, COURSES_DRAFT, STOP_POS, STOP_TYPES } from '../../data/courses.js';
 import { JEJU_MAP, projectLatLng } from '../../data/jeju-map.js';
+import { roadKm, taxiFare, krwToCny, WALK_KM, WALK_KMH, HOTEL_BASE } from '../../data/taxi.js';
+import { CHARTER_PRICES } from '../../data/charter.js';
 
 // 추천 코스: 하루 블록(당일)과 블록 조합(여러 날)을 기간·지역으로 걸러 보여준다.
 
@@ -99,7 +101,50 @@ function listHtml() {
         ${state.days === 1 ? `<div class="pl-filter">${chipGroup('region',
             [{ value: 'all', label: tr('region.all') }, ...REGIONS.map(r => ({ value: r, label: tr(`region.${r}`) }))],
             { selected: [state.region] })}</div>` : ''}
-        <div class="pl-course-list">${cards.length ? cards.join('') : `<p class="pl-muted">${tr('course.empty')}</p>`}</div>        <button type="button" class="pl-link pl-center" onclick="showSection('trip')">${tr('course.custom')} →</button>`;
+        <div class="pl-course-list">${cards.length ? cards.join('') : `<p class="pl-muted">${tr('course.empty')}</p>`}</div>
+        <button type="button" class="pl-link pl-center" onclick="showSection('trip')">${tr('course.custom')} →</button>`;
+}
+
+// 이용자 대부분이 운전하지 않으므로(실태조사: 택시 69%·버스 58%·렌터카 22%) 이동은 택시·도보 기준으로 안내한다
+const money = (krw) => ({ krw: krw.toLocaleString('ko-KR'), cny: krwToCny(krw) });
+
+function legInfo(from, to, driveMin) {
+    const a = STOP_POS[from.name.ko], b = STOP_POS[to.name.ko];
+    if (!a || !b) return null;
+    const km = roadKm(a, b);
+    if (km < WALK_KM) return { walk: true, min: Math.max(5, Math.round(km / WALK_KMH * 60 / 5) * 5) };
+    return { walk: false, min: driveMin, fare: taxiFare(km) };
+}
+
+function legHtml(leg) {
+    if (!leg) return '';
+    return leg.walk
+        ? `<div class="pl-leg"><i class="ph-duotone ph-person-simple-walk"></i> ${tr('course.walk', { m: leg.min })}</div>`
+        : `<div class="pl-leg"><i class="ph-duotone ph-taxi"></i> ${tr('course.taxi', { m: leg.min, ...money(leg.fare) })}</div>`;
+}
+
+// 하루 택시비(제주시 숙소 왕복 포함)와 包车 하루 요금을 나란히 보여준다
+function moveHtml(block) {
+    const stops = block.stops;
+    const legs = stops.slice(0, -1).map((s, i) => legInfo(s, stops[i + 1], s.driveMin));
+    const first = STOP_POS[stops[0].name.ko], last = STOP_POS[stops[stops.length - 1].name.ko];
+    if (!first || !last || legs.some(l => !l)) return '';
+    const total = legs.reduce((sum, l) => sum + (l.fare || 0), 0)
+        + taxiFare(roadKm(HOTEL_BASE, first)) + taxiFare(roadKm(last, HOTEL_BASE));
+    const car = CHARTER_PRICES[0];
+
+    return `<section class="pl-card pl-move">
+        <h4 class="pl-move-title">${tr('course.move.title')}</h4>
+        <div class="pl-move-row">
+            <i class="ph-duotone ph-taxi"></i>
+            <div><strong>${tr('course.move.taxi', money(total))}</strong><span>${tr('course.move.taxi_note')}</span></div>
+        </div>
+        <div class="pl-move-row">
+            <i class="ph-duotone ph-van"></i>
+            <div><strong>${tr('course.move.charter', { price: car.price })}</strong><span>${tr('course.move.charter_note')}</span></div>
+        </div>
+        <p class="pl-muted pl-hint"><i class="ph-duotone ph-info"></i> ${tr('course.move.hint')}</p>
+    </section>`;
 }
 
 function timelineHtml(block) {
@@ -116,7 +161,7 @@ function timelineHtml(block) {
                 <span class="pl-stop-stay">${tr('course.stay', { m: s.stayMin })}</span>
                 ${s.tip ? `<p class="pl-stop-tip">${escapeHtml(pick(s.tip))}</p>` : ''}
             </div>
-            ${i < block.stops.length - 1 && s.driveMin ? `<div class="pl-leg"><i class="ph-duotone ph-car-profile"></i> ${tr('course.drive', { m: s.driveMin })}</div>` : ''}
+            ${i < block.stops.length - 1 ? legHtml(legInfo(s, block.stops[i + 1], s.driveMin)) : ''}
         </li>`).join('')}</ol>`;
 }
 
@@ -136,6 +181,7 @@ function detailHtml() {
             { selected: [String(dayIdx)] })}</div>
             <p class="pl-detail-sub">${escapeHtml(pick(block.title))}</p>` : `<p class="pl-detail-sub">${escapeHtml(pick(block.summary))}</p>`}
         ${mapHtml(block.stops)}
+        ${moveHtml(block)}
         <p class="pl-muted pl-hint"><i class="ph-duotone ph-info"></i> ${tr('course.copy_hint')}</p>
         ${timelineHtml(block)}
         <button type="button" class="res-submit-btn pl-mt" data-charter="${escapeHtml(block.region)}"><i class="ph-duotone ph-van"></i> <span>${tr('course.charter_cta')}</span></button>`;
