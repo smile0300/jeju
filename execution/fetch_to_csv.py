@@ -1,9 +1,11 @@
 import requests
 import csv
 import json
+import os
 
 def fetch_and_save_csv():
-    api_key = "fd0365a6919e44c3b120034ba100678f"
+    # 키는 코드에 두지 않는다 (Cloudflare와 같은 이름의 환경변수)
+    api_key = os.environ["VISIT_JEJU_KEY"]
     url = f"https://api.visitjeju.net/vsjApi/contents/searchList?locale=kr&category=c5&apiKey={api_key}&pageSize=500"
     
     try:
