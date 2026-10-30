@@ -7,11 +7,13 @@ import { getDailyTouristFestivals } from './festival.js';
 // 오늘의 제주 브리핑 카드 (운영자 전용, /admin → /?brief=1 로 연다)
 // - 샤오홍슈 업로드용 3:4 카드 (1080×1440 PNG). 내용은 항상 중국어 (보는 사람이 중국 여행객)
 // - 도메인·위챗·红包·包车 같은 引流/광고 요소는 넣지 않고 계정명만 표시
-// - 오늘/내일 탭은 4장 세트:
-//   [1/4] 날씨 (북·서·남부 5곳)
-//   [2/4] 날씨 (동부·우도·한라산 5곳)
-//   [3/4] 한라산 실시간 탐방로 & CCTV 영상 캡처
-//   [4/4] 당일 진행 중인 제주 축제·전시 추천 (중국 여행객 맞춤형)
+// - 오늘/내일 탭은 6장 세트:
+//   [1/6] 날씨 (북·서·남부 5곳)
+//   [2/6] 날씨 (동부·우도·한라산 5곳)
+//   [3/6] 주간 날씨 (향후 7일 북부·남부 비교 & 여행 추천일)
+//   [4/6] 한라산 실시간 탐방로 & CCTV 영상 캡처
+//   [5/6] 당일 진행 중인 제주 축제·전시 추천 (중국 여행객 맞춤형)
+//   [6/6] 당일 제주공항 항공편 요약 & 전일 비교 (국내/국제/중화권 노선·지연·결항)
 // - 저장 버튼은 공유 시트(navigator.share) 없이 폰/PC에 즉시 파일 다운로드
 
 const ACCOUNT = '济州本地人_正敬';
@@ -43,7 +45,7 @@ const REGIONS_4 = [
 
 const TRAIL_ZH = {
     '어리목': '御里牧', '영실': '灵室', '어승생악': '御乘生岳', '돈내코': '顿乃科',
-    '석굴암': '石窟庵', '관음사': '观音寺', '성판악': '城판岳'.replace('판', '板'), '동능': '山顶(东陵)',
+    '석굴암': '石窟庵', '관음사': '观音寺', '성판악': '城板岳', '동능': '山顶(东陵)',
 };
 const OPEN_STATUS = ['정상운영'];
 
@@ -57,8 +59,68 @@ const HALLA_CCTVS = [
 ];
 let selectedCamKey = 'baengnokdam';
 const cctvSnapshotCache = {}; // { [camKey]: { dataUrl, time } }
+const flightCompCache = {};   // { [offsetDays]: { cur, prev, curYmd, prevYmd } }
 
-// 댓글 유도 문구 (카드·본문 공통). 날짜를 남기면 운영자가 답글로 날씨를 알려준다
+// 국제선 도착 도시 중국어 표기 매핑 (중화권 노선 우선 정렬용 weight 포함)
+const FLIGHT_CITY_MAP = [
+    ['상하이/푸동', '上海浦东', 1],
+    ['상하이/홍차오', '上海虹桥', 1],
+    ['상하이', '上海', 1],
+    ['베이징(다싱)', '北京大兴', 1],
+    ['베이징(서우두)', '北京首都', 1],
+    ['베이징', '北京', 1],
+    ['항조우', '杭州', 1],
+    ['항저우', '杭州', 1],
+    ['난징', '南京', 1],
+    ['닝보', '宁波', 1],
+    ['우시', '无锡', 1],
+    ['무석', '无锡', 1],
+    ['광저우', '广州', 1],
+    ['선전', '深圳', 1],
+    ['심천', '深圳', 1],
+    ['칭다오', '青岛', 1],
+    ['청도', '青岛', 1],
+    ['심양', '沈阳', 1],
+    ['선양', '沈阳', 1],
+    ['다롄', '大连', 1],
+    ['대련', '大连', 1],
+    ['하얼빈', '哈尔滨', 1],
+    ['창춘', '长春', 1],
+    ['장춘', '长春', 1],
+    ['시안', '西安', 1],
+    ['청두', '成都', 1],
+    ['충칭', '重庆', 1],
+    ['정저우', '郑州', 1],
+    ['샤먼', '厦门', 1],
+    ['하문', '厦门', 1],
+    ['푸저우', '福州', 1],
+    ['원저우', '温州', 1],
+    ['창사', '长沙', 1],
+    ['우한', '武汉', 1],
+    ['톈진', '天津', 1],
+    ['천진', '天津', 1],
+    ['홍콩', '香港', 2],
+    ['마카오', '澳门', 2],
+    ['타이페이', '台北', 2],
+    ['타이베이', '台北', 2],
+    ['타이중', '台中', 2],
+    ['가오슝', '高雄', 2],
+    ['싱가폴', '新加坡', 3],
+    ['싱가포르', '新加坡', 3],
+    ['오사카', '大阪', 3],
+    ['후쿠오카', '福冈', 3],
+    ['도쿄', '东京', 3],
+];
+
+function mapIntlCity(rawCity) {
+    const s = String(rawCity || '');
+    for (const [ko, zh, group] of FLIGHT_CITY_MAP) {
+        if (s.includes(ko)) return { zh, group };
+    }
+    return { zh: s.split('/')[0] || '其他', group: 4 };
+}
+
+// 댓글 유도 문구 (본문 캡션 하단에만 표시)
 const ASK = '几号来济州？评论区留日期，帮你看天气';
 const TAGS = ['济州岛', '济州岛天气', '济州岛旅游', '济州岛攻略', '韩国旅游', '济州'];
 const WEEKDAY = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
@@ -258,6 +320,110 @@ async function captureHallasanCctv(camKey = selectedCamKey, force = false) {
     });
 }
 
+// ── 당일 & 전일 제주공항 항공편 집계 (B551178/flight-status/depart) ──────────
+function parseFlightXmlItems(text) {
+    const out = [];
+    if (!text) return out;
+    const matches = text.matchAll(/<item>([\s\S]*?)<\/item>/g);
+    for (const m of matches) {
+        const s = m[1];
+        const get = k => (s.match(new RegExp('<' + k + '>([^<]*)')) || [])[1]?.trim() || '';
+        const sched = get('scheduledatetime');
+        if (sched.length < 8) continue;
+        out.push({
+            date: sched.slice(0, 8),
+            time: sched.slice(8, 12),
+            dep: get('depAirport'),
+            arr: get('arrAirport'),
+            line: get('line'),
+            rmk: get('rmkKor'),
+            cs: get('codeshare'),
+            fid: get('flightid'),
+        });
+    }
+    return out;
+}
+
+function summarizeFlightDay(items) {
+    if (!items || !items.length) return null;
+    const rawTotal = items.length;
+    // 코드쉐어(공동운항 중복 편명)를 제외한 실제 운항기 기준
+    const actual = items.filter(x => x.cs !== 'Y');
+    const use = actual.length ? actual : items;
+    const total = use.length;
+    const dom = use.filter(x => x.line === '국내').length;
+    const intlList = use.filter(x => x.line === '국제');
+    const intl = intlList.length;
+    const cancel = use.filter(x => x.rmk.includes('결항') || x.rmk.includes('취소')).length;
+    const delay = use.filter(x => x.rmk.includes('지연')).length;
+    const departed = use.filter(x => x.rmk.includes('출발')).length;
+    const normalRate = total > 0 ? ((total - cancel - delay) / total * 100).toFixed(1) : '100.0';
+
+    // 국제선 도시별 편수 및 지연/결항 집계
+    const cityMap = {};
+    for (const f of intlList) {
+        const { zh, group } = mapIntlCity(f.arr);
+        if (!cityMap[zh]) cityMap[zh] = { zh, group, count: 0, cancel: 0, delay: 0 };
+        cityMap[zh].count += 1;
+        if (f.rmk.includes('결항') || f.rmk.includes('취소')) cityMap[zh].cancel += 1;
+        else if (f.rmk.includes('지연')) cityMap[zh].delay += 1;
+    }
+    const intlRoutes = Object.values(cityMap).sort((a, b) => a.group - b.group || b.count - a.count);
+
+    return { total, rawTotal, dom, intl, cancel, delay, departed, normalRate, intlRoutes };
+}
+
+async function loadFlightComparison(offsetDays = 0) {
+    if (flightCompCache[offsetDays]) return flightCompCache[offsetDays];
+    const endpoint = 'https://apis.data.go.kr/B551178/flight-status/depart';
+    const curDate = kst(offsetDays);
+    const prevDate = kst(offsetDays - 1);
+    const curYmd = ymdOf(curDate);
+    const prevYmd = ymdOf(prevDate);
+
+    // API는 kst(-3)부터 하루 약 9~9.5페이지씩 오름차순으로 정렬되어 있음
+    // offsetDays=0 (어제+오늘): 페이지 18~39 / offsetDays=1 (오늘+내일): 페이지 27~48
+    const startPage = offsetDays === 0 ? 18 : 27;
+    const pageList = Array.from({ length: 22 }, (_, i) => startPage + i);
+
+    try {
+        const batch1 = pageList.slice(0, 11);
+        const batch2 = pageList.slice(11, 22);
+        const texts1 = await Promise.all(batch1.map(p => fetchPublicDataText(endpoint, { numOfRows: 100, pageNo: p }).catch(() => '')));
+        const texts2 = await Promise.all(batch2.map(p => fetchPublicDataText(endpoint, { numOfRows: 100, pageNo: p }).catch(() => '')));
+        const allItems = [...texts1, ...texts2].flatMap(parseFlightXmlItems);
+
+        // 만약 앞/뒤 경계에 데이터가 더 있을 가능성에 대비해 보충 페이지 확인
+        const allDates = allItems.map(x => x.date);
+        if (allDates.length && allDates[0] === prevYmd && startPage > 1) {
+            const extraPrev = await Promise.all([startPage - 2, startPage - 1].filter(p => p >= 1)
+                .map(p => fetchPublicDataText(endpoint, { numOfRows: 100, pageNo: p }).catch(() => '')));
+            allItems.unshift(...extraPrev.flatMap(parseFlightXmlItems));
+        }
+        if (allDates.length && allDates[allDates.length - 1] === curYmd) {
+            const lastP = pageList[pageList.length - 1];
+            const extraNext = await Promise.all([lastP + 1, lastP + 2]
+                .map(p => fetchPublicDataText(endpoint, { numOfRows: 100, pageNo: p }).catch(() => '')));
+            allItems.push(...extraNext.flatMap(parseFlightXmlItems));
+        }
+
+        const jejuItems = allItems.filter(x => x.dep === '제주');
+        const curItems = jejuItems.filter(x => x.date === curYmd);
+        const prevItems = jejuItems.filter(x => x.date === prevYmd);
+
+        const cur = summarizeFlightDay(curItems);
+        const prev = summarizeFlightDay(prevItems);
+        if (!cur) return null;
+
+        const result = { cur, prev, curYmd, prevYmd, curDate, prevDate };
+        flightCompCache[offsetDays] = result;
+        return result;
+    } catch (e) {
+        console.warn('[brief-card] loadFlightComparison failed', e);
+        return null;
+    }
+}
+
 // 단기예보가 하루치(8시간 이상) 있으면 그걸, 없으면 중기예보(오전·오후 날씨, 강수확률, 최저·최고)로
 function dayInfo(key, ymd) {
     const st = WEATHER_STATE[key];
@@ -282,9 +448,9 @@ function dayInfo(key, ymd) {
 
 const isWet = r => ['🌧️', '🌦️', '🌨️', '❄️'].includes(r.emoji);
 
-// 저녁에 올리면 내일부터, 낮에 올리면 오늘부터 7일
-function weekDays() {
-    const start = kst().getUTCHours() >= 18 ? 1 : 0;
+// startOffset이 주어지면 해당 오프셋(오늘=0, 내일=1)부터 7일, 생략 시 저녁 6시 기준 자동 결정
+function weekDays(startOffset = null) {
+    const start = startOffset !== null ? startOffset : (kst().getUTCHours() >= 18 ? 1 : 0);
     return Array.from({ length: 7 }, (_, i) => {
         const d = kst(start + i);
         const ymd = ymdOf(d);
@@ -417,7 +583,6 @@ function monthCardHtml(data) {
                 ${rowHtml}
             </div>
             <ul class="bc-tips">${monthTips(data).map(t => `<li>${t}</li>`).join('')}</ul>
-            <div class="bc-ask">💬 ${monthAsk(m)}</div>
             <div class="bc-foot">数据：韩国气象厅 地面观测（ASOS）· 雨天＝日降水1mm以上</div>
         </div>
     </div>`;
@@ -485,28 +650,8 @@ async function loadAlerts() {
 }
 
 async function loadDepartures() {
-    const endpoint = 'https://apis.data.go.kr/B551178/flight-status/depart';
-    const ymd = ymdOf(kst());
-    const base = { numOfRows: 100, searchday: ymd, schDate: ymd, schDeptCityCode: 'CJU', depAirportCode: 'CJU' };
-    const parse = text => Array.from(new DOMParser().parseFromString(text, 'text/xml').getElementsByTagName('item'))
-        .map(it => ({ dep: it.getElementsByTagName('depAirport')[0]?.textContent || '', rmk: it.getElementsByTagName('rmkKor')[0]?.textContent || '' }));
-    try {
-        const first = await fetchPublicDataText(endpoint, { ...base, pageNo: 1 });
-        const total = +(first.match(/<totalCount>(\d+)<\/totalCount>/i)?.[1] || 0);
-        const pages = Math.min(Math.ceil(total / 100), 15);
-        const rest = await Promise.all(Array.from({ length: Math.max(0, pages - 1) }, (_, i) =>
-            fetchPublicDataText(endpoint, { ...base, pageNo: i + 2 }).catch(() => '')));
-        const jeju = [first, ...rest].flatMap(parse).filter(f => f.dep === '제주');
-        if (!jeju.length) return null;
-        return {
-            total: jeju.length,
-            cancel: jeju.filter(f => f.rmk.includes('결항')).length,
-            delay: jeju.filter(f => f.rmk.includes('지연')).length,
-        };
-    } catch (e) {
-        console.warn('[brief-card] flights', e);
-        return null;
-    }
+    const comp = await loadFlightComparison(0);
+    return comp?.cur || null;
 }
 
 const alertAsk = '这几天在济州？评论区留航班或日期，帮你看看';
@@ -532,7 +677,7 @@ function alertCardHtml({ alerts, flights }) {
         : '<div class="bc-alert none"><div class="bc-alert-name">✅ 目前济州没有天气预警</div></div>';
     const flightHtml = flights
         ? `<div class="bc-trail"><div class="bc-trail-head">✈️ 今天济州出发航班 <b${flights.cancel ? ' class="bad"' : ''}>${flights.cancel ? `取消 ${flights.cancel} 班` : '暂无取消'}</b></div>
-            <div class="bc-rmeta">共 ${flights.total} 班 · 延误 ${flights.delay} 班 · ${updated} 统计</div></div>`
+            <div class="bc-rmeta">共 ${flights.total} 班（国际 ${flights.intl} 班）· 延误 ${flights.delay} 班 · ${updated} 统计</div></div>`
         : '';
     const tipsList = alertTipsOf(alerts.items);
     return `<div class="bc-card-wrap">
@@ -545,7 +690,6 @@ function alertCardHtml({ alerts, flights }) {
             ${flightHtml}
             ${tipsList.length ? `<ul class="bc-tips">${tipsList.map(t => `<li>${t}</li>`).join('')}</ul>` : ''}
             <div class="bc-note">注意报＝提醒级 · 警报＝危险级（韩国气象厅标准）</div>
-            <div class="bc-ask">💬 ${alertAsk}</div>
             <div class="bc-foot">数据：韩国气象厅 · 韩国机场公社 · ${updated} 更新（韩国时间）</div>
         </div>
     </div>`;
@@ -588,11 +732,13 @@ function tips(rows, isEastMtn = false) {
     return out.slice(0, 3);
 }
 
-// ── 오늘/내일 4장 카드 세트 렌더링 ─────────────────────────────────
-// [1/4] 북·서·남부 5곳 날씨
-// [2/4] 동부·우도·한라산 5곳 날씨
-// [3/4] 한라산 실시간 탐방로 & CCTV 캡처
-// [4/4] 당일 진행 중인 제주 축제·전시 추천
+// ── 오늘/내일 6장 카드 세트 렌더링 ─────────────────────────────────
+// [1/6] 북·서·남부 5곳 날씨
+// [2/6] 동부·우도·한라산 5곳 날씨
+// [3/6] 향후 7일 주간 날씨
+// [4/6] 한라산 실시간 탐방로 & CCTV 캡처
+// [5/6] 당일 진행 중인 제주 축제·전시 추천
+// [6/6] 당일 제주공항 항공편 요약 & 전일 비교
 function weatherFiveCardHtml({ id, fileName, badgeText, titleSub, regions, rows, bestIdx, isEastMtn, updated, dateLabel }) {
     const regionHtml = regions.map((r, i) => {
         const s = rows[i];
@@ -608,12 +754,14 @@ function weatherFiveCardHtml({ id, fileName, badgeText, titleSub, regions, rows,
     return `<div class="bc-card-wrap">
         <div class="bc-card" id="${id}" data-card-name="${fileName}">
             <div class="bc-head">
-                <div><div class="bc-title">${day ? '明日济州' : '今日济州'} · ${titleSub}</div><div class="bc-date">${dateLabel}</div></div>
+                <div>
+                    <div class="bc-title">${day ? '明日济州' : '今日济州'}<span class="bc-title-tag">${titleSub}</span></div>
+                    <div class="bc-date">${dateLabel}</div>
+                </div>
                 <div class="bc-account">@${ACCOUNT}</div>
             </div>
             <div class="bc-regions-5">${regionHtml}</div>
             <ul class="bc-tips">${tips(rows, isEastMtn).map(t => `<li>${t}</li>`).join('')}</ul>
-            <div class="bc-ask">💬 ${ASK}</div>
             <div class="bc-foot">数据：韩国气象厅 · ${updated} 更新（韩国时间）</div>
         </div>
         <div class="bc-card-subbar">
@@ -624,7 +772,7 @@ function weatherFiveCardHtml({ id, fileName, badgeText, titleSub, regions, rows,
 }
 
 function hallasanCardHtml({ ymd, hallaWeather, trails, snap, updated, dateLabel }) {
-    const fileName = `jeju-${day ? 'tomorrow' : 'today'}-${ymd}-3-hallasan.png`;
+    const fileName = `jeju-${day ? 'tomorrow' : 'today'}-${ymd}-4-hallasan.png`;
     const cam = snap?.cam || HALLA_CCTVS.find(c => c.key === selectedCamKey) || HALLA_CCTVS[0];
     const indices = getHallasanIndices(ymd);
 
@@ -651,7 +799,10 @@ function hallasanCardHtml({ ymd, hallaWeather, trails, snap, updated, dateLabel 
     return `<div class="bc-card-wrap">
         <div class="bc-card bc-hallacard" id="brief-card-hallasan" data-card-name="${fileName}">
             <div class="bc-head">
-                <div><div class="bc-title">⛰️ 汉拿山实时播报</div><div class="bc-date">${dateLabel}</div></div>
+                <div>
+                    <div class="bc-title">⛰️ 汉拿山<span class="bc-title-tag">实时播报</span></div>
+                    <div class="bc-date">${dateLabel}</div>
+                </div>
                 <div class="bc-account">@${ACCOUNT}</div>
             </div>
             <div class="bc-cctv-box">${cctvInner}</div>
@@ -673,7 +824,6 @@ function hallasanCardHtml({ ymd, hallaWeather, trails, snap, updated, dateLabel 
                 </div>
             </div>
             <div class="bc-trail">${trailHtml}</div>
-            <div class="bc-ask">💬 准备爬汉拿山？评论区留日期，帮你看山顶天气</div>
             <div class="bc-foot">数据：汉拿山国立公园 · 韩国气象厅 · ${updated} 更新</div>
         </div>
         <div class="bc-cam-bar">
@@ -681,14 +831,14 @@ function hallasanCardHtml({ ymd, hallaWeather, trails, snap, updated, dateLabel 
             <button type="button" class="bc-cam-btn" data-cam-refresh="1">🔄 영상 재캡처</button>
         </div>
         <div class="bc-card-subbar">
-            <span class="bc-card-badge">3/4 한라산 실시간 &amp; CCTV</span>
+            <span class="bc-card-badge">4/6 한라산 실시간 &amp; CCTV</span>
             <button type="button" class="bc-sub-btn primary" data-save-card="brief-card-hallasan">📥 이 카드 저장</button>
         </div>
     </div>`;
 }
 
 function festivalCardHtml({ ymd, festivals, updated, dateLabel }) {
-    const fileName = `jeju-${day ? 'tomorrow' : 'today'}-${ymd}-4-festival.png`;
+    const fileName = `jeju-${day ? 'tomorrow' : 'today'}-${ymd}-5-festival.png`;
     const listHtml = festivals.length
         ? festivals.map(f => `<div class="bc-fest-item">
             <div class="bc-fest-top">
@@ -703,21 +853,183 @@ function festivalCardHtml({ ymd, festivals, updated, dateLabel }) {
     return `<div class="bc-card-wrap">
         <div class="bc-card bc-festcard" id="brief-card-festival" data-card-name="${fileName}">
             <div class="bc-head">
-                <div><div class="bc-title">🎉 ${day ? '明日' : '今日'}济州活动·展览</div><div class="bc-date">${dateLabel} · 游客可去</div></div>
+                <div>
+                    <div class="bc-title">🎉 ${day ? '明日' : '今日'}济州<span class="bc-title-tag">活动·展览</span></div>
+                    <div class="bc-date">${dateLabel} · 游客可去</div>
+                </div>
                 <div class="bc-account">@${ACCOUNT}</div>
             </div>
             <div class="bc-fest-list">${listHtml}</div>
-            <div class="bc-ask">💬 ${ASK}</div>
             <div class="bc-foot">数据：济州观光公社 (VisitJeju) · ${updated} 整理</div>
         </div>
         <div class="bc-card-subbar">
-            <span class="bc-card-badge">4/4 당일 추천 축제·전시</span>
+            <span class="bc-card-badge">5/6 당일 추천 축제·전시</span>
             <button type="button" class="bc-sub-btn primary" data-save-card="brief-card-festival">📥 이 카드 저장</button>
         </div>
     </div>`;
 }
 
-function dailyCardSetHtml({ rows10, trails, snap, festivals }) {
+function fmtDiff(curVal, prevVal, unit = '班', prevLabel = '昨日') {
+    if (prevVal === null || prevVal === undefined) return '--';
+    const diff = curVal - prevVal;
+    if (diff > 0) return `较${prevLabel} +${diff}${unit}`;
+    if (diff < 0) return `较${prevLabel} ${diff}${unit}`;
+    return `与${prevLabel}持平`;
+}
+
+function fmtTableDiff(curVal, prevVal, unit = '班') {
+    if (prevVal === null || prevVal === undefined) return '<span>--</span>';
+    const diff = curVal - prevVal;
+    if (diff > 0) return `<span class="bc-fdiff-up">▲ +${diff}${unit}</span>`;
+    if (diff < 0) return `<span class="bc-fdiff-down">▼ ${diff}${unit}</span>`;
+    return `<span class="bc-fdiff-down">━ 持平</span>`;
+}
+
+function flightCardHtml({ ymd, flightComp, jejuWeather, updated, dateLabel }) {
+    const fileName = `jeju-${day ? 'tomorrow' : 'today'}-${ymd}-6-flight.png`;
+    const curLabel = day ? '明日' : '今日';
+    const prevLabel = day ? '今日' : '昨日';
+    const cur = flightComp?.cur;
+    const prev = flightComp?.prev;
+
+    if (!cur) {
+        return `<div class="bc-card-wrap">
+            <div class="bc-card bc-flightcard" id="brief-card-flight" data-card-name="${fileName}">
+                <div class="bc-head">
+                    <div>
+                        <div class="bc-title">✈️ ${curLabel}济州<span class="bc-title-tag">航班动态</span></div>
+                        <div class="bc-date">${dateLabel} · 济州国际机场</div>
+                    </div>
+                    <div class="bc-account">@${ACCOUNT}</div>
+                </div>
+                <div class="bc-trail"><div class="bc-trail-head">⚠️ 暂时无法获取机场实时航班数据</div></div>
+                <div class="bc-foot">数据：韩国机场公社 (KAC) · ${updated} 更新</div>
+            </div>
+            <div class="bc-card-subbar">
+                <span class="bc-card-badge">6/6 당일 항공편 요약 &amp; 전일 비교</span>
+                <button type="button" class="bc-sub-btn primary" data-save-card="brief-card-flight">📥 이 카드 저장</button>
+            </div>
+        </div>`;
+    }
+
+    const curMd = mdOf(flightComp.curDate);
+    const prevMd = mdOf(flightComp.prevDate);
+
+    // 4대 핵심 지표 (총 운항편, 국제선 직항, 지연, 결항)
+    const delayClass = cur.delay >= 10 ? ' bad' : cur.delay > 0 ? ' warn' : ' good';
+    const cancelClass = cur.cancel > 0 ? ' bad' : ' good';
+
+    // 국제선 직항 도시별 칩
+    const routeChips = cur.intlRoutes.length
+        ? cur.intlRoutes.map(r => {
+            const cls = r.cancel > 0 ? 'off' : r.delay > 0 ? 'warn' : 'on';
+            const statusSuffix = r.cancel > 0 ? `(取消${r.cancel})` : r.delay > 0 ? `(延误${r.delay})` : '';
+            return `<span class="${cls}">${esc(r.zh)} ${r.count}班${statusSuffix}</span>`;
+        }).join('')
+        : '<span class="on">今日暂无国际直飞数据</span>';
+
+    // 공항 날씨(제주시 풍속) + 운항 상황에 맞춘 팁
+    const flightTips = [];
+    const wind = jejuWeather?.wind || 0;
+    if (cur.cancel > 0) {
+        flightTips.push(`⚠️ ${curLabel}共有 ${cur.cancel} 班取消、${cur.delay} 班延误，出发前请确认航司通知`);
+    } else if (cur.delay >= 5) {
+        flightTips.push(`⏳ ${curLabel}有 ${cur.delay} 班延误（无取消），建议留意机场实时大屏`);
+    } else {
+        flightTips.push(`✅ ${curLabel}济州机场起降正常（准点率 ${cur.normalRate}%），无大规模延误`);
+    }
+    if (wind >= 10) {
+        flightTips.push(`🍃 机场周边风速约 ${Math.round(wind)}m/s，受风力影响可能有短时延误`);
+    } else {
+        flightTips.push('🛂 国际线建议提前 2~2.5 小时抵达济州机场办理值机及退税');
+    }
+
+    return `<div class="bc-card-wrap">
+        <div class="bc-card bc-flightcard" id="brief-card-flight" data-card-name="${fileName}">
+            <div class="bc-head">
+                <div>
+                    <div class="bc-title">✈️ ${curLabel}济州<span class="bc-title-tag">航班动态</span></div>
+                    <div class="bc-date">${dateLabel} · 济州国际机场 (CJU) 出发</div>
+                </div>
+                <div class="bc-account">@${ACCOUNT}</div>
+            </div>
+
+            <div class="bc-flight-kpis">
+                <div class="bc-fkpi">
+                    <div class="bc-fkpi-label">总执飞航班</div>
+                    <div class="bc-fkpi-val">${cur.total}<small>班</small></div>
+                    <div class="bc-fkpi-diff">${fmtDiff(cur.total, prev?.total, '班', prevLabel)}</div>
+                </div>
+                <div class="bc-fkpi">
+                    <div class="bc-fkpi-label">国际·港澳台</div>
+                    <div class="bc-fkpi-val">${cur.intl}<small>班</small></div>
+                    <div class="bc-fkpi-diff">${fmtDiff(cur.intl, prev?.intl, '班', prevLabel)}</div>
+                </div>
+                <div class="bc-fkpi${delayClass}">
+                    <div class="bc-fkpi-label">延误航班</div>
+                    <div class="bc-fkpi-val">${cur.delay}<small>班</small></div>
+                    <div class="bc-fkpi-diff">${prev ? `${prevLabel} ${prev.delay}班` : '--'}</div>
+                </div>
+                <div class="bc-fkpi${cancelClass}">
+                    <div class="bc-fkpi-label">取消航班</div>
+                    <div class="bc-fkpi-val">${cur.cancel}<small>班</small></div>
+                    <div class="bc-fkpi-diff">${prev ? `${prevLabel} ${prev.cancel}班` : '--'}</div>
+                </div>
+            </div>
+
+            <div class="bc-flight-comp">
+                <div class="bc-fcomp-title">
+                    📊 ${curLabel} vs ${prevLabel} 航班运力对比
+                    <span>已剔除代码共享重复航班</span>
+                </div>
+                <div class="bc-fcomp-row head">
+                    <span>项目</span>
+                    <span>${curLabel}(${curMd})</span>
+                    <span>${prevLabel}(${prevMd})</span>
+                    <span>变化 / 状态</span>
+                </div>
+                <div class="bc-fcomp-row">
+                    <span>✈️ 全部出发</span>
+                    <span>${cur.total}班</span>
+                    <span>${prev ? `${prev.total}班` : '--'}</span>
+                    ${fmtTableDiff(cur.total, prev?.total)}
+                </div>
+                <div class="bc-fcomp-row">
+                    <span>🇰🇷 韩国国内线</span>
+                    <span>${cur.dom}班</span>
+                    <span>${prev ? `${prev.dom}班` : '--'}</span>
+                    ${fmtTableDiff(cur.dom, prev?.dom)}
+                </div>
+                <div class="bc-fcomp-row">
+                    <span>🌏 国际直飞线</span>
+                    <span>${cur.intl}班</span>
+                    <span>${prev ? `${prev.intl}班` : '--'}</span>
+                    ${fmtTableDiff(cur.intl, prev?.intl)}
+                </div>
+                <div class="bc-fcomp-row">
+                    <span>🎯 正常起降率</span>
+                    <span>${cur.normalRate}%</span>
+                    <span>${prev ? `${prev.normalRate}%` : '--'}</span>
+                    <span class="bc-fdiff-warn">${cur.cancel === 0 && cur.delay === 0 ? '全部正常' : `取消${cur.cancel}·延误${cur.delay}`}</span>
+                </div>
+            </div>
+
+            <div class="bc-trail">
+                <div class="bc-trail-head">🇨🇳 ${curLabel}中国及国际直飞航线 <b>共 ${cur.intl} 班</b></div>
+                <div class="bc-chips">${routeChips}</div>
+            </div>
+
+            <ul class="bc-tips">${flightTips.map(t => `<li>${t}</li>`).join('')}</ul>
+            <div class="bc-foot">数据：韩国机场公社 (KAC) · 实际执飞基准 · ${updated} 更新</div>
+        </div>
+        <div class="bc-card-subbar">
+            <span class="bc-card-badge">6/6 당일 항공편 요약 &amp; 전일 비교</span>
+            <button type="button" class="bc-sub-btn primary" data-save-card="brief-card-flight">📥 이 카드 저장</button>
+        </div>
+    </div>`;
+}
+
+function dailyCardSetHtml({ rows10, wDays, trails, snap, festivals, flightComp }) {
     const d = kst(day);
     const ymd = ymdOf(d);
     const dateLabel = `${d.getUTCMonth() + 1}月${d.getUTCDate()}日 ${WEEKDAY[d.getUTCDay()]}`;
@@ -734,7 +1046,7 @@ function dailyCardSetHtml({ rows10, trails, snap, festivals }) {
     const card1 = weatherFiveCardHtml({
         id: 'brief-card-weather-1',
         fileName: `jeju-${day ? 'tomorrow' : 'today'}-${ymd}-1-west.png`,
-        badgeText: '1/4 날씨 (시내·서부·남부 5곳)',
+        badgeText: '1/6 날씨 (시내·서부·남부 5곳)',
         titleSub: '市区·西·南部',
         regions: REGIONS_WEST_SOUTH,
         rows: rowsWest,
@@ -747,7 +1059,7 @@ function dailyCardSetHtml({ rows10, trails, snap, festivals }) {
     const card2 = weatherFiveCardHtml({
         id: 'brief-card-weather-2',
         fileName: `jeju-${day ? 'tomorrow' : 'today'}-${ymd}-2-east.png`,
-        badgeText: '2/4 날씨 (동부·우도·한라산 5곳)',
+        badgeText: '2/6 날씨 (동부·우도·한라산 5곳)',
         titleSub: '东部·牛岛·山间',
         regions: REGIONS_EAST_MTN,
         rows: rowsEast,
@@ -757,7 +1069,13 @@ function dailyCardSetHtml({ rows10, trails, snap, festivals }) {
         dateLabel,
     });
 
-    const card3 = hallasanCardHtml({
+    const card3 = weekCardHtml(wDays, {
+        inSet: true,
+        badgeText: '3/6 주간 날씨 (향후 7일)',
+        fileName: `jeju-${day ? 'tomorrow' : 'today'}-${ymd}-3-week.png`,
+    });
+
+    const card4 = hallasanCardHtml({
         ymd,
         hallaWeather: rowsEast[4],
         trails,
@@ -766,19 +1084,28 @@ function dailyCardSetHtml({ rows10, trails, snap, festivals }) {
         dateLabel,
     });
 
-    const card4 = festivalCardHtml({
+    const card5 = festivalCardHtml({
         ymd,
         festivals,
         updated,
         dateLabel,
     });
 
-    return `${card1}${card2}${card3}${card4}`;
+    const card6 = flightCardHtml({
+        ymd,
+        flightComp,
+        jejuWeather: rowsWest[0],
+        updated,
+        dateLabel,
+    });
+
+    return `${card1}${card2}${card3}${card4}${card5}${card6}`;
 }
 
-function weekCardHtml(days) {
+function weekCardHtml(days, { inSet = false, badgeText = '', fileName = '' } = {}) {
     const now = kst();
     const updated = `${String(now.getUTCHours()).padStart(2, '0')}:${String(now.getUTCMinutes()).padStart(2, '0')}`;
+    const cardFileName = fileName || `jeju-week-${ymdOf(now)}.png`;
     const rowHtml = days.map(x => {
         const cells = x.rows.map(r => r
             ? `<span class="bc-wcell"><span class="bc-wemoji">${r.emoji}</span>${r.tmin}°~${r.tmax}°</span>`
@@ -789,10 +1116,19 @@ function weekCardHtml(days) {
             <span class="bc-wpop">${x.pop === null ? '--' : `${x.pop}%`}</span>
         </div>`;
     }).join('');
+    const subbar = inSet
+        ? `<div class="bc-card-subbar">
+            <span class="bc-card-badge">${badgeText}</span>
+            <button type="button" class="bc-sub-btn primary" data-save-card="brief-card-week">📥 이 카드 저장</button>
+        </div>`
+        : '';
     return `<div class="bc-card-wrap">
-        <div class="bc-card bc-week" id="brief-card-week" data-card-name="jeju-week-${ymdOf(kst())}.png">
+        <div class="bc-card bc-week" id="brief-card-week" data-card-name="${cardFileName}">
             <div class="bc-head">
-                <div><div class="bc-title">济州一周天气</div><div class="bc-date">${mdOf(days[0].d)} - ${mdOf(days[6].d)}</div></div>
+                <div>
+                    <div class="bc-title">📅 济州一周<span class="bc-title-tag">7日天气</span></div>
+                    <div class="bc-date">${mdOf(days[0].d)} - ${mdOf(days[6].d)} · 北部 vs 南部</div>
+                </div>
                 <div class="bc-account">@${ACCOUNT}</div>
             </div>
             <div class="bc-wtable">
@@ -800,9 +1136,9 @@ function weekCardHtml(days) {
                 ${rowHtml}
             </div>
             <ul class="bc-tips">${weekSummary(days).map(t => `<li>${t}</li>`).join('')}</ul>
-            <div class="bc-ask">💬 ${ASK}</div>
             <div class="bc-foot">数据：韩国气象厅 · ${updated} 更新${days.some(x => x.mid) ? ' · 4天后为中期预报，仅供参考' : '（韩国时间）'}</div>
         </div>
+        ${subbar}
     </div>`;
 }
 
@@ -822,8 +1158,8 @@ function weekCaption(days) {
     return { title, body: lines.join('\n') };
 }
 
-// 샤오홍슈 제목(20자 이내)·본문·해시태그 (10곳 날씨 + 한라산 + 당일 축제 모두 포함)
-function caption(rows10, trails, festivals) {
+// 샤오홍슈 제목(20자 이내)·본문·해시태그 (10곳 날씨 + 주간 + 한라산 + 축제 + 항공편 모두 포함)
+function caption(rows10, wDays, trails, festivals, flightComp) {
     const d = kst(day);
     const md = `${d.getUTCMonth() + 1}月${d.getUTCDate()}日`;
     const when = day ? '明天' : '今天';
@@ -834,7 +1170,7 @@ function caption(rows10, trails, festivals) {
 
     const sky = coastal.length ? SKY_WORD[coastal[0].emoji] || '' : '';
     const title = Array.from(`济州${when}天气｜${d.getUTCMonth() + 1}.${d.getUTCDate()}${sky}${lo !== null ? ` ${lo}~${hi}°` : ''}`).slice(0, 20).join('');
-    const lines = [`📍济州${when}（${md} ${WEEKDAY[d.getUTCDay()]}）全岛10地实时天气`, ''];
+    const lines = [`📍济州${when}（${md} ${WEEKDAY[d.getUTCDay()]}）全岛10地实时天气 & 航班动态`, ''];
 
     REGIONS_10.forEach((r, i) => {
         const x = rows10[i];
@@ -843,11 +1179,28 @@ function caption(rows10, trails, festivals) {
 
     if (best >= 0) lines.push('', `✨ ${when}适合出游：${REGIONS_10[best].name}（${REGIONS_10[best].dir}）`);
 
+    if (wDays && wDays.length) {
+        const wSum = weekSummary(wDays);
+        if (wSum.length) {
+            lines.push(`📅 未来7天（${mdOf(wDays[0].d)}-${mdOf(wDays[6].d)}）：${wSum.slice(0, 2).join(' · ')}`);
+        }
+    }
+
     if (trails && trails.length) {
         const open = trails.filter(t => t.open);
         lines.push(open.length === trails.length
             ? `⛰️ 汉拿山登山路 ${trails.length}条全部开放`
             : `⛰️ 汉拿山登山路 ${open.length}条开放 · ${trails.length - open.length}条管制${open.length ? `（可走：${open.map(t => t.name).join('、')}）` : ''}`);
+    }
+
+    if (flightComp?.cur) {
+        const { cur, prev } = flightComp;
+        const prevLabel = day ? '今日' : '昨日';
+        const diffStr = prev ? `（${fmtDiff(cur.total, prev.total, '班', prevLabel)}）` : '';
+        lines.push('', `✈️ ${when}济州机场出发航班：共${cur.total}班${diffStr} · 国际直飞${cur.intl}班 · 延误${cur.delay}班 · 取消${cur.cancel}班`);
+        if (cur.intlRoutes.length) {
+            lines.push(`🌏 国际直飞：${cur.intlRoutes.slice(0, 8).map(r => `${r.zh}${r.count}班`).join('、')}`);
+        }
     }
 
     if (festivals && festivals.length) {
@@ -857,7 +1210,7 @@ function caption(rows10, trails, festivals) {
 
     lines.push('');
     tips(rows10).forEach(t => lines.push(t));
-    lines.push('', `💬 ${ASK}～`, '', [...TAGS, '汉拿山', '济州岛活动', `${d.getUTCMonth() + 1}月济州`].map(t => `#${t}`).join(' '));
+    lines.push('', `💬 ${ASK}～`, '', [...TAGS, '济州岛一周天气', '济州岛航班', '汉拿山', '济州岛活动', `${d.getUTCMonth() + 1}月济州`].map(t => `#${t}`).join(' '));
     return { title, body: lines.join('\n') };
 }
 
@@ -929,17 +1282,22 @@ async function render(overlay) {
         const ymd = ymdOf(targetDate);
         const ymdDash = ymdDashOf(targetDate);
 
-        // 날씨 10곳 + 한라산 탐방로를 먼저 불러오고, CCTV 캡처는 동시에 시작
-        const [, trails] = await Promise.all([ensureWeather(REGIONS_10), loadTrails()]);
+        // 날씨 10곳 + 한라산 탐방로 + 당일/전일 항공편을 병렬로 조회
+        const [, trails, flightComp] = await Promise.all([
+            ensureWeather(REGIONS_10),
+            loadTrails(),
+            loadFlightComparison(targetDay),
+        ]);
         if (day !== targetDay) return;
 
         const rows10 = REGIONS_10.map(r => summarize(r.key, ymd));
+        const wDays = weekDays(targetDay);
         const festivals = getDailyTouristFestivals(ymdDash, 4);
         const cachedSnap = cctvSnapshotCache[selectedCamKey] || null;
 
-        stage.innerHTML = dailyCardSetHtml({ rows10, trails, snap: cachedSnap, festivals });
-        cap = caption(rows10, trails, festivals);
-        if (saveAllBtn) saveAllBtn.textContent = '📥 전체 다운로드 (4장)';
+        stage.innerHTML = dailyCardSetHtml({ rows10, wDays, trails, snap: cachedSnap, festivals, flightComp });
+        cap = caption(rows10, wDays, trails, festivals, flightComp);
+        if (saveAllBtn) saveAllBtn.textContent = '📥 전체 다운로드 (6장)';
 
         // CCTV 스냅샷이 아직 없다면 비동기로 캡처하여 한라산 카드에 반영
         if (!cachedSnap) {
@@ -1037,12 +1395,12 @@ function open() {
         overlay.className = 'bc-overlay';
         overlay.innerHTML = `<div class="bc-stage"></div>
             <div class="bc-controls">
-                <button type="button" data-day="0">오늘 (4장)</button>
-                <button type="button" data-day="1">내일 (4장)</button>
+                <button type="button" data-day="0">오늘 (6장)</button>
+                <button type="button" data-day="1">내일 (6장)</button>
                 <button type="button" data-day="7">주간</button>
                 <button type="button" data-day="30">월별</button>
                 <button type="button" data-day="99">특보</button>
-                <button type="button" data-save>📥 전체 다운로드 (4장)</button>
+                <button type="button" data-save>📥 전체 다운로드 (6장)</button>
                 <button type="button" data-close>닫기</button>
                 <select data-month hidden>${Array.from({ length: 12 }, (_, i) => `<option value="${i + 1}">${i + 1}월</option>`).join('')}</select>
             </div>
