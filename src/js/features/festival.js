@@ -119,7 +119,7 @@ export async function fetchFestivals() {
         } else if (currentTab === 'highlight') {
             filteredItems = filteredItems.filter(item => {
                 const endDate = item.period && item.period.includes('~') ? new Date(item.period.split('~')[1].trim().replace(/\./g, '-')) : new Date(today);
-                return item._score >= 90 && endDate >= new Date(today);
+                return item._score >= 85 && endDate >= new Date(today);
             });
         } else if (currentTab === 'permanent') {
             filteredItems = filteredItems.filter(item => {
@@ -141,8 +141,14 @@ export async function fetchFestivals() {
         });
     }
     
-    // 4. 정렬
-    filteredItems.sort((a, b) => b._score - a._score);
+    // 4. 정렬: 관광객 적합도 점수 높은 순 -> 단기(시즌) 축제 우선 -> 최신 시작일 우선
+    filteredItems.sort((a, b) => {
+        if (b._score !== a._score) return b._score - a._score;
+        const da = getFestivalDurationDays(a.period);
+        const db = getFestivalDurationDays(b.period);
+        if (da !== db) return da - db;
+        return String(b.period || '').localeCompare(String(a.period || ''));
+    });
     activeItems = filteredItems;
 
     if (activeItems.length === 0) {
@@ -286,7 +292,7 @@ const FESTIVAL_TRANSLATIONS = {
     '휴애리 수국축제': '休爱里绣球花节',
     '안전 인증 농어촌민박 이용 다자녀가구 제주여행 환영 캠페인': '安全认证农渔村民宿 多子女家庭济州旅行欢迎活动',
     '2026년 새연교 음악분수': '2026年赛缘桥音乐喷泉',
-    '2026 새연교 주말 문화공연 『금토금토 새연쇼』': '2026 赛缘桥周末文化演出「金土金土 赛缘秀」',
+    '2026 새연교 주말 문화공연 『금토금토 새연쇼』': '2026 新缘桥周末文化演出『周五·周六新缘秀』',
     '감귤박물관 특별 웹툰 기획전 "기후위기감귤:제주감귤이야기"': '柑橘博物馆特别漫画企划展「气候危机柑橘：济州柑橘故事」',
     '2026 도전! J-스타트업 참가자 모집': '2026 挑战！J-创业参与者招募',
     '탐나오 더-제주 포시즌 The blooming Jeju': '耽罗 The Blooming Jeju 四季济州',
@@ -320,7 +326,7 @@ const FESTIVAL_TRANSLATIONS = {
     '[한라산아래첫마을영농조합법인] 2026제주메밀축제 "제주메밀의 모든 것"': '「汉拿山下第一村」2026济州荞麦节',
     '제주 고향사랑기부제 5월 종소세 신고기간 애플망고 추가 증정 이벤트': '济州故乡爱心捐赠 5月综合所得税申报 苹果芒果赠送活动',
     '[탐나는 마켓 \u00D7 슬로우 빌리지] 5월의 베리 슬로우': '「耽罗市集 x 慢村庄」5月的Very Slow',
-    // === 추가 번역 (2026-07) ===
+    // === 추가 번역 (2026-07 ~ 2026-12) ===
     '그래비티 퀘스트 제주 2026': 'Gravity Quest 济州 2026',
     '김택화 : 제주의 풍경展': '金泽和：济州风景展',
     '제156회 특별전 <뜻을 품은 그림 민화>': '第156届特别展《怀揣意蕴的画作，民画》',
@@ -351,7 +357,7 @@ const FESTIVAL_TRANSLATIONS = {
     '안진희 개인전 <제주, 서천꽃밭을 찾아서>': '安珍熙个展《济州，寻找西天花田》',
     '에코랜드 쿨 썸머 워터트레인 시즌3': 'Ecoland 酷夏水上列车 第3季',
     '《역사의 진동》Resonance of History': '《历史的震动》Resonance of History',
-    '원피스: 대해적시대전 아시아 투어 in 한국·제주': '海贼王：大海贼时代展亚洲巡演 in 韩国·济州',
+    '원피스: 대해적시대전 아시아 투어 in 한국·제주': '《海贼王：大海盗时代》亚洲巡回展（济州站）',
     '2026 굿에 울고 굿에 웃다': '2026 巫俗祭仪：哭与笑',
     '정유진 개인전 <해녀의 숨, 기계의 숨>': '郑宥珍个展《海女的呼吸，机器的呼吸》',
     '제7회 루씨쏜 아뜰리에 회원전 민화로 꿈피우다展': '第7届Lucysson工作室会员展《用民画放飞梦想》',
@@ -359,6 +365,7 @@ const FESTIVAL_TRANSLATIONS = {
     '헌마공신 김만일기념관 - 장덕지 박사 제주馬 사진전': '献马功臣金万镒纪念馆 - 张德智博士济州马摄影展',
     '서귀포공립 소암기념관 특별초대전 <강재희 : 형상 그 너머>': '西归浦公立素菴纪念馆特别邀请展《姜在熙：形象的彼岸》',
     '스튜디오 지브리展 in Jeju X 도토리숲 POP-UP STORE': '吉卜力工作室展 in Jeju X 橡子森林快闪店',
+    '스튜디오 지브리展 in Jeju': '吉卜力工作室展 in Jeju（常设展）',
     '2026 문턱없는 콜라보vol.2 〈어디로 Where are we going?〉': '2026 无界限合作vol.2《去哪里 Where are we going?》',
     '오뚜기 세화로': '不倒翁 细花路',
     '[제주특별자치도관광협] 제주미(味)행 Vol. 4-6 (2026.7. / 선착순 마감)': '[济州道观光协会] 济州味行 Vol. 4-6',
@@ -415,13 +422,26 @@ const FESTIVAL_TRANSLATIONS = {
     '우리가 사랑한 한국영화 OST 콘서트 2026 - 서귀포': '我们热爱的韩国电影OST演唱会2026 - 西归浦',
     '선셋 홀인런 5k': '日落一杆进洞跑 5K',
     '2026 제5회 제주비엔날레 《허그곡 모닥치곡 이야기홍: 변용의 기술》': '2026 第5届济州双年展',
+    '2026 제5회 제주비엔날레 《허끄곡 모닥치곡 이야홍: 변용의 기술》': '2026 第5届济州双年展',
     '제주&교촌 미니벨로 페스타': '济州&校村 Mini Velo Festa',
     '2026 생생 국가유산 활용사업 "멩심헹 성읍에 가게마씀"': '2026 活生生国家遗产活用事业',
     '2026 세계유산축전-제주 화산섬과 용암동굴 유산! 그 너머로(The Inheritance Beyond)': '2026 世界遗产庆典-济州火山岛与熔岩洞窟',
     '제65회 탐라문화제': '第65届耽罗文化节',
     '제32회 서귀포칠십리축제': '第32届西归浦七十里庆典',
     '2026 제주올레걷기축제': '2026 济州偶来徒步节',
-    '2026 대한민국 제주정원문화박람회': '2026 大韩民国济州庭院文化博览会'
+    '2026 대한민국 제주정원문화박람회': '2026 大韩民国济州庭院文化博览会',
+    '2026 제주야페스타': '2026 济州夜游节 (Night Festa)',
+    '제16회 산지천 축제': '第16届山地川文化庆典',
+    '2026년 감귤박물관 감귤따기체험': '2026 柑橘博物馆采摘橘子体验',
+    '귤따러옵서 2026': '2026 济州采橘体验季',
+    '한림 달빛장터': '翰林月光夜市',
+    '세화 오몽 할로윈 마을': '细花万圣节主题村',
+    '한국마사회 제주목장 가을축제': '济州牧场秋季庆典',
+    '비체올린 겨울꽃&나비꽃축제': 'Vicheollin 冬季花卉&蝴蝶花节',
+    '2026 삼도2동 문화의 거리 행사 <삼도2동 예술왓>': '2026 三徒2洞文化街艺术庆典',
+    '2026 제주 안트레 페스티벌 로맨틱 제주': '2026 浪漫济州文化节',
+    '2026 제주반려동물문화산업한마당': '2026 济州宠物文化节',
+    '제30회 제주미술제 <별:별 제주와 미래의 은하>': '第30届济州美术节《星光济州与未来银河》'
 };
 
 const FESTIVAL_TRANSLATIONS_EN = {
@@ -469,7 +489,7 @@ const FESTIVAL_TRANSLATIONS_EN = {
     '휴애리 수국축제': 'Hueree Hydrangea Festival',
     '안전 인증 농어촌민박 이용 다자녀가구 제주여행 환영 캠페인': 'Safety-certified Guest House Welcome Campaign',
     '2026년 새연교 음악분수': '2026 Saeyeongyo Musical Fountain',
-    '2026 새연교 주말 문화공연 『금토금토 새연쇼』': 'Saeyeongyo Weekend Performance "Saeyeo Show"',
+    '2026 새연교 주말 문화공연 『금토금토 새연쇼』': 'Saeyeongyo Weekend Performance "Saeyeon Show"',
     '감귤박물관 특별 웹툰 기획전 "기후위기감귤:제주감귤이야기"': 'Citrus Museum Webtoon Exhibition',
     '2026 도전! J-스타트업 참가자 모집': '2026 Challenge! J-Startup Recruitment',
     '탐나오 더-제주 포시즌 The blooming Jeju': 'Tamnao Blooming Jeju Four Seasons',
@@ -503,7 +523,7 @@ const FESTIVAL_TRANSLATIONS_EN = {
     '[한라산아래첫마을영농조합법인] 2026제주메밀축제 "제주메밀의 모든 것"': '2026 Jeju Buckwheat Festival',
     '제주 고향사랑기부제 5월 종소세 신고기간 애플망고 추가 증정 이벤트': 'Jeju Hometown Love Donation Event',
     '[탐나는 마켓 \u00D7 슬로우 빌리지] 5월의 베리 슬로우': 'Tamnana Market x Slow Village Event',
-    // === 추가 번역 (2026-07) ===
+    // === 추가 번역 (2026-07 ~ 2026-12) ===
     '그래비티 퀘스트 제주 2026': 'Gravity Quest Jeju 2026',
     '김택화 : 제주의 풍경展': 'Kim Taek-hwa: Jeju Landscape Exhibition',
     '제156회 특별전 <뜻을 품은 그림 민화>': '156th Special Exhibition <Minhwa, Paintings with Meaning>',
@@ -542,6 +562,7 @@ const FESTIVAL_TRANSLATIONS_EN = {
     '헌마공신 김만일기념관 - 장덕지 박사 제주馬 사진전': 'Jeju Horse Photo Exhibition by Dr. Jang Deok-ji',
     '서귀포공립 소암기념관 특별초대전 <강재희 : 형상 그 너머>': 'Seogwipo Soam Memorial Hall Special Exhibition: Kang Jae-hee',
     '스튜디오 지브리展 in Jeju X 도토리숲 POP-UP STORE': 'Studio Ghibli Exhibition in Jeju X Acorn Forest Pop-up',
+    '스튜디오 지브리展 in Jeju': 'Studio Ghibli Exhibition in Jeju',
     '2026 문턱없는 콜라보vol.2 〈어디로 Where are we going?〉': '2026 Borderless Collab Vol.2 <Where are we going?>',
     '오뚜기 세화로': 'Ottogi Sehwa-ro',
     '[제주특별자치도관광협] 제주미(味)행 Vol. 4-6 (2026.7. / 선착순 마감)': '[Jeju Tourism Association] Jeju Gourmet Tour Vol. 4-6',
@@ -598,13 +619,22 @@ const FESTIVAL_TRANSLATIONS_EN = {
     '우리가 사랑한 한국영화 OST 콘서트 2026 - 서귀포': 'Korean Movie OST Concert 2026 - Seogwipo',
     '선셋 홀인런 5k': 'Sunset Hole-in-Run 5K',
     '2026 제5회 제주비엔날레 《허그곡 모닥치곡 이야기홍: 변용의 기술》': '2026 5th Jeju Biennale',
+    '2026 제5회 제주비엔날레 《허끄곡 모닥치곡 이야홍: 변용의 기술》': '2026 5th Jeju Biennale',
     '제주&교촌 미니벨로 페스타': 'Jeju & Kyochon Mini Velo Festa',
     '2026 생생 국가유산 활용사업 "멩심헹 성읍에 가게마씀"': '2026 Vivid National Heritage Utilization Project',
     '2026 세계유산축전-제주 화산섬과 용암동굴 유산! 그 너머로(The Inheritance Beyond)': '2026 World Heritage Festival: Jeju Volcanic Island',
     '제65회 탐라문화제': '65th Tamna Culture Festival',
     '제32회 서귀포칠십리축제': '32nd Seogwipo Chilsimni Festival',
     '2026 제주올레걷기축제': '2026 Jeju Olle Walking Festival',
-    '2026 대한민국 제주정원문화박람회': '2026 Korea Jeju Garden Culture Expo'
+    '2026 대한민국 제주정원문화박람회': '2026 Korea Jeju Garden Culture Expo',
+    '2026 제주야페스타': '2026 Jeju Night Festa',
+    '제16회 산지천 축제': '16th Sanjicheon Stream Festival',
+    '2026년 감귤박물관 감귤따기체험': '2026 Citrus Museum Tangerine Picking Experience',
+    '귤따러옵서 2026': '2026 Jeju Tangerine Picking Season',
+    '한림 달빛장터': 'Hallim Moonlight Night Market',
+    '세화 오몽 할로윈 마을': 'Sehwa Omong Halloween Village',
+    '한국마사회 제주목장 가을축제': 'Jeju Horse Ranch Autumn Festival',
+    '비체올린 겨울꽃&나비꽃축제': 'Vicheollin Winter Flower & Butterfly Festival'
 };
 
 const FESTIVAL_IMAGE_MAP = {
@@ -634,7 +664,7 @@ export function getFestivalDisplayTitle(rawTitle, titleZh) {
     const lang = window.getLang ? window.getLang() : 'zh';
     if (lang === 'ko') return rawTitle;
     if (lang === 'en') return FESTIVAL_TRANSLATIONS_EN[rawTitle] || rawTitle;
-    return titleZh || FESTIVAL_TRANSLATIONS[rawTitle] || rawTitle;
+    return FESTIVAL_TRANSLATIONS[rawTitle] || titleZh || rawTitle;
 }
 
 export function renderFestivalItems(container, items) {
@@ -649,7 +679,7 @@ export function renderFestivalItems(container, items) {
         } else if (lang === 'en') {
             displayTitle = FESTIVAL_TRANSLATIONS_EN[rawTitle] || rawTitle;
         } else { // 'zh'
-            displayTitle = item.title_zh || FESTIVAL_TRANSLATIONS[rawTitle] || rawTitle;
+            displayTitle = FESTIVAL_TRANSLATIONS[rawTitle] || item.title_zh || rawTitle;
         }
         const rawImg = item.thumbnail || item.imgpath || item.img || '';
         const img = getFestivalImage(rawTitle, rawImg) || '';
@@ -671,7 +701,6 @@ export function renderFestivalItems(container, items) {
                 displayDate = `${start} ~ ${end}`;
             }
         }
-        const date = rawDate; // Keep original for logic
         let link = item.link;
         if (link) {
             let langPath = 'kr';
@@ -688,7 +717,7 @@ export function renderFestivalItems(container, items) {
         
         // 우선순위가 높은 하이라이트 이벤트인 경우에만 핫 배지 노출
         let badgeHtml = '';
-        if (item._score >= 90) {
+        if (item._score >= 85) {
             badgeHtml = `<span class="tag upcoming" style="background:#ff6b6b; color:white; border:none;">HOT</span>`;
         }
         
@@ -735,31 +764,85 @@ function getFestivalDurationDays(periodStr) {
         const start = new Date(startStr);
         const end = new Date(endStr);
         if (isNaN(start) || isNaN(end)) return 1;
-        return (end - start) / (1000 * 60 * 60 * 24);
+        return Math.max(1, Math.round((end - start) / (1000 * 60 * 60 * 24)) + 1);
     } catch (e) {
         return 1;
     }
 }
 
-const FESTIVAL_EXCLUDE = /지원사업|공모|모집\s*안내|캠페인|공개강좌|워크숍|수업|교육|세미나|참여자\s*모집|신청\s*접수|설명회|간담회/;
-const FESTIVAL_KOREAN_REQ = /강좌|낭독|독서|글쓰기|인문학|토크|해설/;
-const FESTIVAL_BOOST_IP = /지브리|吉卜力|원피스|海贼王|팝업|快闪|스투시|디즈니|산리오/;
-const FESTIVAL_BOOST_TYPE = /전시|展|공연|演出|불꽃|야시장|夜市|축제|节|분수|喷泉|야간개장|夜间|행사|페스티벌|쇼|개장/;
+const FESTIVAL_EXCLUDE = /지원사업|공모|모집\s*안내|캠페인|공개강좌|워크숍|수업|교육|세미나|참여자\s*모집|신청\s*접수|설명회|간담회|만원\s*받자|원정대|멘토링|수강생|선발대회|학술|아카데미|후기\s*SNS|기부제|정기전|회원전|심포지엄|포럼|토론회|창업|스타트업|주민자치|평생학습|노동자|바자회|정기연주회/;
+const FESTIVAL_KOREAN_REQ = /강좌|낭독|독서|글쓰기|인문학|토크|해설|연극|마당극|뮤지컬|학회|북케이션/;
+const FESTIVAL_BOOST_IP = /지브리|吉卜力|원피스|海贼王|팝업|快闪|스투시|디즈니|산리오|9\.81|비체올린|아르떼|스누피|헬로키티|할로윈|감귤|귤따러/;
+const FESTIVAL_BOOST_TYPE = /전시|展|공연|演出|불꽃|야시장|夜市|장터|축제|节|분수|喷泉|야간개장|夜间|야간|야페스타|페스티벌|쇼|개장|비엔날레|올레|억새|감귤|동백|꽃|체험/;
 
 export function getTouristScore(item) {
     const t = item.title || '';
     if (FESTIVAL_EXCLUDE.test(t)) return -1; // 완벽 제외 대상
 
     let score = 50;
-    if (FESTIVAL_BOOST_IP.test(t)) score += 40;
+    const isIp = FESTIVAL_BOOST_IP.test(t);
+    if (isIp) score += 35;
     if (FESTIVAL_BOOST_TYPE.test(t)) score += 20;
-    if (FESTIVAL_KOREAN_REQ.test(t)) score -= 30;
+    if (FESTIVAL_KOREAN_REQ.test(t)) score -= 35;
 
     const days = getFestivalDurationDays(item.period);
-    
-    // 이상 날짜 (2033년 등) 또는 300일 이상 상설 행사는 최하단 배치 (-100점 감점)
-    if (item.period && item.period.includes('2033')) score -= 100;
-    else if (days > 300) score -= 100;
+
+    // 단기 시즌 축제 가산점 (연중 상설 전시보다 당일/이번 주 시즌 축제가 상단에 오도록)
+    if (days <= 14) score += 25;
+    else if (days <= 60) score += 15;
+    else if (days > 150 && !isIp) score -= 25;
+
+    // 이상 날짜 (2033년 등) 또는 300일 이상 상설 행사는 하단 배치 (단, 지브리/원피스 등 메가 IP 전시는 상설이어도 여행객 인기가 높으므로 소폭 감점만 적용)
+    if ((item.period && item.period.includes('2033')) || days > 300) {
+        score -= isIp ? 15 : 100;
+    }
 
     return score;
+}
+
+/**
+ * 특정 날짜(YYYY-MM-DD)에 진행 중인 중국인 여행객 맞춤형 축제/전시 추천 목록 반환
+ */
+export function getDailyTouristFestivals(dateStr, limit = 4) {
+    const months = window.FESTIVAL_DATA?.months || {};
+    const seen = new Set();
+    const candidates = [];
+
+    Object.values(months).flat().forEach(item => {
+        if (!item || !item.title || !item.period || seen.has(item.title)) return;
+        if (!isPeriodOverlap(dateStr, dateStr, item.period)) return;
+        const score = getTouristScore(item);
+        if (score < 60) return; // 한국어 필수 강좌나 일반 상설 행사는 브리핑 카드에서 제외
+        seen.add(item.title);
+
+        const days = getFestivalDurationDays(item.period);
+        const titleZh = FESTIVAL_TRANSLATIONS[item.title] || item.title_zh || item.title;
+        let shortPeriod = item.period;
+        if (shortPeriod.includes('~')) {
+            const [s, e] = shortPeriod.split('~').map(x => x.trim());
+            if (s === e) {
+                shortPeriod = s.slice(5);
+            } else if (s.slice(0, 4) === e.slice(0, 4)) {
+                shortPeriod = `${s.slice(5)} ~ ${e.slice(5)}`;
+            } else {
+                shortPeriod = `${s} ~ ${e}`;
+            }
+        }
+        const isIp = /지브리|원피스|9\.81/.test(item.title);
+        const isNight = /야간|밤|분수|새연쇼|달빛|야페스타/.test(item.title);
+        const isCitrus = /감귤|귤/.test(item.title);
+        const badge = isCitrus ? '🍊 济州橘子季' : isNight ? '🌙 夜间游玩' : isIp ? '🔥 热门IP展' : days <= 30 ? '🎉 季节庆典' : '🎨 人气展览';
+
+        candidates.push({
+            ...item,
+            _score: score,
+            days,
+            titleZh,
+            shortPeriod,
+            badge
+        });
+    });
+
+    candidates.sort((a, b) => (b._score - a._score) || (a.days - b.days));
+    return candidates.slice(0, limit);
 }
