@@ -188,6 +188,7 @@ function renderDay(root, notice) {
     const box = root.querySelector('#charter-day');
     if (!box) return;
     if (state.failed) { box.innerHTML = `<p class="pl-muted">${tr('carpool.load_fail')}</p>`; return; }
+    if (!state.loaded) { box.innerHTML = `<p class="pl-muted"><i class="ph-duotone ph-circle-notch spin"></i> ${tr('carpool.loading')}</p>`; return; }
     if (!state.selected) { box.innerHTML = `<p class="pl-muted">${tr('charter.post.pick_date')}</p>`; return; }
 
     const iso = state.selected;
@@ -350,11 +351,14 @@ async function renderView(root) {
     if (state.view === 'baoche') { view.innerHTML = baocheHtml(); return; }
 
     view.innerHTML = pincheHtml();
+    // 목록(GAS) 응답이 3초가량 걸리므로 달력은 먼저 그리고, 도착하면 날짜별 모집글 점만 다시 그린다
+    initCalendar(root);
+    renderDay(root);
     await loadPosts();
     if (!document.getElementById('charter-cal')) return; // 불러오는 사이 화면·탭이 바뀐 경우
 
     if (state.mock) root.querySelector('#charter-mode').innerHTML = `<p class="pl-draft"><i class="ph-duotone ph-warning"></i> ${tr('carpool.local_mode')}</p>`;
-    initCalendar(root);
+    refreshCalendar(root);
     renderDay(root);
 }
 
