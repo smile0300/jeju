@@ -758,19 +758,19 @@ async function renderResult(root, { from, to }) {
                 </div>
             </div>
             <div class="pl-trip-kpis">
-                <button type="button" class="pl-trip-kpi" data-trip-tab="weather">
+                <button type="button" class="pl-trip-kpi kpi-temp" data-trip-tab="weather">
                     <span class="pl-trip-kpi-label">${escapeHtml(tr('trip.kpi.temp'))}</span>
                     <strong class="pl-trip-kpi-val" id="trip-kpi-temp">…</strong>
                 </button>
-                <button type="button" class="pl-trip-kpi" data-trip-tab="weather">
+                <button type="button" class="pl-trip-kpi kpi-rain" data-trip-tab="weather">
                     <span class="pl-trip-kpi-label">${escapeHtml(tr('trip.kpi.rain'))}</span>
                     <strong class="pl-trip-kpi-val" id="trip-kpi-rain">…</strong>
                 </button>
-                <button type="button" class="pl-trip-kpi" data-trip-tab="course">
+                <button type="button" class="pl-trip-kpi kpi-course" data-trip-tab="course">
                     <span class="pl-trip-kpi-label">${escapeHtml(tr('trip.kpi.course'))}</span>
                     <strong class="pl-trip-kpi-val">${escapeHtml(tr('trip.kpi.course.val', { n: Math.min(dCount, 6) }))}</strong>
                 </button>
-                <button type="button" class="pl-trip-kpi" data-trip-tab="festival">
+                <button type="button" class="pl-trip-kpi kpi-fest" data-trip-tab="festival">
                     <span class="pl-trip-kpi-label">${escapeHtml(tr('trip.kpi.fest'))}</span>
                     <strong class="pl-trip-kpi-val">${escapeHtml(tr('trip.kpi.fest.val', { n: festivals.length }))}</strong>
                 </button>

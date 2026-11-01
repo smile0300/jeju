@@ -765,13 +765,14 @@
     cursor: pointer;
 }
 
-/* ── 올인원 여행 브리핑 (/trip) 대시보드 ── */
+/* ── 올인원 여행 브리핑 (/trip) 대시보드 (정보별 색상 구분 시스템) ── */
 .pl-trip-hero {
     display: flex;
     flex-direction: column;
     gap: 14px;
-    background: #FFFFFF;
-    border: 1px solid #DCE6F2;
+    background: linear-gradient(180deg, #F8FAFF 0%, #FFFFFF 90px);
+    border: 1px solid #DBEAFE;
+    border-top: 4px solid #3182F6;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
 }
 
@@ -790,13 +791,13 @@
     font-size: 0.74rem;
     font-weight: 800;
     margin-bottom: 4px;
-    background: #E8F3FF;
-    color: #1B64DA;
+    background: #DBEAFE;
+    color: #1D4ED8;
 }
 .pl-dday-badge.today,
 .pl-dday-badge.ongoing {
-    background: #E6FCF5;
-    color: #087F5B;
+    background: #D1FAE5;
+    color: #047857;
 }
 .pl-dday-badge.past {
     background: var(--fill-secondary);
@@ -815,26 +816,61 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 3px;
+    gap: 4px;
     background: #F8FAFC;
     border: 1px solid #E2E8F0;
+    border-left: 4px solid #94A3B8;
     border-radius: 12px;
     padding: 10px 12px;
     min-width: 0;
     font: inherit;
     text-align: left;
     cursor: pointer;
-    transition: border-color 0.15s, background 0.15s;
+    transition: transform 0.12s, box-shadow 0.15s;
 }
-.pl-trip-kpi:hover,
 .pl-trip-kpi:active {
-    border-color: var(--accent);
-    background: #F0F7FF;
+    transform: scale(0.98);
 }
+
+/* KPI 1: 예상 기온 (블루 테마) */
+.pl-trip-kpi.kpi-temp {
+    background: #EFF6FF;
+    border-color: #BFDBFE;
+    border-left: 4px solid #2563EB;
+}
+.pl-trip-kpi.kpi-temp .pl-trip-kpi-label { color: #1D4ED8; }
+.pl-trip-kpi.kpi-temp .pl-trip-kpi-val { color: #1E3A8A; }
+
+/* KPI 2: 강수/날씨 (시안/민트 테마) */
+.pl-trip-kpi.kpi-rain {
+    background: #ECFEFF;
+    border-color: #A5F3FC;
+    border-left: 4px solid #0891B2;
+}
+.pl-trip-kpi.kpi-rain .pl-trip-kpi-label { color: #0E7490; }
+.pl-trip-kpi.kpi-rain .pl-trip-kpi-val { color: #164E63; }
+
+/* KPI 3: 맞춤 코스 (에메랄드 그린 테마) */
+.pl-trip-kpi.kpi-course {
+    background: #ECFDF5;
+    border-color: #A7F3D0;
+    border-left: 4px solid #059669;
+}
+.pl-trip-kpi.kpi-course .pl-trip-kpi-label { color: #047857; }
+.pl-trip-kpi.kpi-course .pl-trip-kpi-val { color: #064E3B; }
+
+/* KPI 4: 기간 내 축제 (로즈/코랄 테마) */
+.pl-trip-kpi.kpi-fest {
+    background: #FFF1F2;
+    border-color: #FECDD3;
+    border-left: 4px solid #E11D48;
+}
+.pl-trip-kpi.kpi-fest .pl-trip-kpi-label { color: #BE123C; }
+.pl-trip-kpi.kpi-fest .pl-trip-kpi-val { color: #881337; }
 
 .pl-trip-kpi-label {
     font-size: 0.72rem;
-    font-weight: 700;
+    font-weight: 800;
     color: #64748B;
     white-space: nowrap;
     overflow: hidden;
@@ -843,7 +879,7 @@
 }
 
 .pl-trip-kpi-val {
-    font-size: 0.9rem;
+    font-size: 0.92rem;
     font-weight: 800;
     color: #1E293B;
     white-space: nowrap;
@@ -858,43 +894,69 @@
     }
 }
 
-/* ── 상단 4대 카테고리 탭 바 ── */
+/* ── 상단 4대 카테고리 탭 바 (카테고리별 고유 컬러 부여) ── */
 .pl-trip-tabs {
     position: sticky;
     top: 44px;
     z-index: 90;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 4px;
+    gap: 5px;
     padding: 5px;
     border-radius: 14px;
     background: #FFFFFF;
-    border: 1px solid var(--separator);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border: 1px solid #CBD5E1;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
 }
 
 .pl-trip-tab {
     min-height: 40px;
     padding: 6px 4px;
-    border: none;
+    border: 1px solid transparent;
     border-radius: 10px;
-    background: transparent;
+    background: #F8FAFC;
     font: inherit;
     font-size: 0.8rem;
     font-weight: 800;
-    color: #64748B;
+    color: #475569;
     cursor: pointer;
     white-space: nowrap;
     text-align: center;
     overflow: hidden;
     text-overflow: ellipsis;
-    transition: background 0.15s, color 0.15s;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 
-.pl-trip-tab.active {
-    background: var(--accent);
+/* 비활성 상태에서도 카테고리별 은은한 틴트 구분 */
+.pl-trip-tab[data-trip-tab="weather"] { background: #F0F7FF; color: #1D4ED8; border-color: #DBEAFE; }
+.pl-trip-tab[data-trip-tab="course"] { background: #ECFDF5; color: #047857; border-color: #D1FAE5; }
+.pl-trip-tab[data-trip-tab="festival"] { background: #FFF1F2; color: #BE123C; border-color: #FFE4E6; }
+.pl-trip-tab[data-trip-tab="booking"] { background: #FFFBEB; color: #B45309; border-color: #FEF3C7; }
+
+/* 활성 상태: 각 카테고리의 진한 테마 컬러 */
+.pl-trip-tab[data-trip-tab="weather"].active {
+    background: #2563EB;
     color: #FFFFFF;
-    box-shadow: 0 2px 6px rgba(49, 130, 246, 0.25);
+    border-color: #1D4ED8;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.28);
+}
+.pl-trip-tab[data-trip-tab="course"].active {
+    background: #059669;
+    color: #FFFFFF;
+    border-color: #047857;
+    box-shadow: 0 2px 6px rgba(5, 150, 105, 0.28);
+}
+.pl-trip-tab[data-trip-tab="festival"].active {
+    background: #E11D48;
+    color: #FFFFFF;
+    border-color: #BE123C;
+    box-shadow: 0 2px 6px rgba(225, 29, 72, 0.28);
+}
+.pl-trip-tab[data-trip-tab="booking"].active {
+    background: #D97706;
+    color: #FFFFFF;
+    border-color: #B45309;
+    box-shadow: 0 2px 6px rgba(217, 119, 6, 0.28);
 }
 
 .pl-trip-panel {
@@ -906,7 +968,15 @@
     display: none !important;
 }
 
-/* ── 날짜별 날씨 카드 그리드 (가독성 개선: 한 줄에 최대 4개, 넓은 카드) ── */
+/* ── [날씨 탭 1] 날짜별 기상 예보 카드 (스카이 블루 테마) ── */
+#trip-weather {
+    background: linear-gradient(180deg, #F0F7FF 0%, #FFFFFF 80px);
+    border: 1px solid #BFDBFE;
+    border-top: 4px solid #2563EB;
+    border-radius: 16px;
+    padding: 16px;
+}
+
 #trip-weather .weekly-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
@@ -917,11 +987,19 @@
     padding: 12px 10px;
     border-radius: 14px;
     background: #FFFFFF;
-    border: 1px solid #E2E8F0;
+    border: 1px solid #BFDBFE;
+    box-shadow: 0 1px 4px rgba(37, 99, 235, 0.06);
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 6px;
+}
+
+/* 예보 범위 밖(예년 평균) 카드는 슬레이트 톤으로 실시간 예보와 확실히 구분 */
+#trip-weather .pl-wcard.pl-wcard-hist {
+    background: #F8FAFC;
+    border: 1px dashed #CBD5E1;
+    box-shadow: none;
 }
 
 #trip-weather .pl-wcard .w-date {
@@ -949,16 +1027,37 @@
 }
 
 .pl-wcard-tag.forecast {
-    background: #E8F3FF;
-    color: #1B64DA;
-    font-weight: 700;
+    background: #DBEAFE;
+    color: #1D4ED8;
+    font-weight: 800;
 }
 
-/* ── 최근 3년 동기간 실제 날씨 비교표 ── */
+/* ── [날씨 탭 2] 옷차림 & 준비물 카드 (앰버/옐로우 테마로 예보 카드와 구분) ── */
+#trip-outfit .pl-outfit {
+    background: #FFFBEB;
+    border: 1px solid #FDE68A;
+    border-left: 4px solid #F59E0B;
+    border-radius: 16px;
+    padding: 14px 16px;
+}
+#trip-outfit .pl-outfit > i {
+    color: #D97706 !important;
+}
+#trip-outfit .pl-outfit strong {
+    color: #92400E;
+}
+#trip-outfit .pl-outfit ul {
+    color: #78350F;
+}
+
+/* ── [날씨 탭 3] 최근 3년 동기간 실제 날씨 비교표 (인디고/퍼플 테마) ── */
 .pl-hist-box {
     display: flex;
     flex-direction: column;
     gap: 14px;
+    background: linear-gradient(180deg, #F5F3FF 0%, #FFFFFF 90px);
+    border: 1px solid #DDD6FE;
+    border-top: 4px solid #6366F1;
 }
 
 .pl-hist-head {
@@ -971,7 +1070,7 @@
     margin: 0;
     font-size: 0.98rem;
     font-weight: 800;
-    color: var(--label-primary);
+    color: #4338CA;
 }
 
 .pl-hist-ychips {
@@ -987,15 +1086,18 @@
     gap: 3px;
     padding: 10px 8px;
     border-radius: 12px;
-    background: #F8FAFC;
-    border: 1px solid #E2E8F0;
+    background: #F5F3FF;
+    border: 1px solid #C4B5FD;
     text-align: center;
 }
 
 .pl-hist-yr {
     font-size: 0.76rem;
     font-weight: 800;
-    color: #64748B;
+    color: #5B21B6;
+    background: #EDE9FE;
+    padding: 1px 8px;
+    border-radius: 999px;
 }
 
 .pl-hist-yval {
@@ -1007,17 +1109,18 @@
 .pl-hist-yrain {
     font-size: 0.74rem;
     font-weight: 700;
-    color: #087F5B;
+    color: #047857;
 }
 .pl-hist-yrain.is-rain {
-    color: #1971C2;
+    color: #1D4ED8;
 }
 
 .pl-hist-table-wrap {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    border: 1px solid #E2E8F0;
+    border: 1px solid #DDD6FE;
     border-radius: 12px;
+    background: #FFFFFF;
 }
 
 .pl-hist-table {
@@ -1029,15 +1132,15 @@
 .pl-hist-table th,
 .pl-hist-table td {
     padding: 10px 8px;
-    border-bottom: 1px solid #EDF2F7;
+    border-bottom: 1px solid #F1F5F9;
     text-align: center;
 }
 
 .pl-hist-table thead th {
     font-size: 0.78rem;
     font-weight: 800;
-    color: #475569;
-    background: #F8FAFC;
+    color: #4338CA;
+    background: #EEF2FF;
 }
 
 .pl-hist-table thead th:first-child,
@@ -1078,25 +1181,43 @@
     white-space: nowrap;
 }
 .pl-hist-wx.rain {
-    background: #E7F5FF;
-    color: #1864AB;
+    background: #DBEAFE;
+    color: #1E40AF;
 }
 .pl-hist-wx.sun {
-    background: #FFF9DB;
-    color: #D97706;
+    background: #FEF3C7;
+    color: #B45309;
 }
 
-/* ── 여행 브리핑 내 맞춤 추천 코스 ── */
+/* ── [추천 코스 탭] 에메랄드 그린 테마 ── */
 .pl-trip-course-wrap {
     display: flex;
     flex-direction: column;
     gap: var(--space-3);
 }
 
+.pl-trip-course-wrap .pl-chip[data-trip-cday].active {
+    background: #059669;
+    border-color: #047857;
+    color: #FFFFFF;
+}
+
 .pl-trip-course-card {
     display: flex;
     flex-direction: column;
     gap: 16px;
+    background: linear-gradient(180deg, #ECFDF5 0%, #FFFFFF 90px);
+    border: 1px solid #A7F3D0;
+    border-top: 4px solid #10B981;
+}
+
+.pl-trip-course-card .pl-tag {
+    background: #D1FAE5;
+    color: #065F46;
+}
+
+.pl-trip-course-card .pl-stop-no {
+    background: #059669;
 }
 
 .pl-trip-course-head {
@@ -1108,8 +1229,14 @@
 .pl-trip-move {
     padding: 14px;
     border-radius: 12px;
-    background: #F8FAFC;
-    border: 1px solid #E2E8F0;
+    background: #F0FDF4;
+    border: 1px solid #BBF7D0;
+}
+.pl-trip-move .pl-move-title {
+    color: #065F46;
+}
+.pl-trip-move .pl-move-row > i {
+    color: #059669;
 }
 
 .pl-trip-rain-bar {
@@ -1120,20 +1247,75 @@
     gap: 8px;
     padding: 10px 14px;
     border-radius: 12px;
-    background: #E7F5FF;
-    border: 1px solid #A5D8FF;
-    color: #1864AB;
+    background: #EFF6FF;
+    border: 1px solid #93C5FD;
+    border-left: 4px solid #2563EB;
+    color: #1E40AF;
     font-size: 0.84rem;
     font-weight: 700;
 }
 
-/* ── 원클릭 간편 예약 & 차량 대절/동승 ── */
+/* ── [축제 탭] 로즈/코랄 테마 ── */
+[data-panel="festival"] .pl-card {
+    border: 1px solid #FECDD3;
+    border-top: 4px solid #E11D48;
+    background: linear-gradient(180deg, #FFF1F2 0%, #FFFFFF 80px);
+}
+
+/* ── [예약·차량 탭] 3종 카드별 고유 색상 분리 ── */
 .pl-qres,
 .pl-qcharter,
 .pl-qreco {
     display: flex;
     flex-direction: column;
     gap: 12px;
+}
+
+/* 1) 온라인 간편 예약 대행: 시안/틸 테마 */
+.pl-qres {
+    background: linear-gradient(180deg, #ECFEFF 0%, #FFFFFF 90px);
+    border: 1px solid #A5F3FC;
+    border-top: 4px solid #0891B2;
+}
+.pl-qres .pl-qres-title {
+    color: #0E7490;
+}
+.pl-qres .pl-btn-add {
+    background: #0891B2;
+}
+.pl-qres .pl-btn-add[aria-expanded="true"] {
+    background: #FFFFFF;
+    color: #0E7490;
+    border: 1px solid #67E8F9;
+}
+
+/* 2) 차량 대절 시세 & 동승: 오렌지/앰버 테마 */
+.pl-qcharter {
+    background: linear-gradient(180deg, #FFFBEB 0%, #FFFFFF 90px);
+    border: 1px solid #FDE68A;
+    border-top: 4px solid #F59E0B;
+}
+.pl-qcharter .pl-qres-title {
+    color: #B45309;
+}
+.pl-qcharter .pl-price-val {
+    color: #D97706;
+}
+.pl-qcharter .res-submit-btn {
+    background: linear-gradient(135deg, #D97706 0%, #F59E0B 100%);
+}
+
+/* 3) 제주 현지인 1:1 추천: 바이올렛/퍼플 테마 */
+.pl-qreco {
+    background: linear-gradient(180deg, #F5F3FF 0%, #FFFFFF 90px);
+    border: 1px solid #DDD6FE;
+    border-top: 4px solid #7C3AED;
+}
+.pl-qreco .pl-qres-title {
+    color: #6D28D9;
+}
+.pl-qreco #trip-reco-open {
+    background: linear-gradient(135deg, #6D28D9 0%, #7C3AED 100%);
 }
 
 .pl-qres-head {
@@ -1178,4 +1360,3 @@
     flex: 1 1 200px;
     margin-top: 0;
 }
-
