@@ -136,28 +136,30 @@ export function openTripBriefing(from, to) {
     renderHomeTripWidget();
 }
 
-// ── 홈 화면 여행 날짜 입력 위젯 (#home-trip-planner) ────────────────────
+// ── 여행 날짜 선택 바 (홈 위젯과 /trip 상단에서 공용) ────────────────────
 export function renderHomeTripWidget() {
-    const box = document.getElementById('home-trip-planner');
-    if (!box) return;
+    mountTripDateBar(document.getElementById('home-trip-planner'), 'home-trip', readSavedTrip());
+}
 
-    const saved = readSavedTrip();
+/** box 안에 날짜 선택 바를 그린다. idPrefix로 홈·브리핑 화면의 id 충돌을 피한다 */
+function mountTripDateBar(box, idPrefix, saved) {
+    if (!box) return;
 
     box.innerHTML = `
         <div class="home-trip-card">
             <div class="home-trip-bar">
                 <div class="home-trip-input-wrap">
                     <i class="ph-duotone ph-calendar-dots"></i>
-                    <input type="text" id="home-trip-range" class="home-trip-input" placeholder="${escapeHtml(tr('home.trip.placeholder'))}" readonly>
+                    <input type="text" id="${idPrefix}-range" class="home-trip-input" placeholder="${escapeHtml(tr('home.trip.placeholder'))}" readonly>
                 </div>
-                <button type="button" id="home-trip-go" class="home-trip-btn">
+                <button type="button" id="${idPrefix}-go" class="home-trip-btn">
                     <span>${escapeHtml(tr('home.trip.btn'))}</span>
                     <i class="ph-bold ph-arrow-right"></i>
                 </button>
             </div>
         </div>`;
 
-    const input = box.querySelector('#home-trip-range');
+    const input = box.querySelector(`#${idPrefix}-range`);
     if (input && typeof flatpickr !== 'undefined') {
         const l = lang();
         flatpickr(input, {
@@ -177,7 +179,7 @@ export function renderHomeTripWidget() {
         });
     }
 
-    box.querySelector('#home-trip-go')?.addEventListener('click', () => {
+    box.querySelector(`#${idPrefix}-go`)?.addEventListener('click', () => {
         const dates = input?._flatpickr ? input._flatpickr.selectedDates : [];
         if (dates.length >= 1) {
             const from = dates[0], to = dates[1] || dates[0];
@@ -747,6 +749,8 @@ async function renderResult(root, { from, to }) {
     const festivals = getFestivalsBetween(from, to, 8);
 
     root.innerHTML = `
+        <div id="trip-date-bar" class="pl-trip-date-bar"></div>
+
         <div class="pl-card pl-trip-hero">
             <div class="pl-trip-hero-top">
                 <div>
@@ -754,10 +758,7 @@ async function renderResult(root, { from, to }) {
                     <div class="pl-summary-range">${escapeHtml(fmt.format(from))} ~ ${escapeHtml(fmt.format(to))}</div>
                     <div class="pl-summary-sub">${escapeHtml(durationLabel(from, to))}<span id="trip-wx-summary"></span></div>
                 </div>
-                <div class="pl-summary-actions">
-                    <button type="button" id="trip-share-btn" class="pl-btn-ghost"><i class="ph-duotone ph-link"></i> ${tr('trip.share')}</button>
-                    <button type="button" id="trip-change-btn" class="pl-btn-ghost">${tr('trip.change')}</button>
-                </div>
+                <button type="button" id="trip-share-btn" class="pl-btn-ghost"><i class="ph-duotone ph-link"></i> ${tr('trip.share')}</button>
             </div>
         </div>
 
@@ -825,10 +826,8 @@ async function renderResult(root, { from, to }) {
         root.querySelector('#trip-reco-box').hidden = false;
         e.currentTarget.hidden = true;
     });
-    root.querySelector('#trip-change-btn').addEventListener('click', () => {
-        history.pushState({ section: 'trip', inApp: true }, '', '/trip');
-        render();
-    });
+    // 상단 날짜 바: 홈과 같은 위젯으로 현재 일정을 미리 채워 두고, 새 날짜를 고르면 바로 다시 조회
+    mountTripDateBar(root.querySelector('#trip-date-bar'), 'trip-bar', { from, to });
     root.querySelector('#trip-share-btn').addEventListener('click', async (e) => {
         if (await copyText(window.location.href)) flashLabel(e.currentTarget, tr('common.copied'));
     });
