@@ -27,8 +27,8 @@ const S = {
         // ── 홈 여행 날짜 입력 위젯 ──
         'home.trip.badge': '🗓️ 济州出行定制简报',
         'home.trip.tags': '往年天气 · 节庆 · 推荐路线 · 快捷预约',
-        'home.trip.placeholder': '输入旅行日期，一键生成您的济州专属攻略',
-        'home.trip.btn': '生成攻略',
+        'home.trip.placeholder': '选择旅行日期（开始 ~ 结束）',
+        'home.trip.btn': '查看',
         'home.trip.quick.2d': '今明2天',
         'home.trip.quick.weekend': '本周末',
         'home.trip.quick.4d': '经典4天3晚',
@@ -312,8 +312,8 @@ const S = {
         // ── 홈 여행 날짜 입력 위젯 ──
         'home.trip.badge': '🗓️ 내 제주 여행 날짜 맞춤 브리핑',
         'home.trip.tags': '과거날씨 · 축제정보 · 추천코스 · 간편예약',
-        'home.trip.placeholder': '여행 날짜 입력하고 날씨·축제·코스·예약 한눈에 보기',
-        'home.trip.btn': '브리핑 보기',
+        'home.trip.placeholder': '여행 날짜 선택 (시작 ~ 종료)',
+        'home.trip.btn': '조회',
         'home.trip.quick.2d': '오늘~내일',
         'home.trip.quick.weekend': '이번 주말',
         'home.trip.quick.4d': '3박 4일',
@@ -594,8 +594,8 @@ const S = {
         // ── 홈 여행 날짜 입력 위젯 ──
         'home.trip.badge': '🗓️ Custom Jeju Trip Briefing',
         'home.trip.tags': 'Past Weather · Festivals · Routes · Quick Booking',
-        'home.trip.placeholder': 'Enter travel dates for weather, festivals, routes & booking',
-        'home.trip.btn': 'Plan Trip',
+        'home.trip.placeholder': 'Select travel dates (start ~ end)',
+        'home.trip.btn': 'View',
         'home.trip.quick.2d': 'Today~Tomorrow',
         'home.trip.quick.weekend': 'This Weekend',
         'home.trip.quick.4d': '4D3N Classic',

@@ -142,22 +142,9 @@ export function renderHomeTripWidget() {
     if (!box) return;
 
     const saved = readSavedTrip();
-    const fmt = new Intl.DateTimeFormat(LOCALES[lang()], { month: 'short', day: 'numeric' });
-    const savedHtml = saved
-        ? `<button type="button" class="home-trip-saved" data-saved-trip="1">
-            <span>${escapeHtml(tr('home.trip.saved', {
-                range: `${fmt.format(saved.from)} ~ ${fmt.format(saved.to)}`,
-                dur: durationLabel(saved.from, saved.to),
-            }))}</span>
-           </button>`
-        : '';
 
     box.innerHTML = `
         <div class="home-trip-card">
-            <div class="home-trip-top">
-                <span class="home-trip-badge">${escapeHtml(tr('home.trip.badge'))}</span>
-                <span class="home-trip-tags">${escapeHtml(tr('home.trip.tags'))}</span>
-            </div>
             <div class="home-trip-bar">
                 <div class="home-trip-input-wrap">
                     <i class="ph-duotone ph-calendar-dots"></i>
@@ -167,14 +154,6 @@ export function renderHomeTripWidget() {
                     <span>${escapeHtml(tr('home.trip.btn'))}</span>
                     <i class="ph-bold ph-arrow-right"></i>
                 </button>
-            </div>
-            <div class="home-trip-foot">
-                <div class="home-trip-quicks">
-                    <button type="button" class="home-trip-chip" data-quick="2d">${escapeHtml(tr('home.trip.quick.2d'))}</button>
-                    <button type="button" class="home-trip-chip" data-quick="weekend">${escapeHtml(tr('home.trip.quick.weekend'))}</button>
-                    <button type="button" class="home-trip-chip" data-quick="4d">${escapeHtml(tr('home.trip.quick.4d'))}</button>
-                </div>
-                ${savedHtml}
             </div>
         </div>`;
 
@@ -187,9 +166,12 @@ export function renderHomeTripWidget() {
             dateFormat: 'Y-m-d',
             locale: l === 'en' ? 'default' : l,
             defaultDate: saved ? [saved.from, saved.to] : undefined,
-            onChange(dates) {
-                if (dates.length === 2 && dayCount(dates[0], dates[1]) <= MAX_TRIP_DAYS) {
-                    writeSavedTrip(dates[0], dates[1]);
+            onClose(dates) {
+                if (dates.length >= 1) {
+                    const from = dates[0], to = dates[1] || dates[0];
+                    if (dayCount(from, to) <= MAX_TRIP_DAYS) {
+                        openTripBriefing(from, to);
+                    }
                 }
             },
         });
@@ -211,17 +193,6 @@ export function renderHomeTripWidget() {
         // 날짜를 아직 고르지 않고 버튼을 누른 경우 달력을 열어 선택을 유도한다
         if (input?._flatpickr) input._flatpickr.open();
         else window.showSection?.('trip');
-    });
-
-    box.querySelectorAll('[data-quick]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const [from, to] = getQuickRange(btn.dataset.quick);
-            openTripBriefing(from, to);
-        });
-    });
-
-    box.querySelector('[data-saved-trip]')?.addEventListener('click', () => {
-        if (saved) openTripBriefing(saved.from, saved.to);
     });
 }
 
