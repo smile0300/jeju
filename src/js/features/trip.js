@@ -506,8 +506,11 @@ function quickBookingHtml(from, to) {
 
     const dCount = Math.min(days.length, 14);
     const charterRows = CHARTER_PRICES.slice(0, 4).map(p => {
-        const minPrice = parseInt(String(p.price).replace(/[^0-9]/g, ''), 10) || 600;
-        const estTotal = (minPrice * dCount).toLocaleString('en-US');
+        // "600~900" 형태의 범위를 숫자만 남기고 붙이면 600900이 되므로 최저·최고를 따로 계산
+        const [minPrice = 600, maxPrice = minPrice] = String(p.price).split('~').map(s => parseInt(s.replace(/[^0-9]/g, ''), 10)).filter(n => n > 0);
+        const estTotal = maxPrice > minPrice
+            ? `${(minPrice * dCount).toLocaleString('en-US')}~${(maxPrice * dCount).toLocaleString('en-US')}`
+            : (minPrice * dCount).toLocaleString('en-US');
         return `<li>
             <span class="pl-price-name">${escapeHtml(pick(p.vehicle))}<small>${escapeHtml(pick(p.detail))}</small></span>
             <span class="pl-price-val">${escapeHtml(p.price)} <small>${escapeHtml(tr('trip.qcharter.day_unit'))} · ${escapeHtml(tr('trip.qcharter.total_est', { d: dCount, total: estTotal }))}</small></span>
@@ -739,9 +742,8 @@ async function renderResult(root, { from, to }) {
     courseState.forceRainy = false;
     courseState.lastCards = [];
 
-    const fmt = new Intl.DateTimeFormat(LOCALES[lang()], { month: 'long', day: 'numeric' });
+    const fmt = new Intl.DateTimeFormat(LOCALES[lang()], { month: 'short', day: 'numeric' });
     const dday = ddayLabel(from, to);
-    const dCount = dayCount(from, to);
     const festivals = getFestivalsBetween(from, to, 8);
 
     root.innerHTML = `
@@ -750,37 +752,19 @@ async function renderResult(root, { from, to }) {
                 <div>
                     <span class="pl-dday-badge ${dday.cls}">${escapeHtml(dday.text)}</span>
                     <div class="pl-summary-range">${escapeHtml(fmt.format(from))} ~ ${escapeHtml(fmt.format(to))}</div>
-                    <div class="pl-summary-sub">${escapeHtml(durationLabel(from, to))}</div>
+                    <div class="pl-summary-sub">${escapeHtml(durationLabel(from, to))}<span id="trip-wx-summary"></span></div>
                 </div>
                 <div class="pl-summary-actions">
                     <button type="button" id="trip-share-btn" class="pl-btn-ghost"><i class="ph-duotone ph-link"></i> ${tr('trip.share')}</button>
                     <button type="button" id="trip-change-btn" class="pl-btn-ghost">${tr('trip.change')}</button>
                 </div>
             </div>
-            <div class="pl-trip-kpis">
-                <button type="button" class="pl-trip-kpi kpi-temp" data-trip-tab="weather">
-                    <span class="pl-trip-kpi-label">${escapeHtml(tr('trip.kpi.temp'))}</span>
-                    <strong class="pl-trip-kpi-val" id="trip-kpi-temp">…</strong>
-                </button>
-                <button type="button" class="pl-trip-kpi kpi-rain" data-trip-tab="weather">
-                    <span class="pl-trip-kpi-label">${escapeHtml(tr('trip.kpi.rain'))}</span>
-                    <strong class="pl-trip-kpi-val" id="trip-kpi-rain">…</strong>
-                </button>
-                <button type="button" class="pl-trip-kpi kpi-course" data-trip-tab="course">
-                    <span class="pl-trip-kpi-label">${escapeHtml(tr('trip.kpi.course'))}</span>
-                    <strong class="pl-trip-kpi-val">${escapeHtml(tr('trip.kpi.course.val', { n: Math.min(dCount, 6) }))}</strong>
-                </button>
-                <button type="button" class="pl-trip-kpi kpi-fest" data-trip-tab="festival">
-                    <span class="pl-trip-kpi-label">${escapeHtml(tr('trip.kpi.fest'))}</span>
-                    <strong class="pl-trip-kpi-val">${escapeHtml(tr('trip.kpi.fest.val', { n: festivals.length }))}</strong>
-                </button>
-            </div>
         </div>
 
         <nav class="pl-trip-tabs" role="tablist" aria-label="Trip briefing tabs">
             <button type="button" role="tab" class="pl-trip-tab active" data-trip-tab="weather" aria-selected="true">${escapeHtml(tr('trip.nav.weather'))}</button>
             <button type="button" role="tab" class="pl-trip-tab" data-trip-tab="course" aria-selected="false">${escapeHtml(tr('trip.nav.course'))}</button>
-            <button type="button" role="tab" class="pl-trip-tab" data-trip-tab="festival" aria-selected="false">${escapeHtml(tr('trip.nav.festival'))}</button>
+            <button type="button" role="tab" class="pl-trip-tab" data-trip-tab="festival" aria-selected="false">${escapeHtml(tr('trip.nav.festival'))}${festivals.length ? `<span class="pl-trip-tab-count">${festivals.length}</span>` : ''}</button>
             <button type="button" role="tab" class="pl-trip-tab" data-trip-tab="booking" aria-selected="false">${escapeHtml(tr('trip.nav.booking'))}</button>
         </nav>
 
@@ -880,20 +864,14 @@ async function renderResult(root, { from, to }) {
     root.querySelector('#trip-outfit').innerHTML = outfitHtml(cards);
     root.querySelector('#trip-history-compare').innerHTML = historicalComparisonHtml(days, history_);
 
-    // 상단 KPI(기온·강수) 업데이트
+    // 상단 한 줄 날씨 요약(기온 범위·비 오는 날). 자료가 하나도 없으면 "맑음"으로 단정하지 않고 비워 둔다
     const known = cards.filter(c => c.min !== null);
-    const kpiTempEl = root.querySelector('#trip-kpi-temp');
-    const kpiRainEl = root.querySelector('#trip-kpi-rain');
-    if (kpiTempEl) {
-        kpiTempEl.textContent = known.length
-            ? `${Math.min(...known.map(c => c.min))}° ~ ${Math.max(...known.map(c => c.max))}°`
-            : '–';
-    }
-    if (kpiRainEl) {
+    const wxSummaryEl = root.querySelector('#trip-wx-summary');
+    if (wxSummaryEl && known.length) {
         const rainyDays = known.filter(c => c.rainy).length;
-        kpiRainEl.textContent = rainyDays > 0
-            ? tr('trip.kpi.rain.some', { n: rainyDays })
-            : tr('trip.kpi.rain.sunny');
+        const temp = `${Math.min(...known.map(c => c.min))}~${Math.max(...known.map(c => c.max))}°`;
+        const rain = rainyDays > 0 ? tr('trip.kpi.rain.some', { n: rainyDays }) : tr('trip.kpi.rain.sunny');
+        wxSummaryEl.innerHTML = ` · <b>${temp}</b> · <b class="${rainyDays > 0 ? 'is-rain' : ''}">${escapeHtml(rain)}</b>`;
     }
 
     // 날씨에 맞춰 추천 코스의 비 예보 배지/우천 코스 팁 갱신

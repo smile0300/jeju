@@ -778,10 +778,22 @@
 
 .pl-trip-hero-top {
     display: flex;
-    flex-wrap: wrap;
     align-items: flex-start;
     justify-content: space-between;
     gap: 10px;
+}
+
+/* 링크 복사·날짜 변경은 날짜 오른쪽에 세로로 붙여 첫 화면 높이를 줄인다 */
+.pl-trip-hero .pl-summary-actions {
+    flex-direction: column;
+    flex-shrink: 0;
+    gap: 6px;
+}
+.pl-trip-hero .pl-btn-ghost {
+    min-height: 36px;
+    padding: 0 10px;
+    font-size: 0.78rem;
+    white-space: nowrap;
 }
 
 .pl-dday-badge {
@@ -804,95 +816,33 @@
     color: #4E5968;
 }
 
-.pl-trip-kpis {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
-    padding-top: 12px;
-    border-top: 1px solid #EDF2F7;
-}
-
-.pl-trip-kpi {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-    background: #F8FAFC;
-    border: 1px solid #E2E8F0;
-    border-left: 4px solid #94A3B8;
-    border-radius: 12px;
-    padding: 10px 12px;
-    min-width: 0;
-    font: inherit;
-    text-align: left;
-    cursor: pointer;
-    transition: transform 0.12s, box-shadow 0.15s;
-}
-.pl-trip-kpi:active {
-    transform: scale(0.98);
-}
-
-/* KPI 1: 예상 기온 (블루 테마) */
-.pl-trip-kpi.kpi-temp {
-    background: #EFF6FF;
-    border-color: #BFDBFE;
-    border-left: 4px solid #2563EB;
-}
-.pl-trip-kpi.kpi-temp .pl-trip-kpi-label { color: #1D4ED8; }
-.pl-trip-kpi.kpi-temp .pl-trip-kpi-val { color: #1E3A8A; }
-
-/* KPI 2: 강수/날씨 (시안/민트 테마) */
-.pl-trip-kpi.kpi-rain {
-    background: #ECFEFF;
-    border-color: #A5F3FC;
-    border-left: 4px solid #0891B2;
-}
-.pl-trip-kpi.kpi-rain .pl-trip-kpi-label { color: #0E7490; }
-.pl-trip-kpi.kpi-rain .pl-trip-kpi-val { color: #164E63; }
-
-/* KPI 3: 맞춤 코스 (에메랄드 그린 테마) */
-.pl-trip-kpi.kpi-course {
-    background: #ECFDF5;
-    border-color: #A7F3D0;
-    border-left: 4px solid #059669;
-}
-.pl-trip-kpi.kpi-course .pl-trip-kpi-label { color: #047857; }
-.pl-trip-kpi.kpi-course .pl-trip-kpi-val { color: #064E3B; }
-
-/* KPI 4: 기간 내 축제 (로즈/코랄 테마) */
-.pl-trip-kpi.kpi-fest {
-    background: #FFF1F2;
-    border-color: #FECDD3;
-    border-left: 4px solid #E11D48;
-}
-.pl-trip-kpi.kpi-fest .pl-trip-kpi-label { color: #BE123C; }
-.pl-trip-kpi.kpi-fest .pl-trip-kpi-val { color: #881337; }
-
-.pl-trip-kpi-label {
-    font-size: 0.72rem;
-    font-weight: 800;
-    color: #64748B;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    width: 100%;
-}
-
-.pl-trip-kpi-val {
-    font-size: 0.92rem;
+/* 날짜 아래 한 줄 날씨 결론: "3박 · 15~20° · 약 1일 비" (탭과 겹치던 KPI 4칸 대체) */
+#trip-wx-summary b {
     font-weight: 800;
     color: #1E293B;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    width: 100%;
+}
+#trip-wx-summary b.is-rain {
+    color: #1D4ED8;
 }
 
-@media (max-width: 440px) {
-    .pl-trip-kpis {
-        grid-template-columns: repeat(2, 1fr);
-    }
+/* 탭 라벨 옆 개수 배지 (예: 축제 8) */
+.pl-trip-tab-count {
+    display: inline-block;
+    min-width: 18px;
+    margin-left: 4px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: #E11D48;
+    color: #FFFFFF;
+    font-size: 0.68rem;
+    line-height: 18px;
+    vertical-align: 1px;
 }
+.pl-trip-tab.active .pl-trip-tab-count {
+    background: #FFFFFF;
+    color: #E11D48;
+}
+
 
 /* ── 상단 4대 카테고리 탭 바 (카테고리별 고유 컬러 부여) ── */
 .pl-trip-tabs {
@@ -911,12 +861,12 @@
 
 .pl-trip-tab {
     min-height: 40px;
-    padding: 6px 4px;
+    padding: 6px 2px;
     border: 1px solid transparent;
     border-radius: 10px;
     background: #F8FAFC;
     font: inherit;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     font-weight: 800;
     color: #475569;
     cursor: pointer;
@@ -977,22 +927,23 @@
     padding: 16px;
 }
 
+/* 날씨 앱처럼 하루 = 한 줄 (날짜 | 아이콘 | 기온 | 강수·구분). 일정이 길어져도 그리드가 깨지지 않는다 */
 #trip-weather .weekly-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-    gap: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 #trip-weather .pl-wcard {
-    padding: 12px 10px;
+    padding: 10px 12px;
     border-radius: 14px;
     background: #FFFFFF;
     border: 1px solid #BFDBFE;
     box-shadow: 0 1px 4px rgba(37, 99, 235, 0.06);
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 76px 32px 1fr auto;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
 }
 
 /* 예보 범위 밖(예년 평균) 카드는 슬레이트 톤으로 실시간 예보와 확실히 구분 */
@@ -1022,7 +973,7 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
     gap: 4px;
 }
 
@@ -1152,9 +1103,30 @@
     color: #1E293B;
 }
 
+/* 요일은 날짜 아래로 내려 날짜 열 폭을 줄인다 */
 .pl-hist-date small {
+    display: block;
     font-weight: 600;
     color: #64748B;
+}
+
+/* 모바일: 연도 3열이 가로 스크롤 없이 한 화면에 들어오도록 여백·배지 축소 */
+@media (max-width: 440px) {
+    .pl-hist-table th,
+    .pl-hist-table td {
+        padding: 8px 3px;
+    }
+    .pl-hist-table thead th:first-child,
+    .pl-hist-date {
+        padding-left: 10px;
+    }
+    .pl-hist-temp {
+        font-size: 0.84rem;
+    }
+    .pl-hist-wx {
+        padding: 2px 5px;
+        font-size: 0.66rem;
+    }
 }
 
 .pl-hist-table tbody tr:last-child th,
