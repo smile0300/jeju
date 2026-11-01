@@ -770,8 +770,9 @@
     display: flex;
     flex-direction: column;
     gap: 14px;
-    background: linear-gradient(180deg, #F5F9FF 0%, #FFFFFF 100%);
-    border-color: #CFE2FF;
+    background: #FFFFFF;
+    border: 1px solid #DCE6F2;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
 }
 
 .pl-trip-hero-top {
@@ -806,37 +807,49 @@
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 8px;
-    padding-top: 10px;
-    border-top: 1px dashed #DCE6F2;
+    padding-top: 12px;
+    border-top: 1px solid #EDF2F7;
 }
 
 .pl-trip-kpi {
     display: flex;
     flex-direction: column;
-    gap: 2px;
-    background: #FFFFFF;
-    border: 1px solid #EDF2F7;
+    align-items: flex-start;
+    gap: 3px;
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
     border-radius: 12px;
-    padding: 8px 10px;
+    padding: 10px 12px;
     min-width: 0;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+}
+.pl-trip-kpi:hover,
+.pl-trip-kpi:active {
+    border-color: var(--accent);
+    background: #F0F7FF;
 }
 
 .pl-trip-kpi-label {
-    font-size: 0.7rem;
+    font-size: 0.72rem;
     font-weight: 700;
-    color: var(--label-secondary);
+    color: #64748B;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    width: 100%;
 }
 
 .pl-trip-kpi-val {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     font-weight: 800;
-    color: var(--label-primary);
+    color: #1E293B;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    width: 100%;
 }
 
 @media (max-width: 440px) {
@@ -845,49 +858,94 @@
     }
 }
 
-/* ── 섹션 퀵 앵커 바 ── */
-.pl-trip-nav {
+/* ── 상단 4대 카테고리 탭 바 ── */
+.pl-trip-tabs {
     position: sticky;
     top: 44px;
     z-index: 90;
-    display: flex;
-    gap: 6px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    padding: 8px 4px;
-    background: rgba(242, 244, 246, 0.92);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-}
-.pl-trip-nav::-webkit-scrollbar { display: none; }
-
-.pl-trip-nav-btn {
-    flex-shrink: 0;
-    padding: 7px 12px;
-    border: 1px solid var(--separator);
-    border-radius: 999px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    padding: 5px;
+    border-radius: 14px;
     background: #FFFFFF;
+    border: 1px solid var(--separator);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.pl-trip-tab {
+    min-height: 40px;
+    padding: 6px 4px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
     font: inherit;
     font-size: 0.8rem;
     font-weight: 800;
-    color: #333D4B;
+    color: #64748B;
     cursor: pointer;
     white-space: nowrap;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: background 0.15s, color 0.15s;
 }
 
-.pl-trip-nav-btn:active {
-    border-color: var(--accent);
-    background: #E8F3FF;
-    color: #1B64DA;
+.pl-trip-tab.active {
+    background: var(--accent);
+    color: #FFFFFF;
+    box-shadow: 0 2px 6px rgba(49, 130, 246, 0.25);
 }
 
-.pl-trip-sec {
-    scroll-margin-top: 96px;
+.pl-trip-panel {
     display: flex;
     flex-direction: column;
     gap: var(--space-3);
+}
+.pl-trip-panel[hidden] {
+    display: none !important;
+}
+
+/* ── 날짜별 날씨 카드 그리드 (가독성 개선: 한 줄에 최대 4개, 넓은 카드) ── */
+#trip-weather .weekly-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 10px;
+}
+
+#trip-weather .pl-wcard {
+    padding: 12px 10px;
+    border-radius: 14px;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+#trip-weather .pl-wcard .w-date {
+    font-size: 0.84rem;
+    font-weight: 800;
+    color: #1E293B;
+}
+
+#trip-weather .pl-wcard .w-icon {
+    font-size: 1.6rem;
+    line-height: 1.1;
+}
+
+#trip-weather .pl-wcard .w-temps {
+    font-size: 0.95rem;
+    font-weight: 800;
+}
+
+#trip-weather .pl-wcard .w-meta-info {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
 }
 
 .pl-wcard-tag.forecast {
@@ -900,7 +958,7 @@
 .pl-hist-box {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 14px;
 }
 
 .pl-hist-head {
@@ -911,7 +969,7 @@
 
 .pl-hist-title {
     margin: 0;
-    font-size: 0.95rem;
+    font-size: 0.98rem;
     font-weight: 800;
     color: var(--label-primary);
 }
@@ -926,28 +984,28 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2px;
-    padding: 8px 6px;
+    gap: 3px;
+    padding: 10px 8px;
     border-radius: 12px;
-    background: var(--fill-tertiary);
-    border: 1px solid var(--separator);
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
     text-align: center;
 }
 
 .pl-hist-yr {
-    font-size: 0.74rem;
+    font-size: 0.76rem;
     font-weight: 800;
-    color: var(--label-secondary);
+    color: #64748B;
 }
 
 .pl-hist-yval {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     font-weight: 800;
-    color: var(--label-primary);
+    color: #1E293B;
 }
 
 .pl-hist-yrain {
-    font-size: 0.7rem;
+    font-size: 0.74rem;
     font-weight: 700;
     color: #087F5B;
 }
@@ -958,38 +1016,42 @@
 .pl-hist-table-wrap {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
 }
 
 .pl-hist-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.82rem;
+    font-size: 0.86rem;
 }
 
 .pl-hist-table th,
 .pl-hist-table td {
-    padding: 8px 6px;
-    border-bottom: 1px solid var(--separator);
+    padding: 10px 8px;
+    border-bottom: 1px solid #EDF2F7;
     text-align: center;
 }
 
 .pl-hist-table thead th {
-    font-size: 0.75rem;
+    font-size: 0.78rem;
     font-weight: 800;
-    color: var(--label-secondary);
-    background: var(--fill-tertiary);
+    color: #475569;
+    background: #F8FAFC;
 }
 
 .pl-hist-table thead th:first-child,
 .pl-hist-date {
     text-align: left;
+    padding-left: 12px;
     white-space: nowrap;
     font-weight: 800;
+    color: #1E293B;
 }
 
 .pl-hist-date small {
     font-weight: 600;
-    color: var(--label-secondary);
+    color: #64748B;
 }
 
 .pl-hist-table tbody tr:last-child th,
@@ -998,19 +1060,20 @@
 }
 
 .pl-hist-temp {
+    font-size: 0.9rem;
     font-weight: 800;
     line-height: 1.3;
 }
 .pl-hist-temp .hi { color: #E03131; }
-.pl-hist-temp .sl { color: #ADB5BD; margin: 0 2px; font-weight: 400; }
+.pl-hist-temp .sl { color: #CBD5E1; margin: 0 2px; font-weight: 400; }
 .pl-hist-temp .lo { color: #1971C2; }
 
 .pl-hist-wx {
     display: inline-block;
-    margin-top: 2px;
-    padding: 1px 6px;
+    margin-top: 3px;
+    padding: 2px 7px;
     border-radius: 6px;
-    font-size: 0.68rem;
+    font-size: 0.72rem;
     font-weight: 700;
     white-space: nowrap;
 }
@@ -1020,7 +1083,7 @@
 }
 .pl-hist-wx.sun {
     background: #FFF9DB;
-    color: #E67700;
+    color: #D97706;
 }
 
 /* ── 여행 브리핑 내 맞춤 추천 코스 ── */
@@ -1033,19 +1096,20 @@
 .pl-trip-course-card {
     display: flex;
     flex-direction: column;
-    gap: var(--space-3);
+    gap: 16px;
 }
 
 .pl-trip-course-head {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
 }
 
 .pl-trip-move {
-    padding: 12px;
+    padding: 14px;
     border-radius: 12px;
-    background: var(--fill-tertiary);
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
 }
 
 .pl-trip-rain-bar {
@@ -1059,21 +1123,35 @@
     background: #E7F5FF;
     border: 1px solid #A5D8FF;
     color: #1864AB;
-    font-size: 0.82rem;
+    font-size: 0.84rem;
     font-weight: 700;
 }
 
 /* ── 원클릭 간편 예약 & 차량 대절/동승 ── */
 .pl-qres,
-.pl-qcharter {
+.pl-qcharter,
+.pl-qreco {
     display: flex;
     flex-direction: column;
+    gap: 12px;
+}
+
+.pl-qres-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
     gap: 10px;
+}
+
+.pl-qres-sub {
+    margin-top: 2px;
+    font-size: 0.82rem;
 }
 
 .pl-qres-title {
     margin: 0;
-    font-size: 0.98rem;
+    font-size: 1rem;
     font-weight: 800;
     color: var(--label-primary);
 }
@@ -1098,5 +1176,6 @@
 }
 .pl-qcharter-btns > button {
     flex: 1 1 200px;
+    margin-top: 0;
 }
 

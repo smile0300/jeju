@@ -43,7 +43,7 @@ const QRES_TYPES = [
 ];
 
 let renderToken = 0; // 늦게 도착한 이전 요청이 화면을 덮어쓰지 않도록
-const courseState = { dayIdx: 0, forceRainy: false, lastCards: [] };
+const courseState = { tab: 'weather', dayIdx: 0, forceRainy: false, lastCards: [] };
 
 const parseIso = (s) => {
     const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || '');
@@ -516,45 +516,56 @@ function quickBookingHtml(from, to) {
 
     return `
         <div class="pl-card pl-qres">
-            <h4 class="pl-qres-title">${escapeHtml(tr('trip.qres.title'))}</h4>
-            <p class="pl-muted">${escapeHtml(tr('trip.qres.desc'))}</p>
-            <form id="trip-qres-form" class="reservation-form" novalidate>
-                <div class="form-group">
-                    <label class="form-label required">${escapeHtml(tr('trip.qres.type'))}</label>
-                    ${chipGroup('qresType', catOptions, { selected: ['restaurant'] })}
+            <div class="pl-qres-head">
+                <div>
+                    <h4 class="pl-qres-title">${escapeHtml(tr('trip.qres.title'))}</h4>
+                    <p class="pl-muted pl-qres-sub">${escapeHtml(tr('trip.qres.sub'))}</p>
                 </div>
-                <div class="form-group">
-                    <label class="form-label required">${escapeHtml(tr('trip.qres.date'))}</label>
-                    ${chipGroup('qresDate', dateOptions, { selected: [dateOptions[0]?.value || ''] })}
-                </div>
-                <div class="pl-qres-grid">
+                <button type="button" id="trip-qres-toggle" class="pl-btn-add" aria-expanded="false">
+                    <i class="ph-duotone ph-calendar-check"></i>
+                    <span>${escapeHtml(tr('trip.qres.open_btn'))}</span>
+                </button>
+            </div>
+            <div id="trip-qres-body" hidden>
+                <p class="pl-muted pl-mt">${escapeHtml(tr('trip.qres.desc'))}</p>
+                <form id="trip-qres-form" class="reservation-form" novalidate>
                     <div class="form-group">
-                        <label class="form-label" for="trip-qres-time">${escapeHtml(tr('trip.qres.time'))}</label>
-                        <input type="text" id="trip-qres-time" class="form-input" placeholder="${escapeHtml(tr('trip.qres.time_ph'))}" readonly>
+                        <label class="form-label required">${escapeHtml(tr('trip.qres.type'))}</label>
+                        ${chipGroup('qresType', catOptions, { selected: ['restaurant'] })}
                     </div>
                     <div class="form-group">
-                        <label class="form-label">${escapeHtml(tr('common.party'))}</label>
-                        ${partyStepper('trip-qres-party', 2)}
+                        <label class="form-label required">${escapeHtml(tr('trip.qres.date'))}</label>
+                        ${chipGroup('qresDate', dateOptions, { selected: [dateOptions[0]?.value || ''] })}
                     </div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="trip-qres-store">${escapeHtml(tr('trip.qres.store'))}</label>
-                    <input type="text" id="trip-qres-store" class="form-input" placeholder="${escapeHtml(tr('trip.qres.store_ph'))}" autocomplete="off">
-                </div>
-                <div class="pl-qres-grid">
+                    <div class="pl-qres-grid">
+                        <div class="form-group">
+                            <label class="form-label" for="trip-qres-time">${escapeHtml(tr('trip.qres.time'))}</label>
+                            <input type="text" id="trip-qres-time" class="form-input" placeholder="${escapeHtml(tr('trip.qres.time_ph'))}" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">${escapeHtml(tr('common.party'))}</label>
+                            ${partyStepper('trip-qres-party', 2)}
+                        </div>
+                    </div>
                     <div class="form-group">
-                        <label class="form-label required" for="trip-qres-name">${escapeHtml(tr('trip.qres.name'))}</label>
-                        <input type="text" id="trip-qres-name" class="form-input" placeholder="${escapeHtml(tr('trip.qres.name_ph'))}" autocomplete="off">
+                        <label class="form-label" for="trip-qres-store">${escapeHtml(tr('trip.qres.store'))}</label>
+                        <input type="text" id="trip-qres-store" class="form-input" placeholder="${escapeHtml(tr('trip.qres.store_ph'))}" autocomplete="off">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label required" for="trip-qres-wechat">${escapeHtml(tr('common.wechat'))}</label>
-                        <input type="text" id="trip-qres-wechat" class="form-input" placeholder="${escapeHtml(tr('common.wechat_ph'))}" autocomplete="off">
+                    <div class="pl-qres-grid">
+                        <div class="form-group">
+                            <label class="form-label required" for="trip-qres-name">${escapeHtml(tr('trip.qres.name'))}</label>
+                            <input type="text" id="trip-qres-name" class="form-input" placeholder="${escapeHtml(tr('trip.qres.name_ph'))}" autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label required" for="trip-qres-wechat">${escapeHtml(tr('common.wechat'))}</label>
+                            <input type="text" id="trip-qres-wechat" class="form-input" placeholder="${escapeHtml(tr('common.wechat_ph'))}" autocomplete="off">
+                        </div>
                     </div>
-                </div>
-                <div id="trip-qres-status" class="form-status" style="display:none;"></div>
-                <div id="trip-qres-result"></div>
-                <button type="submit" id="trip-qres-submit" class="res-submit-btn"><i class="ph-duotone ph-calendar-check"></i> <span>${escapeHtml(tr('trip.qres.submit'))}</span></button>
-            </form>
+                    <div id="trip-qres-status" class="form-status" style="display:none;"></div>
+                    <div id="trip-qres-result"></div>
+                    <button type="submit" id="trip-qres-submit" class="res-submit-btn"><i class="ph-duotone ph-calendar-check"></i> <span>${escapeHtml(tr('trip.qres.submit'))}</span></button>
+                </form>
+            </div>
         </div>
 
         <div class="pl-card pl-qcharter">
@@ -565,6 +576,13 @@ function quickBookingHtml(from, to) {
                 <button type="button" class="pl-btn-ghost" data-go-charter="guide">${escapeHtml(tr('trip.qcharter.btn_baoche'))}</button>
                 <button type="button" class="res-submit-btn" data-go-charter="carpool" data-date="${escapeHtml(toIso(from))}">${escapeHtml(tr('trip.qcharter.btn_pinche'))}</button>
             </div>
+        </div>
+
+        <div class="pl-card pl-qreco">
+            <h4 class="pl-qres-title">${tr('trip.sec.reco')}</h4>
+            <p class="pl-muted">${tr('trip.reco.desc')}</p>
+            <button type="button" id="trip-reco-open" class="res-submit-btn"><i class="ph-duotone ph-chats-circle"></i> <span>${tr('trip.reco.open')}</span></button>
+            <div id="trip-reco-box" class="pl-mt" hidden>${recoFormHtml()}</div>
         </div>`;
 }
 
@@ -699,11 +717,24 @@ function renderPicker(root) {
     });
 }
 
+function switchTripTab(root, tabName) {
+    courseState.tab = tabName;
+    root.querySelectorAll('.pl-trip-tab').forEach(btn => {
+        const active = btn.dataset.tripTab === tabName;
+        btn.classList.toggle('active', active);
+        btn.setAttribute('aria-selected', String(active));
+    });
+    root.querySelectorAll('.pl-trip-panel').forEach(panel => {
+        panel.hidden = panel.dataset.panel !== tabName;
+    });
+}
+
 async function renderResult(root, { from, to }) {
     const token = ++renderToken;
     writeSavedTrip(from, to);
     renderHomeTripWidget();
 
+    courseState.tab = 'weather';
     courseState.dayIdx = 0;
     courseState.forceRainy = false;
     courseState.lastCards = [];
@@ -727,62 +758,49 @@ async function renderResult(root, { from, to }) {
                 </div>
             </div>
             <div class="pl-trip-kpis">
-                <div class="pl-trip-kpi">
+                <button type="button" class="pl-trip-kpi" data-trip-tab="weather">
                     <span class="pl-trip-kpi-label">${escapeHtml(tr('trip.kpi.temp'))}</span>
                     <strong class="pl-trip-kpi-val" id="trip-kpi-temp">…</strong>
-                </div>
-                <div class="pl-trip-kpi">
+                </button>
+                <button type="button" class="pl-trip-kpi" data-trip-tab="weather">
                     <span class="pl-trip-kpi-label">${escapeHtml(tr('trip.kpi.rain'))}</span>
                     <strong class="pl-trip-kpi-val" id="trip-kpi-rain">…</strong>
-                </div>
-                <div class="pl-trip-kpi">
-                    <span class="pl-trip-kpi-label">${escapeHtml(tr('trip.kpi.fest'))}</span>
-                    <strong class="pl-trip-kpi-val">${escapeHtml(tr('trip.kpi.fest.val', { n: festivals.length }))}</strong>
-                </div>
-                <div class="pl-trip-kpi">
+                </button>
+                <button type="button" class="pl-trip-kpi" data-trip-tab="course">
                     <span class="pl-trip-kpi-label">${escapeHtml(tr('trip.kpi.course'))}</span>
                     <strong class="pl-trip-kpi-val">${escapeHtml(tr('trip.kpi.course.val', { n: Math.min(dCount, 6) }))}</strong>
-                </div>
+                </button>
+                <button type="button" class="pl-trip-kpi" data-trip-tab="festival">
+                    <span class="pl-trip-kpi-label">${escapeHtml(tr('trip.kpi.fest'))}</span>
+                    <strong class="pl-trip-kpi-val">${escapeHtml(tr('trip.kpi.fest.val', { n: festivals.length }))}</strong>
+                </button>
             </div>
         </div>
-        <p class="pl-muted pl-hint">${tr('trip.share_hint')}</p>
 
-        <nav class="pl-trip-nav" aria-label="Trip briefing sections">
-            <button type="button" class="pl-trip-nav-btn" data-jump="trip-sec-weather">${escapeHtml(tr('trip.nav.weather'))}</button>
-            <button type="button" class="pl-trip-nav-btn" data-jump="trip-sec-course">${escapeHtml(tr('trip.nav.course'))}</button>
-            <button type="button" class="pl-trip-nav-btn" data-jump="trip-sec-festival">${escapeHtml(tr('trip.nav.festival'))}</button>
-            <button type="button" class="pl-trip-nav-btn" data-jump="trip-sec-booking">${escapeHtml(tr('trip.nav.booking'))}</button>
-            <button type="button" class="pl-trip-nav-btn" data-jump="trip-sec-reco">${escapeHtml(tr('trip.nav.reco'))}</button>
+        <nav class="pl-trip-tabs" role="tablist" aria-label="Trip briefing tabs">
+            <button type="button" role="tab" class="pl-trip-tab active" data-trip-tab="weather" aria-selected="true">${escapeHtml(tr('trip.nav.weather'))}</button>
+            <button type="button" role="tab" class="pl-trip-tab" data-trip-tab="course" aria-selected="false">${escapeHtml(tr('trip.nav.course'))}</button>
+            <button type="button" role="tab" class="pl-trip-tab" data-trip-tab="festival" aria-selected="false">${escapeHtml(tr('trip.nav.festival'))}</button>
+            <button type="button" role="tab" class="pl-trip-tab" data-trip-tab="booking" aria-selected="false">${escapeHtml(tr('trip.nav.booking'))}</button>
         </nav>
 
-        <section id="trip-sec-weather" class="pl-trip-sec">
-            <h3 class="pl-h">${tr('trip.sec.weather')}</h3>
+        <section data-panel="weather" class="pl-trip-panel">
             <div id="trip-weather" class="naver-card pl-wx"><p class="pl-muted"><i class="ph-duotone ph-circle-notch spin"></i> ${tr('trip.loading')}</p></div>
             <div id="trip-outfit"></div>
             <div id="trip-history-compare"></div>
         </section>
 
-        <section id="trip-sec-course" class="pl-trip-sec">
-            <h3 class="pl-h">${tr('trip.sec.course')}</h3>
+        <section data-panel="course" class="pl-trip-panel" hidden>
             <div id="trip-course-box" class="pl-trip-course-wrap"></div>
         </section>
 
-        <section id="trip-sec-festival" class="pl-trip-sec">
-            <h3 class="pl-h">${tr('trip.sec.festival')}</h3>
+        <section data-panel="festival" class="pl-trip-panel" hidden>
             <div id="trip-festivals" class="festival-list pl-festivals"></div>
             <button type="button" class="pl-link" onclick="showSection('festival')">${tr('trip.more_festival')} →</button>
         </section>
 
-        <section id="trip-sec-booking" class="pl-trip-sec">
-            <h3 class="pl-h">${tr('trip.sec.booking')}</h3>
+        <section data-panel="booking" class="pl-trip-panel" hidden>
             ${quickBookingHtml(from, to)}
-        </section>
-
-        <section id="trip-sec-reco" class="pl-trip-sec">
-            <h3 class="pl-h">${tr('trip.sec.reco')}</h3>
-            <p class="pl-muted">${tr('trip.reco.desc')}</p>
-            <button type="button" id="trip-reco-open" class="res-submit-btn"><i class="ph-duotone ph-chats-circle"></i> <span>${tr('trip.reco.open')}</span></button>
-            <div id="trip-reco-box" class="pl-card" hidden>${recoFormHtml()}</div>
         </section>`;
 
     // 1) 축제 렌더링
@@ -810,7 +828,16 @@ async function renderResult(root, { from, to }) {
     }
 
     // 4) 이벤트 바인딩
-    root.querySelector('#trip-reco-open').addEventListener('click', (e) => {
+    root.querySelector('#trip-qres-toggle')?.addEventListener('click', (e) => {
+        const body = root.querySelector('#trip-qres-body');
+        if (!body) return;
+        const opening = body.hidden;
+        body.hidden = !opening;
+        e.currentTarget.setAttribute('aria-expanded', String(opening));
+        const span = e.currentTarget.querySelector('span');
+        if (span) span.textContent = tr(opening ? 'trip.qres.close_btn' : 'trip.qres.open_btn');
+    });
+    root.querySelector('#trip-reco-open')?.addEventListener('click', (e) => {
         root.querySelector('#trip-reco-box').hidden = false;
         e.currentTarget.hidden = true;
     });
@@ -821,11 +848,11 @@ async function renderResult(root, { from, to }) {
     root.querySelector('#trip-share-btn').addEventListener('click', async (e) => {
         if (await copyText(window.location.href)) flashLabel(e.currentTarget, tr('common.copied'));
     });
-    root.querySelector('#trip-reco-form').addEventListener('submit', (e) => {
+    root.querySelector('#trip-reco-form')?.addEventListener('submit', (e) => {
         e.preventDefault();
         submitReco(root, from, to);
     });
-    root.querySelector('#trip-qres-form').addEventListener('submit', (e) => {
+    root.querySelector('#trip-qres-form')?.addEventListener('submit', (e) => {
         e.preventDefault();
         submitQuickRes(root, from, to);
     });
@@ -918,11 +945,10 @@ function bindTripInteractions(root) {
     root.dataset.tripExtraBound = '1';
 
     root.addEventListener('click', async (e) => {
-        // 섹션 앵커 이동
-        const jumpBtn = e.target.closest('[data-jump]');
-        if (jumpBtn) {
-            const target = document.getElementById(jumpBtn.dataset.jump);
-            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // 상단 4대 탭 전환 (또는 KPI 카드 클릭 시 해당 탭으로 전환)
+        const tabBtn = e.target.closest('[data-trip-tab]');
+        if (tabBtn) {
+            switchTripTab(root, tabBtn.dataset.tripTab);
             return;
         }
         // 추천 코스 일차 전환
