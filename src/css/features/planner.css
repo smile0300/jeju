@@ -614,3 +614,492 @@
     .current-weather-main .current-weather-box .cw-left .main-temp { min-width: 7.5rem; }
     .current-weather-main .current-weather-box .cw-right { flex: 1 1 0; }
 }
+
+/* ── 홈 화면 여행 날짜 입력 위젯 (#home-trip-planner) ── */
+.home-trip-planner {
+    max-width: 600px;
+    margin: 0 auto var(--space-4);
+}
+
+.home-trip-card {
+    background: linear-gradient(180deg, #F5F9FF 0%, #FFFFFF 100%);
+    border: 1.5px solid #CFE2FF;
+    border-radius: 20px;
+    padding: 14px 16px;
+    box-shadow: 0 4px 16px rgba(49, 130, 246, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.home-trip-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.home-trip-badge {
+    font-size: 0.88rem;
+    font-weight: 800;
+    color: #1B64DA;
+    letter-spacing: -0.2px;
+}
+
+.home-trip-tags {
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: #4E5968;
+    background: #E8F3FF;
+    padding: 3px 8px;
+    border-radius: 999px;
+}
+
+.home-trip-bar {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+}
+
+.home-trip-input-wrap {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #FFFFFF;
+    border: 1px solid #D0D8E2;
+    border-radius: 12px;
+    padding: 0 12px;
+    min-height: 44px;
+}
+
+.home-trip-input-wrap > i {
+    font-size: 1.15rem;
+    color: var(--accent);
+    flex-shrink: 0;
+}
+
+.home-trip-input {
+    width: 100%;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--label-primary);
+    outline: none;
+    cursor: pointer;
+    text-overflow: ellipsis;
+}
+
+.home-trip-input::placeholder {
+    color: #8B95A1;
+    font-weight: 600;
+}
+
+.home-trip-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 0 14px;
+    min-height: 44px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #1B64DA 0%, #3182F6 100%);
+    color: #FFFFFF;
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 800;
+    white-space: nowrap;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(49, 130, 246, 0.28);
+}
+
+.home-trip-btn:active {
+    transform: scale(0.97);
+}
+
+.home-trip-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.home-trip-quicks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.home-trip-chip {
+    padding: 4px 10px;
+    border: 1px solid #DCE6F2;
+    border-radius: 999px;
+    background: #FFFFFF;
+    font: inherit;
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: #333D4B;
+    cursor: pointer;
+}
+
+.home-trip-chip:hover,
+.home-trip-chip:active {
+    border-color: var(--accent);
+    background: #E8F3FF;
+    color: #1B64DA;
+}
+
+.home-trip-saved {
+    border: none;
+    background: #FFF4E6;
+    color: #D9480F;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font: inherit;
+    font-size: 0.76rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+/* ── 올인원 여행 브리핑 (/trip) 대시보드 ── */
+.pl-trip-hero {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    background: linear-gradient(180deg, #F5F9FF 0%, #FFFFFF 100%);
+    border-color: #CFE2FF;
+}
+
+.pl-trip-hero-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.pl-dday-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.74rem;
+    font-weight: 800;
+    margin-bottom: 4px;
+    background: #E8F3FF;
+    color: #1B64DA;
+}
+.pl-dday-badge.today,
+.pl-dday-badge.ongoing {
+    background: #E6FCF5;
+    color: #087F5B;
+}
+.pl-dday-badge.past {
+    background: var(--fill-secondary);
+    color: #4E5968;
+}
+
+.pl-trip-kpis {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    padding-top: 10px;
+    border-top: 1px dashed #DCE6F2;
+}
+
+.pl-trip-kpi {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    background: #FFFFFF;
+    border: 1px solid #EDF2F7;
+    border-radius: 12px;
+    padding: 8px 10px;
+    min-width: 0;
+}
+
+.pl-trip-kpi-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--label-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pl-trip-kpi-val {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--label-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@media (max-width: 440px) {
+    .pl-trip-kpis {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ── 섹션 퀵 앵커 바 ── */
+.pl-trip-nav {
+    position: sticky;
+    top: 44px;
+    z-index: 90;
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 8px 4px;
+    background: rgba(242, 244, 246, 0.92);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+.pl-trip-nav::-webkit-scrollbar { display: none; }
+
+.pl-trip-nav-btn {
+    flex-shrink: 0;
+    padding: 7px 12px;
+    border: 1px solid var(--separator);
+    border-radius: 999px;
+    background: #FFFFFF;
+    font: inherit;
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: #333D4B;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.pl-trip-nav-btn:active {
+    border-color: var(--accent);
+    background: #E8F3FF;
+    color: #1B64DA;
+}
+
+.pl-trip-sec {
+    scroll-margin-top: 96px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.pl-wcard-tag.forecast {
+    background: #E8F3FF;
+    color: #1B64DA;
+    font-weight: 700;
+}
+
+/* ── 최근 3년 동기간 실제 날씨 비교표 ── */
+.pl-hist-box {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.pl-hist-head {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.pl-hist-title {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--label-primary);
+}
+
+.pl-hist-ychips {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.pl-hist-ychip {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 8px 6px;
+    border-radius: 12px;
+    background: var(--fill-tertiary);
+    border: 1px solid var(--separator);
+    text-align: center;
+}
+
+.pl-hist-yr {
+    font-size: 0.74rem;
+    font-weight: 800;
+    color: var(--label-secondary);
+}
+
+.pl-hist-yval {
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: var(--label-primary);
+}
+
+.pl-hist-yrain {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #087F5B;
+}
+.pl-hist-yrain.is-rain {
+    color: #1971C2;
+}
+
+.pl-hist-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.pl-hist-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+}
+
+.pl-hist-table th,
+.pl-hist-table td {
+    padding: 8px 6px;
+    border-bottom: 1px solid var(--separator);
+    text-align: center;
+}
+
+.pl-hist-table thead th {
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--label-secondary);
+    background: var(--fill-tertiary);
+}
+
+.pl-hist-table thead th:first-child,
+.pl-hist-date {
+    text-align: left;
+    white-space: nowrap;
+    font-weight: 800;
+}
+
+.pl-hist-date small {
+    font-weight: 600;
+    color: var(--label-secondary);
+}
+
+.pl-hist-table tbody tr:last-child th,
+.pl-hist-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.pl-hist-temp {
+    font-weight: 800;
+    line-height: 1.3;
+}
+.pl-hist-temp .hi { color: #E03131; }
+.pl-hist-temp .sl { color: #ADB5BD; margin: 0 2px; font-weight: 400; }
+.pl-hist-temp .lo { color: #1971C2; }
+
+.pl-hist-wx {
+    display: inline-block;
+    margin-top: 2px;
+    padding: 1px 6px;
+    border-radius: 6px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.pl-hist-wx.rain {
+    background: #E7F5FF;
+    color: #1864AB;
+}
+.pl-hist-wx.sun {
+    background: #FFF9DB;
+    color: #E67700;
+}
+
+/* ── 여행 브리핑 내 맞춤 추천 코스 ── */
+.pl-trip-course-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.pl-trip-course-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.pl-trip-course-head {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.pl-trip-move {
+    padding: 12px;
+    border-radius: 12px;
+    background: var(--fill-tertiary);
+}
+
+.pl-trip-rain-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: #E7F5FF;
+    border: 1px solid #A5D8FF;
+    color: #1864AB;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+/* ── 원클릭 간편 예약 & 차량 대절/동승 ── */
+.pl-qres,
+.pl-qcharter {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.pl-qres-title {
+    margin: 0;
+    font-size: 0.98rem;
+    font-weight: 800;
+    color: var(--label-primary);
+}
+
+.pl-qres-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+@media (max-width: 440px) {
+    .pl-qres-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.pl-qcharter-btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+}
+.pl-qcharter-btns > button {
+    flex: 1 1 200px;
+}
+

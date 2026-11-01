@@ -139,11 +139,15 @@ export async function getForecastDays(locKey = 'jeju') {
 }
 
 /**
- * 과거 같은 시기 평균 → { 'MMDD': { min, max, rainYears, years } }
- * from~to 와 같은 날짜를 최근 HISTORY_YEARS년에서 가져와 평균낸다.
+ * 과거 같은 시기 평균 및 연도별 상세 실측 자료
+ * → {
+ *     'MMDD': { min, max, rainYears, years, byYear: { [year]: { min, max, rainMm, wind } } },
+ *     _years: [{ year, min, max, rainDays, rainMm }]
+ *   }
+ * from~to 와 같은 날짜를 최근 HISTORY_YEARS년에서 가져와 평균과 연도별 실측 기록을 함께 계산한다.
  */
 export async function getHistoricalDays(from, to) {
-    const cacheKey = `jeju_hist_${toYmd(from)}_${toYmd(to)}`;
+    const cacheKey = `jeju_hist_v2_${toYmd(from)}_${toYmd(to)}`;
     const cached = readCache(cacheKey);
     if (cached) return cached;
 
@@ -151,37 +155,73 @@ export async function getHistoricalDays(from, to) {
     today.setHours(0, 0, 0, 0);
 
     const requests = [];
+    const targetYears = [];
     for (let back = 1; requests.length < HISTORY_YEARS && back <= HISTORY_YEARS + 2; back++) {
         const s = new Date(from); s.setFullYear(from.getFullYear() - back);
         const e = new Date(to);   e.setFullYear(to.getFullYear() - back);
         if (e >= today) continue; // 아직 오지 않은 날짜는 관측 자료가 없다
+        const yr = s.getFullYear();
+        targetYears.push(yr);
         requests.push(
             fetchPublicDataJson('https://apis.data.go.kr/1360000/AsosDalyInfoService/getWthrDataList', {
                 pageNo: 1, numOfRows: 40, dataType: 'JSON', dataCd: 'ASOS', dateCd: 'DAY',
                 startDt: toYmd(s), endDt: toYmd(e), stnIds: ASOS_STATION_JEJU,
-            }).then(itemsOf).catch(err => { console.warn('[Planner] 과거 날씨 실패:', err); return []; })
+            }).then(json => ({ yr, items: itemsOf(json) }))
+              .catch(err => { console.warn('[Planner] 과거 날씨 실패:', err); return { yr, items: [] }; })
         );
     }
 
     const acc = {};
-    (await Promise.all(requests)).forEach(items => {
+    const yearStats = {};
+    (await Promise.all(requests)).forEach(({ yr, items }) => {
         items.forEach(it => {
             if (!it || !it.tm) return;
-            const [, mm, dd] = String(it.tm).split('-');
+            const [yStr, mm, dd] = String(it.tm).split('-');
             const minTa = parseFloat(it.minTa), maxTa = parseFloat(it.maxTa);
             if (isNaN(minTa) || isNaN(maxTa)) return;
-            const a = (acc[`${mm}${dd}`] ||= { minSum: 0, maxSum: 0, years: 0, rainYears: 0 });
-            a.minSum += minTa; a.maxSum += maxTa; a.years += 1;
-            if ((parseFloat(it.sumRn) || 0) >= RAIN_DAY_MM) a.rainYears += 1;
+            const rainMm = Math.round((parseFloat(it.sumRn) || 0) * 10) / 10;
+            const wind = Math.round((parseFloat(it.avgWs) || 0) * 10) / 10;
+            const yKey = yStr || String(yr);
+
+            const a = (acc[`${mm}${dd}`] ||= { minSum: 0, maxSum: 0, years: 0, rainYears: 0, byYear: {} });
+            a.minSum += minTa;
+            a.maxSum += maxTa;
+            a.years += 1;
+            if (rainMm >= RAIN_DAY_MM) a.rainYears += 1;
+            a.byYear[yKey] = { min: Math.round(minTa), max: Math.round(maxTa), rainMm, wind };
+
+            const ys = (yearStats[yKey] ||= { year: +yKey, minSum: 0, maxSum: 0, count: 0, rainDays: 0, rainMm: 0 });
+            ys.minSum += minTa;
+            ys.maxSum += maxTa;
+            ys.count += 1;
+            if (rainMm >= RAIN_DAY_MM) ys.rainDays += 1;
+            ys.rainMm = Math.round((ys.rainMm + rainMm) * 10) / 10;
         });
     });
 
     const out = {};
     Object.keys(acc).forEach(k => {
         const a = acc[k];
-        out[k] = { min: Math.round(a.minSum / a.years), max: Math.round(a.maxSum / a.years), rainYears: a.rainYears, years: a.years };
+        out[k] = {
+            min: Math.round(a.minSum / a.years),
+            max: Math.round(a.maxSum / a.years),
+            rainYears: a.rainYears,
+            years: a.years,
+            byYear: a.byYear,
+        };
     });
-    if (Object.keys(out).length) writeCache(cacheKey, out);
+    out._years = Object.values(yearStats)
+        .filter(ys => ys.count > 0)
+        .sort((a, b) => b.year - a.year)
+        .map(ys => ({
+            year: ys.year,
+            min: Math.round(ys.minSum / ys.count),
+            max: Math.round(ys.maxSum / ys.count),
+            rainDays: ys.rainDays,
+            rainMm: ys.rainMm,
+        }));
+
+    if (Object.keys(acc).length) writeCache(cacheKey, out);
     return out;
 }
 

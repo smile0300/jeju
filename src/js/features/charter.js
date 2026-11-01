@@ -335,6 +335,10 @@ async function render() {
     else if (window.charterFocus === 'carpool') state.view = 'pinche';
     else if (viewParam === 'baoche' || viewParam === 'pinche') state.view = viewParam;
     window.charterFocus = null;
+    if (window.charterPresetDate && /^\d{4}-\d{2}-\d{2}$/.test(window.charterPresetDate)) {
+        state.selected = window.charterPresetDate;
+        window.charterPresetDate = null;
+    }
 
     root.innerHTML = `${tabsHtml()}<div id="charter-view"></div>`;
     await renderView(root);

@@ -83,7 +83,7 @@ export function showStatus(el, msg, type) {
  * 접수 전송. 기존 예약 접수 경로(GAS Reservation 시트)를 그대로 쓰고
  * reservationType으로 종류를 구분한다 → 시트·GAS 변경이 필요 없다.
  */
-export async function submitRequest({ reservationType, wechatId = '', preferredStore = '', visitDate = '', partySize = '', note = '' }) {
+export async function submitRequest({ reservationType, wechatId = '', preferredStore = '', visitDate = '', partySize = '', note = '', bookerName = '', altTime = '' }) {
     const res = await fetch(`${CONFIG.PROXY_URL || ''}/api/reservation`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -95,6 +95,8 @@ export async function submitRequest({ reservationType, wechatId = '', preferredS
             visitDate,
             partySize: String(partySize),
             requestNote: note,
+            bookerName,
+            altTime,
             userAgent: navigator.userAgent,
         }),
     });
