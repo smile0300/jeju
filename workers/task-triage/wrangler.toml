@@ -1,0 +1,14 @@
+name = "jeju-task-triage"
+main = "src/index.js"
+compatibility_date = "2024-03-20"
+
+# 15분마다 작업 큐의 '대기' 행을 Jev로 판정
+[triggers]
+crons = ["*/15 * * * *"]
+
+# 비밀값은 wrangler secret put 으로 설정 (이 파일에 쓰지 말 것)
+# - TYPESAFE_API_KEY : TypeSafe 콘솔에서 발급한 키
+# - TASK_GAS_URL     : Code.js 웹앱 배포 주소 (handleTaskQueue_ 포함 버전)
+# - TASK_SECRET      : GAS 스크립트 속성 TASK_SECRET과 같은 값
+# - PUBLIC_DATA_KEY  : 공공데이터포털 키 (경찰청 습득물 API 활용신청 필요, 사이트 Pages와 같은 키)
+# - NOTIFY_URL       : (선택) 관리자 푸시 주소. 비우면 jeju-weather-alerts의 /api/notify-admin

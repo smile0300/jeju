@@ -115,6 +115,11 @@ function doPost(e) {
     if (data.type === 'admin_update') return adminUpdate(data);
     if (data.type === 'admin_ledger_save') return adminLedgerSave(data);
 
+    // 작업 큐 (workers/task-triage) — TASK_SECRET으로 따로 인증
+    if (data.type === 'task_list' || data.type === 'task_update' || data.type === 'task_append' || data.type === 'lost_get' || data.type === 'lost_update') {
+      return handleTaskQueue_(data);
+    }
+
     if (!publicRequestAllowed_(data)) return json_({ result: 'error', message: 'forbidden' });
 
     // 동승 달력 · 코스/대절 시트 준비 (planner.js)
@@ -132,6 +137,112 @@ function doPost(e) {
   } catch (err) {
     return json_({ result: 'error', message: err.toString() });
   }
+}
+
+/**
+ * 작업 큐 시트 (위챗 접수 → 운영자가 등록 → Jev 판정 → Claude 처리)
+ * 스크립트 속성: TASK_SHEET_ID (작업 큐 스프레드시트 ID), TASK_SECRET (Worker와 같은 값)
+ * - task_list   : { status: '대기' } → 그 상태의 행 목록 (상태 칸이 비어 있으면 '대기'로 본다)
+ * - task_update : { row: 3, fields: { '상태': '처리가능', ... } } → 헤더 이름 기준으로 칸만 덮어쓴다
+ * - task_append : { fields: {...} } → 맨 아래에 한 줄 추가 ('참고' 값이 이미 있으면 추가하지 않음)
+ * - lost_get    : { row: 612 } → 운영 시트 LostReport 한 줄 (연락처·기기 정보는 빼고 돌려준다)
+ * - lost_update : { row: 612, fields: { '경찰접수번호': 'L2026…' } } → LOST_WRITABLE_HEADERS 칸만 (없으면 맨 오른쪽에 추가)
+ */
+var LOST_PRIVATE_HEADERS = ['WechatId', 'UserAgent', 'PhotoURL', 'HotelBooker', 'CarNumber', 'hotelRoom'];
+var LOST_WRITABLE_HEADERS = ['경찰접수번호', '경찰접수일', '경찰관서'];
+function handleTaskQueue_(data) {
+  var props = PropertiesService.getScriptProperties();
+  var secret = String(props.getProperty('TASK_SECRET') || '').trim();
+  var given = String(data._secret || '').trim();
+  // 어느 쪽이 틀렸는지 알 수 있게 길이만 알려 준다 (값은 절대 돌려주지 않음)
+  if (!secret) return json_({ result: 'error', message: 'task forbidden: 스크립트 속성 TASK_SECRET 없음' });
+  if (given !== secret) {
+    return json_({ result: 'error', message: 'task forbidden: 값 불일치 (받은 길이 ' + given.length + ', 설정 길이 ' + secret.length + ')' });
+  }
+
+  if (data.type === 'lost_get') {
+    var lostSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName('LostReport');
+    var lostRow = parseInt(data.row, 10);
+    if (!lostSheet || !(lostRow >= 2) || lostRow > lostSheet.getLastRow()) return json_({ result: 'error', message: 'bad row' });
+    var lostHeaders = headerRow_(lostSheet);
+    var lostValues = lostSheet.getRange(lostRow, 1, 1, lostHeaders.length).getDisplayValues()[0];
+    var fields = {};
+    var photoIds = [];
+    lostHeaders.forEach(function (h, c) {
+      var v = String(lostValues[c] || '').trim();
+      // 사진은 주소 대신 드라이브 파일 ID만 따로 (경찰 신고서 첨부용)
+      if (h === 'PhotoURL') photoIds = (v.match(/[-\w]{25,}/g) || []);
+      if (!h || LOST_PRIVATE_HEADERS.indexOf(h) !== -1) return;
+      if (v && v !== '#N/A') fields[h] = v;
+    });
+    return json_({ result: 'success', row: lostRow, fields: fields, photoIds: photoIds.slice(0, 3) });
+  }
+
+  if (data.type === 'lost_update') {
+    var upSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName('LostReport');
+    var upRow = parseInt(data.row, 10);
+    var names = Object.keys(data.fields || {}).filter(function (h) { return LOST_WRITABLE_HEADERS.indexOf(h) !== -1; });
+    if (!upSheet || !(upRow >= 2) || upRow > upSheet.getLastRow() || !names.length) return json_({ result: 'error', message: 'bad row or fields' });
+    var upLock = LockService.getScriptLock();
+    upLock.waitLock(10000);
+    try {
+      var upHeaders = ensureHeaders_(upSheet, names);
+      names.forEach(function (h) { upSheet.getRange(upRow, upHeaders.indexOf(h) + 1).setValue(data.fields[h]); });
+    } finally {
+      upLock.releaseLock();
+    }
+    return json_({ result: 'success' });
+  }
+
+  var sheet = SpreadsheetApp.openById(props.getProperty('TASK_SHEET_ID')).getSheets()[0];
+  var headers = headerRow_(sheet);
+
+  if (data.type === 'task_append') {
+    if (!data.fields) return json_({ result: 'error', message: 'no fields' });
+    var refIdx = headers.indexOf('참고(링크·위챗ID 등)');
+    var ref = data.fields['참고(링크·위챗ID 등)'];
+    if (ref && refIdx !== -1 && sheet.getLastRow() >= 2) {
+      var refs = sheet.getRange(2, refIdx + 1, sheet.getLastRow() - 1, 1).getDisplayValues();
+      for (var k = 0; k < refs.length; k++) {
+        if (refs[k][0] === ref) return json_({ result: 'success', row: k + 2, existed: true });
+      }
+    }
+    headers = ensureHeaders_(sheet, Object.keys(data.fields));
+    return json_({ result: 'success', row: writeRowAtEnd_(sheet, rowByHeaders_(headers, data.fields)) });
+  }
+
+  if (data.type === 'task_list') {
+    var want = data.status || '대기';
+    var lastRow = sheet.getLastRow();
+    if (lastRow < 2) return json_({ result: 'success', rows: [] });
+    var values = sheet.getRange(2, 1, lastRow - 1, headers.length).getDisplayValues();
+    var statusIdx = headers.indexOf('상태');
+    var rows = [];
+    values.forEach(function (r, i) {
+      if (!r.join('').trim()) return;
+      var status = String(r[statusIdx] || '').trim() || '대기';
+      if (status !== want) return;
+      var obj = { row: i + 2 };
+      headers.forEach(function (h, c) { obj[h] = r[c]; });
+      obj['상태'] = status;
+      rows.push(obj);
+    });
+    return json_({ result: 'success', rows: rows });
+  }
+
+  var row = parseInt(data.row, 10);
+  if (!(row >= 2) || !data.fields) return json_({ result: 'error', message: 'bad row' });
+  var lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    headers = ensureHeaders_(sheet, Object.keys(data.fields));
+    Object.keys(data.fields).forEach(function (h) {
+      sheet.getRange(row, headers.indexOf(h) + 1).setValue(data.fields[h]);
+    });
+  } finally {
+    lock.releaseLock();
+  }
+  return json_({ result: 'success' });
 }
 
 /** SuccessStories A열(CaseId)만 읽어서 다음 번호 */

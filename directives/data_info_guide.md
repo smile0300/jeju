@@ -157,3 +157,11 @@
   - 요금 계산: `src/data/taxi.js` — 제주 중형택시(2024-07 시행) 기본 4,300원/2km + 126m당 100원, 거리 = 직선거리 × 1.35, 제주시(노형·연동) 숙소 왕복 포함. 시간요금·심야할증 미반영이라 '약'으로 표시. 환율 KRW_PER_CNY=215(근사, 2026-04 ECB).
   - 包车 요금은 `src/data/charter.js`의 CHARTER_PRICES[0](5인승) 재사용.
   - 원자료 주의: CSV(MDIS 형식)의 `거주국`·`연령`은 그룹 코드만 있고 라벨이 코드북에 없음. 거주국 2=중국(가중 인원 72.6%로 확인), 연령 2=20대·3=30대는 추정.
+
+## 16. 분실물 → 경찰민원24 대리 신고 자동화 (2026-11-03)
+- **흐름**: LostReport 행 → Worker `jeju-task-triage`(`workers/task-triage`)가 Jev(TypeSafe System One, `jev-latest`)로 분류·지역·장소·색상 판정 → 경찰청 습득물 API 검색 + Jev 일치 판정 → 작업 큐 시트(`TASK_SHEET_ID`)에 '승인필요' + `신고서` JSON → 관리자 푸시 → 승인 후 Claude(`.claude/skills/police-lost-report`) 또는 북마클릿(`tools/make-minwon24-bookmarklet.js`)이 minwon24 양식 채움 → 사람이 제출 → 접수번호를 큐·LostReport(`경찰접수번호`/`경찰접수일`/`경찰관서` 열, 없으면 자동 추가)에 기록. 첫 건: 609행 → L2026110300000009.
+- **습득물 API 지역코드(N_FD_LCT_CD)**: 공식 코드표 못 찾음 → 코드별 보관 장소로 맞춘 뒤 minwon24 신고서 `rgnCd` 목록과 대조해 확인. LCA000 서울, LCH000 강원, LCI000 경기, LCJ000 경남, LCK000 경북, LCG000 전남광주통합특별시, LCR000 대구, LCS000 대전, LCT000 부산, LCU000 울산, LCV000 인천, LCM000 전북, LCN000 충남, LCO000 충북, LCP000 제주, LCW000 세종, LCF000 해외, LCE000 기타. (LCQ000·LCL000에도 광주·전남 경찰서 단위 소량)
+- **minwon24 양식 함정**: 신고 후 수정 불가. 로그인(anyid 본인인증) 필수, 대리인 신고 가능. 분실일자는 readonly 달력, 관서 찾기 결과는 `<td role="button">`, 제출 시 페이지 내 확인 모달. 물품명에 4자리 이상 숫자 금지. CSP 없음(북마클릿 동작). 앱 내장 브라우저는 파일 업로드 불가 → Claude는 Chrome 확장 `file_upload`, 북마클릿은 DataTransfer로 첨부.
+- **사진**: LostReport `PhotoURL`의 드라이브 ID → GAS `?action=image&id=`(공개 링크 파일만, 1000px 축소본) → Worker `/photo`.
+- **GAS 배포 주의**: 작업 큐 기능이 들어간 배포는 `AKfycbzsQ…`. 예전 `AKfycbyr1…`는 구버전 코드. 비밀값은 스크립트 속성 `TASK_SECRET`(이름) = Worker 시크릿 `TASK_SECRET`(값), 로컬은 `.dev.vars`.
+- **Gemini**: API 키 미발급 결정 → 서버 자동화에는 쓰지 않음. 신고 문장은 GAS 자동번역(한국어) 칸 사용.
