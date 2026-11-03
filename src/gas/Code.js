@@ -116,7 +116,7 @@ function doPost(e) {
     if (data.type === 'admin_ledger_save') return adminLedgerSave(data);
 
     // 작업 큐 (workers/task-triage) — TASK_SECRET으로 따로 인증
-    if (data.type === 'task_list' || data.type === 'task_update' || data.type === 'task_append' || data.type === 'lost_get' || data.type === 'lost_update') {
+    if (/^(task_list|task_update|task_append|lost_get|lost_update|lost_pending)$/.test(data.type)) {
       return handleTaskQueue_(data);
     }
 
@@ -147,6 +147,7 @@ function doPost(e) {
  * - task_append : { fields: {...} } → 맨 아래에 한 줄 추가 ('참고' 값이 이미 있으면 추가하지 않음)
  * - lost_get    : { row: 612 } → 운영 시트 LostReport 한 줄 (연락처·기기 정보는 빼고 돌려준다)
  * - lost_update : { row: 612, fields: { '경찰접수번호': 'L2026…' } } → LOST_WRITABLE_HEADERS 칸만 (없으면 맨 오른쪽에 추가)
+ * - lost_pending: { limit: 3 } → 아직 작업 큐에 없는 LostReport 행 번호 (스크립트 속성 LOST_TRIAGE_FROM 행부터, 기본 612)
  */
 var LOST_PRIVATE_HEADERS = ['WechatId', 'UserAgent', 'PhotoURL', 'HotelBooker', 'CarNumber', 'hotelRoom'];
 var LOST_WRITABLE_HEADERS = ['경찰접수번호', '경찰접수일', '경찰관서'];
@@ -201,6 +202,26 @@ function handleTaskQueue_(data) {
 
   var sheet = SpreadsheetApp.openById(props.getProperty('TASK_SHEET_ID')).getSheets()[0];
   var headers = headerRow_(sheet);
+
+  if (data.type === 'lost_pending') {
+    // 큐 '참고' 칸에 이미 있는 LostReport!N 은 건너뛴다 (판정이 실패한 행은 다음 크론에 다시 잡힘)
+    var queued = {};
+    var refCol = headers.indexOf('참고(링크·위챗ID 등)');
+    if (refCol !== -1 && sheet.getLastRow() >= 2) {
+      sheet.getRange(2, refCol + 1, sheet.getLastRow() - 1, 1).getDisplayValues().forEach(function (r) { queued[r[0]] = true; });
+    }
+    var lostSh = SpreadsheetApp.openById(SHEET_ID).getSheetByName('LostReport');
+    var from = Math.max(2, parseInt(props.getProperty('LOST_TRIAGE_FROM') || '612', 10));
+    var last = lostSh.getLastRow();
+    var pending = [];
+    if (last >= from) {
+      lostSh.getRange(from, 1, last - from + 1, 1).getDisplayValues().forEach(function (r, i) {
+        var n = from + i;
+        if (String(r[0]).trim() && !queued['LostReport!' + n]) pending.push(n);
+      });
+    }
+    return json_({ result: 'success', rows: pending.slice(0, parseInt(data.limit, 10) || 3), total: pending.length });
+  }
 
   if (data.type === 'task_append') {
     if (!data.fields) return json_({ result: 'error', message: 'no fields' });

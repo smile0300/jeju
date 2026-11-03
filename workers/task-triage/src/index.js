@@ -403,11 +403,15 @@ function buildPoliceForm(row, fields, ko, answers, lostDate, photoIds) {
 
 export default {
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(triage(env).then(r => console.log('[triage]', JSON.stringify(r))));
+    ctx.waitUntil((async () => {
+      console.log('[triage]', JSON.stringify(await triage(env)));
+      console.log('[lost]', JSON.stringify(await triageLost(env)));
+    })());
   },
 
   // 모든 경로 TASK_SECRET 헤더 필요. minwon24 페이지(북마클릿)에서 부르므로 CORS 허용
-  //   GET  /run?lost_row=612        → LostReport 그 한 줄 판정 (분실물은 크론에 아직 안 붙임)
+  //   GET  /run?lost_row=612        → LostReport 그 한 줄 판정
+  //   GET  /run?lost_pending=1      → 크론과 같은 새 분실 접수 판정 (최대 3건)
   //   GET  /run?lost_row=612&peek=1 → 원본만
   //   POST /run {queueRow|lostRow, fields} → 작업 큐 / 운영 시트 기록
   //   GET  /form[?lost_row=612]     → 신고서 값 (없으면 '승인필요' 분실 건 중 첫 번째)
@@ -463,11 +467,31 @@ async function route(request, env, url) {
       // peek=1 → 판정 없이 원본 내용만 (경찰청 신고서 작성용, 연락처 칸은 GAS에서 이미 빠짐)
       if (lostRow >= 2 && url.searchParams.get('peek')) return Response.json(await callGas(env, { type: 'lost_get', row: lostRow }));
       if (lostRow >= 2) return Response.json(await processLost(env, lostRow));
+      if (url.searchParams.get('lost_pending')) return Response.json(await triageLost(env));
       return Response.json(await triage(env));
     }
   } catch (e) {
     return Response.json({ error: e.message }, { status: 500 });
   }
+}
+
+/**
+ * 새 분실 접수(아직 큐에 없는 LostReport 행)를 판정해 큐에 올린다 — 크론마다 최대 3건
+ * (한 건에 GAS·Jev·습득물 API 호출이 10여 개라 Workers 무료 요청 한도(50) 안에 맞춤)
+ */
+async function triageLost(env) {
+  const { rows } = await callGas(env, { type: 'lost_pending', limit: 3 });
+  const results = [];
+  for (const row of rows) {
+    try {
+      const r = await processLost(env, row);
+      results.push({ row, queueRow: r.queueRow, status: r.status, category: r.category, regions: r.regions });
+    } catch (e) {
+      console.error('[lost] row', row, e.message);
+      results.push({ row, error: e.message });
+    }
+  }
+  return results;
 }
 
 /** 큐에서 '승인필요' 분실 건의 신고서 값을 꺼낸다 (lostRow를 주면 그 건) */

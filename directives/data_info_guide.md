@@ -165,3 +165,4 @@
 - **사진**: LostReport `PhotoURL`의 드라이브 ID → GAS `?action=image&id=`(공개 링크 파일만, 1000px 축소본) → Worker `/photo`.
 - **GAS 배포 주의**: 작업 큐 기능이 들어간 배포는 `AKfycbzsQ…`. 예전 `AKfycbyr1…`는 구버전 코드. 비밀값은 스크립트 속성 `TASK_SECRET`(이름) = Worker 시크릿 `TASK_SECRET`(값), 로컬은 `.dev.vars`.
 - **Gemini**: API 키 미발급 결정 → 서버 자동화에는 쓰지 않음. 신고 문장은 GAS 자동번역(한국어) 칸 사용.
+- **크론 연결 (2026-11-03)**: Worker 크론(15분)이 `lost_pending`으로 아직 큐에 없는 LostReport 행(스크립트 속성 `LOST_TRIAGE_FROM`, 기본 612행부터)을 회당 최대 3건 판정해 큐에 올림. 수동 실행은 `/run?lost_pending=1`. 경찰 제출은 여전히 사람이 함.
