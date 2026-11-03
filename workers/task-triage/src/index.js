@@ -288,7 +288,7 @@ async function notifyAdmin(env, title, body) {
 }
 
 async function processLost(env, row) {
-  const { fields, photoIds = [] } = await callGas(env, { type: 'lost_get', row });
+  const { fields, ko = {}, photoIds = [] } = await callGas(env, { type: 'lost_get', row });
   const state = Object.entries(fields).map(([h, v]) => `${h}: ${v}`).join('\n');
   const answers = await askJev(env, state, LOST_QUESTIONS);
   const cat = answers.category || {};
@@ -327,7 +327,7 @@ async function processLost(env, row) {
 
   const status = isReal < 0.5 ? '확인필요' : '승인필요';
   const summary = String(fields['분실내용(자동번역)'] || fields.Desc_ko || state).replace(/\s+/g, ' ').slice(0, 80);
-  const form = buildPoliceForm(row, fields, answers, lostDate, photoIds);
+  const form = buildPoliceForm(row, fields, ko, answers, lostDate, photoIds);
   const formJson = JSON.stringify(form);
   const queued = await callGas(env, {
     type: 'task_append',
@@ -363,26 +363,29 @@ async function processLost(env, row) {
 
 /**
  * minwon24 분실물 신고서에 넣을 값 (fill 스크립트가 필드 ID 그대로 채운다)
- * 문장은 GAS 자동번역(한국어) 칸을 쓴다 — 분실자 이름·위챗ID는 넣지 않음
+ * 문장은 GAS 자동번역(한국어) 칸, 장소는 GAS가 번역해 준 ko.* 를 쓴다 — 분실자 이름·위챗ID는 넣지 않음
+ * minwon24는 한자를 ?로 저장해 버리므로 남은 한자는 지운다.
  */
-function buildPoliceForm(row, fields, answers, lostDate, photoIds) {
+function buildPoliceForm(row, fields, ko, answers, lostDate, photoIds) {
+  const noHan = (s) => String(s || '').replace(/[㐀-鿿豈-﫿]+/g, ' ').replace(/[ \t]+/g, ' ').trim();
   const cat = answers.category?.choice || 'PRZ000';
   const place = answers.place_type?.choice || 'LL1017';
   const color = answers.color?.choice || 'CL1010';
   const region = REGIONS[answers.region?.choice] ? answers.region.choice : 'jeju';
-  const ko = String(fields['분실내용(자동번역)'] || fields.Desc_ko || '')
+  const koText = String(fields['분실내용(자동번역)'] || fields.Desc_ko || '')
     .replace(/^[A-Z][a-z]{2} [A-Z][a-z]{2} \d{1,2} \d{4} [\d:]+ GMT[^)]*\)\s*/, '')   // 앞에 붙은 날짜 문자열
     .replace(/^\d{4}년 \d{1,2}월 \d{1,2}일 [^)]*\)\s*/, '')
     .trim();
-  const time = String(fields.Time || fields.RegionCategory || '').match(/^(\d{1,2}):\d{2}/) || ko.match(/(\d{1,2})\s*(?:시|:\d{2})/);
-  const route = fields.BoardLoc && fields.AlightLoc ? `${fields.BoardLoc} → ${fields.AlightLoc} ` : '';
-  const where = fields.DetailLocation || fields.HotelName || fields.City || '';
+  const time = String(fields.Time || fields.RegionCategory || '').match(/^(\d{1,2}):\d{2}/) || koText.match(/(\d{1,2})\s*(?:시|:\d{2})/);
+  const pk = (h) => noHan(ko[h] || fields[h]);
+  const route = fields.BoardLoc && fields.AlightLoc ? `${pk('BoardLoc')} → ${pk('AlightLoc')} ` : '';
+  const where = pk('DetailLocation') || pk('HotelName') || pk('City');
   const itemKo = `${COLOR_KO[color]} ${CATEGORY_KO[cat]}`.trim();
   return {
     lostRow: row,
     sido: SIDO_PREFIX[region],
     rgnCd: REGIONS[region].codes[0],
-    lostPlcNm: `${route}${where} ${PLACE_KO[place]}`.replace(/\s+/g, ' ').trim().slice(0, 60),
+    lostPlcNm: `${`${route}${where}`.replace(/\s+/g, ' ').trim().slice(0, 50)} (${PLACE_KO[place]})`,
     lostPlcSeCd: place,
     lostYmd: lostDate.toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' }),
     hour: String(time ? Math.min(23, parseInt(time[1], 10)) : 12).padStart(2, '0'),
@@ -391,8 +394,9 @@ function buildPoliceForm(row, fields, answers, lostDate, photoIds) {
     qty: 1,
     itemName: itemKo.replace(/\d{4,}/g, ''),
     title: `${PLACE_KO[place] === '기타' ? '' : PLACE_KO[place] + ' '}${CATEGORY_KO[cat]} 분실`.trim(),
-    content: `${ko}\n\n분실자는 외국인 관광객이며 제주 여행 정보 서비스(jeju-live)가 대리 신고합니다. (내부 접수 LostReport ${row})`.slice(0, 1900),
-    guText: `${ko} ${where} ${fields.AlightLoc || ''} ${fields.City || ''}`,
+    // 신청인(운영자) 연락처로 경찰 연락이 오므로 대리 신고라는 것만 짧게 남긴다
+    content: noHan(`${koText}\n\n(외국인 관광객 분실물 대리 신고)`).slice(0, 1900),
+    guText: `${koText} ${where} ${pk('AlightLoc')} ${pk('City')}`,
     photoIds
   };
 }

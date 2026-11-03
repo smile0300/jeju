@@ -175,7 +175,12 @@ function handleTaskQueue_(data) {
       if (!h || LOST_PRIVATE_HEADERS.indexOf(h) !== -1) return;
       if (v && v !== '#N/A') fields[h] = v;
     });
-    return json_({ result: 'success', row: lostRow, fields: fields, photoIds: photoIds.slice(0, 3) });
+    // 장소 칸은 자동번역이 없어 중국어 그대로 → 경찰 신고서(한자는 ?로 깨짐)용으로 한국어 번역을 같이 준다
+    var ko = {};
+    ['DetailLocation', 'HotelName', 'BoardLoc', 'AlightLoc', 'City'].forEach(function (h) {
+      if (fields[h]) ko[h] = /[㐀-鿿]/.test(fields[h]) ? MY_DEEPL(fields[h], 'ko') : fields[h];
+    });
+    return json_({ result: 'success', row: lostRow, fields: fields, ko: ko, photoIds: photoIds.slice(0, 3) });
   }
 
   if (data.type === 'lost_update') {
