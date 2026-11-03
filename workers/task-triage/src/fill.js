@@ -40,21 +40,28 @@ export async function jejuFill(form, opts = {}) {
     if (siOpt) setVal(si, siOpt.value); else problems.push('관서 시·도 못 찾음: ' + form.sido);
     const gun = $('plcstFindGun');
     await waitFor(() => gun.options.length > 1);
-    const guOpt = pickOption(gun, o => {
+    // Jev가 고른 구·군(form.gu)이 우선, 없으면 문장에 구 이름이 그대로 나오는지
+    const guOpt = (form.gu && pickOption(gun, o => o.text === form.gu)) || pickOption(gun, o => {
       const base = o.text.replace(/(구|군|시)$/, '');
       return base.length >= 2 && form.guText.includes(base);
     });
-    if (guOpt) { setVal(gun, guOpt.value); guName = guOpt.text; }
     const modal = si.closest('.krds-modal') || document;
-    ($('policeSearchBtn') || [...modal.querySelectorAll('button')].find(b => b.textContent.trim() === '검색'))?.click();
-    // 결과는 <td role="button">경찰청 ○○청 ○○경찰서</td>
-    const station = await waitFor(() => [...modal.querySelectorAll('[role=button], button')].find(b => /경찰서$/.test(b.textContent.trim())));
-    if (station) station.click(); else problems.push('관서 검색 결과 없음');
+    if (guOpt) {
+      setVal(gun, guOpt.value);
+      guName = guOpt.text;
+      ($('policeSearchBtn') || [...modal.querySelectorAll('button')].find(b => b.textContent.trim() === '검색'))?.click();
+      // 결과는 <td role="button">경찰청 ○○청 ○○경찰서</td>
+      const station = await waitFor(() => [...modal.querySelectorAll('[role=button], button')].find(b => /경찰서$/.test(b.textContent.trim())));
+      if (station) station.click(); else problems.push('관서 검색 결과 없음 — 관서 찾기에서 직접 선택');
+    } else {
+      // 시·도 전체 목록의 첫 경찰서를 고르면 엉뚱한 관할이 되므로 팝업을 열어 둔 채 사람에게 넘긴다
+      problems.push(`구·군을 못 정함 — 관서 찾기 팝업에서 ${form.sido} 구·군을 직접 선택`);
+    }
   } else problems.push('관서 찾기 팝업이 안 열림');
 
   // 3) 분실 정보
   setVal($('rgnCd'), form.rgnCd);
-  setVal($('sggNm'), guName || form.sido);
+  setVal($('sggNm'), guName || form.gu || form.sido);
   setVal($('lostPlcNm'), form.lostPlcNm);
   setVal($('lostPlcSeCd'), form.lostPlcSeCd);
   setVal($('lostYmd'), form.lostYmd);

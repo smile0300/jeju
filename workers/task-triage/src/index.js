@@ -7,6 +7,7 @@
  */
 
 import { jejuFill, jejuRecord } from './fill.js';
+import { GU_BY_REGION } from './gu.js';
 
 const JEV_URL ='https://api.typesafe.ai/v1/systemone';
 const MAX_ROWS_PER_RUN = 10;
@@ -327,6 +328,17 @@ async function processLost(env, row) {
 
   const status = isReal < 0.5 ? '확인필요' : '승인필요';
   const summary = String(fields['분실내용(자동번역)'] || fields.Desc_ko || state).replace(/\s+/g, ' ').slice(0, 80);
+  // 관할 경찰서를 정하려면 구·군까지 필요 — 문장에 '이태원'만 있어도 용산구를 고르게 Jev에 따로 묻는다
+  const formRegion = REGIONS[answers.region?.choice] ? answers.region.choice : 'jeju';
+  const guList = GU_BY_REGION[formRegion] || [];
+  if (guList.length > 1) {
+    const guCriteria = Object.fromEntries(guList.map((g, i) => [`g${i}`, g]));
+    guCriteria.unknown = 'Cannot tell which district';
+    const guAns = (await askJev(env, `${state}\n${Object.values(ko).join('\n')}`, {
+      gu: { type: 'choice', instructions: 'In which district (구/군/시) of this city or province was the item lost? Use neighborhood, landmark, station or bus stop names.', criteria: guCriteria }
+    })).gu;
+    if (guAns?.choice && guAns.choice !== 'unknown' && Number(guAns.confidence ?? 0) >= 0.5) answers.gu = guCriteria[guAns.choice];
+  } else if (guList.length === 1) answers.gu = guList[0];
   const form = buildPoliceForm(row, fields, ko, answers, lostDate, photoIds);
   const formJson = JSON.stringify(form);
   const queued = await callGas(env, {
@@ -384,6 +396,7 @@ function buildPoliceForm(row, fields, ko, answers, lostDate, photoIds) {
   return {
     lostRow: row,
     sido: SIDO_PREFIX[region],
+    gu: answers.gu || '',
     rgnCd: REGIONS[region].codes[0],
     lostPlcNm: `${`${route}${where}`.replace(/\s+/g, ' ').trim().slice(0, 50)} (${PLACE_KO[place]})`,
     lostPlcSeCd: place,
