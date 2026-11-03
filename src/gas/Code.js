@@ -412,9 +412,13 @@ function handleLostReport_(data) {
     'PhotoURL': photoUrl,
     'WechatId': data.wechatId || '',
     'UserAgent': data.userAgent || '',
-    'Labels': ''
+    'Labels': '',
+    // 2026-11 양식 추가 칸 (경찰 신고서 색상 코드·신분증 긴급 표시에 바로 쓰임)
+    'ItemColor': data.itemColor || '',
+    'HasIdCard': data.hasIdCard || ''
   };
 
+  if (data.itemColor || data.hasIdCard) ensureHeaders_(sheet, ['ItemColor', 'HasIdCard']);
   var headers = headerRow_(sheet);
   if (!headers.some(function (h) { return rowData[h] !== undefined; })) headers = LOST_REPORT_HEADERS;
   var row = rowByHeaders_(headers, rowData);

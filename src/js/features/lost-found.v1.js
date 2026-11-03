@@ -367,11 +367,13 @@ function resetLostReportForm() {
     // 체크박스 초기화
     const privacyCheck = document.getElementById('agreePrivacy');
     if (privacyCheck) privacyCheck.checked = false;
+    const idCheck = document.getElementById('lost-report-has-id');
+    if (idCheck) idCheck.checked = false;
 
     // 칩 선택 초기화
-    ['lost-report-item-category', 'lost-report-city-category', 'lost-report-region-category'
+    ['lost-report-item-category', 'lost-report-item-color', 'lost-report-city-category', 'lost-report-region-category'
     ].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-    document.querySelectorAll('#item-category-chips .lost-chip, #city-category-chips .lost-chip, #region-category-chips .lost-chip')
+    document.querySelectorAll('#item-category-chips .lost-chip, #item-color-chips .lost-chip, #city-category-chips .lost-chip, #region-category-chips .lost-chip')
         .forEach(c => c.classList.remove('active'));
 
     // 서브 필드 숨기기
@@ -531,11 +533,25 @@ document.addEventListener('DOMContentLoaded', () => {
                         vehicleLabel.classList.remove('required-field');
                     }
                 }
-            } else {
-                // 공항/기타의 경우 기본 날짜/시간 폼만 표시
-                const subCommon = document.getElementById('sub-common-datetime');
-                if(subCommon) subCommon.classList.add('active');
             }
+            // 분실 날짜·시간은 모든 장소에서 받는다 (호텔·버스·택시에서 빠져 있어 경찰 신고서 날짜를 문장에서 추측해야 했음)
+            // 상세 위치 칸은 호텔·차량 전용 칸이 따로 있으니 그때만 숨김
+            const subCommon = document.getElementById('sub-common-datetime');
+            if (subCommon) subCommon.classList.add('active');
+            const detailLoc = document.getElementById('sub-detail-location-group');
+            if (detailLoc) detailLoc.style.display = (val === '호텔' || val === '택시' || val === '버스') ? 'none' : '';
+        });
+    });
+
+    // Item Color Chips (다시 누르면 해제)
+    const colorChips = document.querySelectorAll('#item-color-chips .lost-chip');
+    colorChips.forEach(chip => {
+        chip.addEventListener('click', function() {
+            const wasActive = this.classList.contains('active');
+            colorChips.forEach(c => c.classList.remove('active'));
+            if (!wasActive) this.classList.add('active');
+            const hiddenInput = document.getElementById('lost-report-item-color');
+            if (hiddenInput) hiddenInput.value = wasActive ? '' : this.dataset.value;
         });
     });
 
@@ -613,6 +629,8 @@ export async function submitLostReport() {
         city: getVal('lost-report-city-category'),
         itemName: "N/A", // Deprecated conceptually, but kept to not break anything if backend relies on it
         specifics: getVal('lost-report-specifics'),
+        itemColor: getVal('lost-report-item-color'),
+        hasIdCard: document.getElementById('lost-report-has-id')?.checked ? 'Y' : '',
         regionCategory: regionCat,
         date: getVal('lost-report-date'),
         time: getVal('lost-report-time'),

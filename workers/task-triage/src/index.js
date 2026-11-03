@@ -173,6 +173,9 @@ const COLORS = {
   CL1007: 'Blue, sky blue, mint, navy', CL1008: 'Brown, beige', CL1009: 'Purple', CL1011: 'Pink',
   CL1019: 'Gray', CL1023: 'Silver', CL1010: 'Other or multicolor'
 };
+// 접수 양식 색상 버튼 값 → 신고서 색상 코드 ('기타'는 Jev 판정 사용)
+const COLOR_BY_NAME = { 흰색: 'CL1001', 검정: 'CL1002', 빨강: 'CL1003', 파랑: 'CL1007', 초록: 'CL1006', 노랑: 'CL1005',
+  갈색: 'CL1008', 분홍: 'CL1011', 회색: 'CL1019' };
 const COLOR_KO = { CL1001: '흰색', CL1002: '검은색', CL1003: '빨간색', CL1004: '주황색', CL1005: '노란색', CL1006: '초록색',
   CL1007: '파란색', CL1008: '갈색', CL1009: '보라색', CL1011: '분홍색', CL1019: '회색', CL1023: '은색', CL1010: '' };
 const CATEGORY_KO = { PRA000: '가방', PRO000: '귀금속', PRB000: '도서용품', PRC000: '서류', PRD000: '산업용품', PRQ000: '쇼핑백',
@@ -294,7 +297,8 @@ async function processLost(env, row) {
   const answers = await askJev(env, state, LOST_QUESTIONS);
   const cat = answers.category || {};
   const isReal = Number(answers.is_real?.noul ?? 0);
-  const hasId = Number(answers.has_id?.noul ?? 0);
+  // 접수 양식에서 직접 체크한 값이 있으면 Jev 추측보다 우선
+  const hasId = fields.HasIdCard === 'Y' ? 1 : Number(answers.has_id?.noul ?? 0);
 
   const lostDate = findLostDate(fields);
   const to = new Date(Math.min(Date.now(), lostDate.getTime() + SEARCH_DAYS_AFTER_LOSS * 86400000));
@@ -382,7 +386,7 @@ function buildPoliceForm(row, fields, ko, answers, lostDate, photoIds) {
   const noHan = (s) => String(s || '').replace(/[㐀-鿿豈-﫿]+/g, ' ').replace(/[ \t]+/g, ' ').trim();
   const cat = answers.category?.choice || 'PRZ000';
   const place = answers.place_type?.choice || 'LL1017';
-  const color = answers.color?.choice || 'CL1010';
+  const color = COLOR_BY_NAME[fields.ItemColor] || answers.color?.choice || 'CL1010';
   const region = REGIONS[answers.region?.choice] ? answers.region.choice : 'jeju';
   const koText = String(fields['분실내용(자동번역)'] || fields.Desc_ko || '')
     .replace(/^[A-Z][a-z]{2} [A-Z][a-z]{2} \d{1,2} \d{4} [\d:]+ GMT[^)]*\)\s*/, '')   // 앞에 붙은 날짜 문자열
@@ -408,7 +412,7 @@ function buildPoliceForm(row, fields, ko, answers, lostDate, photoIds) {
     itemName: itemKo.replace(/\d{4,}/g, ''),
     title: `${PLACE_KO[place] === '기타' ? '' : PLACE_KO[place] + ' '}${CATEGORY_KO[cat]} 분실`.trim(),
     // 신청인(운영자) 연락처로 경찰 연락이 오므로 대리 신고라는 것만 짧게 남긴다
-    content: noHan(`${koText}\n\n(외국인 관광객 분실물 대리 신고)`).slice(0, 1900),
+    content: noHan(`${koText}${fields.HasIdCard === 'Y' ? '\n※ 안에 여권·신분증·카드가 들어 있음' : ''}\n\n(외국인 관광객 분실물 대리 신고)`).slice(0, 1900),
     guText: `${koText} ${where} ${pk('AlightLoc')} ${pk('City')}`,
     photoIds
   };
