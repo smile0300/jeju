@@ -6,7 +6,7 @@
  * Jev 판정은 거르는 단계일 뿐 실행 허가가 아니다. push·발송 등은 Claude 쪽에서 따로 승인받는다.
  */
 
-import { jejuFill, jejuRecord } from './fill.js';
+import { jejuFill, jejuSubmit, jejuRecord } from './fill.js';
 import { GU_BY_REGION } from './gu.js';
 
 const JEV_URL ='https://api.typesafe.ai/v1/systemone';
@@ -447,26 +447,61 @@ export default {
     const url = new URL(request.url);
     const cors = {
       'Access-Control-Allow-Origin': 'https://minwon24.police.go.kr',
-      'Access-Control-Allow-Headers': 'x-task-secret, content-type',
+      'Access-Control-Allow-Headers': 'x-task-secret, x-task-ticket, content-type',
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
     };
     if (request.method === 'OPTIONS') return new Response(null, { headers: cors });
     // 채우기 스크립트 자체는 비밀이 아니라 인증 없이 (값·사진은 /form·/photo 에서 인증 후)
     if (url.pathname === '/fill.js') {
       // 번들러(esbuild keepNames)가 함수 안에 __name(...) 을 끼워 넣으므로 브라우저 쪽에 같은 이름의 빈 헬퍼를 둔다
-      return new Response(`var __name = __name || ((f) => f);\nwindow.jejuFill = ${jejuFill.toString()};\nwindow.jejuRecord = ${jejuRecord.toString()};\n`, {
+      return new Response(`var __name = __name || ((f) => f);\nwindow.jejuFill = ${jejuFill.toString()};\nwindow.jejuSubmit = ${jejuSubmit.toString()};\nwindow.jejuRecord = ${jejuRecord.toString()};\n`, {
         headers: { ...cors, 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/javascript; charset=utf-8', 'Cache-Control': 'no-store' }
       });
     }
     if (!['/run', '/form', '/photo'].includes(url.pathname)) return new Response('ok');
-    if (String(request.headers.get('x-task-secret') || '').trim() !== String(env.TASK_SECRET || '').trim()) {
+    let res;
+    const ticket = await checkTicket(env, request.headers.get('x-task-ticket'));
+    if (ticket) {
+      // 신고서 한 건 전용 30분 표 — 그 건의 사진과 접수 기록만 (Claude 자동 등록이 비밀값을 화면 코드에 넣지 않도록)
+      res = await routeTicket(request, env, url, ticket);
+    } else if (String(request.headers.get('x-task-secret') || '').trim() !== String(env.TASK_SECRET || '').trim()) {
       return new Response('forbidden', { status: 403, headers: cors });
+    } else {
+      res = await route(request, env, url);
     }
-    const res = await route(request, env, url);
     Object.entries(cors).forEach(([k, v]) => res.headers.set(k, v));
     return res;
   }
 };
+
+// ─── 신고서 한 건 전용 표 (queueRow.lostRow.만료ms.서명) ───
+const TICKET_MS = 30 * 60000;
+async function signTicket(env, payload) {
+  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(String(env.TASK_SECRET)), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const sig = new Uint8Array(await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(payload)));
+  return [...sig.slice(0, 16)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+async function makeTicket(env, queueRow, lostRow) {
+  const payload = `${queueRow}.${lostRow}.${Date.now() + TICKET_MS}`;
+  return `${payload}.${await signTicket(env, payload)}`;
+}
+async function checkTicket(env, raw) {
+  const m = String(raw || '').match(/^(\d+)\.(\d+)\.(\d+)\.([0-9a-f]{32})$/);
+  if (!m || Number(m[3]) < Date.now()) return null;
+  if (await signTicket(env, `${m[1]}.${m[2]}.${m[3]}`) !== m[4]) return null;
+  return { queueRow: Number(m[1]), lostRow: Number(m[2]) };
+}
+async function routeTicket(request, env, url, t) {
+  if (url.pathname === '/photo' && request.method === 'GET') return route(request, env, url);
+  if (url.pathname === '/run' && request.method === 'POST') {
+    const body = await request.clone().json();
+    if ((body.queueRow && body.queueRow !== t.queueRow) || (body.lostRow && body.lostRow !== t.lostRow)) {
+      return Response.json({ error: 'ticket mismatch' }, { status: 403 });
+    }
+    return route(request, env, url);
+  }
+  return Response.json({ error: 'not allowed with ticket' }, { status: 403 });
+}
 
 async function route(request, env, url) {
   try {
@@ -586,5 +621,6 @@ async function nextForm(env, lostRow) {
   const lost = rows.filter(r => /^LostReport!\d+$/.test(r['참고(링크·위챗ID 등)'] || '') && r['신고서']);
   const pick = lostRow >= 2 ? lost.find(r => r['참고(링크·위챗ID 등)'] === `LostReport!${lostRow}`) : lost[0];
   if (!pick) return { error: lostRow ? `LostReport ${lostRow}: 등록필요 상태의 신고서 없음 (판정을 먼저 돌릴 것)` : '대기 중인 분실 신고 없음' };
-  return { queueRow: pick.row, form: JSON.parse(pick['신고서']), summary: pick['요청내용'], found: pick['처리결과'] };
+  const form = JSON.parse(pick['신고서']);
+  return { queueRow: pick.row, form, summary: pick['요청내용'], found: pick['처리결과'], ticket: await makeTicket(env, pick.row, form.lostRow) };
 }

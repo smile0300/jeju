@@ -22,6 +22,10 @@ export async function jejuFill(form, opts = {}) {
   const waitFor = async (fn, ms = 5000) => { for (let t = 0; t < ms; t += 200) { const v = fn(); if (v) return v; await sleep(200); } return null; };
   const pickOption = (sel, test) => [...sel.options].find(o => o.value && test(o));
   const problems = [];
+  // 로그인이 풀려 있으면 신고서 대신 로그인 화면이 뜬다
+  if (!$('tkcgInstNm')) return { loggedOut: true, path: location.pathname };
+  // 비밀값(북마클릿) 또는 이 건 전용 30분 표(Claude 자동 등록)
+  const auth = opts.ticket ? { 'x-task-ticket': opts.ticket } : opts.secret ? { 'x-task-secret': opts.secret } : null;
 
   // 1) 약관 모두 동의
   const terms = $('chk_terms_all');
@@ -79,12 +83,12 @@ export async function jejuFill(form, opts = {}) {
   setVal($('pstCn'), form.title);
   setVal($('excptnMttr'), form.content);
 
-  // 5) 사진 (secret 있을 때만 — Claude는 file_upload로 따로 첨부)
+  // 5) 사진 (비밀값이나 표가 있을 때 Worker에서 받아 첨부)
   let photos = 0;
-  if (opts.secret && form.photoIds?.length) {
+  if (auth && form.photoIds?.length) {
     const dt = new DataTransfer();
     for (const id of form.photoIds.slice(0, 3)) {
-      const r = await fetch(`${opts.api}/photo?id=${id}`, { headers: { 'x-task-secret': opts.secret } });
+      const r = await fetch(`${opts.api}/photo?id=${id}`, { headers: auth });
       if (r.ok) { const b = await r.blob(); dt.items.add(new File([b], `lost_${form.lostRow}_${dt.items.length + 1}.jpg`, { type: b.type || 'image/jpeg' })); }
     }
     const input = $('file-upload-multi1');
@@ -105,13 +109,28 @@ export async function jejuFill(form, opts = {}) {
   };
 }
 
+/** 신청하기 → 페이지 안 확인 창(접수 후 수정 불가)의 '확인'. 누른 뒤 신청완료 페이지로 넘어간다. */
+export async function jejuSubmit() {
+  const btn = document.getElementById('submitButton');
+  if (!btn) return { error: '신청하기 버튼 없음' };
+  btn.click();
+  for (let t = 0; t < 5000; t += 200) {
+    await new Promise(r => setTimeout(r, 200));
+    const ok = [...document.querySelectorAll('.krds-modal.shown button, .krds-modal.in button')].find(b => b.textContent.trim() === '확인');
+    // 필수 칸이 비면 확인 창 대신 안내 창이 뜬다 — 그 문구를 돌려준다
+    if (ok) { const msg = ok.closest('.krds-modal').innerText.slice(0, 120); ok.click(); return { clicked: true, msg }; }
+  }
+  return { error: '확인 창이 안 뜸', modal: document.querySelector('.krds-modal.shown')?.innerText.slice(0, 200) || '' };
+}
+
 export async function jejuRecord(opts = {}) {
   const sn = new URLSearchParams(location.search).get('aplyCvlcptSn');
   if (!sn) return { error: '신청완료 페이지가 아님' };
   const pending = JSON.parse(localStorage.getItem('jejuPending') || '{}');
   const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' });
   const office = (pending.office || '').split(' ').pop();
-  const post = (body) => fetch(`${opts.api}/run`, { method: 'POST', headers: { 'x-task-secret': opts.secret, 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(r => r.json());
+  const auth = opts.ticket ? { 'x-task-ticket': opts.ticket } : { 'x-task-secret': opts.secret };
+  const post = (body) => fetch(`${opts.api}/run`, { method: 'POST', headers: { ...auth, 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(r => r.json());
   const out = { sn, pending };
   if (pending.queueRow) out.queue = await post({ queueRow: pending.queueRow, fields: { '상태': '완료', '처리일시': `${today} 경찰청 분실신고 접수 ${sn} (${office})` } });
   if (pending.lostRow) out.lost = await post({ lostRow: pending.lostRow, fields: { '경찰접수번호': sn, '경찰접수일': today, '경찰관서': office } });
