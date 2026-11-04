@@ -1,6 +1,6 @@
 ---
 name: police-lost-report
-description: 작업 큐의 '승인필요' 분실 건을 경찰민원24(minwon24) 분실물 신고로 등록. "경찰 등록해", "분실신고 올려", "LostReport N 신고" 요청 시 사용.
+description: 작업 큐의 '등록필요'(결제 확인된) 분실 건을 경찰민원24(minwon24) 분실물 신고로 등록. "경찰 등록해", "분실신고 올려", "LostReport N 신고" 요청 시 사용.
 ---
 
 # 경찰민원24 분실물 신고 (저토큰 절차)
@@ -13,7 +13,7 @@ description: 작업 큐의 '승인필요' 분실 건을 경찰민원24(minwon24)
 ```bash
 node tools/minwon24.js prep [LostReport행번호] <scratchpad>/minwon24
 ```
-- 행 번호를 비우면 큐의 첫 '승인필요' 분실 건.
+- 행 번호를 비우면 큐의 첫 '등록필요' 분실 건. 결제 전('결제대기') 건은 꺼내지 않음.
 - `ERROR … 판정을 먼저` 가 나오면 `node tools/minwon24.js judge N` 을 먼저 실행 (Jev 판정 → 큐 등록).
 - 출력의 `FORM` 을 보고 `lostPlcNm`(중국어 지명일 수 있음)·`itemName`·`title` 을 더 자연스러운 한국어로 고칠 필요가 있으면 `JS` 줄의 JSON 안에서만 고친다. 4자리 이상 숫자는 물품명에 넣지 말 것.
 

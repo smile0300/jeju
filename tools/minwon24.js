@@ -2,7 +2,7 @@
  * 경찰민원24 분실물 신고 — Claude 실행용 도우미 (토큰 절약: 비밀값·사진 바이트를 대화에 올리지 않는다)
  *
  *   node tools/minwon24.js judge <lostRow>
- *     → Jev 판정·습득물 검색 후 작업 큐에 '승인필요'로 올림 (신고서 값 포함)
+ *     → Jev 판정·습득물 검색 후 작업 큐에 '결제대기'(결제 확인 시 '등록필요')로 올림 (신고서 값 포함)
  *   node tools/minwon24.js prep [lostRow] <outDir>
  *     → 작업 큐에서 신고서 값을 받아 outDir/form.json, 사진을 outDir/lost_<row>_N.jpg 로 저장하고
  *       Chrome javascript_tool 에 그대로 붙일 한 줄(JS)과 요약을 출력
