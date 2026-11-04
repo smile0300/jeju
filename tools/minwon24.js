@@ -42,10 +42,11 @@ async function prep(lostRow, outDir) {
 }
 
 // 경찰 접수 완료를 고객 위챗으로 안내 (tools/wechat-send.ps1). 위챗 ID는 출력하지 않는다.
-// --to <id> 를 주면 그 ID로 보낸다(시험용).
+// 1순위: 운영자가 친구 수락 때 단 备注 'JL<행번호>' (고객이 친구 요청 메시지에 적은 접수 코드)
+// 2순위: 양식의 위챗 ID — 위챗 ID 형식일 때만 (휴대폰 번호·wxid_ 는 검색이 안 돼 시도하지 않음)
+// --to <id 또는 JL코드> 를 주면 그것으로만 보낸다(시험용, 큐 기록 안 함).
+const WECHAT_ID_RE = /^[a-zA-Z][-_a-zA-Z0-9]{5,19}$/;
 async function wechat(queueRow, lostRow, sn, office, to) {
-  const id = to || (await (await fetch(`${API}/run?lost_row=${lostRow}&contact=1`, { headers })).json()).wechatId;
-  if (!id) { console.log('FAIL 위챗 ID 없음'); return; }
   const msg = [
     '您好！您在 jeju-live 登记的失物，已在韩国警察厅系统完成报失登记（与亲自到警察局报案效力相同）。',
     `受理编号：${sn}`,
@@ -54,12 +55,25 @@ async function wechat(queueRow, lostRow, sn, office, to) {
     '—— jeju-live 济州失物招领'
   ].filter(Boolean).join('\n');
   const { execFileSync } = require('child_process');
+  const send = (flag, value) => {
+    try {
+      return execFileSync('powershell', ['-STA', '-ExecutionPolicy', 'Bypass', '-File', path.join(__dirname, 'wechat-send.ps1'), flag, value, '-Message', msg],
+        { encoding: 'utf8', timeout: 60000 }).trim().split(/\r?\n/).pop();
+    } catch (e) {
+      return String(e.stdout || e.message).trim().split(/\r?\n/).pop();
+    }
+  };
   let out;
-  try {
-    out = execFileSync('powershell', ['-STA', '-ExecutionPolicy', 'Bypass', '-File', path.join(__dirname, 'wechat-send.ps1'), '-WechatId', id, '-Message', msg],
-      { encoding: 'utf8', timeout: 60000 }).trim().split(/\r?\n/).pop();
-  } catch (e) {
-    out = String(e.stdout || e.message).trim().split(/\r?\n/).pop();
+  if (to) {
+    out = send(/^JL\d+$/i.test(to) ? '-Remark' : '-WechatId', to);
+  } else {
+    out = send('-Remark', `JL${lostRow}`);
+    if (!out.startsWith('OK')) {
+      const id = String((await (await fetch(`${API}/run?lost_row=${lostRow}&contact=1`, { headers })).json()).wechatId || '').replace(/\s/g, '');
+      out = WECHAT_ID_RE.test(id) && !/^wxid_/i.test(id)
+        ? send('-WechatId', id)
+        : `FAIL 접수 코드 JL${lostRow}로 된 친구가 없고, 양식의 위챗 ID도 검색할 수 없는 형식(번호 등)`;
+    }
   }
   const ok = out.startsWith('OK');
   const today = new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Seoul' }).slice(0, 16);

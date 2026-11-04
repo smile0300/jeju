@@ -369,6 +369,7 @@ function resetLostReportForm() {
     if (privacyCheck) privacyCheck.checked = false;
     const idCheck = document.getElementById('lost-report-has-id');
     if (idCheck) idCheck.checked = false;
+    showWechatIdProblem('');
 
     // 칩 선택 초기화
     ['lost-report-item-category', 'lost-report-item-color', 'lost-report-city-category', 'lost-report-region-category'
@@ -613,6 +614,33 @@ export function handleLostImageChange(event) {
     reader.readAsDataURL(file);
 }
 
+// 위챗 ID 규칙: 영문으로 시작, 6~20자, 영문·숫자·_·- (tools/minwon24.js 발송 쪽과 같은 규칙)
+function wechatIdProblem(v) {
+    const s = String(v || '').replace(/\s/g, '');
+    if (!s) return '';
+    if (/^\+?\d[\d-]{6,}$/.test(s)) return 'phone';
+    if (/^wxid_/i.test(s)) return 'wxid';
+    if (!/^[a-zA-Z][-_a-zA-Z0-9]{5,19}$/.test(s)) return 'format';
+    return '';
+}
+function showWechatIdProblem(problem) {
+    const input = document.getElementById('lost-report-wechat');
+    const err = document.getElementById('lost-wechat-error');
+    if (input) input.classList.toggle('invalid', !!problem);
+    if (!err) return;
+    err.textContent = problem && window.t ? window.t('modal.lost.wechat.err.' + problem) : '';
+    err.style.visibility = problem ? 'visible' : 'hidden';
+}
+document.addEventListener('input', (e) => {
+    if (e.target?.id !== 'lost-report-wechat') return;
+    // 타이핑 중에는 길이 부족(format)은 띄우지 않고, 번호·wxid 만 바로 알린다
+    const p = wechatIdProblem(e.target.value);
+    showWechatIdProblem(p === 'format' ? '' : p);
+});
+document.addEventListener('focusout', (e) => {
+    if (e.target?.id === 'lost-report-wechat') showWechatIdProblem(wechatIdProblem(e.target.value));
+});
+
 export async function submitLostReport() {
     const statusEl = document.getElementById('lost-report-status');
     const submitBtn = document.getElementById('lost-report-submit-btn');
@@ -670,6 +698,14 @@ export async function submitLostReport() {
         return;
     }
     
+    // 위챗 ID(微信号)만 받는다 — 휴대폰 번호·기본 wxid_ 는 검색이 안 돼 연락할 수 없다
+    const wxProblem = wechatIdProblem(data.wechatId);
+    if (wxProblem) {
+        showWechatIdProblem(wxProblem);
+        document.getElementById('lost-report-wechat')?.focus();
+        return;
+    }
+
     if (data.regionCategory === '호텔' && !data.hotelRoom) {
         if (statusEl) {
             statusEl.textContent = window.t ? window.t('lost.report.fill_err') : '필수 항목(사진 포함)을 모두 입력해주세요.';
@@ -784,6 +820,12 @@ export async function submitLostReport() {
                 const actionBtns = document.getElementById('upsell-action-btns');
                 if (qrContainer) qrContainer.style.display = 'none';
                 if (actionBtns) actionBtns.style.display = 'flex';
+                // 친구 요청 메시지에 적을 접수 코드 (JL + 시트 행 번호) — 운영자가 이 코드로 备注를 단다
+                const codeEl = document.getElementById('upsell-case-code');
+                if (codeEl) {
+                    codeEl.textContent = lastLostReport?.row ? 'JL' + lastLostReport.row : '';
+                    codeEl.style.display = lastLostReport?.row ? '' : 'none';
+                }
             }
         } else {
             throw new Error(result.error || result.message || 'Unknown Server Error');

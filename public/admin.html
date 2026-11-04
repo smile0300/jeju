@@ -278,6 +278,9 @@
     var stage = lostStage(r);
     if (stage) badges.appendChild(el('span', stage === 'wait' ? 'badge warn' : 'badge info', LOST_STAGES[stage] + (str(r['찾기상품']) ? ' · ' + str(r['찾기상품']) : '')));
     if (str(r.HasIdCard) === 'Y') badges.appendChild(el('span', 'badge warn', '🚨 신분증·카드'));
+    // 위챗 ID 형식이 아니면(번호·wxid_·닉네임) 자동 안내는 접수 코드 备注로만 가능
+    var wx = str(r.WechatId).replace(/\s/g, '');
+    if (wx && (!/^[a-zA-Z][-_a-zA-Z0-9]{5,19}$/.test(wx) || /^wxid_/i.test(wx))) badges.appendChild(el('span', 'badge warn', '⚠ 위챗ID 아님 → 备注 필요'));
     head.appendChild(badges);
     head.appendChild(el('span', 'time', r.Timestamp));
     c.appendChild(head);
@@ -294,6 +297,7 @@
       ['하차', joinNonEmpty([r.AlightLoc, r.AlightTime], ' ')],
       ['색상', r.ItemColor],
       ['위챗', r.WechatId],
+      ['접수 코드', 'JL' + r._row + ' (친구 수락 때 备注로)'],
       ['찾기 서비스', joinNonEmpty([r['찾기상품'], r['결제상태'] && '결제 ' + r['결제상태']], ' · ')],
       ['경찰 접수', joinNonEmpty([r['경찰접수번호'], r['경찰관서'], r['경찰접수일']], ' · ')],
       ['메모', r.AdminNote]
@@ -328,6 +332,7 @@
     editBtn.type = 'button';
     act.appendChild(editBtn);
     if (str(r.WechatId)) act.appendChild(copyBtn('위챗ID 복사', str(r.WechatId)));
+    act.appendChild(copyBtn('코드 JL' + r._row + ' 복사', 'JL' + r._row));
     if (str(r['경찰접수번호'])) act.appendChild(copyBtn('접수번호 복사', str(r['경찰접수번호'])));
     c.appendChild(act);
     editBtn.addEventListener('click', function () {

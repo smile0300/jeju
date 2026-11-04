@@ -132,11 +132,17 @@
             <button class="btn btn-secondary" onclick="closeLostUpsellModal()" style="width: 100%; background: transparent; border: none; color: var(--label-secondary); text-decoration: underline;" data-i18n="modal.upsell.decline">지금은 안 할게요 (정보만 저장)</button>
         </div>
 
-        <div id="upsell-qr-container" style="display:none; margin-bottom: 10px;">
-            <p style="font-size: 0.85rem; color: var(--accent); margin-bottom: 6px; font-weight: 600;" data-i18n="modal.upsell.qr_guide">👇 위챗페이로 아래 금액을 결제해 주세요 👇</p>
-            <p id="upsell-amount" style="font-size: 1.6rem; font-weight: 800; color: var(--color-orange); margin: 0 0 8px;"></p>
-            <img src="/assets/wechat_qr.png" style="width: 180px; height: 180px; border-radius: 8px; border: 1px solid #eee;">
-            <p style="font-size: 0.75rem; color: var(--label-tertiary); margin-top: 10px;" data-i18n="modal.upsell.qr_note">결제 메모에 위챗 ID를 꼭 적어 주세요.</p>
+        <div id="upsell-qr-container" style="display:none; margin-bottom: 4px;">
+            <p style="font-size: 0.85rem; color: var(--accent); margin-bottom: 6px; font-weight: 600;" data-i18n="modal.upsell.qr_guide">친구 추가 후 채팅에서 아래 금액을 송금해 주세요</p>
+            <p id="upsell-amount" style="font-size: 1.6rem; font-weight: 800; color: var(--color-orange); margin: 0;"></p>
+        </div>
+
+        <!-- 고객이 먼저 客服微信 친구 추가 (wechat_qr.png = 친구 추가 QR). 친구 요청 메시지의 접수 코드로 운영자가 备注를 달면
+             경찰 접수 안내를 그 코드로 찾아 자동 발송한다 (tools/minwon24.js wechat). 번호만 적은 고객도 연락 가능 -->
+        <div class="upsell-friend">
+            <div data-i18n-html="modal.upsell.friend.guide">QR로 고객센터 위챗을 친구 추가하고, 친구 요청 메시지에 아래 코드를 적어 주세요.</div>
+            <div class="upsell-friend-code" id="upsell-case-code"></div>
+            <img src="/assets/wechat_qr.png" alt="WeChat QR" style="display:block; width: 150px; height: 150px; margin: 6px auto 0; border-radius: 8px; border: 1px solid #eee;" loading="lazy">
         </div>
     </div>
 </div>

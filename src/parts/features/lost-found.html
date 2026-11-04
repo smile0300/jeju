@@ -373,7 +373,10 @@
                 
                 <div class="lost-form-group">
                     <label class="lost-form-label"><i class="ph-duotone ph-chat-circle"></i> <span data-i18n="modal.lost.wechat.label" class="required-field">위챗 ID</span></label>
-                    <input type="text" id="lost-report-wechat" class="lost-form-input" data-i18n="modal.lost.name.ph" placeholder="위챗 ID를 입력해주세요">
+                    <input type="text" id="lost-report-wechat" class="lost-form-input" data-i18n="modal.lost.name.ph" placeholder="위챗 ID를 입력해주세요" autocomplete="off" autocapitalize="off" spellcheck="false">
+                    <!-- 위챗 ID(微信号)만 받는다: 휴대폰 번호는 검색을 막아 둔 사람이 많아 연락이 안 됨 -->
+                    <p class="lost-form-hint" data-i18n="modal.lost.wechat.howto">위챗 → 나 → 프로필 사진 옆 '위챗 ID'를 길게 눌러 복사하세요.</p>
+                    <p id="lost-wechat-error" class="lost-form-hint lost-form-hint-error" style="visibility:hidden;"></p>
                 </div>
                 
                 <!-- 개인정보 동의 체크박스 추가 -->
