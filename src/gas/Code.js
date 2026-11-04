@@ -113,6 +113,7 @@ function doPost(e) {
 
     // 관리자 페이지 수정 (functions/api/admin/sheet.js) — 관리자 키로 따로 인증
     if (data.type === 'admin_update') return adminUpdate(data);
+    if (data.type === 'admin_lost_update') return adminLostUpdate(data);
     if (data.type === 'admin_ledger_save') return adminLedgerSave(data);
 
     // 작업 큐 (workers/task-triage) — TASK_SECRET으로 따로 인증
@@ -743,6 +744,34 @@ function adminList(params) {
     rows.push(obj);
   }
   return adminJson_({ headers: headers.filter(Boolean), rows: rows });
+}
+
+/**
+ * 관리자 페이지에서 LostReport 한 줄의 운영 칸만 수정 (찾기 서비스 결제 확인, 경찰 접수 기록 등)
+ * data: { key, row, fields } — 고객이 쓴 칸은 건드리지 않게 ADMIN_LOST_COLS 만 허용, 없는 열은 맨 오른쪽에 추가
+ */
+var ADMIN_LOST_COLS = ['찾기상품', '결제상태', '경찰접수번호', '경찰접수일', '경찰관서', 'AdminNote'];
+function adminLostUpdate(data) {
+  if (!adminAuthorized_(data.key)) return adminJson_({ result: 'error', message: 'unauthorized' });
+  var row = parseInt(data.row, 10);
+  var names = Object.keys(data.fields || {}).filter(function (h) { return ADMIN_LOST_COLS.indexOf(h) !== -1; });
+  if (!(row >= 2) || !names.length) return adminJson_({ result: 'error', message: '수정할 수 없는 칸' });
+  var lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+    var sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName('LostReport');
+    if (!sheet || row > sheet.getLastRow()) return adminJson_({ result: 'error', message: '행 없음' });
+    var headers = ensureHeaders_(sheet, names);
+    names.forEach(function (h) { sheet.getRange(row, headers.indexOf(h) + 1).setValue(String(data.fields[h]).trim()); });
+    var vals = sheet.getRange(row, 1, 1, headers.length).getValues()[0];
+    var obj = { _row: row };
+    headers.forEach(function (h, j) { if (h) obj[h] = adminCell_(vals[j]); });
+    var koIdx = lostTranslateCols_(headers).ko - 1;
+    obj._ko = adminCell_(vals[koIdx] !== undefined ? vals[koIdx] : '');
+    return adminJson_({ result: 'success', row: obj, written: names });
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 /**

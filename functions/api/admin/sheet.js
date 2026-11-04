@@ -2,6 +2,7 @@
  * [관리자 전용] 관리자 페이지 시트 조회·수정 — public/admin.html
  *   GET  /api/admin/sheet?sheet=LostReport|SuccessStories  → { headers, rows }
  *   POST /api/admin/sheet  { caseId, fields }               → SuccessStories 한 건 수정
+ *   POST /api/admin/sheet  { sheet:'LostReport', row, fields } → 분실신고 결제·경찰 접수 칸 수정
  *   GET  /api/admin/sheet?sheet=Ledger                      → 정산표 { headers, summary, rows }
  *   POST /api/admin/sheet  { sheet:'Ledger', row?, orig?, values } → 정산표 행 추가(row 없음)·수정
  *
@@ -87,6 +88,19 @@ export async function onRequestPost({ request, env }) {
   try {
     const body = await request.json();
     if (body.sheet === 'Ledger') return await saveLedger(env, body);
+    // 분실신고: 찾기 서비스 결제·경찰 접수 칸만 (GAS가 허용 칸을 다시 막음)
+    if (body.sheet === 'LostReport') {
+      const row = parseInt(body.row, 10);
+      const lostFields = body.fields && typeof body.fields === 'object' ? body.fields : null;
+      if (!(row >= 2) || !lostFields || !Object.keys(lostFields).length) return respond({ error: '수정할 내용이 없습니다.' }, 400);
+      const res = await readGas(await fetch(String(env.ADMIN_GAS_URL).trim(), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'admin_lost_update', key: env.ADMIN_LOOKUP_SECRET || '', row, fields: lostFields }),
+      }));
+      if (res.result !== 'success') throw new Error('저장 실패: ' + (res.message || JSON.stringify(res)));
+      return respond(res);
+    }
     const caseId = String(body.caseId || '').trim();
     const fields = body.fields && typeof body.fields === 'object' ? body.fields : null;
     if (!caseId || !fields || !Object.keys(fields).length) return respond({ error: '수정할 내용이 없습니다.' }, 400);

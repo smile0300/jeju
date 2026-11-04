@@ -34,6 +34,8 @@
   .count { font-size:13px; color:var(--muted); margin:0 2px 10px; display:flex; justify-content:space-between; }
   .badge { display:inline-block; font-size:12px; padding:2px 8px; border-radius:99px; background:var(--bg); border:1px solid var(--line); margin:0 4px 4px 0; }
   .badge.strong { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
+  .badge.warn { background:var(--warn-bg); border-color:var(--warn); color:var(--warn); font-weight:600; }
+  .badge.info { background:var(--info-bg); border-color:var(--info); color:var(--info); font-weight:600; }
   .item-head { display:flex; justify-content:space-between; gap:8px; align-items:flex-start; }
   .time { font-size:12px; color:var(--muted); white-space:nowrap; }
   .title { font-weight:600; margin:2px 0 6px; word-break:break-word; }
@@ -113,6 +115,16 @@
 
   var state = { sheet: 'LostReport', data: {}, shown: PAGE };
 
+  // 분실신고 찾기 서비스 (사이트 접수 후 팝업에서 고름 → 위챗 QR 결제 → 여기서 '결제 확인' → 경찰 등록 → 접수번호 기록)
+  var LOST_PLANS = ['기본 9.9元', '집중 19.9元'];
+  var LOST_STAGES = { wait: '💳 결제 대기', paid: '👮 경찰 등록 대기', done: '✅ 경찰 등록 완료' };
+  function lostStage(r) {
+    if (str(r['경찰접수번호'])) return 'done';
+    if (str(r['결제상태']) === '확인') return 'paid';
+    if (str(r['찾기상품'])) return 'wait';
+    return '';
+  }
+
   try { $('key').value = localStorage.getItem('adminReplyKey') || ''; } catch (e) {}
 
   function el(tag, cls, text) {
@@ -175,6 +187,11 @@
         opts.push([m, m.slice(0, 4) + '년 ' + Number(m.slice(5)) + '월 (' + months[m] + ')']);
       });
     } else if (state.sheet === 'LostReport') {
+      // 찾기 서비스 진행 단계 필터 (값 앞에 ':' — 물건 분류 필터와 구분)
+      Object.keys(LOST_STAGES).forEach(function (k) {
+        var n = rows.filter(function (r) { return lostStage(r) === k; }).length;
+        if (n) opts.push([':' + k, LOST_STAGES[k] + ' (' + n + ')']);
+      });
       var cats = {};
       rows.forEach(function (r) { var c = str(r.ItemCategory); if (c) cats[c] = (cats[c] || 0) + 1; });
       Object.keys(cats).sort().forEach(function (c) { opts.push([c, c + ' (' + cats[c] + ')']); });
@@ -202,7 +219,8 @@
       });
     }
     return rows.filter(function (r) {
-      if (f && str(state.sheet === 'LostReport' ? r.ItemCategory : r.Step) !== f) return false;
+      if (f && f.charAt(0) === ':') { if (lostStage(r) !== f.slice(1)) return false; }
+      else if (f && str(state.sheet === 'LostReport' ? r.ItemCategory : r.Step) !== f) return false;
       if (!q) return true;
       return Object.keys(r).some(function (k) { return str(r[k]).toLowerCase().indexOf(q) !== -1; });
     });
@@ -257,6 +275,9 @@
     [r.ItemCategory, r.City, r.RegionCategory].forEach(function (t, i) {
       if (str(t)) badges.appendChild(el('span', i === 0 ? 'badge strong' : 'badge', t));
     });
+    var stage = lostStage(r);
+    if (stage) badges.appendChild(el('span', stage === 'wait' ? 'badge warn' : 'badge info', LOST_STAGES[stage] + (str(r['찾기상품']) ? ' · ' + str(r['찾기상품']) : '')));
+    if (str(r.HasIdCard) === 'Y') badges.appendChild(el('span', 'badge warn', '🚨 신분증·카드'));
     head.appendChild(badges);
     head.appendChild(el('span', 'time', r.Timestamp));
     c.appendChild(head);
@@ -271,7 +292,11 @@
       ['차량', r.CarNumber],
       ['탑승', joinNonEmpty([r.BoardLoc, r.BoardTime], ' ')],
       ['하차', joinNonEmpty([r.AlightLoc, r.AlightTime], ' ')],
-      ['위챗', r.WechatId]
+      ['색상', r.ItemColor],
+      ['위챗', r.WechatId],
+      ['찾기 서비스', joinNonEmpty([r['찾기상품'], r['결제상태'] && '결제 ' + r['결제상태']], ' · ')],
+      ['경찰 접수', joinNonEmpty([r['경찰접수번호'], r['경찰관서'], r['경찰접수일']], ' · ')],
+      ['메모', r.AdminNote]
     ]);
     c.appendChild(dl);
     if (str(r._ko)) c.appendChild(el('div', 'ko', '🇰🇷 ' + str(r._ko)));
@@ -289,10 +314,96 @@
     }
 
     var act = el('div', 'actions');
+    // 위챗 입금을 확인했으면 한 번에 '확인' — 15분 안에 작업 큐가 경찰 등록 대기로 넘어감
+    if (stage === 'wait') {
+      var payBtn = el('button', '', '💳 결제 확인');
+      payBtn.type = 'button';
+      payBtn.addEventListener('click', function () {
+        if (!window.confirm(r._row + '행 ' + str(r['찾기상품']) + ' 결제를 확인 처리할까요?')) return;
+        saveLost(c, r, { '결제상태': '확인' }, payBtn);
+      });
+      act.appendChild(payBtn);
+    }
+    var editBtn = el('button', 'sub', '✏️ 상태 수정');
+    editBtn.type = 'button';
+    act.appendChild(editBtn);
     if (str(r.WechatId)) act.appendChild(copyBtn('위챗ID 복사', str(r.WechatId)));
+    if (str(r['경찰접수번호'])) act.appendChild(copyBtn('접수번호 복사', str(r['경찰접수번호'])));
     c.appendChild(act);
+    editBtn.addEventListener('click', function () {
+      var f = c.querySelector('form.edit');
+      if (f) { f.remove(); editBtn.textContent = '✏️ 상태 수정'; return; }
+      c.insertBefore(lostEditForm(c, r), act.nextSibling);
+      editBtn.textContent = '닫기';
+    });
     c.appendChild(rawDetails(r));
     return c;
+  }
+
+  // 찾기 서비스·결제·경찰 접수 칸 수정 (고객이 쓴 칸은 GAS가 막음)
+  function lostEditForm(card, r) {
+    var form = el('form', 'edit');
+    function sel(name, options) {
+      var wrap = el('div');
+      var lab = el('label', '', name);
+      var s = el('select');
+      s.name = name;
+      options.forEach(function (o) { var op = el('option', '', o || '(없음)'); op.value = o; s.appendChild(op); });
+      if (options.indexOf(str(r[name])) === -1) { var op = el('option', '', str(r[name])); op.value = str(r[name]); s.appendChild(op); }
+      s.value = str(r[name]);
+      s.dataset.orig = str(r[name]);
+      wrap.appendChild(lab);
+      wrap.appendChild(s);
+      return wrap;
+    }
+    var row1 = el('div', 'row');
+    row1.appendChild(sel('찾기상품', [''].concat(LOST_PLANS)));
+    row1.appendChild(sel('결제상태', ['', '대기', '확인']));
+    form.appendChild(row1);
+    ['경찰접수번호', '경찰관서', '경찰접수일', 'AdminNote'].forEach(function (h) {
+      var f = field(h, r[h]);
+      if (h === '경찰접수일') f.querySelector('input').type = 'date';
+      form.appendChild(f);
+    });
+    form.appendChild(el('div', 'notes', '기본에서 집중으로 업그레이드(10元 추가)하면 찾기상품을 바꾸세요. 경찰 접수는 북마클릿 기록 버튼을 쓰면 자동으로 채워집니다.'));
+    var msg = el('p', 'error');
+    msg.hidden = true;
+    var save = el('button', 'save', '저장');
+    save.type = 'submit';
+    form.appendChild(save);
+    form.appendChild(msg);
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var fields = {};
+      form.querySelectorAll('[name]').forEach(function (inp) {
+        if (inp.value.trim() !== inp.dataset.orig) fields[inp.name] = inp.value.trim();
+      });
+      if (!Object.keys(fields).length) { msg.textContent = '바뀐 내용이 없습니다.'; msg.hidden = false; return; }
+      saveLost(card, r, fields, save, msg);
+    });
+    return form;
+  }
+
+  async function saveLost(card, r, fields, btn, msg) {
+    var label = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '저장 중…';
+    try {
+      var data = await api('POST', { sheet: 'LostReport', row: r._row, fields: fields });
+      var rows = state.data.LostReport.rows;
+      var i = rows.indexOf(r);
+      if (i !== -1) rows[i] = data.row;
+      buildFilter();
+      var fresh = lostCard(data.row);
+      card.replaceWith(fresh);
+      var ok = el('p', 'ok', '✅ 저장됨: ' + data.written.join(', '));
+      fresh.appendChild(ok);
+      setTimeout(function () { ok.remove(); }, 4000);
+    } catch (e) {
+      if (msg) { msg.textContent = e.message; msg.hidden = false; } else showError(e.message);
+      btn.disabled = false;
+      btn.textContent = label;
+    }
   }
 
   function successCard(r) {
