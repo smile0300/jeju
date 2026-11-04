@@ -528,6 +528,8 @@ async function route(request, env, url) {
       const lostRow = parseInt(url.searchParams.get('lost_row'), 10);
       // peek=1 → 판정 없이 원본 내용만 (경찰청 신고서 작성용, 연락처 칸은 GAS에서 이미 빠짐)
       if (lostRow >= 2 && url.searchParams.get('peek')) return Response.json(await callGas(env, { type: 'lost_get', row: lostRow }));
+      // contact=1 → 고객 위챗 ID (경찰 접수 안내 발송용, 비밀값 필요 — 표로는 못 씀)
+      if (lostRow >= 2 && url.searchParams.get('contact')) return Response.json(await callGas(env, { type: 'lost_contact', row: lostRow }));
       if (lostRow >= 2) return Response.json(await processLost(env, lostRow));
       if (url.searchParams.get('lost_pending')) return Response.json(await triageLost(env));
       if (url.searchParams.get('watch')) return Response.json(await watchPaidLost(env));

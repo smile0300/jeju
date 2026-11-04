@@ -28,6 +28,9 @@ node tools/minwon24.js prep [LostReport행번호] <scratchpad>/minwon24
 ## 3. 제출·기록 (Chrome 1회)
 `browser_batch`: `javascript_tool` → `SUBMIT`, `computer wait 4`, `javascript_tool` → `RECORD`
 - `RECORD` 결과에 `sn`(L로 시작)이 있으면 성공 → `notify "✅ 경찰 등록 완료 #lostRow" "<sn> <관서>"`.
+- 이어서 고객 위챗 안내 (Bash 1회): `node tools/minwon24.js wechat <queueRow> <lostRow> <sn> "<관서 마지막 단어, 예: 서울강남경찰서>"`
+  - 위챗 PC 화면을 2~3초 쓴다. 검색 결과에 그 위챗 ID가 OCR로 확인될 때만 보낸다. 실패하면 스크립트가 큐에 기록하고 푸시하므로 추가 조치 없이 다음 건으로.
+  - 위챗 ID는 출력되지 않는다. 화면 캡처·스크린샷 하지 말 것.
 - `신청완료 페이지가 아님` → 제출 실패. `SUBMIT` 결과의 msg/modal 문구와 함께 notify, 다음 건으로.
 
 한 번 실행에 최대 3건. 끝나면 만든 Chrome 탭을 닫는다.

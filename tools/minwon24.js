@@ -6,6 +6,8 @@
  *   node tools/minwon24.js prep [lostRow] <outDir>
  *     → 작업 큐에서 '등록필요' 건을 꺼내 요약(FORM)과 신고서 페이지에서 실행할 JS 세 줄(FILL·SUBMIT·RECORD) 출력
  *       (사진·접수 기록은 이 건 전용 30분 표로 페이지 안에서 처리 — 비밀값은 출력하지 않음)
+ *   node tools/minwon24.js wechat <queueRow> <lostRow> <접수번호> [관서명] [--to 시험용ID]
+ *     → 고객 위챗으로 접수 안내 발송(tools/wechat-send.ps1), 결과를 큐 '위챗안내' 칸에 기록, 실패 시 푸시
  *   node tools/minwon24.js notify <제목> [내용]
  *     → 관리자 앱 푸시
  *   node tools/minwon24.js record <접수번호> <queueRow> <lostRow> <관서명>
@@ -39,6 +41,36 @@ async function prep(lostRow, outDir) {
   console.log('RECORD', `${load}await jejuRecord(${opts})`);
 }
 
+// 경찰 접수 완료를 고객 위챗으로 안내 (tools/wechat-send.ps1). 위챗 ID는 출력하지 않는다.
+// --to <id> 를 주면 그 ID로 보낸다(시험용).
+async function wechat(queueRow, lostRow, sn, office, to) {
+  const id = to || (await (await fetch(`${API}/run?lost_row=${lostRow}&contact=1`, { headers })).json()).wechatId;
+  if (!id) { console.log('FAIL 위챗 ID 없음'); return; }
+  const msg = [
+    '您好！您在 jeju-live 登记的失物，已在韩国警察厅系统完成报失登记（与亲自到警察局报案效力相同）。',
+    `受理编号：${sn}`,
+    office ? `受理警察署：${office}` : '',
+    '接下来10天我们每天为您比对新的拾得物，有消息会第一时间通知您。',
+    '—— jeju-live 济州失物招领'
+  ].filter(Boolean).join('\n');
+  const { execFileSync } = require('child_process');
+  let out;
+  try {
+    out = execFileSync('powershell', ['-STA', '-ExecutionPolicy', 'Bypass', '-File', path.join(__dirname, 'wechat-send.ps1'), '-WechatId', id, '-Message', msg],
+      { encoding: 'utf8', timeout: 60000 }).trim().split(/\r?\n/).pop();
+  } catch (e) {
+    out = String(e.stdout || e.message).trim().split(/\r?\n/).pop();
+  }
+  const ok = out.startsWith('OK');
+  const today = new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Seoul' }).slice(0, 16);
+  if (!to) {
+    await fetch(`${API}/run`, { method: 'POST', headers: { ...headers, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ queueRow: +queueRow, fields: { '위챗안내': `${ok ? '보냄' : '실패'} ${today} ${ok ? '' : out}`.trim() } }) });
+    if (!ok) await notify(`⚠ 위챗 안내 실패 #${lostRow}`, `${sn} · ${out.replace(/^FAIL /, '')} — 직접 보내 주세요`);
+  }
+  console.log(ok ? 'WECHAT OK' : `WECHAT ${out}`);
+}
+
 async function notify(title, body) {
   const r = await fetch('https://jeju-weather-alerts.smile0300.workers.dev/api/notify-admin', {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, body })
@@ -67,6 +99,10 @@ if (cmd === 'judge') {
   prep(args[0] ? parseInt(args[0], 10) : 0, outDir);
 } else if (cmd === 'record') {
   record(...args);
+} else if (cmd === 'wechat') {
+  const i = args.indexOf('--to');
+  const to = i !== -1 ? args.splice(i, 2)[1] : '';
+  wechat(args[0], args[1], args[2], args[3] || '', to);
 } else if (cmd === 'notify') {
   notify(args[0], args[1] || '');
 } else {

@@ -117,7 +117,7 @@ function doPost(e) {
     if (data.type === 'admin_ledger_save') return adminLedgerSave(data);
 
     // 작업 큐 (workers/task-triage) — TASK_SECRET으로 따로 인증
-    if (/^(task_list|task_update|task_append|lost_get|lost_update|lost_pending)$/.test(data.type)) {
+    if (/^(task_list|task_update|task_append|lost_get|lost_update|lost_pending|lost_contact)$/.test(data.type)) {
       return handleTaskQueue_(data);
     }
 
@@ -184,6 +184,16 @@ function handleTaskQueue_(data) {
       if (fields[h]) ko[h] = /[㐀-鿿]/.test(fields[h]) ? MY_DEEPL(fields[h], 'ko') : fields[h];
     });
     return json_({ result: 'success', row: lostRow, fields: fields, ko: ko, photoIds: photoIds.slice(0, 3) });
+  }
+
+  // 경찰 접수 후 고객 위챗 안내용 — 위챗 ID 한 칸만 (tools/minwon24.js wechat 이 바로 발송에 쓰고 출력하지 않음)
+  if (data.type === 'lost_contact') {
+    var cSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName('LostReport');
+    var cRow = parseInt(data.row, 10);
+    if (!cSheet || !(cRow >= 2) || cRow > cSheet.getLastRow()) return json_({ result: 'error', message: 'bad row' });
+    var cHeaders = headerRow_(cSheet);
+    var cCol = cHeaders.indexOf('WechatId');
+    return json_({ result: 'success', wechatId: cCol === -1 ? '' : String(cSheet.getRange(cRow, cCol + 1).getDisplayValue()).trim() });
   }
 
   if (data.type === 'lost_update') {
