@@ -112,22 +112,31 @@
             </div>
         </div>
 
-        <div style="font-size: 3rem; color: var(--color-orange); margin-bottom: 15px;"><i class="ph-duotone ph-rocket-launch"></i></div>
-        <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 10px; color: var(--text-primary);" data-i18n="modal.upsell.title">접수는 완료되었습니다!</h3>
-        <p style="font-size: 0.95rem; color: var(--label-secondary); margin-bottom: 25px; line-height: 1.5;" data-i18n-html="modal.upsell.desc">
-            하지만 시스템에 등록만 해두면 찾는 데 오래 걸릴 수 있습니다.<br><br>
-            <b>단 10위안</b>에 전담 직원이 주변 호텔, 택시 등에 직접 전화를 돌려 <b>3~7일간 집중 수색 및 추적</b>을 시작할까요?
+        <div style="font-size: 3rem; color: var(--color-orange); margin-bottom: 10px;"><i class="ph-duotone ph-rocket-launch"></i></div>
+        <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 8px; color: var(--text-primary);" data-i18n="modal.upsell.title">접수 정보가 저장되었습니다</h3>
+        <p style="font-size: 0.9rem; color: var(--label-secondary); margin-bottom: 16px; line-height: 1.5;" data-i18n-html="modal.upsell.desc">
+            찾기 서비스를 고르시면 경찰청 시스템에 등록하고 찾기 시작합니다.
         </p>
-        
-        <div id="upsell-qr-container" style="display:none; margin-bottom: 20px;">
-            <p style="font-size: 0.85rem; color: var(--accent); margin-bottom: 10px; font-weight: 600;" data-i18n="modal.upsell.qr_guide">👇 위챗페이로 10위안 결제 시 즉시 수색 시작 👇</p>
-            <img src="/assets/wechat_qr.png" style="width: 180px; height: 180px; border-radius: 8px; border: 1px solid #eee;">
-            <p style="font-size: 0.75rem; color: var(--label-tertiary); margin-top: 10px;" data-i18n="modal.upsell.qr_note">결제 시 꼭 비고란에 성함을 남겨주세요.</p>
+
+        <!-- 찾기 서비스 2종 (가격: 기본 9.9 / 집중 19.9, 기본→집중 업그레이드 10) -->
+        <div id="upsell-action-btns" style="display: flex; flex-direction: column; gap: 10px; text-align: left;">
+            <button type="button" class="upsell-plan" onclick="selectUpsellPlan('basic')">
+                <span class="upsell-plan-head"><b data-i18n="modal.upsell.basic.name">기본 찾기</b><b class="upsell-plan-price">9.9元</b></span>
+                <span class="upsell-plan-desc" data-i18n-html="modal.upsell.basic.desc">경찰청 시스템 등록 + 10일간 습득물 자동 확인</span>
+            </button>
+            <button type="button" class="upsell-plan upsell-plan-focus" onclick="selectUpsellPlan('focus')">
+                <span class="upsell-plan-head"><b data-i18n="modal.upsell.focus.name">집중 찾기</b><b class="upsell-plan-price">19.9元</b></span>
+                <span class="upsell-plan-desc" data-i18n-html="modal.upsell.focus.desc">기본 찾기 포함 + 직접 문의</span>
+            </button>
+            <p style="font-size: 0.75rem; color: var(--label-tertiary); margin: 2px 0 0; line-height: 1.5;" data-i18n-html="modal.upsell.found_note">찾은 뒤: 대리수령 100~200元 + 택배비 별도</p>
+            <button class="btn btn-secondary" onclick="closeLostUpsellModal()" style="width: 100%; background: transparent; border: none; color: var(--label-secondary); text-decoration: underline;" data-i18n="modal.upsell.decline">지금은 안 할게요 (정보만 저장)</button>
         </div>
 
-        <div id="upsell-action-btns" style="display: flex; flex-direction: column; gap: 10px;">
-            <button class="btn btn-primary" onclick="showUpsellQR()" style="width: 100%; padding: 12px; font-size: 1rem; font-weight: 700; background: var(--color-orange); border: none;" data-i18n="modal.upsell.accept">🚀 네, 10위안에 전담 수색 시작하기</button>
-            <button class="btn btn-secondary" onclick="closeLostUpsellModal()" style="width: 100%; background: transparent; border: none; color: var(--label-secondary); text-decoration: underline;" data-i18n="modal.upsell.decline">아니요, 괜찮습니다. 접수만 할게요.</button>
+        <div id="upsell-qr-container" style="display:none; margin-bottom: 10px;">
+            <p style="font-size: 0.85rem; color: var(--accent); margin-bottom: 6px; font-weight: 600;" data-i18n="modal.upsell.qr_guide">👇 위챗페이로 아래 금액을 결제해 주세요 👇</p>
+            <p id="upsell-amount" style="font-size: 1.6rem; font-weight: 800; color: var(--color-orange); margin: 0 0 8px;"></p>
+            <img src="/assets/wechat_qr.png" style="width: 180px; height: 180px; border-radius: 8px; border: 1px solid #eee;">
+            <p style="font-size: 0.75rem; color: var(--label-tertiary); margin-top: 10px;" data-i18n="modal.upsell.qr_note">결제 메모에 위챗 ID를 꼭 적어 주세요.</p>
         </div>
     </div>
 </div>

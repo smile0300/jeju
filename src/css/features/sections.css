@@ -4635,6 +4635,60 @@ body:not(.page-home) .wechat-float-btn {
     font-weight: bold;
 }
 
+/* 분실 접수 색상 버튼: 실제 색 점 (번역이 버튼 글자를 바꿔도 남도록 ::before + --chip-color) */
+#item-color-chips .lost-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+}
+#item-color-chips .lost-chip::before {
+    content: '';
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--chip-color, transparent);
+    border: 1px solid rgba(0, 0, 0, 0.18);
+    flex-shrink: 0;
+}
+#item-color-chips .lost-chip.active {
+    border-width: 2px;
+}
+
+/* 분실 접수 후 찾기 서비스 선택 (modals.html #lost-upsell-modal) */
+.upsell-plan {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--separator);
+    border-radius: 12px;
+    background: var(--bg-primary);
+    text-align: left;
+    cursor: pointer;
+}
+.upsell-plan-focus {
+    border: 2px solid var(--color-orange, #ff6b00);
+    background: #fff7f0;
+}
+.upsell-plan-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+.upsell-plan-price {
+    color: var(--color-orange, #ff6b00);
+    font-size: 1.1rem;
+}
+.upsell-plan-desc {
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: var(--label-secondary);
+}
+
 /* Sub-fields */
 .sub-fields {
     display: none;

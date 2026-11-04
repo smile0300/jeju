@@ -129,6 +129,7 @@ function doPost(e) {
 
     if (data.type === 'proxy_pickup') return handleProxyPickup_(data);
     if (data.type === 'lost_report') return handleLostReport_(data);
+    if (data.type === 'lost_plan') return handleLostPlan_(data);
     if (data.type === 'reservation') return handleReservation_(data);
     if (data.type === 'feature' || data.type === 'customer_service' || data.type === 'cctv_apply') {
       return handleSimpleForm_(data);
@@ -436,13 +437,34 @@ function handleLostReport_(data) {
     row[srcCol] = srcText;
   }
 
-  writeRowAtEnd_(sheet, row);
+  var writtenRow = writeRowAtEnd_(sheet, row);
 
   notifyAdmin(
     '🔍 분실물 신고 접수',
     '[분류] ' + (data.itemCategory || '') + '  [도시] ' + (data.city || '') + '  [위챗] ' + (data.wechatId || '')
   );
-  return json_({ result: 'success', status: 'success' });
+  // row: 접수 직후 찾기 서비스(lost_plan)를 고를 때 어느 행인지 알려 주는 용도
+  return json_({ result: 'success', status: 'success', row: writtenRow });
+}
+
+/**
+ * 접수 직후 팝업에서 고른 찾기 서비스 기록 (기본 9.9元 / 집중 19.9元)
+ * { row, wechatId, plan } — 그 행의 WechatId 와 같을 때만 쓴다 (남의 접수 건 표시 방지)
+ * 결제 확인은 운영자가 위챗에서 하고 '결제상태'를 '확인'으로 바꾼다.
+ */
+var LOST_PLANS = { basic: '기본 9.9元', focus: '집중 19.9元' };
+function handleLostPlan_(data) {
+  var sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName('LostReport');
+  var row = parseInt(data.row, 10);
+  if (!sheet || !(row >= 2) || row > sheet.getLastRow() || !LOST_PLANS[data.plan]) return json_({ result: 'error', message: 'bad request' });
+  var headers = ensureHeaders_(sheet, ['찾기상품', '결제상태']);
+  var wechatCol = headers.indexOf('WechatId');
+  var owner = wechatCol === -1 ? '' : String(sheet.getRange(row, wechatCol + 1).getValue()).trim();
+  if (!owner || owner !== String(data.wechatId || '').trim()) return json_({ result: 'error', message: 'forbidden' });
+  sheet.getRange(row, headers.indexOf('찾기상품') + 1).setValue(LOST_PLANS[data.plan]);
+  sheet.getRange(row, headers.indexOf('결제상태') + 1).setValue('대기');
+  notifyAdmin('💰 찾기 서비스 선택 #' + row, LOST_PLANS[data.plan] + '  [위챗] ' + owner + ' — 결제 확인 필요');
+  return json_({ result: 'success' });
 }
 
 function handleReservation_(data) {

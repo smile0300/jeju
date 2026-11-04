@@ -330,7 +330,9 @@ async function processLost(env, row) {
     : `[${regionNames.join('+')}] 습득물 ${found.length}건 중 유력 후보: ` + top.map(([id, p]) => `${id} ${byId[id]?.fdPrdtNm || ''} @${byId[id]?.depPlace || ''} (${p.toFixed(2)})`).join(' / ') +
       ` | Jev 최종: ${match.choice} (${Number(match.confidence ?? 0).toFixed(2)})`;
 
-  const status = isReal < 0.5 ? '확인필요' : '승인필요';
+  // 찾기 서비스(9.9/19.9元) 결제가 확인된 건만 경찰 등록 대상 — 운영자가 LostReport '결제상태'를 '확인'으로 바꾸면 크론이 넘겨 줌
+  const paid = String(fields['결제상태'] || '').trim() === '확인';
+  const status = isReal < 0.5 ? '확인필요' : paid ? '승인필요' : '결제대기';
   const summary = String(fields['분실내용(자동번역)'] || fields.Desc_ko || state).replace(/\s+/g, ' ').slice(0, 80);
   // 관할 경찰서를 정하려면 구·군까지 필요 — 문장에 '이태원'만 있어도 용산구를 고르게 Jev에 따로 묻는다
   const formRegion = REGIONS[answers.region?.choice] ? answers.region.choice : 'jeju';
@@ -372,7 +374,7 @@ async function processLost(env, row) {
   } else {
     const urgent = hasId >= 0.5 ? '🚨 신분증 포함 · ' : '';
     const hit = match && match.choice !== 'none' ? `습득물 유력 후보 ${match.choice}` : `습득물 후보 ${found.length}건`;
-    await notifyAdmin(env, `🔎 분실 접수 #${row}`, `${urgent}${hit} · 경찰청 등록 대기`);
+    await notifyAdmin(env, `🔎 분실 접수 #${row}`, `${urgent}${hit} · ${status === '승인필요' ? '경찰청 등록 대기' : status}`);
   }
   return { row, queueRow: queued.row, existed: !!queued.existed, status, category: cat.choice, regions: regionNames, found: found.length, match: match?.choice || null, foundText, form };
 }
@@ -422,13 +424,21 @@ export default {
   async scheduled(event, env, ctx) {
     ctx.waitUntil((async () => {
       console.log('[triage]', JSON.stringify(await triage(env)));
-      console.log('[lost]', JSON.stringify(await triageLost(env)));
+      // 하루 한 번(KST 09:00~09:14)은 결제 건 10일 감시만 — Workers 무료 요청 한도(50) 때문에 다른 일과 나눔
+      const kst = new Date(event.scheduledTime + 9 * 3600000);
+      if (kst.getUTCHours() === 9 && kst.getUTCMinutes() < 15) {
+        console.log('[watch]', JSON.stringify(await watchPaidLost(env)));
+      } else {
+        console.log('[paid]', JSON.stringify(await promotePaid(env)));
+        console.log('[lost]', JSON.stringify(await triageLost(env)));
+      }
     })());
   },
 
   // 모든 경로 TASK_SECRET 헤더 필요. minwon24 페이지(북마클릿)에서 부르므로 CORS 허용
   //   GET  /run?lost_row=612        → LostReport 그 한 줄 판정
   //   GET  /run?lost_pending=1      → 크론과 같은 새 분실 접수 판정 (최대 3건)
+  //   GET  /run?paid=1 · ?watch=1   → 결제 확인 건 승인필요로 · 결제 건 10일 습득물 감시 (크론과 같음)
   //   GET  /run?lost_row=612&peek=1 → 원본만
   //   POST /run {queueRow|lostRow, fields} → 작업 큐 / 운영 시트 기록
   //   GET  /form[?lost_row=612]     → 신고서 값 (없으면 '승인필요' 분실 건 중 첫 번째)
@@ -485,6 +495,8 @@ async function route(request, env, url) {
       if (lostRow >= 2 && url.searchParams.get('peek')) return Response.json(await callGas(env, { type: 'lost_get', row: lostRow }));
       if (lostRow >= 2) return Response.json(await processLost(env, lostRow));
       if (url.searchParams.get('lost_pending')) return Response.json(await triageLost(env));
+      if (url.searchParams.get('watch')) return Response.json(await watchPaidLost(env));
+      if (url.searchParams.get('paid')) return Response.json(await promotePaid(env));
       return Response.json(await triage(env));
     }
   } catch (e) {
@@ -496,6 +508,63 @@ async function route(request, env, url) {
  * 새 분실 접수(아직 큐에 없는 LostReport 행)를 판정해 큐에 올린다 — 크론마다 최대 3건
  * (한 건에 GAS·Jev·습득물 API 호출이 10여 개라 Workers 무료 요청 한도(50) 안에 맞춤)
  */
+/** '결제대기' 큐 건 중 LostReport 결제상태가 '확인'이 된 것을 '승인필요'로 올린다 (최대 5건) */
+async function promotePaid(env) {
+  const { rows } = await callGas(env, { type: 'task_list', status: '결제대기' });
+  const out = [];
+  for (const q of rows.slice(0, 5)) {
+    const n = parseInt(String(q['참고(링크·위챗ID 등)'] || '').replace('LostReport!', ''), 10);
+    if (!(n >= 2)) continue;
+    const { fields } = await callGas(env, { type: 'lost_get', row: n });
+    if (String(fields['결제상태'] || '').trim() !== '확인') continue;
+    await callGas(env, { type: 'task_update', row: q.row, fields: { '상태': '승인필요' } });
+    await notifyAdmin(env, `💳 결제 확인 #${n}`, `${fields['찾기상품'] || ''} · 경찰청 등록 가능`);
+    out.push(n);
+  }
+  return out;
+}
+
+/**
+ * 경찰 등록을 마친 결제 건(큐 '완료')을 등록일부터 10일간 하루 한 번 습득물과 다시 대조
+ * 새 후보가 Jev 일치 확률 0.5 이상이면 관리자 푸시 (위챗 안내는 운영자가). 이미 알린 습득물은 '감시알림' 칸에 쌓아 중복 방지.
+ */
+const WATCH_DAYS = 10;
+async function watchPaidLost(env) {
+  const { rows } = await callGas(env, { type: 'task_list', status: '완료' });
+  const now = Date.now();
+  const out = [];
+  for (const q of rows) {
+    if (out.length >= 5) break;
+    const ref = String(q['참고(링크·위챗ID 등)'] || '');
+    const done = String(q['처리일시'] || '').match(/^(\d{4}-\d{2}-\d{2})/);
+    if (!/^LostReport!\d+$/.test(ref) || !done || !q['신고서']) continue;
+    if (now - new Date(`${done[1]}T00:00:00+09:00`).getTime() > WATCH_DAYS * 86400000) continue;
+    const form = JSON.parse(q['신고서']);
+    const notified = String(q['감시알림'] || '').split(/\s+/).filter(Boolean);
+    try {
+      const found = (await searchFound(env, form.lclsf, [form.rgnCd], new Date(`${form.lostYmd}T00:00:00+09:00`), new Date()))
+        .filter(c => !notified.includes(c.atcId))
+        .sort((a, b) => String(b.fdYmd).localeCompare(String(a.fdYmd))).slice(0, MAX_MATCH_CANDIDATES);
+      if (!found.length) { out.push({ ref, fresh: 0 }); continue; }
+      const criteria = { none: 'None of these found items is the lost item' };
+      found.forEach(c => { criteria[c.atcId] = `${c.fdPrdtNm} | found ${c.fdYmd} | ${c.depPlace} | ${c.fdSbjt || ''}`.slice(0, 300); });
+      const m = (await askJev(env, `${form.itemName}\n${form.lostPlcNm}\n${form.content}`, {
+        match: { type: 'choice', instructions: 'Which found item (if any) is most likely the same object as this lost item?', criteria }
+      })).match;
+      const p = Number(m?.probabilities?.[m?.choice] ?? 0);
+      if (m?.choice && m.choice !== 'none' && p >= 0.5) {
+        const c = found.find(f => f.atcId === m.choice);
+        await notifyAdmin(env, `🎯 습득물 후보 (${ref})`, `${c.fdPrdtNm} @${c.depPlace} ${c.fdYmd} (${p.toFixed(2)}) · ${m.choice}`);
+        await callGas(env, { type: 'task_update', row: q.row, fields: { '감시알림': [...notified, m.choice].join(' ') } });
+      }
+      out.push({ ref, fresh: found.length, match: m?.choice, p });
+    } catch (e) {
+      out.push({ ref, error: e.message });
+    }
+  }
+  return out;
+}
+
 async function triageLost(env) {
   const { rows } = await callGas(env, { type: 'lost_pending', limit: 3 });
   const results = [];

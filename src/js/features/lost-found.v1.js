@@ -734,6 +734,8 @@ export async function submitLostReport() {
         }
 
         if (result.result === 'success' || result.status === 'success') {
+            // 찾기 서비스 선택 시 어느 접수 건인지 알리기 위해 (GAS가 시트 행 번호를 돌려줌)
+            lastLostReport = { row: result.row || 0, wechatId: data.wechatId };
             const catChip = Array.from(document.querySelectorAll('.lost-chip[data-value]')).find(c => c.dataset.value === data.itemCategory);
             saveMyCase({ type: 'report', caseId: result.caseId || '', labelKey: catChip?.dataset.i18n || '', itemName: data.itemCategory });
             if (statusEl) {
@@ -1439,12 +1441,28 @@ export function renderSuccessGoodsView(isLoadMore = false) {
 };
 
 
-window.showUpsellQR = function() {
+// 찾기 서비스 가격 (업그레이드 기본→집중 차액 10元은 위챗에서 수동 안내)
+const UPSELL_PLANS = { basic: '9.9元', focus: '19.9元' };
+let lastLostReport = null;
+
+window.selectUpsellPlan = function(plan) {
     const qrContainer = document.getElementById('upsell-qr-container');
     const actionBtns = document.getElementById('upsell-action-btns');
+    const amount = document.getElementById('upsell-amount');
+    if (amount) amount.textContent = UPSELL_PLANS[plan] || '';
     if (qrContainer) qrContainer.style.display = 'block';
     if (actionBtns) actionBtns.style.display = 'none';
+
+    // 고른 상품을 운영 시트에 남김 (결제 확인은 운영자가 위챗에서) — 실패해도 결제 안내는 그대로
+    if (lastLostReport?.row) {
+        fetch(`${CONFIG.PROXY_URL}/api/lost-report`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: 'lost_plan', row: lastLostReport.row, wechatId: lastLostReport.wechatId, plan })
+        }).catch(() => {});
+    }
+    if (window.dataLayer) window.dataLayer.push({ event: 'lost_plan_select', label: plan });
 };
+window.showUpsellQR = () => window.selectUpsellPlan('basic');
 
 window.closeLostUpsellModal = function(fromPopState = false) {
     const upsellModal = document.getElementById('lost-upsell-modal');
