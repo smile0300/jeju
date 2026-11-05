@@ -2157,6 +2157,13 @@
     color: white;
 }
 
+/* 습득물 상세 '내 물건이에요 · 대리수령' — 닫기·상담 위 한 줄 전체 */
+.lost-modal-pickup {
+    display: block;
+    width: 100%;
+    margin: 4px 0 10px;
+}
+
 .lost-modal-btn.secondary {
     background: #f1f5f9;
     color: var(--text-secondary);
@@ -4737,6 +4744,13 @@ body:not(.page-home) .wechat-float-btn {
     font-size: 1.1rem;
     font-weight: 800;
     letter-spacing: 1px;
+}
+
+.upsell-declined p {
+    margin: 4px 0 12px;
+    font-size: 0.92rem;
+    line-height: 1.55;
+    color: var(--text-primary);
 }
 
 /* 분실 접수 후 찾기 서비스 선택 (modals.html #lost-upsell-modal) */

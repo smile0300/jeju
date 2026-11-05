@@ -128,7 +128,13 @@
                 <span class="upsell-plan-head"><b data-i18n="modal.upsell.focus.name">집중 찾기</b><b class="upsell-plan-price">19.9元</b></span>
                 <span class="upsell-plan-desc" data-i18n-html="modal.upsell.focus.desc">기본 찾기 포함 + 직접 문의</span>
             </button>
-            <button class="btn btn-secondary" onclick="closeLostUpsellModal()" style="width: 100%; background: transparent; border: none; color: var(--label-secondary); text-decoration: underline;" data-i18n="modal.upsell.decline">지금은 안 할게요 (정보만 저장)</button>
+            <button class="btn btn-secondary" onclick="declineUpsell()" style="width: 100%; background: transparent; border: none; color: var(--label-secondary); text-decoration: underline;" data-i18n="modal.upsell.decline">지금은 안 할게요 (정보만 저장)</button>
+        </div>
+
+        <!-- '지금은 안 할게요' 뒤: 다음에 무슨 일이 있는지 안내 (친구 추가 칸은 아래에 그대로) -->
+        <div id="upsell-declined" class="upsell-declined" style="display:none;">
+            <p data-i18n-html="modal.upsell.declined">정보를 저장했어요. 비슷한 습득물이 보이면 위챗으로 알려 드릴게요.</p>
+            <button type="button" class="btn btn-primary" onclick="closeLostUpsellModal()" style="width: 100%; padding: 12px;" data-i18n="modal.upsell.close">확인</button>
         </div>
 
         <div id="upsell-qr-container" style="display:none; margin-bottom: 4px;">

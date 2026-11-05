@@ -302,9 +302,10 @@ export function openLostDetailModalByIndex(index) {
                 ${item.tel ? `<div class="lost-modal-field"><span class="lost-modal-label">${window.t('lost.detail.tel')}</span><span class="lost-modal-value"><a href="tel:${escapeHTML(item.tel)}" style="color: var(--primary-color, #0076ff); text-decoration: underline; font-weight: 500;">${escapeHTML(item.tel)}</a></span></div>` : ''}
                 ${item.desc ? `<div class="lost-modal-field" style="flex-direction: column; align-items: flex-start; gap: 6px; margin-top: 8px; border-top: 1px dashed #eee; padding-top: 8px;"><span class="lost-modal-label" style="margin-bottom: 2px;">${window.t('lost.detail.desc')}</span><span class="lost-modal-value" style="width: 100%; white-space: pre-wrap; line-height: 1.5; color: #444; background: #f8f9fa; padding: 10px 12px; border-radius: 6px; font-size: 13px; box-sizing: border-box;">${escapeHTML(item.desc)}</span></div>` : ''}
             </div>
+            <button class="lost-modal-btn primary lost-modal-pickup" onclick="pickupFoundItem(${index})">${window.t('lost.detail.pickup')}</button>
             <div class="lost-modal-footer">
                 <button class="lost-modal-btn secondary" onclick="closeLostDetailModal()">${window.t('lost.detail.close')}</button>
-                <button class="lost-modal-btn primary" onclick="showWechatQR()">${window.t('lost.detail.cs')}</button>
+                <button class="lost-modal-btn secondary" onclick="showWechatQR()">${window.t('lost.detail.cs')}</button>
             </div>
             <div id="wechat-qr-container" style="display:none; text-align:center; padding: 15px; border-top: 1px solid #eee;">
                 <p style="font-size: 14px; color: #666; margin-bottom: 10px;">${window.t('lost.detail.wechat_guide')}</p>
@@ -821,6 +822,8 @@ export async function submitLostReport() {
                 const actionBtns = document.getElementById('upsell-action-btns');
                 if (qrContainer) qrContainer.style.display = 'none';
                 if (actionBtns) actionBtns.style.display = 'flex';
+                const declined = document.getElementById('upsell-declined');
+                if (declined) declined.style.display = 'none';
                 // 친구 요청 메시지에 적을 접수 코드 (JL + 시트 행 번호) — 운영자가 이 코드로 备注를 단다
                 const codeEl = document.getElementById('upsell-case-code');
                 if (codeEl) {
@@ -1508,6 +1511,15 @@ window.selectUpsellPlan = function(plan) {
 };
 window.showUpsellQR = () => window.selectUpsellPlan('basic');
 
+// '지금은 안 할게요' — 바로 닫지 않고 다음 안내와 친구 추가 코드를 보여 준다
+window.declineUpsell = function() {
+    const actionBtns = document.getElementById('upsell-action-btns');
+    const declined = document.getElementById('upsell-declined');
+    if (actionBtns) actionBtns.style.display = 'none';
+    if (declined) declined.style.display = 'block';
+    if (window.dataLayer) window.dataLayer.push({ event: 'lost_plan_decline' });
+};
+
 // ─── 경찰청 등록 사례 (접수 화면 신뢰 띠 · 진행상황 페이지) ───
 // /api/lost-cases: 지역·분류·날짜·가린 접수번호만. 건수가 적을 땐 누적 숫자 대신 최근 사례만 보여 준다.
 const LOST_TRUST_MIN_COUNT = 20;
@@ -1589,6 +1601,20 @@ window.checkProxyDeepLink = function() {
 let currentProxyStep = 1;
 const MAX_PROXY_STEP = 3;
 
+/** 습득물 상세에서 '내 물건이에요' → 대리수령 신청을 그 물건 정보(이름·관리번호·보관 장소)로 채워서 연다 */
+window.pickupFoundItem = function(index) {
+    const item = cachedLostItems[index];
+    if (!item) return;
+    // 모달 닫기의 history.back()은 비동기라 바로 이어지는 화면 이동을 되돌려 버린다 → #modal만 지우고 닫는다
+    window.closeLostDetailModal?.(true);
+    if (window.location.hash === '#modal') history.replaceState(history.state, '', window.location.pathname + window.location.search);
+    window.openProxyPickupModal('', item.name || '', '', '', `${item.place || ''} ${item.lct || ''}`);
+    const set = (id, v) => { const el = document.getElementById(id); if (el && v) el.value = v; };
+    set('proxy-mgmt-num', item.id);
+    set('proxy-location-detail', [item.place, item.tel, item.date].filter(Boolean).join(' · '));
+    if (window.dataLayer) window.dataLayer.push({ event: 'lost_found_pickup', label: item.id });
+};
+
 /** 대리수령 모달 열기: CaseId, 물품명, 원래 위챗ID, 장소(호텔 여부 판별) 자동 입력 */
 window.openProxyPickupModal = function(caseId, itemName, originalWechat, region, place) {
     showSection('pickup');
@@ -1659,7 +1685,8 @@ window.openProxyPickupModal = function(caseId, itemName, originalWechat, region,
     let mappedLoc = '';
     if (locationStr.includes('호텔') || locationStr.includes('hotel') || locationStr.includes('酒店')) mappedLoc = '호텔';
     else if (locationStr.includes('공항') || locationStr.includes('airport') || locationStr.includes('机场')) mappedLoc = '공항';
-    else if (locationStr.includes('경찰') || locationStr.includes('police') || locationStr.includes('警察')) mappedLoc = '경찰서';
+    // 습득물 보관 장소는 대부분 '○○지구대', '○○파출소', '○○경찰서' 형태
+    else if (/경찰|지구대|파출소|police|警察/.test(locationStr)) mappedLoc = '경찰서';
     else if (locationStr.includes('택시') || locationStr.includes('taxi') || locationStr.includes('出租车')) mappedLoc = '택시';
     else if (locationStr.includes('버스') || locationStr.includes('bus') || locationStr.includes('公交')) mappedLoc = '버스';
 
