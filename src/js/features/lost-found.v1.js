@@ -337,6 +337,7 @@ export function showWechatQR() {
 export function openLostReportModal() {
     showSection('lost-report');
     resetLostReportForm();
+    window.renderLostCases?.();
     // 새로 고침 전에 쓰던 내용이 있으면 되살린다 (form-draft.js)
     window.restoreFormDraft?.('lost-report', 'draft_lost_report');
 }
@@ -1244,6 +1245,7 @@ export function renderSuccessGoodsView(isLoadMore = false) {
     const container = document.getElementById('lost-success-container');
     if (!container) return;
     renderMyCases();
+    window.renderLostCases?.();
 
     if (!isLoadMore) {
         window.successVisibleCount = 5;
@@ -1505,6 +1507,52 @@ window.selectUpsellPlan = function(plan) {
     if (window.dataLayer) window.dataLayer.push({ event: 'lost_plan_select', label: plan });
 };
 window.showUpsellQR = () => window.selectUpsellPlan('basic');
+
+// ─── 경찰청 등록 사례 (접수 화면 신뢰 띠 · 진행상황 페이지) ───
+// /api/lost-cases: 지역·분류·날짜·가린 접수번호만. 건수가 적을 땐 누적 숫자 대신 최근 사례만 보여 준다.
+const LOST_TRUST_MIN_COUNT = 20;
+let lostCasesData = null;
+function lostChipLabel(groupId, value) {
+    const chip = [...document.querySelectorAll(`#${groupId} .lost-chip`)].find(c => c.dataset.value === value);
+    return chip?.dataset.i18n && window.t ? window.t(chip.dataset.i18n) : value;
+}
+async function loadLostCases() {
+    if (lostCasesData) return lostCasesData;
+    try {
+        const res = await fetch(`${CONFIG.PROXY_URL}/api/lost-cases`);
+        if (res.ok) lostCasesData = await res.json();
+    } catch (e) { /* 실패는 저장하지 않음 — 다음에 화면을 열 때 다시 시도 */ }
+    return lostCasesData || { total: 0, cases: [] };
+}
+window.renderLostCases = async function() {
+    const data = await loadLostCases();
+    const cases = Array.isArray(data.cases) ? data.cases : [];
+    if (!cases.length) return;
+    const t = (k) => (window.t ? window.t(k) : k);
+    const label = (c) => `${escapeHTML(lostChipLabel('city-category-chips', c.city))} · ${escapeHTML(lostChipLabel('item-category-chips', c.cat))}`;
+    const md = (d) => escapeHTML(String(d || '').slice(5).replace('-', '/'));
+
+    const trust = document.getElementById('lost-trust');
+    if (trust) {
+        const head = data.total >= LOST_TRUST_MIN_COUNT
+            ? t('lost.trust.count').replace('{n}', data.total)
+            : t('lost.trust.recent');
+        trust.innerHTML = `<span class="lost-trust-head"><i class="ph-fill ph-seal-check"></i> ${escapeHTML(head)}</span>`
+            + cases.slice(0, 2).map(c => `<span class="lost-trust-item">${label(c)} · ${md(c.d)} ${escapeHTML(t('lost.cases.done'))}</span>`).join('')
+            + `<span class="lost-trust-more">${escapeHTML(t('lost.trust.more'))}</span>`;
+        trust.style.visibility = 'visible';
+    }
+
+    const list = document.getElementById('lost-police-cases');
+    if (list) {
+        list.innerHTML = `<h4 class="lost-police-title">${escapeHTML(t('lost.cases.title'))}</h4>`
+            + `<p class="lost-police-hint">${escapeHTML(t('lost.cases.verify'))}</p>`
+            + cases.slice(0, 10).map(c => `<div class="lost-police-row"><span>${label(c)}</span><span class="lost-police-sn">${escapeHTML(c.sn)}</span><span class="lost-police-date">${md(c.d)}</span></div>`).join('');
+    }
+};
+document.addEventListener('DOMContentLoaded', () => {
+    if (['/lost-report', '/lost-status'].includes(window.location.pathname)) window.renderLostCases();
+});
 
 window.closeLostUpsellModal = function(fromPopState = false) {
     const upsellModal = document.getElementById('lost-upsell-modal');

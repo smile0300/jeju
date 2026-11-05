@@ -283,6 +283,33 @@ function handleTaskQueue_(data) {
   return json_({ result: 'success' });
 }
 
+/**
+ * 사이트 공개용 경찰청 등록 사례 (접수 화면 신뢰 띠·진행상황 페이지)
+ * 지역·물건 분류·접수일·가린 접수번호만 — 위챗 ID·상세 장소·설명·사진은 내보내지 않는다
+ */
+function publicLostCases_() {
+  var sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName('LostReport');
+  if (!sheet || sheet.getLastRow() < 2) return json_({ total: 0, cases: [] });
+  var headers = headerRow_(sheet);
+  var col = function (h) { return headers.indexOf(h); };
+  var snCol = col('경찰접수번호');
+  if (snCol === -1) return json_({ total: 0, cases: [] });
+  var values = sheet.getRange(2, 1, sheet.getLastRow() - 1, headers.length).getDisplayValues();
+  var cases = [];
+  values.forEach(function (r) {
+    var sn = String(r[snCol] || '').trim();
+    if (!/^L\d{12,}$/.test(sn)) return;
+    cases.push({
+      d: String(col('경찰접수일') === -1 ? '' : r[col('경찰접수일')]).slice(0, 10),
+      city: String(col('City') === -1 ? '' : r[col('City')]).slice(0, 10),
+      cat: String(col('ItemCategory') === -1 ? '' : r[col('ItemCategory')]).slice(0, 12),
+      sn: sn.slice(0, 9) + '****' + sn.slice(-4)
+    });
+  });
+  cases.reverse();
+  return json_({ total: cases.length, cases: cases.slice(0, 30) });
+}
+
 /** SuccessStories A열(CaseId)만 읽어서 다음 번호 */
 function nextCaseId_(sheet) {
   var lastRow = sheet.getLastRow();
@@ -606,6 +633,7 @@ function doGet(e) {
     if (action === 'admin_list') return adminList(e.parameter);
     if (action === 'admin_ledger') return adminLedger(e.parameter);
     if (action === 'image') return publicImage_(e.parameter.id);
+    if (action === 'lost_cases') return publicLostCases_();
     var ss = SpreadsheetApp.openById(SHEET_ID);
     var sheetName = (action === 'success') ? 'SuccessStories' : 'RewardList';
     var sheet = ss.getSheetByName(sheetName);

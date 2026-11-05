@@ -210,7 +210,9 @@
                     <!-- Populated dynamically via JS -->
                 </div>
             </div>
-            <p data-i18n="modal.lost.desc" style="margin-bottom: 20px;">请填写以下信息，我们将协助您在 MINWON24(LOST112) 登记。 (填写越详细找回概率越高)</p>
+            <p data-i18n="modal.lost.desc" style="margin-bottom: 12px;">请填写以下信息，我们将协助您在 MINWON24(LOST112) 登记。 (填写越详细找回概率越高)</p>
+            <!-- 신뢰 띠: 경찰청 등록 누적·최근 사례 (lost-found.v1.js renderLostTrust, /api/lost-cases) -->
+            <a id="lost-trust" class="lost-trust" href="/lost-status" onclick="event.preventDefault(); window.showSection && window.showSection('lost-status');" style="visibility:hidden;"></a>
         </div>
         <div class="lost-report-body progressive-form">
             <div class="progress-container">
@@ -600,6 +602,8 @@
                 <li style="margin-bottom: 0;" data-i18n-html="lost.notice.prog5"><b>[직접수령]</b> 고객님께서 직접 물품을 찾아가셨습니다.</li>
             </ul>
         </div>
+        <!-- 최근 경찰청 등록 사례 (가린 접수번호 — LOST112에서 직접 조회 가능) -->
+        <div id="lost-police-cases" class="lost-police-cases"></div>
         <div id="lost-success-container" class="lost-success-container"></div>
     </div>
 </section>

@@ -116,6 +116,12 @@ const TRANSLATIONS = {
         'nav.lost':       '失物招领',
         'lost.home.search':   '失物查询',
         'lost.home.status':   '进度查询',
+        'lost.trust.count': "累计 {n} 件已在韩国警察厅登记",
+        'lost.trust.recent': "最近在韩国警察厅登记",
+        'lost.trust.more': "查看登记记录 ›",
+        'lost.cases.title': "最近在警察厅登记的失物",
+        'lost.cases.verify': "受理编号可在 LOST112 查询（为保护隐私已隐藏部分数字）",
+        'lost.cases.done': "已登记",
         'lost.home.register': '失物登记',
         'lost.home.proxy':    '代领服务',
         'lost.home.back':     '返回',
@@ -837,6 +843,12 @@ const TRANSLATIONS = {
         'nav.lost':       '분실물',
         'lost.home.search':   '분실조회',
         'lost.home.status':   '진행상황',
+        'lost.trust.count': "지금까지 {n}건 경찰청 등록 완료",
+        'lost.trust.recent': "최근 경찰청 등록 사례",
+        'lost.trust.more': "등록 사례 보기 ›",
+        'lost.cases.title': "최근 경찰청에 등록한 분실물",
+        'lost.cases.verify': "접수번호는 LOST112에서 조회할 수 있어요 (개인정보 보호를 위해 일부 가림)",
+        'lost.cases.done': "등록 완료",
         'lost.home.register': '분실신고',
         'lost.home.proxy':    '대리수령',
         'lost.home.back':     '뒤로',
@@ -1493,6 +1505,12 @@ const TRANSLATIONS = {
         'nav.lost':       'Lost & Found',
         'lost.home.search':   'Search',
         'lost.home.status':   'My Status',
+        'lost.trust.count': "{n} items registered with the Korean police",
+        'lost.trust.recent': "Recently registered with the Korean police",
+        'lost.trust.more': "See cases ›",
+        'lost.cases.title': "Recently registered with the police",
+        'lost.cases.verify': "Receipt numbers can be checked on LOST112 (partly hidden for privacy)",
+        'lost.cases.done': "registered",
         'lost.home.register': 'Report',
         'lost.home.proxy':    'Pickup',
         'lost.home.back':     'Back',
@@ -2119,6 +2137,8 @@ export function setLanguage(lang) {
         if (window.rewardApp && window.rewardApp.renderList) {
             window.rewardApp.renderList();
         }
+        // 경찰청 등록 사례 (분실 접수 신뢰 띠·진행상황)
+        if (window.renderLostCases) window.renderLostCases();
         // 한라산 탭 재렌더링
         if (window.hallasanApp && window.hallasanApp.fetchStatus) {
             window.hallasanApp.fetchStatus(false, true);

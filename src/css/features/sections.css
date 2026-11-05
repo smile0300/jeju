@@ -4671,6 +4671,50 @@ body:not(.page-home) .wechat-float-btn {
     border-color: #d93025;
 }
 
+/* 분실 접수 화면 신뢰 띠 — 최근 경찰청 등록 사례 (렌더 전엔 visibility:hidden 으로 자리만 잡음) */
+.lost-trust {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 0 0 16px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(49, 130, 246, 0.06);
+    border: 1px solid rgba(49, 130, 246, 0.15);
+    font-size: 0.82rem;
+    line-height: 1.45;
+    color: var(--label-secondary);
+    text-decoration: none;
+    text-align: left;
+}
+.lost-trust-head {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+.lost-trust-head i { color: #3182f6; }
+.lost-trust-more {
+    align-self: flex-end;
+    color: #3182f6;
+    font-weight: 600;
+}
+
+/* 진행상황 페이지: 최근 경찰청 등록 목록 */
+.lost-police-cases { margin-bottom: 20px; }
+.lost-police-title { margin: 0 0 4px; font-size: 15px; color: var(--label-primary); }
+.lost-police-hint { margin: 0 0 10px; font-size: 12.5px; color: var(--label-secondary); line-height: 1.5; }
+.lost-police-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 10px;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--separator);
+    font-size: 13.5px;
+    color: var(--text-primary);
+}
+.lost-police-sn { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; color: var(--label-secondary); }
+.lost-police-date { font-size: 12px; color: var(--label-tertiary); }
+
 /* 접수 후 고객이 먼저 客服微信 추가 (접수 코드 JL+행번호를 친구 요청 메시지에) */
 .upsell-friend {
     margin: 12px 0 0;
