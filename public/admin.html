@@ -73,10 +73,13 @@
     <a href="/admin-reply.html">위챗 답변 도우미 →</a>
   </header>
 
-  <!-- 샤오홍슈 포스팅용 브리핑 카드 (src/js/features/brief-card.js) -->
+  <!-- 샤오홍슈·인스타 포스팅용 브리핑 카드 (src/js/features/brief-card.js, lost-brief-card.js) -->
   <div class="card">
-    <button type="button" style="width:100%" onclick="location.href='/?brief=1'">📰 오늘의 제주 브리핑 카드 (3:4)</button>
-    <p class="hint">카드 화면을 캡처한 뒤 카드 부분만 잘라 샤오홍슈에 올리세요. 아래 버튼으로 오늘·내일을 바꿀 수 있습니다.</p>
+    <div class="row" style="flex-wrap:wrap; gap:8px;">
+      <button type="button" style="flex:1 1 220px" onclick="location.href='/?brief=1'">📰 오늘의 제주 브리핑 카드 (3:4)</button>
+      <button type="button" style="flex:1 1 220px; background:#2e5aac" onclick="location.href='/?brief_lost=1'">📦 분실물 주간·월간 브리핑 카드 (3:4)</button>
+    </div>
+    <p class="hint">오늘의 날씨·항공·축제 브리핑과 주간·월간 분실물 요약 및 고밀도 실물 사진(20~56장) 모아보기 카드를 생성·다운로드합니다.</p>
   </div>
 
   <div class="card" id="login">

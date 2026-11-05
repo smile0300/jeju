@@ -23,6 +23,7 @@ import '../features/trip.js';
 import '../features/course.js';
 import '../features/charter.js';
 import '../features/brief-card.js';
+import '../features/lost-brief-card.js';
 
 
 

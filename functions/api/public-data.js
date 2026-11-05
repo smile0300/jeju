@@ -5,7 +5,7 @@ export async function onRequest(context) {
     'apis.data.go.kr', 'jeju.go.kr', 'openapi.airport.co.kr', 'api.visitjeju.net',
     'api.jejuits.go.kr', '123.140.197.51', '211.114.96.121', '211.34.191.215',
     '59.8.86.15', '119.65.216.155', 'hallacctv.kr', 'www.hallacctv.kr',
-    '1.245.193.152', '59.8.86.94'
+    '1.245.193.152', '59.8.86.94', 'lost112.go.kr', 'www.lost112.go.kr'
   ];
   const ALLOWED_ORIGIN = '*';
 

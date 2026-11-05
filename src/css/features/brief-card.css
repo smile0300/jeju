@@ -552,3 +552,294 @@
     align-self: flex-end; padding: 6px 14px; border-radius: 999px; border: 0;
     background: #38bdf8; color: #0f172a; font-size: 12px; font-weight: 800; cursor: pointer;
 }
+
+/* ── 분실물 주간·월간 브리핑 카드 (lost-brief-card.js) ── */
+.lbc-top-controls {
+    align-items: center;
+    max-width: 1140px;
+    background: rgba(15, 23, 42, 0.75);
+    padding: 10px 14px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+}
+.lbc-ctrl-group-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #94a3b8;
+    margin-right: 2px;
+}
+.lbc-ctrl-sep {
+    color: rgba(255, 255, 255, 0.2);
+    margin: 0 2px;
+}
+.lbc-helper-tip {
+    margin: -4px 0 2px;
+    font-size: 12px;
+    color: #cbd5e1;
+    text-align: center;
+}
+
+.lbc-card {
+    padding: 14px 14px 10px;
+    gap: 7px;
+}
+.lbc-summary-card {
+    background: linear-gradient(165deg, #1e3a8a 0%, #0f172a 60%, #090d16 100%);
+}
+.lbc-theme-phone {
+    background: linear-gradient(165deg, #0369a1 0%, #0f172a 55%, #020617 100%);
+}
+.lbc-theme-wallet {
+    background: linear-gradient(165deg, #b45309 0%, #1e1b4b 58%, #090d16 100%);
+}
+.lbc-theme-bag {
+    background: linear-gradient(165deg, #6d28d9 0%, #1e1b4b 58%, #090d16 100%);
+}
+.lbc-theme-all {
+    background: linear-gradient(165deg, #047857 0%, #0f172a 58%, #020617 100%);
+}
+
+/* [카드 1] KPI 3열 */
+.lbc-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+}
+.lbc-kpi {
+    background: rgba(255, 255, 255, 0.11);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 10px;
+    padding: 6px 8px;
+    text-align: center;
+}
+.lbc-kpi.highlight {
+    background: rgba(56, 189, 248, 0.2);
+    border-color: rgba(56, 189, 248, 0.5);
+}
+.lbc-kpi-label {
+    font-size: 9.5px;
+    color: rgba(255, 255, 255, 0.78);
+    font-weight: 600;
+}
+.lbc-kpi-val {
+    font-size: 16px;
+    font-weight: 800;
+    color: #fde047;
+    margin-top: 1px;
+    line-height: 1.15;
+}
+.lbc-kpi-val small {
+    font-size: 9.5px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.85);
+    margin-left: 2px;
+}
+
+/* [카드 1] 품목 순위 바 차트 & 장소 칩 */
+.lbc-section-box {
+    background: rgba(15, 23, 42, 0.48);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 11px;
+    padding: 7px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.lbc-section-box.compact {
+    padding: 6px 10px;
+}
+.lbc-sec-title {
+    font-size: 10px;
+    font-weight: 700;
+    color: #bae6fd;
+    letter-spacing: -0.2px;
+}
+.lbc-cat-list {
+    display: flex;
+    flex-direction: column;
+    gap: 3.5px;
+}
+.lbc-cat-row {
+    display: grid;
+    grid-template-columns: 92px 1fr 68px;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+}
+.lbc-cat-label {
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.lbc-cat-bar-wrap {
+    height: 7px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 99px;
+    overflow: hidden;
+}
+.lbc-cat-bar {
+    height: 100%;
+    border-radius: 99px;
+}
+.lbc-cat-val {
+    text-align: right;
+    font-size: 9.5px;
+    white-space: nowrap;
+    color: rgba(255, 255, 255, 0.9);
+}
+.lbc-cat-val b {
+    color: #fde047;
+    font-size: 10.5px;
+}
+.lbc-cat-val small {
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 8.5px;
+}
+
+.lbc-place-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+.lbc-place-chip {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+    padding: 2px 7px;
+    font-size: 9.5px;
+    font-weight: 600;
+    color: #f8fafc;
+}
+.lbc-place-chip b {
+    color: #fde047;
+    margin-left: 2px;
+}
+
+/* [카드 1] 하단 미니 썸네일 스트립 (6x2 = 12장) */
+.lbc-mini-strip-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.lbc-mini-strip {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: repeat(2, 40px);
+    gap: 3px;
+}
+.lbc-mini-thumb {
+    width: 100%;
+    height: 100%;
+    border-radius: 5px;
+    overflow: hidden;
+    background: #0f172a;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.lbc-mini-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* [카드 2~5] 고밀도 사진 그리드 카드 */
+.lbc-photo-card {
+    padding: 11px 11px 8px;
+    gap: 5px;
+}
+.lbc-compact-head .lbc-photo-title {
+    font-size: 17px;
+}
+.lbc-compact-head .bc-date {
+    font-size: 10.5px;
+    margin-top: 1px;
+}
+.lbc-compact-foot {
+    font-size: 9px !important;
+    padding-top: 2px;
+}
+
+.lbc-dense-grid {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(var(--cols, 5), 1fr);
+    grid-template-rows: repeat(var(--rows, 6), 1fr);
+    gap: 2.5px;
+}
+.lbc-tile {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    border-radius: 5px;
+    overflow: hidden;
+    background: #0f172a;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+}
+.lbc-tile:hover {
+    border-color: #fde047;
+}
+.lbc-tile img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.lbc-tile-date {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    background: rgba(15, 23, 42, 0.76);
+    color: #fde047;
+    font-size: 7.5px;
+    font-weight: 800;
+    line-height: 1;
+    padding: 1.5px 3.5px;
+    border-radius: 3px;
+    letter-spacing: -0.2px;
+}
+.lbc-tile-cap {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(0deg, rgba(2, 6, 23, 0.9) 0%, rgba(2, 6, 23, 0.65) 75%, transparent 100%);
+    padding: 5px 3px 2px;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 2px;
+    line-height: 1.05;
+}
+.lbc-tile-name {
+    font-size: 8px;
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.lbc-tile-loc {
+    font-size: 7px;
+    color: #bae6fd;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.lbc-tile.no-label .lbc-tile-date,
+.lbc-tile.no-label .lbc-tile-cap {
+    display: none;
+}
+.lbc-empty {
+    grid-column: 1 / -1;
+    grid-row: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.65);
+}

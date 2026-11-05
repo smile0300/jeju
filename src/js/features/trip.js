@@ -1,5 +1,5 @@
 import { tr, trKo, pick, lang, escapeHtml } from './planner/strings.js';
-import { getForecastDays, getHistoricalDays, getFestivalsBetween, toYmd } from './planner/forecast.js';
+import { getForecastDays, getHistoricalDays, getRegionalWeatherForDate, getFestivalsBetween, toYmd } from './planner/forecast.js';
 import { renderFestivalItems } from './festival.js';
 import { chipGroup, bindChips, readChips, partyStepper, bindPartySteppers, wechatQrHtml, showStatus, submitRequest, copyText, flashLabel } from './planner/shared.js';
 import { BLOCKS, COMBOS, STOP_POS, STOP_TYPES } from '../../data/courses.js';
@@ -210,29 +210,38 @@ function outfitKey(min, max) {
 }
 
 /** 날짜 하나 → { date, ymd, mmdd, min, max, rainy, isForecast, html } */
-function dayCard(date, fc, hist) {
+function dayCard(date, fc, hist, index = 0) {
     const md = `${date.getMonth() + 1}/${date.getDate()}`;
     const wd = new Intl.DateTimeFormat(LOCALES[lang()], { weekday: 'short' }).format(date);
     const head = `<div class="w-date-box"><span class="w-date">${md} ${escapeHtml(wd)}</span></div>`;
     const temps = (min, max) => `<div class="w-temps"><span class="w-max">${max}°</span><span class="w-slash">/</span><span class="w-min">${min}°</span></div>`;
     const ymd = toYmd(date);
     const mmdd = ymd.slice(4);
+    const caret = `<span class="pl-wcard-caret" aria-hidden="true"><i class="ph-bold ph-caret-down"></i></span>`;
 
     if (fc && fc.min !== null && fc.max !== null) {
         return {
             date, ymd, mmdd, min: fc.min, max: fc.max, rainy: fc.pop >= RAINY_POP, isForecast: true,
-            html: `<div class="weekly-card pl-wcard">
+            html: `<div class="weekly-card pl-wcard pl-wcard-clickable" data-date-idx="${index}" data-ymd="${ymd}" data-is-fc="1" role="button" tabindex="0" aria-expanded="false" title="${escapeHtml(tr('trip.click_region_hint'))}">
                 ${head}<div class="w-icon">${fc.icon}</div>${temps(fc.min, fc.max)}
-                <div class="w-meta-info"><span class="pl-wcard-tag forecast">${tr('trip.badge.forecast')}</span><span class="w-pop"><i class="ph-duotone ph-drop color-rain"></i>${fc.pop}%</span></div>
+                <div class="w-meta-info">
+                    <span class="pl-wcard-tag forecast">${tr('trip.badge.forecast')}</span>
+                    <span class="w-pop"><i class="ph-duotone ph-drop color-rain"></i>${fc.pop}%</span>
+                    ${caret}
+                </div>
             </div>`,
         };
     }
     if (hist) {
         return {
             date, ymd, mmdd, min: hist.min, max: hist.max, rainy: hist.rainYears * 2 >= hist.years, isForecast: false,
-            html: `<div class="weekly-card pl-wcard pl-wcard-hist">
+            html: `<div class="weekly-card pl-wcard pl-wcard-hist pl-wcard-clickable" data-date-idx="${index}" data-ymd="${ymd}" data-is-fc="0" role="button" tabindex="0" aria-expanded="false" title="${escapeHtml(tr('trip.click_region_hint'))}">
                 ${head}<div class="w-icon"><i class="ph-duotone ph-clock-counter-clockwise color-cloud"></i></div>${temps(hist.min, hist.max)}
-                <div class="w-meta-info"><span class="pl-wcard-tag">${tr('trip.hist_short')}</span><span class="w-pop">${tr('trip.hist_rain_short', { r: hist.rainYears, y: hist.years })}</span></div>
+                <div class="w-meta-info">
+                    <span class="pl-wcard-tag">${tr('trip.hist_short')}</span>
+                    <span class="w-pop">${tr('trip.hist_rain_short', { r: hist.rainYears, y: hist.years })}</span>
+                    ${caret}
+                </div>
             </div>`,
         };
     }
@@ -241,6 +250,128 @@ function dayCard(date, fc, hist) {
         html: `<div class="weekly-card pl-wcard pl-wcard-hist">${head}<div class="w-icon">–</div>
             <div class="w-meta-info"><span class="pl-wcard-tag">${tr('trip.badge.none')}</span></div></div>`,
     };
+}
+
+/** 날짜 카드 클릭 시 해당 날짜의 5대 권역 날씨 아코디언 패널 열기/닫기 */
+function bindTripWeatherRegionEvents(box, days, from, to) {
+    if (!box) return;
+
+    let activeCard = null;
+    let activePanel = null;
+
+    const closeActive = () => {
+        if (activeCard) {
+            activeCard.classList.remove('is-active');
+            activeCard.setAttribute('aria-expanded', 'false');
+            const caret = activeCard.querySelector('.pl-wcard-caret i');
+            if (caret) caret.className = 'ph-bold ph-caret-down';
+            activeCard = null;
+        }
+        if (activePanel) {
+            activePanel.remove();
+            activePanel = null;
+        }
+    };
+
+    const cards = box.querySelectorAll('.pl-wcard-clickable');
+    cards.forEach(card => {
+        const toggle = async () => {
+            const idx = parseInt(card.getAttribute('data-date-idx'), 10);
+            const targetDate = days[idx];
+            if (!targetDate) return;
+
+            // 이미 열려있는 카드를 누르면 닫기
+            if (card === activeCard) {
+                closeActive();
+                return;
+            }
+
+            // 이전 패널 닫기
+            closeActive();
+
+            // 현재 카드 활성화
+            activeCard = card;
+            card.classList.add('is-active');
+            card.setAttribute('aria-expanded', 'true');
+            const caret = card.querySelector('.pl-wcard-caret i');
+            if (caret) caret.className = 'ph-bold ph-caret-up';
+
+            const md = `${targetDate.getMonth() + 1}/${targetDate.getDate()}`;
+            const isFc = card.getAttribute('data-is-fc') === '1';
+
+            // 패널 엘리먼트 생성 및 삽입
+            const panel = document.createElement('div');
+            panel.className = 'pl-region-panel';
+            panel.innerHTML = `
+                <div class="pl-region-panel-head">
+                    <span class="pl-region-panel-title">
+                        <i class="ph-duotone ph-map-pin"></i> ${escapeHtml(tr('trip.region_weather_title', { date: md }))}
+                    </span>
+                    <button type="button" class="pl-region-panel-close" aria-label="${escapeHtml(tr('trip.region.close'))}">
+                        <i class="ph-bold ph-x"></i>
+                    </button>
+                </div>
+                <div class="pl-region-panel-loading">
+                    <div class="pl-spinner"></div>
+                    <span>${escapeHtml(tr('trip.region.loading'))}</span>
+                </div>`;
+
+            card.insertAdjacentElement('afterend', panel);
+            activePanel = panel;
+
+            // 닫기 버튼 이벤트
+            panel.querySelector('.pl-region-panel-close')?.addEventListener('click', (e) => {
+                e.stopPropagation();
+                closeActive();
+            });
+
+            try {
+                const regionalList = await getRegionalWeatherForDate(targetDate, isFc, from, to);
+                if (activePanel !== panel) return;
+
+                const gridCards = regionalList.map(item => {
+                    const name = tr(item.nameKey);
+                    if (item.min === null || item.max === null) {
+                        return `<div class="pl-region-card pl-region-empty">
+                            <span class="pl-region-name">${escapeHtml(name)}</span>
+                            <div class="pl-region-icon">–</div>
+                            <div class="pl-region-sub">${escapeHtml(tr('trip.badge.none'))}</div>
+                        </div>`;
+                    }
+
+                    const popHtml = item.isForecast
+                        ? `<span class="pl-region-pop"><i class="ph-duotone ph-drop color-rain"></i>${item.pop}%</span>`
+                        : `<span class="pl-region-pop">${tr('trip.hist_rain_short', { r: item.rainYears, y: item.years })}</span>`;
+
+                    return `<div class="pl-region-card">
+                        <span class="pl-region-name">${escapeHtml(name)}</span>
+                        <div class="pl-region-icon">${item.icon}</div>
+                        <div class="pl-region-temps"><span class="w-max">${item.max}°</span><span class="w-slash">/</span><span class="w-min">${item.min}°</span></div>
+                        <div class="pl-region-sub">${popHtml}</div>
+                    </div>`;
+                }).join('');
+
+                const loadingEl = panel.querySelector('.pl-region-panel-loading');
+                if (loadingEl) {
+                    loadingEl.outerHTML = `<div class="pl-region-grid">${gridCards}</div>`;
+                }
+            } catch (err) {
+                if (activePanel !== panel) return;
+                const loadingEl = panel.querySelector('.pl-region-panel-loading');
+                if (loadingEl) {
+                    loadingEl.innerHTML = `<span class="pl-muted">${escapeHtml(tr('trip.region.empty'))}</span>`;
+                }
+            }
+        };
+
+        card.addEventListener('click', toggle);
+        card.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggle();
+            }
+        });
+    });
 }
 
 /** 최근 3년(예: 2025·2024·2023) 동기간 실제 관측 날씨 연도별 비교표 */
@@ -853,12 +984,13 @@ async function renderResult(root, { from, to }) {
 
     const box = root.querySelector('#trip-weather');
     if (!box) return;
-    const cards = days.map(d => dayCard(d, forecast[toYmd(d)], history_[toYmd(d).slice(4)]));
+    const cards = days.map((d, idx) => dayCard(d, forecast[toYmd(d)], history_[toYmd(d).slice(4)], idx));
     courseState.lastCards = cards;
 
     const usesHistoryInCards = cards.some(c => !c.isForecast && c.min !== null);
     box.innerHTML = `<div class="weekly-grid">${cards.map(c => c.html).join('')}</div>
         <p class="pl-muted pl-hint">${tr('trip.loc_note')}${usesHistoryInCards ? ' ' + tr('trip.legend') : ''}</p>`;
+    bindTripWeatherRegionEvents(box, days, from, to);
 
     root.querySelector('#trip-outfit').innerHTML = outfitHtml(cards);
     root.querySelector('#trip-history-compare').innerHTML = historicalComparisonHtml(days, history_);

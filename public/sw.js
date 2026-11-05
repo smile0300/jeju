@@ -79,7 +79,7 @@ self.addEventListener('notificationclick', function(event) {
  * ─────────────────────────────────────────────────────────────────
  */
 
-const CACHE_NAME = 'jeju-live-cache-v18';
+const CACHE_NAME = 'jeju-live-cache-v19';
 
 // 설치 즉시 활성화 (이전 SW 대기 없이 즉시 교체)
 self.addEventListener('install', event => {

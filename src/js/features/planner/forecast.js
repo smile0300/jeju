@@ -146,8 +146,8 @@ export async function getForecastDays(locKey = 'jeju') {
  *   }
  * from~to 와 같은 날짜를 최근 HISTORY_YEARS년에서 가져와 평균과 연도별 실측 기록을 함께 계산한다.
  */
-export async function getHistoricalDays(from, to) {
-    const cacheKey = `jeju_hist_v2_${toYmd(from)}_${toYmd(to)}`;
+export async function getHistoricalDays(from, to, stnId = ASOS_STATION_JEJU) {
+    const cacheKey = `jeju_hist_v2_${stnId}_${toYmd(from)}_${toYmd(to)}`;
     const cached = readCache(cacheKey);
     if (cached) return cached;
 
@@ -165,7 +165,7 @@ export async function getHistoricalDays(from, to) {
         requests.push(
             fetchPublicDataJson('https://apis.data.go.kr/1360000/AsosDalyInfoService/getWthrDataList', {
                 pageNo: 1, numOfRows: 40, dataType: 'JSON', dataCd: 'ASOS', dateCd: 'DAY',
-                startDt: toYmd(s), endDt: toYmd(e), stnIds: ASOS_STATION_JEJU,
+                startDt: toYmd(s), endDt: toYmd(e), stnIds: stnId,
             }).then(json => ({ yr, items: itemsOf(json) }))
               .catch(err => { console.warn('[Planner] 과거 날씨 실패:', err); return { yr, items: [] }; })
         );
@@ -268,3 +268,95 @@ export async function getHallasanClosedCount() {
     writeCache(cacheKey, closed);
     return closed;
 }
+
+/**
+ * 제주 5대 주요 권역/대표 지역 설정
+ */
+export const REGIONAL_AREAS = [
+    { key: 'jeju',     nameKey: 'trip.region.jeju',     stnId: '184', isMountain: false },
+    { key: 'seogwipo', nameKey: 'trip.region.seogwipo', stnId: '189', isMountain: false },
+    { key: 'seongsan', nameKey: 'trip.region.seongsan', stnId: '188', isMountain: false },
+    { key: 'aewol',    nameKey: 'trip.region.aewol',    stnId: '185', isMountain: false },
+    { key: 'hallasan', nameKey: 'trip.region.hallasan', stnId: '184', isMountain: true },
+];
+
+/**
+ * 특정 날짜에 대한 제주 5대 권역 날씨 조회
+ * @param {Date} date
+ * @param {boolean} isForecast
+ * @param {Date} from
+ * @param {Date} to
+ */
+export async function getRegionalWeatherForDate(date, isForecast, from, to) {
+    const ymd = toYmd(date);
+    const mmdd = ymd.slice(4);
+
+    if (isForecast) {
+        // 단기+중기 예보 지역별 병렬 조회
+        return Promise.all(
+            REGIONAL_AREAS.map(async (area) => {
+                try {
+                    const days = await getForecastDays(area.key).catch(() => ({}));
+                    const d = days[ymd];
+                    if (!d || d.min === null || d.max === null) {
+                        return { ...area, min: null, max: null, pop: null, icon: '–', isForecast: true };
+                    }
+                    return {
+                        ...area,
+                        min: d.min,
+                        max: d.max,
+                        pop: d.pop ?? 0,
+                        icon: d.icon || '<i class="ph-duotone ph-sun color-sun"></i>',
+                        isForecast: true,
+                    };
+                } catch (e) {
+                    return { ...area, min: null, max: null, pop: null, icon: '–', isForecast: true };
+                }
+            })
+        );
+    } else {
+        // 과거 3년 동기간 관측치(ASOS) 지점별 병렬 조회
+        const stnList = ['184', '189', '188', '185'];
+        const histMap = {};
+        await Promise.all(
+            stnList.map(async (stn) => {
+                try {
+                    histMap[stn] = await getHistoricalDays(from, to, stn).catch(() => ({}));
+                } catch (e) {
+                    histMap[stn] = {};
+                }
+            })
+        );
+
+        return REGIONAL_AREAS.map((area) => {
+            const h = histMap[area.stnId]?.[mmdd];
+            if (!h || h.min === undefined || h.max === undefined) {
+                return { ...area, min: null, max: null, rainYears: null, years: null, isForecast: false, icon: '–' };
+            }
+
+            let min = h.min;
+            let max = h.max;
+            // 한라산(성판악 등 해발 ~750m)은 해발고도 감률에 따라 약 5~6도 낮음
+            if (area.isMountain) {
+                min = Math.round(min - 6);
+                max = Math.round(max - 6);
+            }
+
+            const rainy = h.rainYears * 2 >= h.years;
+            const icon = rainy
+                ? '<i class="ph-duotone ph-cloud-rain color-rain"></i>'
+                : '<i class="ph-duotone ph-clock-counter-clockwise color-cloud"></i>';
+
+            return {
+                ...area,
+                min,
+                max,
+                rainYears: h.rainYears,
+                years: h.years,
+                isForecast: false,
+                icon,
+            };
+        });
+    }
+}
+
