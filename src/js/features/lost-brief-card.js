@@ -109,13 +109,68 @@ function splitDateChunks(startYmd, endYmd) {
     ];
 }
 
-// 이미지 URL을 동일 출처 프록시(/api/public-data)로 감싸 CORS 없이 캔버스 저장 가능하게 처리
-function proxyImgUrl(rawUrl) {
+// 화면 표시에는 경찰청(lost112) 원본 URL을 직접 사용해(crossorigin 속성 없이) 브라우저에서 100% 즉시 표시되게 하고,
+// PNG 저장(html-to-image) 시에만 다중 프록시로 Data URL 변환을 수행한다.
+function normalizeImgUrl(rawUrl) {
     if (!rawUrl) return '';
     const trimmed = String(rawUrl).trim();
     if (!trimmed || trimmed.includes('img02_no_img.gif')) return '';
-    const httpsUrl = trimmed.replace(/^http:\/\//i, 'https://');
-    return `${CONFIG.PROXY_URL}/api/public-data?url=${encodeURIComponent(httpsUrl)}`;
+    return trimmed.replace(/^http:\/\//i, 'https://');
+}
+
+const dataUrlCache = {};
+
+async function blobToDataUrl(blob) {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result || '');
+        reader.onerror = () => resolve('');
+        reader.readAsDataURL(blob);
+    });
+}
+
+async function fetchImageAsDataUrl(rawUrl) {
+    if (!rawUrl || rawUrl.startsWith('data:')) return rawUrl;
+    if (dataUrlCache[rawUrl]) return dataUrlCache[rawUrl];
+
+    const candidates = [
+        `https://wsrv.nl/?url=${encodeURIComponent(rawUrl)}&w=320&output=jpg`,
+        `${CONFIG.PROXY_URL}/api/public-data?url=${encodeURIComponent(rawUrl)}`,
+        `${CONFIG.EXTERNAL_PROXY_URL}${encodeURIComponent(rawUrl)}`,
+    ];
+
+    for (const proxyUrl of candidates) {
+        try {
+            const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(6000) });
+            if (!res.ok) continue;
+            const ct = res.headers.get('content-type') || '';
+            if (!ct.startsWith('image/') && !ct.includes('octet-stream')) continue;
+            const blob = await res.blob();
+            if (blob.size < 200) continue;
+            const dataUrl = await blobToDataUrl(blob);
+            if (dataUrl && dataUrl.startsWith('data:image')) {
+                dataUrlCache[rawUrl] = dataUrl;
+                return dataUrl;
+            }
+        } catch (e) {
+            // 다음 프록시 후보 시도
+        }
+    }
+    return '';
+}
+
+async function inlineCardImages(cardEl) {
+    const imgs = Array.from(cardEl.querySelectorAll('img[data-raw-src]'));
+    await Promise.all(
+        imgs.map(async (img) => {
+            const raw = img.getAttribute('data-raw-src');
+            if (!raw || img.src.startsWith('data:image')) return;
+            const dataUrl = await fetchImageAsDataUrl(raw);
+            if (dataUrl) {
+                img.src = dataUrl;
+            }
+        })
+    );
 }
 
 // 품목 대분류 정규화
@@ -271,7 +326,7 @@ async function fetchLostPeriodData(periodKey) {
             ...it,
             catGroup,
             hasPhoto: hasRealPhoto,
-            imgUrl: hasRealPhoto ? proxyImgUrl(it.rawImg) : '',
+            imgUrl: hasRealPhoto ? normalizeImgUrl(it.rawImg) : '',
         });
     });
 
@@ -370,7 +425,7 @@ function summaryCardHtml(data, stats) {
     // 하단 12장(6×2) 미니 사진 프리뷰 스트립
     const miniPhotos = stats.allPhotos.slice(0, 12);
     const miniStripHtml = miniPhotos.map(it =>
-        `<div class="lbc-mini-thumb"><img src="${esc(it.imgUrl)}" alt="" crossorigin="anonymous" onerror="this.src='${FALLBACK_IMG}'"></div>`
+        `<div class="lbc-mini-thumb"><img src="${esc(it.imgUrl)}" data-raw-src="${esc(it.imgUrl)}" alt="" loading="lazy" onerror="this.src='${FALLBACK_IMG}'"></div>`
     ).join('');
 
     const fileName = `jeju-lost-summary-${data.endYmd}.png`;
@@ -460,7 +515,7 @@ function photoGridCardHtml({
         const dateLabel = fmtDotMd(it.date);
         const placeLabel = shortPlaceLabel(it.place, currentLang);
         return `<div class="lbc-tile${showTileLabels ? '' : ' no-label'}" data-swap-group="${groupKey}" data-tile-idx="${idx}" title="클릭하면 다른 사진으로 교체됩니다 (${esc(it.name)} · ${esc(it.place)})">
-            <img src="${esc(it.imgUrl)}" alt="${esc(it.name)}" crossorigin="anonymous" onerror="this.src='${FALLBACK_IMG}'">
+            <img src="${esc(it.imgUrl)}" data-raw-src="${esc(it.imgUrl)}" alt="${esc(it.name)}" loading="lazy" onerror="this.src='${FALLBACK_IMG}'">
             <span class="lbc-tile-date">${esc(dateLabel)}</span>
             <div class="lbc-tile-cap">
                 <span class="lbc-tile-name">${esc(itemLabel)}</span>
@@ -647,6 +702,7 @@ async function saveSingleCard(cardEl, btn) {
         btn.textContent = '저장 중...';
     }
     try {
+        await inlineCardImages(cardEl);
         const { toBlob } = await import('html-to-image');
         const blob = await toBlob(cardEl, {
             pixelRatio: 1,
@@ -678,6 +734,7 @@ async function saveAllCards(overlay, btn) {
         for (let i = 0; i < cards.length; i++) {
             btn.textContent = `저장 중 (${i + 1}/${cards.length})...`;
             const cardEl = cards[i];
+            await inlineCardImages(cardEl);
             const blob = await toBlob(cardEl, {
                 pixelRatio: 1,
                 canvasWidth: 1080,

@@ -62,7 +62,7 @@ export async function onRequest(context) {
     const isDataApi = hostname.includes('apis.data.go.kr');
     const fetchOnce = () => fetch(targetUrl.toString(), {
       method: 'GET',
-      headers: { 'Accept': '*/*', 'User-Agent': 'Mozilla/5.0' },
+      headers: hostname.includes('lost112.go.kr') ? { 'Accept': 'image/*,*/*;q=0.8', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36', 'Referer': 'https://www.lost112.go.kr/' } : { 'Accept': '*/*', 'User-Agent': 'Mozilla/5.0' },
       ...(isDataApi ? { signal: AbortSignal.timeout(8000) } : {})
     });
     let res;
