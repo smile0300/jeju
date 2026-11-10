@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>可能的拾得物 · JejuLive</title>
+<!-- 고객 전용 유력 후보 페이지 (링크 토큰으로만 열림) — 외부 리소스 0, 검색 노출·리퍼러 차단 -->
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#ff6b35">
+<link rel="icon" href="/img/icon-192.png">
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--ink:#1d2433;--sub:#5d6677;--line:#e6e8ec;--brand:#ff6b35;--ok:#1f9d55;--hi:#e8590c;--mid:#b7791f;--lo:#718096;--soft:#fff4ee}
+@media (prefers-color-scheme:dark){:root{--bg:#12151b;--card:#1b2029;--ink:#eef1f5;--sub:#a3abb9;--line:#2a313d;--soft:#2a1f1a}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.6 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Noto Sans SC",sans-serif;-webkit-text-size-adjust:100%}
+.wrap{max-width:480px;margin:0 auto;padding:16px 16px calc(24px + env(safe-area-inset-bottom))}
+.top{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;color:var(--sub)}
+.top img{width:24px;height:24px;border-radius:6px}
+h1{font-size:22px;line-height:1.35;margin:16px 0 4px}
+.lead{color:var(--sub);font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-top:12px}
+.kv{display:flex;justify-content:space-between;gap:12px;font-size:13px;padding:4px 0}
+.kv span:first-child{color:var(--sub)}
+.kv b{font-weight:600;text-align:right}
+.mono{font-family:ui-monospace,Menlo,monospace;font-size:12px}
+.badge{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--soft);color:var(--hi)}
+.badge.ok{background:rgba(31,157,85,.12);color:var(--ok)}
+.item{display:flex;gap:12px;padding:14px 0;border-top:1px solid var(--line)}
+.item:first-of-type{border-top:0;padding-top:4px}
+.ph{flex:none;width:76px;height:76px;border-radius:10px;background:var(--bg);border:1px solid var(--line);overflow:hidden;display:flex;align-items:center;justify-content:center;color:var(--sub);font-size:11px;text-align:center}
+.ph img{width:100%;height:100%;object-fit:cover}
+.body{flex:1;min-width:0}
+.name{font-weight:600;font-size:15px;word-break:break-all}
+.meta{color:var(--sub);font-size:12px;margin-top:2px;word-break:break-all}
+.tier{font-size:12px;font-weight:700}
+.tier.hi{color:var(--hi)}.tier.mid{color:var(--mid)}.tier.lo{color:var(--lo)}
+.new{font-size:11px;color:#fff;background:var(--brand);border-radius:4px;padding:0 5px;margin-left:6px;font-weight:600}
+.mine{display:inline-block;margin-top:8px;padding:7px 12px;border-radius:8px;background:var(--brand);color:#fff;text-decoration:none;font-size:13px;font-weight:600}
+.empty{color:var(--sub);font-size:14px;text-align:center;padding:16px 0}
+.lock{text-align:center}
+.lock .n{font-size:34px;font-weight:800;color:var(--brand);line-height:1.2}
+.lock p{font-size:14px}
+.lock small{display:block;color:var(--sub);font-size:12px;margin-top:6px}
+.note{color:var(--sub);font-size:12px;margin-top:14px;line-height:1.7}
+.state{color:var(--sub);text-align:center;padding:40px 0;font-size:14px}
+footer{text-align:center;color:var(--sub);font-size:12px;margin-top:22px}
+footer a{color:inherit}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><img src="/img/icon-192.png" alt="">JejuLive 济州失物招领</div>
+  <h1>为您筛选的可能拾得物</h1>
+  <p class="lead">我们每天把韩国警察厅的新拾得物与您登记的失物进行比对。</p>
+  <div id="app"><p class="state">正在加载…</p></div>
+  <footer><a href="/wx/">JejuLive · 济州旅行秘书</a></footer>
+</div>
+<script>
+(function(){
+  var app=document.getElementById('app');
+  var t=new URLSearchParams(location.search).get('t')||'';
+  try{ if(!localStorage.getItem('jeju_lang')) localStorage.setItem('jeju_lang','zh'); }catch(e){}
+
+  var CAT={PRA000:'包类',PRH000:'钱包',PRJ000:'手机',PRG000:'电子产品',PRI000:'笔记本电脑',PRN000:'证件/护照',PRP000:'卡类',PRL000:'现金',PRO000:'首饰',PRK000:'衣物/鞋帽',PRC000:'文件',PRB000:'书籍/文具',PRQ000:'购物袋',PRE000:'体育用品',PRR000:'乐器',PRM000:'有价证券',PRF000:'汽车用品',PRD000:'工业用品',PRZ000:'其他物品'};
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function md(d){d=String(d||'');return d.length>=10?d.slice(5,10).replace('-','/'):d;}
+  // 확률 숫자 대신 단계 표현 (AI 추정을 '찾았다'로 오해하지 않게)
+  function tier(p){return p>=0.6?['hi','很可能是您的']:p>=0.3?['mid','有可能']:['lo','待核实'];}
+  function kv(k,v){return '<div class="kv"><span>'+esc(k)+'</span><b>'+v+'</b></div>';}
+
+  if(!/^\d+-[0-9a-f]{24}$/.test(t)){ app.innerHTML='<p class="state">链接无效，请联系客服重新获取。</p>'; return; }
+
+  fetch('/api/lost-match?t='+encodeURIComponent(t)).then(function(r){return r.json();}).then(function(d){
+    if(!d||d.error){ app.innerHTML='<p class="state">'+(d&&d.error==='invalid'?'链接无效，请联系客服重新获取。':'暂时无法加载，请稍后刷新。')+'</p>'; return; }
+    var h='<div class="card">'+kv('登记编号','<span class="mono">'+esc(d.code)+'</span>');
+    if(d.category&&CAT[d.category]) h+=kv('物品分类',esc(CAT[d.category]));
+    if(d.lostDate) h+=kv('丢失日期',esc(d.lostDate));
+    if(d.status==='registered'&&d.police){
+      h+=kv('韩国警察厅','<span class="badge ok">✔ 已登记 '+esc(md(d.police.date))+'</span>');
+      h+=kv('受理编号','<span class="mono">'+esc(d.police.sn)+'</span>');
+      if(d.watchUntil) h+=kv('每日比对至',esc(d.watchUntil));
+    }else if(d.status==='paid'){
+      h+=kv('状态','<span class="badge">正在警察厅登记中</span>');
+    }else{
+      h+=kv('状态','<span class="badge">未开通寻找服务</span>');
+    }
+    h+='</div>';
+
+    if(d.status==='unpaid'){
+      h+='<div class="card lock">'+(d.count>0
+        ? '<div class="n">'+d.count+' 件</div><p>已初步发现可能是您的拾得物</p>'
+        : '<p>目前还没有发现相似的拾得物</p>')
+        +'<small>开通寻找服务（9.9元起）后：查看拾得物详情 · 在韩国警察厅正式报失 · 连续10天每日比对<br>请在微信回复「开通」，并附上登记编号 '+esc(d.code)+'</small></div>';
+    }else{
+      var cs=Array.isArray(d.candidates)?d.candidates:[];
+      h+='<div class="card">';
+      if(!cs.length){
+        h+='<p class="empty">暂未发现相似的拾得物'+(d.watchUntil?'<br>我们会每天比对至 '+esc(d.watchUntil)+'，有新发现会微信通知您':'')+'</p>';
+      }else{
+        var today=new Date(Date.now()+9*3600e3).toISOString().slice(0,10);
+        h+=cs.map(function(c){
+          var tr=tier(Number(c.p)||0);
+          var img=c.img?'<img src="/api/public-data?url='+encodeURIComponent(c.img)+'" alt="" loading="lazy" onerror="this.parentNode.textContent=\'暂无照片\'">':'暂无照片';
+          var q=new URLSearchParams({item:c.name||'',place:c.place||'',mgmt:c.id||'',detail:[d.code,c.place,c.date].filter(Boolean).join(' · '),utm_source:'match'});
+          return '<div class="item"><div class="ph">'+img+'</div><div class="body">'
+            +'<div class="tier '+tr[0]+'">'+tr[1]+(c.src==='watch'&&c.at&&(Date.parse(today)-Date.parse(c.at))<3*864e5?'<span class="new">NEW</span>':'')+'</div>'
+            +'<div class="name">'+esc(c.name||'(未填写物品名)')+'</div>'
+            +'<div class="meta">拾获 '+esc(c.date||'-')+' · 保管处 '+esc(c.place||'-')+'</div>'
+            +'<div class="meta mono">管理编号 '+esc(c.id||'')+'</div>'
+            +'<a class="mine" href="/pickup?'+q.toString()+'">这是我的，申请代领</a>'
+            +'</div></div>';
+        }).join('');
+      }
+      h+='</div>';
+    }
+    h+='<p class="note">※ 以上为系统根据物品分类、日期和地点的初步比对结果，需人工核实后才能确认。物品名称和保管处为韩国警察厅原文（韩语）。如有疑问，请直接在微信联系客服并告知登记编号。</p>';
+    app.innerHTML=h;
+  }).catch(function(){ app.innerHTML='<p class="state">暂时无法加载，请稍后刷新。</p>'; });
+})();
+</script>
+</body>
+</html>

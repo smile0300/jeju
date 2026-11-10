@@ -1592,6 +1592,10 @@ window.checkProxyDeepLink = function() {
         setTimeout(() => {
             if (typeof window.openProxyPickupModal === 'function') {
                 window.openProxyPickupModal(caseId, itemName, wechat, region, place);
+                // 후보 페이지(/m/)에서 온 경우: 습득물 관리번호·보관 정보까지 채움
+                const set = (id, v) => { const el = document.getElementById(id); if (el && v) el.value = v; };
+                set('proxy-mgmt-num', params.get('mgmt') || '');
+                set('proxy-location-detail', params.get('detail') || '');
             }
         }, 300);
     }

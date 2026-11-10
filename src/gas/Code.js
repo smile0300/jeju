@@ -117,7 +117,7 @@ function doPost(e) {
     if (data.type === 'admin_ledger_save') return adminLedgerSave(data);
 
     // 작업 큐 (workers/task-triage) — TASK_SECRET으로 따로 인증
-    if (/^(task_list|task_update|task_append|lost_get|lost_update|lost_pending|lost_contact)$/.test(data.type)) {
+    if (/^(task_list|task_get|task_update|task_append|lost_get|lost_update|lost_pending|lost_contact)$/.test(data.type)) {
       return handleTaskQueue_(data);
     }
 
@@ -145,6 +145,7 @@ function doPost(e) {
  * 작업 큐 시트 (위챗 접수 → 운영자가 등록 → Jev 판정 → Claude 처리)
  * 스크립트 속성: TASK_SHEET_ID (작업 큐 스프레드시트 ID), TASK_SECRET (Worker와 같은 값)
  * - task_list   : { status: '대기' } → 그 상태의 행 목록 (상태 칸이 비어 있으면 '대기'로 본다)
+ * - task_get    : { row: 3 } → 그 한 줄 (고객 후보 페이지용, Worker /match 가 필요한 칸만 골라 공개)
  * - task_update : { row: 3, fields: { '상태': '처리가능', ... } } → 헤더 이름 기준으로 칸만 덮어쓴다
  * - task_append : { fields: {...} } → 맨 아래에 한 줄 추가 ('참고' 값이 이미 있으면 추가하지 않음)
  * - lost_get    : { row: 612 } → 운영 시트 LostReport 한 줄 (연락처·기기 정보는 빼고 돌려준다)
@@ -247,6 +248,15 @@ function handleTaskQueue_(data) {
     }
     headers = ensureHeaders_(sheet, Object.keys(data.fields));
     return json_({ result: 'success', row: writeRowAtEnd_(sheet, rowByHeaders_(headers, data.fields)) });
+  }
+
+  if (data.type === 'task_get') {
+    var gRow = parseInt(data.row, 10);
+    if (!(gRow >= 2) || gRow > sheet.getLastRow()) return json_({ result: 'success', row: null });
+    var gVals = sheet.getRange(gRow, 1, 1, headers.length).getDisplayValues()[0];
+    var gObj = { row: gRow };
+    headers.forEach(function (h, c) { gObj[h] = gVals[c]; });
+    return json_({ result: 'success', row: gObj });
   }
 
   if (data.type === 'task_list') {

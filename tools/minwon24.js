@@ -8,6 +8,8 @@
  *       (사진·접수 기록은 이 건 전용 30분 표로 페이지 안에서 처리 — 비밀값은 출력하지 않음)
  *   node tools/minwon24.js wechat <queueRow> <lostRow> <접수번호> [관서명] [--to 시험용ID]
  *     → 고객 위챗으로 접수 안내 발송(tools/wechat-send.ps1), 결과를 큐 '위챗안내' 칸에 기록, 실패 시 푸시
+ *   node tools/minwon24.js link <queueRow>
+ *     → 고객용 유력 후보 페이지 주소 (결제 전 고객에게 보내면 후보 건수만 보임 — 결제 유도용)
  *   node tools/minwon24.js notify <제목> [내용]
  *     → 관리자 앱 푸시
  *   node tools/minwon24.js record <접수번호> <queueRow> <lostRow> <관서명>
@@ -23,6 +25,14 @@ const vars = fs.readFileSync(path.join(__dirname, '..', '.dev.vars'), 'utf8');
 const secret = (vars.match(/^TASK_SECRET=(.+)$/m) || [])[1]?.trim();
 if (!secret) throw new Error('.dev.vars 에 TASK_SECRET 이 없습니다');
 const headers = { 'x-task-secret': secret };
+
+// 고객용 유력 후보 페이지 — Worker publicMatch 와 같은 서명 (TASK_SECRET HMAC, 큐 행 번호)
+// 위챗 전용 서브도메인이 준비되면 MATCH_BASE 만 바꾼다
+const MATCH_BASE = 'https://jeju-live.com';
+function matchLink(queueRow) {
+  const sig = require('crypto').createHmac('sha256', secret).update(`match.${queueRow}`).digest('hex').slice(0, 24);
+  return `${MATCH_BASE}/m/?t=${queueRow}-${sig}`;
+}
 
 // 신고서 페이지에서 그대로 실행할 JS 세 줄 — 사진·기록은 이 건 전용 30분 표(ticket)로, 비밀값은 넣지 않는다
 async function prep(lostRow, outDir) {
@@ -47,11 +57,17 @@ async function prep(lostRow, outDir) {
 // --to <id 또는 JL코드> 를 주면 그것으로만 보낸다(시험용, 큐 기록 안 함).
 const WECHAT_ID_RE = /^[a-zA-Z][-_a-zA-Z0-9]{5,19}$/;
 async function wechat(queueRow, lostRow, sn, office, to) {
+  // 후보 페이지가 실제로 열릴 때만 링크를 넣는다 (Worker 배포 전·장애 시 깨진 링크를 보내지 않도록)
+  const link = matchLink(queueRow);
+  let linkOk = false;
+  // 고객이 실제로 여는 사이트 쪽(/api/lost-match)으로 확인 — 사이트 배포 전이면 code 가 없어 링크를 빼고 보낸다
+  try { linkOk = !!(await (await fetch(`${MATCH_BASE}/api/lost-match?t=${link.split('t=')[1]}`)).json()).code; } catch (e) { linkOk = false; }
   const msg = [
     '您好！您在 jeju-live 登记的失物，已在韩国警察厅系统完成报失登记（与亲自到警察局报案效力相同）。',
     `受理编号：${sn}`,
     office ? `受理警察署：${office}` : '',
     '接下来10天我们每天为您比对新的拾得物，有消息会第一时间通知您。',
+    linkOk ? `可能的拾得物（随时更新）：${link}` : '',
     '—— jeju-live 济州失物招领'
   ].filter(Boolean).join('\n');
   const { execFileSync } = require('child_process');
@@ -117,6 +133,8 @@ if (cmd === 'judge') {
   const i = args.indexOf('--to');
   const to = i !== -1 ? args.splice(i, 2)[1] : '';
   wechat(args[0], args[1], args[2], args[3] || '', to);
+} else if (cmd === 'link') {
+  console.log(matchLink(parseInt(args[0], 10)));
 } else if (cmd === 'notify') {
   notify(args[0], args[1] || '');
 } else {

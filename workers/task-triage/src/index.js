@@ -272,11 +272,61 @@ async function searchFound(env, categoryCd, regionCodes, from, to) {
     }
     return [...text.matchAll(/<item>([\s\S]*?)<\/item>/g)].map(([, body]) => {
       const tag = (t) => (body.match(new RegExp(`<${t}>([\\s\\S]*?)</${t}>`)) || [])[1] || '';
-      return { atcId: tag('atcId'), fdPrdtNm: tag('fdPrdtNm'), depPlace: tag('depPlace'), fdYmd: tag('fdYmd'), prdtClNm: tag('prdtClNm'), fdSbjt: tag('fdSbjt') };
+      return { atcId: tag('atcId'), fdPrdtNm: tag('fdPrdtNm'), depPlace: tag('depPlace'), fdYmd: tag('fdYmd'), prdtClNm: tag('prdtClNm'), fdSbjt: tag('fdSbjt'), fdFilePathImg: tag('fdFilePathImg') };
     });
   }));
   const seen = new Set();
   return lists.flat().filter(i => i && i.atcId && !seen.has(i.atcId) && seen.add(i.atcId));
+}
+
+// ─── 고객용 유력 후보 페이지 (jeju-live.com/m/?t=…) ───
+// 큐 '후보JSON' 칸에 습득물 후보를 쌓고, 링크 토큰은 큐 행 번호를 TASK_SECRET으로 서명한 값 (시트에 따로 저장 안 함)
+const CANDIDATE_MIN_P = 0.1;      // 이보다 낮은 일치 확률은 페이지에 올리지 않는다
+const CANDIDATE_MAX = 8;
+function candidateOf(c, p, src) {
+  const img = String(c.fdFilePathImg || '');
+  return {
+    id: c.atcId, name: c.fdPrdtNm || '', place: c.depPlace || '', date: c.fdYmd || '',
+    img: /^https?:\/\//.test(img) && !/no_?img/i.test(img) ? img : '',
+    p: Math.round(Number(p) * 100) / 100, src,
+    at: new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' })
+  };
+}
+function mergeCandidates(prevJson, fresh) {
+  let prev = [];
+  try { prev = JSON.parse(prevJson || '[]'); } catch { prev = []; }
+  const byId = new Map(prev.map(c => [c.id, c]));
+  fresh.forEach(c => { if (!byId.has(c.id) || byId.get(c.id).p < c.p) byId.set(c.id, { ...(byId.get(c.id) || {}), ...c }); });
+  return JSON.stringify([...byId.values()].sort((a, b) => b.p - a.p).slice(0, CANDIDATE_MAX));
+}
+async function matchToken(env, queueRow) {
+  return `${queueRow}-${(await signTicket(env, `match.${queueRow}`)).slice(0, 24)}`;
+}
+const PAID_STATUSES = ['등록대기', '등록필요', '완료'];
+/** GET /match?t= — 인증 없이 토큰만으로. 연락처·분실자 설명은 내보내지 않는다 (결제 전이면 후보 건수만) */
+async function publicMatch(env, token) {
+  const m = String(token || '').match(/^(\d+)-([0-9a-f]{24})$/);
+  if (!m || await matchToken(env, Number(m[1])) !== token) return Response.json({ error: 'invalid' }, { status: 404 });
+  const { row: q } = await callGas(env, { type: 'task_get', row: Number(m[1]) });
+  if (!q || !/^LostReport!\d+$/.test(String(q['참고(링크·위챗ID 등)'] || ''))) return Response.json({ error: 'invalid' }, { status: 404 });
+  let cands = [];
+  try { cands = JSON.parse(q['후보JSON'] || '[]'); } catch { cands = []; }
+  const status = String(q['상태'] || '').trim();
+  const paid = PAID_STATUSES.includes(status);
+  const done = String(q['처리일시'] || '').match(/^(\d{4}-\d{2}-\d{2}).*?(L\d{8})\d*(\d{4})/);
+  let form = {};
+  try { form = JSON.parse(q['신고서'] || '{}'); } catch { form = {}; }
+  const watchUntil = done ? new Date(new Date(`${done[1]}T00:00:00+09:00`).getTime() + WATCH_DAYS * 86400000).toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' }) : '';
+  return Response.json({
+    code: `JL${String(q['참고(링크·위챗ID 등)']).replace('LostReport!', '')}`,
+    status: status === '완료' ? 'registered' : paid ? 'paid' : 'unpaid',
+    lostDate: form.lostYmd || '',
+    category: String(q['Jev분류'] || '').split(' ')[0],
+    police: done ? { date: done[1], sn: `${done[2]}****${done[3]}` } : null,
+    watchUntil,
+    count: cands.length,
+    candidates: paid ? cands : []
+  });
 }
 
 async function notifyAdmin(env, title, body) {
@@ -329,6 +379,8 @@ async function processLost(env, row) {
     ? `습득물 후보 없음 (${ymd(lostDate)}~${ymd(to)} ${regionNames.join('+')}, ${cat.choice || '분류 실패'})`
     : `[${regionNames.join('+')}] 습득물 ${found.length}건 중 유력 후보: ` + top.map(([id, p]) => `${id} ${byId[id]?.fdPrdtNm || ''} @${byId[id]?.depPlace || ''} (${p.toFixed(2)})`).join(' / ') +
       ` | Jev 최종: ${match.choice} (${Number(match.confidence ?? 0).toFixed(2)})`;
+  const candJson = mergeCandidates('[]', top.filter(([id, p]) => p >= CANDIDATE_MIN_P && byId[id])
+    .map(([id, p]) => candidateOf(byId[id], p, 'initial')));
 
   // 찾기 서비스(9.9/19.9元) 결제가 확인된 건만 경찰 등록 대상 — 운영자가 LostReport '결제상태'를 '확인'으로 바꾸면 크론이 넘겨 줌
   const paid = String(fields['결제상태'] || '').trim() === '확인';
@@ -360,7 +412,8 @@ async function processLost(env, row) {
       'Jev승인필요': '1.00',
       '판정일시': new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }),
       '처리결과': foundText,
-      '신고서': formJson
+      '신고서': formJson,
+      '후보JSON': candJson
     }
   });
 
@@ -369,7 +422,7 @@ async function processLost(env, row) {
     await callGas(env, {
       type: 'task_update',
       row: queued.row,
-      fields: { 'Jev분류': `${cat.choice || ''} ${LOST_CATEGORIES[cat.choice] || ''}`.trim(), '판정일시': new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }), '처리결과': foundText, '신고서': formJson }
+      fields: { 'Jev분류': `${cat.choice || ''} ${LOST_CATEGORIES[cat.choice] || ''}`.trim(), '판정일시': new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }), '처리결과': foundText, '신고서': formJson, '후보JSON': candJson }
     });
   } else {
     const urgent = hasId >= 0.5 ? '🚨 신분증 포함 · ' : '';
@@ -457,6 +510,10 @@ export default {
       return new Response(`var __name = __name || ((f) => f);\nwindow.jejuFill = ${jejuFill.toString()};\nwindow.jejuSubmit = ${jejuSubmit.toString()};\nwindow.jejuRecord = ${jejuRecord.toString()};\n`, {
         headers: { ...cors, 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/javascript; charset=utf-8', 'Cache-Control': 'no-store' }
       });
+    }
+    // 고객 후보 페이지 데이터 — 비밀값 대신 서명 토큰 (jeju-live.com/api/lost-match 가 받아 캐시)
+    if (url.pathname === '/match' && request.method === 'GET') {
+      try { return await publicMatch(env, url.searchParams.get('t')); } catch (e) { return Response.json({ error: e.message }, { status: 500 }); }
     }
     if (!['/run', '/form', '/photo'].includes(url.pathname)) return new Response('ok');
     let res;
@@ -594,7 +651,8 @@ async function watchPaidLost(env) {
       if (m?.choice && m.choice !== 'none' && p >= 0.5) {
         const c = found.find(f => f.atcId === m.choice);
         await notifyAdmin(env, `🎯 습득물 후보 (${ref})`, `${c.fdPrdtNm} @${c.depPlace} ${c.fdYmd} (${p.toFixed(2)}) · ${m.choice}`);
-        await callGas(env, { type: 'task_update', row: q.row, fields: { '감시알림': [...notified, m.choice].join(' ') } });
+        // 고객 후보 페이지에도 같이 올린다 (같은 링크를 다시 열면 새 후보가 보임)
+        await callGas(env, { type: 'task_update', row: q.row, fields: { '감시알림': [...notified, m.choice].join(' '), '후보JSON': mergeCandidates(q['후보JSON'], [candidateOf(c, p, 'watch')]) } });
       }
       out.push({ ref, fresh: found.length, match: m?.choice, p });
     } catch (e) {
