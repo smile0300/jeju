@@ -19,6 +19,9 @@
             <input type="text" id="wechat-id-input" class="modal-copy-input" value="jeju_jk" readonly>
             <button onclick="copyWechatId()" class="btn btn-primary" data-i18n="modal.wechat.copy">复制</button>
         </div>
+        <!-- 환경별(openWechatQR): 휴대폰 브라우저 → 복사+위챗 열기 버튼, 위챗 안 → QR 길게 누르기 안내, 샤오홍슈 안 → 복사 후 검색 안내 -->
+        <button type="button" id="wechat-open-btn" class="btn btn-primary modal-wechat-open" onclick="copyAndOpenWechat()" data-i18n="modal.wechat.open" style="display:none">复制微信号并打开微信</button>
+        <p id="wechat-env-hint" class="modal-wechat-hint" style="display:none"></p>
     </div>
 </div>
 

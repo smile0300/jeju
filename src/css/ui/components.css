@@ -583,6 +583,18 @@ i.ph-duotone.hover-scale:hover {
     display: flex;
     gap: 8px;
 }
+.modal-wechat-open {
+    width: 100%;
+    margin-top: 10px;
+    padding: 12px;
+    font-weight: 600;
+}
+.modal-wechat-hint {
+    margin-top: 10px;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: var(--label-secondary);
+}
 .modal-copy-input {
     flex: 1;
     padding: 10px;

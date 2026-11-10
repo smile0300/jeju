@@ -494,6 +494,11 @@ const TRANSLATIONS = {
         'modal.wechat.title': '联系我们 (WeChat)',
         'modal.wechat.desc':  '通过扫描下方二维码\n或复制ID添加我的微信',
         'modal.wechat.copy':  '复制',
+        'modal.wechat.open':  '复制微信号并打开微信',
+        'modal.wechat.opening': '已复制，正在打开微信…',
+        'modal.wechat.hint.wechat': '长按上方二维码，选择「识别图中二维码」即可直接添加。',
+        'modal.wechat.hint.xhs': '小红书内无法直接打开微信：请复制微信号，到微信「添加朋友」中搜索。',
+        'modal.wechat.hint.fallback': '微信号已复制。如果微信没有自动打开，请手动打开微信，在「添加朋友」中粘贴搜索。',
 
         // ── 모달: 분실물 신고 ──
         'modal.lost.title':      '登记报失物品',
@@ -1182,6 +1187,11 @@ const TRANSLATIONS = {
         'modal.wechat.title': '문의하기 (WeChat)',
         'modal.wechat.desc':  '아래 QR코드를 스캔하거나\nID를 복사하여 위챗을 추가하세요',
         'modal.wechat.copy':  '복사',
+        'modal.wechat.open':  '위챗 ID 복사하고 위챗 열기',
+        'modal.wechat.opening': '복사했습니다. 위챗을 여는 중…',
+        'modal.wechat.hint.wechat': '위 QR코드를 길게 눌러 「识别图中二维码」를 선택하면 바로 추가됩니다.',
+        'modal.wechat.hint.xhs': '샤오홍슈 안에서는 위챗을 바로 열 수 없습니다. ID를 복사해 위챗 「친구 추가」에서 검색해 주세요.',
+        'modal.wechat.hint.fallback': 'ID를 복사했습니다. 위챗이 열리지 않으면 직접 위챗을 열어 「친구 추가」에 붙여넣어 검색해 주세요.',
 
         'modal.lost.title':      '분실물 등록',
         'modal.lost.desc':       '정보 입력은 무료예요. 제출 후 찾기 서비스(9.9위안~)를 고르시면 경찰청 시스템에 등록하고 찾기 시작합니다. (자세할수록 찾을 확률이 높아요)',
@@ -1844,6 +1854,11 @@ const TRANSLATIONS = {
         'modal.wechat.title': 'Contact Us (WeChat)',
         'modal.wechat.desc':  'Scan the QR code below\nor copy the ID to add WeChat',
         'modal.wechat.copy':  'Copy',
+        'modal.wechat.open':  'Copy ID & open WeChat',
+        'modal.wechat.opening': 'Copied. Opening WeChat…',
+        'modal.wechat.hint.wechat': 'Long-press the QR code above and choose "Scan QR code in image" to add us.',
+        'modal.wechat.hint.xhs': 'WeChat can’t be opened from inside Xiaohongshu. Copy the ID and search it under "Add Contacts" in WeChat.',
+        'modal.wechat.hint.fallback': 'ID copied. If WeChat didn’t open, open it yourself and paste the ID under "Add Contacts".',
 
         'modal.lost.title':      'Register Lost Item',
         'modal.lost.desc':       'Filling in is free. After submitting, choose a search service (from 9.9 RMB) and we will register your item in the Korean police system and start searching. (More details = higher chance of recovery)',

@@ -206,9 +206,29 @@ export function goBack(fallback = 'home') {
     history.replaceState({ section: fallback }, '', fallback === 'home' ? '/' : `/${fallback}`);
 }
 
+// 위챗 팝업을 여는 환경 — 개인 계정은 '친구 추가 화면 바로 열기' 공식 링크가 없어
+// 휴대폰 브라우저는 ID 복사 + weixin:// 로 앱만 열고, 위챗 안에서는 QR 길게 누르기로 안내한다
+function wechatEnv() {
+    const ua = navigator.userAgent;
+    if (/MicroMessenger/i.test(ua)) return 'wechat';
+    if (/xhsdiscover|XiaoHongShu/i.test(ua)) return 'xhs';   // 샤오홍슈 앱 안 브라우저는 weixin:// 를 막음
+    if (/Android|iPhone|iPad|iPod/i.test(ua)) return 'mobile';
+    return 'desktop';
+}
+
 export function openWechatQR() {
     const modal = document.getElementById('wechat-qr-modal');
-    if (modal) { 
+    if (modal) {
+        const env = wechatEnv();
+        const btn = document.getElementById('wechat-open-btn');
+        const hint = document.getElementById('wechat-env-hint');
+        if (btn) { btn.style.display = env === 'mobile' ? 'block' : 'none'; btn.textContent = t('modal.wechat.open'); }
+        if (hint) {
+            const key = env === 'wechat' ? 'modal.wechat.hint.wechat' : env === 'xhs' ? 'modal.wechat.hint.xhs' : '';
+            hint.textContent = key ? t(key) : '';
+            hint.style.display = key ? 'block' : 'none';
+        }
+
         modal.style.display = 'flex'; 
         document.body.style.overflow = 'hidden'; 
         if (window.pushModalState) window.pushModalState();
@@ -378,6 +398,31 @@ export function copyWechatId() {
             });
         }
     });
+}
+
+// 휴대폰 브라우저: 위챗 ID를 복사하고 위챗 앱을 연다 (사용자는 검색창에 붙여넣어 추가)
+export async function copyAndOpenWechat() {
+    const id = document.getElementById('wechat-id-input')?.value || '';
+    const btn = document.getElementById('wechat-open-btn');
+    const hint = document.getElementById('wechat-env-hint');
+    let copied = false;
+    try { await navigator.clipboard.writeText(id); copied = true; } catch (e) {
+        // 일부 안드로이드 브라우저는 clipboard API가 없음 → 옛 방식
+        const input = document.getElementById('wechat-id-input');
+        try { input?.select(); copied = document.execCommand('copy'); } catch (e2) { copied = false; }
+    }
+    if (btn) btn.textContent = t('modal.wechat.opening');
+    if (window.dataLayer) window.dataLayer.push({ event: 'wechat_open_app', label: copied ? 'copied' : 'copy_failed' });
+    // 앱이 열리면 페이지가 가려진다 — 1.5초 뒤에도 보이면 위챗이 없거나 막힌 것
+    const timer = setTimeout(() => {
+        if (document.visibilityState === 'visible' && hint) {
+            hint.textContent = t('modal.wechat.hint.fallback');
+            hint.style.display = 'block';
+        }
+        if (btn) btn.textContent = t('modal.wechat.open');
+    }, 1500);
+    document.addEventListener('visibilitychange', () => { if (document.hidden) clearTimeout(timer); }, { once: true });
+    window.location.href = 'weixin://';
 }
 
 // ─── 날씨 요약 모달 ────────────────────────────────────────────

@@ -16,7 +16,7 @@ import { fetchFoundGoods, switchLostView, openLostDetailModalByIndex, openLostRe
 import { fetchFestivals, initFestivalFilters } from '../features/festival.js';
 import { initReservationSection, adjustParty, submitReservation, changeReservationType } from '../features/reservation.js';
 import { initReward } from '../features/reward.js';
-import { showSection, goBack, openWechatQR, closeWechatQR, openFeatureModal, closeFeatureModal, submitFeatureRequest, openCSModal, closeCSModal, submitCSFeedback, copyWechatId, openWeatherSummaryModal, closeWeatherSummaryModal, openShareModal, closeShareModal, shareToPlatform } from '../ui/ui.js';
+import { showSection, goBack, openWechatQR, closeWechatQR, openFeatureModal, closeFeatureModal, submitFeatureRequest, openCSModal, closeCSModal, submitCSFeedback, copyWechatId, copyAndOpenWechat, openWeatherSummaryModal, closeWeatherSummaryModal, openShareModal, closeShareModal, shareToPlatform } from '../ui/ui.js';
 import '../ui/home.js';
 import '../ui/home-info-banner.js';
 import '../features/trip.js';
@@ -206,6 +206,7 @@ window.openFeatureModal = openFeatureModal;
 window.closeFeatureModal = closeFeatureModal;
 window.submitFeatureRequest = submitFeatureRequest;
 window.copyWechatId = copyWechatId;
+window.copyAndOpenWechat = copyAndOpenWechat;
 window.openWeatherSummaryModal = openWeatherSummaryModal;
 window.closeWeatherSummaryModal = closeWeatherSummaryModal;
 window.openShareModal = openShareModal;
