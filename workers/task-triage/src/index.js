@@ -281,6 +281,11 @@ async function searchFound(env, categoryCd, regionCodes, from, to) {
 
 // ─── 고객용 유력 후보 페이지 (jeju-live.com/m/?t=…) ───
 // 큐 '후보JSON' 칸에 습득물 후보를 쌓고, 링크 토큰은 큐 행 번호를 TASK_SECRET으로 서명한 값 (시트에 따로 저장 안 함)
+const MATCH_INSTRUCTIONS = 'Which found item (if any) is most likely the same object as this lost item?';
+// 여권·신분증은 경찰 습득물 목록에 소유자 이름(영문·한글 음역)이 함께 적히는 경우가 많다
+function enNameHint(en) {
+  return en ? ` The lost item contains a passport or ID belonging to "${en}". A found item whose name or description contains this name (or its Korean transliteration, e.g. ZHANG SAN → 장산) is a very strong match; a passport/ID with a clearly different name is not a match.` : '';
+}
 const CANDIDATE_MIN_P = 0.1;      // 이보다 낮은 일치 확률은 페이지에 올리지 않는다
 const CANDIDATE_MAX = 8;
 function candidateOf(c, p, src) {
@@ -366,7 +371,7 @@ async function processLost(env, row) {
     const criteria = { none: 'None of these found items is the lost item' };
     candidates.forEach(c => { criteria[c.atcId] = `${c.fdPrdtNm} | found ${c.fdYmd} | ${c.depPlace} | ${c.fdSbjt || ''}`.slice(0, 300); });
     const matchAnswers = await askJev(env, state, {
-      match: { type: 'choice', instructions: 'Which found item (if any) is most likely the same object as this lost item?', criteria }
+      match: { type: 'choice', instructions: MATCH_INSTRUCTIONS + enNameHint(fields.EnglishName), criteria }
     });
     match = matchAnswers.match || null;
   }
@@ -413,7 +418,8 @@ async function processLost(env, row) {
       '판정일시': new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }),
       '처리결과': foundText,
       '신고서': formJson,
-      '후보JSON': candJson
+      '후보JSON': candJson,
+      '영문명': fields.EnglishName || ''
     }
   });
 
@@ -644,8 +650,9 @@ async function watchPaidLost(env) {
       if (!found.length) { out.push({ ref, fresh: 0 }); continue; }
       const criteria = { none: 'None of these found items is the lost item' };
       found.forEach(c => { criteria[c.atcId] = `${c.fdPrdtNm} | found ${c.fdYmd} | ${c.depPlace} | ${c.fdSbjt || ''}`.slice(0, 300); });
-      const m = (await askJev(env, `${form.itemName}\n${form.lostPlcNm}\n${form.content}`, {
-        match: { type: 'choice', instructions: 'Which found item (if any) is most likely the same object as this lost item?', criteria }
+      const en = String(q['영문명'] || '').trim();
+      const m = (await askJev(env, `${form.itemName}\n${form.lostPlcNm}\n${form.content}${en ? `\nOwner name on passport/ID: ${en}` : ''}`, {
+        match: { type: 'choice', instructions: MATCH_INSTRUCTIONS + enNameHint(en), criteria }
       })).match;
       const p = Number(m?.probabilities?.[m?.choice] ?? 0);
       if (m?.choice && m.choice !== 'none' && p >= 0.5) {

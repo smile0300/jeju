@@ -464,10 +464,13 @@ function handleLostReport_(data) {
     'Labels': '',
     // 2026-11 양식 추가 칸 (경찰 신고서 색상 코드·신분증 긴급 표시에 바로 쓰임)
     'ItemColor': data.itemColor || '',
-    'HasIdCard': data.hasIdCard || ''
+    'HasIdCard': data.hasIdCard || '',
+    // 여권·신분증 분실 시 영문 이름 (경찰청 습득물 대조용 — 공개 목록·경찰 신고서 본문에는 넣지 않음)
+    'EnglishName': String(data.englishName || '').toUpperCase().replace(/[^A-Z' .-]/g, '').slice(0, 60)
   };
 
   if (data.itemColor || data.hasIdCard) ensureHeaders_(sheet, ['ItemColor', 'HasIdCard']);
+  if (rowData.EnglishName) ensureHeaders_(sheet, ['EnglishName']);
   var headers = headerRow_(sheet);
   if (!headers.some(function (h) { return rowData[h] !== undefined; })) headers = LOST_REPORT_HEADERS;
   var row = rowByHeaders_(headers, rowData);

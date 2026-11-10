@@ -268,6 +268,13 @@
                         <span style="font-size: 0.85rem; color: var(--text-primary); font-weight: 500;" data-i18n="modal.lost.idcard">안에 여권·신분증·카드가 있어요</span>
                     </label>
                 </div>
+
+                <!-- 여권 분류이거나 신분증 체크 시에만 (syncLostEnName) — 경찰청 습득물 목록의 이름과 대조 -->
+                <div class="lost-form-group" id="lost-report-en-name-group" style="display:none;">
+                    <label class="lost-form-label" for="lost-report-en-name"><span class="required-field" data-i18n="modal.lost.en_name.label">여권·신분증의 영문 이름</span></label>
+                    <input type="text" id="lost-report-en-name" class="lost-form-input" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="60" data-i18n="modal.lost.en_name.ph" placeholder="예: ZHANG SAN">
+                    <p class="lost-form-hint" data-i18n="modal.lost.en_name.hint">여권과 똑같이 (성 이름 순, 대문자). 경찰서에 맡겨진 습득물은 이 이름으로 찾습니다.</p>
+                </div>
                 
                 <div class="lost-form-group">
                     <label class="lost-form-label"><span data-i18n="modal.lost.photo.label" class="required-field">사진 첨부</span></label>

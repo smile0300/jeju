@@ -342,6 +342,7 @@ export function openLostReportModal() {
     renderLostResume();
     // 새로 고침 전에 쓰던 내용이 있으면 되살린다 (form-draft.js)
     window.restoreFormDraft?.('lost-report', 'draft_lost_report');
+    setTimeout(syncLostEnName, 0);
 }
 
 /** 분실물 등록 폼 완전 초기화 */
@@ -372,6 +373,8 @@ function resetLostReportForm() {
     if (privacyCheck) privacyCheck.checked = false;
     const idCheck = document.getElementById('lost-report-has-id');
     if (idCheck) idCheck.checked = false;
+    const enName = document.getElementById('lost-report-en-name');
+    if (enName) enName.value = '';
     showWechatIdProblem('');
 
     // 칩 선택 초기화
@@ -409,6 +412,14 @@ window.nextLostStep = function() {
         const cat = document.getElementById('lost-report-item-category')?.value;
         if (!cat) { formAlert(window.t ? window.t('lost.report.cat_err') : '물품 종류를 선택해주세요.'); return; }
         if (!lostReportImageBase64) { formAlert(window.t ? window.t('lost.report.fill_err') : '필수 항목(사진 포함)을 모두 입력해주세요.'); return; }
+        if (needsLostEnName()) {
+            const v = normalizeEnName(document.getElementById('lost-report-en-name')?.value);
+            if (!/^[A-Z][A-Z' .-]{1,58}[A-Z.]$/.test(v) || !/[A-Z]{2}/.test(v)) {
+                formAlert(window.t ? window.t('modal.lost.en_name.err') : '여권의 영문 이름을 입력해 주세요.');
+                document.getElementById('lost-report-en-name')?.focus();
+                return;
+            }
+        }
     } else if (currentLostStep === 2) {
         const city = document.getElementById('lost-report-city-category')?.value;
         if (!city) { formAlert(window.t ? window.t('modal.lost.city_err') : '지역(도시)을 선택해주세요.'); return; }
@@ -476,6 +487,19 @@ function updateLostStepView() {
     }
 }
 
+// ─── 여권·신분증 분실: 영문 이름 (경찰청 습득물은 여권 이름으로 등록돼 있어 대조에 필요) ───
+function needsLostEnName() {
+    return document.getElementById('lost-report-item-category')?.value === '여권'
+        || !!document.getElementById('lost-report-has-id')?.checked;
+}
+function normalizeEnName(v) {
+    return String(v || '').toUpperCase().replace(/[，,]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+function syncLostEnName() {
+    const g = document.getElementById('lost-report-en-name-group');
+    if (g) g.style.display = needsLostEnName() ? 'block' : 'none';
+}
+
 // Global Chip Event Listener Setup
 document.addEventListener('DOMContentLoaded', () => {
     // Item Category Chips
@@ -486,7 +510,15 @@ document.addEventListener('DOMContentLoaded', () => {
             this.classList.add('active');
             const hiddenInput = document.getElementById('lost-report-item-category');
             if (hiddenInput) hiddenInput.value = this.dataset.value;
+            syncLostEnName();
         });
+    });
+    document.getElementById('lost-report-has-id')?.addEventListener('change', syncLostEnName);
+    // 입력하는 대로 대문자로 (여권 표기와 같게)
+    document.getElementById('lost-report-en-name')?.addEventListener('input', (e) => {
+        const el = e.target, pos = el.selectionStart;
+        const up = el.value.toUpperCase();
+        if (up !== el.value) { el.value = up; try { el.setSelectionRange(pos, pos); } catch (err) { /* 무시 */ } }
     });
 
     // City Category Chips
@@ -662,6 +694,7 @@ export async function submitLostReport() {
         specifics: getVal('lost-report-specifics'),
         itemColor: getVal('lost-report-item-color'),
         hasIdCard: document.getElementById('lost-report-has-id')?.checked ? 'Y' : '',
+        englishName: needsLostEnName() ? normalizeEnName(getVal('lost-report-en-name')) : '',
         regionCategory: regionCat,
         date: getVal('lost-report-date'),
         time: getVal('lost-report-time'),
