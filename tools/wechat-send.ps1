@@ -65,7 +65,8 @@ Paste $(if ($Remark) { $Remark } else { $WechatId })
 
 # 검색 결과 팝업(검색창 바로 아래)을 읽어 "ID: <id>" 확인 — 닉네임만 비슷한 다른 사람에게 보내지 않도록
 # OCR은 1↔l, 0↔o 를 자주 헷갈린다 → 양쪽 다 같은 규칙으로 바꿔서 비교. 결과가 늦게 그려질 수 있어 최대 4번 읽음
-function Canon($s) { (($s -replace '\s', '').ToLower() -replace '[il|!]', '1' -replace 'o', '0') }
+# 밑줄(_)은 OCR이 아예 못 읽는 경우가 많아(JIAMINGKEJI018_ → JlAMlNGKEJ1018) 양쪽에서 뺀다
+function Canon($s) { (($s -replace '[\s_]', '').ToLower() -replace '[il|!]', '1' -replace 'o', '0') }
 # 검색어를 되풀이하는 줄("Search mobile/QQ ID: …", "Internet search results …", 搜索/查找/网络…)은 연락처가 아니다.
 # 2026-11-04 이 줄의 "QQ ID: <검색어>" 때문에 친구가 아닌데도 통과 → 이미 열려 있던 다른 고객 대화방으로 오발송됨.
 $echo = '(?i)search|qq|internet|mobile|phone|搜索|搜一搜|查找|网络|手机'
