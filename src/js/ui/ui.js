@@ -160,6 +160,7 @@ export function showSection(sectionId, pushHistory = true) {
     if (sectionId === 'lost-status') window.lostApp?.renderMyCases?.();
 
     if (sectionId === 'lost') {
+        window.renderLostCases?.();
         if (window.toggleLostGuide) {
             const guide = document.getElementById('inline-lost-guide');
             if (guide && guide.style.display !== 'block') {
@@ -208,7 +209,7 @@ export function goBack(fallback = 'home') {
 
 // 위챗 팝업을 여는 환경 — 개인 계정은 '친구 추가 화면 바로 열기' 공식 링크가 없어
 // 휴대폰 브라우저는 ID 복사 + weixin:// 로 앱만 열고, 위챗 안에서는 QR 길게 누르기로 안내한다
-function wechatEnv() {
+export function wechatEnv() {
     const ua = navigator.userAgent;
     if (/MicroMessenger/i.test(ua)) return 'wechat';
     if (/xhsdiscover|XiaoHongShu/i.test(ua)) return 'xhs';   // 샤오홍슈 앱 안 브라우저는 weixin:// 를 막음
@@ -401,16 +402,25 @@ export function copyWechatId() {
 }
 
 // 휴대폰 브라우저: 위챗 ID를 복사하고 위챗 앱을 연다 (사용자는 검색창에 붙여넣어 추가)
-export async function copyAndOpenWechat() {
-    const id = document.getElementById('wechat-id-input')?.value || '';
-    const btn = document.getElementById('wechat-open-btn');
-    const hint = document.getElementById('wechat-env-hint');
-    let copied = false;
-    try { await navigator.clipboard.writeText(id); copied = true; } catch (e) {
-        // 일부 안드로이드 브라우저는 clipboard API가 없음 → 옛 방식
-        const input = document.getElementById('wechat-id-input');
-        try { input?.select(); copied = document.execCommand('copy'); } catch (e2) { copied = false; }
+// 클립보드 복사 (clipboard API가 없는 일부 안드로이드 브라우저는 임시 입력칸으로)
+export async function copyText(text) {
+    try { await navigator.clipboard.writeText(text); return true; } catch (e) {
+        const ta = document.createElement('textarea');
+        ta.value = text; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;opacity:0;top:0';
+        document.body.appendChild(ta); ta.select();
+        let ok = false;
+        try { ok = document.execCommand('copy'); } catch (e2) { ok = false; }
+        ta.remove();
+        return ok;
     }
+}
+
+// 버튼·안내 칸·ID를 넘기면 다른 화면(분실 접수 결제 팝업)에서도 같은 동작
+export async function copyAndOpenWechat(btnEl, hintEl, idText) {
+    const btn = btnEl instanceof HTMLElement ? btnEl : document.getElementById('wechat-open-btn');
+    const hint = hintEl instanceof HTMLElement ? hintEl : document.getElementById('wechat-env-hint');
+    const id = (typeof idText === 'string' && idText.trim()) || document.getElementById('wechat-id-input')?.value || '';
+    const copied = await copyText(id.trim());
     if (btn) btn.textContent = t('modal.wechat.opening');
     if (window.dataLayer) window.dataLayer.push({ event: 'wechat_open_app', label: copied ? 'copied' : 'copy_failed' });
     // 앱이 열리면 페이지가 가려진다 — 1.5초 뒤에도 보이면 위챗이 없거나 막힌 것

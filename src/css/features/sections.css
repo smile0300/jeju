@@ -4770,6 +4770,94 @@ body:not(.page-home) .wechat-float-btn {
     border: 2px solid var(--color-orange, #ff6b00);
     background: #fff7f0;
 }
+/* 고르기만 한 상태 (확정 전) — 라디오 표시 + 파란 테두리 */
+.upsell-radio {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
+    border-radius: 50%;
+    border: 2px solid var(--separator);
+    align-self: center;
+}
+.upsell-plan.selected {
+    border: 2px solid var(--accent, #3182f6);
+    box-shadow: 0 0 0 3px rgba(49, 130, 246, 0.15);
+}
+.upsell-plan.selected .upsell-radio {
+    border-color: var(--accent, #3182f6);
+    background: radial-gradient(circle, var(--accent, #3182f6) 45%, transparent 50%);
+}
+.upsell-plan-head > b:first-of-type { flex: 1; }
+.upsell-confirm {
+    width: 100%;
+    padding: 13px;
+    font-weight: 700;
+}
+.upsell-confirm:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+.upsell-change {
+    margin-top: 6px;
+    border: none;
+    background: none;
+    color: var(--label-secondary);
+    font-size: 0.82rem;
+    text-decoration: underline;
+    cursor: pointer;
+}
+.upsell-wechat-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 8px;
+    font-size: 0.85rem;
+    color: var(--label-secondary);
+}
+.upsell-wechat-row b {
+    color: var(--text-primary);
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+}
+.upsell-copy {
+    padding: 4px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--accent, #3182f6);
+    background: transparent;
+    color: var(--accent, #3182f6);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+/* 이 기기에서 결제 단계를 마치지 않은 접수 → 이어서 (접수 화면 위 · 진행상황 내 접수 내역) */
+.lost-resume {
+    display: block;
+    width: 100%;
+    margin: 0 0 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--color-orange, #ff6b00);
+    background: #fff7f0;
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    text-align: left;
+    cursor: pointer;
+}
+.lost-resume b { color: var(--color-orange, #ff6b00); }
+.my-case-resume {
+    margin-top: 6px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--color-orange, #ff6b00);
+    background: transparent;
+    color: var(--color-orange, #ff6b00);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+}
 .upsell-plan-head {
     display: flex;
     justify-content: space-between;
@@ -4818,6 +4906,12 @@ body:not(.page-home) .wechat-float-btn {
     display: flex;
     gap: 10px;
     justify-content: center;
+}
+/* 분실 신고·대리수령: 하단 버튼 줄을 화면 폭까지 넓히고(버튼이 띠 양끝에 붙지 않게) 위아래 여백을 맞춤 */
+.lost-report-form-content .step-actions {
+    margin-left: -20px;
+    margin-right: -20px;
+    padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 0px));
 }
 
 

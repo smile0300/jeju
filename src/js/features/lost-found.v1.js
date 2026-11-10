@@ -339,6 +339,7 @@ export function openLostReportModal() {
     showSection('lost-report');
     resetLostReportForm();
     window.renderLostCases?.();
+    renderLostResume();
     // 새로 고침 전에 쓰던 내용이 있으면 되살린다 (form-draft.js)
     window.restoreFormDraft?.('lost-report', 'draft_lost_report');
 }
@@ -773,9 +774,10 @@ export async function submitLostReport() {
 
         if (result.result === 'success' || result.status === 'success') {
             // 찾기 서비스 선택 시 어느 접수 건인지 알리기 위해 (GAS가 시트 행 번호를 돌려줌)
-            lastLostReport = { row: result.row || 0, wechatId: data.wechatId };
+            lastLostReport = { row: result.row || 0, wechatId: data.wechatId, plan: '' };
             const catChip = Array.from(document.querySelectorAll('.lost-chip[data-value]')).find(c => c.dataset.value === data.itemCategory);
-            saveMyCase({ type: 'report', caseId: result.caseId || '', labelKey: catChip?.dataset.i18n || '', itemName: data.itemCategory });
+            // row·wechatId 도 남겨 둔다 — 결제 팝업을 실수로 닫아도 접수 화면·진행상황에서 다시 열 수 있게 (lost_plan 은 위챗 ID가 맞아야 받음)
+            saveMyCase({ type: 'report', caseId: result.caseId || '', labelKey: catChip?.dataset.i18n || '', itemName: data.itemCategory, row: result.row || 0, wechatId: data.wechatId });
             if (statusEl) {
                 statusEl.textContent = window.t ? window.t('lost.report.success') : '접수 완료';
                 statusEl.className = 'form-status success';
@@ -809,28 +811,8 @@ export async function submitLostReport() {
                 document.querySelectorAll('.lost-chip').forEach(c => c.classList.remove('active'));
             }
 
-            // 업셀링 팝업 띄우기
-            const upsellModal = document.getElementById('lost-upsell-modal');
-            if (upsellModal) {
-                upsellModal.style.display = 'flex';
-                document.body.style.overflow = 'hidden';
-                if (window.applyTranslations) window.applyTranslations(); // 번역 적용
-                if (window.pushModalState) window.pushModalState();
-                
-                // 위챗 QR 숨기기 초기화
-                const qrContainer = document.getElementById('upsell-qr-container');
-                const actionBtns = document.getElementById('upsell-action-btns');
-                if (qrContainer) qrContainer.style.display = 'none';
-                if (actionBtns) actionBtns.style.display = 'flex';
-                const declined = document.getElementById('upsell-declined');
-                if (declined) declined.style.display = 'none';
-                // 친구 요청 메시지에 적을 접수 코드 (JL + 시트 행 번호) — 운영자가 이 코드로 备注를 단다
-                const codeEl = document.getElementById('upsell-case-code');
-                if (codeEl) {
-                    codeEl.textContent = lastLostReport?.row ? 'JL' + lastLostReport.row : '';
-                    codeEl.style.display = lastLostReport?.row ? '' : 'none';
-                }
-            }
+            // 찾기 서비스 선택(결제) 팝업
+            openUpsellModal();
         } else {
             throw new Error(result.error || result.message || 'Unknown Server Error');
         }
@@ -872,6 +854,30 @@ export function saveMyCase(entry) {
     } catch (e) { /* 저장 불가 환경은 무시 */ }
 }
 
+function updateMyCase(row, patch) {
+    if (!row) return;
+    try {
+        const list = loadMyCases().map(c => (c.type === 'report' && Number(c.row) === Number(row) ? { ...c, ...patch } : c));
+        localStorage.setItem(MY_CASES_KEY, JSON.stringify(list));
+    } catch (e) { /* 저장 불가 환경은 무시 */ }
+}
+
+// 결제 단계를 마치지 않았을 수 있는 이 기기의 접수 (14일 이내, 결제 팝업을 다시 열 수 있는 것)
+const RESUME_DAYS = 14;
+function resumableCases() {
+    return loadMyCases().filter(c => c.type === 'report' && c.row && c.wechatId && Date.now() - c.at < RESUME_DAYS * 86400000);
+}
+
+// 접수 화면 위 배너 — 상품을 아직 안 고른 최근(3일) 접수가 있으면 새로 쓰지 않고 이어서
+function renderLostResume() {
+    const slot = document.getElementById('lost-resume-slot');
+    if (!slot) return;
+    const c = resumableCases().find(x => !x.plan && Date.now() - x.at < 3 * 86400000);
+    if (!c) { slot.innerHTML = ''; return; }
+    const t = window.t || (k => k);
+    slot.innerHTML = `<button type="button" class="lost-resume" onclick="resumeUpsell(${Number(c.row)})">${t('lost.resume.banner').replace('{code}', `<b>JL${Number(c.row)}</b>`)}</button>`;
+}
+
 export function renderMyCases() {
     const container = document.getElementById('my-cases-container');
     if (!container) return;
@@ -891,11 +897,16 @@ export function renderMyCases() {
             const step = parseInt(stories[idx].Step, 10) || 1;
             status = t('lost.my.step' + Math.min(Math.max(step, 1), 5));
         }
-        const caseHtml = c.caseId ? `<span class="my-case-id"># ${escapeHTML(c.caseId)}</span>` : '';
+        const caseHtml = c.caseId ? `<span class="my-case-id"># ${escapeHTML(c.caseId)}</span>` : (c.row ? `<span class="my-case-id">JL${Number(c.row)}</span>` : '');
+        const canResume = c.type === 'report' && c.row && c.wechatId && Date.now() - c.at < RESUME_DAYS * 86400000;
+        const resumeHtml = canResume
+            ? `<button type="button" class="my-case-resume" onclick="event.stopPropagation(); resumeUpsell(${Number(c.row)})">${escapeHTML(t(c.plan ? 'lost.my.resume_pay' : 'lost.my.resume'))}</button>`
+            : '';
         const click = idx !== -1 ? ` onclick="openSuccessModal(${idx})" style="cursor:pointer;"` : '';
         return `<div class="my-case-row"${click}>
                 <div class="my-case-main"><span class="my-case-name">${escapeHTML(name)}</span>${caseHtml}</div>
                 <div class="my-case-sub"><span>${date}</span><span class="my-case-status">${escapeHTML(status)}</span></div>
+                ${resumeHtml}
             </div>`;
     }).join('');
 
@@ -1492,13 +1503,125 @@ export function renderSuccessGoodsView(isLoadMore = false) {
 const UPSELL_PLANS = { basic: '9.9元', focus: '19.9元' };
 let lastLostReport = null;
 
-window.selectUpsellPlan = function(plan) {
+let pickedUpsellPlan = '';
+
+// 결제 팝업 열기 — 접수 직후, 또는 이 기기에 남은 접수로 다시 열 때(resumeUpsell). plan 이 있으면 결제 안내 단계로
+function openUpsellModal() {
+    const upsellModal = document.getElementById('lost-upsell-modal');
+    if (!upsellModal) return;
+    upsellModal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    if (window.applyTranslations) window.applyTranslations();
+    if (window.pushModalState) window.pushModalState();
+
+    const declined = document.getElementById('upsell-declined');
+    if (declined) declined.style.display = 'none';
+    pickedUpsellPlan = lastLostReport?.plan || '';
+    if (lastLostReport?.plan) showUpsellPayment(lastLostReport.plan);
+    else showUpsellChoices();
+
+    // 친구 요청 메시지에 적을 접수 코드 (JL + 시트 행 번호) — 운영자가 이 코드로 备注를 단다
+    const codeEl = document.getElementById('upsell-case-code');
+    if (codeEl) {
+        codeEl.textContent = lastLostReport?.row ? 'JL' + lastLostReport.row : '';
+        codeEl.style.display = lastLostReport?.row ? '' : 'none';
+    }
+    // 위챗 ID 는 고객센터 팝업과 같은 값 하나만 관리
+    const idEl = document.getElementById('upsell-wechat-id');
+    const srcId = document.getElementById('wechat-id-input')?.value;
+    if (idEl && srcId) idEl.textContent = srcId;
+    // 환경별: 휴대폰 브라우저 → 복사+위챗 열기 / 위챗 안 → QR 길게 누르기 / 샤오홍슈 안 → 복사 후 검색
+    const env = window.wechatEnv ? window.wechatEnv() : 'desktop';
+    const openBtn = document.getElementById('upsell-open-wechat');
+    const hint = document.getElementById('upsell-wechat-hint');
+    const t = (k) => (window.t ? window.t(k) : k);
+    // '복사+위챗 열기'는 금액 안내(입금) 단계·'지금은 안 할게요' 뒤에만 — 고르는 단계에선 확정 버튼과 헷갈림
+    upsellCanOpenWechat = env === 'mobile';
+    if (openBtn) openBtn.textContent = t('modal.wechat.open');
+    setUpsellOpenWechat(!!lastLostReport?.plan);
+    if (hint) {
+        const key = env === 'wechat' ? 'modal.wechat.hint.wechat' : env === 'xhs' ? 'modal.wechat.hint.xhs' : '';
+        hint.textContent = key ? t(key) : '';
+        hint.style.display = key ? 'block' : 'none';
+    }
+}
+
+let upsellCanOpenWechat = false;
+function setUpsellOpenWechat(show) {
+    const openBtn = document.getElementById('upsell-open-wechat');
+    if (openBtn) openBtn.style.display = show && upsellCanOpenWechat ? 'block' : 'none';
+}
+
+function showUpsellChoices() {
+    setUpsellOpenWechat(false);
+    const qrContainer = document.getElementById('upsell-qr-container');
+    const actionBtns = document.getElementById('upsell-action-btns');
+    if (qrContainer) qrContainer.style.display = 'none';
+    if (actionBtns) actionBtns.style.display = 'flex';
+    renderUpsellPick();
+}
+
+function showUpsellPayment(plan) {
+    setUpsellOpenWechat(true);
     const qrContainer = document.getElementById('upsell-qr-container');
     const actionBtns = document.getElementById('upsell-action-btns');
     const amount = document.getElementById('upsell-amount');
     if (amount) amount.textContent = UPSELL_PLANS[plan] || '';
     if (qrContainer) qrContainer.style.display = 'block';
     if (actionBtns) actionBtns.style.display = 'none';
+}
+
+// 고른 상품 표시 + 확정 버튼 문구 ('9.9元로 확정')
+function renderUpsellPick() {
+    document.querySelectorAll('#lost-upsell-modal .upsell-plan').forEach(b => b.classList.toggle('selected', b.dataset.plan === pickedUpsellPlan));
+    const btn = document.getElementById('upsell-confirm-btn');
+    if (!btn) return;
+    const t = (k) => (window.t ? window.t(k) : k);
+    btn.disabled = !pickedUpsellPlan;
+    btn.textContent = pickedUpsellPlan ? t('modal.upsell.confirm_n').replace('{p}', UPSELL_PLANS[pickedUpsellPlan]) : t('modal.upsell.confirm');
+}
+
+// 상품 카드는 고르기만 — 바로 확정하지 않는다 (다른 상품으로 바꿀 수 있게)
+window.pickUpsellPlan = function(plan) {
+    if (!UPSELL_PLANS[plan]) return;
+    pickedUpsellPlan = plan;
+    renderUpsellPick();
+};
+
+window.confirmUpsellPlan = function() {
+    if (pickedUpsellPlan) window.selectUpsellPlan(pickedUpsellPlan);
+};
+
+// 확정 뒤 '상품 변경' — 다시 고르게 (다시 확정하면 시트의 찾기상품이 바뀜)
+window.changeUpsellPlan = function() {
+    showUpsellChoices();
+    if (window.dataLayer) window.dataLayer.push({ event: 'lost_plan_change' });
+};
+
+window.copyUpsellWechatId = async function(btn) {
+    const id = document.getElementById('upsell-wechat-id')?.textContent?.trim() || '';
+    const ok = window.copyText ? await window.copyText(id) : false;
+    if (btn) {
+        const t = (k) => (window.t ? window.t(k) : k);
+        btn.textContent = ok ? t('modal.upsell.copied') : t('modal.wechat.copy');
+        setTimeout(() => { btn.textContent = t('modal.wechat.copy'); }, 1500);
+    }
+    if (window.dataLayer) window.dataLayer.push({ event: 'wechat_id_copy', label: 'upsell' });
+};
+
+// 이 기기에 남은 접수(row·wechatId)로 결제 팝업 다시 열기 — 접수 화면 배너 · 진행상황 '내 접수 내역'
+window.resumeUpsell = function(row) {
+    const c = loadMyCases().find(x => x.type === 'report' && Number(x.row) === Number(row));
+    if (!c) return;
+    lastLostReport = { row: c.row, wechatId: c.wechatId || '', plan: c.plan || '' };
+    openUpsellModal();
+    if (window.dataLayer) window.dataLayer.push({ event: 'lost_plan_resume', label: 'JL' + c.row });
+};
+
+window.selectUpsellPlan = function(plan) {
+    showUpsellPayment(plan);
+    if (lastLostReport) lastLostReport.plan = plan;
+    updateMyCase(lastLostReport?.row, { plan });
 
     // 고른 상품을 운영 시트에 남김 (결제 확인은 운영자가 위챗에서) — 실패해도 결제 안내는 그대로
     if (lastLostReport?.row) {
@@ -1517,6 +1640,7 @@ window.declineUpsell = function() {
     const declined = document.getElementById('upsell-declined');
     if (actionBtns) actionBtns.style.display = 'none';
     if (declined) declined.style.display = 'block';
+    setUpsellOpenWechat(true);
     if (window.dataLayer) window.dataLayer.push({ event: 'lost_plan_decline' });
 };
 
@@ -1544,8 +1668,8 @@ window.renderLostCases = async function() {
     const label = (c) => `${escapeHTML(lostChipLabel('city-category-chips', c.city))} · ${escapeHTML(lostChipLabel('item-category-chips', c.cat))}`;
     const md = (d) => escapeHTML(String(d || '').slice(5).replace('-', '/'));
 
-    const trust = document.getElementById('lost-trust');
-    if (trust) {
+    // 신고서 화면(#lost-trust)과 조회 화면 신고 버튼 위(.lost-trust-search) 둘 다
+    document.querySelectorAll('.lost-trust').forEach(trust => {
         const head = data.total >= LOST_TRUST_MIN_COUNT
             ? t('lost.trust.count').replace('{n}', data.total)
             : t('lost.trust.recent');
@@ -1553,7 +1677,7 @@ window.renderLostCases = async function() {
             + cases.slice(0, 2).map(c => `<span class="lost-trust-item">${label(c)} · ${md(c.d)} ${escapeHTML(t('lost.cases.done'))}</span>`).join('')
             + `<span class="lost-trust-more">${escapeHTML(t('lost.trust.more'))}</span>`;
         trust.style.visibility = 'visible';
-    }
+    });
 
     const list = document.getElementById('lost-police-cases');
     if (list) {
@@ -1563,7 +1687,7 @@ window.renderLostCases = async function() {
     }
 };
 document.addEventListener('DOMContentLoaded', () => {
-    if (['/lost-report', '/lost-status'].includes(window.location.pathname)) window.renderLostCases();
+    if (['/lost', '/lost-report', '/lost-status'].includes(window.location.pathname)) window.renderLostCases();
 });
 
 window.closeLostUpsellModal = function(fromPopState = false) {

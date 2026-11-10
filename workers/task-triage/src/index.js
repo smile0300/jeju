@@ -313,7 +313,7 @@ async function publicMatch(env, token) {
   try { cands = JSON.parse(q['후보JSON'] || '[]'); } catch { cands = []; }
   const status = String(q['상태'] || '').trim();
   const paid = PAID_STATUSES.includes(status);
-  const done = String(q['처리일시'] || '').match(/^(\d{4}-\d{2}-\d{2}).*?(L\d{8})\d*(\d{4})/);
+  const done = String(q['처리일시'] || '').match(/^(\d{4}-\d{2}-\d{2}).*?(L\d{12,})/);
   let form = {};
   try { form = JSON.parse(q['신고서'] || '{}'); } catch { form = {}; }
   const watchUntil = done ? new Date(new Date(`${done[1]}T00:00:00+09:00`).getTime() + WATCH_DAYS * 86400000).toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' }) : '';
@@ -322,7 +322,7 @@ async function publicMatch(env, token) {
     status: status === '완료' ? 'registered' : paid ? 'paid' : 'unpaid',
     lostDate: form.lostYmd || '',
     category: String(q['Jev분류'] || '').split(' ')[0],
-    police: done ? { date: done[1], sn: `${done[2]}****${done[3]}` } : null,
+    police: done ? { date: done[1], sn: `${done[2].slice(0, -5)}*****` } : null,  // 공개 목록과 같이 뒤 5자리 가림
     watchUntil,
     count: cands.length,
     candidates: paid ? cands : []

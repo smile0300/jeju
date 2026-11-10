@@ -95,7 +95,7 @@ footer{text-align:center;color:var(--sub);font-size:12px;margin-top:22px}
     var head=d.total>=20?('累计 '+d.total+' 件已在韩国警察厅登记'):'最近在韩国警察厅登记';
     el.innerHTML='<div class="ok">✔ '+esc(head)+'</div>'+cs.slice(0,5).map(function(c){
       return '<div class="row"><span>'+esc(CITY[c.city]||c.city)+' · '+esc(CAT[c.cat]||c.cat)+'</span><span class="sn">'+esc(c.sn)+'</span><span>'+esc(String(c.d||'').slice(5).replace('-','/'))+'</span></div>';
-    }).join('')+'<p class="hint">受理编号可在 LOST112 查询（为保护隐私已隐藏部分数字）</p>';
+    }).join('')+'<p class="hint">均为韩国警察厅（LOST112）正式受理编号，为保护隐私已隐藏后5位</p>';
     el.style.visibility='visible';
   }).catch(function(){});
 })();

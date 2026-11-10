@@ -114,7 +114,8 @@
                     </div>
                 </div>
 
-                <!-- 분실물 수색 및 추적 의뢰 버튼 -->
+                <!-- 분실물 수색 및 추적 의뢰 버튼 — 바로 위 신뢰 띠(경찰청 등록 사례)를 보고 신고를 결심하도록 -->
+                <a class="lost-trust lost-trust-search" href="/lost-status" onclick="event.preventDefault(); window.showSection && window.showSection('lost-status');" style="visibility:hidden;"></a>
                 <div class="action-row">
                     <button class="lost-report-btn btn btn-primary" style="width: 100%;" onclick="window.goToLostRegister()">
                         <i class="ph-duotone ph-magnifying-glass-plus"></i> <span data-i18n="lost.report.btn">분실물을 못 찾으셨나요?</span>
@@ -205,6 +206,8 @@
     </header>
     <div class="lost-report-form-content section-content" style="padding: 20px; padding-bottom: 100px; box-sizing: border-box; overflow-y: visible !important; max-height: none !important; width: 100% !important; max-width: none !important; border-radius: 0;">
         <div class="lost-report-header">
+            <!-- 이 기기에서 결제 단계를 마치지 않은 최근 접수가 있으면 '이어서 선택' 배너 (lost-found.v1.js renderLostResume) -->
+            <div id="lost-resume-slot"></div>
             <div class="marquee-container" style="cursor: default; margin-top: 0px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid var(--separator);">
                 <div class="marquee-content" id="modal-success-marquee-content">
                     <!-- Populated dynamically via JS -->
