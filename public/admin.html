@@ -321,15 +321,17 @@
     }
 
     var act = el('div', 'actions');
-    // 위챗 입금을 확인했으면 한 번에 '확인' — 15분 안에 작업 큐가 경찰 등록 대기로 넘어감
-    if (stage === 'wait') {
-      var payBtn = el('button', '', '💳 결제 확인');
-      payBtn.type = 'button';
-      payBtn.addEventListener('click', function () {
-        if (!window.confirm(r._row + '행 ' + str(r['찾기상품']) + ' 결제를 확인 처리할까요?')) return;
-        saveLost(c, r, { '결제상태': '확인' }, payBtn);
+    // 위챗 입금 금액 버튼 — 찾기상품·결제 '확인'을 한 번에 쓰고 작업 큐를 바로 '등록대기'로 (자동 등록이 경찰민원24 제출)
+    if (stage === 'wait' || stage === '') {
+      LOST_PLANS.forEach(function (plan) {
+        var payBtn = el('button', '', '💳 ' + plan.split(' ')[1] + ' 결제');
+        payBtn.type = 'button';
+        payBtn.addEventListener('click', function () {
+          if (!window.confirm(r._row + '행 ' + plan + ' 결제 확인 → 경찰 등록대기로 넘길까요?')) return;
+          saveLost(c, r, { '찾기상품': plan, '결제상태': '확인' }, payBtn);
+        });
+        act.appendChild(payBtn);
       });
-      act.appendChild(payBtn);
     }
     var editBtn = el('button', 'sub', '✏️ 상태 수정');
     editBtn.type = 'button';
@@ -404,9 +406,10 @@
       buildFilter();
       var fresh = lostCard(data.row);
       card.replaceWith(fresh);
-      var ok = el('p', 'ok', '✅ 저장됨: ' + data.written.join(', '));
+      var q = data.queue === '등록대기' ? ' · 작업 큐 등록대기 (30분 안에 경찰 등록)' : data.queue ? ' · 작업 큐: ' + data.queue : '';
+      var ok = el('p', 'ok', '✅ 저장됨: ' + data.written.join(', ') + q);
       fresh.appendChild(ok);
-      setTimeout(function () { ok.remove(); }, 4000);
+      setTimeout(function () { ok.remove(); }, 6000);
     } catch (e) {
       if (msg) { msg.textContent = e.message; msg.hidden = false; } else showError(e.message);
       btn.disabled = false;

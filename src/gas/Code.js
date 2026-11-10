@@ -806,10 +806,34 @@ function adminLostUpdate(data) {
     headers.forEach(function (h, j) { if (h) obj[h] = adminCell_(vals[j]); });
     var koIdx = lostTranslateCols_(headers).ko - 1;
     obj._ko = adminCell_(vals[koIdx] !== undefined ? vals[koIdx] : '');
-    return adminJson_({ result: 'success', row: obj, written: names });
+    // 결제 확인 → 작업 큐의 그 분실 건을 바로 '등록대기'로 (자동 등록 작업이 경찰민원24에 제출)
+    var queued = String(data.fields['결제상태'] || '').trim() === '확인' ? markLostQueueReady_(row) : '';
+    return adminJson_({ result: 'success', row: obj, written: names, queue: queued });
   } finally {
     lock.releaseLock();
   }
+}
+
+// 작업 큐에서 LostReport!row 줄의 상태를 '등록대기'로 — 경찰 등록 전 단계일 때만 (완료 건은 그대로)
+var LOST_QUEUE_PROMOTABLE = ['', '대기', '확인필요', '결제대기', '등록필요'];
+function markLostQueueReady_(lostRow) {
+  var id = PropertiesService.getScriptProperties().getProperty('TASK_SHEET_ID');
+  if (!id) return 'no-queue';
+  var sheet = SpreadsheetApp.openById(id).getSheets()[0];
+  var headers = headerRow_(sheet);
+  var refCol = headers.indexOf('참고(링크·위챗ID 등)');
+  var stCol = headers.indexOf('상태');
+  if (refCol === -1 || stCol === -1 || sheet.getLastRow() < 2) return 'no-queue';
+  var refs = sheet.getRange(2, refCol + 1, sheet.getLastRow() - 1, 1).getDisplayValues();
+  for (var i = 0; i < refs.length; i++) {
+    if (refs[i][0] !== 'LostReport!' + lostRow) continue;
+    var cell = sheet.getRange(i + 2, stCol + 1);
+    var cur = String(cell.getDisplayValue()).trim();
+    if (LOST_QUEUE_PROMOTABLE.indexOf(cur) === -1) return cur;
+    cell.setValue('등록대기');
+    return '등록대기';
+  }
+  return 'not-queued';
 }
 
 /**

@@ -118,7 +118,7 @@ async function triage(env) {
 
 // ─── 분실물 (LostReport) ─────────────────────────────────────────
 // 분실 접수 한 줄 → Jev로 분류 → 경찰청 습득물 API 검색 → Jev로 같은 물건인지 판정 → 큐에 추가 + 관리자 푸시
-// 경찰청 분실신고(minwon24) 등록은 로그인·제출 승인이 필요해서 여기서 하지 않고 큐에 '등록필요'로 남긴다.
+// 경찰청 분실신고(minwon24) 등록은 로그인·제출 승인이 필요해서 여기서 하지 않고 큐에 '등록대기'로 남긴다.
 
 const DEFAULT_NOTIFY_URL = 'https://jeju-weather-alerts.smile0300.workers.dev/api/notify-admin';
 const FOUND_ENDPOINTS = [
@@ -332,7 +332,7 @@ async function processLost(env, row) {
 
   // 찾기 서비스(9.9/19.9元) 결제가 확인된 건만 경찰 등록 대상 — 운영자가 LostReport '결제상태'를 '확인'으로 바꾸면 크론이 넘겨 줌
   const paid = String(fields['결제상태'] || '').trim() === '확인';
-  const status = isReal < 0.5 ? '확인필요' : paid ? '등록필요' : '결제대기';
+  const status = isReal < 0.5 ? '확인필요' : paid ? '등록대기' : '결제대기';
   const summary = String(fields['분실내용(자동번역)'] || fields.Desc_ko || state).replace(/\s+/g, ' ').slice(0, 80);
   // 관할 경찰서를 정하려면 구·군까지 필요 — 문장에 '이태원'만 있어도 용산구를 고르게 Jev에 따로 묻는다
   const formRegion = REGIONS[answers.region?.choice] ? answers.region.choice : 'jeju';
@@ -374,7 +374,7 @@ async function processLost(env, row) {
   } else {
     const urgent = hasId >= 0.5 ? '🚨 신분증 포함 · ' : '';
     const hit = match && match.choice !== 'none' ? `습득물 유력 후보 ${match.choice}` : `습득물 후보 ${found.length}건`;
-    await notifyAdmin(env, `🔎 분실 접수 #${row}`, `${urgent}${hit} · ${status === '등록필요' ? '경찰청 등록 대기' : status}`);
+    await notifyAdmin(env, `🔎 분실 접수 #${row}`, `${urgent}${hit} · ${status === '등록대기' ? '경찰청 등록 대기' : status}`);
   }
   return { row, queueRow: queued.row, existed: !!queued.existed, status, category: cat.choice, regions: regionNames, found: found.length, match: match?.choice || null, foundText, form };
 }
@@ -438,10 +438,10 @@ export default {
   // 모든 경로 TASK_SECRET 헤더 필요. minwon24 페이지(북마클릿)에서 부르므로 CORS 허용
   //   GET  /run?lost_row=612        → LostReport 그 한 줄 판정
   //   GET  /run?lost_pending=1      → 크론과 같은 새 분실 접수 판정 (최대 3건)
-  //   GET  /run?paid=1 · ?watch=1   → 결제 확인 건 등록필요로 · 결제 건 10일 습득물 감시 (크론과 같음)
+  //   GET  /run?paid=1 · ?watch=1   → 결제 확인 건 등록대기로 · 결제 건 10일 습득물 감시 (크론과 같음)
   //   GET  /run?lost_row=612&peek=1 → 원본만
   //   POST /run {queueRow|lostRow, fields} → 작업 큐 / 운영 시트 기록
-  //   GET  /form[?lost_row=612]     → 신고서 값 (없으면 '등록필요' 분실 건 중 첫 번째)
+  //   GET  /form[?lost_row=612]     → 신고서 값 (없으면 '등록대기' 분실 건 중 첫 번째)
   //   GET  /photo?id=드라이브ID      → 사진 바이너리 (신고서 첨부용)
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -545,7 +545,7 @@ async function route(request, env, url) {
  * 새 분실 접수(아직 큐에 없는 LostReport 행)를 판정해 큐에 올린다 — 크론마다 최대 3건
  * (한 건에 GAS·Jev·습득물 API 호출이 10여 개라 Workers 무료 요청 한도(50) 안에 맞춤)
  */
-/** '결제대기' 큐 건 중 LostReport 결제상태가 '확인'이 된 것을 '등록필요'로 올린다 (최대 5건) */
+/** '결제대기' 큐 건 중 LostReport 결제상태가 '확인'이 된 것을 '등록대기'로 올린다 (관리자 결제 버튼은 GAS가 바로 올림) (최대 5건) */
 async function promotePaid(env) {
   const { rows } = await callGas(env, { type: 'task_list', status: '결제대기' });
   const out = [];
@@ -554,7 +554,7 @@ async function promotePaid(env) {
     if (!(n >= 2)) continue;
     const { fields } = await callGas(env, { type: 'lost_get', row: n });
     if (String(fields['결제상태'] || '').trim() !== '확인') continue;
-    await callGas(env, { type: 'task_update', row: q.row, fields: { '상태': '등록필요' } });
+    await callGas(env, { type: 'task_update', row: q.row, fields: { '상태': '등록대기' } });
     await notifyAdmin(env, `💳 결제 확인 #${n}`, `${fields['찾기상품'] || ''} · 경찰청 등록 가능`);
     out.push(n);
   }
@@ -617,12 +617,15 @@ async function triageLost(env) {
   return results;
 }
 
-/** 큐에서 '등록필요' 분실 건의 신고서 값을 꺼낸다 (lostRow를 주면 그 건) */
+/** 큐에서 경찰 등록 대기 분실 건의 신고서 값을 꺼낸다 (lostRow를 주면 그 건)
+ *  상태 '등록대기'(관리자 결제 버튼·크론이 씀)와 예전 이름 '등록필요' 둘 다 */
+const READY_STATUSES = ['등록대기', '등록필요'];
 async function nextForm(env, lostRow) {
-  const { rows } = await callGas(env, { type: 'task_list', status: '등록필요' });
+  const rows = (await Promise.all(READY_STATUSES.map(status => callGas(env, { type: 'task_list', status }))))
+    .flatMap(r => r.rows || []);
   const lost = rows.filter(r => /^LostReport!\d+$/.test(r['참고(링크·위챗ID 등)'] || '') && r['신고서']);
   const pick = lostRow >= 2 ? lost.find(r => r['참고(링크·위챗ID 등)'] === `LostReport!${lostRow}`) : lost[0];
-  if (!pick) return { error: lostRow ? `LostReport ${lostRow}: 등록필요 상태의 신고서 없음 (판정을 먼저 돌릴 것)` : '대기 중인 분실 신고 없음' };
+  if (!pick) return { error: lostRow ? `LostReport ${lostRow}: 등록대기 상태의 신고서 없음 (판정을 먼저 돌릴 것)` : '대기 중인 분실 신고 없음' };
   const form = JSON.parse(pick['신고서']);
   return { queueRow: pick.row, form, summary: pick['요청내용'], found: pick['처리결과'], ticket: await makeTicket(env, pick.row, form.lostRow) };
 }
