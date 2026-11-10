@@ -545,11 +545,13 @@ async function route(request, env, url) {
  * 새 분실 접수(아직 큐에 없는 LostReport 행)를 판정해 큐에 올린다 — 크론마다 최대 3건
  * (한 건에 GAS·Jev·습득물 API 호출이 10여 개라 Workers 무료 요청 한도(50) 안에 맞춤)
  */
-/** '결제대기' 큐 건 중 LostReport 결제상태가 '확인'이 된 것을 '등록대기'로 올린다 (관리자 결제 버튼은 GAS가 바로 올림) (최대 5건) */
+/** '결제대기' 큐 건 중 LostReport 결제상태가 '확인'이 된 것을 '등록대기'로 올린다 (관리자 결제 버튼은 GAS가 바로 올림)
+ *  최근 건부터 6건까지 확인 — 예전엔 앞 5건만 봐서 결제 안 한 옛 건에 막혀 뒤 건이 영영 안 올라갔음
+ *  (lost_get 이 번역까지 해서 12건이면 GAS 응답이 100초를 넘김 → 524) */
 async function promotePaid(env) {
   const { rows } = await callGas(env, { type: 'task_list', status: '결제대기' });
   const out = [];
-  for (const q of rows.slice(0, 5)) {
+  for (const q of rows.slice().reverse().slice(0, 6)) {
     const n = parseInt(String(q['참고(링크·위챗ID 등)'] || '').replace('LostReport!', ''), 10);
     if (!(n >= 2)) continue;
     const { fields } = await callGas(env, { type: 'lost_get', row: n });
