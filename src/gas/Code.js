@@ -313,7 +313,7 @@ function publicLostCases_() {
       d: String(col('경찰접수일') === -1 ? '' : r[col('경찰접수일')]).slice(0, 10),
       city: String(col('City') === -1 ? '' : r[col('City')]).slice(0, 10),
       cat: String(col('ItemCategory') === -1 ? '' : r[col('ItemCategory')]).slice(0, 12),
-      sn: sn.slice(0, -5) + '*****'  // 뒤 5자리를 가림 (LOST112에서 개별 건 조회 불가하게)
+      sn: sn.slice(0, -6) + '*****' + sn.slice(-1)  // 맨 끝 1자리 앞 5자리를 가림 (LOST112에서 개별 건 조회 불가하게)
     });
   });
   cases.reverse();

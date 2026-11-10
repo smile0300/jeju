@@ -327,7 +327,7 @@ async function publicMatch(env, token) {
     status: status === '완료' ? 'registered' : paid ? 'paid' : 'unpaid',
     lostDate: form.lostYmd || '',
     category: String(q['Jev분류'] || '').split(' ')[0],
-    police: done ? { date: done[1], sn: `${done[2].slice(0, -5)}*****` } : null,  // 공개 목록과 같이 뒤 5자리 가림
+    police: done ? { date: done[1], sn: `${done[2].slice(0, -6)}*****${done[2].slice(-1)}` } : null,  // 공개 목록과 같이 맨 끝 앞 5자리 가림
     watchUntil,
     count: cands.length,
     candidates: paid ? cands : []
