@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>济州失物招领 · JejuLive</title>
+<meta name="description" content="在济州丢了东西？免费登记，我们在韩国警察厅系统为您登记并帮您找回。">
+<!-- 위챗 안내 전용 경량 랜딩: 외부 리소스 0, 검색 노출 안 함 (본 /lost 와 중복 방지) -->
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#ff6b35">
+<link rel="icon" href="/img/icon-192.png">
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--ink:#1d2433;--sub:#5d6677;--line:#e6e8ec;--brand:#ff6b35;--brand-ink:#fff;--ok:#1f9d55}
+@media (prefers-color-scheme:dark){:root{--bg:#12151b;--card:#1b2029;--ink:#eef1f5;--sub:#a3abb9;--line:#2a313d}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.6 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Noto Sans SC",sans-serif;-webkit-text-size-adjust:100%}
+.wrap{max-width:480px;margin:0 auto;padding:16px 16px calc(24px + env(safe-area-inset-bottom))}
+.top{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;color:var(--sub)}
+.top img{width:24px;height:24px;border-radius:6px}
+h1{font-size:24px;line-height:1.35;margin:18px 0 6px}
+.lead{color:var(--sub);font-size:14px}
+.acts{display:grid;gap:10px;margin:20px 0}
+.btn{display:flex;align-items:center;justify-content:space-between;padding:15px 16px;border-radius:12px;background:var(--card);border:1px solid var(--line);color:var(--ink);text-decoration:none;font-weight:600}
+.btn small{display:block;font-weight:400;color:var(--sub);font-size:12px;margin-top:2px}
+.btn.main{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.btn.main small{color:rgba(255,255,255,.85)}
+.btn>span{flex:1;min-width:0}
+.btn::after{content:"›";font-size:22px;line-height:1;opacity:.6}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:12px}
+.card h2{font-size:15px;margin-bottom:10px}
+ol{list-style:none;counter-reset:s;display:grid;gap:10px}
+ol li{counter-increment:s;display:flex;gap:10px;font-size:14px}
+ol li::before{content:counter(s);flex:none;width:22px;height:22px;border-radius:50%;background:var(--brand);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px}
+ol li b{display:block}
+ol li span{color:var(--sub);font-size:13px}
+#cases{visibility:hidden;min-height:96px}
+.row{display:flex;justify-content:space-between;gap:8px;font-size:13px;padding:7px 0;border-top:1px solid var(--line)}
+.row:first-of-type{border-top:0}
+.row .sn{color:var(--sub);font-family:ui-monospace,Menlo,monospace;font-size:12px}
+.ok{color:var(--ok);font-weight:600;font-size:13px;margin-bottom:6px}
+.hint{color:var(--sub);font-size:12px;margin-top:8px}
+#wxtip{display:none;background:#fff7e6;color:#8a5a00;border:1px solid #ffe1a8;border-radius:10px;padding:10px 12px;font-size:13px;margin-top:14px}
+.copy{margin-left:6px;border:0;background:none;color:inherit;text-decoration:underline;font:inherit;cursor:pointer}
+footer{text-align:center;color:var(--sub);font-size:12px;margin-top:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><img src="/img/icon-192.png" alt="">JejuLive 济州实时</div>
+
+  <h1>在济州丢了东西？<br>别慌，我们帮您找</h1>
+  <p class="lead">出租车、公交、机场、酒店、景点……丢失的物品大多会被送到韩国警察厅系统。我们用中文帮您查询、登记、代领。</p>
+
+  <div class="acts">
+    <a class="btn main" href="/lost-report?utm_source=wechat"><span>登记失物（免费）<small>填写丢失信息，提交后可选择寻找服务</small></span></a>
+    <a class="btn" href="/lost?utm_source=wechat"><span>查询拾得物<small>先看看警察厅里有没有您的东西</small></span></a>
+    <a class="btn" href="/lost-status?utm_source=wechat"><span>查询进度<small>已经登记过？查看处理情况</small></span></a>
+  </div>
+
+  <div class="card">
+    <h2>怎么帮您找回</h2>
+    <ol>
+      <li><div><b>免费登记</b><span>填写丢失时间、地点和物品特征，越详细越容易找到</span></div></li>
+      <li><div><b>选择寻找服务（9.9元起）</b><span>我们在韩国警察厅系统为您正式报失</span></div></li>
+      <li><div><b>找到后微信通知</b><span>可代领，或寄回中国</span></div></li>
+    </ol>
+  </div>
+
+  <div class="card" id="cases" aria-live="polite"></div>
+
+  <div id="wxtip">如果页面打不开或很慢：点右上角 <b>···</b> → <b>在浏览器打开</b>。<button class="copy" type="button" id="copybtn">复制网址</button></div>
+
+  <footer>© JejuLive · 济州旅行秘书</footer>
+</div>
+<script>
+(function(){
+  // 기존 화면으로 넘어갔을 때 중국어로 열리게 (사용자가 이미 고른 언어는 유지)
+  try{ if(!localStorage.getItem('jeju_lang')) localStorage.setItem('jeju_lang','zh'); }catch(e){}
+
+  if(/MicroMessenger/i.test(navigator.userAgent)) document.getElementById('wxtip').style.display='block';
+  document.getElementById('copybtn').onclick=function(){
+    var u=location.origin+'/wx/', b=this;
+    function done(){ b.textContent='已复制'; }
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(u).then(done,function(){ prompt('复制网址',u); }); }
+    else prompt('复制网址',u);
+  };
+
+  // 경찰청 등록 사례 (본 화면 신뢰 띠와 같은 데이터·규칙: 20건 미만이면 누적 숫자 대신 최근 사례만)
+  var CITY={'제주':'济州','서울':'首尔','부산':'釜山','인천':'仁川机场'};
+  var CAT={'가방/캐리어':'包/行李箱','스마트폰':'手机','지갑':'钱包','여권':'护照','의류':'衣物','시계/이어폰':'手表/耳机','카메라':'相机','기타':'其他'};
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  fetch('/api/lost-cases').then(function(r){return r.ok?r.json():null;}).then(function(d){
+    var cs=d&&Array.isArray(d.cases)?d.cases:[]; if(!cs.length) return;
+    var el=document.getElementById('cases');
+    var head=d.total>=20?('累计 '+d.total+' 件已在韩国警察厅登记'):'最近在韩国警察厅登记';
+    el.innerHTML='<div class="ok">✔ '+esc(head)+'</div>'+cs.slice(0,5).map(function(c){
+      return '<div class="row"><span>'+esc(CITY[c.city]||c.city)+' · '+esc(CAT[c.cat]||c.cat)+'</span><span class="sn">'+esc(c.sn)+'</span><span>'+esc(String(c.d||'').slice(5).replace('-','/'))+'</span></div>';
+    }).join('')+'<p class="hint">受理编号可在 LOST112 查询（为保护隐私已隐藏部分数字）</p>';
+    el.style.visibility='visible';
+  }).catch(function(){});
+})();
+</script>
+</body>
+</html>
