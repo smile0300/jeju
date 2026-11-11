@@ -1,0 +1,176 @@
+/* ── 한라산 화면 "오름" 탭 (src/js/features/oreum.js) ──
+   칩·태그는 planner.css의 .pl-chips / .pl-chip / .pl-tag / .pl-filter를 그대로 쓴다. */
+
+.hallasan-tabs { margin: 4px 0 16px; }
+.hallasan-tabs .flight-tab i { font-size: 1.1rem; }
+
+.oreum-pane[hidden] { display: none; }
+
+.oreum-intro {
+    margin: 0 0 12px;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--label-secondary);
+}
+
+.oreum-pane .pl-filter { margin-bottom: 8px; }
+/* 지역 6개가 375px 폭 한 줄에 들어가도록 칩을 조금 줄인다 (넘치면 좌우 스크롤) */
+.oreum-pane .pl-chips { gap: 6px; }
+.oreum-pane .pl-chip { min-height: 36px; padding: 0 12px; font-size: 0.85rem; }
+/* 넘치는 줄은 오른쪽 끝을 흐리게 해서 옆으로 넘길 수 있다는 걸 보여준다 */
+.oreum-pane .pl-filter.is-overflow {
+    -webkit-mask-image: linear-gradient(to right, #000 85%, transparent);
+    mask-image: linear-gradient(to right, #000 85%, transparent);
+}
+.oreum-pane .pl-filter.is-overflow.at-end { -webkit-mask-image: none; mask-image: none; }
+.oreum-season-filter { margin-bottom: 4px; }
+
+.oreum-count {
+    margin: 8px 2px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--label-secondary);
+}
+
+.oreum-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+@media (min-width: 768px) {
+    .oreum-list { grid-template-columns: 1fr 1fr; }
+}
+
+.oreum-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    padding: 16px;
+    border: 1px solid var(--separator);
+    border-radius: 16px;
+    background: var(--bg-card);
+}
+
+.oreum-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+}
+.oreum-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    line-height: 1.4;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+.oreum-ko {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--label-secondary);
+}
+.oreum-region { flex-shrink: 0; }
+
+.oreum-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.oreum-tags .pl-tag { align-self: auto; }
+.oreum-flag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--fill-secondary);
+    color: var(--label-secondary);
+    font-size: 0.72rem;
+    font-weight: 800;
+    line-height: 1.5;
+    white-space: nowrap;
+}
+.oreum-flag.warn { background: #FFF4E6; color: #D9480F; }
+.oreum-flag.now { background: #E6F7EE; color: #0B7A3E; }
+
+.oreum-photo {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.55;
+}
+.oreum-photo i { color: var(--accent); }
+
+.oreum-meta {
+    font-size: 0.8rem;
+    color: var(--label-secondary);
+}
+
+.oreum-transport {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: var(--fill-secondary);
+    font-size: 0.82rem;
+    line-height: 1.55;
+}
+.oreum-row {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    min-width: 0;
+}
+.oreum-row > i {
+    flex-shrink: 0;
+    margin-top: 2px;
+    font-size: 1rem;
+    color: var(--accent);
+}
+.oreum-row > span { min-width: 0; overflow-wrap: anywhere; }
+/* 노선 번호는 정류장 문장 아래 줄에 따로 */
+.oreum-routes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 4px;
+}
+.oreum-route {
+    padding: 0 6px;
+    border-radius: 6px;
+    background: var(--bg-card);
+    border: 1px solid var(--separator);
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1.6;
+}
+.oreum-route.more { background: transparent; border-style: dashed; color: var(--label-secondary); }
+.oreum-cny { color: var(--label-secondary); }
+
+.oreum-map-btn {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--separator);
+    border-radius: 999px;
+    background: var(--bg-card);
+    color: var(--label-primary);
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.oreum-empty {
+    padding: 24px;
+    text-align: center;
+    color: var(--label-secondary);
+}
+
+.oreum-foot {
+    margin: 16px 2px 8px;
+    font-size: 0.75rem;
+    line-height: 1.6;
+    color: var(--label-secondary);
+}

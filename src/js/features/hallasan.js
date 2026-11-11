@@ -338,7 +338,9 @@ export function renderHallasanCCTV() {
 }
 
 function isHallasanActive() {
-    return document.getElementById('hallasan')?.classList.contains('active');
+    // 오름 탭을 보고 있을 때는 CCTV를 틀지 않는다 (oreum.js가 탭 전환 시 start/stop 호출)
+    return document.getElementById('hallasan')?.classList.contains('active')
+        && !document.getElementById('hallasan-pane-mountain')?.hidden;
 }
 
 // 한라산 섹션이 보일 때만 재생. 이미 재생 중인 영상은 건너뛴다.

@@ -166,3 +166,15 @@
 - **GAS 배포 주의**: 작업 큐 기능이 들어간 배포는 `AKfycbzsQ…`. 예전 `AKfycbyr1…`는 구버전 코드. 비밀값은 스크립트 속성 `TASK_SECRET`(이름) = Worker 시크릿 `TASK_SECRET`(값), 로컬은 `.dev.vars`.
 - **Gemini**: API 키 미발급 결정 → 서버 자동화에는 쓰지 않음. 신고 문장은 GAS 자동번역(한국어) 칸 사용.
 - **크론 연결 (2026-11-03)**: Worker 크론(15분)이 `lost_pending`으로 아직 큐에 없는 LostReport 행(스크립트 속성 `LOST_TRIAGE_FROM`, 기본 612행부터)을 회당 최대 3건 판정해 큐에 올림. 수동 실행은 `/run?lost_pending=1`. 경찰 제출은 여전히 사람이 함.
+
+## 17. 한라산 화면 오름 탭 (2026-11-11)
+- **데이터**: `src/data/oreums.js` (20곳, 정적). 화면 `src/js/features/oreum.js`, 문구 `planner/strings.js`의 `oreum.*`, 탭 라벨 `i18n.js`의 `hallasan.tab.*`. 후보 조사·검증·선정 경위는 `directives/proposals/oreum_candidates.md` 4~7절.
+- **Gemini 조사 결과 함정**: 비짓제주 링크 30개 전부 엉뚱한 항목, 확인일 2024로 기재, 중국어 이름 12곳·버스 번호 다수 지어냄 → 조사 결과는 반드시 API로 대조할 것.
+- **출처**
+  - 중국어·영어 이름: 비짓제주 API `searchList` `locale=cn/en`, `category=c1`(관광지 약 1,300건)을 통째로 받아 contentsid로 짝지음. `cid` 단건 조회는 링크가 틀리면 엉뚱한 곳이 나옴. 공식 중문명에도 깨진 것 있음(금오름 `今岳岳（Wangmae）`, 우도봉 `乌多峰风景`, 붉은오름(표선) `红奥瑞姆`).
+  - 높이: 공공데이터포털 15096996 「제주특별자치도_제주오름요약설명_20211130」(90곳, CSV). data.go.kr 파일은 `selectFileDataDownload.do?publicDataPk=&publicDataDetailPk=&fileDetailSn=1` → `atchFileId` → `/cmm/cmm/fileDownload.do?atchFileId=&fileDetailSn=1`로 로그인 없이 받음.
+  - 버스 정류장 좌표: 15010850 「버스정류소현황_20221101」(cp949 CSV). 정류장 외국어명(표지판 표기): 15135324 「버스정류장외국어번역정보_20240905」(xlsx, 영·중·일).
+  - 정류장별 현재 경유 노선: 제주 BIS 화면용 엔드포인트 `POST https://bus.jeju.go.kr/data/search/arriveScheduleAndTransitLineByStationId` (`stationId`, `type=1`) → `routeInfoList[].routeNum`. 우도 순환버스는 없음.
+  - 입구 좌표·택시요금: 카카오 로컬 키워드 검색(`○○ 주차장`) + 카카오모빌리티 길찾기 `summary.fare.taxi` (`KAKAO_REST_KEY`). 비짓제주 좌표는 정상부·엉뚱한 곳일 때가 있음(문도지오름 약 4km 오차).
+- **통제 현황**: 자연휴식년제 4곳(송악산 정상부 ~2027-07-31, 백약이 정상부·물찻·도너리) + 2026-05-08 고시 차마·취사·야영 금지 27곳. 2026-04 「오름 보전·이용 및 관리 지침」으로 신규 지정이 나올 수 있으니 분기마다 확인. 도너리오름 기한 2026-12-31.
+- **CCTV**: 오름 탭을 보는 동안 한라산 CCTV 스트림을 멈춤(`isHallasanActive`가 `#hallasan-pane-mountain[hidden]`도 확인).

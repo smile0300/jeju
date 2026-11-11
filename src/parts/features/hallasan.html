@@ -8,6 +8,19 @@
     <h1 class="visually-hidden">Hallasan Mountain Trail Status Today — Open, Closed, Restricted | 汉拿山登山实时通行状态 한라산 등산 통제 현황</h1>
     <div class="section hallasan-section-wrap">
         <div class="container">
+            <!-- 한라산 / 오름 탭 (oreum.js가 전환 처리) -->
+            <div class="flight-tabs hallasan-tabs" role="tablist">
+                <button type="button" class="flight-tab active" role="tab" aria-selected="true" data-hallasan-tab="mountain" onclick="window.oreumApp && window.oreumApp.switchTab('mountain')">
+                    <i class="ph-duotone ph-mountains"></i>&nbsp;<span data-i18n="hallasan.tab.mountain">汉拿山</span>
+                </button>
+                <button type="button" class="flight-tab" role="tab" aria-selected="false" data-hallasan-tab="oreum" onclick="window.oreumApp && window.oreumApp.switchTab('oreum')">
+                    <i class="ph-duotone ph-tree-evergreen"></i>&nbsp;<span data-i18n="hallasan.tab.oreum">火山丘 Oreum</span>
+                </button>
+            </div>
+
+            <div id="hallasan-pane-oreum" class="oreum-pane" hidden></div>
+
+            <div id="hallasan-pane-mountain">
             <!-- [NEW] 한라산 히어로 통제 현황 섹션 (Hero Status Section) -->
             <div id="hallasan-hero-status" class="hero-status-wrapper">
                 <div id="hallasan-status-container">
@@ -41,6 +54,7 @@
 
             <!-- SEO Content Description -->
             <div class="seo-content-desc" data-i18n="seo.desc.hallasan">汉拿山登山路线实时通行状态及管制信息</div>
+            </div><!-- /#hallasan-pane-mountain -->
         </div>
     </div>
 </section>

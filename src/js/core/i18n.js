@@ -429,6 +429,8 @@ const TRANSLATIONS = {
         'hallasan.cctv':    '汉拿山实时画面',
         'hallasan.reserve': '预约汉拿山',
         'hallasan.notice':  '汉拿山公告',
+        'hallasan.tab.mountain': '汉拿山',
+        'hallasan.tab.oreum': '火山丘 Oreum',
 
         // ── 축제 ──
         'festival.title':   '济州精彩活动',
@@ -1138,6 +1140,8 @@ const TRANSLATIONS = {
         'hallasan.cctv':    '한라산 실시간 CCTV',
         'hallasan.reserve': '한라산 예약',
         'hallasan.notice':  '한라산 공지사항',
+        'hallasan.tab.mountain': '한라산',
+        'hallasan.tab.oreum': '오름',
         'hallasan.loading.official': '공식 실시간 데이터를 가져오는 중입니다...',
 
         'festival.title':   '제주 축제/행사',
@@ -1817,6 +1821,8 @@ const TRANSLATIONS = {
         'hallasan.cctv':    'Hallasan Live CCTV',
         'hallasan.reserve': 'Reserve Hallasan',
         'hallasan.notice':  'Hallasan Notices',
+        'hallasan.tab.mountain': 'Hallasan',
+        'hallasan.tab.oreum': 'Oreums',
         'hallasan.loading.official': 'Loading official data...',
 
         'festival.title':   'Jeju Festivals & Events',

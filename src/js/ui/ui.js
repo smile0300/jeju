@@ -22,8 +22,8 @@ const SEO_META = {
     },
     'hallasan': {
         title: 'Hallasan Mountain Trail Open/Closed Status - Jeju Live | 汉拿山登山信息',
-        desc: 'Real-time Hallasan Mountain trail status — open, closed, or restricted. Check Seongpanak, Gwaneumsa, Eorimok, and Yeongsil trail conditions before hiking. 汉拿山登山路实时通行状态。',
-        keywords: 'Hallasan trail open closed, Hallasan hiking today, 汉拿山登山条件, Hallasan weather, 한라산 등산 통제'
+        desc: 'Real-time Hallasan Mountain trail status — open, closed, or restricted. Check Seongpanak, Gwaneumsa, Eorimok, and Yeongsil trail conditions before hiking, plus 20 easy Jeju oreums (volcanic cones) reachable by bus or taxi. 汉拿山登山路实时通行状态及济州火山丘推荐。',
+        keywords: 'Hallasan trail open closed, Hallasan hiking today, 汉拿山登山条件, Hallasan weather, 한라산 등산 통제, Jeju oreum, 济州火山丘, 제주 오름 추천, Saebyeol Oreum'
     },
     'airport': {
         title: 'Jeju Airport (CJU) Live Flight Status - Jeju Live | 济州机场实时航班',

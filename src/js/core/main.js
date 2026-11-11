@@ -21,6 +21,7 @@ import '../ui/home.js';
 import '../ui/home-info-banner.js';
 import '../features/trip.js';
 import '../features/course.js';
+import '../features/oreum.js';
 import '../features/charter.js';
 import '../features/brief-card.js';
 import '../features/lost-brief-card.js';
