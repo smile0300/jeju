@@ -460,7 +460,7 @@ export function renderFlightList(container, items, type) {
         const estTimeRaw = (f.est_time || '').toString();
         const schedStr = schedTimeRaw.length >= 4 ? `${schedTimeRaw.slice(0, 2)}:${schedTimeRaw.slice(2, 4)}` : '-';
         const estStr = estTimeRaw.length >= 4 && estTimeRaw !== schedTimeRaw
-            ? `<span style="color:#f59e0b; font-size:0.7rem; font-weight:700;">→ ${estTimeRaw.slice(0, 2)}:${estTimeRaw.slice(2, 4)}</span>` : '';
+            ? `<span style="color:#C2410C; font-size:0.75rem; font-weight:700;">→ ${estTimeRaw.slice(0, 2)}:${estTimeRaw.slice(2, 4)}</span>` : '';
 
         let rawCity = type === 'arrive' ? (f.dep_airport || '-') : (f.arr_airport || '-');
         let city = getCityName(rawCity).replace(/\//g, '/<br>');

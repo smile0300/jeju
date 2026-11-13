@@ -226,7 +226,7 @@
     right: var(--space-2);
     background: var(--label-tertiary);
     color: white;
-    font-size: var(--text-caption-2);
+    font-size: var(--text-caption-1);
     font-weight: 700;
     padding: 2px var(--space-2);
     border-radius: var(--radius-full);
@@ -344,7 +344,7 @@
         font-size: 1.75rem;
     }
     .item-label {
-        font-size: var(--text-caption-2); /* 11pt */
+        font-size: var(--text-caption-1); /* 12px — 한자 가독성 */
     }
     /* clamp()으로 자동 처리되므로 override 불필요 */
 }

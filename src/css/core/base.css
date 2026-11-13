@@ -40,8 +40,8 @@
        헤드라인: 크고 굵게 / 보조: 회색으로 낮게
     ───────────────────────────────────────── */
     --label-primary:     #191F28;  /* 토스 딥 다크 — 메인 텍스트 */
-    --label-secondary:   #8B95A1;  /* 토스 미드 그레이 — 보조 텍스트 */
-    --label-tertiary:    #B0B8C1;  /* 토스 라이트 그레이 — 힌트 */
+    --label-secondary:   #5F6B78;  /* 보조 텍스트 — 흰 배경 대비 5.4 (가독성 위해 #8B95A1에서 진하게, 2026-11) */
+    --label-tertiary:    #6B7684;  /* 힌트 — 흰 배경 대비 4.6 (#B0B8C1에서 진하게, 2026-11) */
     --label-quaternary:  #D1D6DB;  /* 비활성 텍스트 */
 
     /* ─────────────────────────────────────────
@@ -82,9 +82,9 @@
     --primary-gradient:   var(--gradient-accent);
     --secondary-gradient: var(--gradient-accent);
     --accent-gradient:    var(--gradient-accent);
-    --success-gradient:   linear-gradient(135deg, #34C759 0%, #2AAE4B 100%);
-    --warning-gradient:   linear-gradient(135deg, #FF9500 0%, #E68500 100%);
-    --danger-gradient:    linear-gradient(135deg, #FF3B30 0%, #D62E24 100%);
+    --success-gradient:   linear-gradient(135deg, #178A3D 0%, #15803D 100%); /* 흰 글자 대비 4.5+ */
+    --warning-gradient:   linear-gradient(135deg, #D9480F 0%, #C2410C 100%); /* 흰 글자 대비 4.0+ */
+    --danger-gradient:    linear-gradient(135deg, #E03131 0%, #C92A2A 100%); /* 흰 글자 대비 4.5+ */
 
     /* 레거시 컬러 직접 참조 */
     --accent-blue:    var(--accent);

@@ -240,11 +240,11 @@
     position: absolute;
     top: 10px;
     left: 10px;
-    background: #ff2442;
+    background: #E11D48;
     color: white;
     padding: 2px 8px;
     border-radius: 4px;
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     font-weight: 800;
     display: flex;
     align-items: center;
@@ -420,7 +420,7 @@
     left: -4px;
     background: #ffffff;
     padding: 2px 6px;
-    font-size: 0.65rem;
+    font-size: 0.75rem;
     font-weight: 900;
     line-height: 1.2;
     z-index: 30;
@@ -521,12 +521,13 @@
 
 @media (max-width: 380px) {
     .tab-name {
-        font-size: 9.5px;
+        font-size: 12px;
         letter-spacing: -0.3px;
     }
 
     .location-tab {
         padding: 6px 0;
+        min-height: 36px;
         min-width: 0;
     }
 }
@@ -1300,10 +1301,11 @@
 }
 
 .t-info-line span {
-    font-size: 0.62rem;
+    font-size: 0.72rem;
     font-weight: 800;
     color: #4E5968;
-    white-space: nowrap;
+    /* 글자를 키운 만큼 좁은 카드에서는 거리/시간이 두 줄로 내려간다 */
+    white-space: normal;
     letter-spacing: -0.2px;
     word-break: keep-all;
     text-align: center;
@@ -1314,7 +1316,7 @@
 .trail-status-badge {
     padding: 3px 10px;
     border-radius: 6px;
-    font-size: 0.65rem;
+    font-size: 0.75rem;
     font-weight: 800;
     color: white;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -1670,9 +1672,8 @@
     color: var(--text-muted);
     font-weight: 600;
     text-align: center;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    /* 해를 넘기는 긴 기간이 잘리지 않게 줄바꿈 허용 */
+    white-space: normal;
     letter-spacing: -0.3px;
     width: 100%;
 }
@@ -2038,13 +2039,18 @@
     }
 
     .flight-col {
-        font-size: 0.72rem;
+        font-size: 0.78rem;
+    }
+
+    /* 6자리 편명(HO1375)이 14% 칸을 넘지 않게 자간만 줄인다 */
+    .flight-col:nth-child(1) {
+        letter-spacing: -0.4px;
     }
 
     .flight-col .badge {
         min-width: auto;
         padding: 3px 6px;
-        font-size: 0.68rem;
+        font-size: 0.75rem;
     }
 }
 
@@ -4077,8 +4083,8 @@
 }
 
 .h-time {
-    font-size: 0.7rem;
-    color: #868e96;
+    font-size: 0.75rem;
+    color: #5F6B78;
     margin-bottom: 8px;
     font-weight: 600;
     line-height: 1;
@@ -4099,9 +4105,9 @@
 }
 
 .h-pop {
-    font-size: 0.65rem;
+    font-size: 0.75rem;
     font-weight: 800;
-    color: #228be6;
+    color: #1971C2;
     margin-bottom: 2px;
     line-height: 1;
 }
@@ -4228,7 +4234,7 @@
 }
 
 .w-date-box {
-    font-size: 0.65rem;
+    font-size: 0.75rem;
     font-weight: 700;
     color: #212529;
     margin-bottom: -2px;
@@ -4252,11 +4258,11 @@
 }
 
 .w-max {
-    color: #fa5252;
+    color: #E03131;
 }
 
 .w-min {
-    color: #228be6;
+    color: #1971C2;
 }
 
 .w-slash {
@@ -4269,15 +4275,15 @@
     flex-direction: column;
     align-items: center;
     gap: 2px;
-    font-size: 0.55rem;
+    font-size: 0.7rem;
     font-weight: 700;
-    color: #868e96;
+    color: #5F6B78;
     line-height: 1;
 }
 
 .w-pop {
-    color: #228be6;
-    font-size: 0.6rem;
+    color: #1971C2;
+    font-size: 0.72rem;
 }
 
 

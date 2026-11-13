@@ -47,9 +47,9 @@
     letter-spacing: 0.5px;
 }
 
-.open .hero-badge { background: #10b981; }
-.partial .hero-badge { background: #f59e0b; }
-.closed .hero-badge { background: #ef4444; }
+.open .hero-badge { background: #047857; }
+.partial .hero-badge { background: #B45309; }
+.closed .hero-badge { background: #DC2626; }
 
 .hero-title {
     font-size: 1.4rem;

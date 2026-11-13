@@ -718,7 +718,7 @@ export function renderFestivalItems(container, items) {
         // 우선순위가 높은 하이라이트 이벤트인 경우에만 핫 배지 노출
         let badgeHtml = '';
         if (item._score >= 85) {
-            badgeHtml = `<span class="tag upcoming" style="background:#ff6b6b; color:white; border:none;">HOT</span>`;
+            badgeHtml = `<span class="tag upcoming" style="background:#E03131; color:white; border:none;">HOT</span>`;
         }
         
         const imgHtml = img 

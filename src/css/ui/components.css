@@ -151,9 +151,9 @@
 }
 
 /* 단색 — 그라데이션 제거 (Apple HIG) */
-.badge-success { background: var(--color-success); }  /* #34C759 */
-.badge-warning { background: var(--color-warning); }  /* #FF9500 */
-.badge-danger  { background: var(--color-danger);  }  /* #FF3B30 */
+.badge-success { background: #087F5B; }  /* #34C759 */
+.badge-warning { background: #C2410C; }  /* #FF9500 */
+.badge-danger  { background: #E03131; }  /* #FF3B30 */
 .badge-info    { background: var(--color-info);    }  /* #007AFF — 사용 시 변경 불필 */
 
 /* 상태 배지 — 단색 적용 */

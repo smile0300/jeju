@@ -876,9 +876,9 @@ function renderSunCol(locKey, ymd, sunTime, labelKey) {
     const sunEmoji = '<i class="ph-duotone ph-sun-horizon color-sun-horizon"></i>';
     return `
         <div class="hourly-col sun-col" id="h-${locKey}-${ymd}" style="justify-content: center; min-width: 55px; border-right: 1px solid #f1f3f5;">
-            <span style="font-weight: 800; color: #fd7e14; font-size: 0.72rem; margin-bottom: 6px;">${sunTime}</span>
+            <span style="font-weight: 800; color: #C2410C; font-size: 0.75rem; margin-bottom: 6px;">${sunTime}</span>
             <span style="font-size: 1.6rem; line-height: 1; margin-bottom: 4px;">${sunEmoji}</span>
-            <span style="font-weight: 800; color: #fd7e14; font-size: 0.65rem;">${label}</span>
+            <span style="font-weight: 800; color: #C2410C; font-size: 0.72rem;">${label}</span>
         </div>`;
 }
 
