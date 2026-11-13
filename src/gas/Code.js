@@ -153,7 +153,7 @@ function doPost(e) {
  * - lost_pending: { limit: 3 } → 아직 작업 큐에 없는 LostReport 행 번호 (스크립트 속성 LOST_TRIAGE_FROM 행부터, 기본 612)
  */
 var LOST_PRIVATE_HEADERS = ['WechatId', 'UserAgent', 'PhotoURL', 'HotelBooker', 'CarNumber', 'hotelRoom'];
-var LOST_WRITABLE_HEADERS = ['경찰접수번호', '경찰접수일', '경찰관서'];
+var LOST_WRITABLE_HEADERS = ['경찰접수번호', '경찰접수일', '경찰관서', '위챗친구'];
 function handleTaskQueue_(data) {
   var props = PropertiesService.getScriptProperties();
   var secret = String(props.getProperty('TASK_SECRET') || '').trim();
@@ -193,8 +193,10 @@ function handleTaskQueue_(data) {
     var cRow = parseInt(data.row, 10);
     if (!cSheet || !(cRow >= 2) || cRow > cSheet.getLastRow()) return json_({ result: 'error', message: 'bad row' });
     var cHeaders = headerRow_(cSheet);
-    var cCol = cHeaders.indexOf('WechatId');
-    return json_({ result: 'success', wechatId: cCol === -1 ? '' : String(cSheet.getRange(cRow, cCol + 1).getDisplayValue()).trim() });
+    var cVals = cSheet.getRange(cRow, 1, 1, cHeaders.length).getDisplayValues()[0];
+    var cGet = function (h) { var i = cHeaders.indexOf(h); return i === -1 ? '' : String(cVals[i] || '').trim(); };
+    // plan·pay·friend: 친구 수락 뒤 보내는 안내 멘트를 고르는 데 쓴다 (tools/minwon24.js friends)
+    return json_({ result: 'success', wechatId: cGet('WechatId'), plan: cGet('찾기상품'), pay: cGet('결제상태'), friend: cGet('위챗친구') });
   }
 
   if (data.type === 'lost_update') {
@@ -813,15 +815,19 @@ function adminLostUpdate(data) {
     var sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName('LostReport');
     if (!sheet || row > sheet.getLastRow()) return adminJson_({ result: 'error', message: '행 없음' });
     var headers = ensureHeaders_(sheet, names);
+    var before = sheet.getRange(row, 1, 1, headers.length).getDisplayValues()[0];
     names.forEach(function (h) { sheet.getRange(row, headers.indexOf(h) + 1).setValue(String(data.fields[h]).trim()); });
     var vals = sheet.getRange(row, 1, 1, headers.length).getValues()[0];
+    // 결제 확인(또는 기본→집중 업그레이드) → 받은 금액을 정산표에 한 줄 (실패해도 결제 저장은 그대로)
+    var ledgerNote = '';
+    try { ledgerNote = ledgerAddLostPayment_(row, headers, before, vals); } catch (err) { ledgerNote = '오류: ' + err; }
     var obj = { _row: row };
     headers.forEach(function (h, j) { if (h) obj[h] = adminCell_(vals[j]); });
     var koIdx = lostTranslateCols_(headers).ko - 1;
     obj._ko = adminCell_(vals[koIdx] !== undefined ? vals[koIdx] : '');
     // 결제 확인 → 작업 큐의 그 분실 건을 바로 '등록대기'로 (자동 등록 작업이 경찰민원24에 제출)
     var queued = String(data.fields['결제상태'] || '').trim() === '확인' ? markLostQueueReady_(row) : '';
-    return adminJson_({ result: 'success', row: obj, written: names, queue: queued });
+    return adminJson_({ result: 'success', row: obj, written: names, queue: queued, ledger: ledgerNote });
   } finally {
     lock.releaseLock();
   }
@@ -947,6 +953,61 @@ function ledgerLayout_(sheet) {
   return { headerRow: headerRow, lastCol: lastCol, lastData: lastData, headers: headers, dateCol: dateCol, top: top };
 }
 
+// 맨 아래에 새 행을 만든다 — 마지막 데이터 행의 서식·수식(순수익 등)을 복사. 돌려주는 값 = 새 행 번호
+function ledgerNewRow_(sheet, L) {
+  var target = L.lastData + 1;
+  if (L.lastData > L.headerRow) {
+    var tpl = sheet.getRange(L.lastData, 1, 1, L.lastCol);
+    var dest = sheet.getRange(target, 1, 1, L.lastCol);
+    tpl.copyTo(dest, SpreadsheetApp.CopyPasteType.PASTE_FORMAT, false);
+    var tplF = tpl.getFormulasR1C1()[0];
+    var destF = dest.getFormulas()[0];
+    for (var c = 0; c < L.lastCol; c++) {
+      if (tplF[c] && !destF[c]) sheet.getRange(target, c + 1).setFormulaR1C1(tplF[c]);
+    }
+  }
+  return target;
+}
+
+/**
+ * 분실 접수 찾기 서비스 결제 → 정산표 자동 입력 (관리자 9.9元/19.9元 버튼, 상태 수정 폼 공통)
+ * - 결제상태가 '확인'일 때, 전에 받은 금액과의 차액만 적는다 (기본→집중 업그레이드 = +10元)
+ * - 비고에 'JL<행번호> …' 를 적고, 같은 비고가 이미 있으면 다시 적지 않는다 (버튼을 두 번 눌러도 한 줄)
+ * 돌려주는 값: '' (해당 없음) | '¥9.9 입력' | '이미 있음' | 사유
+ */
+var LOST_PLAN_PRICE = { '기본 9.9元': 9.9, '집중 19.9元': 19.9 };
+function ledgerAddLostPayment_(lostRow, headers, before, after) {
+  var planCol = headers.indexOf('찾기상품'), payCol = headers.indexOf('결제상태');
+  if (planCol === -1 || payCol === -1) return '';
+  var plan = String(after[planCol] || '').trim();
+  if (String(after[payCol] || '').trim() !== '확인') return '';
+  var price = LOST_PLAN_PRICE[plan];
+  if (!price) return '';
+  var prevPaid = String(before[payCol] || '').trim() === '확인' ? (LOST_PLAN_PRICE[String(before[planCol] || '').trim()] || 0) : 0;
+  var amount = Math.round((price - prevPaid) * 100) / 100;
+  if (!(amount > 0)) return '';
+  var note = 'JL' + lostRow + ' ' + (prevPaid ? '집중 업그레이드 +' + amount + '元' : plan);
+
+  var sheet = ledgerSheet_();
+  if (!sheet) return LEDGER_SHEET + ' 시트 없음';
+  var L = ledgerLayout_(sheet);
+  var col = function (name) { return L.headers.indexOf(name); };
+  var feeCol = col('수거비'), noteCol = col('비고'), itemCol = col('항목');
+  if (feeCol === -1 || noteCol === -1) return "정산표에 '수거비'·'비고' 열이 없음";
+  if (L.lastData > L.headerRow) {
+    var notes = sheet.getRange(L.headerRow + 1, noteCol + 1, L.lastData - L.headerRow, 1).getDisplayValues();
+    for (var i = 0; i < notes.length; i++) if (String(notes[i][0]).trim() === note) return '이미 있음';
+  }
+  var target = ledgerNewRow_(sheet, L);
+  var formulas = sheet.getRange(target, 1, 1, L.lastCol).getFormulas()[0];
+  var put = function (c, v) { if (c !== -1 && !formulas[c]) sheet.getRange(target, c + 1).setValue(v); };
+  put(L.dateCol, Utilities.formatDate(new Date(), 'Asia/Seoul', 'yyyy-MM-dd'));
+  put(itemCol, '찾기 서비스');
+  put(feeCol, amount);
+  put(noteCol, note);
+  return '¥' + amount + ' 입력';
+}
+
 function ledgerValue_(v) {
   return v instanceof Date ? Utilities.formatDate(v, 'Asia/Seoul', 'yyyy-MM-dd') : v;
 }
@@ -1029,17 +1090,7 @@ function adminLedgerSave(data) {
         return adminJson_({ result: 'error', message: '시트 내용이 바뀌었습니다. 새로고침 후 다시 수정하세요.' });
       }
     } else {
-      target = L.lastData + 1;
-      if (L.lastData > L.headerRow) {
-        var tpl = sheet.getRange(L.lastData, 1, 1, L.lastCol);
-        var dest = sheet.getRange(target, 1, 1, L.lastCol);
-        tpl.copyTo(dest, SpreadsheetApp.CopyPasteType.PASTE_FORMAT, false);
-        var tplF = tpl.getFormulasR1C1()[0];
-        var destF = dest.getFormulas()[0];
-        for (var c = 0; c < L.lastCol; c++) {
-          if (tplF[c] && !destF[c]) sheet.getRange(target, c + 1).setFormulaR1C1(tplF[c]);
-        }
-      }
+      target = ledgerNewRow_(sheet, L);
     }
 
     var formulas = sheet.getRange(target, 1, 1, L.lastCol).getFormulas()[0];

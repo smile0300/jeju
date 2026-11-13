@@ -301,6 +301,7 @@
       ['색상', r.ItemColor],
       ['위챗', r.WechatId],
       ['접수 코드', 'JL' + r._row + ' (친구 수락 때 备注로)'],
+      ['위챗 친구', r['위챗친구']],
       ['찾기 서비스', joinNonEmpty([r['찾기상품'], r['결제상태'] && '결제 ' + r['결제상태']], ' · ')],
       ['경찰 접수', joinNonEmpty([r['경찰접수번호'], r['경찰관서'], r['경찰접수일']], ' · ')],
       ['메모', r.AdminNote]
@@ -407,7 +408,9 @@
       var fresh = lostCard(data.row);
       card.replaceWith(fresh);
       var q = data.queue === '등록대기' ? ' · 작업 큐 등록대기 (30분 안에 경찰 등록)' : data.queue ? ' · 작업 큐: ' + data.queue : '';
-      var ok = el('p', 'ok', '✅ 저장됨: ' + data.written.join(', ') + q);
+      var lg = data.ledger ? ' · 정산표: ' + data.ledger : '';
+      if (data.ledger && data.ledger.indexOf('입력') !== -1) delete state.data.Ledger;   // 정산 탭을 열 때 새로 받아 오게
+      var ok = el('p', 'ok', '✅ 저장됨: ' + data.written.join(', ') + q + lg);
       fresh.appendChild(ok);
       setTimeout(function () { ok.remove(); }, 6000);
     } catch (e) {

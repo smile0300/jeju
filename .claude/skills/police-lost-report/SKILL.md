@@ -22,14 +22,14 @@ node tools/minwon24.js prep [LostReport행번호] <scratchpad>/minwon24
 1. `tabs_context_mcp {createIfEmpty:true}`
 2. `browser_batch`: `navigate` → `https://minwon24.police.go.kr/cvlcpt/cvlcptAply.do?cvlcptId=MW-001`, `javascript_tool` → `FILL` 줄 그대로
    - `{loggedOut:true}` → `node tools/minwon24.js notify "🔐 경찰민원24 로그인 필요" "등록필요 건 대기 중"` 후 끝 (제출하지 않음).
-   - `problems` 가 비어 있지 않으면 → 제출하지 말고 `notify "⚠ 경찰 등록 보류 #lostRow" "<problems>"` 후 다음 건으로.
+   - `problems` 가 비어 있지 않거나 테스트·허위로 보이면 → 제출하지 말고 `node tools/minwon24.js hold <queueRow> <lostRow> "<이유>"` 후 다음 건으로 (큐 상태가 '보류'가 되어 prep이 다시 꺼내지 않음, 푸시도 이 명령이 보냄).
    - 사진 수가 FORM의 photoIds 수보다 적어도 제출은 진행 (사진은 선택 항목).
 
 ## 3. 제출·기록 (Chrome 1회)
 `browser_batch`: `javascript_tool` → `SUBMIT`, `computer wait 4`, `javascript_tool` → `RECORD`
 - `RECORD` 결과에 `sn`(L로 시작)이 있으면 성공 → `notify "✅ 경찰 등록 완료 #lostRow" "<sn> <관서>"`.
 - 이어서 고객 위챗 안내 (Bash 1회): `node tools/minwon24.js wechat <queueRow> <lostRow> <sn> "<관서 마지막 단어, 예: 서울강남경찰서>"`
-  - 위챗 PC 화면을 2~3초 쓴다. 먼저 备注 'JL<lostRow>'(고객이 친구 요청에 적은 접수 코드)로 찾고, 없으면 양식의 위챗 ID(형식이 맞을 때만)로 찾는다. OCR로 확인될 때만 보낸다. 실패하면 스크립트가 큐에 기록하고 푸시하므로 추가 조치 없이 다음 건으로.
+  - 위챗 PC 화면을 3~5초 쓴다. 먼저 양식의 위챗 ID(형식이 맞을 때만)를 검색해 프로필의 ID가 정확히 같을 때만 그 대화방으로 보내고, 안 되면 내 연락처에서 备注 'JL<lostRow>'로 찾는다(`tools/wechat-add.ps1`, OCR 안 씀). 실패하면 스크립트가 큐에 기록하고 푸시하므로 추가 조치 없이 다음 건으로.
   - 위챗 ID는 출력되지 않는다. 화면 캡처·스크린샷 하지 말 것.
 - `신청완료 페이지가 아님` → 제출 실패. `SUBMIT` 결과의 msg/modal 문구와 함께 notify, 다음 건으로.
 
