@@ -4,7 +4,7 @@ compatibility_date = "2024-03-20"
 
 # 15분마다 작업 큐의 '대기' 행을 Jev로 판정
 [triggers]
-crons = ["*/15 * * * *"]
+crons = ["*/15 * * * *", "7,37 * * * *"]   # 두 번째 = 사이트 점검 (src/index.js HEALTH_CRON 과 같아야 함)
 
 # 비밀값은 wrangler secret put 으로 설정 (이 파일에 쓰지 말 것)
 # - TYPESAFE_API_KEY : TypeSafe 콘솔에서 발급한 키

@@ -17,6 +17,10 @@
  *       누구인지 알 수 없는 요청은 그대로 두고 푸시로 알린다. 처음 보는 화면은 tools/wechat-requests.local.txt 에 적는다
  *       --dry 는 요청·수락·备注·발송·기록 없이 무엇을 할지만 본다
  *       끝에 대리수령(SuccessStories) 안내도 한다 — 단계가 바뀐 케이스에 그 단계 안내 (备注 JEJU-00NN, 시트 '위챗안내' 칸)
+ *       이어서 결제 건 10일 습득물 감시 결과를 고객에게 알린다 (새 후보 → 후보 페이지 링크, 10일 끝 → 종료·업그레이드 안내)
+ *       끝나면 Worker 에 생존 신호(위챗 창을 잡았는지 포함)를 남긴다 — 사이트 점검이 PC 자동화 끊김을 알림
+ *   node tools/minwon24.js watch [--dry]
+ *     → 감시 결과 고객 알림만
  *   node tools/minwon24.js proxy [--dry]
  *     → 대리수령 안내만 (friends 끝부분과 같음)
  *   node tools/minwon24.js link <queueRow>
@@ -108,6 +112,7 @@ async function wechat(queueRow, lostRow, sn, office, to) {
 
 // ── 위챗 공통 ──
 // tools/wechat-add.ps1 실행 → 마지막 줄. 위챗 ID는 출력에서 가린다.
+let wxScreenFail = false;
 function wx(args, hideId, raw) {
   const { execFileSync } = require('child_process');
   let out;
@@ -117,8 +122,9 @@ function wx(args, hideId, raw) {
   } catch (e) {
     out = String(e.stdout || e.message);
   }
-  if (raw) return out.trim().split(/\r?\n/);
+  if (raw) { const ls = out.trim().split(/\r?\n/); if (SCREEN_FAIL.test(ls[ls.length - 1] || '')) wxScreenFail = true; return ls; }
   out = out.trim().split(/\r?\n/).pop() || 'FAIL 출력 없음';
+  if (SCREEN_FAIL.test(out)) wxScreenFail = true;
   return hideId ? out.split(new RegExp(hideId.replace(/[^a-zA-Z0-9]/g, '\\$&'), 'i')).join('<ID>') : out;
 }
 const sent = (out) => /^OK .*\bsent$/.test(out);
@@ -304,7 +310,81 @@ async function friends(max, onlyRow, dry) {
   }
   // C. 대리수령 안내
   await proxy(M, st, test, dry, save, today);
+  // D. 결제 건 습득물 감시 결과 안내
+  await watchNotify(M, st, test, dry, save);
   save();
+}
+
+// ── 결제 건 10일 습득물 감시 → 고객 위챗 알림 ──
+// Worker 가 매일 09시에 새 습득물과 대조해 후보를 큐 '후보JSON' 에 쌓는다(src 'watch'). 여기서는
+//   ① 아직 고객에게 안 알린 후보가 생기면 후보 페이지 링크와 함께 알리고
+//   ② 10일 감시가 끝나면 종료 안내(기본 상품이면 집중 업그레이드 안내 포함)를 한 번 보낸다.
+// 어디까지 알렸는지는 tools/wechat-add.local.txt 의 watch. 처음 보는 건은 이미 지난 후보·이미 끝난 감시를 '알린 것'으로 친다
+// (이 기능 전에는 운영자가 푸시를 보고 직접 처리했으므로).
+const WATCH_SEND_PER_RUN = 3;
+async function sendLost(lostRow, msg, test) {
+  // 친구가 된 고객은 备注 JL<행> — 내 연락처에서 먼저, 없으면 양식의 위챗 ID(프로필 ID가 정확히 같을 때만)
+  let out = wx(['-Local', '-Remark', `JL${lostRow}`, '-Message', msg, ...test]);
+  if (/^OK not-friend/.test(out)) {
+    const id = String((await contact(lostRow)).wechatId || '').replace(/\s/g, '');
+    if (idOk(id)) out = wx(['-WechatId', id, '-CheckOnly', '-Remark', `JL${lostRow}`, '-Message', msg, ...test], id);
+  }
+  return out;
+}
+async function watchNotify(M, st, test, dry, save) {
+  const r = await (await fetch(`${API}/run?watch_status=1`, { headers })).json().catch(e => ({ error: e.message }));
+  if (r.result !== 'success') { console.log(`WATCH 현황을 못 읽음 ${r.message || r.error || ''}`); return; }
+  const W = M.watch;
+  const dayStr = (ms) => new Date(ms).toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' });
+  const yday = dayStr(Date.now() - 864e5);
+  st.watch = st.watch || {};
+  const live = new Set();
+  let sentCount = 0;
+  for (const w of r.rows) {
+    live.add(String(w.queueRow));
+    // 마지막 감시는 처리일 + (감시일수-1)일 09시 → 그다음 날 10시 이후에 종료 안내
+    const endMs = new Date(`${w.done}T10:00:00+09:00`).getTime() + r.watchDays * 864e5;
+    let ws = st.watch[w.queueRow];
+    if (!ws || ws.lost !== w.lostRow) {
+      ws = st.watch[w.queueRow] = { lost: w.lostRow, sent: w.cands.filter(c => String(c.at || '') < yday).map(c => c.id), ended: Date.now() > endMs, everFound: w.cands.length > 0 };
+    }
+    if (sentCount >= WATCH_SEND_PER_RUN) continue;
+    const code = `JL${w.lostRow}`;
+    const fresh = w.cands.filter(c => !ws.sent.includes(c.id));
+    let kind = '', msg = '';
+    const link = matchLink(w.queueRow);
+    if (fresh.length && !ws.ended) {
+      kind = 'found';
+      msg = W.found.replace(/\{n\}/g, fresh.length);
+    } else if (!ws.ended && Date.now() > endMs) {
+      const c = await contact(w.lostRow);
+      const basic = c.plan === '기본 9.9元';
+      kind = 'end';
+      msg = (ws.everFound || w.cands.length ? W.end_found : W.end_none) + (basic ? W.upsell : '');
+    } else continue;
+    // 후보 페이지가 실제로 열릴 때만 링크를 넣는다
+    let linkOk = false;
+    try { linkOk = !!(await (await fetch(`${MATCH_BASE}/api/lost-match?t=${link.split('t=')[1]}`)).json()).code; } catch (e) { linkOk = false; }
+    if (kind === 'found' && !linkOk) { console.log(`${code} 후보 ${fresh.length}건 — 후보 페이지가 안 열려 다음에 다시`); continue; }
+    if (!linkOk) msg = msg.replace(/\n[^\n]*\{link\}[^\n]*/g, '');   // 링크가 든 줄은 통째로 뺀다
+    msg = msg.replace(/\{code\}/g, code).replace(/\{link\}/g, link);
+    sentCount++;
+    const out = await sendLost(w.lostRow, msg, test);
+    if (sent(out)) {
+      if (kind === 'found') { ws.sent.push(...fresh.map(c => c.id)); ws.everFound = true; }
+      else ws.ended = true;
+    } else if (/^OK dry-run|typed-only/.test(out)) { /* 시험 */ }
+    else if (!dry) {
+      // 친구가 아니거나 발송 실패 — 같은 일로 푸시를 되풀이하지 않도록 이번 후보는 알린 것으로 치고 운영자에게 넘긴다
+      if (kind === 'found') ws.sent.push(...fresh.map(c => c.id)); else ws.ended = true;
+      await notify(`⚠ 위챗 ${kind === 'found' ? '습득물 후보' : '감시 종료'} 안내 실패 ${code}`, `${out.replace(/^(OK|FAIL) /, '')} — 직접 안내해 주세요${kind === 'found' ? ' (후보 ' + fresh.length + '건)' : ''}`);
+    }
+    console.log(`${code} 감시 ${kind === 'found' ? `후보 ${fresh.length}건` : '종료'} ${out}`);
+    save();
+  }
+  // 큐에서 빠진(감시 끝나고 상태가 바뀐) 건은 정리
+  for (const k of Object.keys(st.watch)) if (!live.has(k) && st.watch[k].ended) delete st.watch[k];
+  if (!sentCount) console.log('WATCH 보낼 안내 없음');
 }
 
 // ── 대리수령(SuccessStories) 위챗 자동 안내 ──
@@ -411,7 +491,10 @@ if (cmd === 'judge') {
   const row = i !== -1 ? parseInt(args.splice(i, 2)[1], 10) : 0;
   const d = args.indexOf('--dry');
   if (d !== -1) args.splice(d, 1);
-  friends(parseInt(args[0], 10) || 3, row, d !== -1);
+  const dryRun = d !== -1;
+  friends(parseInt(args[0], 10) || 3, row, dryRun)
+    .catch(e => console.log(`FRIENDS 오류 ${e.message}`))
+    .then(() => (row || dryRun) ? null : postRun({ heartbeat: 'pc', info: { wechat: !wxScreenFail } }).catch(() => {}));
 } else if (cmd === 'proxy') {
   (async () => {
     const dry = args.includes('--dry');
@@ -421,6 +504,14 @@ if (cmd === 'judge') {
     try { st = JSON.parse(fs.readFileSync(FRIEND_STATE, 'utf8')); } catch (e) { /* 첫 실행 */ }
     if (st.day !== today) { st.day = today; st.count = 0; }
     await proxy(M, st, dry ? ['-DryRun', '-NoEnter'] : [], dry, () => { if (!dry) fs.writeFileSync(FRIEND_STATE, JSON.stringify(st)); }, today);
+  })();
+} else if (cmd === 'watch') {
+  (async () => {
+    const dry = args.includes('--dry');
+    const M = JSON.parse(fs.readFileSync(path.join(__dirname, 'wechat-messages.json'), 'utf8'));
+    let st = {};
+    try { st = JSON.parse(fs.readFileSync(FRIEND_STATE, 'utf8')); } catch (e) { /* 첫 실행 */ }
+    await watchNotify(M, st, dry ? ['-DryRun', '-NoEnter'] : [], dry, () => { if (!dry) fs.writeFileSync(FRIEND_STATE, JSON.stringify(st)); });
   })();
 } else if (cmd === 'link') {
   console.log(matchLink(parseInt(args[0], 10)));

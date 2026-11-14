@@ -117,7 +117,7 @@ function doPost(e) {
     if (data.type === 'admin_ledger_save') return adminLedgerSave(data);
 
     // 작업 큐 (workers/task-triage) — TASK_SECRET으로 따로 인증
-    if (/^(task_list|task_get|task_update|task_append|lost_get|lost_update|lost_pending|lost_contact|proxy_list|proxy_update)$/.test(data.type)) {
+    if (/^(task_list|task_get|task_update|task_append|lost_get|lost_update|lost_pending|lost_contact|proxy_list|proxy_update|health_get|health_set|heartbeat)$/.test(data.type)) {
       return handleTaskQueue_(data);
     }
 
@@ -198,6 +198,24 @@ function handleTaskQueue_(data) {
     var cGet = function (h) { var i = cHeaders.indexOf(h); return i === -1 ? '' : String(cVals[i] || '').trim(); };
     // plan·pay·friend: 친구 수락 뒤 보내는 안내 멘트를 고르는 데 쓴다 (tools/minwon24.js friends)
     return json_({ result: 'success', wechatId: cGet('WechatId'), plan: cGet('찾기상품'), pay: cGet('결제상태'), friend: cGet('위챗친구') });
+  }
+
+  // 사이트 점검(Worker 크론) 상태와 PC 자동화 생존 신호 — 스크립트 속성에 JSON으로 둔다
+  // health_get → { state, hb: { pc: {at, wechat} } } / health_set { state } / heartbeat { name, info }
+  if (data.type === 'health_get') {
+    var hProps = PropertiesService.getScriptProperties();
+    var parse = function (k) { try { return JSON.parse(hProps.getProperty(k) || 'null'); } catch (e) { return null; } };
+    return json_({ result: 'success', state: parse('HEALTH_STATE') || {}, hb: { pc: parse('HB_PC') } });
+  }
+  if (data.type === 'health_set') {
+    PropertiesService.getScriptProperties().setProperty('HEALTH_STATE', JSON.stringify(data.state || {}).slice(0, 8000));
+    return json_({ result: 'success' });
+  }
+  if (data.type === 'heartbeat') {
+    var hbName = String(data.name || '').replace(/\W/g, '').toUpperCase().slice(0, 20);
+    if (!hbName) return json_({ result: 'error', message: 'name 없음' });
+    PropertiesService.getScriptProperties().setProperty('HB_' + hbName, JSON.stringify({ at: Date.now(), info: data.info || {} }).slice(0, 2000));
+    return json_({ result: 'success' });
   }
 
   // 대리수령(SuccessStories) 위챗 자동 안내용 (tools/minwon24.js proxy)

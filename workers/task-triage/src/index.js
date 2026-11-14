@@ -481,6 +481,8 @@ function buildPoliceForm(row, fields, ko, answers, lostDate, photoIds) {
 
 export default {
   async scheduled(event, env, ctx) {
+    // 사이트 점검은 따로 도는 크론 (요청 한도가 실행마다 따로 잡히도록)
+    if (event.cron === HEALTH_CRON) { ctx.waitUntil(runHealth(env).then(r => console.log('[health]', JSON.stringify(r)))); return; }
     ctx.waitUntil((async () => {
       console.log('[triage]', JSON.stringify(await triage(env)));
       // 하루 한 번(KST 09:00~09:14)은 결제 건 10일 감시만 — Workers 무료 요청 한도(50) 때문에 다른 일과 나눔
@@ -586,6 +588,8 @@ async function route(request, env, url) {
         const body = await request.json();
         // { lostRow, fields } → 운영 시트 LostReport (경찰접수번호 등 허용된 칸만, GAS에서 막음)
         if (body.lostRow) return Response.json(await callGas(env, { type: 'lost_update', row: body.lostRow, fields: body.fields }));
+        // { heartbeat: 'pc', info } → PC 자동화(30분 예약 작업) 생존 신호 — 사이트 점검이 끊김을 알린다
+        if (body.heartbeat) return Response.json(await callGas(env, { type: 'heartbeat', name: body.heartbeat, info: body.info || {} }));
         // { caseId, fields } → 대리수령 SuccessStories ('위챗안내' 칸만, GAS에서 막음)
         if (body.caseId) return Response.json(await callGas(env, { type: 'proxy_update', caseId: body.caseId, fields: body.fields }));
         return Response.json(await callGas(env, { type: 'task_update', row: body.queueRow, fields: body.fields }));
@@ -596,6 +600,10 @@ async function route(request, env, url) {
       // contact=1 → 고객 위챗 ID (경찰 접수 안내 발송용, 비밀값 필요 — 표로는 못 씀)
       if (lostRow >= 2 && url.searchParams.get('contact')) return Response.json(await callGas(env, { type: 'lost_contact', row: lostRow }));
       if (lostRow >= 2) return Response.json(await processLost(env, lostRow));
+      // watch_status=1 → 결제 건 10일 감시 현황 (고객 위챗 알림용: 큐 행·LostReport 행·처리일·감시로 찾은 후보)
+      if (url.searchParams.get('watch_status')) return Response.json(await watchStatus(env));
+      // health=1 → 사이트 점검을 지금 한 번 (크론과 같음)
+      if (url.searchParams.get('health')) return Response.json(await runHealth(env, url.searchParams.get('dry') === '1'));
       // proxy_from=60 → 대리수령 케이스 목록 (위챗 자동 안내용, 위챗 ID 포함 — 비밀값 필요)
       if (url.searchParams.get('proxy_from')) return Response.json(await callGas(env, { type: 'proxy_list', from: parseInt(url.searchParams.get('proxy_from'), 10) }));
       if (url.searchParams.get('lost_pending')) return Response.json(await triageLost(env));
@@ -671,6 +679,112 @@ async function watchPaidLost(env) {
     }
   }
   return out;
+}
+
+// 고객 위챗 알림용 감시 현황 — 위챗 ID·신고서 내용은 빼고, 감시(watch)로 찾은 후보만
+async function watchStatus(env) {
+  const { rows } = await callGas(env, { type: 'task_list', status: '완료' });
+  const out = [];
+  for (const q of rows) {
+    const ref = String(q['참고(링크·위챗ID 등)'] || '').match(/^LostReport!(\d+)$/);
+    const done = String(q['처리일시'] || '').match(/^(\d{4}-\d{2}-\d{2})/);
+    if (!ref || !done || !q['신고서']) continue;
+    let cands = [];
+    try { cands = JSON.parse(q['후보JSON'] || '[]'); } catch { cands = []; }
+    out.push({
+      queueRow: q.row, lostRow: +ref[1], done: done[1],
+      cands: cands.filter(c => c.src === 'watch').map(c => ({ id: c.id, date: c.date, at: c.at, p: c.p }))
+    });
+  }
+  return { result: 'success', watchDays: WATCH_DAYS, rows: out };
+}
+
+// ── 사이트 점검 ──
+// 고객이 보는 것과 같은 경로(jeju-live.com/api/…)로 30분마다 부른다. 같은 항목이 2번 연속 실패하면 관리자 푸시, 회복하면 한 번 더.
+// PC 자동화(30분 예약 작업)는 tools/minwon24.js friends 가 남기는 생존 신호로 본다.
+const HEALTH_CRON = '7,37 * * * *';
+const SITE = 'https://jeju-live.com';
+const HEALTH_FAILS_TO_ALERT = 2;
+function kstParts(ms) {
+  const d = new Date(ms + 9 * 3600000);
+  const p = (n) => String(n).padStart(2, '0');
+  return { ymd: `${d.getUTCFullYear()}${p(d.getUTCMonth() + 1)}${p(d.getUTCDate())}`, h: d.getUTCHours(), m: d.getUTCMinutes(), hh: p(d.getUTCHours()) };
+}
+function publicData(endpoint, params) {
+  return `${SITE}/api/public-data?endpoint=${encodeURIComponent(endpoint)}&${new URLSearchParams(params)}`;
+}
+function healthChecks(now) {
+  // 초단기실황은 매시 40분 이후에 그 시각 자료가 나온다 → 45분 전이면 한 시간 전 자료
+  const n = kstParts(now - (kstParts(now).m < 45 ? 3600000 : 0));
+  const today = kstParts(now).ymd;
+  const items = (j) => j?.response?.body?.items;
+  return [
+    { id: 'home', name: '사이트 첫 화면', url: `${SITE}/`, ok: (t) => /<html/i.test(t) && t.length > 20000 },
+    { id: 'weather', name: '날씨(기상청)', url: publicData('https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst', { pageNo: 1, numOfRows: 20, dataType: 'JSON', base_date: n.ymd, base_time: `${n.hh}00`, nx: 52, ny: 38 }), json: true, ok: (j) => (items(j)?.item || []).length > 0 },
+    { id: 'air', name: '대기질(에어코리아)', url: publicData('https://apis.data.go.kr/B552584/ArpltnInforInqireSvc/getMsrstnAcctoRltmMesureDnsty', { stationName: '연동', dataTerm: 'DAILY', pageNo: 1, numOfRows: 1, returnType: 'json', ver: '1.3' }), json: true, ok: (j) => (items(j) || []).length > 0 },
+    { id: 'flight', name: '항공편(공항공사)', url: publicData('https://apis.data.go.kr/B551178/flight-status/depart', { numOfRows: 5, pageNo: 20 }), ok: (t) => /<resultCode>00<\/resultCode>/.test(t) && /<item>/.test(t) },
+    { id: 'police', name: '경찰청 습득물', url: publicData('https://apis.data.go.kr/1320000/LosfundInfoInqireService/getLosfundInfoAccToClAreaPd', { pageNo: 1, numOfRows: 3, START_YMD: today, END_YMD: today, N_FD_LCT_CD: 'LCP000' }), ok: (t) => /<resultCode>00<\/resultCode>/.test(t) },
+    { id: 'hallasan', name: '한라산 탐방로', url: `${SITE}/api/hallasan-status`, json: true, ok: (j) => Array.isArray(j) && j.length > 0 && j.every(x => x.status) },
+    { id: 'lostcases', name: '분실 사례 목록', url: `${SITE}/api/lost-cases`, json: true, ok: (j) => Array.isArray(j?.cases) },
+    { id: 'success', name: '대리수령 목록', url: `${SITE}/api/success-list`, json: true, ok: (j) => Array.isArray(j) && j.length > 0 },
+  ];
+}
+async function runCheck(c) {
+  const t0 = Date.now();
+  try {
+    const res = await fetch(c.url, { signal: AbortSignal.timeout(25000), headers: { 'User-Agent': 'jeju-live-health' } });
+    const text = await res.text();
+    if (!res.ok) return { ok: false, why: `HTTP ${res.status}` };
+    let body = text;
+    if (c.json) { try { body = JSON.parse(text); } catch { return { ok: false, why: `JSON 아님: ${text.slice(0, 60)}` }; } }
+    if (!c.ok(body)) return { ok: false, why: `응답 모양이 다름: ${text.replace(/\s+/g, ' ').slice(0, 80)}` };
+    return { ok: true, ms: Date.now() - t0 };
+  } catch (e) {
+    return { ok: false, why: e.name === 'TimeoutError' ? '25초 안에 응답 없음' : e.message };
+  }
+}
+async function runHealth(env, dry) {
+  const now = Date.now();
+  const g = await callGas(env, { type: 'health_get' });
+  const state = g.state || {};
+  state.fail = state.fail || {};
+  state.alerted = state.alerted || {};
+  const checks = healthChecks(now);
+  const results = await Promise.all(checks.map(runCheck));
+  const report = {};
+  checks.forEach((c, i) => { report[c.id] = results[i]; });
+
+  // PC 자동화: 예약 작업은 08~24시 30분마다 → 09시~24시 사이에 90분 넘게 신호가 없으면 실패
+  const k = kstParts(now);
+  const hb = g.hb?.pc;
+  if (k.h >= 9) {
+    const age = hb ? now - hb.at : Infinity;
+    report.pc = age > 90 * 60000
+      ? { ok: false, why: hb ? `${Math.round(age / 60000)}분째 신호 없음 (PC 꺼짐·잠김·앱 종료?)` : '신호 기록 없음' }
+      : hb.info?.wechat === false ? { ok: false, why: '위챗 PC 창을 못 잡음 (로그아웃·꺼짐?)' } : { ok: true };
+  }
+  const names = Object.fromEntries(checks.map(c => [c.id, c.name]));
+  names.pc = 'PC 자동화(위챗·경찰 등록)';
+
+  const alerts = [];
+  for (const [id, r] of Object.entries(report)) {
+    if (r.ok) {
+      if (state.alerted[id]) alerts.push({ title: `✅ 복구: ${names[id]}`, body: '다시 정상입니다.' });
+      state.fail[id] = 0; delete state.alerted[id];
+    } else {
+      state.fail[id] = (state.fail[id] || 0) + 1;
+      if (state.fail[id] >= HEALTH_FAILS_TO_ALERT && !state.alerted[id]) {
+        alerts.push({ title: `⚠ 사이트 점검: ${names[id]} 실패`, body: `${r.why} (${state.fail[id]}번 연속)` });
+        state.alerted[id] = now;
+      }
+    }
+  }
+  state.last = now;
+  if (!dry) {
+    for (const a of alerts) await notifyAdmin(env, a.title, a.body);
+    await callGas(env, { type: 'health_set', state });
+  }
+  return { report, alerts, fail: state.fail };
 }
 
 async function triageLost(env) {
