@@ -10,10 +10,14 @@
 # -CheckOnly : 친구인지만 본다(친구가 아니어도 요청을 보내지 않음 → OK not-friend)
 # -Message   : 친구로 확인되면(이미 친구·방금 친구가 됨) 프로필의 Messages 버튼으로 그 사람 대화방을 열어 보낸다 → 끝에 ' sent' / ' send-fail <이유>'
 # -NoEnter   : (시험용) 대화방에 붙여 넣기까지만 하고 지운다 — 실제로 보내지 않음 → ' typed-only'
+# -Requests  : 받은 친구 요청 목록(Contacts → New Friends)에서 아직 수락하지 않은 것 → 'REQ<탭>위챗ID(보일 때)<탭>줄 이름' 줄들, 마지막 줄 'OK requests N'
+#              처음 보는 화면이면 'UNK<탭>보이는 버튼들<탭>줄 끝' (누르지 않음)
+# -Accept    : -Remark JL<행> [-WechatId id] — 줄에 그 접수 코드가 있거나 프로필의 위챗 ID가 같은 요청을 수락하고 备注를 단다 → OK accepted | OK accepted-noremark
 # -Local     : 위챗 서버에 ID 검색을 하지 않고 내 연락처에서 备注($Remark, 접수 코드)로만 찾는다 — 친구 수락 여부 확인용(검색 횟수 제한 없음)
-param([string]$WechatId, [string]$Remark, [string]$Hello, [string]$Message, [switch]$CheckOnly, [switch]$Local, [switch]$DryRun, [switch]$Dump, [switch]$NoEnter)
+param([string]$WechatId, [string]$Remark, [string]$Hello, [string]$Message, [switch]$CheckOnly, [switch]$Local, [switch]$DryRun, [switch]$Dump, [switch]$NoEnter, [switch]$Requests, [switch]$Accept)
 if ($Local -and -not $Remark) { "FAIL -Local 은 -Remark 필요"; exit 1 }
-if (-not $Local -and -not $WechatId) { "FAIL -WechatId 필요"; exit 1 }
+if ($Accept -and $Remark -notmatch '^(JL\d+|JEJU-\d+)$') { "FAIL -Accept 는 -Remark JL<행번호> 또는 JEJU-<번호> 필요"; exit 1 }
+if (-not $Local -and -not $WechatId -and -not $Requests -and -not $Accept) { "FAIL -WechatId 필요"; exit 1 }
 $ErrorActionPreference = 'Stop'
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 Add-Type -AssemblyName UIAutomationClient, UIAutomationTypes, System.Windows.Forms
@@ -36,6 +40,7 @@ public class WxA { [DllImport("user32.dll")] public static extern bool SetForegr
       var t = new System.Text.StringBuilder(64); GetWindowText(h, t, 64); string s = t.ToString();
       if (s == "WeChat" || s == "Weixin" || s == "微信") found.Add(h); return true; }, IntPtr.Zero);
     return found; }
+  [DllImport("user32.dll")] public static extern bool SetWindowPos(IntPtr h, IntPtr a, int x, int y, int w, int hh, uint f);
   [DllImport("user32.dll")] public static extern bool SetCursorPos(int x, int y);
   [DllImport("user32.dll")] public static extern void mouse_event(uint f, int x, int y, uint d, UIntPtr e); }
 '@
@@ -71,9 +76,22 @@ function DumpTree($root) {
   }
 }
 function Done($line, $code) {
-  foreach ($c in 'mmui::VerifyFriendWindow', 'mmui::AddFriendWindow') { $w = WxWindow $c; if ($w) { CloseWin $w } }
+  foreach ($c in 'mmui::VerifyFriendWindow', 'mmui::AddFriendWindow', 'mmui::ProfileUniquePop') { $w = WxWindow $c; if ($w) { CloseWin $w } }
   if ($script:oldClip) { [System.Windows.Forms.Clipboard]::SetText($script:oldClip) }
   $line; exit $code
+}
+# 프로필 창에서 'WeChat ID:' 바로 다음 값이 $id 와 정확히 같은지 (값이 늦게 채워져 몇 번 다시 본다)
+function ProfileHasId($w, $id) {
+  for ($n = 0; $n -lt 6; $n++) {
+    $next = $false
+    foreach ($e in $w.FindAll($TS::Descendants, $True_)) {
+      $c = $e.Current
+      if ($next -and $c.ClassName -eq 'mmui::ProfileTextView') { if ($c.Name.Trim().ToLower() -eq $id.Trim().ToLower()) { return $true }; $next = $false }
+      elseif ($c.Name -match '^(WeChat ID|微信号)\s*[:：]?\s*$') { $next = $true }
+    }
+    Start-Sleep -Milliseconds 300
+  }
+  $false
 }
 function Fail($why) { Done "FAIL $why" 1 }
 # 메인 창에 $expect 이름의 대화방이 열려 있을 때만 붙여 넣고 보낸다. 돌려주는 값: 'sent' 또는 'send-fail <이유>'
@@ -131,7 +149,7 @@ if (-not [WxA]::IsWindowVisible($mainH)) {
   if (-not [WxA]::IsWindowVisible($mainH)) { "FAIL 위챗 창이 트레이에 숨겨져 있고 단축키(Ctrl+Alt+W)로 열리지 않음"; exit 1 }
 }
 # 전에 열어 둔 Add Contacts 창이 남아 있으면 예전 사람의 프로필을 읽게 된다 → 먼저 닫는다
-foreach ($c in 'mmui::VerifyFriendWindow', 'mmui::AddFriendWindow') { $stale = WxWindow $c; if ($stale) { CloseWin $stale; Start-Sleep -Milliseconds 400 } }
+foreach ($c in 'mmui::VerifyFriendWindow', 'mmui::AddFriendWindow', 'mmui::ProfileUniquePop') { $stale = WxWindow $c; if ($stale) { CloseWin $stale; Start-Sleep -Milliseconds 400 } }
 
 [WxA]::ShowWindow($proc.MainWindowHandle, 9) | Out-Null
 $search = $null
@@ -147,6 +165,103 @@ $script:oldClip = [System.Windows.Forms.Clipboard]::GetText()
 [WxA]::SetForegroundWindow($proc.MainWindowHandle) | Out-Null
 Start-Sleep -Milliseconds 500
 if ([WxA]::GetForegroundWindow() -ne $proc.MainWindowHandle) { Fail '위챗 창을 앞으로 가져오지 못함' }
+if ($Requests -or $Accept) {
+  # ── 받은 친구 요청 (Contacts 탭 → New Friends) ──
+  # 줄 이름 = 별명 + 인사말 + 상태. 끝난 상태(Added 등)가 아닌 줄만 눌러 오른쪽 프로필에 수락 버튼이 있는지 본다.
+  # 수락 버튼·수락 창의 모양은 실제 요청으로 확인하지 못했다(2026-11-14) → 모르는 모양이면 누르지 않고 UNK 줄로 알린다.
+  $reFinal = '(Added|Expired|Pending|Sent|Waiting for verification|已添加|已过期|等待验证|已发送)\s*$'
+  $reAccept = '^(Accept|Go to Verify|Verify|Confirm|接受|前往验证|通过验证)$'
+  $reOk = '^(OK|Done|Accept|确定|完成)$'
+  $condBtn = Cond $A::ControlTypeProperty ([System.Windows.Automation.ControlType]::Button)
+  function Tab($re) { foreach ($e in $win.FindAll($TS::Descendants, (Cond $A::ClassNameProperty 'mmui::XTabBarItem'))) { if ($e.Current.Name -match $re) { return $e } }; $null }
+  function Fin($line, $code) { $t = Tab '^(WeChat|微信)$'; if ($t) { Click $t; Start-Sleep -Milliseconds 300 }; Done $line $code }
+  function Names($root, $minX) { @($root.FindAll($TS::Descendants, $condBtn) | Where-Object { $_.Current.Name -and $_.Current.BoundingRectangle.X -ge $minX -and $_.Current.Name -notmatch '^(Pin|Minimize|Maximize|Close|More)$' } | ForEach-Object { "$($_.Current.Name)#$(($_.Current.AutomationId -split '\.')[-1])" }) -join ' | ' }
+  # 왼쪽 탭 줄이 화면 밖에 있으면 누를 수 없다 → 창을 화면 안으로 옮긴다
+  $wr = $win.Current.BoundingRectangle
+  if ($wr.X -lt 0 -or $wr.Y -lt 0) {
+    [WxA]::SetWindowPos($proc.MainWindowHandle, [IntPtr]::Zero, [Math]::Max(16, [int]$wr.X), [Math]::Max(8, [int]$wr.Y), 0, 0, 0x15) | Out-Null
+    Start-Sleep -Milliseconds 500
+  }
+  $tab = Tab '^(Contacts|通讯录)$'
+  if (-not $tab) { Fail '위챗 창에서 Contacts 탭을 못 찾음' }
+  Click $tab; Start-Sleep -Milliseconds 800
+  $cellCond = Cond $A::ClassNameProperty 'mmui::ContactsCellNewFriendView'
+  $cells = @($win.FindAll($TS::Descendants, $cellCond))
+  if (-not $cells.Count) {
+    $grp = $null
+    foreach ($e in $win.FindAll($TS::Descendants, (Cond $A::ClassNameProperty 'mmui::ContactsCellGroupView'))) { if ($e.Current.Name -match '^(New Friends|新的朋友)') { $grp = $e } }
+    if (-not $grp) { Fin 'FAIL 위챗 창에서 New Friends 줄을 못 찾음 (연락처 목록이 아래로 내려가 있음)' 1 }
+    Click $grp; Start-Sleep -Milliseconds 800
+    $cells = @($win.FindAll($TS::Descendants, $cellCond))
+  }
+  $bottom = $win.Current.BoundingRectangle.Bottom
+  $found = 0; $seen = 0
+  foreach ($cell in $cells) {
+    $name = $cell.Current.Name; $cr = $cell.Current.BoundingRectangle
+    if ($seen -ge 8) { break }
+    if ($name -match $reFinal -or $cr.Width -le 0 -or ($cr.Y + $cr.Height / 2) -ge $bottom) { continue }
+    $seen++
+    Click $cell
+    # 오른쪽 프로필이 이 줄의 사람으로 바뀔 때까지 (표시 이름 = 줄 이름의 앞부분)
+    $dn = ''
+    for ($i = 0; $i -lt 8; $i++) {
+      Start-Sleep -Milliseconds 350
+      $d = BySuffix $win 'display_name_text'
+      $dn = if ($d) { $d.Current.Name.Trim() } else { '' }
+      if ($dn -and $name.StartsWith($dn)) { break } else { $dn = '' }
+    }
+    $tail = if ($name.Length -gt 14) { $name.Substring($name.Length - 14) } else { $name }
+    if (-not $dn) { if ($Requests) { "UNK`t프로필이 열리지 않음`t$tail" }; continue }
+    # 프로필의 "WeChat ID:" 값 (안 보이는 사람도 있다)
+    $wid = ''; $next = $false; $btn = $null
+    foreach ($e in $win.FindAll($TS::Descendants, $True_)) {
+      $c = $e.Current
+      if ($c.BoundingRectangle.X -le $cr.Right) { continue }
+      if ($next -and $c.ClassName -eq 'mmui::ProfileTextView') { $wid = $c.Name.Trim(); $next = $false }
+      elseif ($c.Name -match '^(WeChat ID|微信号)\s*[:：]?\s*$') { $next = $true }
+      if ($c.ControlType -eq [System.Windows.Automation.ControlType]::Button -and $c.Name -match $reAccept -and $c.BoundingRectangle.Width -gt 0) { $btn = $e }
+    }
+    if ($Requests) {
+      if ($btn) { $found++; "REQ`t$wid`t$name" } else { "UNK`t$(Names $win $cr.Right)`t$tail" }
+      continue
+    }
+    $num = $Remark -replace '\D', ''
+    $pre = if ($Remark -match '^JEJU') { 'JEJU[-\s]*0*' } else { 'JL\s*0*' }
+    $isTarget = ($num -and $name -match ($pre + $num + '(?!\d)')) -or ($WechatId -and $wid -and $wid.ToLower() -eq $WechatId.Trim().ToLower())
+    if (-not $isTarget) { continue }
+    if (-not $btn) { Fin 'FAIL 그 요청에 수락 버튼이 없음' 1 }
+    if ($DryRun) { Fin 'OK dry-run (수락 가능)' 0 }
+    Click $btn
+    $ver = $null; $direct = $false
+    for ($i = 0; $i -lt 12 -and -not $ver -and -not $direct; $i++) {
+      Start-Sleep -Milliseconds 400
+      $ver = WxWindow 'mmui::VerifyFriendWindow'
+      if (-not $ver -and $i -ge 3 -and (BySuffix $win 'chat_img_button')) { $direct = $true }
+    }
+    if ($direct) { Fin 'OK accepted-noremark' 0 }
+    if (-not $ver) {
+      $tops = @($A::RootElement.FindAll($TS::Children, $True_) | Where-Object { $script:pids -contains $_.Current.ProcessId } | ForEach-Object { $_.Current.ClassName }) -join ','
+      Fin "FAIL 수락 버튼을 눌렀지만 수락 창이 열리지 않음 (창: $tops) — 직접 확인 필요" 1
+    }
+    Start-Sleep -Milliseconds 500
+    $tag = 'OK accepted'
+    $remarkEdit = @($ver.FindAll($TS::Descendants, (Cond $A::ControlTypeProperty ([System.Windows.Automation.ControlType]::Edit)))) | Where-Object { $_.Current.Name -eq 'ModifyRemark' } | Select-Object -First 1
+    if ($remarkEdit) {
+      Click $remarkEdit; Start-Sleep -Milliseconds 200; Paste $Remark; Start-Sleep -Milliseconds 300
+      $now = ''; try { $now = $remarkEdit.GetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern).Current.Value } catch {}
+      if ($now -ne $Remark) { Fin 'FAIL 수락 창에 备注가 들어가지 않음 — 직접 확인 필요' 1 }
+    } else { $tag = 'OK accepted-noremark' }
+    $ok = @($ver.FindAll($TS::Descendants, $condBtn)) | Where-Object { $_.Current.Name -match $reOk } | Select-Object -First 1
+    if (-not $ok) { Fin "FAIL 수락 창의 확인 버튼을 못 찾음 ($(Names $ver -99999)) — 직접 확인 필요" 1 }
+    Click $ok
+    for ($i = 0; $i -lt 12 -and (WxWindow 'mmui::VerifyFriendWindow'); $i++) { Start-Sleep -Milliseconds 500 }
+    if (WxWindow 'mmui::VerifyFriendWindow') { Fin 'FAIL 확인을 눌렀지만 수락 창이 닫히지 않음 — 직접 확인 필요' 1 }
+    Start-Sleep -Milliseconds 800
+    Fin $tag 0
+  }
+  if ($Requests) { Fin "OK requests $found" 0 }
+  Fin 'FAIL 그 접수 코드·위챗 ID의 요청이 목록에 없음' 1
+}
 Click $search; Start-Sleep -Milliseconds 300
 if ($Local) {
   # 내 연락처 검색(서버 조회 없음): 팝업 목록에 이름이 접수 코드와 정확히 같은 줄이 있으면 친구
@@ -171,13 +286,53 @@ if ($Local) {
 Paste $WechatId
 
 # 검색 팝업의 'Search WeChat ID'(위챗 ID로 찾기) 줄 → Add Contacts 창이 그 ID의 프로필을 띄운다
-$item = $null
+$item = $null; $cands = @()
 for ($i = 0; $i -lt 8 -and -not $item; $i++) {
   Start-Sleep -Milliseconds 500
   $list = $win.FindFirst($TS::Descendants, (Cond $A::AutomationIdProperty 'search_list'))
-  if ($list) { foreach ($li in $list.FindAll($TS::Children, $True_)) { if ($li.Current.Name -match '^(Search WeChat ID|搜索微信号|查找微信号)$') { $item = $li } } }
+  if ($list) {
+    $cands = @()
+    foreach ($li in $list.FindAll($TS::Children, $True_)) {
+      if ($li.Current.Name -match '^(Search WeChat ID|搜索微信号|查找微信号)$') { $item = $li }
+      elseif ($li.Current.ClassName -eq 'mmui::SearchContentCellView') { $cands += $li }
+    }
+    if ($cands.Count -and $i -ge 2) { break }
+  }
 }
-if (-not $item) { [System.Windows.Forms.SendKeys]::SendWait('^a{BS}'); Fail "검색 팝업에 '위챗 ID 검색' 줄이 없음" }
+$viaContact = $false
+if (-not $item -and $cands.Count) {
+  # 이미 내 연락처에 있는 사람(备注 없이 별명으로 저장됨)은 'Search WeChat ID' 줄 대신 연락처 줄로 뜬다 (2026-11-15 JEJU-0060)
+  # → 그 대화방 → Chat Info → 상대 이름 → 프로필 창(ProfileUniquePop)에서 위챗 ID가 정확히 같은지 본다. 같은 사람이 아니면 다음 후보 (최대 3명)
+  $names = @($cands | ForEach-Object { $_.Current.Name.Trim() } | Select-Object -First 3)
+  for ($k = 0; $k -lt $names.Count -and -not $viaContact; $k++) {
+    if ($k) {   # 검색을 다시 해서 k번째 후보를 누른다
+      Click $search; Start-Sleep -Milliseconds 300; Paste $WechatId; Start-Sleep -Milliseconds 1200
+      $list = $win.FindFirst($TS::Descendants, (Cond $A::AutomationIdProperty 'search_list'))
+      $cands = @(); if ($list) { foreach ($li in $list.FindAll($TS::Children, $True_)) { if ($li.Current.ClassName -eq 'mmui::SearchContentCellView') { $cands += $li } } }
+      if ($cands.Count -le $k -or $cands[$k].Current.Name.Trim() -ne $names[$k]) { break }
+    }
+    Click $cands[$k]
+    $room = $null
+    for ($i = 0; $i -lt 10; $i++) { Start-Sleep -Milliseconds 300; $room = BySuffix $win 'current_chat_name_label'; if ($room -and $room.Current.Name.Trim() -eq $names[$k]) { break } else { $room = $null } }
+    if (-not $room) { continue }
+    $info = BySuffix $win 'more_button'
+    if (-not $info) { continue }
+    Click $info
+    $member = $null
+    for ($i = 0; $i -lt 10 -and -not $member; $i++) { Start-Sleep -Milliseconds 300; $member = BySuffix $win 'single_chat_member_cell' }
+    if (-not $member) { Click $info; continue }
+    Click $member
+    $pop = $null
+    for ($i = 0; $i -lt 10 -and -not $pop; $i++) { Start-Sleep -Milliseconds 300; $pop = WxWindow 'mmui::ProfileUniquePop' }
+    if ($pop -and (ProfileHasId $pop $WechatId)) { $viaContact = $true; $add = $pop; $chatBtn = BySuffix $pop 'chat_img_button'; $addBtn = $null }
+    else { if ($pop) { CloseWin $pop; Start-Sleep -Milliseconds 300 }; Click $info; Start-Sleep -Milliseconds 300 }
+  }
+  if (-not $viaContact) { Fail '연락처에 비슷한 사람은 있지만 프로필의 위챗 ID가 같은 사람이 없음' }
+  if (-not $chatBtn) { Fail '연락처 프로필 창에 Messages 버튼이 없음' }
+  if ($Dump) { DumpTree $add }
+}
+if (-not $item -and -not $viaContact) { [System.Windows.Forms.SendKeys]::SendWait('^a{BS}'); Fail "검색 팝업에 '위챗 ID 검색' 줄이 없음" }
+if (-not $viaContact) {
 Click $item
 
 # 프로필이 뜰 때까지 기다린다 — 친구면 아래에 Messages(대화) 버튼, 아니면 Add to Contacts 버튼이 생긴다
@@ -198,6 +353,7 @@ if (-not $chatBtn -and -not $addBtn) {
 $box = $add.FindFirst($TS::Descendants, (Cond $A::ClassNameProperty 'mmui::XValidatorTextEdit'))
 $boxText = ''; try { $boxText = $box.GetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern).Current.Value } catch {}
 if ($boxText.Trim().ToLower() -ne $WechatId.Trim().ToLower()) { Fail "Add Contacts 창의 검색어가 다름" }
+}
 
 if ($chatBtn) {
   # 친구 프로필에는 "WeChat ID:" 값이 보인다 → 검색한 ID와 같아야 한다
@@ -207,6 +363,7 @@ if ($chatBtn) {
     foreach ($e in $add.FindAll($TS::Descendants, (Cond $A::ClassNameProperty 'mmui::ProfileTextView'))) {
       if ($e.Current.AutomationId -match 'user_info_center_view' -and $e.Current.Name.Trim().ToLower() -eq $WechatId.Trim().ToLower()) { $idOk = $true }
     }
+    if (-not $idOk -and (ProfileHasId $add $WechatId)) { $idOk = $true }
     if ($idOk) { break }
     Start-Sleep -Milliseconds 400
   }

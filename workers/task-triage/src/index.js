@@ -586,6 +586,8 @@ async function route(request, env, url) {
         const body = await request.json();
         // { lostRow, fields } → 운영 시트 LostReport (경찰접수번호 등 허용된 칸만, GAS에서 막음)
         if (body.lostRow) return Response.json(await callGas(env, { type: 'lost_update', row: body.lostRow, fields: body.fields }));
+        // { caseId, fields } → 대리수령 SuccessStories ('위챗안내' 칸만, GAS에서 막음)
+        if (body.caseId) return Response.json(await callGas(env, { type: 'proxy_update', caseId: body.caseId, fields: body.fields }));
         return Response.json(await callGas(env, { type: 'task_update', row: body.queueRow, fields: body.fields }));
       }
       const lostRow = parseInt(url.searchParams.get('lost_row'), 10);
@@ -594,6 +596,8 @@ async function route(request, env, url) {
       // contact=1 → 고객 위챗 ID (경찰 접수 안내 발송용, 비밀값 필요 — 표로는 못 씀)
       if (lostRow >= 2 && url.searchParams.get('contact')) return Response.json(await callGas(env, { type: 'lost_contact', row: lostRow }));
       if (lostRow >= 2) return Response.json(await processLost(env, lostRow));
+      // proxy_from=60 → 대리수령 케이스 목록 (위챗 자동 안내용, 위챗 ID 포함 — 비밀값 필요)
+      if (url.searchParams.get('proxy_from')) return Response.json(await callGas(env, { type: 'proxy_list', from: parseInt(url.searchParams.get('proxy_from'), 10) }));
       if (url.searchParams.get('lost_pending')) return Response.json(await triageLost(env));
       if (url.searchParams.get('watch')) return Response.json(await watchPaidLost(env));
       if (url.searchParams.get('paid')) return Response.json(await promotePaid(env));

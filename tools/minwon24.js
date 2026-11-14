@@ -13,7 +13,12 @@
  *       이미 친구인데 备注가 없으면(고객이 먼저 추가 → 별명으로 보임) JL<행번호>로 달고, 친구가 되면 안내 멘트(tools/wechat-messages.json) 발송
  *       요청을 보낸 건은 그 뒤 실행 때마다 수락 여부를 확인해 수락되면 안내 멘트 발송. 결과는 LostReport '위챗친구' 칸
  *       어디까지 봤는지·오늘 보낸 요청 수·수락 대기 목록은 tools/wechat-add.local.txt (하루 10건까지). --row N 은 그 한 건만
- *       --dry 는 요청·备注·발송·기록 없이 무엇을 할지만 본다
+ *       받은 친구 요청(New Friends)도 본다: 인사말에 접수 코드 JL<행>가 있거나 프로필의 위챗 ID가 최근 접수와 같으면 수락(备注 JL<행>)하고 안내 발송,
+ *       누구인지 알 수 없는 요청은 그대로 두고 푸시로 알린다. 처음 보는 화면은 tools/wechat-requests.local.txt 에 적는다
+ *       --dry 는 요청·수락·备注·발송·기록 없이 무엇을 할지만 본다
+ *       끝에 대리수령(SuccessStories) 안내도 한다 — 단계가 바뀐 케이스에 그 단계 안내 (备注 JEJU-00NN, 시트 '위챗안내' 칸)
+ *   node tools/minwon24.js proxy [--dry]
+ *     → 대리수령 안내만 (friends 끝부분과 같음)
  *   node tools/minwon24.js link <queueRow>
  *     → 고객용 유력 후보 페이지 주소 (결제 전 고객에게 보내면 후보 건수만 보임 — 결제 유도용)
  *   node tools/minwon24.js hold <queueRow> <lostRow> <이유>
@@ -103,7 +108,7 @@ async function wechat(queueRow, lostRow, sn, office, to) {
 
 // ── 위챗 공통 ──
 // tools/wechat-add.ps1 실행 → 마지막 줄. 위챗 ID는 출력에서 가린다.
-function wx(args, hideId) {
+function wx(args, hideId, raw) {
   const { execFileSync } = require('child_process');
   let out;
   try {
@@ -112,6 +117,7 @@ function wx(args, hideId) {
   } catch (e) {
     out = String(e.stdout || e.message);
   }
+  if (raw) return out.trim().split(/\r?\n/);
   out = out.trim().split(/\r?\n/).pop() || 'FAIL 출력 없음';
   return hideId ? out.split(new RegExp(hideId.replace(/[^a-zA-Z0-9]/g, '\\$&'), 'i')).join('<ID>') : out;
 }
@@ -137,6 +143,8 @@ const FRIEND_DAILY_MAX = 10;        // ID 검색 친구 요청이 잦으면 위�
 const WAIT_DAYS = 5;                // 이 기간 안에 친구가 안 되면 대기 목록에서 뺀다
 const WAIT_PER_RUN = 5;             // 한 번 실행에 확인할 대기 건수 (건당 위챗 화면을 3~5초 쓴다)
 const SERVER_CHECK_MS = 6 * 3600e3; // 고객이 备注 없이 먼저 추가한 경우는 ID 검색으로만 알 수 있다 → 건당 6시간에 한 번만
+const REQ_LOOKBACK = 40;            // 코드 없는 친구 요청은 프로필의 위챗 ID를 최근 이만큼의 접수와 맞춰 본다
+const REQ_LOG = path.join(__dirname, 'wechat-requests.local.txt');
 const SCREEN_FAIL = /위챗 창|검색창|요청 창이 열리지|닫히지 않음|트레이/;   // 위챗이 꺼졌거나 화면을 못 잡음 → 다음 실행 때 다시
 async function friends(max, onlyRow, dry) {
   const M = JSON.parse(fs.readFileSync(path.join(__dirname, 'wechat-messages.json'), 'utf8'));
@@ -160,6 +168,81 @@ async function friends(max, onlyRow, dry) {
     }
     return false;
   };
+
+  // 0. 받은 친구 요청 수락 — 누구인지 확인되는 요청만 (접수 코드 또는 위챗 ID)
+  if (!onlyRow) {
+    const lines = wx(['-Requests'], null, true);
+    const tail = lines[lines.length - 1] || '';
+    if (!/^OK requests/.test(tail)) { console.log(`REQUESTS ${tail}`); if (SCREEN_FAIL.test(tail)) return; }
+    st.req = st.req || {};
+    for (const k of Object.keys(st.req)) if ((Date.now() - new Date(st.req[k]).getTime()) / 864e5 > 14) delete st.req[k];
+    const key = (t) => require('crypto').createHash('sha1').update(t).digest('hex').slice(0, 12);
+    let recent = null;   // 최근 접수의 위챗 ID → 행 (필요할 때만 읽는다)
+    let pcases = null;   // 대리수령 케이스 (필요할 때만 읽는다)
+    for (const line of lines) {
+      const [kind, a, text = ''] = line.split('\t');
+      if (kind === 'UNK') {
+        // 수락 버튼이 우리가 아는 이름이 아님 → 누르지 않고 화면 모양을 적어 둔다 (wechat-add.ps1 의 $reAccept 에 추가할 것)
+        const k = key(a + text);
+        if (!st.req[k]) {
+          st.req[k] = today;
+          if (!dry) { fs.appendFileSync(REQ_LOG, `${nowKst()}\t${a}\t${text}\n`); await notify('⚠ 위챗 친구 요청 — 처음 보는 화면', '자동 수락을 못 했습니다. 직접 수락해 주세요 (화면 모양은 기록해 둠)'); }
+        }
+        console.log('REQUESTS 처음 보는 화면 — 수락하지 않음');
+        continue;
+      }
+      if (kind !== 'REQ') continue;
+      const id = a.trim();
+      let n = 0;
+      const m = text.match(/JL\s*0*(\d{2,6})(?!\d)/i);
+      if (m && +m[1] <= st.last + 50 && +m[1] > st.last - 300 && (await contact(+m[1])).result === 'success') n = +m[1];
+      if (!n && id) {
+        if (!recent) {
+          recent = {};
+          for (let r = st.last + 3; r > st.last - REQ_LOOKBACK && r >= 2; r--) {
+            const c = await contact(r).catch(() => ({}));
+            const w = String(c.wechatId || '').replace(/\s/g, '').toLowerCase();
+            if (c.result === 'success' && w && !recent[w]) recent[w] = r;   // 같은 ID면 최근 접수
+          }
+        }
+        n = recent[id.toLowerCase()] || 0;
+      }
+      if (!n) {
+        // 대리수령 고객인지 — 인사말의 JEJU-00NN 또는 위챗 ID
+        if (!pcases) pcases = (await (await fetch(`${API}/run?proxy_from=${PROXY_FROM}`, { headers })).json().catch(() => ({}))).cases || [];
+        const pm = text.match(/jeju[-\s]*0*(\d{2,4})(?!\d)/i);
+        const pc = pcases.find(c => (pm && c.num === +pm[1]) || (id && String(c.wechatId).replace(/\s/g, '').toLowerCase() === id.toLowerCase()));
+        if (pc && +pc.step >= 1 && +pc.step <= 4) {
+          const code = proxyCode(pc);
+          const out = wx(['-Accept', '-Remark', code, ...(id ? ['-WechatId', id] : []), ...(dry ? ['-DryRun'] : [])], id || null);
+          console.log(`${code} 친구 요청 ${out}`);   // 안내는 아래 대리수령 단계가 备注로 찾아 보낸다
+          if (/^FAIL/.test(out) && !dry && !st.req[key('fail' + code)]) { st.req[key('fail' + code)] = today; await notify(`⚠ 위챗 친구 요청 수락 실패 ${code}`, out.replace(/^FAIL /, '')); }
+          continue;
+        }
+        const k = key(id + text);
+        if (!st.req[k]) { st.req[k] = today; if (!dry) await notify('위챗 친구 요청 — 누구인지 확인 안 됨', '접수 코드가 없고 위챗 ID도 최근 접수와 다릅니다. 직접 확인해 수락해 주세요 (备注 JL<행번호>)'); }
+        console.log('REQUESTS 누구인지 확인 안 되는 요청 1건 — 그대로 둠');
+        continue;
+      }
+      const c = await contact(n);
+      let out = wx(['-Accept', '-Remark', `JL${n}`, ...(id ? ['-WechatId', id] : []), ...(dry ? ['-DryRun'] : [])], id || null);
+      if (/^OK accepted$/.test(out)) {
+        // 备注까지 달았다 → 내 연락처에서 JL<행>로 찾아 안내 발송
+        const msg = /안내 보냄/.test(c.friend || '') ? [] : ['-Message', welcomeText(M, n, c)];
+        const sentOut = wx(['-Local', '-Remark', `JL${n}`, ...msg, ...test]);
+        if (!(await settle(n, sentOut))) { st.wait[n] = { since: today }; await mark(n, '요청 수락·안내 대기'); }
+        out += ` → ${sentOut}`;
+      } else if (/^OK accepted-noremark/.test(out)) {
+        st.wait[n] = { since: today };   // B 단계가 위챗 ID로 찾아 备注를 달고 안내를 보낸다
+        await mark(n, '요청 수락·备注 대기');
+      } else if (/^FAIL/.test(out) && !dry) {
+        const k = key('fail' + n);
+        if (!st.req[k]) { st.req[k] = today; await notify(`⚠ 위챗 친구 요청 수락 실패 JL${n}`, out.replace(/^FAIL /, '')); }
+      }
+      console.log(`JL${n} 친구 요청 ${out}`);
+      save();
+    }
+  }
 
   // A. 새 접수
   let done = 0, seen = 0, stop = false;
@@ -219,7 +302,67 @@ async function friends(max, onlyRow, dry) {
     if (await settle(n, out)) console.log(`JL${n} 수락 확인 → ${out}`);
     save();
   }
+  // C. 대리수령 안내
+  await proxy(M, st, test, dry, save, today);
   save();
+}
+
+// ── 대리수령(SuccessStories) 위챗 자동 안내 ──
+// 관리자 화면에서 단계(Step)를 바꾸면 다음 실행 때 그 단계의 안내를 보낸다 (5 고객 직접수령 = 종결, 안내 없음)
+// 시트 '위챗안내' 칸: 's<보낸 단계> …' — 예: 's1 보냄 11-14 21:30', 's0 요청 보냄 11-14 21:30'(친구 대기)
+// 备注는 케이스 번호(JEJU-0060). PROXY_FROM 이전 케이스는 예전처럼 수동이라 건드리지 않는다.
+const PROXY_FROM = 60;
+const PROXY_PER_RUN = 5;
+const proxyCode = (c) => String(c.caseId).toUpperCase();
+function proxyText(M, c, step) {
+  const P = M.proxy, tw = c.tw && P[`s${step}_tw`];
+  const t = tw || P[`s${step}`];
+  if (!t) return '';
+  const note = step === 4 && c.note ? `\n${c.note}` : '';
+  return t.replace(/\{code\}/g, proxyCode(c)).replace(/\{item\}/g, c.item || '').replace(/\{note\}/g, note);
+}
+async function proxy(M, st, test, dry, save, today) {
+  const r = await (await fetch(`${API}/run?proxy_from=${PROXY_FROM}`, { headers })).json().catch(e => ({ error: e.message }));
+  if (r.result !== 'success') { console.log(`PROXY 목록을 못 읽음 ${r.message || r.error || ''}`); return; }
+  st.pserver = st.pserver || {};
+  const mark = async (c, text) => { if (!dry) await postRun({ caseId: c.caseId, fields: { '위챗안내': `${text} ${nowKst().slice(5)}` } }).catch(() => {}); };
+  let done = 0, seen = 0;
+  for (const c of r.cases) {
+    const step = parseInt(c.step, 10) || 0;
+    const last = parseInt((String(c.notice).match(/^s(\d)/) || [])[1], 10) || 0;
+    if (step < 1 || step > 4 || last >= step) continue;
+    seen++;
+    if (done >= PROXY_PER_RUN) break;
+    done++;
+    const code = proxyCode(c), msg = proxyText(M, c, step);
+    if (!msg) { console.log(`${code} 단계 ${step} 안내 멘트가 wechat-messages.json 에 없음`); continue; }
+    const id = String(c.wechatId || '').replace(/\s/g, '');
+    // 1) 내 연락처에서 备注로 (이미 친구·备注를 단 경우 — 서버 조회 없음)
+    let out = wx(['-Local', '-Remark', code, '-Message', msg, ...test]);
+    if (SCREEN_FAIL.test(out)) { console.log(`${code} ${out}`); return; }
+    // 2) 위챗 ID 검색 — 친구면 备注를 달고 보내고, 아니면 친구 요청 (같은 ID는 6시간에 한 번만 검색)
+    if (/^OK not-friend/.test(out) && idOk(id) && Date.now() - (st.pserver[code] || 0) > SERVER_CHECK_MS) {
+      st.pserver[code] = Date.now();
+      const limit = st.count >= FRIEND_DAILY_MAX;
+      out = wx(['-WechatId', id, '-Remark', code, '-Hello', M.proxy.hello.replace(/\{code\}/g, code), ...(limit ? ['-CheckOnly'] : []), '-Message', msg, ...test], id);
+      if (SCREEN_FAIL.test(out)) { console.log(`${code} ${out}`); return; }
+      if (/^OK (requested|added)/.test(out)) st.count++;
+    }
+    if (sent(out)) { await mark(c, `s${step} 보냄`); delete st.pserver[code]; }
+    else if (/send-fail/.test(out)) {
+      await mark(c, `s${last} 안내 실패(단계 ${step})`);
+      if (!dry) await notify(`⚠ 대리수령 위챗 안내 실패 ${code}`, `${out.replace(/^.*send-fail /, '')} — 직접 안내해 주세요`);
+    } else if (/^OK requested/.test(out)) await mark(c, `s${last} 요청 보냄`);
+    else if (/^OK dry-run|typed-only/.test(out)) { /* 시험 */ }
+    else if (!/요청 보냄|고객 추가 대기/.test(c.notice)) {
+      // 친구가 아니고 검색으로도 못 찾음 (번호·닉네임을 적은 고객 등) → 운영자에게 한 번만 알린다
+      await mark(c, `s${last} 고객 추가 대기`);
+      if (!dry) await notify(`대리수령 ${code} — 위챗 친구가 아님`, `위챗 ID로 찾을 수 없습니다. 고객을 친구로 추가하고 备注를 ${code} 로 달면 안내가 자동으로 나갑니다`);
+    }
+    console.log(`${code} 단계 ${step} ${out}`);
+    save();
+  }
+  if (!seen) console.log('PROXY 보낼 안내 없음');
 }
 
 async function notify(title, body) {
@@ -269,6 +412,16 @@ if (cmd === 'judge') {
   const d = args.indexOf('--dry');
   if (d !== -1) args.splice(d, 1);
   friends(parseInt(args[0], 10) || 3, row, d !== -1);
+} else if (cmd === 'proxy') {
+  (async () => {
+    const dry = args.includes('--dry');
+    const M = JSON.parse(fs.readFileSync(path.join(__dirname, 'wechat-messages.json'), 'utf8'));
+    const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' });
+    let st = {};
+    try { st = JSON.parse(fs.readFileSync(FRIEND_STATE, 'utf8')); } catch (e) { /* 첫 실행 */ }
+    if (st.day !== today) { st.day = today; st.count = 0; }
+    await proxy(M, st, dry ? ['-DryRun', '-NoEnter'] : [], dry, () => { if (!dry) fs.writeFileSync(FRIEND_STATE, JSON.stringify(st)); }, today);
+  })();
 } else if (cmd === 'link') {
   console.log(matchLink(parseInt(args[0], 10)));
 } else if (cmd === 'hold') {

@@ -188,3 +188,22 @@
 - **발송 방식 변경**: 경찰 접수 안내도 `wechat-send.ps1`(OCR) 대신 `wechat-add.ps1`(UI Automation만) 사용 — 프로필의 위챗 ID가 정확히 같을 때만 그 프로필의 Messages 버튼으로 대화방을 열고, 대화방 이름을 다시 확인한 뒤 보냄.
 - **위챗 PC 함정 (2026-11-14 확인)**: ① 검색 중 ESC는 메인 창을 트레이로 숨김 → 검색어는 Ctrl+A·Backspace로 지울 것 ② 숨겨진 창을 `ShowWindow`로 띄우면 화면 요소가 비어 있음, `Weixin.exe` 재실행은 로그인 창이 하나 더 뜸 → Ctrl+Alt+W 단축키로 복원 ③ 검색 팝업도 제목이 'WeChat'인 별도 창 → 메인 창은 UIA 클래스 `mmui::MainWindow`로 고를 것 ④ 내 연락처 검색 결과의 연락처 줄은 `mmui::SearchContentCellView`(id `search_item_<이름>`), 같은 이름의 `XTableCell`은 검색 기록·추천어 ⑤ 입력창을 누르면 이름 뒤에 안내문이 붙음(`JL635Hold mouse to input by voice`).
 - **남은 수동 단계**: 위챗 송금 수령 → 관리자 결제 버튼(의도된 수동). 고객이 보낸 친구 요청 수락(위챗 ID 대신 휴대폰 번호를 적은 고객은 수락 때 备注 JL<행>를 달아야 자동 안내가 감).
+
+### 받은 친구 요청 자동 수락 (2026-11-14 추가)
+
+- `tools/wechat-add.ps1 -Requests` / `-Accept -Remark JL<행> [-WechatId id]`, `node tools/minwon24.js friends`의 0단계에서 호출(30분 예약 작업).
+- **수락 기준**: 요청 줄(별명+인사말)에 접수 코드 `JL<행>`가 있거나, 프로필의 위챗 ID가 최근 40건 접수의 ID와 같을 때만. 수락하면서 备注 JL<행>를 달고 안내 멘트 발송. 누구인지 알 수 없는 요청은 그대로 두고 푸시(같은 요청은 한 번만).
+- **화면 구조(위챗 PC 4.x)**: Contacts 탭(`mmui::XTabBarItem`) → 연락처 목록 안에 `New Friends` 묶음(`mmui::ContactsCellGroupView`, 누르면 펼침) → 요청 줄 `mmui::ContactsCellNewFriendView`(자식 요소 없음, 이름 = 별명+인사말+상태 `Added` 등). 줄은 Invoke 패턴이 안 먹혀 마우스로 눌러야 하고, 누르면 오른쪽에 프로필(`display_name_text`, `WeChat ID:` 다음 `mmui::ProfileTextView`)이 뜸. 탭도 Invoke가 안 먹힘 → 창이 화면 왼쪽 밖으로 나가 있으면 스크립트가 화면 안으로 옮김.
+- **미검증**: 대기 중인 실제 요청이 없어 수락 버튼 이름과 수락 창 모양은 추정(`Accept|Go to Verify|前往验证…`, `mmui::VerifyFriendWindow`). 모르는 모양이면 누르지 않고 `tools/wechat-requests.local.txt`에 보이는 버튼 이름을 적고 푸시 → 그 이름을 `wechat-add.ps1`의 `$reAccept`/`$reOk`에 추가하면 됨.
+- PowerShell 변수는 대소문자를 구분하지 않음 — `$ACCEPT`가 `-Accept` 스위치와, `$BTN`이 `$btn`과 충돌했었음.
+
+### 대리수령(SuccessStories) 위챗 자동 안내 (2026-11-15, GAS v129 · Worker 재배포)
+
+- **흐름**: 관리자 화면에서 단계(Step)를 바꾸면 30분 예약 작업(`node tools/minwon24.js friends` 끝부분, 단독은 `proxy [--dry]`)이 그 단계 안내를 보낸다. 1 접수 / 2 물품확인중 / 3 수령완료 / 4 발송완료(공개 노트 Note 내용을 같이 보냄 — 송장번호를 넣어 둘 것) / 5 고객 직접수령 = 종결, 안내 없음.
+- **대상**: JEJU-0060부터(`PROXY_FROM`). 그 이전 케이스는 수동으로 처리했으므로 건드리지 않음. 0059는 2026-11-15 '5 고객 직접수령'으로 종결.
+- **기록**: SuccessStories `위챗안내` 칸(자동 생성) — `s<보낸 단계> 보냄 MM-DD HH:mm`. 같은 단계는 두 번 보내지 않음. 다시 보내려면 이 칸을 비우거나 앞 숫자를 낮추면 됨.
+- **친구 찾기 순서**: ① 내 연락처 备注 `JEJU-00NN` ② 양식의 위챗 ID 검색(6시간에 한 번) → 친구면 备注 달고 발송, 아니면 친구 요청(인사말 `proxy.hello`) ③ 둘 다 안 되면(닉네임·번호를 적은 고객) 푸시 1회 — 운영자가 친구 추가하며 备注 `JEJU-00NN`를 달면 다음 실행에 발송. 받은 친구 요청에 `JEJU-00NN`이 있거나 위챗 ID가 케이스와 같으면 자동 수락.
+- **멘트**: `tools/wechat-messages.json`의 `proxy` (간체 `s1~s4`, 번체 `s1_tw~s4_tw` — UserAgent zh_TW/HK 또는 주소에 台灣·香港이면 번체). 비용·발송 방식은 약속하지 않고 "확인 후 안내"로만 씀.
+- **API**: Worker `GET /run?proxy_from=60` → 케이스 목록(위챗 ID 포함, 비밀값 필요), `POST /run {caseId, fields:{'위챗안내'}}` → GAS `proxy_list`/`proxy_update` (`PROXY_WRITABLE_HEADERS`).
+- **위챗 PC 발견**: 이미 내 연락처에 있는 사람(备注 없음)을 위챗 ID로 검색하면 'Search WeChat ID' 줄이 없고 연락처 줄(`SearchContentCellView`, 이름=별명)만 뜸 → 그 대화방 → `more_button`(Chat Info) → `single_chat_member_cell` → 프로필 창 `mmui::ProfileUniquePop`('WeChat ID:' 값으로 정확히 대조, `value_remark_view`·`chat_img_button` 그대로 사용). `wechat-add.ps1`에 반영.
+- **정산표 연동은 아직 수동**: 대리수령 금액이 건마다 달라 자동 입력하지 않음.

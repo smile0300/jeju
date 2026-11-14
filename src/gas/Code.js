@@ -117,7 +117,7 @@ function doPost(e) {
     if (data.type === 'admin_ledger_save') return adminLedgerSave(data);
 
     // 작업 큐 (workers/task-triage) — TASK_SECRET으로 따로 인증
-    if (/^(task_list|task_get|task_update|task_append|lost_get|lost_update|lost_pending|lost_contact)$/.test(data.type)) {
+    if (/^(task_list|task_get|task_update|task_append|lost_get|lost_update|lost_pending|lost_contact|proxy_list|proxy_update)$/.test(data.type)) {
       return handleTaskQueue_(data);
     }
 
@@ -154,6 +154,7 @@ function doPost(e) {
  */
 var LOST_PRIVATE_HEADERS = ['WechatId', 'UserAgent', 'PhotoURL', 'HotelBooker', 'CarNumber', 'hotelRoom'];
 var LOST_WRITABLE_HEADERS = ['경찰접수번호', '경찰접수일', '경찰관서', '위챗친구'];
+var PROXY_WRITABLE_HEADERS = ['위챗안내'];
 function handleTaskQueue_(data) {
   var props = PropertiesService.getScriptProperties();
   var secret = String(props.getProperty('TASK_SECRET') || '').trim();
@@ -197,6 +198,50 @@ function handleTaskQueue_(data) {
     var cGet = function (h) { var i = cHeaders.indexOf(h); return i === -1 ? '' : String(cVals[i] || '').trim(); };
     // plan·pay·friend: 친구 수락 뒤 보내는 안내 멘트를 고르는 데 쓴다 (tools/minwon24.js friends)
     return json_({ result: 'success', wechatId: cGet('WechatId'), plan: cGet('찾기상품'), pay: cGet('결제상태'), friend: cGet('위챗친구') });
+  }
+
+  // 대리수령(SuccessStories) 위챗 자동 안내용 (tools/minwon24.js proxy)
+  // proxy_list  : { from: 60 } → 그 번호 이후 케이스의 단계·위챗 ID·물건·공개 노트·위챗안내 기록 (위챗 ID는 발송에만 쓰고 출력하지 않음)
+  // proxy_update: { caseId, fields: { '위챗안내': … } } → PROXY_WRITABLE_HEADERS 칸만
+  if (data.type === 'proxy_list') {
+    var pSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName('SuccessStories');
+    if (!pSheet || pSheet.getLastRow() < 2) return json_({ result: 'success', cases: [] });
+    var pHeaders = headerRow_(pSheet);
+    var pVals = pSheet.getRange(2, 1, pSheet.getLastRow() - 1, pHeaders.length).getDisplayValues();
+    var pFrom = parseInt(data.from, 10) || 0;
+    var pGet = function (r, h) { var i = pHeaders.indexOf(h); return i === -1 ? '' : String(r[i] || '').trim(); };
+    var cases = [];
+    pVals.forEach(function (r) {
+      var id = pGet(r, 'CaseId');
+      var num = parseInt((id.match(/(\d+)\s*$/) || [])[1], 10);
+      if (!(num >= pFrom)) return;
+      cases.push({
+        caseId: id, num: num, step: pGet(r, 'Step'), wechatId: pGet(r, 'WeChatId'),
+        item: pGet(r, 'Item') || pGet(r, 'Item_zh'), note: pGet(r, 'Note'),
+        tw: /zh[_-](TW|HK|MO)/i.test(pGet(r, 'UserAgent')) || /台灣|臺灣|台湾|香港|澳門/.test(pGet(r, 'Address')),
+        notice: pGet(r, '위챗안내')
+      });
+    });
+    return json_({ result: 'success', cases: cases });
+  }
+  if (data.type === 'proxy_update') {
+    var puSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName('SuccessStories');
+    var puId = String(data.caseId || '').trim().toLowerCase();
+    var puNames = Object.keys(data.fields || {}).filter(function (h) { return PROXY_WRITABLE_HEADERS.indexOf(h) !== -1; });
+    if (!puSheet || !puId || !puNames.length) return json_({ result: 'error', message: 'bad case or fields' });
+    var puLock = LockService.getScriptLock();
+    puLock.waitLock(10000);
+    try {
+      var puHeaders = ensureHeaders_(puSheet, puNames);
+      var ids = puSheet.getRange(2, puHeaders.indexOf('CaseId') + 1, puSheet.getLastRow() - 1, 1).getDisplayValues();
+      var puRow = -1;
+      for (var q = 0; q < ids.length; q++) if (String(ids[q][0]).trim().toLowerCase() === puId) { puRow = q + 2; break; }
+      if (puRow === -1) return json_({ result: 'error', message: puId + ' 없음' });
+      puNames.forEach(function (h) { puSheet.getRange(puRow, puHeaders.indexOf(h) + 1).setValue(data.fields[h]); });
+    } finally {
+      puLock.releaseLock();
+    }
+    return json_({ result: 'success' });
   }
 
   if (data.type === 'lost_update') {

@@ -433,7 +433,7 @@
     c.appendChild(el('div', 'title', joinNonEmpty([r.Item, r.Place], ' · ') || '(물건 미입력)'));
 
     var dl = el('dl');
-    addPairs(dl, [['지역', r.Region], ['위챗', r.WeChatId], ['신청자', r.RequesterName], ['관리번호', r.MgmtNumber], ['메모', r.AdminNote], ['공개 노트', r.Note]]);
+    addPairs(dl, [['지역', r.Region], ['위챗', r.WeChatId], ['신청자', r.RequesterName], ['관리번호', r.MgmtNumber], ['메모', r.AdminNote], ['공개 노트', r.Note], ['위챗 안내', r['위챗안내']]]);
     c.appendChild(dl);
 
     var act = el('div', 'actions');
