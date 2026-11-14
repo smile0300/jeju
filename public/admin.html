@@ -170,6 +170,10 @@
       $('login').hidden = true;
       buildFilter();
       render();
+      // 대리수령 카드에 정산 상태를 보이려면 정산표도 필요 — 뒤에서 불러와 다시 그린다
+      if (sheet === 'SuccessStories' && !state.data.Ledger) {
+        ensureLedger().then(function () { if (state.sheet === 'SuccessStories') render(); }).catch(function () {});
+      }
     } catch (e) {
       $('count').textContent = '';
       showError(e.message);
@@ -436,10 +440,25 @@
     addPairs(dl, [['지역', r.Region], ['위챗', r.WeChatId], ['신청자', r.RequesterName], ['관리번호', r.MgmtNumber], ['메모', r.AdminNote], ['공개 노트', r.Note], ['위챗 안내', r['위챗안내']]]);
     c.appendChild(dl);
 
+    // 정산표 연결: 비고에 케이스 번호(JEJU-0060)가 들어간 줄 = 이 케이스의 정산
+    var led = caseLedgerRows(r.CaseId);
+    if (led) {
+      var pc = ledgerCol('순수익');
+      if (led.length) {
+        var sum = led.reduce(function (s, x) { return s + (pc === -1 ? 0 : num(x.v[pc])); }, 0);
+        c.appendChild(el('div', 'ko', '💰 정산표 ' + led.length + '줄 · 순수익 ' + won(sum)));
+      } else if (Number(str(r.Step)) >= 3) {
+        badges.appendChild(el('span', 'badge warn', '정산 미입력'));
+      }
+    }
+
     var act = el('div', 'actions');
     var editBtn = el('button', 'sub', '✏️ 수정');
     editBtn.type = 'button';
     act.appendChild(editBtn);
+    var payBtn = el('button', 'sub', led && led.length ? '💰 정산 수정' : '💰 정산 입력');
+    payBtn.type = 'button';
+    act.appendChild(payBtn);
     if (str(r.WeChatId)) act.appendChild(copyBtn('위챗ID 복사', str(r.WeChatId)));
     [['ItemImg', '물건 사진'], ['PassportPhoto', '여권'], ['ReservationPhoto', '예약 캡처']].forEach(function (p) {
       var u = safeUrl(r[p[0]]);
@@ -456,7 +475,46 @@
       c.appendChild(editForm(r));
       editBtn.textContent = '닫기';
     });
+    payBtn.addEventListener('click', async function () {
+      var f = c.querySelector('form.edit');
+      if (f) { f.remove(); payBtn.textContent = led && led.length ? '💰 정산 수정' : '💰 정산 입력'; return; }
+      payBtn.disabled = true;
+      try { await ensureLedger(); } catch (e) { showError(e.message); payBtn.disabled = false; return; }
+      payBtn.disabled = false;
+      var rows = caseLedgerRows(r.CaseId) || [];
+      var code = str(r.CaseId).toUpperCase();
+      var preset = {};
+      var ic = ledgerCol('항목'), nc = ledgerCol('비고');
+      if (ic !== -1) preset[ic] = str(r.Item);
+      if (nc !== -1) preset[nc] = code;
+      var saved = function () {
+        var fresh = successCard(r);
+        c.replaceWith(fresh);
+        var ok = el('p', 'ok', '✅ 정산표에 저장됨 (' + code + ')');
+        fresh.appendChild(ok);
+        setTimeout(function () { ok.remove(); }, 5000);
+      };
+      // 이미 줄이 있으면 마지막 줄을 고친다 (추가 비용은 정산 탭에서 비고에 같은 번호를 넣어 새 줄로)
+      var form = ledgerForm(rows.length ? rows[rows.length - 1] : null, preset, saved);
+      form.insertBefore(el('div', 'hint', rows.length
+        ? code + ' 정산 줄을 고칩니다. 비용이 더 생기면 정산 탭에서 비고에 ' + code + ' 를 넣어 새 줄로 추가하세요.'
+        : '받은 돈(수거비·배송비 ¥)과 쓴 돈(박스비·배송비 ₩)을 넣으세요. 비고의 ' + code + ' 로 이 케이스와 연결됩니다.'), form.firstChild);
+      c.appendChild(form);
+      payBtn.textContent = '닫기';
+    });
     return c;
+  }
+
+  // 이 케이스의 정산 줄 (정산표를 아직 안 불러왔으면 null)
+  function caseLedgerRows(caseId) {
+    if (!state.data.Ledger) return null;
+    var nc = ledgerCol('비고'), id = str(caseId).trim();
+    if (nc === -1 || !id) return [];
+    var re = new RegExp('(^|[^0-9A-Za-z])' + id.replace(/[^0-9A-Za-z]/g, '[-\\s]?') + '(?!\\d)', 'i');
+    return ledger().rows.filter(function (x) { return re.test(str(x.d[nc])); });
+  }
+  async function ensureLedger() {
+    if (!state.data.Ledger) state.data.Ledger = await api('GET', null, '?sheet=Ledger');
   }
 
   function field(name, value) {
@@ -639,7 +697,26 @@
     return c;
   }
 
-  function ledgerForm(r) {
+  // 박스크기·택배사처럼 같은 값을 되풀이해 쓰는 글자 열 → 예전 값을 고를 수 있게
+  function ledgerChoices(i) {
+    var seen = {}, out = [];
+    ledger().rows.slice().reverse().forEach(function (r) {
+      var v = str(r.d[i]).trim();
+      if (v && v !== '-' && !seen[v] && out.length < 15) { seen[v] = 1; out.push(v); }
+    });
+    return out;
+  }
+  // 박스크기를 고르면 그 크기의 최근 박스비를 채운다 (비어 있을 때만)
+  function lastBoxCost(size) {
+    var sc = ledgerCol('박스크기'), bc = ledgerCol('박스비');
+    if (sc === -1 || bc === -1) return '';
+    var rows = ledger().rows;
+    for (var k = rows.length - 1; k >= 0; k--) if (str(rows[k].d[sc]).trim() === size && num(rows[k].v[bc]) > 0) return num(rows[k].v[bc]);
+    return '';
+  }
+
+  // preset: 새 행에 미리 채울 값 { 열번호: 값 } / onSaved: 저장 뒤 처리 (없으면 정산 탭 다시 그림)
+  function ledgerForm(r, preset, onSaved) {
     var hs = ledger().headers;
     var form = el('form', 'edit');
     var auto = [];
@@ -653,13 +730,27 @@
       var input = el('input');
       input.id = id;
       input.dataset.col = i;
-      var v = r ? (h.number || h.date ? r.v[i] : r.d[i]) : (h.date ? todayKst() : '');
+      var v = r ? (h.number || h.date ? r.v[i] : r.d[i]) : (preset && preset[i] !== undefined ? preset[i] : h.date ? todayKst() : '');
       v = str(v);
       if (h.date && (!v || /^\d{4}-\d{2}-\d{2}$/.test(v))) input.type = 'date';
       if (h.number) { input.inputMode = 'decimal'; input.dataset.number = '1'; }
       input.value = v;
       input.dataset.orig = r ? v : '';
       wrap.appendChild(input);
+      if (!h.number && !h.date && /박스크기|택배사/.test(h.name)) {
+        var dl = el('datalist');
+        dl.id = id + '_dl';
+        ledgerChoices(i).forEach(function (c) { var o = el('option'); o.value = c; dl.appendChild(o); });
+        input.setAttribute('list', dl.id);
+        wrap.appendChild(dl);
+      }
+      if (/박스크기/.test(h.name)) {
+        input.addEventListener('change', function () {
+          var box = form.querySelector('input[data-col="' + ledgerCol('박스비') + '"]');
+          var cost = lastBoxCost(input.value.trim());
+          if (box && !box.value.trim() && cost !== '') box.value = cost;
+        });
+      }
       form.appendChild(wrap);
     });
     if (auto.length) form.appendChild(el('div', 'hint', '자동 계산(수식) 열: ' + auto.join(', ') + ' — 저장하면 시트 수식으로 다시 계산됩니다.'));
@@ -692,6 +783,7 @@
       try {
         var data = await api('POST', { sheet: 'Ledger', row: r ? r._row : null, orig: r ? r.d : null, values: values });
         state.data.Ledger = data.ledger;
+        if (onSaved) return onSaved(data);
         buildFilter();
         render();
         $('count').textContent += ' · ✅ ' + data.row + '행 ' + (r ? '수정됨' : '추가됨');
