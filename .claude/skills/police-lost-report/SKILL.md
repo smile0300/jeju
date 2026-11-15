@@ -22,7 +22,8 @@ node tools/minwon24.js prep [LostReport행번호] <scratchpad>/minwon24
 1. `tabs_context_mcp {createIfEmpty:true}`
 2. `browser_batch`: `navigate` → `https://minwon24.police.go.kr/cvlcpt/cvlcptAply.do?cvlcptId=MW-001`, `javascript_tool` → `FILL` 줄 그대로
    - `{loggedOut:true}` → `node tools/minwon24.js notify "🔐 경찰민원24 로그인 필요" "등록필요 건 대기 중"` 후 끝 (제출하지 않음).
-   - `problems` 가 비어 있지 않거나 테스트·허위로 보이면 → 제출하지 말고 `node tools/minwon24.js hold <queueRow> <lostRow> "<이유>"` 후 다음 건으로 (큐 상태가 '보류'가 되어 prep이 다시 꺼내지 않음, 푸시도 이 명령이 보냄).
+   - 결제된 건은 보류하지 않고 등록하는 것이 원칙 (사용자 지시 2026-11-15). `사진 첨부 실패`·`소분류 없음` 은 그대로 제출을 진행한다.
+   - 관서 관련 problems(`관서 …`·`구·군을 못 정함`)는 제출이 안 되므로, 그때만 `node tools/minwon24.js hold <queueRow> <lostRow> "<이유>"` 후 다음 건으로 (큐 상태 '보류' → prep이 다시 꺼내지 않음, 운영자에게 푸시). 고객에게 보류 안내는 보내지 않는다.
    - 사진 수가 FORM의 photoIds 수보다 적어도 제출은 진행 (사진은 선택 항목).
 
 ## 3. 제출·기록 (Chrome 1회)

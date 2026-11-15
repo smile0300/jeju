@@ -308,6 +308,7 @@
       ['위챗 친구', r['위챗친구']],
       ['찾기 서비스', joinNonEmpty([r['찾기상품'], r['결제상태'] && '결제 ' + r['결제상태']], ' · ')],
       ['경찰 접수', joinNonEmpty([r['경찰접수번호'], r['경찰관서'], r['경찰접수일']], ' · ')],
+      ['집중 결과', joinNonEmpty([r['집중결과'], r['집중메모'], r['집중안내'] && '위챗 ' + r['집중안내']], ' · ')],
       ['메모', r.AdminNote]
     ]);
     c.appendChild(dl);
@@ -336,6 +337,43 @@
           saveLost(c, r, { '찾기상품': plan, '결제상태': '확인' }, payBtn);
         });
         act.appendChild(payBtn);
+      });
+    }
+    // 19.9 집중 찾기 결과 — 저장하면 30분 안에 고객 위챗으로 결과 안내(메모는 중국어로 번역돼 같이 감)
+    if ((stage === 'paid' || stage === 'done') && str(r['찾기상품']).indexOf('집중') !== -1 && !str(r['집중결과'])) {
+      [['찾음', '🎯 집중 결과: 찾음'], ['못 찾음', '🎯 집중 결과: 못 찾음']].forEach(function (p) {
+        var fb = el('button', 'sub', p[1]);
+        fb.type = 'button';
+        fb.addEventListener('click', function () {
+          var old = c.querySelector('form.focus');
+          if (old) old.remove();
+          var form = el('form', 'edit focus');
+          form.appendChild(el('div', 'hint', 'JL' + r._row + ' 집중 결과 「' + p[0] + '」 — 저장하면 30분 안에 고객 위챗으로 결과 안내가 나갑니다.'));
+          var f = field('집중메모', '');
+          f.querySelector('label').textContent = p[0] === '찾음' ? '고객에게 전할 메모 (선택 · 예: 신라호텔 프런트 보관 중) — 중국어로 번역됨' : '고객에게 전할 메모 (선택 · 예: 호텔·택시회사·식당에 문의) — 중국어로 번역됨';
+          var ta = el('textarea');
+          ta.name = '집중메모';
+          ta.dataset.orig = '';
+          var inp = f.querySelector('input');
+          inp.replaceWith(ta);
+          ta.id = inp.id;
+          form.appendChild(f);
+          var save = el('button', 'save', '저장 · 고객 안내');
+          save.type = 'submit';
+          var msg = el('p', 'error');
+          msg.hidden = true;
+          form.appendChild(save);
+          form.appendChild(msg);
+          form.addEventListener('submit', function (ev) {
+            ev.preventDefault();
+            var fields = { '집중결과': p[0] };
+            if (ta.value.trim()) fields['집중메모'] = ta.value.trim();
+            saveLost(c, r, fields, save, msg);
+          });
+          c.insertBefore(form, act.nextSibling);
+          ta.focus();
+        });
+        act.appendChild(fb);
       });
     }
     var editBtn = el('button', 'sub', '✏️ 상태 수정');
@@ -375,6 +413,12 @@
     row1.appendChild(sel('찾기상품', [''].concat(LOST_PLANS)));
     row1.appendChild(sel('결제상태', ['', '대기', '확인']));
     form.appendChild(row1);
+    if (str(r['찾기상품']).indexOf('집중') !== -1) {
+      var row2 = el('div', 'row');
+      row2.appendChild(sel('집중결과', ['', '찾음', '못 찾음']));
+      form.appendChild(row2);
+      form.appendChild(field('집중메모', r['집중메모']));
+    }
     ['경찰접수번호', '경찰관서', '경찰접수일', 'AdminNote'].forEach(function (h) {
       var f = field(h, r[h]);
       if (h === '경찰접수일') f.querySelector('input').type = 'date';
@@ -468,6 +512,41 @@
       act.appendChild(a);
     });
     c.appendChild(act);
+
+    // 단계 바로 바꾸기 — 시트 SuccessStories 의 Step 칸에 저장. 1~3단계는 30분 안에 고객 위챗 안내가 자동으로 나감
+    var cur = Number(str(r.Step)) || 0;
+    var stepBar = el('div', 'actions');
+    var stepMsg = el('p', 'error');
+    stepMsg.hidden = true;
+    Object.keys(STEPS).forEach(function (s) {
+      if (Number(s) <= cur || cur >= 4) return;   // 앞 단계로만 (4 발송완료·5 직접수령 = 끝, 되돌리기는 ✏️ 수정)
+      var b = el('button', Number(s) === cur + 1 ? '' : 'sub', '→ ' + STEPS[s]);
+      b.type = 'button';
+      b.addEventListener('click', async function () {
+        var auto = Number(s) <= 3 && Number(str(r.CaseId).replace(/\D/g, '')) >= 60;
+        if (!confirm(r.CaseId + ' 단계를 \'' + STEPS[s] + '\'(으)로 바꿀까요?\n' + (auto ? '30분 안에 고객 위챗으로 이 단계 안내가 자동 발송됩니다.' : '고객 위챗 자동 안내는 없습니다' + (s === '4' ? ' — 송장번호는 직접 안내해 주세요.' : '.')))) return;
+        stepBar.querySelectorAll('button').forEach(function (x) { x.disabled = true; });
+        stepMsg.hidden = true;
+        try {
+          var data = await api('POST', { caseId: r.CaseId, fields: { Step: s } });
+          var rows = state.data.SuccessStories.rows;
+          var i = rows.indexOf(r);
+          if (i !== -1) rows[i] = data.row;
+          buildFilter();
+          var fresh = successCard(data.row);
+          c.replaceWith(fresh);
+          var ok = el('p', 'ok', '✅ ' + STEPS[s] + '(으)로 저장됨' + (auto ? ' · 위챗 안내 30분 안에 발송' : ''));
+          fresh.appendChild(ok);
+          setTimeout(function () { ok.remove(); }, 5000);
+        } catch (e) {
+          stepMsg.textContent = e.message;
+          stepMsg.hidden = false;
+          stepBar.querySelectorAll('button').forEach(function (x) { x.disabled = false; });
+        }
+      });
+      stepBar.appendChild(b);
+    });
+    if (stepBar.children.length) { c.appendChild(stepBar); c.appendChild(stepMsg); }
 
     editBtn.addEventListener('click', function () {
       var f = c.querySelector('form.edit');

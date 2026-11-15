@@ -13,7 +13,7 @@ function MY_DEEPL(text, targetLang) {
   var langMap = {
     "ko": "ko", "kr": "ko",
     "en": "en", "en-us": "en", "en-gb": "en",
-    "zh": "zh-CN", "cn": "zh-CN", "zh-hans": "zh-CN",
+    "zh": "zh-CN", "cn": "zh-CN", "zh-hans": "zh-CN", "zh-tw": "zh-TW", "zh-hant": "zh-TW",
     "ja": "ja", "jp": "ja"
   };
   var googleTarget = langMap[targetLang.toLowerCase()] || "ko";

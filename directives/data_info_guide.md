@@ -232,3 +232,18 @@
 - 수동 실행: `GET /run?health=1` (`&dry=1`이면 푸시·기록 없이 결과만).
 - 2026-11-15 첫 점검 때 `/api/lost-cases`가 한 번 20초 넘게 걸림(GAS 콜드 스타트 추정, 재시도 3초) — 한 번 실패는 알리지 않는 이유.
 - 무료 플랜 cron 한도: 계정 전체 5개(weather-alerts 1 + task-triage 2 = 3개 사용 중).
+
+### 2026-11-15 대리수령 단계 버튼 · 번체 안내 · 자동 안내 범위 조정
+- 관리자 대리수령 카드에 단계 버튼(→ 2 물품확인중 / 3 수령완료 / 4 발송완료 / 5 고객 직접수령) 추가. 누르면 확인창 후 시트 SuccessStories `Step` 칸에 저장(기존 수정 저장과 같은 POST). 앞 단계로만 이동, 되돌리기는 ✏️ 수정. 4·5단계 카드에는 버튼 없음.
+- 대리수령 자동 위챗 안내는 1~3단계만(`PROXY_AUTO_MAX=3`). 4 발송완료는 송장번호가 며칠 뒤 나오기도 해 운영자가 직접 안내, 5 직접수령은 안내 없이 종결 (사용자 지시).
+- 번체 고객 판별: GAS `isTraditional_(text, ua)` — UA zh_TW/HK/MO, 대만·홍콩·마카오 지명, 또는 고객 글의 번체 전용 글자 ≥2이고 간체 전용보다 많을 때. `lost_contact`·`proxy_list` 가 `tw` 를 줌(proxy 는 자동번역 `_zh`/`_en` 열 제외). GAS v131.
+- 분실물 안내도 번체: `wechat-messages.json` 의 `tw` 블록이 간체 키를 대신함(hello·welcome_*·watch.*·plans 이름). 경찰 등록 안내 번체는 `minwon24.js wechat()` 안.
+- `reply` 블록: 후보 확인 고객에게 운영자가 복사해 보내는 답장(mine / not_mine / self_pickup, 각 _tw). 자동 발송 아님.
+- 경찰 등록: 결제 건은 보류 없이 등록 — `사진 첨부 실패`·`소분류 없음` 은 그대로 제출, 관서를 못 정한 경우만 hold(고객 안내 없음).
+
+### 2026-11-15 19.9 집중 찾기 안내 (A·B안)
+- A: 집중 19.9元 고객의 경찰 등록 완료 안내에 "重点寻找也已开始：专员会在3~7天内直接联系…" 한 줄 자동 추가 (`minwon24.js wechat()`, 간·번체).
+- B: 관리자 분실신고 카드(집중 + 결제 확인/등록 완료, 집중결과 비어 있을 때)에 `🎯 집중 결과: 찾음 / 못 찾음` 버튼 → 메모(한국어, 선택) 입력 후 저장 → LostReport `집중결과`·`집중메모` 칸(ADMIN_LOST_COLS에 추가).
+- 발송: `minwon24.js friends` E단계(또는 `node tools/minwon24.js focus [--dry]`)가 Worker `/run?focus=1` → GAS `focus_list`(집중결과 있고 `집중안내` 빈 행, 메모는 고객 언어 간체/번체로 Google 번역) → `wechat-messages.json` focus.found/none 발송 → `집중안내` 칸에 `보냄/실패 MM-DD HH:mm`(LOST_WRITABLE_HEADERS 추가). 실패는 푸시. 한 번 실행에 3건.
+- 찾음 멘트는 수령 방법 ①본인 ②대리수령(100~200元+택배) 중 회신 요청까지 포함. 이후는 `reply` 템플릿으로 운영자가 직접.
+- deepl.js(MY_DEEPL) langMap에 zh-tw/zh-hant → zh-TW 추가 (전에는 ko로 떨어졌음). GAS v132, task-triage 재배포.

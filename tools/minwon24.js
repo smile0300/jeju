@@ -19,6 +19,8 @@
  *       끝에 대리수령(SuccessStories) 안내도 한다 — 단계가 바뀐 케이스에 그 단계 안내 (备注 JEJU-00NN, 시트 '위챗안내' 칸)
  *       이어서 결제 건 10일 습득물 감시 결과를 고객에게 알린다 (새 후보 → 후보 페이지 링크, 10일 끝 → 종료·업그레이드 안내)
  *       끝나면 Worker 에 생존 신호(위챗 창을 잡았는지 포함)를 남긴다 — 사이트 점검이 PC 자동화 끊김을 알림
+ *   node tools/minwon24.js focus [--dry]
+ *     → 19.9 집중 찾기 결과 안내만 (관리자 '🎯 집중 결과' 버튼으로 넣은 것)
  *   node tools/minwon24.js watch [--dry]
  *     → 감시 결과 고객 알림만
  *   node tools/minwon24.js proxy [--dry]
@@ -79,20 +81,31 @@ async function wechat(queueRow, lostRow, sn, office, to) {
   let linkOk = false;
   // 고객이 실제로 여는 사이트 쪽(/api/lost-match)으로 확인 — 사이트 배포 전이면 code 가 없어 링크를 빼고 보낸다
   try { linkOk = !!(await (await fetch(`${MATCH_BASE}/api/lost-match?t=${link.split('t=')[1]}`)).json()).code; } catch (e) { linkOk = false; }
-  const msg = [
+  const c = to ? {} : await contact(lostRow).catch(() => ({}));
+  const focus = /집중/.test(c.plan || '');   // 19.9 집중 — 직접 문의가 시작됐다는 줄을 더함
+  const msg = (c.tw ? [
+    '您好！您在 jeju-live 登記的失物，已在韓國警察廳系統完成報失登記（與親自到警察局報案效力相同）。',
+    `受理編號：${sn}`,
+    office ? `受理警察署：${office}` : '',
+    '接下來10天我們每天為您比對新的拾得物，有消息會第一時間通知您。',
+    focus ? '重點尋找也已開始：專員會在3~7天內直接聯繫店家·飯店·計程車公司幫您查找，結果會在本聊天中告訴您。' : '',
+    linkOk ? `可能的拾得物（隨時更新）：${link}` : '',
+    '—— jeju-live 濟州失物招領'
+  ] : [
     '您好！您在 jeju-live 登记的失物，已在韩国警察厅系统完成报失登记（与亲自到警察局报案效力相同）。',
     `受理编号：${sn}`,
     office ? `受理警察署：${office}` : '',
     '接下来10天我们每天为您比对新的拾得物，有消息会第一时间通知您。',
+    focus ? '重点寻找也已开始：专员会在3~7天内直接联系店铺·酒店·出租车公司帮您查找，结果会在本聊天中告诉您。' : '',
     linkOk ? `可能的拾得物（随时更新）：${link}` : '',
     '—— jeju-live 济州失物招领'
-  ].filter(Boolean).join('\n');
+  ]).filter(Boolean).join('\n');
   let out;
   if (to) {
     out = /^JL\d+$/i.test(to) ? wx(['-Local', '-Remark', to, '-Message', msg]) : wx(['-WechatId', to, '-CheckOnly', '-Message', msg], to);
   } else {
     // 1순위 양식의 위챗 ID(검색 가능한 형식일 때 — 프로필의 ID가 정확히 같아야 보냄), 실패하면 备注 'JL<행번호>'
-    const id = String((await contact(lostRow)).wechatId || '').replace(/\s/g, '');
+    const id = String(c.wechatId || '').replace(/\s/g, '');
     out = idOk(id) ? wx(['-WechatId', id, '-CheckOnly', '-Remark', `JL${lostRow}`, '-Message', msg], id) : 'FAIL 양식의 위챗 ID가 검색할 수 없는 형식(번호 등)';
     if (!sent(out)) {
       const byRemark = wx(['-Local', '-Remark', `JL${lostRow}`, '-Message', msg]);
@@ -134,7 +147,13 @@ const postRun = (body) => fetch(`${API}/run`, { method: 'POST', headers: { ...he
 const nowKst = () => new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Seoul' }).slice(0, 16);
 
 // 친구가 된 직후 보내는 안내 멘트 — 고른 상품·결제 상태에 따라 (tools/wechat-messages.json 에서 고칠 수 있음)
+// 번체로 접수한 고객(대만·홍콩 — GAS 가 UA·주소·글자로 판단해 tw 로 줌)에게는 wechat-messages.json 의 tw 멘트로
+function lang(M, tw) {
+  if (!tw || !M.tw) return M;
+  return { ...M, ...M.tw, plans: { ...M.plans, ...(M.tw.plans || {}) }, watch: { ...M.watch, ...(M.tw.watch || {}) } };
+}
 function welcomeText(M, n, c) {
+  M = lang(M, c.tw);
   const plan = M.plans[c.plan];
   const key = c.pay === '확인' ? 'welcome_paid' : plan ? 'welcome_plan' : 'welcome_noplan';
   return M[key].replace(/\{code\}/g, `JL${n}`).replace(/\{plan\}/g, plan ? plan.name : '').replace(/\{price\}/g, plan ? plan.price : '');
@@ -266,7 +285,7 @@ async function friends(max, onlyRow, dry) {
       if (!(await settle(n, out))) { st.wait[n] = { since: today }; await mark(n, '번호라 검색 불가·고객 추가 대기'); out = 'SKIP 검색할 수 없는 형식(번호 등) — 고객이 먼저 추가해야 함 (수락 대기)'; }
     } else {
       const limit = st.count >= FRIEND_DAILY_MAX;   // 한도를 넘으면 요청은 못 보내도 이미 친구인지는 본다
-      out = wx(['-WechatId', id, '-Remark', `JL${n}`, '-Hello', M.hello.replace(/\{code\}/g, `JL${n}`), ...(limit ? ['-CheckOnly'] : []), ...msg, ...test], id);
+      out = wx(['-WechatId', id, '-Remark', `JL${n}`, '-Hello', lang(M, c.tw).hello.replace(/\{code\}/g, `JL${n}`), ...(limit ? ['-CheckOnly'] : []), ...msg, ...test], id);
       if (SCREEN_FAIL.test(out)) { console.log(`JL${n} ${out}`); break; }
       if (/^OK (requested|added)/.test(out)) st.count++;
       if (/^OK not-friend/.test(out)) { console.log(`JL${n} 오늘 요청 한도(${FRIEND_DAILY_MAX}건) — 내일 이어서`); break; }
@@ -312,7 +331,32 @@ async function friends(max, onlyRow, dry) {
   await proxy(M, st, test, dry, save, today);
   // D. 결제 건 습득물 감시 결과 안내
   await watchNotify(M, st, test, dry, save);
+  // E. 19.9 집중 찾기 결과 안내
+  await focusNotify(M, test, dry);
   save();
+}
+
+// ── 19.9 집중 찾기 결과 → 고객 위챗 안내 ──
+// 관리자 분실신고 카드의 '🎯 집중 결과' 버튼이 LostReport '집중결과'(찾음/못 찾음)·'집중메모'를 쓰면,
+// 여기서 결과 안내(메모는 GAS가 고객 언어로 번역)를 보내고 '집중안내' 칸에 기록한다 → 다시 안 보냄
+async function focusNotify(M, test, dry) {
+  const r = await (await fetch(`${API}/run?focus=1`, { headers })).json().catch(e => ({ error: e.message }));
+  if (r.result !== 'success') { console.log(`FOCUS 목록을 못 읽음 ${r.message || r.error || ''}`); return; }
+  let n = 0;
+  for (const f of r.rows.slice(0, 3)) {
+    const F = lang(M, f.tw).focus;
+    const t = f.result === '찾음' ? F.found : F.none;
+    const memo = f.memo ? F.memo_label.replace(/\{memo\}/g, f.memo) : '';
+    const msg = t.replace(/\{code\}/g, `JL${f.row}`).replace(/\{memo\}/g, memo);
+    n++;
+    const out = await sendLost(f.row, msg, test);
+    console.log(`JL${f.row} 집중 결과(${f.result}) ${out}`);
+    if (dry || /^OK dry-run|typed-only/.test(out)) continue;
+    const ok = sent(out);
+    await postRun({ lostRow: f.row, fields: { '집중안내': `${ok ? '보냄' : '실패'} ${nowKst().slice(5)}` } }).catch(() => {});
+    if (!ok) await notify(`⚠ 위챗 집중 결과 안내 실패 JL${f.row}`, `${out.replace(/^(OK|FAIL) /, '')} — 직접 안내해 주세요 (${f.result})`);
+  }
+  if (!n) console.log('FOCUS 보낼 안내 없음');
 }
 
 // ── 결제 건 10일 습득물 감시 → 고객 위챗 알림 ──
@@ -334,7 +378,6 @@ async function sendLost(lostRow, msg, test) {
 async function watchNotify(M, st, test, dry, save) {
   const r = await (await fetch(`${API}/run?watch_status=1`, { headers })).json().catch(e => ({ error: e.message }));
   if (r.result !== 'success') { console.log(`WATCH 현황을 못 읽음 ${r.message || r.error || ''}`); return; }
-  const W = M.watch;
   const dayStr = (ms) => new Date(ms).toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' });
   const yday = dayStr(Date.now() - 864e5);
   st.watch = st.watch || {};
@@ -353,11 +396,13 @@ async function watchNotify(M, st, test, dry, save) {
     const fresh = w.cands.filter(c => !ws.sent.includes(c.id));
     let kind = '', msg = '';
     const link = matchLink(w.queueRow);
+    if (!(fresh.length && !ws.ended) && !(!ws.ended && Date.now() > endMs)) continue;
+    const c = await contact(w.lostRow).catch(() => ({}));
+    const W = lang(M, c.tw).watch;
     if (fresh.length && !ws.ended) {
       kind = 'found';
       msg = W.found.replace(/\{n\}/g, fresh.length);
     } else if (!ws.ended && Date.now() > endMs) {
-      const c = await contact(w.lostRow);
       const basic = c.plan === '기본 9.9元';
       kind = 'end';
       msg = (ws.everFound || w.cands.length ? W.end_found : W.end_none) + (basic ? W.upsell : '');
@@ -388,11 +433,12 @@ async function watchNotify(M, st, test, dry, save) {
 }
 
 // ── 대리수령(SuccessStories) 위챗 자동 안내 ──
-// 관리자 화면에서 단계(Step)를 바꾸면 다음 실행 때 그 단계의 안내를 보낸다 (5 고객 직접수령 = 종결, 안내 없음)
+// 관리자 화면에서 단계(Step)를 바꾸면 다음 실행 때 그 단계의 안내를 보낸다 (1~3단계만. 4 발송완료는 운영자가 송장과 함께 직접, 5 고객 직접수령 = 종결, 안내 없음)
 // 시트 '위챗안내' 칸: 's<보낸 단계> …' — 예: 's1 보냄 11-14 21:30', 's0 요청 보냄 11-14 21:30'(친구 대기)
 // 备注는 케이스 번호(JEJU-0060). PROXY_FROM 이전 케이스는 예전처럼 수동이라 건드리지 않는다.
 const PROXY_FROM = 60;
 const PROXY_PER_RUN = 5;
+const PROXY_AUTO_MAX = 3;   // 자동 안내는 1 접수 ~ 3 수령완료까지
 const proxyCode = (c) => String(c.caseId).toUpperCase();
 function proxyText(M, c, step) {
   const P = M.proxy, tw = c.tw && P[`s${step}_tw`];
@@ -410,7 +456,8 @@ async function proxy(M, st, test, dry, save, today) {
   for (const c of r.cases) {
     const step = parseInt(c.step, 10) || 0;
     const last = parseInt((String(c.notice).match(/^s(\d)/) || [])[1], 10) || 0;
-    if (step < 1 || step > 4 || last >= step) continue;
+    // 4 발송완료는 송장번호가 며칠 뒤에 나오기도 해서 운영자가 직접 안내한다 (사용자 지시 2026-11-15)
+    if (step < 1 || step > PROXY_AUTO_MAX || last >= step) continue;
     seen++;
     if (done >= PROXY_PER_RUN) break;
     done++;
@@ -505,6 +552,10 @@ if (cmd === 'judge') {
     if (st.day !== today) { st.day = today; st.count = 0; }
     await proxy(M, st, dry ? ['-DryRun', '-NoEnter'] : [], dry, () => { if (!dry) fs.writeFileSync(FRIEND_STATE, JSON.stringify(st)); }, today);
   })();
+} else if (cmd === 'focus') {
+  const dry = args.includes('--dry');
+  const M = JSON.parse(fs.readFileSync(path.join(__dirname, 'wechat-messages.json'), 'utf8'));
+  focusNotify(M, dry ? ['-DryRun', '-NoEnter'] : [], dry);
 } else if (cmd === 'watch') {
   (async () => {
     const dry = args.includes('--dry');

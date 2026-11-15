@@ -604,6 +604,8 @@ async function route(request, env, url) {
       if (url.searchParams.get('watch_status')) return Response.json(await watchStatus(env));
       // health=1 → 사이트 점검을 지금 한 번 (크론과 같음)
       if (url.searchParams.get('health')) return Response.json(await runHealth(env, url.searchParams.get('dry') === '1'));
+      // focus=1 → 19.9 집중 찾기 결과 안내 대기 행 (관리자가 결과를 넣은 것, 메모는 고객 언어로 번역됨)
+      if (url.searchParams.get('focus')) return Response.json(await callGas(env, { type: 'focus_list' }));
       // proxy_from=60 → 대리수령 케이스 목록 (위챗 자동 안내용, 위챗 ID 포함 — 비밀값 필요)
       if (url.searchParams.get('proxy_from')) return Response.json(await callGas(env, { type: 'proxy_list', from: parseInt(url.searchParams.get('proxy_from'), 10) }));
       if (url.searchParams.get('lost_pending')) return Response.json(await triageLost(env));

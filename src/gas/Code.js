@@ -31,6 +31,22 @@ var LOST_REPORT_HEADERS = [
   'CarNumber', 'BoardLoc', 'BoardTime', 'AlightLoc', 'AlightTime',
   'PhotoURL', 'WechatId', 'UserAgent', 'Labels'
 ];
+
+// 번체 고객인지 (tools/minwon24.js 가 안내 멘트를 번체로 고름) — UA 언어 zh_TW/HK/MO, 대만·홍콩·마카오 지명,
+// 또는 고객이 쓴 글에 번체 전용 글자가 간체 전용 글자보다 많을 때 (台·里·后·表처럼 양쪽에서 쓰는 글자는 뺌)
+var TRAD_ONLY_ = '們個這說處號機場遺錢車鑰飯點東過還經關問請謝麼從現發時間電話門館區縣鄉寫對應沒見錯樓買賣藍綠黃紅頭臉鏡衛視聽讀護證開書邊會來為與給幫筆記灣學實將當萬達帶夾銀鐵線單華國歲張計舊顏氣魚雙';
+var SIMP_ONLY_ = '们个这说处号机场遗钱车钥饭点东过还经关问请谢么从现发时间电话门馆区县乡写对应没见错楼买卖蓝绿黄红头脸镜卫视听读护证开书边会来为与给帮笔记湾学实将当万达带夹银铁线单华国岁张计旧颜气鱼双';
+function isTraditional_(text, ua) {
+  if (/zh[_-](TW|HK|MO)|zh[_-]Hant/i.test(String(ua || ''))) return true;
+  var s = String(text || '');
+  if (/台灣|臺灣|台湾|香港|澳門|澳门/.test(s)) return true;
+  var t = 0, m = 0;
+  for (var i = 0; i < s.length; i++) {
+    if (TRAD_ONLY_.indexOf(s[i]) !== -1) t++;
+    else if (SIMP_ONLY_.indexOf(s[i]) !== -1) m++;
+  }
+  return t >= 2 && t > m;
+}
 var RESERVATION_HEADERS = [
   'Timestamp', 'ReservationType', 'WechatId',
   'PreferredStore', 'VisitDate', 'PartySize', 'RequestNote', 'UserAgent', 'BookerName', 'AltTime'
@@ -117,7 +133,7 @@ function doPost(e) {
     if (data.type === 'admin_ledger_save') return adminLedgerSave(data);
 
     // 작업 큐 (workers/task-triage) — TASK_SECRET으로 따로 인증
-    if (/^(task_list|task_get|task_update|task_append|lost_get|lost_update|lost_pending|lost_contact|proxy_list|proxy_update|health_get|health_set|heartbeat)$/.test(data.type)) {
+    if (/^(task_list|task_get|task_update|task_append|lost_get|lost_update|lost_pending|lost_contact|focus_list|proxy_list|proxy_update|health_get|health_set|heartbeat)$/.test(data.type)) {
       return handleTaskQueue_(data);
     }
 
@@ -153,7 +169,7 @@ function doPost(e) {
  * - lost_pending: { limit: 3 } → 아직 작업 큐에 없는 LostReport 행 번호 (스크립트 속성 LOST_TRIAGE_FROM 행부터, 기본 612)
  */
 var LOST_PRIVATE_HEADERS = ['WechatId', 'UserAgent', 'PhotoURL', 'HotelBooker', 'CarNumber', 'hotelRoom'];
-var LOST_WRITABLE_HEADERS = ['경찰접수번호', '경찰접수일', '경찰관서', '위챗친구'];
+var LOST_WRITABLE_HEADERS = ['경찰접수번호', '경찰접수일', '경찰관서', '위챗친구', '집중안내'];
 var PROXY_WRITABLE_HEADERS = ['위챗안내'];
 function handleTaskQueue_(data) {
   var props = PropertiesService.getScriptProperties();
@@ -197,7 +213,10 @@ function handleTaskQueue_(data) {
     var cVals = cSheet.getRange(cRow, 1, 1, cHeaders.length).getDisplayValues()[0];
     var cGet = function (h) { var i = cHeaders.indexOf(h); return i === -1 ? '' : String(cVals[i] || '').trim(); };
     // plan·pay·friend: 친구 수락 뒤 보내는 안내 멘트를 고르는 데 쓴다 (tools/minwon24.js friends)
-    return json_({ result: 'success', wechatId: cGet('WechatId'), plan: cGet('찾기상품'), pay: cGet('결제상태'), friend: cGet('위챗친구') });
+    // tw: 번체로 접수한 고객(대만·홍콩) → 안내도 번체로
+    var cText = cHeaders.filter(function (h) { return ['UserAgent', 'PhotoURL', 'WechatId'].indexOf(h) === -1; }).map(cGet).join(' ');
+    return json_({ result: 'success', wechatId: cGet('WechatId'), plan: cGet('찾기상품'), pay: cGet('결제상태'), friend: cGet('위챗친구'),
+      tw: isTraditional_(cText, cGet('UserAgent')) });
   }
 
   // 사이트 점검(Worker 크론) 상태와 PC 자동화 생존 신호 — 스크립트 속성에 JSON으로 둔다
@@ -236,7 +255,8 @@ function handleTaskQueue_(data) {
       cases.push({
         caseId: id, num: num, step: pGet(r, 'Step'), wechatId: pGet(r, 'WeChatId'),
         item: pGet(r, 'Item') || pGet(r, 'Item_zh'), note: pGet(r, 'Note'),
-        tw: /zh[_-](TW|HK|MO)/i.test(pGet(r, 'UserAgent')) || /台灣|臺灣|台湾|香港|澳門/.test(pGet(r, 'Address')),
+        tw: isTraditional_(pHeaders.filter(function (h) { return !/^(UserAgent|WeChatId|ItemImg|PassportPhoto|ReservationPhoto)$|_(zh|en)$/.test(h); })
+          .map(function (h) { return pGet(r, h); }).join(' '), pGet(r, 'UserAgent')),
         notice: pGet(r, '위챗안내')
       });
     });
@@ -260,6 +280,27 @@ function handleTaskQueue_(data) {
       puLock.releaseLock();
     }
     return json_({ result: 'success' });
+  }
+
+  // 19.9 집중 찾기 결과 안내 대기 (tools/minwon24.js focus): 관리자가 '집중결과'를 넣었고 '집중안내'가 빈 행
+  // → { rows: [{ row, result, memo(번역), tw }] } — 메모(한국어)는 고객 언어(간체/번체)로 번역해 준다
+  if (data.type === 'focus_list') {
+    var fSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName('LostReport');
+    var fHeaders = headerRow_(fSheet);
+    var fRes = fHeaders.indexOf('집중결과');
+    if (!fSheet || fRes === -1 || fSheet.getLastRow() < 2) return json_({ result: 'success', rows: [] });
+    var fVals = fSheet.getRange(2, 1, fSheet.getLastRow() - 1, fHeaders.length).getDisplayValues();
+    var fGet = function (r, h) { var i = fHeaders.indexOf(h); return i === -1 ? '' : String(r[i] || '').trim(); };
+    var fRows = [];
+    fVals.forEach(function (r, i) {
+      if (!fGet(r, '집중결과') || fGet(r, '집중안내')) return;
+      var tw = isTraditional_(fHeaders.filter(function (h) { return ['UserAgent', 'PhotoURL', 'WechatId'].indexOf(h) === -1; })
+        .map(function (h) { return fGet(r, h); }).join(' '), fGet(r, 'UserAgent'));
+      var memo = fGet(r, '집중메모');
+      fRows.push({ row: i + 2, result: fGet(r, '집중결과'), plan: fGet(r, '찾기상품'), tw: tw,
+        memo: memo ? MY_DEEPL(memo, tw ? 'zh-tw' : 'zh') : '' });
+    });
+    return json_({ result: 'success', rows: fRows });
   }
 
   if (data.type === 'lost_update') {
@@ -866,7 +907,7 @@ function adminList(params) {
  * 관리자 페이지에서 LostReport 한 줄의 운영 칸만 수정 (찾기 서비스 결제 확인, 경찰 접수 기록 등)
  * data: { key, row, fields } — 고객이 쓴 칸은 건드리지 않게 ADMIN_LOST_COLS 만 허용, 없는 열은 맨 오른쪽에 추가
  */
-var ADMIN_LOST_COLS = ['찾기상품', '결제상태', '경찰접수번호', '경찰접수일', '경찰관서', 'AdminNote'];
+var ADMIN_LOST_COLS = ['찾기상품', '결제상태', '경찰접수번호', '경찰접수일', '경찰관서', 'AdminNote', '집중결과', '집중메모'];
 function adminLostUpdate(data) {
   if (!adminAuthorized_(data.key)) return adminJson_({ result: 'error', message: 'unauthorized' });
   var row = parseInt(data.row, 10);
