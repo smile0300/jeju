@@ -394,7 +394,7 @@ const TRANSLATIONS = {
 
         // ── 현상금 동적 텍스트 ──
         'reward.loading.list': '正在加载任务列表...',
-        'reward.empty.list': '暂无赏金任务',
+        'reward.empty.list': '目前暂无登记的物品',
         'reward.default.title': '回国红包',
 
         // ── 축제 동적 텍스트 ──
@@ -1107,7 +1107,7 @@ const TRANSLATIONS = {
 
         // ── 현상금 동적 텍스트 ──
         'reward.loading.list': '임무 목록을 불러오는 중...',
-        'reward.empty.list': '진행 중인 현상금 임무가 없습니다',
+        'reward.empty.list': '현재 등록된 물건이 없습니다.',
         'reward.default.title': '용돈벌기',
 
         // ── 축제 동적 텍스트 ──
@@ -1788,7 +1788,7 @@ const TRANSLATIONS = {
 
         // ── 현상금 동적 텍스트 ──
         'reward.loading.list': 'Loading mission list...',
-        'reward.empty.list': 'No bounty missions available',
+        'reward.empty.list': 'No items are registered at the moment.',
         'reward.default.title': 'Bounty Mission',
 
         // ── 축제 동적 텍스트 ──

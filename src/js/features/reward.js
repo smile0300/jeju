@@ -1,23 +1,4 @@
-let REWARD_DATA_CACHED = [
-    {
-        "id": 1,
-        "title": "AirPods Pro 2 (Apple)",
-        "reward": 150,
-        "imageUrl": "https://images.unsplash.com/photo-1588423771073-b8903fbb85b5?auto=format&fit=crop&w=300&q=80"
-    },
-    {
-        "id": 2,
-        "title": "10000mAh Power Bank (MI)",
-        "reward": 80,
-        "imageUrl": "https://images.unsplash.com/photo-1609091839311-d5368196c0ff?auto=format&fit=crop&w=300&q=80"
-    },
-    {
-        "id": 3,
-        "title": "iPad Mini 6",
-        "reward": 200,
-        "imageUrl": "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?auto=format&fit=crop&w=300&q=80"
-    }
-];
+let REWARD_DATA_CACHED = [];
 
 /**
  * 구글 드라이브 및 다양한 필드명에 대응하는 이미지 URL 추출 헬퍼 (v2.2: 로컬 이미지 폴백 및 HEIC 경고 추가)
@@ -85,7 +66,7 @@ export async function initReward() {
         
         console.log('[Reward] Data received:', data);
 
-        if (Array.isArray(data) && data.length > 0) {
+        if (Array.isArray(data)) {
             REWARD_DATA_CACHED = data;
         }
     } catch (e) {
