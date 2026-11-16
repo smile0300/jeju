@@ -211,7 +211,10 @@ async function searchFoundMulti(env, cats, regionCodes, from, to, exclude = [], 
   const byDate = order === 'recent'
     ? (a, b) => String(b.fdYmd).localeCompare(String(a.fdYmd))
     : (a, b) => String(a.fdYmd).localeCompare(String(b.fdYmd));
-  const lists = await Promise.all(cats.map((c, i) => (i === 0 ? searchFound(env, c, regionCodes, from, to) : searchFound(env, c, regionCodes, from, to).catch(() => [])).then(l => l.map(x => ({ ...x, _cat: c })))));
+  // 습득일이 분실일보다 이른 것은 뺀다 — API 기간 조건(START_YMD)이 정확히 걸리지 않음 (2026-11-16 #638: 11-15 습득 반지가 11-16 분실 건 후보로)
+  const fromYmd = ymd(from);
+  const lists = await Promise.all(cats.map((c, i) => (i === 0 ? searchFound(env, c, regionCodes, from, to) : searchFound(env, c, regionCodes, from, to).catch(() => []))
+    .then(l => l.filter(x => !/^\d{8}$/.test(String(x.fdYmd).replace(/-/g, '')) || String(x.fdYmd).replace(/-/g, '') >= fromYmd).map(x => ({ ...x, _cat: c })))));
   const seen = new Set(exclude);
   const take = (list, n) => list.filter(i => !seen.has(i.atcId)).sort(byDate).slice(0, n).filter(i => seen.add(i.atcId));
   const primary = take(lists[0] || [], lists.length > 1 ? PRIMARY_SLOTS : MAX_MATCH_CANDIDATES);
@@ -261,6 +264,11 @@ const LOST_QUESTIONS = {
     instructions: 'What is the main color of the lost item?',
     criteria: COLORS
   },
+  // 도착지(region_alt)는 탈것 안에 두고 내린 경우에만 쓴다 — 공항 체크인 카운터·역 대합실에서 잃어버린 건 그 자리 지역만 (2026-11-16 #638 제주공항 → 인천 후보)
+  on_vehicle: {
+    type: 'noul',
+    instructions: 'Was the item most likely left INSIDE a moving vehicle (on the plane, bus, train, subway or taxi), rather than in a terminal, station, counter, shop or other fixed place?'
+  },
   region_alt: {
     type: 'choice',
     instructions: 'If the item was lost on a bus, train, taxi or plane, which city or province is the other end of that trip (where a found item would be handed in)? Choose same if there is no second place.',
@@ -268,7 +276,8 @@ const LOST_QUESTIONS = {
   }
 };
 
-const ymd = (d) => d.toISOString().slice(0, 10).replace(/-/g, '');
+// 한국 날짜 기준 (toISOString 은 UTC 라 KST 자정이 전날로 바뀌어 하루 이른 습득물까지 들어왔음 — 2026-11-16)
+const ymd = (d) => new Date(d.getTime() + 9 * 3600000).toISOString().slice(0, 10).replace(/-/g, '');
 
 /** 시트 값 중 YYYY-MM-DD 모양을 분실일로 본다 (열이 밀린 옛 행도 있어서 이름 대신 값으로 찾음) */
 function findLostDate(fields) {
@@ -396,7 +405,8 @@ async function processLost(env, row, dry = false) {
   const lostDate = findLostDate(fields);
   const to = new Date(Math.min(Date.now(), lostDate.getTime() + SEARCH_DAYS_AFTER_LOSS * 86400000));
   // 확신이 낮으면 제주를 같이 본다 (이용자 대부분이 제주 여행 중)
-  const regionKeys = [answers.region?.choice, answers.region_alt?.choice].filter(k => REGIONS[k]);
+  const onVehicle = Number(answers.on_vehicle?.noul ?? 0) >= 0.5;
+  const regionKeys = [answers.region?.choice, onVehicle ? answers.region_alt?.choice : null].filter(k => REGIONS[k]);
   if (!regionKeys.length || Number(answers.region?.confidence ?? 0) < MIN_CONFIDENCE) regionKeys.push('jeju');
   const regionNames = [...new Set(regionKeys)];
   const regionCodes = [...new Set(regionNames.flatMap(k => REGIONS[k].codes))];
@@ -423,7 +433,7 @@ async function processLost(env, row, dry = false) {
     : `[${regionNames.join('+')} · ${cats.join('+')}] 습득물 ${foundTotal}건 중 유력 후보: ` + top.map(([id, p]) => `${id} ${byId[id]?.fdPrdtNm || ''} @${byId[id]?.depPlace || ''} (${p.toFixed(2)})`).join(' / ') +
       ` | Jev 최종: ${match.choice} (${Number(match.confidence ?? 0).toFixed(2)})`;
   // dry: 검색·판정만 하고 큐에 쓰지 않음 (분류 확장 비교 시험용 GET /run?lost_row=N&dry=1)
-  if (dry) return { row, cats, catProbs: cat.probabilities, regions: regionNames, total: foundTotal, sent: candidates.length,
+  if (dry) return { row, cats, onVehicle, regionAlt: answers.region_alt?.choice, from: ymd(lostDate), to: ymd(to), catProbs: cat.probabilities, regions: regionNames, total: foundTotal, sent: candidates.length,
     byCat: cats.map(c => [c, candidates.filter(x => x._cat === c).length]),
     top: top.map(([id, p]) => ({ id, p: +p.toFixed(2), cat: byId[id]?._cat, name: byId[id]?.fdPrdtNm, place: byId[id]?.depPlace, date: byId[id]?.fdYmd })),
     final: match?.choice || null };

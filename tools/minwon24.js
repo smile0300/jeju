@@ -187,8 +187,13 @@ async function friends(max, onlyRow, dry) {
   const settle = async (n, out) => {
     if (sent(out)) { delete st.wait[n]; await mark(n, '친구·안내 보냄'); return true; }
     if (/^OK (friend|added)/.test(out)) {   // 친구인데 발송 실패(또는 이미 안내한 건)
+      const fails = ((st.wait[n] && st.wait[n].fails) || 0) + 1;
       delete st.wait[n];
-      if (/send-fail/.test(out)) { await mark(n, '친구·안내 실패'); if (!dry) await notify(`⚠ 위챗 안내 실패 JL${n}`, `${out.replace(/^.*send-fail /, '')} — 직접 안내해 주세요`); }
+      if (/send-fail/.test(out)) {
+        // 대화방이 안 열리는 등 화면 문제는 대개 일시적 → 备注는 달렸으니 다음 실행에서 备注로 찾아 다시 보낸다 (3번째 실패에서 운영자에게)
+        if (fails < 3 && !dry) { st.wait[n] = { since: today, fails }; await mark(n, `친구·안내 재시도 대기(${fails})`); return true; }
+        await mark(n, '친구·안내 실패'); if (!dry) await notify(`⚠ 위챗 안내 실패 JL${n}`, `${out.replace(/^.*send-fail /, '')} — 직접 안내해 주세요`);
+      }
       return true;
     }
     return false;
