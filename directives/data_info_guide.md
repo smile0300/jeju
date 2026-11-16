@@ -247,3 +247,21 @@
 - 발송: `minwon24.js friends` E단계(또는 `node tools/minwon24.js focus [--dry]`)가 Worker `/run?focus=1` → GAS `focus_list`(집중결과 있고 `집중안내` 빈 행, 메모는 고객 언어 간체/번체로 Google 번역) → `wechat-messages.json` focus.found/none 발송 → `집중안내` 칸에 `보냄/실패 MM-DD HH:mm`(LOST_WRITABLE_HEADERS 추가). 실패는 푸시. 한 번 실행에 3건.
 - 찾음 멘트는 수령 방법 ①본인 ②대리수령(100~200元+택배) 중 회신 요청까지 포함. 이후는 `reply` 템플릿으로 운영자가 직접.
 - deepl.js(MY_DEEPL) langMap에 zh-tw/zh-hant → zh-TW 추가 (전에는 ko로 떨어졌음). GAS v132, task-triage 재배포.
+
+### 2026-11-16 정기 자동화를 Claude 예약 작업 → Windows 작업 스케줄러 + Puppeteer 로 이전
+- 이유: Claude 앱 예약 실행은 항상 수동(default) 모드로 시작해 경찰민원24 Chrome 동작마다 승인 요청이 뜸 + 30분마다 Pro 한도 소모.
+- 작업 스케줄러 `jeju-live minwon24 auto`: 매일 08:00부터 16시간 동안 30분마다, 사용자 로그인 중일 때만, 이전 실행 중이면 건너뜀, 25분 제한. `wscript tools/minwon24-auto.vbs` → `node tools/minwon24-auto.js` (콘솔 창 없음), 로그 `tools/minwon24-auto.local.txt`.
+- `minwon24-auto.js`: ① `minwon24.js friends`(친구·안내·대리수령·감시·집중·생존 신호) ② Worker `/form` 등록대기 건 → 전용 Chrome(포트 9333, 프로필 `%LOCALAPPDATA%\jeju-live\minwon24-chrome`)에 붙어 `/fill.js` 의 jejuFill → jejuSubmit → jejuRecord → `minwon24.js wechat` 안내·완료 푸시. 최대 3건. 관서 문제만 hold. 로그아웃이면 '🔐 로그인 필요' 푸시 → `node tools/minwon24-auto.js --login`.
+- 전용 Chrome 은 닫지 않는다(로그인 세션 유지). 스크립트는 탭만 열고 닫음. 시험: `--no-submit <lostRow>` (Worker `/form?lost_row=N&preview=1` — 사진 전용 표 0.0, 기록 불가).
+- Worker 표(ticket) 강화: POST 는 그 건의 queueRow/lostRow 기록만, 표 0.0 은 사진만.
+- `wechat-add.ps1 -Requests`: 예약 실행에서 New Friends 줄을 못 찾던 문제 → 연락처 목록을 맨 위로 스크롤하고 최대 3번 재시도.
+- Claude 예약 작업 `minwon24-auto-register` 는 꺼 둠(삭제 안 함). Claude 는 실패 푸시가 왔을 때만 수동으로.
+
+### 2026-11-16 습득물 후보 검색 분류 확장 (task-triage)
+- 문제: 검색 조건이 Jev 분류 하나라 분류가 빗나가면(예: 쇼핑백↔가방) 습득물을 아예 못 찾음.
+- `searchCategories(cat)`: 1순위 분류 + Jev 분류 확률 0.2 이상인 2순위 + 짝 분류(지갑→카드·신분증, 휴대폰→전자기기, 전자기기→휴대폰·노트북, 가방→쇼핑백, 신분증→지갑, 카드→지갑), 최대 3개.
+- `searchFoundMulti`: 분류별 검색 후 Jev에 보내는 60건을 1순위 40건 + 나머지 분류가 남은 칸을 나눠 채움. Jev 호출 수는 그대로(한 번에 판정), 경찰청 API 호출만 분류 수만큼 늘어남.
+- 신고서 JSON 에 `searchCats` 저장 → 10일 감시도 같은 분류들로 검색(지역은 기존대로 신고서 지역 하나 — 사용자 결정).
+- 시험: `GET /run?lost_row=N&dry=1` (검색·판정만, 큐에 안 씀). 627~638 8건으로 확인 — 637은 쇼핑백 0.58/가방 0.22 → 가방도 검색, 638은 귀금속 0.52/기타 0.35 → 기타도 검색.
+- 남은 점: 후보 60건을 '최근 습득일 순'으로 자르므로 서울처럼 습득물이 많은 지역은 분실 직후 습득된 물건이 밀려날 수 있음(633 지갑 2,322건).
+- (같은 날 추가) 첫 검색의 60건은 '분실일에 가까운 순'(습득일 오름차순)으로 자름, 10일 감시는 '최근 순' 유지. 627·633(서울)은 분실 직후(11-07~08) 습득물이 후보에 들어오게 됨, 635 제주 지갑 유력 후보는 0.58→0.80.

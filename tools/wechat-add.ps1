@@ -189,7 +189,16 @@ if ($Requests -or $Accept) {
   $cells = @($win.FindAll($TS::Descendants, $cellCond))
   if (-not $cells.Count) {
     $grp = $null
-    foreach ($e in $win.FindAll($TS::Descendants, (Cond $A::ClassNameProperty 'mmui::ContactsCellGroupView'))) { if ($e.Current.Name -match '^(New Friends|新的朋友)') { $grp = $e } }
+    # 연락처 목록이 아래로 내려가 있거나 아직 안 그려졌으면 맨 위로 올리고 다시 찾는다 (예약 실행에서 2026-11-16 실패)
+    for ($try = 0; $try -lt 3 -and -not $grp; $try++) {
+      if ($try -gt 0) {
+        foreach ($e in $win.FindAll($TS::Descendants, (Cond $A::IsScrollPatternAvailableProperty $true))) {
+          try { $sp = $e.GetCurrentPattern([System.Windows.Automation.ScrollPattern]::Pattern); if ($sp.Current.VerticallyScrollable) { $sp.SetScrollPercent(-1, 0) } } catch { }
+        }
+        Start-Sleep -Milliseconds 1000
+      }
+      foreach ($e in $win.FindAll($TS::Descendants, (Cond $A::ClassNameProperty 'mmui::ContactsCellGroupView'))) { if ($e.Current.Name -match '^(New Friends|新的朋友)') { $grp = $e } }
+    }
     if (-not $grp) { Fin 'FAIL 위챗 창에서 New Friends 줄을 못 찾음 (연락처 목록이 아래로 내려가 있음)' 1 }
     Click $grp; Start-Sleep -Milliseconds 800
     $cells = @($win.FindAll($TS::Descendants, $cellCond))

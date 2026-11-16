@@ -182,6 +182,44 @@ const CATEGORY_KO = { PRA000: '가방', PRO000: '귀금속', PRB000: '도서용�
   PRE000: '스포츠용품', PRR000: '악기', PRM000: '유가증권', PRK000: '의류', PRF000: '자동차', PRG000: '전자기기',
   PRH000: '지갑', PRN000: '증명서', PRI000: '컴퓨터', PRP000: '카드', PRL000: '현금', PRJ000: '휴대폰', PRZ000: '기타물품' };
 const MAX_MATCH_CANDIDATES = 60;
+// 분류가 틀리면 습득물을 아예 못 찾으므로 분류를 넓혀 검색한다 (2026-11-16)
+//  ① Jev 분류 확률이 SECOND_CAT_MIN_P 이상인 두 번째 분류 ② 경찰서가 자주 다르게 등록하는 짝 분류
+//  후보 60건은 1순위 분류 PRIMARY_SLOTS 건 + 나머지 분류가 남은 칸을 나눠 채운다 (최근 습득일 순)
+const SECOND_CAT_MIN_P = 0.2;
+const MAX_SEARCH_CATS = 3;
+const PRIMARY_SLOTS = 40;
+const CATEGORY_PAIRS = {
+  PRH000: ['PRP000', 'PRN000'],   // 지갑 → 카드, 신분증
+  PRJ000: ['PRG000'],             // 휴대폰 → 전자기기
+  PRG000: ['PRJ000', 'PRI000'],   // 전자기기 → 휴대폰, 노트북
+  PRA000: ['PRQ000'],             // 가방 → 쇼핑백
+  PRN000: ['PRH000'],             // 신분증·여권 → 지갑
+  PRP000: ['PRH000']              // 카드 → 지갑
+};
+function searchCategories(cat) {
+  const first = cat?.choice;
+  if (!first || !LOST_CATEGORIES[first]) return [];
+  const second = Object.entries(cat.probabilities || {}).filter(([k, p]) => k !== first && LOST_CATEGORIES[k] && p >= SECOND_CAT_MIN_P)
+    .sort((a, b) => b[1] - a[1]).map(([k]) => k).slice(0, 1);
+  return [...new Set([first, ...second, ...(CATEGORY_PAIRS[first] || [])])].slice(0, MAX_SEARCH_CATS);
+}
+// 분류별로 검색해 60건 안에서 1순위 분류를 먼저 채운다 (분류를 합쳐 최근 순으로만 자르면 1순위의 진짜 후보가 밀려남)
+// order 'near' = 분실일에 가까운(습득일이 이른) 순 — 첫 검색. 대부분 분실 직후 며칠 안에 습득되는데,
+//   최근 순으로 자르면 서울처럼 습득물이 많은 곳에서는 그 물건이 60건 밖으로 밀려난다 (2026-11-16)
+// order 'recent' = 최근 습득 순 — 10일 감시(새로 올라온 것을 본다)
+async function searchFoundMulti(env, cats, regionCodes, from, to, exclude = [], order = 'near') {
+  const byDate = order === 'recent'
+    ? (a, b) => String(b.fdYmd).localeCompare(String(a.fdYmd))
+    : (a, b) => String(a.fdYmd).localeCompare(String(b.fdYmd));
+  const lists = await Promise.all(cats.map((c, i) => (i === 0 ? searchFound(env, c, regionCodes, from, to) : searchFound(env, c, regionCodes, from, to).catch(() => [])).then(l => l.map(x => ({ ...x, _cat: c })))));
+  const seen = new Set(exclude);
+  const take = (list, n) => list.filter(i => !seen.has(i.atcId)).sort(byDate).slice(0, n).filter(i => seen.add(i.atcId));
+  const primary = take(lists[0] || [], lists.length > 1 ? PRIMARY_SLOTS : MAX_MATCH_CANDIDATES);
+  const rest = lists.slice(1);
+  const out = [...primary];
+  rest.forEach((l, i) => out.push(...take(l, Math.floor((MAX_MATCH_CANDIDATES - out.length) / (rest.length - i)))));
+  return { candidates: out.sort(byDate), total: lists.reduce((n, l) => n + l.length, 0) };
+}
 
 // 경찰청 물품 분류 코드 (src/parts/features/lost-found.html 과 같은 목록)
 const LOST_CATEGORIES = {
@@ -346,7 +384,7 @@ async function notifyAdmin(env, title, body) {
   }
 }
 
-async function processLost(env, row) {
+async function processLost(env, row, dry = false) {
   const { fields, ko = {}, photoIds = [] } = await callGas(env, { type: 'lost_get', row });
   const state = Object.entries(fields).map(([h, v]) => `${h}: ${v}`).join('\n');
   const answers = await askJev(env, state, LOST_QUESTIONS);
@@ -362,11 +400,11 @@ async function processLost(env, row) {
   if (!regionKeys.length || Number(answers.region?.confidence ?? 0) < MIN_CONFIDENCE) regionKeys.push('jeju');
   const regionNames = [...new Set(regionKeys)];
   const regionCodes = [...new Set(regionNames.flatMap(k => REGIONS[k].codes))];
-  const found = cat.choice ? await searchFound(env, cat.choice, regionCodes, lostDate, to) : [];
+  const cats = searchCategories(cat);
+  const { candidates, total: foundTotal } = cats.length ? await searchFoundMulti(env, cats, regionCodes, lostDate, to) : { candidates: [], total: 0 };
 
   // 습득물 후보 중 같은 물건이 있는지 Jev에 한 번에 묻는다 (보기 = 습득물 + '없음')
   let match = null;
-  const candidates = found.sort((a, b) => String(b.fdYmd).localeCompare(String(a.fdYmd))).slice(0, MAX_MATCH_CANDIDATES);
   if (candidates.length) {
     const criteria = { none: 'None of these found items is the lost item' };
     candidates.forEach(c => { criteria[c.atcId] = `${c.fdPrdtNm} | found ${c.fdYmd} | ${c.depPlace} | ${c.fdSbjt || ''}`.slice(0, 300); });
@@ -381,9 +419,14 @@ async function processLost(env, row) {
     : [];
   const byId = Object.fromEntries(candidates.map(c => [c.atcId, c]));
   const foundText = !candidates.length
-    ? `습득물 후보 없음 (${ymd(lostDate)}~${ymd(to)} ${regionNames.join('+')}, ${cat.choice || '분류 실패'})`
-    : `[${regionNames.join('+')}] 습득물 ${found.length}건 중 유력 후보: ` + top.map(([id, p]) => `${id} ${byId[id]?.fdPrdtNm || ''} @${byId[id]?.depPlace || ''} (${p.toFixed(2)})`).join(' / ') +
+    ? `습득물 후보 없음 (${ymd(lostDate)}~${ymd(to)} ${regionNames.join('+')}, ${cats.join('+') || '분류 실패'})`
+    : `[${regionNames.join('+')} · ${cats.join('+')}] 습득물 ${foundTotal}건 중 유력 후보: ` + top.map(([id, p]) => `${id} ${byId[id]?.fdPrdtNm || ''} @${byId[id]?.depPlace || ''} (${p.toFixed(2)})`).join(' / ') +
       ` | Jev 최종: ${match.choice} (${Number(match.confidence ?? 0).toFixed(2)})`;
+  // dry: 검색·판정만 하고 큐에 쓰지 않음 (분류 확장 비교 시험용 GET /run?lost_row=N&dry=1)
+  if (dry) return { row, cats, catProbs: cat.probabilities, regions: regionNames, total: foundTotal, sent: candidates.length,
+    byCat: cats.map(c => [c, candidates.filter(x => x._cat === c).length]),
+    top: top.map(([id, p]) => ({ id, p: +p.toFixed(2), cat: byId[id]?._cat, name: byId[id]?.fdPrdtNm, place: byId[id]?.depPlace, date: byId[id]?.fdYmd })),
+    final: match?.choice || null };
   const candJson = mergeCandidates('[]', top.filter(([id, p]) => p >= CANDIDATE_MIN_P && byId[id])
     .map(([id, p]) => candidateOf(byId[id], p, 'initial')));
 
@@ -403,6 +446,7 @@ async function processLost(env, row) {
     if (guAns?.choice && guAns.choice !== 'unknown' && Number(guAns.confidence ?? 0) >= 0.5) answers.gu = guCriteria[guAns.choice];
   } else if (guList.length === 1) answers.gu = guList[0];
   const form = buildPoliceForm(row, fields, ko, answers, lostDate, photoIds);
+  form.searchCats = cats;   // 10일 감시도 같은 분류들로 (신고서 채우기에는 안 쓰임)
   const formJson = JSON.stringify(form);
   const queued = await callGas(env, {
     type: 'task_append',
@@ -432,10 +476,10 @@ async function processLost(env, row) {
     });
   } else {
     const urgent = hasId >= 0.5 ? '🚨 신분증 포함 · ' : '';
-    const hit = match && match.choice !== 'none' ? `습득물 유력 후보 ${match.choice}` : `습득물 후보 ${found.length}건`;
+    const hit = match && match.choice !== 'none' ? `습득물 유력 후보 ${match.choice}` : `습득물 후보 ${foundTotal}건`;
     await notifyAdmin(env, `🔎 분실 접수 #${row}`, `${urgent}${hit} · ${status === '등록대기' ? '경찰청 등록 대기' : status}`);
   }
-  return { row, queueRow: queued.row, existed: !!queued.existed, status, category: cat.choice, regions: regionNames, found: found.length, match: match?.choice || null, foundText, form };
+  return { row, queueRow: queued.row, existed: !!queued.existed, status, category: cat.choice, regions: regionNames, found: foundTotal, cats, match: match?.choice || null, foundText, form };
 }
 
 /**
@@ -560,7 +604,8 @@ async function routeTicket(request, env, url, t) {
   if (url.pathname === '/photo' && request.method === 'GET') return route(request, env, url);
   if (url.pathname === '/run' && request.method === 'POST') {
     const body = await request.clone().json();
-    if ((body.queueRow && body.queueRow !== t.queueRow) || (body.lostRow && body.lostRow !== t.lostRow)) {
+    // 표로는 그 건의 큐·LostReport 기록만 (시험용 표 0.0 은 사진만)
+    if (!t.queueRow || (!body.queueRow && !body.lostRow) || (body.queueRow && body.queueRow !== t.queueRow) || (body.lostRow && body.lostRow !== t.lostRow)) {
       return Response.json({ error: 'ticket mismatch' }, { status: 403 });
     }
     return route(request, env, url);
@@ -570,7 +615,7 @@ async function routeTicket(request, env, url, t) {
 
 async function route(request, env, url) {
   try {
-    if (url.pathname === '/form') return Response.json(await nextForm(env, parseInt(url.searchParams.get('lost_row'), 10)));
+    if (url.pathname === '/form') return Response.json(await nextForm(env, parseInt(url.searchParams.get('lost_row'), 10), url.searchParams.get('preview') === '1'));
     if (url.pathname === '/photo') {
       const id = String(url.searchParams.get('id') || '');
       if (!/^[-\w]{10,100}$/.test(id)) return Response.json({ error: 'bad id' }, { status: 400 });
@@ -599,7 +644,7 @@ async function route(request, env, url) {
       if (lostRow >= 2 && url.searchParams.get('peek')) return Response.json(await callGas(env, { type: 'lost_get', row: lostRow }));
       // contact=1 → 고객 위챗 ID (경찰 접수 안내 발송용, 비밀값 필요 — 표로는 못 씀)
       if (lostRow >= 2 && url.searchParams.get('contact')) return Response.json(await callGas(env, { type: 'lost_contact', row: lostRow }));
-      if (lostRow >= 2) return Response.json(await processLost(env, lostRow));
+      if (lostRow >= 2) return Response.json(await processLost(env, lostRow, url.searchParams.get('dry') === '1'));
       // watch_status=1 → 결제 건 10일 감시 현황 (고객 위챗 알림용: 큐 행·LostReport 행·처리일·감시로 찾은 후보)
       if (url.searchParams.get('watch_status')) return Response.json(await watchStatus(env));
       // health=1 → 사이트 점검을 지금 한 번 (크론과 같음)
@@ -658,9 +703,8 @@ async function watchPaidLost(env) {
     const form = JSON.parse(q['신고서']);
     const notified = String(q['감시알림'] || '').split(/\s+/).filter(Boolean);
     try {
-      const found = (await searchFound(env, form.lclsf, [form.rgnCd], new Date(`${form.lostYmd}T00:00:00+09:00`), new Date()))
-        .filter(c => !notified.includes(c.atcId))
-        .sort((a, b) => String(b.fdYmd).localeCompare(String(a.fdYmd))).slice(0, MAX_MATCH_CANDIDATES);
+      const wCats = Array.isArray(form.searchCats) && form.searchCats.length ? form.searchCats : [form.lclsf];
+      const found = (await searchFoundMulti(env, wCats, [form.rgnCd], new Date(`${form.lostYmd}T00:00:00+09:00`), new Date(), notified, 'recent')).candidates;
       if (!found.length) { out.push({ ref, fresh: 0 }); continue; }
       const criteria = { none: 'None of these found items is the lost item' };
       found.forEach(c => { criteria[c.atcId] = `${c.fdPrdtNm} | found ${c.fdYmd} | ${c.depPlace} | ${c.fdSbjt || ''}`.slice(0, 300); });
@@ -807,12 +851,15 @@ async function triageLost(env) {
 /** 큐에서 경찰 등록 대기 분실 건의 신고서 값을 꺼낸다 (lostRow를 주면 그 건)
  *  상태 '등록대기'(관리자 결제 버튼·크론이 씀)와 예전 이름 '등록필요' 둘 다 */
 const READY_STATUSES = ['등록대기', '등록필요'];
-async function nextForm(env, lostRow) {
-  const rows = (await Promise.all(READY_STATUSES.map(status => callGas(env, { type: 'task_list', status }))))
+// preview=1 (시험용, lostRow 필수): 결제대기·완료 건도 신고서 값만 — 표(ticket)가 없어 사진·기록·제출 기록 불가
+async function nextForm(env, lostRow, preview) {
+  const statuses = preview && lostRow >= 2 ? [...READY_STATUSES, '결제대기', '확인필요', '대기', '완료', '보류'] : READY_STATUSES;
+  const rows = (await Promise.all(statuses.map(status => callGas(env, { type: 'task_list', status }))))
     .flatMap(r => r.rows || []);
   const lost = rows.filter(r => /^LostReport!\d+$/.test(r['참고(링크·위챗ID 등)'] || '') && r['신고서']);
   const pick = lostRow >= 2 ? lost.find(r => r['참고(링크·위챗ID 등)'] === `LostReport!${lostRow}`) : lost[0];
   if (!pick) return { error: lostRow ? `LostReport ${lostRow}: 등록대기 상태의 신고서 없음 (판정을 먼저 돌릴 것)` : '대기 중인 분실 신고 없음' };
   const form = JSON.parse(pick['신고서']);
+  if (preview && !READY_STATUSES.includes(pick['상태'])) return { queueRow: pick.row, form, preview: true, status: pick['상태'], ticket: await makeTicket(env, 0, 0) };
   return { queueRow: pick.row, form, summary: pick['요청내용'], found: pick['처리결과'], ticket: await makeTicket(env, pick.row, form.lostRow) };
 }
