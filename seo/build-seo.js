@@ -366,7 +366,7 @@ ${otherHubsHtml(cat, lang)}`;
 
 // SPA 라우트 우선순위 (dist/*.html 중 목록에 없는 라우트는 0.6)
 const ROUTE_PRIORITY = { '': ['1.0', 'daily'], lost: ['0.95', 'daily'], weather: ['0.9', 'hourly'], airport: ['0.85', 'hourly'], hallasan: ['0.8', 'daily'], festival: ['0.75', 'weekly'] };
-const SITEMAP_EXCLUDE = new Set(['index', '404', 'admin-reply']);
+const SITEMAP_EXCLUDE = new Set(['index', '404', 'admin', 'admin-reply']);
 
 function buildSitemap(groups) {
     const routes = [''].concat(
