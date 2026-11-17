@@ -2,7 +2,7 @@
 // 미니맵, 구간 이동(도보·택시·배·섬 안 교통), 이동 방법 요약, 장소 타임라인.
 
 import { tr, pick, escapeHtml } from './strings.js';
-import { STOP_POS, STOP_TYPES, isInSeason } from '../../../data/courses.js';
+import { BLOCKS, STOP_POS, STOP_TYPES, COVERS, isInSeason } from '../../../data/courses.js';
 import { JEJU_MAP, projectLatLng } from '../../../data/jeju-map.js';
 import { roadKm, taxiFare, krwToCny, driveMin, WALK_KM, WALK_KMH, HOTEL_BASE } from '../../../data/taxi.js';
 import { CHARTER_PRICES } from '../../../data/charter.js';
@@ -18,6 +18,21 @@ export const blockLabel = (block) => (block.season ? tr(`season.${block.season}`
 /** 지금이 제철인 계절 코스에 붙는 배지 */
 export const nowBadge = (block) => (isInSeason(block)
     ? `<span class="pl-tag pl-tag-now">${tr('course.now')}</span>` : '');
+
+/**
+ * 코스 표지 사진 + 출처(비짓제주 · 사진 속 장소). 비율 칸을 CSS로 먼저 잡아 사진이 늦게 와도 레이아웃이 밀리지 않는다.
+ * eager = 화면 맨 위에 바로 보이는 사진(상세 화면)은 지연 로딩하지 않는다
+ */
+export function coverHtml(key, { eager = false } = {}) {
+    const cover = COVERS[key], block = BLOCKS[key];
+    if (!cover || !block) return '';
+    const stop = block.stops.find(s => s.name.ko === cover.stop);
+    const place = stop ? pick(stop.name) : cover.stop;
+    return `<span class="pl-cover">
+        <img src="/img/courses/${cover.img}" alt="${escapeHtml(place)}" width="480" height="270" decoding="async"${eager ? '' : ' loading="lazy"'}>
+        <span class="pl-cover-credit">${escapeHtml(tr('course.photo_credit'))} · ${escapeHtml(place)}</span>
+    </span>`;
+}
 
 export const money = (krw) => ({ krw: krw.toLocaleString('ko-KR'), cny: krwToCny(krw) });
 

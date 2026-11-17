@@ -419,6 +419,33 @@
 .pl-stop-hotel .pl-stop-no { background: var(--fill-secondary); color: var(--label-secondary); font-size: 1rem; }
 .pl-stop-hotel .pl-stop-name { font-size: 0.9rem; font-weight: 700; color: var(--label-secondary); }
 
+/* 코스 표지 사진 (비짓제주). 16:9 칸을 먼저 잡아 사진 로딩 전후 높이가 같다 */
+.pl-cover {
+    position: relative;
+    display: block;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: 12px;
+    background: var(--fill-secondary);
+}
+.pl-course-card .pl-cover { margin-bottom: var(--space-2); }
+.pl-cover img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.pl-cover-credit {
+    position: absolute;
+    right: 6px;
+    bottom: 6px;
+    max-width: calc(100% - 12px);
+    padding: 1px 6px;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.45);
+    color: #ffffff;
+    font-size: 0.65rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 /* 목록 카드 태그 줄 + '지금 제철' 배지 */
 .pl-course-tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .pl-tag-now { background: #FFF0F6; color: #D6336C; }

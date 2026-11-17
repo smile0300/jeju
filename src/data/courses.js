@@ -374,6 +374,26 @@ export const STOP_POS = {
     '위미동백나무군락': [33.3027, 126.6569],
 };
 
+// 코스 카드 표지 사진: public/img/courses/{img}. stop = 사진 속 장소(그 코스의 stop.name.ko, 출처 표시에 이름을 쓴다)
+// 출처: 비짓제주(제주관광공사) API 대표사진 썸네일(480px). 중국 접속성 때문에 외부 링크 대신 사이트에 직접 올린다.
+// 바꿀 때는 비짓제주 API의 repPhoto.photoid.thumbnailpath를 받아 같은 이름으로 덮어쓰면 된다.
+export const COVERS = {
+    east: { img: 'east.webp', stop: '성산일출봉' },
+    west: { img: 'west.webp', stop: '협재해수욕장' },
+    south: { img: 'south.webp', stop: '방주교회' },
+    north: { img: 'north.webp', stop: '도두동 무지개해안도로' },
+    mid: { img: 'mid.webp', stop: '사려니숲길' },
+    rainy: { img: 'rainy.jpg', stop: '아르떼뮤지엄 제주' },
+    udo: { img: 'udo.webp', stop: '검멀레해수욕장' },
+    sunset: { img: 'sunset.webp', stop: '수월봉' },
+    jongdal: { img: 'jongdal.webp', stop: '비자림' },
+    seogwipo: { img: 'seogwipo.webp', stop: '쇠소깍' },
+    spring: { img: 'spring.webp', stop: '가시리 유채꽃길' },
+    summer: { img: 'summer.webp', stop: '종달리수국길' },
+    autumn: { img: 'autumn.webp', stop: '새별오름' },
+    winter: { img: 'winter.webp', stop: '위미동백나무군락' },
+};
+
 // 여러 날 코스: days = 날짜 순서대로 BLOCKS의 키. 같은 일수에서는 먼저 적힌 것이 여행 브리핑의 기본 코스가 된다
 export const COMBOS = [
     { id: '2d', days: ['east', 'west'],

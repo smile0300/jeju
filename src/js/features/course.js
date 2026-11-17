@@ -1,7 +1,7 @@
 import { tr, pick, escapeHtml } from './planner/strings.js';
 import { chipGroup, bindChips, copyText, flashLabel } from './planner/shared.js';
 import { BLOCKS, COMBOS, REGIONS, COURSES_DRAFT, isInSeason } from '../../data/courses.js';
-import { mapHtml, moveHtml, timelineHtml, blockLabel, nowBadge, driveTotal } from './planner/course-view.js';
+import { mapHtml, moveHtml, timelineHtml, blockLabel, nowBadge, driveTotal, coverHtml } from './planner/course-view.js';
 
 // 추천 코스: 하루 블록(당일)과 블록 조합(여러 날)을 기간·지역으로 걸러 보여준다.
 // 이동 안내는 택시·도보 기준(이용자 대부분이 운전하지 않음: 택시 69%·버스 58%·렌터카 22%)
@@ -14,6 +14,7 @@ const durationLabel = (d) => (d === 1 ? tr('common.daytrip') : tr('common.nights
 function blockCardHtml(key) {
     const b = BLOCKS[key];
     return `<button type="button" class="pl-course-card" data-open="block:${key}">
+        ${coverHtml(key)}
         <span class="pl-course-tags"><span class="pl-tag">${blockLabel(b)}</span>${nowBadge(b)}</span>
         <span class="pl-course-title">${escapeHtml(pick(b.title))}</span>
         <span class="pl-course-sub">${escapeHtml(pick(b.summary))}</span>
@@ -23,6 +24,7 @@ function blockCardHtml(key) {
 
 function comboCardHtml(combo) {
     return `<button type="button" class="pl-course-card" data-open="combo:${combo.id}">
+        ${coverHtml(combo.days[0])}
         <span class="pl-tag">${durationLabel(combo.days.length)}</span>
         <span class="pl-course-title">${escapeHtml(pick(combo.title))}</span>
         <span class="pl-course-days">${combo.days.map((k, i) =>
@@ -75,6 +77,7 @@ function detailHtml() {
             keys.map((k, i) => ({ value: String(i), label: `${tr('course.day', { n: i + 1 })} · ${blockLabel(BLOCKS[k])}` })),
             { selected: [String(dayIdx)] })}</div>
             <p class="pl-detail-sub">${escapeHtml(pick(block.title))}</p>` : `<p class="pl-detail-sub">${escapeHtml(pick(block.summary))}</p>`}
+        ${coverHtml(keys[dayIdx], { eager: true })}
         ${mapHtml(block.stops)}
         ${moveHtml(block)}
         <p class="pl-muted pl-hint"><i class="ph-duotone ph-info"></i> ${tr('course.copy_hint')}</p>
