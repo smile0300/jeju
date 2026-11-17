@@ -13,6 +13,7 @@
 const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
+require('./net-retry');
 const puppeteer = require('puppeteer');
 
 const ROOT = path.join(__dirname, '..');

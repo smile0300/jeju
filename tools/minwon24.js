@@ -38,6 +38,7 @@
  */
 const fs = require('fs');
 const path = require('path');
+require('./net-retry');
 
 const API = 'https://jeju-task-triage.smile0300.workers.dev';
 const vars = fs.readFileSync(path.join(__dirname, '..', '.dev.vars'), 'utf8');
@@ -502,10 +503,12 @@ async function proxy(M, st, test, dry, save, today) {
 }
 
 async function notify(title, body) {
-  const r = await fetch('https://jeju-weather-alerts.smile0300.workers.dev/api/notify-admin', {
-    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, body })
-  });
-  console.log('notify', r.status);
+  try {
+    const r = await fetch('https://jeju-weather-alerts.smile0300.workers.dev/api/notify-admin', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, body })
+    });
+    console.log('notify', r.status);
+  } catch (e) { console.log('notify 실패', e?.cause?.code || e.message); } // 푸시 실패로 나머지 처리를 멈추지 않음
 }
 
 async function record(sn, queueRow, lostRow, office) {

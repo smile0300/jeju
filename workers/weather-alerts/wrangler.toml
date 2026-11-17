@@ -2,9 +2,10 @@ name = "jeju-weather-alerts"
 main = "src/index.js"
 compatibility_date = "2024-03-20"
 
-# 10분마다 실행되도록 크론 설정
+# 기상특보 푸시 크론 — 2026-11-17 운영자 요청으로 비활성화 (다시 켜려면 ["*/10 * * * *"])
+# 관리자 푸시(/api/notify-admin)·구독(/api/subscribe)은 fetch 핸들러라 크론과 무관하게 계속 동작
 [triggers]
-crons = ["*/10 * * * *"]
+crons = []
 
 # 중복 발송 방지를 위한 KV 바인딩 (주석을 해제하고 id를 입력하세요)
 [[kv_namespaces]]

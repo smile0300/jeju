@@ -275,3 +275,8 @@
 - 08:00 실행: 备注 JL640은 달았으나 발송 단계에서 `send-fail 그 고객 대화방이 열리지 않음` → 기존 규칙상 재시도 없이 '친구·안내 실패' + 운영자 푸시로 끝남.
 - 수정: 친구인데 send-fail 이면 수락 대기 목록에 넣어 다음 실행에서 备注로 다시 발송, 3번째 실패에서만 푸시(`settle`, wait[n].fails). 640은 수동으로 대기에 넣고 바로 재실행 → 발송 성공.
 - 2026-11-17 사용자 결정: 10일 감시에서 새 후보가 나와도 고객에게 위챗을 따로 보내지 않음(`WATCH_NOTIFY_FOUND=false`) — 경찰 등록 안내 때 보낸 후보 페이지 링크에 자동으로 추가되기 때문. 운영자 푸시(🎯)와 10일 종료 안내(후보 있었으면 end_found + 링크)는 그대로.
+
+## 2026-11-17 기상특보 크론 끔 · 자동화 네트워크 재시도
+- `workers/weather-alerts` 크론 `*/10 * * * *` → `crons = []` (운영자 요청). 고객 기상특보 푸시 중단. 관리자 푸시 `/api/notify-admin`·구독 `/api/subscribe`는 fetch 핸들러라 계속 동작. 다시 켜려면 wrangler.toml 크론 복원 후 `npx wrangler deploy`.
+- 원인: 11-17 16:00·17:30 실행이 PC DNS 일시 장애(ENOTFOUND)로 중단, 오류 푸시까지 실패해 스택이 찍힘. 날씨 Worker 문제 아님.
+- `tools/net-retry.js`: 전역 fetch 감싸 연결 전 실패(ENOTFOUND·EAI_AGAIN·ECONNREFUSED 등)만 15초 간격 최대 4회 시도. 이미 보냈을 수 있는 실패는 중복 기록 방지 위해 재시도 안 함. `minwon24.js`·`minwon24-auto.js`에서 require. `notify()`는 실패해도 예외를 던지지 않음.
