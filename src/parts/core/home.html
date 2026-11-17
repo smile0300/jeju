@@ -96,7 +96,7 @@
             </a>
             <a href="/charter" class="home-item item-food" id="home-food-btn" onclick="event.preventDefault(); window.toggleCharterExpand()">
                 <span class="item-icon"><i class="ph-duotone ph-van color-food"></i></span>
-                <span class="item-label" data-i18n="nav.charter">包车/拼车</span>
+                <span class="item-label" data-i18n="nav.charter">拼车·交通</span>
                 <span class="coming-soon-badge">BETA</span>
             </a>
             <!-- 예약신청 버튼 -->
@@ -129,18 +129,24 @@
                 <span class="item-icon"><i class="ph-duotone ph-package color-lost"></i></span>
                 <span class="item-label" data-i18n="lost.home.proxy">代领服务</span>
             </div>
-            <!-- ===== 차량 서브 버튼 (평소 숨김, 차량 클릭 시 좌우에 삽입) ===== -->
-            <!-- 包车(대절): 코스 자리 대체 -->
-            <div class="home-item item-charter-sub" id="charter-sub-baoche"
-                 style="display:none" onclick="window.goToCharter('guide')">
-                <span class="item-icon"><i class="ph-duotone ph-van color-food"></i></span>
-                <span class="item-label" data-i18n="charter.home.baoche">包车</span>
-            </div>
-            <!-- 拼车(동승): 예약신청 자리 대체 -->
+            <!-- ===== 차량 서브 버튼 (평소 숨김, 차량 클릭 시 위·좌·우에 삽입) ===== -->
+            <!-- 拼车(동승): 코스 자리(왼쪽) 대체 — 동승을 먼저 보이게 -->
             <div class="home-item item-charter-sub" id="charter-sub-pinche"
                  style="display:none" onclick="window.goToCharter('carpool')">
                 <span class="item-icon"><i class="ph-duotone ph-users-three color-food"></i></span>
                 <span class="item-label" data-i18n="charter.home.pinche">拼车</span>
+            </div>
+            <!-- 打车·公交(택시·버스 요금): 분실물 자리(위) 대체 -->
+            <div class="home-item item-charter-sub" id="charter-sub-fare"
+                 style="display:none" onclick="window.goToCharter('fare')">
+                <span class="item-icon"><i class="ph-duotone ph-taxi color-food"></i></span>
+                <span class="item-label" data-i18n="charter.home.fare">打车·公交</span>
+            </div>
+            <!-- 包车(대절): 예약신청 자리(오른쪽) 대체 -->
+            <div class="home-item item-charter-sub" id="charter-sub-baoche"
+                 style="display:none" onclick="window.goToCharter('guide')">
+                <span class="item-icon"><i class="ph-duotone ph-van color-food"></i></span>
+                <span class="item-label" data-i18n="charter.home.baoche">包车</span>
             </div>
             <!-- ===== 예약신청 서브 버튼 (평소 숨김, 예약신청 클릭 시 해당 자리에 삽입) ===== -->
             <!-- 미용실/네일: 날씨예보 자리 대체 -->

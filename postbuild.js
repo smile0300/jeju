@@ -51,9 +51,9 @@ const SEO_META = {
         keywords: 'Jeju itinerary, Jeju east west route, Udo day trip, Jeju camellia, 济州路线, 济州东线西线, 牛岛一日游, 济州山茶花, 제주 추천 코스, 우도 코스'
     },
     'charter': {
-        title: 'Jeju Private Car Hire & Ride Share Guide - Jeju Live | 济州包车拼车',
-        desc: 'Reference prices for hiring a car with a driver in Jeju, how to pick a legal operator, and ride-share matching. 济州包车参考价格、挑选方法和拼车对接。',
-        keywords: 'Jeju private car hire, Jeju driver, 济州包车, 济州拼车, 제주 차량 대절'
+        title: 'Jeju Ride Share, Taxi & Bus Fares - Jeju Live | 济州拼车·打车公交价格',
+        desc: 'Find travelers to share a ride in Jeju, plus official taxi and bus fares and private car reference prices. 济州拼车对接、出租车和公交车官方价格、包车参考价。',
+        keywords: 'Jeju ride share, Jeju taxi fare, Jeju bus fare, Jeju private car hire, 济州拼车, 济州打车价格, 济州公交, 济州包车, 제주 동승, 제주 택시 요금, 제주 버스 요금'
     },
     'reward': {
         title: 'Jeju Live Bounty Missions & Rewards | 济州红包任务',
@@ -101,9 +101,9 @@ const ROUTE_INTRO = {
         ko: '당일부터 6일까지 제주 추천 코스를 동부(성산·우도), 서부(애월·협재), 남부(서귀포), 북부(제주시), 중산간으로 나누고, 서남부 일몰 코스와 유채·수국·억새·동백 계절 코스, 비 오는 날 코스도 넣었습니다. 코스마다 들를 곳을 순서대로 운영시간, 그랜드 하얏트 기준 택시 시간·요금과 함께 안내합니다.'
     },
     'charter': {
-        en: 'Thinking of hiring a car with a driver in Jeju? See reference prices by hours and route, how Korean law treats paid rides so you can tell a legal operator from an illegal one, and ride-share matching to split the cost with other travelers.',
-        zh: '想在济州包车（带司机）？这里有按时长和路线的参考价格、韩国法律对收费载客的规定（教您分辨合法和非法包车），以及拼车对接，和其他游客分摊费用。',
-        ko: '제주에서 기사 포함 차량 대절을 알아보고 있다면, 시간·코스별 참고 가격, 유상 운송에 관한 법 규정과 합법 업체 구별법, 다른 여행자와 비용을 나누는 동승 매칭을 확인하세요.'
+        en: 'Find other travelers going the same way on the same day and split the cost. Also here: official Jeju taxi and bus fares with sample taxi prices from Grand Hyatt Jeju, and reference prices for hiring a car with a driver, including how to tell a legal operator from an illegal one.',
+        zh: '找同一天、同方向的游客一起拼车，分摊费用。这里还有济州出租车和公交车的官方价格、从济州君悦酒店打车的参考价，以及带司机包车的参考价格和分辨合法包车的方法。',
+        ko: '같은 날 같은 방향으로 가는 여행자와 동승해 비용을 나누세요. 제주 택시·버스 공식 요금과 그랜드 하얏트 제주 기준 택시 예상 요금, 기사 포함 차량 대절 참고 가격과 합법 업체 구별법도 정리했습니다.'
     },
     'reward': {
         en: 'Flying home to China from Jeju? Bounty missions let travelers carry a recovered lost item back for its owner and earn a reward. See open missions, how pickup and hand-over work, and what you receive.',

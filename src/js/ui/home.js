@@ -262,18 +262,19 @@
         if (window.showSection) window.showSection('reservation');
     };
 
-    // ===== 차량 홈버튼 → 좌우 包车 / 拼车 토글 =====
+    // ===== 차량 홈버튼 → 위 打车·公交 / 왼쪽 拼车 / 오른쪽 包车 토글 =====
 
     let charterExpanded = false;
 
-    // 차량 버튼(가운데 아래)의 왼쪽·오른쪽 칸을 서브 버튼으로 대체
+    // 차량 버튼(가운데 아래)의 위·왼쪽·오른쪽 칸을 서브 버튼으로 대체. 동승을 먼저 보이도록 왼쪽에 둔다
     const CHARTER_REPLACE_MAP = [
-        { origId: 'home-course-btn',      subId: 'charter-sub-baoche', animClass: 'lost-sub-in-left',  outClass: 'lost-sub-out-left' },
-        { origId: 'home-reservation-btn', subId: 'charter-sub-pinche', animClass: 'lost-sub-in-right', outClass: 'lost-sub-out-right' },
+        { origId: 'home-course-btn',      subId: 'charter-sub-pinche', animClass: 'lost-sub-in-left',  outClass: 'lost-sub-out-left' },
+        { origId: 'home-lost-btn',        subId: 'charter-sub-fare',   animClass: 'lost-sub-in-top',   outClass: 'lost-sub-out-top' },
+        { origId: 'home-reservation-btn', subId: 'charter-sub-baoche', animClass: 'lost-sub-in-right', outClass: 'lost-sub-out-right' },
     ];
 
     // 펼친 동안 숨길 나머지 버튼 (그리드 자리 유지를 위해 visibility 사용)
-    const CHARTER_HIDE_IDS = ['home-weather-btn', 'home-hallasan-btn', 'home-airport-btn', 'home-festival-btn', 'home-lost-btn', 'home-reward-btn'];
+    const CHARTER_HIDE_IDS = ['home-weather-btn', 'home-hallasan-btn', 'home-airport-btn', 'home-festival-btn', 'home-reward-btn'];
 
     window.toggleCharterExpand = function() {
         if (charterExpanded) {
@@ -365,7 +366,7 @@
         }, 250);
     };
 
-    // 차량 서브 버튼 동작: 'guide' = 包车 안내를 펼쳐 맨 위에, 'carpool' = 拼车 달력 (기본 화면)
+    // 차량 서브 버튼 동작: 'carpool' = 拼车 달력 (기본 화면), 'fare' = 택시·버스 요금표, 'guide' = 包车 안내
     window.goToCharter = function(focus) {
         window.charterFocus = focus;
         window.collapseCharterGrid();

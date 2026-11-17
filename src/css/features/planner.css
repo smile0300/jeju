@@ -508,7 +508,8 @@
 /* ── 차량 대절: 包车/拼车 탭 · 동승 달력 ── */
 .pl-seg {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr; /* 탭 개수(동승·택시버스·대절)만큼 한 줄에 나눈다 */
     gap: 4px;
     padding: 4px;
     margin-bottom: var(--space-4);
@@ -532,6 +533,9 @@
     cursor: pointer;
 }
 .pl-seg-btn[aria-selected="true"] { background: var(--accent); color: #fff; }
+@media (max-width: 400px) {
+    .pl-seg-btn { gap: 4px; padding: 0 4px; font-size: 0.85rem; white-space: nowrap; }
+}
 .pl-guide { margin-top: var(--space-4); }
 .pl-guide > .pl-h4:first-child { margin-top: 0; }
 .pl-h4 { margin: var(--space-4) 0 var(--space-2); font-size: 0.95rem; font-weight: 800; }

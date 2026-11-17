@@ -2,12 +2,14 @@ import { CONFIG } from '../core/config.js';
 import { tr, pick, lang, escapeHtml } from './planner/strings.js';
 import { partyStepper, bindPartySteppers, showStatus, copyText, flashLabel } from './planner/shared.js';
 import { CHARTER_PRICES, CHARTER_COMPARE, CHARTER_UPDATED } from '../../data/charter.js';
+import { STOP_POS } from '../../data/courses.js';
+import { TAXI_TABLE, BUS_TABLE, TAXI_EXAMPLES, FARES_UPDATED, HOTEL_BASE, roadKm, taxiFare, driveMin, krwToCny } from '../../data/taxi.js';
 
 // 차량 대절/동승: 달력에서 날짜를 골라 그날의 동승 모집을 보고, 자기 일정을 올리고, 댓글로 협의한다.
 // - 모집글은 올리는 즉시 공개된다 (운영자는 시트의 Hidden 칸에 Y를 넣어 숨길 수 있다).
 // - 지난 날짜의 글은 지우지 않고 "종료"로 남긴다 (이력이 쌓여야 다음 사람이 믿고 쓴다).
 // - 이 사이트는 차량을 운영하지 않는다.
-// - 화면은 위쪽 탭으로 나뉜다: 拼车(동승 달력, 기본) / 包车(참고 요금·업체 비교·고르는 법).
+// - 화면은 위쪽 탭으로 나뉜다: 拼车(동승 달력, 기본) / 打车·公交(택시·버스 요금표) / 包车(참고 요금·업체 비교·고르는 법, 일일투어 예약 참고용).
 
 const CHECKS = ['plate', 'agency', 'insurance', 'license', 'price', 'cancel'];
 const LOCALES = { zh: 'zh-CN', ko: 'ko-KR', en: 'en-US' };
@@ -99,11 +101,49 @@ function compareHtml() {
         <p class="pl-muted pl-hint">${tr('charter.compare.note')}</p>`;
 }
 
+// 탭: 동승(기본) · 택시·버스 요금 · 차량 대절(일일투어 예약 참고용)
+const VIEWS = ['pinche', 'fare', 'baoche'];
+const VIEW_ICON = { pinche: 'ph-users-three', fare: 'ph-taxi', baoche: 'ph-van' };
+
 function tabsHtml() {
-    return `<div class="pl-seg" role="tablist">${['pinche', 'baoche'].map(v => `
+    return `<div class="pl-seg" role="tablist">${VIEWS.map(v => `
         <button type="button" role="tab" class="pl-seg-btn" data-view="${v}" aria-selected="${state.view === v}">
-            <i class="ph-duotone ${v === 'baoche' ? 'ph-van' : 'ph-users-three'}"></i> ${tr(`charter.tab.${v}`)}</button>`).join('')}
+            <i class="ph-duotone ${VIEW_ICON[v]}"></i> ${tr(`charter.tab.${v}`)}</button>`).join('')}
     </div>`;
+}
+
+const fareText = (v) => escapeHtml(typeof v === 'string' ? v : pick(v));
+
+// 택시·버스: 택시 요금 체계 · 숙소(그랜드 하얏트)에서 가는 예상 요금 · 버스 요금
+function fareHtml() {
+    const examples = TAXI_EXAMPLES.map(ex => {
+        const pos = ex.pos || STOP_POS[ex.stop];
+        if (!pos) return '';
+        const km = roadKm(HOTEL_BASE, pos), t = driveMin(km), krw = taxiFare(km);
+        return `<li><span class="pl-price-name">${escapeHtml(pick(ex.to))}<small>${tr('fare.example.time', { m: t.min, m2: t.max, km: Math.round(km) })}</small></span>
+            <span class="pl-price-val">${krw.toLocaleString('ko-KR')}<small>${tr('fare.won_cny', { cny: krwToCny(krw) })}</small></span></li>`;
+    }).join('');
+
+    return `<p class="pl-intro">${tr('fare.intro')}</p>
+        <div class="pl-card pl-guide">
+            <h4 class="pl-h4"><i class="ph-duotone ph-taxi"></i> ${tr('fare.taxi.title')}</h4>
+            <ul class="pl-price">${TAXI_TABLE.map(r => `
+                <li><span class="pl-price-name">${fareText(r.item)}</span>
+                    <span class="pl-price-val">${fareText(r.fare)}${typeof r.fare === 'string' ? `<small>${tr('fare.won')}</small>` : ''}</span></li>`).join('')}</ul>
+            <p class="pl-muted pl-hint">${tr('fare.taxi.note')}</p>
+
+            <h4 class="pl-h4">${tr('fare.example.title')}</h4>
+            <ul class="pl-price">${examples}</ul>
+            <p class="pl-muted pl-hint">${tr('fare.example.note')}</p>
+        </div>
+        <div class="pl-card pl-guide">
+            <h4 class="pl-h4"><i class="ph-duotone ph-bus"></i> ${tr('fare.bus.title')}</h4>
+            <ul class="pl-price">${BUS_TABLE.map(r => `
+                <li><span class="pl-price-name">${fareText(r.kind)}${pick(r.note) ? `<small>${fareText(r.note)}</small>` : ''}</span>
+                    <span class="pl-price-val">${escapeHtml(r.card)}<small>${tr('fare.card')}${r.cash ? ` · ${tr('fare.cash')} ${escapeHtml(r.cash)}` : ''}</small></span></li>`).join('')}</ul>
+            <ul class="pl-checklist">${['transfer', 'tagoff', 'app'].map(k => `<li><i class="ph-duotone ph-check-circle"></i><span>${tr(`fare.bus.tip.${k}`)}</span></li>`).join('')}</ul>
+            <p class="pl-muted pl-hint">${tr('fare.updated', { d: FARES_UPDATED })}</p>
+        </div>`;
 }
 
 // 包车: 참고 요금 · 업체별 비교 · 고르는 법
@@ -335,7 +375,8 @@ async function render() {
     const viewParam = new URLSearchParams(location.search).get('view');
     if (window.charterFocus === 'guide') state.view = 'baoche';
     else if (window.charterFocus === 'carpool') state.view = 'pinche';
-    else if (viewParam === 'baoche' || viewParam === 'pinche') state.view = viewParam;
+    else if (window.charterFocus === 'fare') state.view = 'fare';
+    else if (VIEWS.includes(viewParam)) state.view = viewParam;
     window.charterFocus = null;
     if (window.charterPresetDate && /^\d{4}-\d{2}-\d{2}$/.test(window.charterPresetDate)) {
         state.selected = window.charterPresetDate;
@@ -350,6 +391,7 @@ async function renderView(root) {
     root.querySelectorAll('.pl-seg-btn').forEach(b => b.setAttribute('aria-selected', String(b.dataset.view === state.view)));
     const view = root.querySelector('#charter-view');
     if (state.view === 'baoche') { view.innerHTML = baocheHtml(); return; }
+    if (state.view === 'fare') { view.innerHTML = fareHtml(); return; }
 
     view.innerHTML = pincheHtml();
     // 목록(GAS) 응답이 3초가량 걸리므로 달력은 먼저 그리고, 도착하면 날짜별 모집글 점만 다시 그린다
