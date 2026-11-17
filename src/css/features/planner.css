@@ -405,6 +405,24 @@
     color: var(--label-secondary);
 }
 
+/* 운영시간·휴무·요금 한 줄 */
+.pl-stop-info {
+    flex-basis: 100%;
+    margin: 0;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: var(--label-secondary);
+}
+.pl-stop-info i { vertical-align: -2px; }
+
+/* 출발·도착 숙소(그랜드 하얏트 제주): 번호 대신 침대 아이콘, 회색 */
+.pl-stop-hotel .pl-stop-no { background: var(--fill-secondary); color: var(--label-secondary); font-size: 1rem; }
+.pl-stop-hotel .pl-stop-name { font-size: 0.9rem; font-weight: 700; color: var(--label-secondary); }
+
+/* 목록 카드 태그 줄 + '지금 제철' 배지 */
+.pl-course-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.pl-tag-now { background: #FFF0F6; color: #D6336C; }
+
 /* ── 차량 대절 ── */
 .pl-price {
     list-style: none;

@@ -2,9 +2,8 @@ import { tr, trKo, pick, lang, escapeHtml } from './planner/strings.js';
 import { getForecastDays, getHistoricalDays, getRegionalWeatherForDate, getFestivalsBetween, toYmd } from './planner/forecast.js';
 import { renderFestivalItems } from './festival.js';
 import { chipGroup, bindChips, readChips, partyStepper, bindPartySteppers, wechatQrHtml, showStatus, submitRequest, copyText, flashLabel } from './planner/shared.js';
-import { BLOCKS, COMBOS, STOP_POS, STOP_TYPES } from '../../data/courses.js';
-import { JEJU_MAP, projectLatLng } from '../../data/jeju-map.js';
-import { roadKm, taxiFare, krwToCny, WALK_KM, WALK_KMH, HOTEL_BASE } from '../../data/taxi.js';
+import { BLOCKS, COMBOS, isInSeason } from '../../data/courses.js';
+import { mapHtml, moveHtml, timelineHtml, blockLabel } from './planner/course-view.js';
 import { CHARTER_PRICES } from '../../data/charter.js';
 
 // 여행 일정 도우미 (올인원 여행 브리핑):
@@ -455,111 +454,15 @@ function outfitHtml(cards) {
     </div>`;
 }
 
-// ── 추천 코스 매칭 (인라인 미니맵 + 타임라인 + 택시 vs 대절 비교) ─────────────
-const TYPE_ICON = { spot: 'ph-map-pin', cafe: 'ph-coffee', photo: 'ph-camera' };
-const typeTag = (type) => (TYPE_ICON[type]
-    ? `<span class="pl-type pl-type-${type}"><i class="ph-duotone ${TYPE_ICON[type]}"></i> ${tr(`course.type.${type}`)}</span>` : '');
-const money = (krw) => ({ krw: krw.toLocaleString('ko-KR'), cny: krwToCny(krw) });
+// ── 추천 코스 매칭 (미니맵·타임라인·택시 vs 대절 비교는 course-view.js 공용) ─────────────
 
-function routeViewBox(route) {
-    const { width: W, height: H } = JEJU_MAP;
-    if (!route.length) return { x: 0, y: 0, w: W, h: H };
-    const xs = route.map(p => p.xy[0]), ys = route.map(p => p.xy[1]);
-    const PAD = 60, MIN_W = 600;
-    const w = Math.min(W, Math.max(MIN_W, Math.max(...xs) - Math.min(...xs) + PAD * 2, (Math.max(...ys) - Math.min(...ys) + PAD * 2) * W / H));
-    const h = w * H / W;
-    const clamp = (v, max) => Math.max(0, Math.min(max, v));
-    return {
-        x: clamp((Math.min(...xs) + Math.max(...xs)) / 2 - w / 2, W - w),
-        y: clamp((Math.min(...ys) + Math.max(...ys)) / 2 - h / 2, H - h),
-        w, h,
-    };
-}
-
-function mapHtml(stops) {
-    const route = stops.map((s, i) => ({ i, type: s.type, pos: STOP_POS[s.name.ko] })).filter(p => p.pos)
-        .map(p => ({ ...p, xy: projectLatLng(...p.pos) }));
-    const vb = routeViewBox(route);
-    const k = vb.w / JEJU_MAP.width;
-    const r = 24 * k;
-    const line = route.length > 1 ? `<polyline class="pl-map-route" points="${route.map(p => p.xy.join(',')).join(' ')}"/>` : '';
-
-    const clusters = [];
-    for (const p of route) {
-        const near = clusters.find(c => Math.hypot(c.xy[0] - p.xy[0], c.xy[1] - p.xy[1]) < r * 1.8);
-        if (near) near.nos.push(p.i + 1); else clusters.push({ xy: p.xy, type: p.type, nos: [p.i + 1] });
+/** 여행 일수에 맞춘 코스 키 배열 반환. 당일이면 기본 지역 코스 + 여행 달에 제철인 계절 코스 */
+function getMatchedCourseKeys(dCount, from) {
+    if (dCount <= 1) {
+        const month = from.getMonth() + 1;
+        const seasonal = Object.keys(BLOCKS).filter(k => isInSeason(BLOCKS[k], month));
+        return ['east', 'west', 'south', 'north', 'mid', ...seasonal, 'rainy'];
     }
-    const pins = clusters.map(({ xy: [x, y], type, nos }) => {
-        const w = 2 * r + (nos.length - 1) * r * 1.4;
-        return `<g class="pl-map-pin pl-pin-${type}"><rect x="${(x - w / 2).toFixed(1)}" y="${(y - r).toFixed(1)}" width="${w.toFixed(1)}" height="${(2 * r).toFixed(1)}" rx="${r.toFixed(1)}"/><text x="${x}" y="${y}">${nos.join('·')}</text></g>`;
-    }).join('');
-
-    return `<figure class="pl-map">
-        <svg viewBox="${[vb.x, vb.y, vb.w, vb.h].map(Math.round).join(' ')}" style="--k:${k.toFixed(3)}" role="img" aria-label="${escapeHtml(tr('course.map.aria'))}">
-            <path class="pl-map-land" d="${JEJU_MAP.path}"/>${line}${pins}
-        </svg>
-        <figcaption class="pl-map-legend">${STOP_TYPES.map(typeTag).join('')}</figcaption>
-    </figure>`;
-}
-
-function legInfo(fromStop, toStop, driveMin) {
-    const a = STOP_POS[fromStop.name.ko], b = STOP_POS[toStop.name.ko];
-    if (!a || !b) return null;
-    const km = roadKm(a, b);
-    if (km < WALK_KM) return { walk: true, min: Math.max(5, Math.round(km / WALK_KMH * 60 / 5) * 5) };
-    return { walk: false, min: driveMin, fare: taxiFare(km) };
-}
-
-function legHtml(leg) {
-    if (!leg) return '';
-    return leg.walk
-        ? `<div class="pl-leg"><i class="ph-duotone ph-person-simple-walk"></i> ${tr('course.walk', { m: leg.min })}</div>`
-        : `<div class="pl-leg"><i class="ph-duotone ph-taxi"></i> ${tr('course.taxi', { m: leg.min, ...money(leg.fare) })}</div>`;
-}
-
-function moveHtml(block) {
-    const stops = block.stops;
-    const legs = stops.slice(0, -1).map((s, i) => legInfo(s, stops[i + 1], s.driveMin));
-    const first = STOP_POS[stops[0].name.ko], last = STOP_POS[stops[stops.length - 1].name.ko];
-    if (!first || !last || legs.some(l => !l)) return '';
-    const total = legs.reduce((sum, l) => sum + (l.fare || 0), 0)
-        + taxiFare(roadKm(HOTEL_BASE, first)) + taxiFare(roadKm(last, HOTEL_BASE));
-    const car = CHARTER_PRICES[0];
-
-    return `<div class="pl-move pl-trip-move">
-        <h4 class="pl-move-title">${tr('course.move.title')}</h4>
-        <div class="pl-move-row">
-            <i class="ph-duotone ph-taxi"></i>
-            <div><strong>${tr('course.move.taxi', money(total))}</strong><span>${tr('course.move.taxi_note')}</span></div>
-        </div>
-        <div class="pl-move-row">
-            <i class="ph-duotone ph-van"></i>
-            <div><strong>${tr('course.move.charter', { price: car.price })}</strong><span>${tr('course.move.charter_note')}</span></div>
-        </div>
-    </div>`;
-}
-
-function timelineHtml(block) {
-    return `<ol class="pl-timeline pl-trip-timeline">${block.stops.map((s, i) => `
-        <li class="pl-stop">
-            <div class="pl-stop-head">
-                <span class="pl-stop-no">${i + 1}</span>
-                <span class="pl-stop-name">${escapeHtml(pick(s.name))}</span>
-                ${typeTag(s.type)}
-            </div>
-            <div class="pl-stop-body">
-                <span class="pl-stop-ko">${escapeHtml(s.name.ko)}</span>
-                <button type="button" class="pl-copy" data-copy="${escapeHtml(s.name.ko)}"><i class="ph-duotone ph-copy"></i> ${tr('course.copy_ko')}</button>
-                <span class="pl-stop-stay">${tr('course.stay', { m: s.stayMin })}</span>
-                ${s.tip ? `<p class="pl-stop-tip">${escapeHtml(pick(s.tip))}</p>` : ''}
-            </div>
-            ${i < block.stops.length - 1 ? legHtml(legInfo(s, block.stops[i + 1], s.driveMin)) : ''}
-        </li>`).join('')}</ol>`;
-}
-
-/** 여행 일수에 맞춘 코스 키 배열 반환 */
-function getMatchedCourseKeys(dCount) {
-    if (dCount <= 1) return ['east', 'west', 'south', 'north', 'mid', 'rainy'];
     const target = Math.min(6, dCount);
     const combo = COMBOS.find(c => c.days.length === target) || COMBOS[COMBOS.length - 1];
     return combo.days;
@@ -571,7 +474,7 @@ function renderTripCourseBox(root, from, to) {
 
     const dCount = dayCount(from, to);
     const isSingle = dCount === 1;
-    const keys = getMatchedCourseKeys(dCount);
+    const keys = getMatchedCourseKeys(dCount, from);
     const idx = Math.min(courseState.dayIdx, keys.length - 1);
     const activeCard = !isSingle ? courseState.lastCards[idx] : courseState.lastCards[0];
     const isDayRainy = !!(activeCard && activeCard.rainy);
@@ -581,7 +484,7 @@ function renderTripCourseBox(root, from, to) {
 
     const tabsHtml = keys.map((k, i) => {
         if (isSingle) {
-            return `<button type="button" class="pl-chip${i === idx ? ' active' : ''}" data-trip-cday="${i}">${escapeHtml(tr(`region.${BLOCKS[k].region}`))}</button>`;
+            return `<button type="button" class="pl-chip${i === idx ? ' active' : ''}" data-trip-cday="${i}">${escapeHtml(blockLabel(BLOCKS[k]))}</button>`;
         }
         const dayDate = new Date(from);
         dayDate.setDate(from.getDate() + i);
@@ -589,7 +492,7 @@ function renderTripCourseBox(root, from, to) {
         const c = courseState.lastCards[i];
         const rainDot = c && c.rainy ? ' ☔' : '';
         return `<button type="button" class="pl-chip${i === idx ? ' active' : ''}" data-trip-cday="${i}">
-            ${escapeHtml(tr('course.day', { n: i + 1 }))} (${md}) · ${escapeHtml(tr(`region.${BLOCKS[k].region}`))}${rainDot}
+            ${escapeHtml(tr('course.day', { n: i + 1 }))} (${md}) · ${escapeHtml(blockLabel(BLOCKS[k]))}${rainDot}
         </button>`;
     }).join('');
 
@@ -608,14 +511,14 @@ function renderTripCourseBox(root, from, to) {
         ${rainBanner}
         <div class="pl-card pl-trip-course-card">
             <div class="pl-trip-course-head">
-                <span class="pl-tag">${escapeHtml(tr(`region.${block.region}`))}</span>
+                <span class="pl-tag">${escapeHtml(blockLabel(block))}</span>
                 <h4 class="pl-detail-title">${escapeHtml(pick(block.title))}</h4>
                 <p class="pl-detail-sub">${escapeHtml(pick(block.summary))}</p>
             </div>
             ${mapHtml(block.stops)}
-            ${moveHtml(block)}
+            ${moveHtml(block, { compact: true })}
             <p class="pl-muted pl-hint"><i class="ph-duotone ph-info"></i> ${tr('course.copy_hint')}</p>
-            ${timelineHtml(block)}
+            ${timelineHtml(block, { extraClass: 'pl-trip-timeline' })}
         </div>
         <button type="button" class="pl-link" onclick="showSection('course')">${escapeHtml(tr('trip.course.all_btn'))}</button>`;
 }

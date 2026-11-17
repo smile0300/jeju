@@ -1,22 +1,20 @@
 import { tr, pick, escapeHtml } from './planner/strings.js';
 import { chipGroup, bindChips, copyText, flashLabel } from './planner/shared.js';
-import { BLOCKS, COMBOS, REGIONS, COURSES_DRAFT, STOP_POS, STOP_TYPES } from '../../data/courses.js';
-import { JEJU_MAP, projectLatLng } from '../../data/jeju-map.js';
-import { roadKm, taxiFare, krwToCny, WALK_KM, WALK_KMH, HOTEL_BASE } from '../../data/taxi.js';
-import { CHARTER_PRICES } from '../../data/charter.js';
+import { BLOCKS, COMBOS, REGIONS, COURSES_DRAFT, isInSeason } from '../../data/courses.js';
+import { mapHtml, moveHtml, timelineHtml, blockLabel, nowBadge, driveTotal } from './planner/course-view.js';
 
 // 추천 코스: 하루 블록(당일)과 블록 조합(여러 날)을 기간·지역으로 걸러 보여준다.
+// 이동 안내는 택시·도보 기준(이용자 대부분이 운전하지 않음: 택시 69%·버스 58%·렌터카 22%)
 
 const MAX_DAYS = 6;
 const state = { days: 1, region: 'all', detail: null, detailDay: 0 };
 
 const durationLabel = (d) => (d === 1 ? tr('common.daytrip') : tr('common.nights', { d, n: d - 1 }));
-const driveTotal = (block) => block.stops.reduce((sum, s) => sum + (s.driveMin || 0), 0);
 
 function blockCardHtml(key) {
     const b = BLOCKS[key];
     return `<button type="button" class="pl-course-card" data-open="block:${key}">
-        <span class="pl-tag">${tr(`region.${b.region}`)}</span>
+        <span class="pl-course-tags"><span class="pl-tag">${blockLabel(b)}</span>${nowBadge(b)}</span>
         <span class="pl-course-title">${escapeHtml(pick(b.title))}</span>
         <span class="pl-course-sub">${escapeHtml(pick(b.summary))}</span>
         <span class="pl-course-meta">${tr('course.stops', { n: b.stops.length })} · ${tr('course.drive_total', { m: driveTotal(b) })}</span>
@@ -28,68 +26,25 @@ function comboCardHtml(combo) {
         <span class="pl-tag">${durationLabel(combo.days.length)}</span>
         <span class="pl-course-title">${escapeHtml(pick(combo.title))}</span>
         <span class="pl-course-days">${combo.days.map((k, i) =>
-            `<span class="pl-daychip">${tr('course.day', { n: i + 1 })} ${tr(`region.${BLOCKS[k].region}`)}</span>`).join('')}</span>
+            `<span class="pl-daychip">${tr('course.day', { n: i + 1 })} ${blockLabel(BLOCKS[k])}</span>`).join('')}</span>
     </button>`;
 }
 
-const TYPE_ICON = { spot: 'ph-map-pin', cafe: 'ph-coffee', photo: 'ph-camera' };
-
-const typeTag = (type) => (TYPE_ICON[type]
-    ? `<span class="pl-type pl-type-${type}"><i class="ph-duotone ${TYPE_ICON[type]}"></i> ${tr(`course.type.${type}`)}</span>` : '');
-
-// 코스 범위로 확대한 viewBox. 섬 전체와 같은 가로세로 비율을 유지해 화면 높이가 코스마다 같다
-function routeViewBox(route) {
-    const { width: W, height: H } = JEJU_MAP;
-    if (!route.length) return { x: 0, y: 0, w: W, h: H };
-    const xs = route.map(p => p.xy[0]), ys = route.map(p => p.xy[1]);
-    const PAD = 60, MIN_W = 600; // 너무 확대하면 해안선이 안 보여 섬의 어디인지 알 수 없다
-    const w = Math.min(W, Math.max(MIN_W, Math.max(...xs) - Math.min(...xs) + PAD * 2, (Math.max(...ys) - Math.min(...ys) + PAD * 2) * W / H));
-    const h = w * H / W;
-    const clamp = (v, max) => Math.max(0, Math.min(max, v));
-    return {
-        x: clamp((Math.min(...xs) + Math.max(...xs)) / 2 - w / 2, W - w),
-        y: clamp((Math.min(...ys) + Math.max(...ys)) / 2 - h / 2, H - h),
-        w, h,
-    };
-}
-
-// 제주 외곽선 위에 코스 동선(번호+선)을 그린다. 핀 색은 장소 유형별. 외부 지도 SDK 없이 인라인 SVG
-function mapHtml(stops) {
-    const route = stops.map((s, i) => ({ i, type: s.type, pos: STOP_POS[s.name.ko] })).filter(p => p.pos)
-        .map(p => ({ ...p, xy: projectLatLng(...p.pos) }));
-    const vb = routeViewBox(route);
-    const k = vb.w / JEJU_MAP.width; // 확대해도 핀·선 두께가 화면에서 같은 크기로 보이도록
-    const r = 24 * k;
-    const line = route.length > 1 ? `<polyline class="pl-map-route" points="${route.map(p => p.xy.join(',')).join(' ')}"/>` : '';
-
-    // 걸어서 갈 만큼 가까운 장소는 핀이 겹치므로 "1·2"처럼 하나로 합친다
-    const clusters = [];
-    for (const p of route) {
-        const near = clusters.find(c => Math.hypot(c.xy[0] - p.xy[0], c.xy[1] - p.xy[1]) < r * 1.8);
-        if (near) near.nos.push(p.i + 1); else clusters.push({ xy: p.xy, type: p.type, nos: [p.i + 1] });
-    }
-    const pins = clusters.map(({ xy: [x, y], type, nos }) => {
-        const w = 2 * r + (nos.length - 1) * r * 1.4;
-        return `<g class="pl-map-pin pl-pin-${type}"><rect x="${(x - w / 2).toFixed(1)}" y="${(y - r).toFixed(1)}" width="${w.toFixed(1)}" height="${(2 * r).toFixed(1)}" rx="${r.toFixed(1)}"/><text x="${x}" y="${y}">${nos.join('·')}</text></g>`;
-    }).join('');
-
-    return `<figure class="pl-map">
-        <svg viewBox="${[vb.x, vb.y, vb.w, vb.h].map(Math.round).join(' ')}" style="--k:${k.toFixed(3)}" role="img" aria-label="${escapeHtml(tr('course.map.aria'))}">
-            <path class="pl-map-land" d="${JEJU_MAP.path}"/>${line}${pins}
-        </svg>
-        <figcaption class="pl-map-legend">${STOP_TYPES.map(typeTag).join('')}</figcaption>
-    </figure>`;
+// 하루 코스 목록: 계절 코스는 지역 필터에서 빼고 '계절' 필터로 모은다. 전체 보기에서는 제철 코스를 맨 앞, 제철이 아닌 계절 코스를 맨 뒤에
+function blockKeys() {
+    const keys = Object.keys(BLOCKS);
+    if (state.region === 'season') return keys.filter(k => BLOCKS[k].season)
+        .sort((a, b) => isInSeason(BLOCKS[b]) - isInSeason(BLOCKS[a]));
+    if (state.region !== 'all') return keys.filter(k => !BLOCKS[k].season && BLOCKS[k].region === state.region);
+    const rank = (k) => (isInSeason(BLOCKS[k]) ? 0 : BLOCKS[k].season ? 2 : 1);
+    return keys.sort((a, b) => rank(a) - rank(b));
 }
 
 function listHtml() {
     const durations = Array.from({ length: MAX_DAYS }, (_, i) => ({ value: String(i + 1), label: durationLabel(i + 1) }));
-    let cards;
-    if (state.days === 1) {
-        const keys = Object.keys(BLOCKS).filter(k => state.region === 'all' || BLOCKS[k].region === state.region);
-        cards = keys.map(blockCardHtml);
-    } else {
-        cards = COMBOS.filter(c => c.days.length === state.days).map(comboCardHtml);
-    }
+    const cards = state.days === 1
+        ? blockKeys().map(blockCardHtml)
+        : COMBOS.filter(c => c.days.length === state.days).map(comboCardHtml);
 
     return `
         <button type="button" class="pl-card pl-plan" onclick="showSection('trip')">
@@ -105,66 +60,6 @@ function listHtml() {
         <button type="button" class="pl-link pl-center" onclick="showSection('trip')">${tr('course.custom')} →</button>`;
 }
 
-// 이용자 대부분이 운전하지 않으므로(실태조사: 택시 69%·버스 58%·렌터카 22%) 이동은 택시·도보 기준으로 안내한다
-const money = (krw) => ({ krw: krw.toLocaleString('ko-KR'), cny: krwToCny(krw) });
-
-function legInfo(from, to, driveMin) {
-    const a = STOP_POS[from.name.ko], b = STOP_POS[to.name.ko];
-    if (!a || !b) return null;
-    const km = roadKm(a, b);
-    if (km < WALK_KM) return { walk: true, min: Math.max(5, Math.round(km / WALK_KMH * 60 / 5) * 5) };
-    return { walk: false, min: driveMin, fare: taxiFare(km) };
-}
-
-function legHtml(leg) {
-    if (!leg) return '';
-    return leg.walk
-        ? `<div class="pl-leg"><i class="ph-duotone ph-person-simple-walk"></i> ${tr('course.walk', { m: leg.min })}</div>`
-        : `<div class="pl-leg"><i class="ph-duotone ph-taxi"></i> ${tr('course.taxi', { m: leg.min, ...money(leg.fare) })}</div>`;
-}
-
-// 하루 택시비(제주시 숙소 왕복 포함)와 包车 하루 요금을 나란히 보여준다
-function moveHtml(block) {
-    const stops = block.stops;
-    const legs = stops.slice(0, -1).map((s, i) => legInfo(s, stops[i + 1], s.driveMin));
-    const first = STOP_POS[stops[0].name.ko], last = STOP_POS[stops[stops.length - 1].name.ko];
-    if (!first || !last || legs.some(l => !l)) return '';
-    const total = legs.reduce((sum, l) => sum + (l.fare || 0), 0)
-        + taxiFare(roadKm(HOTEL_BASE, first)) + taxiFare(roadKm(last, HOTEL_BASE));
-    const car = CHARTER_PRICES[0];
-
-    return `<section class="pl-card pl-move">
-        <h4 class="pl-move-title">${tr('course.move.title')}</h4>
-        <div class="pl-move-row">
-            <i class="ph-duotone ph-taxi"></i>
-            <div><strong>${tr('course.move.taxi', money(total))}</strong><span>${tr('course.move.taxi_note')}</span></div>
-        </div>
-        <div class="pl-move-row">
-            <i class="ph-duotone ph-van"></i>
-            <div><strong>${tr('course.move.charter', { price: car.price })}</strong><span>${tr('course.move.charter_note')}</span></div>
-        </div>
-        <p class="pl-muted pl-hint"><i class="ph-duotone ph-info"></i> ${tr('course.move.hint')}</p>
-    </section>`;
-}
-
-function timelineHtml(block) {
-    return `<ol class="pl-timeline">${block.stops.map((s, i) => `
-        <li class="pl-stop">
-            <div class="pl-stop-head">
-                <span class="pl-stop-no">${i + 1}</span>
-                <span class="pl-stop-name">${escapeHtml(pick(s.name))}</span>
-                ${typeTag(s.type)}
-            </div>
-            <div class="pl-stop-body">
-                <span class="pl-stop-ko">${escapeHtml(s.name.ko)}</span>
-                <button type="button" class="pl-copy" data-copy="${escapeHtml(s.name.ko)}"><i class="ph-duotone ph-copy"></i> ${tr('course.copy_ko')}</button>
-                <span class="pl-stop-stay">${tr('course.stay', { m: s.stayMin })}</span>
-                ${s.tip ? `<p class="pl-stop-tip">${escapeHtml(pick(s.tip))}</p>` : ''}
-            </div>
-            ${i < block.stops.length - 1 ? legHtml(legInfo(s, block.stops[i + 1], s.driveMin)) : ''}
-        </li>`).join('')}</ol>`;
-}
-
 function detailHtml() {
     const [type, id] = state.detail.split(':');
     const combo = type === 'combo' ? COMBOS.find(c => c.id === id) : null;
@@ -177,13 +72,14 @@ function detailHtml() {
         <button type="button" class="pl-link" data-back="1">← ${tr('course.back')}</button>
         <h3 class="pl-detail-title">${escapeHtml(pick(combo ? combo.title : block.title))}</h3>
         ${combo ? `<div class="pl-filter">${chipGroup('detailDay',
-            keys.map((k, i) => ({ value: String(i), label: `${tr('course.day', { n: i + 1 })} · ${tr(`region.${BLOCKS[k].region}`)}` })),
+            keys.map((k, i) => ({ value: String(i), label: `${tr('course.day', { n: i + 1 })} · ${blockLabel(BLOCKS[k])}` })),
             { selected: [String(dayIdx)] })}</div>
             <p class="pl-detail-sub">${escapeHtml(pick(block.title))}</p>` : `<p class="pl-detail-sub">${escapeHtml(pick(block.summary))}</p>`}
         ${mapHtml(block.stops)}
         ${moveHtml(block)}
         <p class="pl-muted pl-hint"><i class="ph-duotone ph-info"></i> ${tr('course.copy_hint')}</p>
         ${timelineHtml(block)}
+        <p class="pl-muted pl-hint"><i class="ph-duotone ph-info"></i> ${tr('course.info_hint')}</p>
         <button type="button" class="res-submit-btn pl-mt" data-charter="${escapeHtml(block.region)}"><i class="ph-duotone ph-van"></i> <span>${tr('course.charter_cta')}</span></button>`;
 }
 

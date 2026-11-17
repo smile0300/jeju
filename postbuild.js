@@ -47,8 +47,8 @@ const SEO_META = {
     },
     'course': {
         title: 'Jeju Travel Routes: Day Trips to 6 Days - Jeju Live | 济州推荐路线',
-        desc: 'Jeju Island routes by duration and area — east, west, south, north, inland and rainy-day options. 济州岛东线、西线、南线推荐路线，从当日到6天5晚。',
-        keywords: 'Jeju itinerary, Jeju east west route, 济州路线, 济州东线西线, 제주 추천 코스'
+        desc: 'Jeju Island routes by duration and area — east, west, south, north, Udo, sunset, seasonal (canola, hydrangea, silver grass, camellia) and rainy-day options. 济州岛东线、西线、南线、牛岛和季节限定路线，从当日到6天5晚。',
+        keywords: 'Jeju itinerary, Jeju east west route, Udo day trip, Jeju camellia, 济州路线, 济州东线西线, 牛岛一日游, 济州山茶花, 제주 추천 코스, 우도 코스'
     },
     'charter': {
         title: 'Jeju Private Car Hire & Ride Share Guide - Jeju Live | 济州包车拼车',
@@ -96,9 +96,9 @@ const ROUTE_INTRO = {
         ko: '제주 여행 날짜를 넣으면 그 기간의 예보(먼 날짜는 평년 날씨), 옷차림, 여행 중 열리는 축제를 한 화면에서 보여줍니다.'
     },
     'course': {
-        en: 'Ready-made Jeju routes from a single day to six days, split by area — east (Seongsan, Udo), west (Aewol, Hyeopjae), south (Seogwipo), north (Jeju City) and inland — plus rainy-day options. Each route lists stops in order with photo spots and cafes.',
-        zh: '从一日游到六天五晚的济州推荐路线，按东线（城山、牛岛）、西线（涯月、挟才）、南线（西归浦）、北线（济州市）和中部分区，还有下雨天的备选路线。每条路线按顺序列出景点、拍照点和咖啡店。',
-        ko: '당일부터 6일까지 제주 추천 코스를 동부(성산·우도), 서부(애월·협재), 남부(서귀포), 북부(제주시), 중산간으로 나누고 비 오는 날 코스도 넣었습니다. 코스마다 들를 곳을 순서대로, 포토존·카페와 함께 안내합니다.'
+        en: 'Ready-made Jeju routes from a single day to six days, split by area — east (Seongsan, Udo), west (Aewol, Hyeopjae), south (Seogwipo), north (Jeju City) and inland — plus a southwest sunset route, seasonal routes for canola, hydrangeas, silver grass and camellias, and rainy-day options. Each route lists stops in order with opening hours, taxi times and fares from Grand Hyatt Jeju.',
+        zh: '从一日游到六天五晚的济州推荐路线，按东线（城山、牛岛）、西线（涯月、挟才）、南线（西归浦）、北线（济州市）和中部分区，还有西南日落路线、油菜花·绣球花·芒草·山茶花季节限定路线和下雨天的备选路线。每条路线按顺序列出营业时间，以及从济州君悦酒店出发的打车时间和费用。',
+        ko: '당일부터 6일까지 제주 추천 코스를 동부(성산·우도), 서부(애월·협재), 남부(서귀포), 북부(제주시), 중산간으로 나누고, 서남부 일몰 코스와 유채·수국·억새·동백 계절 코스, 비 오는 날 코스도 넣었습니다. 코스마다 들를 곳을 순서대로 운영시간, 그랜드 하얏트 기준 택시 시간·요금과 함께 안내합니다.'
     },
     'charter': {
         en: 'Thinking of hiring a car with a driver in Jeju? See reference prices by hours and route, how Korean law treats paid rides so you can tell a legal operator from an illegal one, and ride-share matching to split the cost with other travelers.',
