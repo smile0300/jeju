@@ -371,6 +371,7 @@ async function focusNotify(M, test, dry) {
 // 어디까지 알렸는지는 tools/wechat-add.local.txt 의 watch. 처음 보는 건은 이미 지난 후보·이미 끝난 감시를 '알린 것'으로 친다
 // (이 기능 전에는 운영자가 푸시를 보고 직접 처리했으므로).
 const WATCH_SEND_PER_RUN = 3;
+const WATCH_NOTIFY_FOUND = false;   // true 로 바꾸면 새 후보마다 고객 위챗 안내 (watch.found)
 async function sendLost(lostRow, msg, test) {
   // 친구가 된 고객은 备注 JL<행> — 내 연락처에서 먼저, 없으면 양식의 위챗 ID(프로필 ID가 정확히 같을 때만)
   let out = wx(['-Local', '-Remark', `JL${lostRow}`, '-Message', msg, ...test]);
@@ -398,7 +399,10 @@ async function watchNotify(M, st, test, dry, save) {
     }
     if (sentCount >= WATCH_SEND_PER_RUN) continue;
     const code = `JL${w.lostRow}`;
-    const fresh = w.cands.filter(c => !ws.sent.includes(c.id));
+    let fresh = w.cands.filter(c => !ws.sent.includes(c.id));
+    // 새 후보가 생겨도 고객에게 따로 알리지 않는다 — 경찰 등록 안내 때 보낸 후보 페이지 링크에 자동으로 추가되므로 (사용자 결정 2026-11-17)
+    // 알린 것으로만 치고(종료 안내가 '후보 있었음' 멘트를 고르게 everFound 표시) 넘어간다. 운영자 푸시(Worker 🎯)는 그대로
+    if (!WATCH_NOTIFY_FOUND && fresh.length) { ws.sent.push(...fresh.map(c => c.id)); ws.everFound = true; fresh = []; save(); }
     let kind = '', msg = '';
     const link = matchLink(w.queueRow);
     if (!(fresh.length && !ws.ended) && !(!ws.ended && Date.now() > endMs)) continue;
