@@ -47,8 +47,8 @@ const SEO_META = {
     },
     'course': {
         title: 'Jeju Travel Routes: Day Trips to 6 Days - Jeju Live | 济州推荐路线',
-        desc: 'Jeju Island routes by duration and area — east, west, south, north, Udo, sunset, seasonal (canola, hydrangea, silver grass, camellia) and rainy-day options. 济州岛东线、西线、南线、牛岛和季节限定路线，从当日到6天5晚。',
-        keywords: 'Jeju itinerary, Jeju east west route, Udo day trip, Jeju camellia, 济州路线, 济州东线西线, 牛岛一日游, 济州山茶花, 제주 추천 코스, 우도 코스'
+        desc: 'Jeju Island routes by duration and area — east, west, south, north, Udo, Jungmun, Aewol, forests, sunset, seasonal (canola, hydrangea, silver grass, camellia) and rainy-day options. 济州岛东线、西线、南线、牛岛、中文、涯月、森林和季节限定路线，从当日到6天5晚。',
+        keywords: 'Jeju itinerary, Jeju east west route, Udo day trip, Jungmun day trip, Aewol cafe route, Jeju camellia, 济州路线, 济州东线西线, 牛岛一日游, 中文旅游区路线, 涯月咖啡馆, 济州山茶花, 제주 추천 코스, 우도 코스, 중문 코스, 애월 코스'
     },
     'charter': {
         title: 'Jeju Ride Share, Taxi & Bus Fares - Jeju Live | 济州拼车·打车公交价格',
@@ -96,9 +96,9 @@ const ROUTE_INTRO = {
         ko: '제주 여행 날짜를 넣으면 그 기간의 예보(먼 날짜는 평년 날씨), 옷차림, 여행 중 열리는 축제를 한 화면에서 보여줍니다.'
     },
     'course': {
-        en: 'Ready-made Jeju routes from a single day to six days, split by area — east (Seongsan, Udo), west (Aewol, Hyeopjae), south (Seogwipo), north (Jeju City) and inland — plus a southwest sunset route, seasonal routes for canola, hydrangeas, silver grass and camellias, and rainy-day options. Each route lists stops in order with opening hours, taxi times and fares from Grand Hyatt Jeju.',
-        zh: '从一日游到六天五晚的济州推荐路线，按东线（城山、牛岛）、西线（涯月、挟才）、南线（西归浦）、北线（济州市）和中部分区，还有西南日落路线、油菜花·绣球花·芒草·山茶花季节限定路线和下雨天的备选路线。每条路线按顺序列出营业时间，以及从济州君悦酒店出发的打车时间和费用。',
-        ko: '당일부터 6일까지 제주 추천 코스를 동부(성산·우도), 서부(애월·협재), 남부(서귀포), 북부(제주시), 중산간으로 나누고, 서남부 일몰 코스와 유채·수국·억새·동백 계절 코스, 비 오는 날 코스도 넣었습니다. 코스마다 들를 곳을 순서대로 운영시간, 그랜드 하얏트 기준 택시 시간·요금과 함께 안내합니다.'
+        en: 'Ready-made Jeju routes from a single day to six days, split by area — east (Seongsan, Udo), west (Aewol, Hyeopjae, Hallim), south (Seogwipo, Jungmun, Namwon), north (Jeju City) and inland forests — plus a southwest sunset route, seasonal routes for canola, hydrangeas, silver grass and camellias, and rainy-day options. Each route lists stops in order with opening hours, taxi times and fares from Grand Hyatt Jeju.',
+        zh: '从一日游到六天五晚的济州推荐路线，按东线（城山、牛岛）、西线（涯月、挟才、翰林）、南线（西归浦、中文、南元）、北线（济州市）和中部森林分区，还有西南日落路线、油菜花·绣球花·芒草·山茶花季节限定路线和下雨天的备选路线。每条路线按顺序列出营业时间，以及从济州君悦酒店出发的打车时间和费用。',
+        ko: '당일부터 6일까지 제주 추천 코스를 동부(성산·우도), 서부(애월·협재·한림), 남부(서귀포·중문·남원), 북부(제주시), 중산간 숲으로 나누고, 서남부 일몰 코스와 유채·수국·억새·동백 계절 코스, 비 오는 날 코스도 넣었습니다. 코스마다 들를 곳을 순서대로 운영시간, 그랜드 하얏트 기준 택시 시간·요금과 함께 안내합니다.'
     },
     'charter': {
         en: 'Find other travelers going the same way on the same day and split the cost. Also here: official Jeju taxi and bus fares with sample taxi prices from Grand Hyatt Jeju, and reference prices for hiring a car with a driver, including how to tell a legal operator from an illegal one.',
