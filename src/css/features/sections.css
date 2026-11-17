@@ -4711,6 +4711,49 @@ body:not(.page-home) .wechat-float-btn {
     font-weight: 600;
 }
 
+/* 진행상황 페이지: 분실신고 / 대리수령 탭 (flight-tab과 같은 모양, 공항 JS가 .flight-tab을 전역으로 건드려서 별도 클래스) */
+.lost-status-tabs { display: flex; background: #e2e8f0; padding: 6px; border-radius: 30px; margin-bottom: 18px; }
+.lost-status-tab {
+    flex: 1; min-height: var(--touch-target); padding: 0 var(--space-3);
+    font-size: var(--text-subheadline); font-weight: 600; color: var(--label-secondary);
+    background: transparent; border: none; border-radius: 25px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; white-space: nowrap;
+    transition: all var(--duration-fast) var(--ease-out);
+}
+.lost-status-tab.active { background: var(--bg-primary); color: var(--accent); box-shadow: var(--shadow-xs); }
+#lost-status-pane-police[hidden], #lost-status-pane-proxy[hidden] { display: none; }
+.lost-status-cta { width: 100%; padding: 12px 0; margin-bottom: 24px; }
+
+/* 경찰청 탭: 누적 등록 건수 배지 */
+.lost-police-count {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding: 14px 16px;
+    background: rgba(49, 130, 246, 0.06); border: 1px solid rgba(49, 130, 246, 0.15); border-radius: 10px;
+    font-size: 15px; font-weight: 700; color: var(--label-primary); line-height: 1.4;
+}
+.lost-police-count i { font-size: 22px; color: #3182f6; flex-shrink: 0; }
+.lost-police-count[hidden] { display: none; }
+
+/* 경찰청 탭: 접수번호 안내 (접힘) */
+.lost-police-guide { margin: -8px 0 20px; border: 1px solid var(--separator); border-radius: 8px; background: var(--bg-primary); }
+.lost-police-guide summary { padding: 12px 14px; font-size: 14px; font-weight: 600; color: var(--label-primary); cursor: pointer; }
+.lost-police-guide ol { margin: 0; padding: 0 16px 12px 34px; font-size: 13px; line-height: 1.6; color: var(--label-secondary); }
+.lost-police-guide li + li { margin-top: 6px; }
+
+/* 대리수령 탭: 고객 후기 가로 스크롤 */
+.lost-reviews { margin-bottom: 20px; }
+.lost-review-strip { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 6px; -webkit-overflow-scrolling: touch; }
+.lost-review-card {
+    flex: 0 0 82%; max-width: 300px; scroll-snap-align: start; box-sizing: border-box;
+    display: flex; flex-direction: column; justify-content: space-between; gap: 10px;
+    padding: 14px; background: var(--bg-primary); border: 1px solid var(--separator); border-radius: 10px;
+}
+.lost-review-text {
+    margin: 0; font-size: 13.5px; line-height: 1.6; color: var(--label-primary); white-space: pre-line;
+    display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden;
+}
+.lost-review-meta { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 12px; color: var(--label-secondary); }
+.lost-review-shot { flex-shrink: 0; color: #3182f6; text-decoration: none; white-space: nowrap; }
+
 /* 진행상황 페이지: 최근 경찰청 등록 목록 */
 .lost-police-cases { margin-bottom: 20px; }
 .lost-police-title { margin: 0 0 4px; font-size: 15px; color: var(--label-primary); }

@@ -1712,6 +1712,12 @@ window.renderLostCases = async function() {
         trust.style.visibility = 'visible';
     });
 
+    const count = document.getElementById('lost-police-count');
+    if (count && data.total >= LOST_TRUST_MIN_COUNT) {
+        count.innerHTML = `<i class="ph-fill ph-seal-check"></i><span>${escapeHTML(t('lost.trust.count').replace('{n}', data.total))}</span>`;
+        count.hidden = false;
+    }
+
     const list = document.getElementById('lost-police-cases');
     if (list) {
         list.innerHTML = `<h4 class="lost-police-title">${escapeHTML(t('lost.cases.title'))}</h4>`
@@ -1722,6 +1728,51 @@ window.renderLostCases = async function() {
 document.addEventListener('DOMContentLoaded', () => {
     if (['/lost', '/lost-report', '/lost-status'].includes(window.location.pathname)) window.renderLostCases();
 });
+
+// 진행상황 페이지: 분실신고(경찰접수) / 대리수령 탭 전환
+window.switchLostStatusTab = function(tab) {
+    const cur = tab === 'proxy' ? 'proxy' : 'police';
+    document.querySelectorAll('[data-lost-status-tab]').forEach(btn => {
+        const on = btn.dataset.lostStatusTab === cur;
+        btn.classList.toggle('active', on);
+        btn.setAttribute('aria-selected', String(on));
+    });
+    const police = document.getElementById('lost-status-pane-police');
+    const proxy = document.getElementById('lost-status-pane-proxy');
+    if (police) police.hidden = cur !== 'police';
+    if (proxy) proxy.hidden = cur !== 'proxy';
+    if (cur === 'proxy') renderLostReviews();
+};
+
+// 대리수령 탭: 샤오훙수 고객 후기 (닉네임 가림·이미지 모자이크본, SEO 가이드와 같은 데이터)
+// 첫 화면 용량을 늘리지 않도록 탭을 열 때만 별도 청크로 불러옴
+let lostReviewsLang = null;
+async function renderLostReviews() {
+    const box = document.getElementById('lost-reviews');
+    const lang = localStorage.getItem('jeju_lang') || 'zh';
+    if (!box || lostReviewsLang === lang) return;
+    let reviews;
+    try {
+        reviews = (await import('../../../seo/reviews.json')).default.reviews || [];
+    } catch (e) { return; }
+    if (!reviews.length) return;
+    lostReviewsLang = lang;
+    const t = (k) => (window.t ? window.t(k) : k);
+    const txt = lang === 'en' ? 'en' : 'zh'; // 한국어 화면은 운영자 참고용 → 원문(중국어)
+    // 원본 캡처가 있는 후기 먼저, 그다음 최신순
+    const sorted = [...reviews].sort((a, b) => (!!b.img - !!a.img) || String(b.month).localeCompare(String(a.month)));
+    const cards = sorted.map(r => {
+        const region = r.region ? (r.region[txt] || r.region.zh || '') : '';
+        const meta = [r.nick, region, String(r.month || '').replace('-', '.')].filter(Boolean).map(escapeHTML).join(' · ');
+        const shot = r.img
+            ? `<a class="lost-review-shot" href="/img/reviews/${encodeURIComponent(r.img)}" target="_blank" rel="noopener"><i class="ph-duotone ph-image"></i> ${escapeHTML(t('lost.reviews.shot'))}</a>`
+            : '';
+        return `<div class="lost-review-card"><p class="lost-review-text">${escapeHTML(r[txt] || r.zh || '')}</p><div class="lost-review-meta"><span>${meta}</span>${shot}</div></div>`;
+    }).join('');
+    box.innerHTML = `<h4 class="lost-police-title"><i class="ph-fill ph-star" style="color:#f59e0b"></i> ${escapeHTML(t('lost.reviews.title'))}</h4>`
+        + `<p class="lost-police-hint">${escapeHTML(t('lost.reviews.hint'))}</p>`
+        + `<div class="lost-review-strip">${cards}</div>`;
+}
 
 window.closeLostUpsellModal = function(fromPopState = false) {
     const upsellModal = document.getElementById('lost-upsell-modal');
