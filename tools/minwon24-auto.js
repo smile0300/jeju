@@ -87,7 +87,17 @@ async function main() {
       const sub = await page.evaluate(async (src) => { (0, eval)(src); return await window.jejuSubmit(); }, fillSrc);
       log('SUBMIT', JSON.stringify(sub));
       await page.waitForFunction(() => new URLSearchParams(location.search).get('aplyCvlcptSn'), { timeout: 20000 }).catch(() => {});
-      const rec = await page.evaluate(async (src, o) => { (0, eval)(src); return await jejuRecord(o); }, fillSrc, opts).catch(e => ({ error: e.message }));
+      let rec = await page.evaluate(async (src, o) => { (0, eval)(src); return await jejuRecord(o); }, fillSrc, opts).catch(e => ({ error: e.message }));
+      if (!rec.sn) {
+        // 제출 뒤 페이지가 넘어가면 기록은 끝났는데 결과만 못 받는 경우가 있다(11-17 #643) → 시트에 오늘 접수번호가 적혔는지 본다
+        await new Promise(r => setTimeout(r, 5000));
+        const f = (await (await fetch(`${API}/run?lost_row=${lostRow}&peek=1`, { headers })).json().catch(() => ({}))).fields || {};
+        const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' });
+        if (f['경찰접수번호'] && String(f['경찰접수일'] || '').slice(0, 10) === today) {
+          log('기록 결과 못 받음 — 시트의 접수번호로 진행', rec.error || '');
+          rec = { sn: f['경찰접수번호'], pending: { office: f['경찰관서'] || '' } };
+        }
+      }
       if (!rec.sn) {
         log('제출 실패', JSON.stringify(rec));
         notify(`⚠ 경찰 등록 실패 #${lostRow}`, `${sub.error || sub.msg || ''} ${rec.error || ''}`.trim().slice(0, 150));

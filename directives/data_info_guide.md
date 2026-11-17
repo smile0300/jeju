@@ -280,3 +280,8 @@
 - `workers/weather-alerts` 크론 `*/10 * * * *` → `crons = []` (운영자 요청). 고객 기상특보 푸시 중단. 관리자 푸시 `/api/notify-admin`·구독 `/api/subscribe`는 fetch 핸들러라 계속 동작. 다시 켜려면 wrangler.toml 크론 복원 후 `npx wrangler deploy`.
 - 원인: 11-17 16:00·17:30 실행이 PC DNS 일시 장애(ENOTFOUND)로 중단, 오류 푸시까지 실패해 스택이 찍힘. 날씨 Worker 문제 아님.
 - `tools/net-retry.js`: 전역 fetch 감싸 연결 전 실패(ENOTFOUND·EAI_AGAIN·ECONNREFUSED 등)만 15초 간격 최대 4회 시도. 이미 보냈을 수 있는 실패는 중복 기록 방지 위해 재시도 안 함. `minwon24.js`·`minwon24-auto.js`에서 require. `notify()`는 실패해도 예외를 던지지 않음.
+
+## 2026-11-17 경찰 등록 후 위챗 안내 누락(#643) 수정
+- 증상: 21:30 Puppeteer 실제 제출 첫 건. 접수(L2026111700001125)와 시트·큐 기록은 됐는데 위챗 접수 안내가 안 나감.
+- 원인: 제출 뒤 경찰민원24 페이지가 넘어가면서 `jejuRecord` evaluate가 "Execution context was destroyed"로 결과를 못 돌려줌 → `rec.sn` 없음 → '제출 실패'로 보고 `minwon24.js wechat` 미호출.
+- 수정(`tools/minwon24-auto.js`): `rec.sn`이 없으면 5초 뒤 `/run?lost_row=N&peek=1`로 시트를 보고, 오늘 날짜 경찰접수번호가 있으면 그 번호·관서로 성공 처리 후 위챗 안내 진행.
