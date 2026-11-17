@@ -7,7 +7,7 @@ import { CHARTER_PRICES, CHARTER_COMPARE, CHARTER_UPDATED } from '../../data/cha
 // - 모집글은 올리는 즉시 공개된다 (운영자는 시트의 Hidden 칸에 Y를 넣어 숨길 수 있다).
 // - 지난 날짜의 글은 지우지 않고 "종료"로 남긴다 (이력이 쌓여야 다음 사람이 믿고 쓴다).
 // - 이 사이트는 차량을 운영하지 않는다.
-// - 화면은 위쪽 탭으로 나뉜다: 包车(참고 요금·업체 비교·고르는 법) / 拼车(동승 달력).
+// - 화면은 위쪽 탭으로 나뉜다: 拼车(동승 달력, 기본) / 包车(참고 요금·업체 비교·고르는 법).
 
 const CHECKS = ['plate', 'agency', 'insurance', 'license', 'price', 'cancel'];
 const LOCALES = { zh: 'zh-CN', ko: 'ko-KR', en: 'en-US' };
@@ -15,7 +15,8 @@ const HISTORY_DAYS = 90;                   // 달력에서 되돌아볼 수 있�
 const MOCK_KEY = 'jeju_carpool_mock';
 const IS_LOCAL = ['localhost', '127.0.0.1'].includes(window.location.hostname);
 
-const state = { posts: [], comments: {}, selected: null, loaded: false, mock: false, failed: false, formOpen: false, view: 'baoche' };
+// 처음 들어오면 동승(拼车) 탭부터 보여준다 — 동승 모집을 활성화하는 것이 우선
+const state = { posts: [], comments: {}, selected: null, loaded: false, mock: false, failed: false, formOpen: false, view: 'pinche' };
 
 const pad = (n) => String(n).padStart(2, '0');
 const toIso = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -99,7 +100,7 @@ function compareHtml() {
 }
 
 function tabsHtml() {
-    return `<div class="pl-seg" role="tablist">${['baoche', 'pinche'].map(v => `
+    return `<div class="pl-seg" role="tablist">${['pinche', 'baoche'].map(v => `
         <button type="button" role="tab" class="pl-seg-btn" data-view="${v}" aria-selected="${state.view === v}">
             <i class="ph-duotone ${v === 'baoche' ? 'ph-van' : 'ph-users-three'}"></i> ${tr(`charter.tab.${v}`)}</button>`).join('')}
     </div>`;

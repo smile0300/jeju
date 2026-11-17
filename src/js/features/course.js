@@ -83,7 +83,7 @@ function detailHtml() {
         <p class="pl-muted pl-hint"><i class="ph-duotone ph-info"></i> ${tr('course.copy_hint')}</p>
         ${timelineHtml(block)}
         <p class="pl-muted pl-hint"><i class="ph-duotone ph-info"></i> ${tr('course.info_hint')}</p>
-        <button type="button" class="res-submit-btn pl-mt" data-charter="${escapeHtml(block.region)}"><i class="ph-duotone ph-van"></i> <span>${tr('course.charter_cta')}</span></button>`;
+        <button type="button" class="res-submit-btn pl-mt" data-charter="${escapeHtml(block.region)}"><i class="ph-duotone ph-users-three"></i> <span>${tr('course.charter_cta')}</span></button>`;
 }
 
 function render() {
@@ -111,7 +111,7 @@ function render() {
             if (copy) { if (await copyText(copy.dataset.copy)) flashLabel(copy, tr('common.copied')); return; }
             const charter = e.target.closest('[data-charter]');
             if (charter) {
-                window.charterPresetRoute = charter.dataset.charter; // 차량 대절 화면에서 코스를 미리 선택
+                window.charterFocus = 'carpool'; // 코스에서는 대절이 아니라 동승 모집(달력)으로 보낸다
                 window.showSection('charter');
             }
         });

@@ -4,8 +4,7 @@
 import { tr, pick, escapeHtml } from './strings.js';
 import { BLOCKS, STOP_POS, STOP_TYPES, COVERS, isInSeason } from '../../../data/courses.js';
 import { JEJU_MAP, projectLatLng } from '../../../data/jeju-map.js';
-import { roadKm, taxiFare, krwToCny, driveMin, WALK_KM, WALK_KMH, HOTEL_BASE } from '../../../data/taxi.js';
-import { CHARTER_PRICES } from '../../../data/charter.js';
+import { roadKm, taxiFare, krwToCny, driveMin, WALK_KM, WALK_KMH, HOTEL_BASE, BUS_FARE } from '../../../data/taxi.js';
 
 const TYPE_ICON = { spot: 'ph-map-pin', cafe: 'ph-coffee', photo: 'ph-camera' };
 
@@ -126,14 +125,19 @@ export function legHtml(leg, { back = false, viaFerry = false } = {}) {
     return `<div class="pl-leg${back ? ' pl-leg-back' : ''}"><i class="ph-duotone ${icon}"></i> ${prefix}${text}</div>`;
 }
 
-/** 하루 택시비(숙소 왕복 포함)와 包车 하루 요금을 나란히 보여준다. compact = 여행 브리핑용(카드 테두리·안내문 없음) */
+/**
+ * 하루 택시비(숙소 왕복 포함)와 버스비를 나란히 보여준다. compact = 여행 브리핑용(카드 테두리·안내문 없음)
+ * 차량 대절(包车)은 운영자가 직접 운영하지 않아 코스 화면에서는 안내하지 않는다(대절 요금은 일일투어 예약 참고용으로 대절 탭에만)
+ */
 export function moveHtml(block, { compact = false } = {}) {
     const stops = block.stops;
     const legs = stops.slice(0, -1).map((_, i) => legInfo(block, i));
     const hotel = hotelLegs(block);
     if (!hotel || legs.some(l => !l)) return '';
     const total = [hotel.out, hotel.back, ...legs].reduce((sum, l) => sum + (l.fare || 0), 0);
-    const car = CHARTER_PRICES[0];
+    // 버스는 걷는 구간·배를 빼고 차로 가는 구간마다 한 번씩 탄다고 본다(섬 안 순환버스는 별도 요금이라 우도는 항구 왕복만)
+    const rides = [hotel.out, hotel.back, ...legs].filter(l => l.kind === 'taxi').length;
+    const busTotal = rides * BUS_FARE;
     const isUdo = block.transport === 'udo';
 
     const rows = `
@@ -146,8 +150,8 @@ export function moveHtml(block, { compact = false } = {}) {
             <div><strong>${tr('course.move.ferry')}</strong><span>${tr('course.move.ferry_note')}</span></div>
         </div>` : ''}
         <div class="pl-move-row">
-            <i class="ph-duotone ph-van"></i>
-            <div><strong>${tr('course.move.charter', { price: car.price })}</strong><span>${tr('course.move.charter_note')}</span></div>
+            <i class="ph-duotone ph-bus"></i>
+            <div><strong>${tr(isUdo ? 'course.move.bus_udo' : 'course.move.bus', { n: rides, ...money(busTotal) })}</strong><span>${tr('course.move.bus_note')}</span></div>
         </div>
         <p class="pl-muted pl-hint"><i class="ph-duotone ph-clock"></i> ${tr('course.move.time_note')}</p>`;
 

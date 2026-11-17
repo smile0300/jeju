@@ -111,7 +111,7 @@ const TRANSLATIONS = {
         // ── 홈 메뉴 ──
         'cctv.loading':   '正在加载实时画面...',
         'nav.weather':    '天气预报',
-        'nav.hallasan':   '汉拿山',
+        'nav.hallasan':   '汉拿山/火山丘',
         'nav.airport':    '机场信息',
         'nav.lost':       '失物招领',
         'lost.home.search':   '失物查询',
@@ -860,7 +860,7 @@ const TRANSLATIONS = {
 
         'cctv.loading':   'CCTV 화면을 불러오는 중입니다...',
         'nav.weather':    '날씨예보',
-        'nav.hallasan':   '한라산',
+        'nav.hallasan':   '한라산/오름',
         'nav.airport':    '공항정보',
         'nav.lost':       '분실물',
         'lost.home.search':   '분실조회',
@@ -1544,7 +1544,7 @@ const TRANSLATIONS = {
 
         'cctv.loading':   'Loading CCTV footage...',
         'nav.weather':    'Weather',
-        'nav.hallasan':   'Hallasan',
+        'nav.hallasan':   'Halla/Oreums', // 'Hallasan/Oreums'는 홈 타일에서 두 줄로 넘어가 줄 높이가 어긋남
         'nav.airport':    'Airport',
         'nav.lost':       'Lost & Found',
         'lost.home.search':   'Search',
