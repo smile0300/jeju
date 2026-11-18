@@ -151,10 +151,14 @@ function render() {
             if (state.detail === 'build' && onBuilderClick(e)) { render(); return; }
             const buildFrom = e.target.closest('[data-build-from]');
             if (buildFrom) startFromBlock(buildFrom.dataset.buildFrom);
-            if (buildFrom || e.target.closest('[data-build]')) { state.detail = 'build'; render(); window.scrollTo(0, 0); return; }
+            if (buildFrom || e.target.closest('[data-build]')) { openDetail('build'); return; }
             const open = e.target.closest('[data-open]');
-            if (open) { state.detail = open.dataset.open; state.detailDay = 0; render(); window.scrollTo(0, 0); return; }
-            if (e.target.closest('[data-back]')) { state.detail = null; render(); window.scrollTo(0, 0); return; }
+            if (open) { openDetail(open.dataset.open); return; }
+            if (e.target.closest('[data-back]')) {
+                // 상세는 기록 한 칸이라, 휴대폰 뒤로가기와 같은 길(popstate)로 목록에 돌아간다
+                if (history.state && history.state.courseDetail) { history.back(); return; }
+                state.detail = null; render(); window.scrollTo(0, 0); return;
+            }
             const copy = e.target.closest('[data-copy]');
             if (copy) { if (await copyText(copy.dataset.copy)) flashLabel(copy, tr('common.copied')); return; }
             const charter = e.target.closest('[data-charter]');
@@ -181,7 +185,34 @@ function render() {
     root.innerHTML = state.detail === 'build' ? builderHtml(state.budget) : state.detail ? detailHtml() : listHtml();
 }
 
-window.courseApp = { enter: render };
+// 코스 상세·직접 만들기는 /course 안에서 기록을 한 칸 쌓는다 → 뒤로가기(휴대폰·상단 ←)가 홈이 아니라 목록으로 간다
+let listScroll = 0;
+function openDetail(detail) {
+    listScroll = window.scrollY;
+    state.detail = detail;
+    state.detailDay = 0;
+    history.pushState({ section: 'course', inApp: true, courseDetail: detail }, '', '/course');
+    render();
+    window.scrollTo(0, 0);
+}
+
+/** 지금 기록 칸에 맞춰 상세/목록 상태를 맞춘다 */
+function syncFromHistory() {
+    const detail = (history.state && history.state.courseDetail) || null;
+    if (detail !== state.detail) state.detailDay = 0;
+    state.detail = detail;
+}
+
+window.courseApp = { enter: () => { syncFromHistory(); render(); } };
+
+window.addEventListener('popstate', () => {
+    if (window.location.pathname !== '/course') return;
+    const wasDetail = !!state.detail;
+    syncFromHistory();
+    if (!document.getElementById('course')?.classList.contains('active')) return;
+    render();
+    window.scrollTo(0, wasDetail && !state.detail ? listScroll : 0);
+});
 
 window.addEventListener('jeju:langchange', () => {
     if (document.getElementById('course')?.classList.contains('active')) render();
