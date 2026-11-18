@@ -33,6 +33,20 @@ public class WxA { [DllImport("user32.dll")] public static extern bool SetForegr
   [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);
   [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern int GetWindowText(IntPtr h, System.Text.StringBuilder s, int n);
   [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr h);
+  [DllImport("user32.dll")] public static extern bool IsIconic(IntPtr h);
+  [DllImport("user32.dll")] public static extern bool BringWindowToTop(IntPtr h);
+  [DllImport("user32.dll")] public static extern bool AttachThreadInput(uint a, uint b, bool attach);
+  [DllImport("kernel32.dll")] public static extern uint GetCurrentThreadId();
+  // 다른 프로그램이 앞에 있을 때 Windows의 창 전환 막기를 피한다: 앞 창의 입력 스레드에 잠깐 붙어서 전환
+  public static bool Front(IntPtr h) {
+    IntPtr fg = GetForegroundWindow(); if (fg == h) return true;
+    uint p; uint fgT = GetWindowThreadProcessId(fg, out p); uint me = GetCurrentThreadId();
+    keybd_event(0x12, 0, 0, UIntPtr.Zero); keybd_event(0x12, 0, 2, UIntPtr.Zero);
+    bool att = fgT != 0 && fgT != me && AttachThreadInput(me, fgT, true);
+    if (IsIconic(h)) ShowWindow(h, 9);
+    BringWindowToTop(h); SetForegroundWindow(h);
+    if (att) AttachThreadInput(me, fgT, false);
+    return GetForegroundWindow() == h; }
   // 위챗 메인 창 — 트레이로 숨겨져 있어도 찾는다 (따로 띄운 대화창이 있으면 Process.MainWindowHandle 은 그 창을 가리킨다)
   // 검색 팝업도 제목이 같은 별도 창이라 후보를 모두 돌려주고, 부르는 쪽이 창 종류(mmui::MainWindow)로 고른다
   public static System.Collections.Generic.List<IntPtr> TitledWindows(int[] pids) { var found = new System.Collections.Generic.List<IntPtr>();
@@ -104,9 +118,7 @@ function SendTo($expect, $text) {
     if ($input -and $input.Current.Name.Trim() -ne $expect) { $input = $null }
   }
   if (-not $input) { return 'send-fail 그 고객 대화방이 열리지 않음' }
-  [WxA]::SetForegroundWindow($proc.MainWindowHandle) | Out-Null
-  Start-Sleep -Milliseconds 300
-  if ([WxA]::GetForegroundWindow() -ne $proc.MainWindowHandle) { return 'send-fail 위챗 창이 앞에 있지 않음' }
+  if (-not (FrontRetry $proc.MainWindowHandle)) { return 'send-fail 위챗 창이 앞에 있지 않음' }
   Click $input; Start-Sleep -Milliseconds 300
   # 클릭 뒤에도 같은 방인지 한 번 더 (그 사이 다른 대화가 열렸으면 보내지 않는다)
   $again = $A::FromHandle($proc.MainWindowHandle).FindFirst($TS::Descendants, (Cond $A::AutomationIdProperty 'chat_input_field'))
@@ -131,6 +143,19 @@ function SendFromProfile($add, $text) {
   SendTo $expect $text
 }
 
+# 창을 앞으로 — 절전(모던 스탠바이)에서 깨어난 직후엔 몇 초간 실패한다(2026-11-17·18 깨어난 3~6초 뒤 실행이 '앞으로 가져오지 못함') → 최대 약 8초 재시도
+function FrontRetry($h) {
+  for ($t = 0; $t -lt 6; $t++) {
+    if ([WxA]::Front($h)) { Start-Sleep -Milliseconds 300; if ([WxA]::GetForegroundWindow() -eq $h) { return $true } }
+    if ($t -eq 3) { [WxA]::ShowWindow($h, 6) | Out-Null; Start-Sleep -Milliseconds 400; [WxA]::ShowWindow($h, 9) | Out-Null }   # 최소화 → 복원
+    Start-Sleep -Milliseconds 1200
+  }
+  return $false
+}
+
+# 화면 잠김(잠금 화면이 떠 있음)이면 위챗을 조작할 수 없다 → 바로 끝내고 다음 실행에 다시
+if (Get-Process -Name LogonUI -ErrorAction SilentlyContinue) { "FAIL 위챗 창을 쓸 수 없음 (화면 잠김)"; exit 1 }
+
 $procs = @(Get-Process -Name Weixin -ErrorAction SilentlyContinue)
 $script:pids = @($procs | ForEach-Object { $_.Id })
 $mainH = [IntPtr]::Zero
@@ -153,18 +178,17 @@ foreach ($c in 'mmui::VerifyFriendWindow', 'mmui::AddFriendWindow', 'mmui::Profi
 
 [WxA]::ShowWindow($proc.MainWindowHandle, 9) | Out-Null
 $search = $null
-for ($i = 0; $i -lt 5 -and -not $search; $i++) {
-  if ($i) { Start-Sleep -Milliseconds 600 }
+# 깨어난 직후·창을 막 꺼낸 직후엔 화면 요소가 늦게 채워진다 → 약 10초까지 기다리고, 중간에 한 번 최소화 → 복원으로 다시 그리게 한다
+for ($i = 0; $i -lt 12 -and -not $search; $i++) {
+  if ($i) { Start-Sleep -Milliseconds 800 }
+  if ($i -eq 6) { [WxA]::ShowWindow($proc.MainWindowHandle, 6) | Out-Null; Start-Sleep -Milliseconds 400; [WxA]::ShowWindow($proc.MainWindowHandle, 9) | Out-Null; Start-Sleep -Milliseconds 600 }
   $win = $null; try { $win = $A::FromHandle($proc.MainWindowHandle) } catch {}   # 다른 창이 닫히는 순간에는 잠깐 실패한다
   if ($win) { $search = $win.FindFirst($TS::Descendants, (New-Object System.Windows.Automation.AndCondition((Cond $A::ClassNameProperty 'mmui::XValidatorTextEdit'), (Cond $A::NameProperty 'Search')))) }
 }
 if (-not $search) { "FAIL 검색창을 못 찾음"; exit 1 }
 $script:oldClip = [System.Windows.Forms.Clipboard]::GetText()
-# 다른 창이 앞에 있으면 Windows가 창 전환을 막는다 → Alt 키를 한 번 눌렀다 떼면 허용됨
-[WxA]::keybd_event(0x12, 0, 0, [UIntPtr]::Zero); [WxA]::keybd_event(0x12, 0, 2, [UIntPtr]::Zero)
-[WxA]::SetForegroundWindow($proc.MainWindowHandle) | Out-Null
-Start-Sleep -Milliseconds 500
-if ([WxA]::GetForegroundWindow() -ne $proc.MainWindowHandle) { Fail '위챗 창을 앞으로 가져오지 못함' }
+# 다른 창이 앞에 있으면 Windows가 창 전환을 막는다 → Alt 키 + 입력 스레드 연결로 전환, 몇 번 다시 시도
+if (-not (FrontRetry $proc.MainWindowHandle)) { Fail '위챗 창을 앞으로 가져오지 못함' }
 if ($Requests -or $Accept) {
   # ── 받은 친구 요청 (Contacts 탭 → New Friends) ──
   # 줄 이름 = 별명 + 인사말 + 상태. 끝난 상태(Added 등)가 아닌 줄만 눌러 오른쪽 프로필에 수락 버튼이 있는지 본다.

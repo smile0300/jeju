@@ -70,6 +70,8 @@ async function main() {
     const prev = +(fs.existsSync(LAST) ? fs.readFileSync(LAST, 'utf8') : 0) || 0;
     if (Date.now() - prev < 10 * 60000) return;
     fs.writeFileSync(LAST, String(Date.now()));
+    // 절전에서 깨어나면 작업 스케줄러가 놓친 실행을 3~6초 만에 바로 띄운다 → 화면·위챗이 준비되도록 잠깐 기다림
+    await new Promise(r => setTimeout(r, 20000));
   }
   console.log(`\n=== ${new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Seoul' })} ${args.join(' ')}`);
   if (!NO_FRIENDS) log('FRIENDS\n' + m24('friends'));
