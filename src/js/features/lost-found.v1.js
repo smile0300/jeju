@@ -1692,6 +1692,27 @@ async function loadLostCases() {
     } catch (e) { /* 실패는 저장하지 않음 — 다음에 화면을 열 때 다시 시도 */ }
     return lostCasesData || { total: 0, cases: [] };
 }
+// 한국 날짜 (등록일이 오늘이면 NEW)
+function kstToday() {
+    return new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
+}
+// 경찰서명 표시: 알려진 관서는 zh/en으로, 처음 보는 관서는 한국어 원문 그대로 (공식 기록처럼 보여서 무방)
+const POLICE_OFFICE_NAMES = {
+    '제주동부': ['济州东部', 'Jeju Dongbu'], '제주서부': ['济州西部', 'Jeju Seobu'], '서귀포': ['西归浦', 'Seogwipo'],
+    '서울강남': ['首尔江南', 'Seoul Gangnam'], '서울강북': ['首尔江北', 'Seoul Gangbuk'], '서울마포': ['首尔麻浦', 'Seoul Mapo'],
+    '서울중부': ['首尔中部', 'Seoul Jungbu'], '서울동대문': ['首尔东大门', 'Seoul Dongdaemun'], '서울종로': ['首尔钟路', 'Seoul Jongno'],
+    '서울남대문': ['首尔南大门', 'Seoul Namdaemun'], '서울용산': ['首尔龙山', 'Seoul Yongsan'], '서울서초': ['首尔瑞草', 'Seoul Seocho'],
+    '서울송파': ['首尔松坡', 'Seoul Songpa'], '서울영등포': ['首尔永登浦', 'Seoul Yeongdeungpo'], '서울성동': ['首尔城东', 'Seoul Seongdong'],
+    '부산해운대': ['釜山海云台', 'Busan Haeundae'], '부산동부': ['釜山东部', 'Busan Dongbu'], '부산중부': ['釜山中部', 'Busan Jungbu'],
+    '부산진': ['釜山镇', 'Busanjin'], '인천공항': ['仁川机场', 'Incheon Airport'],
+};
+function policeOfficeLabel(ko) {
+    const lang = localStorage.getItem('jeju_lang') || 'zh';
+    if (lang === 'ko') return ko;
+    const hit = POLICE_OFFICE_NAMES[String(ko).replace(/경찰서$/, '')];
+    if (!hit) return ko;
+    return lang === 'en' ? `${hit[1]} Police Station` : `${hit[0]}警察署`;
+}
 window.renderLostCases = async function() {
     const data = await loadLostCases();
     const cases = Array.isArray(data.cases) ? data.cases : [];
@@ -1725,7 +1746,16 @@ window.renderLostCases = async function() {
             + `<details class="lost-police-guide"><summary><i class="ph-duotone ph-question"></i> ${escapeHTML(t('lost.guide.q'))}</summary><ol>`
             + ['a1', 'a2', 'a3'].map(k => `<li>${escapeHTML(t('lost.guide.' + k))}</li>`).join('')
             + `</ol></details>`
-            + cases.slice(0, 10).map(c => `<div class="lost-police-row"><span>${label(c)}</span><span class="lost-police-sn">${escapeHTML(c.sn)}</span><span class="lost-police-date">${md(c.d)}</span></div>`).join('');
+            + cases.slice(0, 10).map(c => {
+                const place = c.place ? ` · ${escapeHTML(lostChipLabel('region-category-chips', c.place))}` : '';
+                const isNew = c.d === kstToday();
+                const po = c.po ? `<span class="lost-police-po"><i class="ph-fill ph-shield-check"></i>${escapeHTML(policeOfficeLabel(c.po))}</span>` : '';
+                return `<div class="lost-police-row${isNew ? ' is-new' : ''}">`
+                    + `<div class="lost-police-line"><span class="lost-police-what">${label(c)}${place}</span>`
+                    + `<span class="lost-police-date">${isNew ? '<b class="lost-police-new">NEW</b>' : ''}${md(c.d)}</span></div>`
+                    + `<div class="lost-police-line">${po}<span class="lost-police-sn">${escapeHTML(c.sn)}</span></div>`
+                    + `</div>`;
+            }).join('');
     }
 };
 document.addEventListener('DOMContentLoaded', () => {

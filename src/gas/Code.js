@@ -401,8 +401,9 @@ function handleTaskQueue_(data) {
 
 /**
  * 사이트 공개용 경찰청 등록 사례 (접수 화면 신뢰 띠·진행상황 페이지)
- * 지역·물건 분류·접수일·가린 접수번호만 — 위챗 ID·상세 장소·설명·사진은 내보내지 않는다
+ * 지역·물건 분류·장소 유형(칩 값만)·접수일·경찰서명·가린 접수번호만 — 위챗 ID·상세 장소·설명·사진은 내보내지 않는다
  */
+var PUBLIC_PLACE_TYPES_ = ['공항', '호텔', '버스', '택시', '지하철/기차', '식당/카페', '관광지/거리', '기타'];
 function publicLostCases_() {
   var sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName('LostReport');
   if (!sheet || sheet.getLastRow() < 2) return json_({ total: 0, cases: [] });
@@ -419,7 +420,10 @@ function publicLostCases_() {
       d: String(col('경찰접수일') === -1 ? '' : r[col('경찰접수일')]).slice(0, 10),
       city: String(col('City') === -1 ? '' : r[col('City')]).slice(0, 10),
       cat: String(col('ItemCategory') === -1 ? '' : r[col('ItemCategory')]).slice(0, 12),
-      sn: sn.slice(0, -6) + '*****' + sn.slice(-1)  // 맨 끝 1자리 앞 5자리를 가림 (LOST112에서 개별 건 조회 불가하게)
+      // 장소는 신고서 칩 값일 때만 (자유 입력이 섞이지 않게)
+      place: (function (p) { return PUBLIC_PLACE_TYPES_.indexOf(p) === -1 ? '' : p; })(String(col('RegionCategory') === -1 ? '' : r[col('RegionCategory')]).trim()),
+      po: (function (o) { return /^[가-힣]{2,12}경찰서$/.test(o) ? o : ''; })(String(col('경찰관서') === -1 ? '' : r[col('경찰관서')]).trim()),
+      sn:sn.slice(0, -6) + '*****' + sn.slice(-1)  // 맨 끝 1자리 앞 5자리를 가림 (LOST112에서 개별 건 조회 불가하게)
     });
   });
   cases.reverse();
