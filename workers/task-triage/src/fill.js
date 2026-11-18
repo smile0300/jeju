@@ -40,7 +40,8 @@ export async function jejuFill(form, opts = {}) {
   const si = await waitFor(() => $('plcstFindSi'));
   let guName = '';
   if (si) {
-    const siOpt = pickOption(si, o => o.text.startsWith(form.sido));
+    // 팝업 직후엔 시·도 목록이 아직 비어 있을 수 있다(11-17 #640 '서울 못 찾음' 보류) → 채워질 때까지 기다림
+    const siOpt = await waitFor(() => pickOption(si, o => o.text.startsWith(form.sido)), 8000);
     if (siOpt) setVal(si, siOpt.value); else problems.push('관서 시·도 못 찾음: ' + form.sido);
     const gun = $('plcstFindGun');
     await waitFor(() => gun.options.length > 1);
