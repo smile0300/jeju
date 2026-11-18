@@ -4734,10 +4734,16 @@ body:not(.page-home) .wechat-float-btn {
 .lost-police-count[hidden] { display: none; }
 
 /* 경찰청 탭: 접수번호 안내 (접힘) */
-.lost-police-guide { margin: -8px 0 20px; border: 1px solid var(--separator); border-radius: 8px; background: var(--bg-primary); }
+.lost-police-guide { margin: 0 0 6px; border: 1px solid var(--separator); border-radius: 8px; background: var(--bg-primary); }
 .lost-police-guide summary { padding: 12px 14px; font-size: 14px; font-weight: 600; color: var(--label-primary); cursor: pointer; }
 .lost-police-guide ol { margin: 0; padding: 0 16px 12px 34px; font-size: 13px; line-height: 1.6; color: var(--label-secondary); }
 .lost-police-guide li + li { margin-top: 6px; }
+
+/* 대리수령 탭: 진행 상황 안내 접기 */
+.lost-progress-notice summary { display: flex; align-items: center; justify-content: space-between; cursor: pointer; list-style: none; }
+.lost-progress-notice summary::-webkit-details-marker { display: none; }
+.lost-progress-caret { display: inline-block; color: var(--label-secondary); transition: transform var(--duration-fast) var(--ease-out); }
+.lost-progress-notice[open] .lost-progress-caret { transform: rotate(180deg); }
 
 /* 대리수령 탭: 고객 후기 가로 스크롤 */
 .lost-reviews { margin-bottom: 20px; }

@@ -1293,6 +1293,8 @@ export function renderSuccessGoodsView(isLoadMore = false) {
     if (!container) return;
     renderMyCases();
     window.renderLostCases?.();
+    // 대리수령 탭이 기본 → 처음 열 때도 후기를 채움
+    if (!document.getElementById('lost-status-pane-proxy')?.hidden) renderLostReviews();
 
     if (!isLoadMore) {
         window.successVisibleCount = 5;
@@ -1311,7 +1313,6 @@ export function renderSuccessGoodsView(isLoadMore = false) {
                 <p style="font-size: 0.9rem; margin: 0;" data-i18n="lost.loading">${loadingText}</p>
             </div>
             <div style="text-align: center; margin-top: 10px;">
-                <p class="lost-cta-hint" style="font-size: 0.8rem; color: var(--text-secondary); margin: 0 0 8px;" data-i18n="lost.modal.cta_hint">${window.t ? window.t('lost.modal.cta_hint') : ''}</p>
                 <div style="display: flex; gap: 10px; justify-content: center; width: 100%;">
                     <button class="btn btn-primary btn-cta-success" style="flex: 1; padding: 12px 0;" onclick="openLostReportModal();" data-i18n="lost.modal.cta_report">
                         ${ctaReportText}
@@ -1349,7 +1350,6 @@ export function renderSuccessGoodsView(isLoadMore = false) {
                 <p style="font-size: 0.9rem; margin: 0;">${emptyText}</p>
             </div>
             <div style="text-align: center; margin-top: 10px;">
-                <p class="lost-cta-hint" style="font-size: 0.8rem; color: var(--text-secondary); margin: 0 0 8px;" data-i18n="lost.modal.cta_hint">${window.t ? window.t('lost.modal.cta_hint') : ''}</p>
                 <div style="display: flex; gap: 10px; justify-content: center; width: 100%;">
                     <button class="btn btn-primary btn-cta-success" style="flex: 1; padding: 12px 0;" onclick="openLostReportModal();" data-i18n="lost.modal.cta_report">
                         ${ctaReportText}
@@ -1518,7 +1518,6 @@ export function renderSuccessGoodsView(isLoadMore = false) {
         <div class="success-all-grid">${cardsHtml}</div>
         ${loadMoreHtml}
         <div style="text-align: center; margin-top: 16px; margin-bottom: 24px;">
-        <p class="lost-cta-hint" style="font-size: 0.8rem; color: var(--text-secondary); margin: 0 0 8px;" data-i18n="lost.modal.cta_hint">${window.t ? window.t('lost.modal.cta_hint') : ''}</p>
         <div style="display: flex; gap: 10px; justify-content: center; width: 100%;">
             <button class="btn btn-primary btn-cta-success" style="flex: 1; padding: 12px 0;" onclick="openLostReportModal();" data-i18n="lost.modal.cta_report">
                 ${window.t ? window.t('lost.modal.cta_report') : '분실신고신청'}
@@ -1701,7 +1700,7 @@ window.renderLostCases = async function() {
     const label = (c) => `${escapeHTML(lostChipLabel('city-category-chips', c.city))} · ${escapeHTML(lostChipLabel('item-category-chips', c.cat))}`;
     const md = (d) => escapeHTML(String(d || '').slice(5).replace('-', '/'));
 
-    // 신고서 화면(#lost-trust)과 조회 화면 신고 버튼 위(.lost-trust-search) 둘 다
+    // 신고서 화면(#lost-trust)
     document.querySelectorAll('.lost-trust').forEach(trust => {
         const head = data.total >= LOST_TRUST_MIN_COUNT
             ? t('lost.trust.count').replace('{n}', data.total)
@@ -1722,6 +1721,10 @@ window.renderLostCases = async function() {
     if (list) {
         list.innerHTML = `<h4 class="lost-police-title">${escapeHTML(t('lost.cases.title'))}</h4>`
             + `<p class="lost-police-hint">${escapeHTML(t('lost.cases.verify'))}</p>`
+            // 접수번호 안내 (온라인 셀프 조회는 확인되지 않아 약속하지 않음)
+            + `<details class="lost-police-guide"><summary><i class="ph-duotone ph-question"></i> ${escapeHTML(t('lost.guide.q'))}</summary><ol>`
+            + ['a1', 'a2', 'a3'].map(k => `<li>${escapeHTML(t('lost.guide.' + k))}</li>`).join('')
+            + `</ol></details>`
             + cases.slice(0, 10).map(c => `<div class="lost-police-row"><span>${label(c)}</span><span class="lost-police-sn">${escapeHTML(c.sn)}</span><span class="lost-police-date">${md(c.d)}</span></div>`).join('');
     }
 };

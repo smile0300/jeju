@@ -114,8 +114,7 @@
                     </div>
                 </div>
 
-                <!-- 분실물 수색 및 추적 의뢰 버튼 — 바로 위 신뢰 띠(경찰청 등록 사례)를 보고 신고를 결심하도록 -->
-                <a class="lost-trust lost-trust-search" href="/lost-status" onclick="event.preventDefault(); window.showSection && window.showSection('lost-status');" style="visibility:hidden;"></a>
+                <!-- 분실물 수색 및 추적 의뢰 버튼 -->
                 <div class="action-row">
                     <button class="lost-report-btn btn btn-primary" style="width: 100%;" onclick="window.goToLostRegister()">
                         <i class="ph-duotone ph-magnifying-glass-plus"></i> <span data-i18n="lost.report.btn">분실물을 못 찾으셨나요?</span>
@@ -600,46 +599,38 @@
         
         <!-- 분실신고(경찰접수) / 대리수령 탭 — 접수 후 안내는 위챗으로 하므로 '내 접수내역'은 표시하지 않음 -->
         <div class="lost-status-tabs" role="tablist">
-            <button type="button" class="lost-status-tab active" role="tab" aria-selected="true" data-lost-status-tab="police" onclick="window.switchLostStatusTab('police')">
-                <i class="ph-duotone ph-seal-check"></i>&nbsp;<span data-i18n="lost.status.tab.police">警察厅申报</span>
-            </button>
-            <button type="button" class="lost-status-tab" role="tab" aria-selected="false" data-lost-status-tab="proxy" onclick="window.switchLostStatusTab('proxy')">
+            <button type="button" class="lost-status-tab active" role="tab" aria-selected="true" data-lost-status-tab="proxy" onclick="window.switchLostStatusTab('proxy')">
                 <i class="ph-duotone ph-package"></i>&nbsp;<span data-i18n="lost.home.proxy">代领服务</span>
             </button>
+            <button type="button" class="lost-status-tab" role="tab" aria-selected="false" data-lost-status-tab="police" onclick="window.switchLostStatusTab('police')">
+                <i class="ph-duotone ph-seal-check"></i>&nbsp;<span data-i18n="lost.status.tab.police">警察厅申报</span>
+            </button>
         </div>
 
-        <div id="lost-status-pane-police">
-            <!-- 누적 경찰청 등록 건수 (renderLostCases가 채움, 기준 미만이면 숨김) -->
-            <div id="lost-police-count" class="lost-police-count" hidden></div>
-            <!-- 최근 경찰청 등록 사례 (가린 접수번호) -->
-            <div id="lost-police-cases" class="lost-police-cases"></div>
-            <!-- 접수번호 안내 (온라인 셀프 조회는 확인되지 않아 약속하지 않음) -->
-            <details class="lost-police-guide">
-                <summary><i class="ph-duotone ph-question"></i> <span data-i18n="lost.guide.q">受理编号是什么？怎么用？</span></summary>
-                <ol>
-                    <li data-i18n="lost.guide.a1">编号由韩国警察厅失物系统（LOST112）发放，格式为 L + 登记日期 + 流水号，与亲自到警察局报案效力相同。</li>
-                    <li data-i18n="lost.guide.a2">登记完成后，完整编号会通过微信发给您（这里为保护隐私隐藏了5位）。</li>
-                    <li data-i18n="lost.guide.a3">物品找到后，携带护照并出示此编号即可到保管的警察署领取，也可以委托我们代领并寄回。</li>
-                </ol>
-            </details>
-            <button type="button" class="btn btn-primary lost-status-cta" onclick="openLostReportModal();" data-i18n="lost.modal.cta_report">申报遗失</button>
-        </div>
-
-        <div id="lost-status-pane-proxy" hidden>
+        <div id="lost-status-pane-proxy">
         <!-- 샤오훙수 고객 후기 (seo/reviews.json, 탭을 열 때 불러옴) -->
         <div id="lost-reviews" class="lost-reviews"></div>
-        <!-- 진행상황 안내 -->
-        <div style="margin-bottom: 20px; padding: 16px; background: rgba(49, 130, 246, 0.05); border: 1px solid rgba(49, 130, 246, 0.1); border-radius: 8px;">
-            <h4 style="margin: 0 0 8px 0; color: var(--label-primary); font-size: 15px; display: flex; align-items: center; gap: 6px;"><i class="ph-fill ph-info" style="color: #3182f6;"></i> <span data-i18n="lost.notice.progress_title">진행 상황 안내</span></h4>
-            <ul style="padding-left: 20px; color: var(--color-text-sub); line-height: 1.6; font-size: 13.5px; margin: 0;">
+        <!-- 진행상황 안내 (제목을 누르면 접고 펼침) -->
+        <details class="lost-progress-notice" open style="margin-bottom: 20px; padding: 16px; background: rgba(49, 130, 246, 0.05); border: 1px solid rgba(49, 130, 246, 0.1); border-radius: 8px;">
+            <summary><h4 style="margin: 0; color: var(--label-primary); font-size: 15px; display: flex; align-items: center; gap: 6px;"><i class="ph-fill ph-info" style="color: #3182f6;"></i> <span data-i18n="lost.notice.progress_title">진행 상황 안내</span></h4><i class="ph-bold ph-caret-down lost-progress-caret"></i></summary>
+            <ul style="padding-left: 20px; color: var(--color-text-sub); line-height: 1.6; font-size: 13.5px; margin: 8px 0 0;">
                 <li style="margin-bottom: 6px;" data-i18n-html="lost.notice.prog1"><b>[접수]</b> 분실물이 접수되어 정보를 확인 중입니다.</li>
                 <li style="margin-bottom: 6px;" data-i18n-html="lost.notice.prog2"><b>[물품확인중]</b> 물건이 보관소에 있는지 확인하고 있습니다.</li>
                 <li style="margin-bottom: 6px;" data-i18n-html="lost.notice.prog3"><b>[대리수령완료]</b> 대리인이 보관소에서 물품을 수령하여 보관 중입니다.</li>
                 <li style="margin-bottom: 6px;" data-i18n-html="lost.notice.prog4"><b>[발송완료]</b> 요청하신 주소로 물품이 발송되었습니다.</li>
                 <li style="margin-bottom: 0;" data-i18n-html="lost.notice.prog5"><b>[직접수령]</b> 고객님께서 직접 물품을 찾아가셨습니다.</li>
             </ul>
-        </div>
+        </details>
         <div id="lost-success-container" class="lost-success-container"></div>
         </div>
+
+        <div id="lost-status-pane-police" hidden>
+            <!-- 누적 경찰청 등록 건수 (renderLostCases가 채움, 기준 미만이면 숨김) -->
+            <div id="lost-police-count" class="lost-police-count" hidden></div>
+            <!-- 최근 경찰청 등록 사례 (가린 접수번호) + 접수번호 안내 — renderLostCases가 채움 -->
+            <div id="lost-police-cases" class="lost-police-cases"></div>
+            <button type="button" class="btn btn-primary lost-status-cta" onclick="openLostReportModal();" data-i18n="lost.modal.cta_report">申报遗失</button>
+        </div>
+
     </div>
 </section>
