@@ -6,11 +6,11 @@
     const LOST_REPLACE_MAP = [
         { origId: 'home-hallasan-btn', subId: 'lost-sub-search',   animClass: 'lost-sub-in-top',    outClass: 'lost-sub-out-top' },
         { origId: 'home-festival-btn', subId: 'lost-sub-status',   animClass: 'lost-sub-in-left',   outClass: 'lost-sub-out-left' },
-        { origId: 'home-reward-btn',   subId: 'lost-sub-register', animClass: 'lost-sub-in-right',  outClass: 'lost-sub-out-right' },
+        { origId: 'home-reservation-btn', subId: 'lost-sub-register', animClass: 'lost-sub-in-right',  outClass: 'lost-sub-out-right' }, // 가운데 오른쪽 칸 = 예약신청
         { origId: 'home-food-btn',     subId: 'lost-sub-proxy',    animClass: 'lost-sub-in-bottom', outClass: 'lost-sub-out-bottom' }, // 가운데 아래 칸 = 차량
     ];
 
-    const CORNER_BTN_IDS = ['home-weather-btn', 'home-airport-btn', 'home-course-btn', 'home-reservation-btn'];
+    const CORNER_BTN_IDS = ['home-weather-btn', 'home-airport-btn', 'home-course-btn', 'home-reward-btn'];
 
     // 펼침도 기록 한 칸으로 남겨, 휴대폰 뒤로가기가 사이트를 떠나지 않고 메뉴를 접게 한다
     function pushHomeExpand(kind) {
@@ -154,9 +154,10 @@
         { origId: 'home-airport-btn',   subId: 'res-sub-activity',   animClass: 'lost-sub-in-top',    outClass: 'lost-sub-out-top' },
         { origId: 'home-festival-btn',  subId: 'res-sub-skin',       animClass: 'lost-sub-in-left',   outClass: 'lost-sub-out-left' },
         { origId: 'home-lost-btn',      subId: 'res-sub-cloth',      animClass: 'lost-sub-in-right',  outClass: 'lost-sub-out-right' },
-        { origId: 'home-reward-btn',    subId: 'res-sub-snap',       animClass: 'lost-sub-in-right',  outClass: 'lost-sub-out-right' },
+        // 예약신청이 가운데 오른쪽 칸이라 아래 줄 세 칸에 스냅·렌트·기타를 순서대로 둔다
+        { origId: 'home-course-btn',    subId: 'res-sub-snap',       animClass: 'lost-sub-in-bottom', outClass: 'lost-sub-out-bottom' },
         { origId: 'home-food-btn',      subId: 'res-sub-rental',     animClass: 'lost-sub-in-bottom', outClass: 'lost-sub-out-bottom' },
-        { origId: 'home-course-btn',    subId: 'res-sub-other',      animClass: 'lost-sub-in-bottom', outClass: 'lost-sub-out-bottom' },
+        { origId: 'home-reward-btn',    subId: 'res-sub-other',      animClass: 'lost-sub-in-bottom', outClass: 'lost-sub-out-bottom' },
     ];
 
     window.toggleReservationExpand = function() {
@@ -270,11 +271,11 @@
     const CHARTER_REPLACE_MAP = [
         { origId: 'home-course-btn',      subId: 'charter-sub-pinche', animClass: 'lost-sub-in-left',  outClass: 'lost-sub-out-left' },
         { origId: 'home-lost-btn',        subId: 'charter-sub-fare',   animClass: 'lost-sub-in-top',   outClass: 'lost-sub-out-top' },
-        { origId: 'home-reservation-btn', subId: 'charter-sub-baoche', animClass: 'lost-sub-in-right', outClass: 'lost-sub-out-right' },
+        { origId: 'home-reward-btn',      subId: 'charter-sub-baoche', animClass: 'lost-sub-in-right', outClass: 'lost-sub-out-right' }, // 오른쪽 아래 칸 = 맛집
     ];
 
     // 펼친 동안 숨길 나머지 버튼 (그리드 자리 유지를 위해 visibility 사용)
-    const CHARTER_HIDE_IDS = ['home-weather-btn', 'home-hallasan-btn', 'home-airport-btn', 'home-festival-btn', 'home-reward-btn'];
+    const CHARTER_HIDE_IDS = ['home-weather-btn', 'home-hallasan-btn', 'home-airport-btn', 'home-festival-btn', 'home-reservation-btn'];
 
     window.toggleCharterExpand = function() {
         if (charterExpanded) {

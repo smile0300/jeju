@@ -84,11 +84,10 @@
                 <span class="item-icon"><i class="ph-duotone ph-magnifying-glass color-lost"></i></span>
                 <span class="item-label" data-i18n="nav.lost">失物招领</span>
             </a>
-            <!-- 맛집(BETA). 예전 용돈 타일 자리 — id·class(home-reward-btn/item-reward)는 홈 그리드 펼침 로직(home.js)이 칸 이름으로 참조하므로 유지 -->
-            <a href="/eats" class="home-item item-reward" id="home-reward-btn" onclick="event.preventDefault(); showSection('eats')">
-                <span class="item-icon"><i class="ph-duotone ph-fork-knife color-reward"></i></span>
-                <span class="item-label" data-i18n="nav.eats">济州美食</span>
-                <span class="coming-soon-badge">BETA</span>
+            <!-- 예약신청 버튼 (가운데 오른쪽 칸) -->
+            <a href="/reservation" class="home-item item-reservation" id="home-reservation-btn" onclick="event.preventDefault(); window.toggleReservationExpand()">
+                <span class="item-icon"><i class="ph-duotone ph-calendar-check color-reservation"></i></span>
+                <span class="item-label" data-i18n="nav.reservation">预约申请</span>
             </a>
             <!-- 여행 코스 & 차량 대절/동승 (id·class는 홈 그리드 전환 로직이 참조하므로 유지. 차량은 가운데 아래 칸) -->
             <a href="/course" class="home-item item-course" id="home-course-btn" onclick="event.preventDefault(); showSection('course')">
@@ -101,10 +100,11 @@
                 <span class="item-label" data-i18n="nav.charter">拼车·交通</span>
                 <span class="coming-soon-badge">BETA</span>
             </a>
-            <!-- 예약신청 버튼 -->
-            <a href="/reservation" class="home-item item-reservation" id="home-reservation-btn" onclick="event.preventDefault(); window.toggleReservationExpand()">
-                <span class="item-icon"><i class="ph-duotone ph-calendar-check color-reservation"></i></span>
-                <span class="item-label" data-i18n="nav.reservation">预约申请</span>
+            <!-- 맛집(BETA, 오른쪽 아래 칸). 예전 용돈 타일 자리 — id·class(home-reward-btn/item-reward)는 홈 그리드 펼침 로직(home.js)이 칸 이름으로 참조하므로 유지 -->
+            <a href="/eats" class="home-item item-reward" id="home-reward-btn" onclick="event.preventDefault(); showSection('eats')">
+                <span class="item-icon"><i class="ph-duotone ph-fork-knife color-reward"></i></span>
+                <span class="item-label" data-i18n="nav.eats">济州美食</span>
+                <span class="coming-soon-badge">BETA</span>
             </a>
             <!-- ===== 분실물 서브 버튼 (평소 숨김, 분실물 클릭 시 해당 자리에 삽입) ===== -->
             <!-- 조회: 날씨예보 자리 대체 -->
