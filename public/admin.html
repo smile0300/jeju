@@ -721,11 +721,15 @@
     var monthRows = ledger().rows.filter(function (r) { return monthOf(r) === month; });
     var sum = function (rs) { return rs.reduce(function (s, r) { return s + (pc === -1 ? 0 : num(r.v[pc])); }, 0); };
     var stats = el('div', 'stats');
+    var BREAK_EVEN = 170000;   // 월 손익분기점 (운영자 지정 2026-11-18)
+    var gap = sum(monthRows) - BREAK_EVEN;
     [[won(sum(monthRows)), '이번 달 순수익 · ' + monthRows.length + '건'],
-     [won(sum(rows)), ($('filter').value || $('q').value.trim() ? '선택 결과' : '전체') + ' 순수익 · ' + rows.length + '건']
+     [(gap > 0 ? '+' : '') + won(gap), '이번 달 손익분기(' + won(BREAK_EVEN) + ') 대비', gap >= 0 ? '#16a34a' : '#dc2626']
     ].forEach(function (s) {
       var d = el('div', 'stat');
-      d.appendChild(el('b', '', s[0]));
+      var b = el('b', '', s[0]);
+      if (s[2]) b.style.color = s[2];
+      d.appendChild(b);
       d.appendChild(el('span', '', s[1]));
       stats.appendChild(d);
     });
