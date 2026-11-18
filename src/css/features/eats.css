@@ -1,0 +1,157 @@
+/* ===== 맛집 (BETA) — src/js/features/eats.js ===== */
+.eat-beta {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    border-radius: 12px;
+    background: #FFF4E6;
+    color: #8A4B08;
+    font-size: 0.8rem;
+    line-height: 1.5;
+}
+html[lang="ko"] .eat-beta { word-break: keep-all; } /* 중국어에 keep-all을 걸면 문장 중간에서 어색하게 줄바꿈됨 */
+.eat-beta-tag {
+    flex-shrink: 0;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: #E67700;
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    line-height: 1.6;
+}
+
+.eat-filters { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.eat-search-row { display: flex; gap: 8px; }
+.eat-search {
+    flex: 1;
+    min-width: 0;
+    min-height: 42px;
+    padding: 0 12px;
+    border: 1px solid var(--separator);
+    border-radius: 12px;
+    background: var(--bg-card);
+    color: var(--label-primary);
+    font: inherit;
+    font-size: 16px; /* iOS 확대 방지 */
+}
+.eat-more-btn {
+    flex-shrink: 0;
+    min-height: 42px;
+    padding: 0 12px;
+    border: 1px solid var(--separator);
+    border-radius: 12px;
+    background: var(--bg-card);
+    color: var(--label-primary);
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.eat-more-btn.active { border-color: var(--accent); color: var(--accent-active); background: var(--accent-subtle); }
+.eat-count-dot {
+    display: inline-block;
+    min-width: 18px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.72rem;
+    line-height: 18px;
+    text-align: center;
+}
+.eat-panel { display: flex; flex-direction: column; gap: 6px; padding-top: 2px; }
+.eat-panel[hidden] { display: none; }
+.eat-group-label { font-size: 0.78rem; font-weight: 800; color: var(--label-secondary); margin-top: 4px; }
+.eat-kw .pl-chip { min-height: 34px; padding: 0 12px; font-size: 0.82rem; }
+.eat-filters .pl-filter .pl-chip { min-height: 36px; font-size: 0.85rem; }
+
+.eat-result-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 4px 2px 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--label-secondary);
+}
+.eat-reset { border: 0; background: none; color: var(--accent); font: inherit; font-weight: 700; cursor: pointer; padding: 4px 0; }
+.eat-empty { text-align: center; color: var(--label-secondary); padding: 40px 0; font-size: 0.9rem; }
+
+.eat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--separator);
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 10px;
+    box-shadow: var(--shadow-sm);
+}
+.eat-head { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+.eat-name-wrap { min-width: 0; }
+.eat-name { margin: 0; font-size: 1.02rem; font-weight: 800; color: var(--label-primary); overflow-wrap: anywhere; }
+.eat-sub { font-size: 0.78rem; color: var(--label-secondary); margin-top: 2px; overflow-wrap: anywhere; }
+.eat-price { flex-shrink: 0; font-size: 0.82rem; font-weight: 800; color: #E67700; text-align: right; font-variant-numeric: tabular-nums; }
+
+.eat-tags { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin-top: 8px; }
+.eat-cu { padding: 2px 8px; border-radius: 6px; background: var(--fill-secondary); color: var(--label-primary); font-size: 0.74rem; font-weight: 700; }
+.eat-rating { font-size: 0.8rem; font-weight: 800; color: #F59F00; }
+.eat-rating small { font-weight: 600; color: var(--label-secondary); font-size: 0.74rem; }
+
+.eat-badges { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.eat-badge { padding: 2px 7px; border-radius: 999px; font-size: 0.7rem; font-weight: 700; background: var(--accent-subtle); color: var(--accent-active); }
+.eat-badge-hyangto, .eat-badge-century { background: #EBFBEE; color: #2B8A3E; }
+.eat-badge-goodprice { background: #FFF4E6; color: #D9480F; }
+.eat-badge-locals, .eat-badge-tv { background: #F3F0FF; color: #6741D9; }
+.eat-badge-twoplus, .eat-badge-booking, .eat-badge-nokids { background: #FFF5F5; color: #C92A2A; }
+
+.eat-meta { display: flex; flex-direction: column; gap: 2px; margin-top: 8px; font-size: 0.78rem; color: var(--label-secondary); overflow-wrap: anywhere; }
+.eat-meta b { color: var(--label-primary); font-weight: 700; margin-right: 4px; }
+
+.eat-more { margin-top: 8px; font-size: 0.8rem; }
+.eat-more summary { cursor: pointer; color: var(--accent); font-weight: 700; }
+.eat-ko { margin: 6px 0 0; line-height: 1.5; color: var(--label-primary); overflow-wrap: anywhere; }
+.eat-ko b { color: var(--label-secondary); margin-right: 4px; }
+.eat-ko-sub { color: var(--label-secondary); }
+
+.eat-addr { margin-top: 8px; font-size: 0.78rem; color: var(--label-secondary); overflow-wrap: anywhere; }
+.eat-addr-hint { display: block; font-size: 0.72rem; }
+
+.eat-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); gap: 6px; margin-top: 10px; }
+.eat-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px;
+    padding: 0 6px;
+    border: 1px solid var(--separator);
+    border-radius: 10px;
+    background: var(--bg-card);
+    color: var(--label-primary);
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+}
+.eat-btn-main { background: #03C75A; border-color: #03C75A; color: #fff; }
+
+.eat-load-more, .eat-report {
+    display: block;
+    width: 100%;
+    min-height: 44px;
+    margin-top: 6px;
+    border: 1px solid var(--separator);
+    border-radius: 12px;
+    background: var(--bg-card);
+    color: var(--label-primary);
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+.eat-report { border: 0; background: none; color: var(--label-secondary); font-size: 0.8rem; font-weight: 600; text-decoration: underline; }

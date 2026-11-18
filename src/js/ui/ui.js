@@ -55,10 +55,10 @@ const SEO_META = {
         desc: 'Reference prices for hiring a car with a driver in Jeju, how to pick a legal operator, and ride-share matching. 济州包车参考价格、挑选方法和拼车对接。',
         keywords: 'Jeju private car hire, Jeju driver, 济州包车, 济州拼车, 제주 차량 대절'
     },
-    'reward': {
-        title: 'Jeju Live Bounty Missions & Rewards | 济州红包任务',
-        desc: 'Earn rewards by helping deliver lost items to China. Jeju Live bounty missions connect travelers returning to China with lost item owners. 顺路赚零花钱，帮忙带失物回中国。',
-        keywords: 'Jeju reward mission, 济州红包, 回国带物品, Jeju bounty traveler'
+    'eats': {
+        title: 'Jeju Restaurants & Cafés Finder (BETA) - Jeju Live | 济州美食筛选',
+        desc: 'Find Jeju restaurants and cafés by area, food, price per person and features — black pork, seafood, noodles, local favorites, solo-friendly, Chinese menu. 按区域、菜系、人均价格筛选济州餐厅和咖啡馆。',
+        keywords: 'Jeju restaurants, Jeju black pork, Jeju seafood, Jeju cafe, 济州美食, 济州黑猪肉, 济州海鲜, 济州咖啡馆, 제주 맛집'
     }
 };
 
@@ -144,7 +144,6 @@ export function showSection(sectionId, pushHistory = true) {
             if (arriveData && !arriveData.innerHTML.includes('flight-row')) window.fetchFlights('arrive');
         }
         if (sectionId === 'festival' && window.fetchFestivals) window.fetchFestivals();
-        if (sectionId === 'reward' && window.initReward) window.initReward();
     }
 
     // 예약 유형 드롭다운은 진입할 때마다 현재 유형(currentReservationType)으로 갱신해야 한다.
@@ -154,6 +153,7 @@ export function showSection(sectionId, pushHistory = true) {
     // 여행 일정 · 추천 코스 · 차량 대절 화면은 들어올 때마다 현재 언어·주소 기준으로 다시 그린다
     if (sectionId === 'trip') window.tripApp?.enter();
     if (sectionId === 'course') window.courseApp?.enter();
+    if (sectionId === 'eats') window.eatsApp?.enter();
     if (sectionId === 'charter') window.charterApp?.enter();
 
     // 진행상황 화면엔 이 기기에서 접수한 내 건을 맨 위에 다시 그린다

@@ -55,10 +55,10 @@ const SEO_META = {
         desc: 'Find travelers to share a ride in Jeju, plus official taxi and bus fares and private car reference prices. 济州拼车对接、出租车和公交车官方价格、包车参考价。',
         keywords: 'Jeju ride share, Jeju taxi fare, Jeju bus fare, Jeju private car hire, 济州拼车, 济州打车价格, 济州公交, 济州包车, 제주 동승, 제주 택시 요금, 제주 버스 요금'
     },
-    'reward': {
-        title: 'Jeju Live Bounty Missions & Rewards | 济州红包任务',
-        desc: 'Earn rewards by helping deliver lost items to China. Jeju Live bounty missions connect travelers returning to China with lost item owners. 顺路赚零花钱，帮忙带失物回中国。',
-        keywords: 'Jeju reward mission, 济州红包, 回国带物品, Jeju bounty traveler'
+    'eats': {
+        title: 'Jeju Restaurants & Cafés Finder (BETA) - Jeju Live | 济州美食筛选',
+        desc: 'Find Jeju restaurants and cafés by area, food, price per person and features — black pork, seafood, noodles, local favorites, solo-friendly, Chinese menu. 按区域、菜系、人均价格筛选济州餐厅和咖啡馆。',
+        keywords: 'Jeju restaurants, Jeju black pork, Jeju seafood, Jeju cafe, Jeju local food, 济州美食, 济州黑猪肉, 济州海鲜, 济州咖啡馆, 济州本地人餐厅, 제주 맛집, 제주 흑돼지, 제주 향토음식'
     }
 };
 
@@ -105,10 +105,10 @@ const ROUTE_INTRO = {
         zh: '找同一天、同方向的游客一起拼车，分摊费用。这里还有济州出租车和公交车的官方价格、从济州君悦酒店打车的参考价，以及带司机包车的参考价格和分辨合法包车的方法。',
         ko: '같은 날 같은 방향으로 가는 여행자와 동승해 비용을 나누세요. 제주 택시·버스 공식 요금과 그랜드 하얏트 제주 기준 택시 예상 요금, 기사 포함 차량 대절 참고 가격과 합법 업체 구별법도 정리했습니다.'
     },
-    'reward': {
-        en: 'Flying home to China from Jeju? Bounty missions let travelers carry a recovered lost item back for its owner and earn a reward. See open missions, how pickup and hand-over work, and what you receive.',
-        zh: '从济州回中国？红包任务让顺路的游客帮失主把找回的失物带回国，完成后获得红包奖励。这里可以查看进行中的任务、领取和交接流程以及奖励内容。',
-        ko: '제주에서 중국으로 돌아가는 여행자가 되찾은 분실물을 주인에게 전해주고 보상을 받는 미션입니다. 진행 중인 미션, 수령·전달 방법, 보상 내용을 확인하세요.'
+    'eats': {
+        en: 'Jeju restaurants and cafés you can filter by area (Jeju City, Aewol, Hallim, Jungmun, Seogwipo, Seongsan, Udo, Gujwa, Jocheon and more), food type (black pork, seafood, noodles, soups, local home food, cafés), price per person and features such as solo-friendly, Chinese or English menu, short wait and breakfast. Includes places officially designated by Jeju for local food and fair prices, with opening hours, Google ratings and Naver, Kakao and Google map links.',
+        zh: '按区域（济州市区、涯月、翰林、中文、西归浦、城山、牛岛、旧左、朝天等）、菜系（黑猪肉、海鲜、面食、汤饭、乡土料理、咖啡馆）、人均价格和特色（可一人用餐、中文/英文菜单、排队短、早餐）筛选济州餐厅和咖啡馆。收录济州官方认定的乡土美食店和平价良心店，附营业时间、Google评分以及Naver、Kakao、Google地图链接。',
+        ko: '지역(제주시내·애월·한림·중문·서귀포·성산·우도·구좌·조천 등), 음식 종류(흑돼지·해산물·국수·국밥·향토음식·카페), 1인 가격, 키워드(1인 식사·중국어/영어 메뉴·대기 짧음·아침 식사)로 제주 식당과 카페를 찾아보세요. 제주도 지정 향토음식점·착한가격업소를 포함해 영업시간, 구글 평점, 네이버·카카오·구글 지도 링크를 함께 보여줍니다.'
     }
 };
 
@@ -158,7 +158,7 @@ const routes = [
     'trip',
     'course',
     'charter',
-    'reward'
+    'eats'
 ];
 
 let indexHtmlContent = fs.readFileSync(indexFile, 'utf-8');

@@ -15,12 +15,12 @@ import { fetchFlights, switchFlightTab } from '../features/airport.js';
 import { fetchFoundGoods, switchLostView, openLostDetailModalByIndex, openLostReportModal, handleLostImageChange, submitLostReport, showWechatQR, fetchSuccessStories } from '../features/lost-found.v1.js';
 import { fetchFestivals, initFestivalFilters } from '../features/festival.js';
 import { initReservationSection, adjustParty, submitReservation, changeReservationType } from '../features/reservation.js';
-import { initReward } from '../features/reward.js';
 import { showSection, goBack, openWechatQR, closeWechatQR, openFeatureModal, closeFeatureModal, submitFeatureRequest, openCSModal, closeCSModal, submitCSFeedback, copyWechatId, copyAndOpenWechat, copyText, wechatEnv, openWeatherSummaryModal, closeWeatherSummaryModal, openShareModal, closeShareModal, shareToPlatform } from '../ui/ui.js';
 import '../ui/home.js';
 import '../ui/home-info-banner.js';
 import '../features/trip.js';
 import '../features/course.js';
+import '../features/eats.js';
 import '../features/oreum.js';
 import '../features/charter.js';
 import '../features/brief-card.js';
@@ -221,7 +221,6 @@ window.submitCSFeedback = submitCSFeedback;
 
 window.fetchHallasanStatus = fetchHallasanStatus;
 window.fetchFestivals = fetchFestivals;
-window.initReward = initReward;
 window.fetchFlights = fetchFlights;
 window.initReservationSection = initReservationSection;
 window.adjustParty = adjustParty;
@@ -332,13 +331,14 @@ const ROUTE_MAP = {
     '/airport': 'airport',
     '/festival': 'festival',
     '/lost': 'lost',
-    '/reward': 'reward',
+    '/eats': 'eats',
+    '/reward': 'eats', // 용돈(红包) 페이지가 맛집으로 바뀜 — 예전 링크 호환
     '/pickup': 'pickup',
     '/terms': 'terms',
     '/privacy': 'privacy',
     '/lost-report': 'lost-report',
     '/lost-status': 'lost-status',
-    '/food': 'charter', // 맛집 타일이 차량 대절/동승으로 바뀜 — 예전 링크 호환
+    '/food': 'eats', // 예전 맛집 링크 → 맛집(BETA)
     '/charter': 'charter',
     '/course': 'course',
     '/trip': 'trip',

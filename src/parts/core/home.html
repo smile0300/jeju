@@ -84,9 +84,11 @@
                 <span class="item-icon"><i class="ph-duotone ph-magnifying-glass color-lost"></i></span>
                 <span class="item-label" data-i18n="nav.lost">失物招领</span>
             </a>
-            <a href="/reward" class="home-item item-reward" id="home-reward-btn" onclick="event.preventDefault(); showSection('reward')">
-                <span class="item-icon"><i class="ph-duotone ph-money color-reward"></i></span>
-                <span class="item-label" data-i18n="nav.reward">红　包</span>
+            <!-- 맛집(BETA). 예전 용돈 타일 자리 — id·class(home-reward-btn/item-reward)는 홈 그리드 펼침 로직(home.js)이 칸 이름으로 참조하므로 유지 -->
+            <a href="/eats" class="home-item item-reward" id="home-reward-btn" onclick="event.preventDefault(); showSection('eats')">
+                <span class="item-icon"><i class="ph-duotone ph-fork-knife color-reward"></i></span>
+                <span class="item-label" data-i18n="nav.eats">济州美食</span>
+                <span class="coming-soon-badge">BETA</span>
             </a>
             <!-- 여행 코스 & 차량 대절/동승 (id·class는 홈 그리드 전환 로직이 참조하므로 유지. 차량은 가운데 아래 칸) -->
             <a href="/course" class="home-item item-course" id="home-course-btn" onclick="event.preventDefault(); showSection('course')">
