@@ -16,6 +16,7 @@ Disallow: /execution/
 Disallow: /directives/
 Disallow: /tmp/
 Disallow: /admin-reply
+Disallow: /api/admin/
 
 # Sitemap 위치 명시
 Sitemap: https://jeju-live.com/sitemap.xml
