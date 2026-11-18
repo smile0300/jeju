@@ -40,6 +40,13 @@ const notify = (t, b) => m24('notify', t, b || '');
 const log = (...a) => console.log(new Date().toLocaleTimeString('sv-SE', { timeZone: 'Asia/Seoul' }), ...a);
 
 async function main() {
+  // 작업 스케줄러가 정시 실행 약 6분 뒤(:05:55·:35:55)에 한 번 더 띄우는 일이 있음(원인 미상, 11-18 확인) → 옵션 없는 정기 실행은 10분 안에 또 돌지 않는다
+  const LAST = path.join(__dirname, 'minwon24-auto.last.local.txt');
+  if (!args.length) {
+    const prev = +(fs.existsSync(LAST) ? fs.readFileSync(LAST, 'utf8') : 0) || 0;
+    if (Date.now() - prev < 10 * 60000) return;
+    fs.writeFileSync(LAST, String(Date.now()));
+  }
   console.log(`\n=== ${new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Seoul' })} ${args.join(' ')}`);
   if (!NO_FRIENDS) log('FRIENDS\n' + m24('friends'));
   // 등록할 건이 없으면 Chrome 을 띄우지 않는다
@@ -100,7 +107,12 @@ async function main() {
       }
       if (!rec.sn) {
         log('제출 실패', JSON.stringify(rec));
-        notify(`⚠ 경찰 등록 실패 #${lostRow}`, `${sub.error || sub.msg || ''} ${rec.error || ''}`.trim().slice(0, 150));
+        if (sub.clicked) {
+          // 신청 버튼은 눌렸다 → 실제로 접수됐을 수 있다. 등록대기로 두면 다음 실행이 또 제출함(11-18 #644 15:00·15:05 두 번 제출) → 보류로 돌려 운영자가 확인
+          log('HOLD ' + m24('hold', String(queueRow), String(lostRow), `제출 버튼은 눌렸는데 접수번호 확인 못 함(${rec.error || ''}) — 민원24에서 접수 여부 확인 후 없으면 등록대기로`));
+        } else {
+          notify(`⚠ 경찰 등록 실패 #${lostRow}`, `${sub.error || sub.msg || ''} ${rec.error || ''}`.trim().slice(0, 150));
+        }
         break;
       }
       const office = (rec.pending?.office || res.관서 || '').split(' ').pop();
