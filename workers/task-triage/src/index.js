@@ -235,11 +235,66 @@ const LOST_CATEGORIES = {
   PRD000: 'Industrial goods', PRZ000: 'Other items'
 };
 
+// 경찰민원24 소분류 (2026-11-18 신고서 선택지 그대로). en=Jev 보기, ko=물품명·제목에 쓸 이름(브랜드 붙일 때 겹치지 않게 일반 명사)
+// 예전엔 소분류를 늘 '기타'로 골라 카메라가 '전자기기 > 기타용품', 모자가 '의류 > 기타의류'로 등록됐음
+const SUBCATS = {
+  PRA100: ['Women\'s handbag or purse', '가방'], PRA200: ['Men\'s bag or briefcase', '가방'], PRA300: ['Other bag: backpack, suitcase, pouch, unknown', '가방'],
+  PRO100: ['Ring', '반지'], PRO200: ['Necklace', '목걸이'], PRO300: ['Earrings', '귀걸이'], PRO400: ['Wristwatch (not smartwatch)', '시계'], PRO500: ['Other jewelry: bracelet, brooch', '귀금속'],
+  PRB100: ['Study book, textbook', '책'], PRB200: ['Novel', '책'], PRB300: ['Computer book', '책'], PRB400: ['Comic book', '만화책'], PRB500: ['Other book, notebook, stationery', '책'],
+  PRC100: ['Documents, papers', '서류'], PRD100: ['Industrial goods, tools', '산업용품'], PRQ100: ['Shopping bag', '쇼핑백'], PRE100: ['Sports equipment', '스포츠용품'],
+  PRR100: ['Keyboard instrument', '건반악기'], PRR200: ['Wind instrument', '관악기'], PRR300: ['Percussion instrument', '타악기'], PRR400: ['String instrument (guitar, violin)', '현악기'], PRR900: ['Other instrument', '악기'],
+  PRM200: ['Gift certificate, voucher', '상품권'], PRM400: ['Other securities', '유가증권'],
+  PRK100: ['Women\'s clothing', '옷'], PRK200: ['Men\'s clothing', '옷'], PRK300: ['Baby or kids clothing', '아기옷'], PRK500: ['Hat, cap, beanie', '모자'], PRK600: ['Shoes, sandals', '신발'], PRK400: ['Other clothing: scarf, gloves, unknown', '의류'],
+  PRF100: ['Car key', '자동차 열쇠'], PRF200: ['Car navigation', '내비게이션'], PRF300: ['Car license plate', '번호판'], PRF400: ['Other car item', '자동차용품'],
+  PRG700: ['Tablet (iPad etc.)', '태블릿'], PRG800: ['Smartwatch (Apple Watch, Galaxy Watch)', '스마트워치'], PRG900: ['Wireless earphones (AirPods etc.)', '무선이어폰'], PRG400: ['Camera, action camera, drone camera, instant camera', '카메라'], PRG600: ['Other electronics: charger, power bank, e-reader, game console', '전자기기'],
+  PRH100: ['Women\'s wallet', '지갑'], PRH200: ['Men\'s wallet', '지갑'], PRH300: ['Other or unknown wallet, card holder', '지갑'],
+  PRN100: ['ID card', '신분증'], PRN200: ['Driver license', '면허증'], PRN300: ['Passport', '여권'], PRN400: ['Other certificate', '증명서'],
+  PRI100: ['Samsung laptop', '노트북'], PRI200: ['LG laptop', '노트북'], PRI600: ['Apple MacBook', '노트북'], PRI400: ['Other laptop', '노트북'],
+  PRP100: ['Credit or debit (bank) card', '카드'], PRP200: ['Membership or general card', '카드'], PRP400: ['Transport card (T-money etc.)', '교통카드'], PRP300: ['Other card', '카드'],
+  PRL100: ['Korean cash', '현금'], PRL200: ['Check', '수표'], PRL400: ['Foreign currency (RMB, USD etc.)', '외화'], PRL300: ['Other money', '현금'],
+  PRJ100: ['Samsung Galaxy phone', '휴대폰'], PRJ200: ['LG phone', '휴대폰'], PRJ400: ['iPhone', '휴대폰'], PRJ900: ['Other brand phone (Huawei, Xiaomi, OPPO, vivo...)', '휴대폰'], PRJ500: ['Other communication device', '통신기기'],
+  PRZ700: ['Glasses', '안경'], PRZ600: ['Sunglasses', '선글라스'], PRZ100: ['Other item', '기타물품']
+};
+const SUBCAT_MIN_P = 0.3;
+
+// 제목·물품명에 붙일 브랜드 (중국어·영어·한국어 표기). 처음 맞는 것 하나만 — 영문 표기로 적는다(민원24는 한자를 ?로 저장)
+const BRANDS = [
+  ['Apple', /苹果|apple|애플|iphone|ipad|macbook|airpods|아이폰|아이패드|맥북|에어팟/i], ['Samsung', /三星|samsung|삼성|galaxy|갤럭시/i],
+  ['Huawei', /华为|huawei|화웨이/i], ['Xiaomi', /小米|xiaomi|샤오미|redmi/i], ['OPPO', /oppo/i], ['vivo', /(?<![a-z])vivo(?![a-z])/i], ['Honor', /荣耀|(?<![a-z])honor(?![a-z])/i],
+  ['Canon', /佳能|canon|캐논/i], ['Sony', /索尼|sony|소니/i], ['Nikon', /尼康|nikon|니콘/i], ['Fujifilm', /富士|fuji|후지/i], ['Leica', /徕卡|leica|라이카/i], ['Ricoh', /理光|ricoh|리코/i],
+  ['Panasonic', /松下|panasonic|파나소닉/i], ['Olympus', /奥林巴斯|olympus|올림푸스/i], ['DJI', /大疆|(?<![a-z])dji(?![a-z])/i], ['GoPro', /gopro|고프로/i], ['Insta360', /insta\s?360/i], ['instax', /拍立得|instax|인스탁스/i],
+  ['Nintendo', /任天堂|nintendo|닌텐도/i], ['Bose', /(?<![a-z])bose(?![a-z])/i], ['Marshall', /马歇尔|marshall|마샬/i], ['Garmin', /佳明|garmin|가민/i], ['Casio', /卡西欧|casio|카시오/i],
+  ['Rolex', /劳力士|rolex|롤렉스/i], ['Omega', /欧米茄|omega|오메가/i], ['Cartier', /卡地亚|cartier|까르띠에/i], ['Tiffany', /蒂芙尼|tiffany|티파니/i], ['Pandora', /潘多拉|pandora|판도라/i], ['Swarovski', /施华洛世奇|swarovski|스와로브스키/i],
+  ['Louis Vuitton', /路易威登|louis\s?vuitton|루이\s?비통|(?<![a-z])lv(?![a-z])/i], ['Gucci', /古驰|gucci|구찌/i], ['Chanel', /香奈儿|chanel|샤넬/i], ['Hermes', /爱马仕|herm[eè]s|에르메스/i], ['Dior', /迪奥|dior|디올/i], ['Prada', /普拉达|prada|프라다/i],
+  ['Miu Miu', /缪缪|miu\s?miu|미우미우/i], ['Celine', /思琳|celine|셀린/i], ['Loewe', /罗意威|loewe|로에베/i], ['Bottega Veneta', /葆蝶家|bottega|보테가/i], ['Balenciaga', /巴黎世家|balenciaga|발렌시아가/i], ['YSL', /圣罗兰|saint\s?laurent|(?<![a-z])ysl(?![a-z])|생로랑/i],
+  ['Burberry', /博柏利|巴宝莉|burberry|버버리/i], ['Fendi', /芬迪|fendi|펜디/i], ['Goyard', /戈雅|goyard|고야드/i], ['Longchamp', /珑骧|longchamp|롱샴/i], ['Coach', /蔻驰|코치 /i], ['Michael Kors', /michael\s?kors|(?<![a-z])mk(?![a-z])|마이클\s?코어스/i],
+  ['MCM', /(?<![a-z])mcm(?![a-z])/i], ['Montblanc', /万宝龙|mont\s?blanc|몽블랑/i], ['Gentle Monster', /gentle\s?monster|젠틀\s?몬스터/i], ['Ray-Ban', /雷朋|ray-?ban|레이밴/i],
+  ['Rimowa', /日默瓦|rimowa|리모와/i], ['Samsonite', /新秀丽|samsonite|쌤소나이트|샘소나이트/i], ['Tumi', /途明|(?<![a-z])tumi(?![a-z])|투미/i],
+  ['MLB', /(?<![a-z])mlb(?![a-z])/i], ['Nike', /耐克|(?<![a-z])nike(?![a-z])|나이키/i], ['Adidas', /阿迪达斯|adidas|아디다스/i], ['New Balance', /新百伦|new\s?balance|뉴발란스/i], ['Converse', /匡威|converse|컨버스/i],
+  ['The North Face', /北面|north\s?face|노스\s?페이스/i], ['Arc\'teryx', /始祖鸟|arc'?teryx|아크테릭스/i], ['Moncler', /盟可睐|moncler|몽클레르/i], ['Canada Goose', /加拿大鹅|canada\s?goose|캐나다\s?구스/i], ['Patagonia', /巴塔哥尼亚|patagonia|파타고니아/i],
+  ['Uniqlo', /优衣库|uniqlo|유니클로/i], ['Lululemon', /露露乐蒙|lululemon|룰루레몬/i], ['Supreme', /supreme|슈프림/i], ['Stussy', /st[uü]ssy|스투시/i],
+  ['Pop Mart', /泡泡玛特|pop\s?mart|팝마트|labubu|拉布布|라부부/i], ['Dyson', /戴森|dyson|다이슨/i], ['Lenovo', /联想|lenovo|레노버/i]
+];
+const brandOf = (text) => (BRANDS.find(([, re]) => re.test(text)) || [])[0] || '';
+
+/** 대분류 안에서 가장 그럴듯한 소분류. 대분류가 '기타물품'인데 다른 분류의 소분류가 확실하면(0.6+) 그쪽으로 옮긴다 */
+function pickSubcat(cat, sub) {
+  const probs = Object.entries(sub?.probabilities || {}).filter(([k]) => SUBCATS[k]).sort((a, b) => b[1] - a[1]);
+  if (cat === 'PRZ000' && probs[0] && probs[0][0].slice(0, 3) !== 'PRZ' && probs[0][1] >= 0.6) return { cat: probs[0][0].slice(0, 3) + '000', mclsf: probs[0][0] };
+  const inCat = probs.find(([k]) => k.slice(0, 3) === cat.slice(0, 3));
+  return { cat, mclsf: inCat && inCat[1] >= SUBCAT_MIN_P ? inCat[0] : '' };
+}
+
 const LOST_QUESTIONS = {
   category: {
     type: 'choice',
     instructions: 'This is a lost item report from a tourist in Jeju. Which police lost-item category fits the lost item best?',
     criteria: LOST_CATEGORIES
+  },
+  subcategory: {
+    type: 'choice',
+    instructions: 'Which exact kind of item is the lost item? (A camera is a camera even if it is in a case; a cap or beanie is a hat.)',
+    criteria: Object.fromEntries(Object.entries(SUBCATS).map(([k, [en]]) => [k, en]))
   },
   is_real: {
     type: 'noul',
@@ -436,7 +491,8 @@ async function processLost(env, row, dry = false) {
   if (dry) return { row, cats, onVehicle, regionAlt: answers.region_alt?.choice, from: ymd(lostDate), to: ymd(to), catProbs: cat.probabilities, regions: regionNames, total: foundTotal, sent: candidates.length,
     byCat: cats.map(c => [c, candidates.filter(x => x._cat === c).length]),
     top: top.map(([id, p]) => ({ id, p: +p.toFixed(2), cat: byId[id]?._cat, name: byId[id]?.fdPrdtNm, place: byId[id]?.depPlace, date: byId[id]?.fdYmd })),
-    final: match?.choice || null };
+    final: match?.choice || null, sub: (answers.subcategory?.probabilities ? Object.entries(answers.subcategory.probabilities).sort((a, b) => b[1] - a[1]).slice(0, 3) : null),
+    form: (({ lclsf, mclsf, brand, itemName, title }) => ({ lclsf, mclsf, brand, itemName, title }))(buildPoliceForm(row, fields, ko, answers, lostDate, photoIds)) };
   const candJson = mergeCandidates('[]', top.filter(([id, p]) => p >= CANDIDATE_MIN_P && byId[id])
     .map(([id, p]) => candidateOf(byId[id], p, 'initial')));
 
@@ -499,7 +555,7 @@ async function processLost(env, row, dry = false) {
  */
 function buildPoliceForm(row, fields, ko, answers, lostDate, photoIds) {
   const noHan = (s) => String(s || '').replace(/[㐀-鿿豈-﫿]+/g, ' ').replace(/[ \t]+/g, ' ').trim();
-  const cat = answers.category?.choice || 'PRZ000';
+  const { cat, mclsf } = pickSubcat(answers.category?.choice || 'PRZ000', answers.subcategory);
   const place = answers.place_type?.choice || 'LL1017';
   const color = COLOR_BY_NAME[fields.ItemColor] || answers.color?.choice || 'CL1010';
   const region = REGIONS[answers.region?.choice] ? answers.region.choice : 'jeju';
@@ -511,7 +567,10 @@ function buildPoliceForm(row, fields, ko, answers, lostDate, photoIds) {
   const pk = (h) => noHan(ko[h] || fields[h]);
   const route = fields.BoardLoc && fields.AlightLoc ? `${pk('BoardLoc')} → ${pk('AlightLoc')} ` : '';
   const where = pk('DetailLocation') || pk('HotelName') || pk('City');
-  const itemKo = `${COLOR_KO[color]} ${CATEGORY_KO[cat]}`.trim();
+  const noun = mclsf ? SUBCATS[mclsf][1] : CATEGORY_KO[cat];
+  const brand = brandOf(`${fields.Specifics || ''} ${fields['분실내용(원본)'] || ''} ${koText}`);
+  const what = `${brand} ${noun}`.trim();
+  const itemKo = `${COLOR_KO[color]} ${what}`.trim();
   return {
     lostRow: row,
     sido: SIDO_PREFIX[region],
@@ -522,10 +581,12 @@ function buildPoliceForm(row, fields, ko, answers, lostDate, photoIds) {
     lostYmd: lostDate.toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' }),
     hour: String(time ? Math.min(23, parseInt(time[1], 10)) : 12).padStart(2, '0'),
     lclsf: cat,
+    mclsf,
+    brand,
     color,
     qty: 1,
     itemName: itemKo.replace(/\d{4,}/g, ''),
-    title: `${PLACE_KO[place] === '기타' ? '' : PLACE_KO[place] + ' '}${CATEGORY_KO[cat]} 분실`.trim(),
+    title: `${PLACE_KO[place] === '기타' ? '' : PLACE_KO[place] + ' '}${what} 분실`.trim(),
     // 신청인(운영자) 연락처로 경찰 연락이 오므로 대리 신고라는 것만 짧게 남긴다
     content: noHan(`${koText}${fields.HasIdCard === 'Y' ? '\n※ 안에 여권·신분증·카드가 들어 있음' : ''}\n\n(외국인 관광객 분실물 대리 신고)`).slice(0, 1900),
     guText: `${koText} ${where} ${pk('AlightLoc')} ${pk('City')}`,

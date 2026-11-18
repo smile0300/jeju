@@ -76,7 +76,8 @@ export async function jejuFill(form, opts = {}) {
   setVal($('lostCmdtyLclsfCd'), form.lclsf);
   const mid = $('lostCmdtyMclsfCd');
   await waitFor(() => mid.options.length > 1);
-  const midOpt = pickOption(mid, o => o.text.includes('기타')) || pickOption(mid, () => true);
+  // Jev가 고른 소분류(form.mclsf)가 목록에 있으면 그것 (카메라·모자 등), 없으면 '기타'
+  const midOpt = (form.mclsf && pickOption(mid, o => o.value === form.mclsf)) || pickOption(mid, o => o.text.includes('기타')) || pickOption(mid, () => true);
   if (midOpt) setVal(mid, midOpt.value); else problems.push('소분류 없음');
   setVal($('cmdtyColrCd'), form.color);
   setVal($('lostQty'), String(form.qty || 1));
