@@ -137,7 +137,8 @@ export function dayTransport(block) {
     const all = [hotel.out, hotel.back, ...legs];
     // 버스는 걷는 구간·배를 빼고 차로 가는 구간마다 한 번씩 탄다고 본다(섬 안 순환버스는 별도 요금이라 우도는 항구 왕복만)
     const rides = all.filter(l => l.kind === 'taxi').length;
-    return { taxi: all.reduce((sum, l) => sum + (l.fare || 0), 0), rides, bus: rides * BUS_FARE };
+    const minutes = all.reduce((sum, l) => sum + (l.min || (l.kind === 'ferry' ? 15 : 0)), 0); // 평일 낮 기준 이동 시간 합계
+    return { taxi: all.reduce((sum, l) => sum + (l.fare || 0), 0), rides, bus: rides * BUS_FARE, minutes };
 }
 
 export function moveHtml(block, { compact = false } = {}) {

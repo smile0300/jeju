@@ -463,6 +463,44 @@
 .pl-prefs .pl-hint { margin: 0; }
 .pl-list-head { margin: var(--space-4) 0 var(--space-2); font-size: 1rem; font-weight: 800; }
 
+/* 코스 직접 만들기 */
+.pl-build-entry { background: #FFF9DB; }
+.pl-build-mine { display: flex; flex-direction: column; gap: var(--space-3); }
+.pl-mine { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.pl-mine-item { display: flex; align-items: center; gap: 6px; min-height: 40px; }
+.pl-mine-item .pl-stop-no { position: static; flex-shrink: 0; }
+.pl-mine-name { flex: 1; min-width: 0; font-weight: 700; font-size: 0.9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pl-icon-btn {
+    flex-shrink: 0;
+    width: 36px; height: 36px;
+    border: 1px solid var(--separator);
+    border-radius: 10px;
+    background: var(--bg-card);
+    color: var(--label-secondary);
+    cursor: pointer;
+}
+.pl-icon-btn:disabled { visibility: hidden; }
+.pl-build-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.pl-build-warn { margin: 0; padding: 8px 10px; border-radius: 10px; background: #FFF4E6; color: #D9480F; font-size: 0.8rem; font-weight: 700; }
+.pl-build-detail > summary { cursor: pointer; font-weight: 800; padding: var(--space-2) 0; }
+.pl-picks { list-style: none; margin: var(--space-2) 0 0; padding: 0; display: flex; flex-direction: column; }
+.pl-pick { display: flex; align-items: center; gap: var(--space-2); padding: 10px 0; border-bottom: 1px solid var(--separator); }
+.pl-pick-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.pl-pick-name { font-weight: 700; font-size: 0.9rem; }
+.pl-pick-meta { font-size: 0.75rem; color: var(--label-secondary); }
+.pl-pick-btn {
+    flex-shrink: 0;
+    padding: 6px 12px;
+    border: 1px solid var(--accent-active);
+    border-radius: 999px;
+    background: var(--bg-card);
+    color: var(--accent-active);
+    font: inherit; font-size: 0.8rem; font-weight: 800;
+    cursor: pointer;
+}
+.pl-pick.added .pl-pick-btn { background: var(--accent-active); color: #fff; }
+.pl-pick-btn:disabled { opacity: 0.4; cursor: default; }
+
 /* ── 차량 대절 ── */
 .pl-price {
     list-style: none;

@@ -3,6 +3,7 @@ import { chipGroup, bindChips, copyText, flashLabel } from './planner/shared.js'
 import { BLOCKS, REGIONS, CONCEPTS, COURSES_DRAFT, isInSeason } from '../../data/courses.js';
 import { mapHtml, moveHtml, timelineHtml, blockLabel, nowBadge, driveTotal, coverHtml, money } from './planner/course-view.js';
 import { rankBlocks, buildPlans, dayCost, isGoodMatch, TAXI_FROM_BUDGET } from './planner/course-match.js';
+import { builderHtml, onBuilderChip, onBuilderClick, startFromBlock } from './planner/course-builder.js';
 
 // 추천 코스: 여행 일수 · 여행 속도(느긋~빡빡 5단계) · 예산(0원~로얄 5단계) · 컨셉을 고르면
 // 당일은 하루 코스를 잘 맞는 순서로, 여러 날은 하루 코스를 묶은 일정 후보(course-match.js)를 보여준다.
@@ -89,6 +90,10 @@ function listHtml() {
         ${COURSES_DRAFT ? `<p class="pl-draft"><i class="ph-duotone ph-warning"></i> ${tr('course.draft')}</p>` : ''}
         <div class="pl-filter">${chipGroup('days', durations, { selected: [String(state.days)] })}</div>
         ${prefsHtml()}
+        <button type="button" class="pl-card pl-plan pl-build-entry" data-build="1">
+            <span class="pl-plan-text"><strong><i class="ph-duotone ph-pencil-simple-line"></i> ${tr('build.entry')}</strong><span>${tr('build.entry_desc')}</span></span>
+            <span class="pl-plan-go">${tr('build.entry_btn')} →</span>
+        </button>
         <h4 class="pl-list-head">${tr('course.result')}</h4>
         ${state.days === 1 ? `<div class="pl-filter">${chipGroup('region',
             [{ value: 'all', label: tr('region.all') }, ...REGIONS.map(r => ({ value: r, label: tr(`region.${r}`) }))],
@@ -119,6 +124,7 @@ function detailHtml() {
         <p class="pl-muted pl-hint"><i class="ph-duotone ph-info"></i> ${tr('course.copy_hint')}</p>
         ${timelineHtml(block)}
         <p class="pl-muted pl-hint"><i class="ph-duotone ph-info"></i> ${tr('course.info_hint')}</p>
+        <button type="button" class="pl-link pl-center" data-build-from="${escapeHtml(keys[dayIdx])}"><i class="ph-duotone ph-pencil-simple-line"></i> ${tr('build.from_course')}</button>
         <button type="button" class="res-submit-btn pl-mt" data-charter="${escapeHtml(block.region)}"><i class="ph-duotone ph-users-three"></i> <span>${tr('course.charter_cta')}</span></button>`;
 }
 
@@ -130,6 +136,7 @@ function render() {
     if (titleEl) titleEl.textContent = tr('course.title');
 
     bindChips(root, (name, values) => {
+        if (onBuilderChip(name, values)) { render(); return; }
         if (name === 'concept') { state.concepts = values; render(); return; } // 컨셉은 하나도 안 골라도 된다(=전체)
         if (!values.length) return;
         if (name === 'days') { state.days = parseInt(values[0], 10); state.region = 'all'; }
@@ -141,6 +148,10 @@ function render() {
     if (!root.dataset.courseBound) {
         root.dataset.courseBound = '1';
         root.addEventListener('click', async (e) => {
+            if (state.detail === 'build' && onBuilderClick(e)) { render(); return; }
+            const buildFrom = e.target.closest('[data-build-from]');
+            if (buildFrom) startFromBlock(buildFrom.dataset.buildFrom);
+            if (buildFrom || e.target.closest('[data-build]')) { state.detail = 'build'; render(); window.scrollTo(0, 0); return; }
             const open = e.target.closest('[data-open]');
             if (open) { state.detail = open.dataset.open; state.detailDay = 0; render(); window.scrollTo(0, 0); return; }
             if (e.target.closest('[data-back]')) { state.detail = null; render(); window.scrollTo(0, 0); return; }
@@ -167,7 +178,7 @@ function render() {
         });
     }
 
-    root.innerHTML = state.detail ? detailHtml() : listHtml();
+    root.innerHTML = state.detail === 'build' ? builderHtml(state.budget) : state.detail ? detailHtml() : listHtml();
 }
 
 window.courseApp = { enter: render };
