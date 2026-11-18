@@ -28,7 +28,7 @@ const S = {
         'ar.daejeong': '大静·安德',
         'pr.1': '₩1万以下', 'pr.2': '₩1~2万', 'pr.3': '₩2~3万', 'pr.4': '₩3万以上',
         'kw.locals': '本地人常去', 'kw.hyangto': '官方乡土美食店', 'kw.goodprice': '平价良心店', 'kw.century': '百年老店',
-        'kw.tv': '韩国美食节目', 'kw.solo': '可一人用餐', 'kw.cnmenu': '中文菜单', 'kw.enmenu': '英文菜单', 'kw.cnreview': '有中文评价',
+        'kw.tv': '韩国美食节目', 'kw.hot': '韩国年轻人爱去', 'kw.solo': '可一人用餐', 'kw.cnmenu': '中文菜单', 'kw.enmenu': '英文菜单', 'kw.cnreview': '有中文评价',
         'kw.photo': '出片', 'kw.ocean': '海景', 'kw.breakfast': '早餐（9点前营业）', 'kw.shortwait': '排队短', 'kw.walkin': '外国人可直接去',
         'kw.twoplus': '2人起点', 'kw.booking': '需预约', 'kw.nokids': '禁止儿童',
         'so.rec': '推荐', 'so.rating': '评分高', 'so.reviews': '评价多', 'so.cheap': '价格低',
@@ -61,7 +61,7 @@ const S = {
         'ar.daejeong': 'Daejeong·Andeok',
         'pr.1': 'Under ₩10k', 'pr.2': '₩10–20k', 'pr.3': '₩20–30k', 'pr.4': '₩30k+',
         'kw.locals': 'Locals’ favorite', 'kw.hyangto': 'Official local-food', 'kw.goodprice': 'Fair-price shop', 'kw.century': '100-year shop',
-        'kw.tv': 'On Korean TV', 'kw.solo': 'Solo-friendly', 'kw.cnmenu': 'Chinese menu', 'kw.enmenu': 'English menu', 'kw.cnreview': 'Chinese reviews',
+        'kw.tv': 'On Korean TV', 'kw.hot': 'Trending with young Koreans', 'kw.solo': 'Solo-friendly', 'kw.cnmenu': 'Chinese menu', 'kw.enmenu': 'English menu', 'kw.cnreview': 'Chinese reviews',
         'kw.photo': 'Photogenic', 'kw.ocean': 'Ocean view', 'kw.breakfast': 'Breakfast (before 9am)', 'kw.shortwait': 'Short wait', 'kw.walkin': 'Easy walk-in',
         'kw.twoplus': '2+ people', 'kw.booking': 'Booking needed', 'kw.nokids': 'No kids',
         'so.rec': 'Recommended', 'so.rating': 'Top rated', 'so.reviews': 'Most reviewed', 'so.cheap': 'Cheapest',
@@ -94,7 +94,7 @@ const S = {
         'ar.daejeong': '대정·안덕',
         'pr.1': '1만원 이하', 'pr.2': '1~2만원', 'pr.3': '2~3만원', 'pr.4': '3만원 이상',
         'kw.locals': '도민 맛집', 'kw.hyangto': '향토음식점 지정', 'kw.goodprice': '착한가격업소', 'kw.century': '백년가게',
-        'kw.tv': '방송 출연', 'kw.solo': '1인 식사', 'kw.cnmenu': '중국어 메뉴', 'kw.enmenu': '영어 메뉴', 'kw.cnreview': '중국어 후기',
+        'kw.tv': '방송 출연', 'kw.hot': '요즘 핫플', 'kw.solo': '1인 식사', 'kw.cnmenu': '중국어 메뉴', 'kw.enmenu': '영어 메뉴', 'kw.cnreview': '중국어 후기',
         'kw.photo': '사진 명소', 'kw.ocean': '오션뷰', 'kw.breakfast': '아침 식사(9시 전)', 'kw.shortwait': '대기 짧음', 'kw.walkin': '외국인 바로 방문',
         'kw.twoplus': '2인부터', 'kw.booking': '예약 필요', 'kw.nokids': '노키즈',
         'so.rec': '추천순', 'so.rating': '평점순', 'so.reviews': '리뷰순', 'so.cheap': '가격 낮은순',
@@ -121,8 +121,8 @@ const CUISINES = ['pork', 'seafood', 'noodle', 'soup', 'meat', 'local', 'snack',
 const AREAS = ['jeju', 'aewol', 'hallim', 'daejeong', 'jungmun', 'seogwipo', 'pyoseon', 'seongsan', 'udo', 'gujwa', 'jocheon'];
 const PRICES = ['1', '2', '3', '4'];
 // 필터로 고를 수 있는 키워드 (뱃지로만 보이는 twoplus·booking·nokids는 제외)
-const KEYWORDS = ['locals', 'hyangto', 'goodprice', 'solo', 'cnmenu', 'enmenu', 'cnreview', 'shortwait', 'walkin', 'breakfast', 'ocean', 'photo', 'tv', 'century'];
-const BADGE_ORDER = ['hyangto', 'goodprice', 'century', 'locals', 'tv', 'cnmenu', 'enmenu', 'cnreview', 'solo', 'twoplus', 'booking', 'breakfast', 'ocean', 'nokids'];
+const KEYWORDS = ['hot', 'locals', 'hyangto', 'goodprice', 'solo', 'cnmenu', 'enmenu', 'cnreview', 'shortwait', 'walkin', 'breakfast', 'ocean', 'photo', 'tv', 'century'];
+const BADGE_ORDER = ['hyangto', 'goodprice', 'century', 'locals', 'tv', 'hot', 'cnmenu', 'enmenu', 'cnreview', 'solo', 'twoplus', 'booking', 'breakfast', 'ocean', 'nokids'];
 const SORTS = ['rec', 'rating', 'reviews', 'cheap'];
 
 const state = { q: '', cu: [], ar: [], pr: [], kw: [], sort: 'rec', shown: PAGE, more: false };
@@ -163,6 +163,7 @@ function recScore(d) {
     if (t.includes('locals')) s += 0.15;
     if (t.includes('cnreview')) s += 0.1;
     if (t.includes('cnmenu')) s += 0.1;
+    if (t.includes('hot')) s += 0.1; // 20·30대 인기 — 주 이용자층(20·30대 여성)과 겹침
     s += (d.pr || 0) * 0.02;
     return s;
 }

@@ -10,6 +10,9 @@ const html = fs.readFileSync(src, 'utf8');
 const i = html.indexOf('const DATA = ');
 const j = html.indexOf('];', i);
 const DATA = JSON.parse(html.slice(i + 13, j + 1));
+// 방송·20·30대 인기 보강분(구글맵 검증 완료)은 뒤에 붙여 기존 id 순서를 유지한다
+const { TREND, EXTRA_TAGS } = require('./eats_trend.js');
+DATA.push(...TREND);
 
 // 주소 → 세부 지역 키
 function area(addr) {
@@ -20,18 +23,18 @@ function area(addr) {
             성산읍: 'seongsan', 표선면: 'pyoseon', 남원읍: 'pyoseon', 대정읍: 'daejeong', 안덕면: 'daejeong' };
         return map[m[2]] || 'jeju';
     }
-    if (/서귀포시/.test(a)) return /(중문|색달|대포|하원|회수|도순|월평|강정|상예|하예)/.test(a) ? 'jungmun' : 'seogwipo';
+    if (/서귀포시/.test(a)) return /(중문|색달|대포|하원|회수|도순|월평|강정|상예|하예|천제연)/.test(a) ? 'jungmun' : 'seogwipo';
     return 'jeju';
 }
 
 // 음식 종류 키 (여러 개 가능). 세부유형 + 대표메뉴 + 이름으로 판단
 const CUISINE = [
     ['pork', /흑돼지|돼지|삼겹|오겹|두루치기|근고기|가브리|주물럭|백돼지|돔베/],
-    ['seafood', /해산물|회|갈치|고등어|우럭|전복|성게|보말|물회|자리|옥돔|해녀|게장|문어|딱새우|소라|각재기|멜|객주리|삼치|복어|복요리|복지리|오분작|깅이|어죽|생선|다금바리|해물|조개|한치|쥐치/],
-    ['noodle', /국수|칼국수|짬뽕|짜장|냉면|밀면|메밀|라면/],
+    ['seafood', /해산물|회|스시|초밥|갈치|고등어|우럭|전복|성게|보말|물회|자리|옥돔|해녀|게장|문어|딱새우|소라|각재기|멜|객주리|삼치|복어|복요리|복지리|오분작|깅이|어죽|생선|다금바리|해물|조개|한치|쥐치/],
+    ['noodle', /국수|칼국수|짬뽕|짜장|냉면|밀면|메밀|라면|우동/],
     ['soup', /국밥|해장국|순대|곰탕|몸국|탕|국$|국·|죽|삼계탕|순두부|찌개|접짝|뚝배기|전골|샤브/],
     ['meat', /갈비|말고기|말코기|흑우|한우|닭|치킨|통닭|족발|보쌈|고기구이|생고기/],
-    ['snack', /빵|떡|분식|떡볶이|모닥치기|빙떡|김밥|버거|카스테라|베이커리/],
+    ['snack', /빵|떡|분식|떡볶이|모닥치기|빙떡|김밥|버거|카스테라|베이커리|도넛|꽈배기|만두|바게트/],
     ['western', /양식|코스|카레|커틀렛|파스타|피자/],
 ];
 function cuisines(d) {
@@ -84,7 +87,10 @@ for (const d of DATA) {
     if (/향토음식점/.test(titles) || d.규모 === '향토지정') tags.push('hyangto');
     if (/착한가격/.test(titles) || d.규모 === '착한가격') tags.push('goodprice');
     if (/백년가게/.test(titles)) tags.push('century');
-    if (/수요미식회|맛있는녀석들|생활의 달인|백종원/.test(d.선정근거 || '')) tags.push('tv');
+    const extra = EXTRA_TAGS[d.이름_ko] || '';
+    const why = (d.선정근거 || '') + ' ' + extra;
+    if (/수요미식회|맛있는녀석들|생활의 ?달인|백종원|전지적참견시점|백반기행|맛집의옆집|먹을텐데|또간집/.test(why)) tags.push('tv');
+    if (/다이닝코드|또간집|먹을텐데/.test(why)) tags.push('hot');
     if (d.사진포인트 || /오션뷰/.test(d.세부유형 || '')) tags.push('photo');
     if (/오션뷰|바다|해변|해안/.test((d.세부유형 || '') + (d.사진포인트 || ''))) tags.push('ocean');
     if (d.중국어후기 === '있음') tags.push('cnreview');
@@ -117,7 +123,7 @@ for (const d of DATA) {
         h: d.영업시간 || '',
         off: d.정기휴무 || '',
         t: tags,
-        why: (d.선정근거 || '').replace(/\s*\/\s*트랙 [AB].*$/, ''),
+        why: [(d.선정근거 || '').replace(/\s*\/\s*트랙 [AB].*$/, ''), extra].filter(Boolean).join(' / '),
         ph: d.사진포인트 || '',
         cn: d.우려사항 && !/네이버에서 영업 여부/.test(d.우려사항) ? d.우려사항 : '',
         tel: d.연락처 || '',
@@ -130,7 +136,7 @@ for (const d of DATA) {
 }
 
 const final = `// 자동 생성 파일 — 직접 고치지 말 것. tools/build_eats_data.js 로 다시 만든다.
-// 출처: '제주 후보지 선별' 아티팩트 (식당·카페, 폐업 제외) · ${new Date().toISOString().slice(0, 10)}
+// 출처: '제주 후보지 선별' 아티팩트 (식당·카페, 폐업 제외) + tools/eats_trend.js (방송·20·30대 인기, 구글맵 검증) · ${new Date().toISOString().slice(0, 10)}
 // 키: n 이름 · c food|cafe · cu 음식종류 · s 세부유형 · mn 대표메뉴 · a 주소 · ar 세부지역 · p [1인 최소,최대]원 · pt 가격 원문
 //     g 구글평점 · gr 구글리뷰 · nr 네이버리뷰 · w 최대대기(분) · h 영업시간 · off 정기휴무 · t 태그 · why 선정근거 · ph 사진포인트
 //     cn 주의사항 · tel 연락처 · pr 우선순위 · ln 네이버 플레이스 · lk 카카오맵

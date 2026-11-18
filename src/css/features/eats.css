@@ -106,6 +106,7 @@ html[lang="ko"] .eat-beta { word-break: keep-all; } /* 중국어에 keep-all을 
 .eat-badge-hyangto, .eat-badge-century { background: #EBFBEE; color: #2B8A3E; }
 .eat-badge-goodprice { background: #FFF4E6; color: #D9480F; }
 .eat-badge-locals, .eat-badge-tv { background: #F3F0FF; color: #6741D9; }
+.eat-badge-hot { background: #FFF0F6; color: #C2255C; }
 .eat-badge-twoplus, .eat-badge-booking, .eat-badge-nokids { background: #FFF5F5; color: #C92A2A; }
 
 .eat-meta { display: flex; flex-direction: column; gap: 2px; margin-top: 8px; font-size: 0.78rem; color: var(--label-secondary); overflow-wrap: anywhere; }
