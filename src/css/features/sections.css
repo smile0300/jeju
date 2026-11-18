@@ -4749,15 +4749,15 @@ body:not(.page-home) .wechat-float-btn {
 .lost-reviews { margin-bottom: 20px; }
 .lost-review-strip { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 6px; -webkit-overflow-scrolling: touch; }
 .lost-review-card {
-    flex: 0 0 82%; max-width: 300px; scroll-snap-align: start; box-sizing: border-box;
-    display: flex; flex-direction: column; justify-content: space-between; gap: 10px;
-    padding: 14px; background: var(--bg-primary); border: 1px solid var(--separator); border-radius: 10px;
+    flex: 0 0 66%; max-width: 240px; scroll-snap-align: start; box-sizing: border-box;
+    display: flex; flex-direction: column; justify-content: space-between; gap: 8px;
+    padding: 11px 12px; background: var(--bg-primary); border: 1px solid var(--separator); border-radius: 10px;
 }
 .lost-review-text {
-    margin: 0; font-size: 13.5px; line-height: 1.6; color: var(--label-primary); white-space: pre-line;
-    display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden;
+    margin: 0; font-size: 12.5px; line-height: 1.55; color: var(--label-primary); white-space: pre-line;
+    display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
 }
-.lost-review-meta { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 12px; color: var(--label-secondary); }
+.lost-review-meta { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 11px; color: var(--label-secondary); }
 .lost-review-shot { flex-shrink: 0; color: #3182f6; text-decoration: none; white-space: nowrap; }
 
 /* 진행상황 페이지: 최근 경찰청 등록 목록 */
