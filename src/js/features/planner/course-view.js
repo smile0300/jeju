@@ -148,24 +148,38 @@ export function moveHtml(block, { compact = false } = {}) {
     const isUdo = block.transport === 'udo';
 
     const rows = `
-        <div class="pl-move-row">
+        <div class="pl-move-row pl-move-extra">
             <i class="ph-duotone ph-taxi"></i>
             <div><strong>${tr(isUdo ? 'course.move.taxi_udo' : 'course.move.taxi', money(total))}</strong><span>${tr('course.move.taxi_note')}</span></div>
         </div>
-        ${isUdo ? `<div class="pl-move-row">
+        ${isUdo ? `<div class="pl-move-row pl-move-extra">
             <i class="ph-duotone ph-boat"></i>
             <div><strong>${tr('course.move.ferry')}</strong><span>${tr('course.move.ferry_note')}</span></div>
         </div>` : ''}
         <div class="pl-move-row">
             <i class="ph-duotone ph-bus"></i>
-            <div><strong>${tr(isUdo ? 'course.move.bus_udo' : 'course.move.bus', { n: rides, ...money(busTotal) })}</strong><span>${tr('course.move.bus_note')}</span></div>
+            <div><strong>${tr(isUdo ? 'course.move.bus_udo' : 'course.move.bus', { n: rides, ...money(busTotal) })}</strong><span class="pl-move-extra">${tr('course.move.bus_note')}</span></div>
         </div>
-        <p class="pl-muted pl-hint"><i class="ph-duotone ph-clock"></i> ${tr('course.move.time_note')}</p>`;
+        <p class="pl-muted pl-hint pl-move-extra"><i class="ph-duotone ph-clock"></i> ${tr('course.move.time_note')}</p>`;
 
-    return compact
-        ? `<div class="pl-move pl-trip-move"><h4 class="pl-move-title">${tr('course.move.title')}</h4>${rows}</div>`
-        : `<section class="pl-card pl-move"><h4 class="pl-move-title">${tr('course.move.title')}</h4>${rows}
-            <p class="pl-muted pl-hint"><i class="ph-duotone ph-info"></i> ${tr('course.move.hint')}</p></section>`;
+    if (compact) return `<div class="pl-move pl-trip-move"><h4 class="pl-move-title">${tr('course.move.title')}</h4>${rows}</div>`;
+
+    // 기본은 접힌 상태(버스 요금 한 줄만). 오른쪽 화살표로 택시·안내문까지 펼친다
+    return `<section class="pl-card pl-move pl-move-collapsed">
+            <div class="pl-move-head"><h4 class="pl-move-title">${tr('course.move.title')}</h4>
+                <button type="button" class="pl-move-toggle" data-move-toggle aria-expanded="false" aria-label="${tr('course.move.toggle')}"><i class="ph-bold ph-caret-down"></i></button></div>
+            ${rows}
+            <p class="pl-muted pl-hint pl-move-extra"><i class="ph-duotone ph-info"></i> ${tr('course.move.hint')}</p></section>`;
+}
+
+if (typeof document !== 'undefined') {
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-move-toggle]');
+        if (!btn) return;
+        const card = btn.closest('.pl-move');
+        const open = card.classList.toggle('pl-move-collapsed') === false;
+        btn.setAttribute('aria-expanded', String(open));
+    });
 }
 
 const hotelItem = (legBelow) => `
