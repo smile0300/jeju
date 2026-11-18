@@ -378,12 +378,15 @@ if ($chatBtn) {
   }
   if (-not $idOk) { Fail '프로필의 위챗 ID가 검색한 ID와 다름' }
   # 고객이 먼저 친구 추가를 걸어 온 경우 备注가 비어 있어 대화 목록에 본인 별명으로 보인다 → 접수 코드로 단다
-  # 이미 다른 备注가 있으면(운영자가 직접 단 이름, 예전 접수 코드) 건드리지 않는다
+  # 대리수령 코드(JEJU-00NN)가 달린 친구는 건드리지 않는다 — 대리수령 안내가 그 备注로 고객을 찾음
+  # 그 밖의 备注(예전 접수 코드 JL<행>, 위챗이 자동으로 채운 이름 등)는 새 접수 코드로 바꾼다
+  # (2026-11-18 #645: 운영자가 단 적 없는 '고객 이름'이 备注로 들어 있어 JL645를 못 달았음 — 운영자는 고객에게 이름을 따로 달지 않음)
   $rv = BySuffix $add 'value_remark_view'
   $cur = if ($rv) { $rv.Current.Name.Trim() } else { '' }
   $tag = 'OK friend'
   if (-not $Remark -or -not $rv -or $cur -eq $Remark) { }
-  elseif ($cur) { $tag = 'OK friend (다른 备注가 이미 있음 — 그대로 둠)' }
+  elseif ($cur -match '^JEJU-\d+') { $tag = "OK friend (대리수령 备注 '$cur' — 그대로 둠)" }
+  elseif ($cur -and $DryRun) { Done "OK dry-run (备注 '$cur' → $Remark 로 바꿀 수 있음)" 0 }
   elseif ($DryRun) { Done 'OK dry-run (친구 · 备注 없음 → 달 수 있음)' 0 }
   else { $tag = '' }
   if ($tag) {

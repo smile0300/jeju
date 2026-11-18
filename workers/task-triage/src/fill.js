@@ -67,7 +67,7 @@ export async function jejuFill(form, opts = {}) {
   // 3) 분실 정보
   setVal($('rgnCd'), form.rgnCd);
   setVal($('sggNm'), guName || form.gu || form.sido);
-  setVal($('lostPlcNm'), form.lostPlcNm);
+  setVal($('lostPlcNm'), String(form.lostPlcNm || '').replace(/["“”'‘’`<>\\]/g, ''));
   setVal($('lostPlcSeCd'), form.lostPlcSeCd);
   setVal($('lostYmd'), form.lostYmd);
   setVal($('lostCmdtyLostHrCn'), form.hour);
@@ -81,9 +81,11 @@ export async function jejuFill(form, opts = {}) {
   if (midOpt) setVal(mid, midOpt.value); else problems.push('소분류 없음');
   setVal($('cmdtyColrCd'), form.color);
   setVal($('lostQty'), String(form.qty || 1));
-  setVal($('lostItemCn'), form.itemName);
-  setVal($('pstCn'), form.title);
-  setVal($('excptnMttr'), form.content);
+  // 따옴표·꺾쇠는 빼고 넣는다 (예방용 — 11-18 #645 거절은 민원24 점검 중 서버 500이었음)
+  const clean = (s) => String(s || '').replace(/["“”'‘’`<>\\]/g, '').replace(/&/g, ' and ');
+  setVal($('lostItemCn'), clean(form.itemName));
+  setVal($('pstCn'), clean(form.title));
+  setVal($('excptnMttr'), clean(form.content));
 
   // 5) 사진 (비밀값이나 표가 있을 때 Worker에서 받아 첨부)
   let photos = 0;

@@ -39,6 +39,30 @@ const m24 = (...a) => {
 const notify = (t, b) => m24('notify', t, b || '');
 const log = (...a) => console.log(new Date().toLocaleTimeString('sv-SE', { timeZone: 'Asia/Seoul' }), ...a);
 
+/** 민원24 '내 신고 내역'(최신순)에서 이 신고서와 같은 물품명·분실일·장소 줄의 접수번호. listed=false 면 목록을 못 읽음 */
+async function findFiled(browser, form) {
+  const p = await browser.newPage();
+  try {
+    await p.goto('https://minwon24.police.go.kr/myPage/myDclrTpofDsctn.do', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await new Promise(r => setTimeout(r, 3000));
+    const rows = await p.evaluate(() => [...document.querySelectorAll('tr, li')].map(r => r.innerText.replace(/\s+/g, ' ').trim()).filter(s => /^L20\d{11,}/.test(s)));
+    if (!rows.length) return { listed: false };
+    const place = String(form.lostPlcNm || '').replace(/\s+/g, ' ').slice(0, 12);
+    const hit = rows.find(s => s.includes(form.itemName) && s.includes(form.lostYmd) && s.includes(place));
+    return { listed: true, sn: hit ? hit.match(/^L\d+/)[0] : '' };
+  } catch (e) { return { listed: false, error: e.message }; }
+  finally { await p.close().catch(() => {}); }
+}
+
+/** 접수 안 된 제출 횟수 (행별, 3번이면 보류) */
+function bumpTries(lostRow) {
+  const file = path.join(__dirname, 'minwon24-auto.tries.local.json');
+  let m = {}; try { m = JSON.parse(fs.readFileSync(file, 'utf8')); } catch (e) { /* 처음 */ }
+  m[lostRow] = (m[lostRow] || 0) + 1;
+  fs.writeFileSync(file, JSON.stringify(m));
+  return m[lostRow];
+}
+
 async function main() {
   // 작업 스케줄러가 정시 실행 약 6분 뒤(:05:55·:35:55)에 한 번 더 띄우는 일이 있음(원인 미상, 11-18 확인) → 옵션 없는 정기 실행은 10분 안에 또 돌지 않는다
   const LAST = path.join(__dirname, 'minwon24-auto.last.local.txt');
@@ -91,6 +115,14 @@ async function main() {
       const officeProblem = (res.problems || []).find(p => /관서|구·군/.test(p));
       if (officeProblem) { log('HOLD ' + m24('hold', String(queueRow), String(lostRow), officeProblem)); continue; }
       if (NO_SUBMIT) { log('제출하지 않음(--no-submit) — 채운 양식 탭을 열어 둡니다. 확인 후 그 탭만 닫으세요.'); page = null; return; }
+      // 제출 때 서버 응답을 모아 둔다 — "민원을 신청할 수 없습니다" 원인 확인용
+      const posts = [];
+      const onResp = async (r) => {
+        if (r.request().method() !== 'POST' || !/police\.go\.kr/.test(r.url())) return;
+        let body = ''; try { body = (await r.text()).replace(/\s+/g, ' ').slice(0, 300); } catch (e) { /* 이동 중 */ }
+        posts.push(`${r.status()} ${r.url().replace(/^https:\/\/[^/]+/, '').slice(0, 80)} ${body}`);
+      };
+      page.on('response', onResp);
       const sub = await page.evaluate(async (src) => { (0, eval)(src); return await window.jejuSubmit(); }, fillSrc);
       log('SUBMIT', JSON.stringify(sub));
       await page.waitForFunction(() => new URLSearchParams(location.search).get('aplyCvlcptSn'), { timeout: 20000 }).catch(() => {});
@@ -105,11 +137,33 @@ async function main() {
           rec = { sn: f['경찰접수번호'], pending: { office: f['경찰관서'] || '' } };
         }
       }
+      if (!rec.sn && sub.clicked) {
+        // 신청완료 화면이 안 떴다 → 실제로 접수됐는지 '내 신고 내역'에서 같은 물품명·분실일·장소를 찾는다
+        // (11-18 #644 15:00·#645 21:03: 민원24 불안정으로 접수 안 됨 — 목록에 없었음)
+        const where = await page.evaluate(() => `${location.pathname} ${(document.querySelector('.krds-modal.shown, .krds-modal.in')?.innerText || '').replace(/\s+/g, ' ').slice(0, 100)}`).catch(e => e.message);
+        log('신청완료 화면 아님 —', where);
+        posts.forEach(s => log('  POST', s));
+        const filed = await findFiled(browser, f.form);
+        if (filed.sn) {
+          const office = (res.관서 || '').split(' ').pop();
+          log('내 신고 내역에서 찾음', filed.sn, m24('record', filed.sn, String(queueRow), String(lostRow), office));
+          rec = { sn: filed.sn, pending: { office } };
+        } else if (filed.listed && posts.some(s => /^5\d\d /.test(s))) {
+          // 서버 500 = 민원24 점검·장애(11-18 21시) → 횟수 세지 않고 등록대기로 두고 다음 실행에 다시
+          log('민원24 서버 오류(500) — 접수 안 됨, 등록대기 유지·다음 실행에 다시');
+          break;
+        } else if (filed.listed) {
+          const tries = bumpTries(lostRow);
+          if (tries >= 3) log('HOLD ' + m24('hold', String(queueRow), String(lostRow), `민원24 제출이 ${tries}번 접수되지 않음 — 화면 확인 필요 (${where.slice(0, 60)})`));
+          else log(`접수 안 됨(내 신고 내역에 없음) — 등록대기 유지, 다음 실행에 다시 (${tries}/3)`);
+          break;
+        }
+      }
       if (!rec.sn) {
         log('제출 실패', JSON.stringify(rec));
         if (sub.clicked) {
-          // 신청 버튼은 눌렸다 → 실제로 접수됐을 수 있다. 등록대기로 두면 다음 실행이 또 제출함(11-18 #644 15:00·15:05 두 번 제출) → 보류로 돌려 운영자가 확인
-          log('HOLD ' + m24('hold', String(queueRow), String(lostRow), `제출 버튼은 눌렸는데 접수번호 확인 못 함(${rec.error || ''}) — 민원24에서 접수 여부 확인 후 없으면 등록대기로`));
+          // 내 신고 내역도 못 읽음 → 접수됐을 수 있으니 재제출하지 않고 보류(운영자 확인)
+          log('HOLD ' + m24('hold', String(queueRow), String(lostRow), `제출 버튼은 눌렸는데 접수 여부 확인 못 함(${rec.error || ''}) — 민원24 내 신고 내역 확인 후 없으면 등록대기로`));
         } else {
           notify(`⚠ 경찰 등록 실패 #${lostRow}`, `${sub.error || sub.msg || ''} ${rec.error || ''}`.trim().slice(0, 150));
         }

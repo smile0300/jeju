@@ -273,7 +273,11 @@ const BRANDS = [
   ['MLB', /(?<![a-z])mlb(?![a-z])/i], ['Nike', /耐克|(?<![a-z])nike(?![a-z])|나이키/i], ['Adidas', /阿迪达斯|adidas|아디다스/i], ['New Balance', /新百伦|new\s?balance|뉴발란스/i], ['Converse', /匡威|converse|컨버스/i],
   ['The North Face', /北面|north\s?face|노스\s?페이스/i], ['Arc\'teryx', /始祖鸟|arc'?teryx|아크테릭스/i], ['Moncler', /盟可睐|moncler|몽클레르/i], ['Canada Goose', /加拿大鹅|canada\s?goose|캐나다\s?구스/i], ['Patagonia', /巴塔哥尼亚|patagonia|파타고니아/i],
   ['Uniqlo', /优衣库|uniqlo|유니클로/i], ['Lululemon', /露露乐蒙|lululemon|룰루레몬/i], ['Supreme', /supreme|슈프림/i], ['Stussy', /st[uü]ssy|스투시/i],
-  ['Pop Mart', /泡泡玛特|pop\s?mart|팝마트|labubu|拉布布|라부부/i], ['Dyson', /戴森|dyson|다이슨/i], ['Lenovo', /联想|lenovo|레노버/i]
+  ['Bvlgari', /宝格丽|bvlgari|bulgari|불가리/i], ['Van Cleef', /梵克雅宝|van\s?cleef|반클리프/i], ['Chopard', /萧邦|chopard|쇼파드/i], ['Chloe', /蔻依|chlo[eé]|끌로에/i],
+  ['Givenchy', /纪梵希|givenchy|지방시/i], ['Valentino', /华伦天奴|valentino|발렌티노/i], ['Versace', /范思哲|versace|베르사체/i], ['Armani', /阿玛尼|armani|아르마니/i],
+  ['Tory Burch', /汤丽柏琦|tory\s?burch|토리버치/i], ['Kate Spade', /凯特丝蓓|kate\s?spade|케이트\s?스페이드/i], ['Marc Jacobs', /莫杰|marc\s?jacobs|마크\s?제이콥스/i],
+  ['Daniel Wellington', /daniel\s?wellington|(?<![a-z])dw(?![a-z])\s?(手表|watch)|다니엘\s?웰링턴/i], ['Seiko', /精工|seiko|세이코/i], ['Tissot', /天梭|tissot|티쏘/i], ['Longines', /浪琴|longines|론진/i],
+  ['Pop Mart',/泡泡玛特|pop\s?mart|팝마트|labubu|拉布布|라부부/i], ['Dyson', /戴森|dyson|다이슨/i], ['Lenovo', /联想|lenovo|레노버/i]
 ];
 const brandOf = (text) => (BRANDS.find(([, re]) => re.test(text)) || [])[0] || '';
 
