@@ -374,12 +374,155 @@ export const BLOCKS = {
               tip: { zh: '东洋最大的山茶花园之一，粉色和红色山茶花', ko: '동양 최대급 동백 정원, 분홍·빨강 동백', en: 'One of Asia\'s largest camellia gardens' } },
             { name: { ko: '휴애리자연생활공원', zh: '休爱里自然生活公园', en: 'Hueree Nature Park' }, type: 'spot', stayMin: 70,
               info: { ko: '10~2월 09:00–18:00 (입장 16:30까지) · 연중무휴 · 귤 따기는 시기별로 확인', zh: '10~2月 09:00–18:00（16:30停止入场）· 全年无休 · 摘橘子视季节而定', en: 'Oct–Feb 09:00–18:00 (entry until 16:30) · Open daily · Tangerine picking varies' },
-              tip: { zh: '冬季山茶花节和摘橘子体验', ko: '겨울 동백축제와 감귤 따기 체험', en: 'Winter camellia festival and tangerine picking' } },
-            { name: { ko: '위미동백나무군락', zh: '为美山茶花林', en: 'Wimi Camellia Forest' }, type: 'photo', stayMin: 30,
+              tip: { zh: '冬季山茶花节和摘橘子体验', ko: '겨울 동백축제와 감귤 따기 체험', en: 'Winter camellia festival and tangerine picking' } },            { name: { ko: '위미동백나무군락', zh: '为美山茶花林', en: 'Wimi Camellia Forest' }, type: 'photo', stayMin: 30,
               info: { ko: '동백 12~2월 · 마을 안이라 조용히 관람', zh: '山茶花12~2月 · 在村子里，请安静参观', en: 'Camellias Dec–Feb · In a village — please keep quiet' },
               tip: { zh: '百年山茶花树围成的防风林', ko: '100년 넘은 동백나무가 둘러싼 방풍림', en: 'A century-old windbreak of camellia trees' } },
         ],
     },
+};
+
+// ── 컨셉 코스 (2026-11-18) ──
+// 이미 등록한 장소를 다시 쓰는 코스는 stop()으로 가져와 이름·운영정보를 한 곳에서만 관리한다.
+// 여행 속도(pace)·예산 단계를 고르게 채우려고 만든 것: 느긋(2~3곳) · 빡빡(6곳) · 0원 · 로얄
+function stop(ko, over = {}) {
+    for (const b of Object.values(BLOCKS)) {
+        const s = b.stops.find(x => x.name.ko === ko);
+        if (s) return { ...s, ...over };
+    }
+    throw new Error(`courses.js: 등록되지 않은 장소 ${ko}`);
+}
+
+const SEHWA = { name: { ko: '세화해수욕장', zh: '细花海边', en: 'Sehwa Beach' }, type: 'photo', stayMin: 40, info: FREE,
+    tip: { zh: '白沙和玉色海水，海边有小咖啡馆和杂货店', ko: '흰 모래와 옥빛 바다, 해변 앞에 작은 카페·소품샵', en: 'White sand and jade water, with small cafes and shops along the shore' } };
+
+Object.assign(BLOCKS, {
+    slowcafe: {
+        region: 'east',
+        title: { zh: '慢慢喝咖啡：枫林茶房 · 细花海边 · 汉拿山咖啡馆', ko: '느긋한 카페 하루: 풍림다방 · 세화해변 · 카페한라산', en: 'Slow Cafe Day: Punglim Dabang · Sehwa Beach · Cafe Hallasan' },
+        summary: { zh: '只去三个地方：手冲咖啡、发呆看海、复古电视机拍照', ko: '세 곳만 천천히: 핸드드립 커피, 바다 멍, 레트로 TV 사진', en: 'Just three stops: pour-over coffee, sea-gazing and retro-TV photos' },
+        stops: [
+            stop('풍림다방 송당', { stayMin: 90 }),
+            { ...SEHWA, stayMin: 70 },
+            stop('카페한라산', { stayMin: 90 }),
+        ],
+    },
+    slowforest: {
+        region: 'mid',
+        title: { zh: '森林里慢慢走：思连伊林荫道 · 秘密森林', ko: '숲에서 쉬어가기: 사려니숲길 · 비밀의숲', en: 'Forest Pause: Saryeoni Trail · Secret Forest' },
+        summary: { zh: '只去两片森林，走得慢一点也没关系', ko: '숲 두 곳만, 천천히 걸어도 되는 하루', en: 'Just two forests — take all the time you like' },
+        stops: [
+            stop('사려니숲길', { stayMin: 120 }),
+            stop('비밀의숲', { stayMin: 80 }),
+        ],
+    },
+    eastrush: {
+        region: 'east',
+        title: { zh: '东线特种兵：一天打卡6个地方', ko: '동부 하이라이트 몰아보기: 하루 6곳', en: 'East Highlights Rush: 6 Stops in a Day' },
+        summary: { zh: '咸德、月汀里、细花、日出峰、广峙其、涉地可支，东边名景一次看完', ko: '함덕·월정리·세화·일출봉·광치기·섭지코지, 동쪽 명소를 하루에', en: 'Hamdeok, Woljeong, Sehwa, Seongsan, Gwangchigi and Seopjikoji in one day' },
+        stops: [
+            stop('함덕해수욕장', { stayMin: 40 }),
+            stop('월정리해변', { stayMin: 30 }),
+            { ...SEHWA, stayMin: 30 },
+            stop('성산일출봉', { stayMin: 80 }),
+            stop('광치기해변', { stayMin: 20 }),
+            stop('섭지코지', { stayMin: 50 }),
+        ],
+    },
+    westphoto: {
+        region: 'west',
+        title: { zh: '西线拍照特种兵：6个出片点', ko: '서쪽 인생샷 몰아보기: 하루 6곳', en: 'West Photo Rush: 6 Spots in a Day' },
+        summary: { zh: '彩虹海岸、涯月、金陵、茶园、风车，最后在水月峰看日落', ko: '무지개 해안도로, 애월, 금능, 녹차밭, 풍차, 수월봉 일몰까지', en: 'Rainbow road, Aewol, Geumneung, tea fields, windmills and a Suwolbong sunset' },
+        stops: [
+            stop('도두동 무지개해안도로', { stayMin: 25 }),
+            stop('애월 한담해안산책로', { stayMin: 40 }),
+            stop('금능해수욕장', { stayMin: 40 }),
+            stop('오설록 티뮤지엄', { stayMin: 50 }),
+            stop('신창풍차해안도로', { stayMin: 30 }),
+            stop('수월봉', { stayMin: 40 }),
+        ],
+    },
+    freecity: {
+        region: 'north',
+        title: { zh: '零门票济州市海边：沙罗峰 · 龙头岩 · 彩虹海岸 · 梨湖', ko: '0원 제주시 바다 산책: 사라봉 · 용두암 · 무지개해안도로 · 이호테우', en: 'Free Jeju City Seaside: Sarabong · Yongduam · Rainbow Road · Iho' },
+        summary: { zh: '全部免费，坐公交也方便，在梨湖小马灯塔看日落', ko: '입장료 없이 버스로도 다니기 쉬운 코스, 이호테우 말 등대에서 일몰', en: 'No entry fees and easy by bus; sunset at the Iho horse lighthouses' },
+        stops: [
+            stop('사라봉공원', { stayMin: 40, tip: { zh: '可以俯瞰济州港和市区的小山丘', ko: '제주항과 시내가 내려다보이는 작은 오름', en: 'A small hill overlooking Jeju Port and the city' } }),
+            stop('용두암'),
+            stop('도두동 무지개해안도로'),
+            stop('이호테우해변', { stayMin: 50 }),
+        ],
+    },
+    royalwest: {
+        region: 'west',
+        title: { zh: '豪华西线：9.81公园 · 本态博物馆 · 雪绿 · One & Only', ko: '로얄 서부: 9.81파크 · 본태박물관 · 오설록 · 원앤온리', en: 'Premium West: 9.81 Park · Bonte Museum · O\'sulloc · One and Only' },
+        summary: { zh: '无动力赛车、安藤忠雄美术馆、茶园，在山房山前的海边咖啡馆结束', ko: '무동력 레이싱, 안도 다다오 미술관, 녹차밭, 산방산 앞 해변 카페로 마무리', en: 'Gravity racing, a Tadao Ando museum, tea fields and a beach cafe below Sanbangsan' },
+        stops: [
+            { name: { ko: '9.81파크 제주', zh: '9.81 Park', en: '9.81 Park' }, type: 'spot', stayMin: 100,
+              info: { ko: '09:00–18:00 · 연중무휴 · 날씨에 따라 운영 변동 · 레이싱 3회 약 44,500원', zh: '09:00–18:00 · 全年无休 · 天气不好可能停运 · 赛车3次约44,500韩元', en: '09:00–18:00 · Open daily · May close in bad weather · 3 races about ₩44,500' },
+              tip: { zh: '不用驾照的无动力赛车，看着大海往下冲', ko: '면허 없이 타는 무동력 레이싱, 바다를 보며 내려가는 코스', en: 'Gravity racing with no licence needed, rolling down toward the sea' } },
+            stop('본태박물관'),
+            stop('오설록 티뮤지엄'),
+            stop('원앤온리', { stayMin: 80 }),
+        ],
+    },
+    royaleast: {
+        region: 'east',
+        title: { zh: '豪华城山：光之掩体 · Aqua Planet · 涉地可支', ko: '로얄 성산: 빛의 벙커 · 아쿠아플라넷 · 섭지코지', en: 'Premium Seongsan: Bunker de Lumières · Aqua Planet · Seopjikoji' },
+        summary: { zh: '地下碉堡里的沉浸式艺术、大型水族馆，最后在海边散步', ko: '옛 통신 벙커 속 몰입형 미디어아트, 대형 아쿠아리움, 해안 산책으로 마무리', en: 'Immersive art in an old bunker, a big aquarium and a coastal walk to finish' },
+        stops: [
+            { name: { ko: '빛의 벙커', zh: '光之掩体', en: 'Bunker de Lumières' }, type: 'spot', stayMin: 70,
+              info: { ko: '입장 17:00까지 · 성인 19,000원', zh: '17:00停止入场 · 成人19,000韩元', en: 'Entry until 17:00 · Adult ₩19,000' },
+              tip: { zh: '在旧通信碉堡里看名画投影，下雨天也适合', ko: '옛 통신 벙커에서 보는 명화 미디어아트, 비 오는 날에도 좋음', en: 'Masterpieces projected inside an old bunker — good on rainy days too' } },
+            { name: { ko: '아쿠아플라넷 제주', zh: 'Aqua Planet 济州', en: 'Aqua Planet Jeju' }, type: 'spot', stayMin: 100,
+              info: { ko: '09:30–18:00 (매표 17:00까지) · 연중무휴 · 성인 약 45,500원', zh: '09:30–18:00（17:00停止售票）· 全年无休 · 成人约45,500韩元', en: '09:30–18:00 (tickets until 17:00) · Open daily · Adult about ₩45,500' },
+              tip: { zh: '巨大水槽前拍照，可以看海女表演', ko: '대형 수조 앞 사진, 해녀 공연도 볼 수 있음', en: 'Photos by the giant tank; haenyeo diver shows too' } },
+            stop('섭지코지'),
+            stop('광치기해변'),
+        ],
+    },
+});
+
+// 컨셉·여행 속도 (추천 화면에서 사용)
+// pace: 1 느긋 ~ 5 빡빡 (장소 수·체류·이동량을 보고 정함). concepts: CONCEPTS 중 1~3개
+export const CONCEPTS = ['classic', 'sea', 'cafe', 'nature', 'photo', 'art'];
+const META = {
+    east: { pace: 4, concepts: ['classic', 'sea'] },
+    west: { pace: 3, concepts: ['sea', 'cafe', 'photo'] },
+    south: { pace: 3, concepts: ['classic', 'sea'] },
+    north: { pace: 2, concepts: ['sea', 'photo'] },
+    mid: { pace: 3, concepts: ['nature', 'photo'] },
+    rainy: { pace: 2, concepts: ['art'] },
+    udo: { pace: 3, concepts: ['sea', 'classic'] },
+    sunset: { pace: 3, concepts: ['photo', 'sea'] },
+    jongdal: { pace: 3, concepts: ['nature', 'cafe'] },
+    seogwipo: { pace: 3, concepts: ['classic', 'sea'] },
+    jocheon: { pace: 3, concepts: ['nature'] },
+    aewol: { pace: 3, concepts: ['sea', 'cafe'] },
+    jungmun: { pace: 3, concepts: ['art', 'classic'] },
+    namwon: { pace: 3, concepts: ['nature', 'sea'] },
+    spring: { pace: 2, concepts: ['photo', 'nature'] },
+    summer: { pace: 3, concepts: ['photo', 'sea'] },
+    autumn: { pace: 2, concepts: ['photo', 'nature'] },
+    winter: { pace: 2, concepts: ['photo', 'nature'] },
+    slowcafe: { pace: 1, concepts: ['cafe', 'sea'] },
+    slowforest: { pace: 1, concepts: ['nature'] },
+    eastrush: { pace: 5, concepts: ['classic', 'sea', 'photo'] },
+    westphoto: { pace: 5, concepts: ['photo', 'sea'] },
+    freecity: { pace: 2, concepts: ['sea', 'photo'] },
+    royalwest: { pace: 3, concepts: ['art', 'cafe'] },
+    royaleast: { pace: 3, concepts: ['art', 'sea'] },
+};
+for (const [k, m] of Object.entries(META)) Object.assign(BLOCKS[k], m);
+
+// 성인 1인 입장료(원) — 예산 계산용 추정치. 표시 문구(info)와 따로 둔다. 없는 곳은 무료로 본다
+export const FEES = {
+    '성산일출봉': 5000, '중문 대포해안 주상절리대': 2000, '정방폭포': 2000, '천지연폭포': 2000,
+    '산굼부리': 7000, '비밀의숲': 5000, '스누피가든': 19000, '아르떼뮤지엄 제주': 18000,
+    '그리스신화박물관': 9000, '여미지식물원': 12000, '테디베어뮤지엄': 12000, '성산항': 12000,
+    '용머리해안': 2000, '비자림': 3000, '보롬왓': 6000, '휴애리자연생활공원': 13000, '카멜리아힐': 12000,
+    '제주돌문화공원': 5000, '절물자연휴양림': 1000, '한림공원': 15000, '본태박물관': 30000,
+    '천제연폭포': 2500, '붉은오름자연휴양림': 1000, '9.81파크 제주': 44500, '빛의 벙커': 19000,
+    '아쿠아플라넷 제주': 45500,
 };
 
 // 장소 좌표 [위도, 경도] — stop.name.ko로 찾는다 (코스 미니맵·이동 계산용). 출처: 비짓제주 API (2026-11-17 대조)
@@ -464,6 +607,11 @@ export const STOP_POS = {
     '목장카페 밭디': [33.4077, 126.7729],
     '표선해수욕장': [33.3272, 126.8381],
     '남원큰엉해안': [33.2734, 126.7038],
+    // 컨셉 코스
+    '세화해수욕장': [33.5253, 126.8613],
+    '9.81파크 제주': [33.3929, 126.3586],
+    '빛의 벙커': [33.4398, 126.8990],
+    '아쿠아플라넷 제주': [33.4325, 126.9272],
 };
 
 // 코스 카드 표지 사진: public/img/courses/{img}. stop = 사진 속 장소(그 코스의 stop.name.ko, 출처 표시에 이름을 쓴다)
@@ -484,6 +632,13 @@ export const COVERS = {
     aewol: { img: 'aewol.webp', stop: '금능해수욕장' },
     jungmun: { img: 'jungmun.webp', stop: '허니문하우스' },
     namwon: { img: 'namwon.webp', stop: '남원큰엉해안' },
+    slowcafe: { img: 'slowcafe.webp', stop: '세화해수욕장' },
+    slowforest: { img: 'slowforest.webp', stop: '비밀의숲' },
+    eastrush: { img: 'eastrush.webp', stop: '섭지코지' },
+    westphoto: { img: 'westphoto.webp', stop: '신창풍차해안도로' },
+    freecity: { img: 'freecity.webp', stop: '이호테우해변' },
+    royalwest: { img: 'royalwest.webp', stop: '9.81파크 제주' },
+    royaleast: { img: 'royaleast.webp', stop: '빛의 벙커' },
     spring: { img: 'spring.webp', stop: '가시리 유채꽃길' },
     summer: { img: 'summer.webp', stop: '종달리수국길' },
     autumn: { img: 'autumn.webp', stop: '새별오름' },

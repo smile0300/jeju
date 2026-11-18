@@ -449,6 +449,19 @@
 /* 목록 카드 태그 줄 + '지금 제철' 배지 */
 .pl-course-tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .pl-tag-now { background: #FFF0F6; color: #D6336C; }
+.pl-tag-match { background: #EBFBEE; color: #2B8A3E; }
+.pl-course-cost { font-size: 0.85rem; font-weight: 800; color: var(--accent-active); }
+
+/* 추천 코스: 속도·예산 슬라이더 + 컨셉 칩 */
+.pl-prefs { display: flex; flex-direction: column; gap: var(--space-4); }
+.pl-pref { display: flex; flex-direction: column; gap: var(--space-2); }
+.pl-pref-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-2); }
+.pl-pref-head strong { font-size: 0.9rem; }
+.pl-pref-val { font-size: 0.85rem; font-weight: 800; color: var(--accent-active); }
+.pl-range { width: 100%; margin: 0; accent-color: var(--accent-active); height: 28px; }
+.pl-pref-ends { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--label-secondary); }
+.pl-prefs .pl-hint { margin: 0; }
+.pl-list-head { margin: var(--space-4) 0 var(--space-2); font-size: 1rem; font-weight: 800; }
 
 /* ── 차량 대절 ── */
 .pl-price {

@@ -129,15 +129,21 @@ export function legHtml(leg, { back = false, viaFerry = false } = {}) {
  * 하루 택시비(숙소 왕복 포함)와 버스비를 나란히 보여준다. compact = 여행 브리핑용(카드 테두리·안내문 없음)
  * 차량 대절(包车)은 운영자가 직접 운영하지 않아 코스 화면에서는 안내하지 않는다(대절 요금은 일일투어 예약 참고용으로 대절 탭에만)
  */
-export function moveHtml(block, { compact = false } = {}) {
-    const stops = block.stops;
-    const legs = stops.slice(0, -1).map((_, i) => legInfo(block, i));
+/** 하루 교통비: 택시 합계(숙소 왕복 포함)·버스 탑승 횟수·버스 합계. 좌표가 빠진 코스는 null */
+export function dayTransport(block) {
+    const legs = block.stops.slice(0, -1).map((_, i) => legInfo(block, i));
     const hotel = hotelLegs(block);
-    if (!hotel || legs.some(l => !l)) return '';
-    const total = [hotel.out, hotel.back, ...legs].reduce((sum, l) => sum + (l.fare || 0), 0);
+    if (!hotel || legs.some(l => !l)) return null;
+    const all = [hotel.out, hotel.back, ...legs];
     // 버스는 걷는 구간·배를 빼고 차로 가는 구간마다 한 번씩 탄다고 본다(섬 안 순환버스는 별도 요금이라 우도는 항구 왕복만)
-    const rides = [hotel.out, hotel.back, ...legs].filter(l => l.kind === 'taxi').length;
-    const busTotal = rides * BUS_FARE;
+    const rides = all.filter(l => l.kind === 'taxi').length;
+    return { taxi: all.reduce((sum, l) => sum + (l.fare || 0), 0), rides, bus: rides * BUS_FARE };
+}
+
+export function moveHtml(block, { compact = false } = {}) {
+    const t = dayTransport(block);
+    if (!t) return '';
+    const { taxi: total, rides, bus: busTotal } = t;
     const isUdo = block.transport === 'udo';
 
     const rows = `
