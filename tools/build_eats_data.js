@@ -12,6 +12,7 @@ const j = html.indexOf('];', i);
 const DATA = JSON.parse(html.slice(i + 13, j + 1));
 // 방송·20·30대 인기 보강분(구글맵 검증 완료)은 뒤에 붙여 기존 id 순서를 유지한다
 const { TREND, EXTRA_TAGS } = require('./eats_trend.js');
+const CATCHTABLE = JSON.parse(fs.readFileSync(path.join(__dirname, 'eats_catchtable.json'), 'utf8'));
 DATA.push(...TREND);
 
 // 주소 → 세부 지역 키
@@ -129,6 +130,7 @@ for (const d of DATA) {
         tel: d.연락처 || '',
         pr: parseInt(d.우선순위해당, 10) || 0,
         ...link(d),
+        ct: CATCHTABLE[d.이름_ko] || '', // 캐치테이블 글로벌 원격 줄서기·예약 (tools/eats_catchtable.json)
     };
     // 빈 값은 지워서 용량을 줄인다
     for (const k of Object.keys(r)) if (r[k] === '' || r[k] === null || (Array.isArray(r[k]) && !r[k].length)) delete r[k];
@@ -139,7 +141,7 @@ const final = `// 자동 생성 파일 — 직접 고치지 말 것. tools/build
 // 출처: '제주 후보지 선별' 아티팩트 (식당·카페, 폐업 제외) + tools/eats_trend.js (방송·20·30대 인기, 구글맵 검증) · ${new Date().toISOString().slice(0, 10)}
 // 키: n 이름 · c food|cafe · cu 음식종류 · s 세부유형 · mn 대표메뉴 · a 주소 · ar 세부지역 · p [1인 최소,최대]원 · pt 가격 원문
 //     g 구글평점 · gr 구글리뷰 · nr 네이버리뷰 · w 최대대기(분) · h 영업시간 · off 정기휴무 · t 태그 · why 선정근거 · ph 사진포인트
-//     cn 주의사항 · tel 연락처 · pr 우선순위 · ln 네이버 플레이스 · lk 카카오맵
+//     cn 주의사항 · tel 연락처 · pr 우선순위 · ln 네이버 플레이스 · lk 카카오맵 · ct 캐치테이블 id
 export const EATS = ${JSON.stringify(rows)};
 `;
 fs.writeFileSync(path.join(__dirname, '..', 'src', 'data', 'eats.js'), final);

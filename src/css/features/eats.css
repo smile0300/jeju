@@ -95,6 +95,29 @@ html[lang="ko"] .eat-beta { word-break: keep-all; } /* 중국어에 keep-all을 
 .eat-name { margin: 0; font-size: 1.02rem; font-weight: 800; color: var(--label-primary); overflow-wrap: anywhere; }
 .eat-sub { font-size: 0.78rem; color: var(--label-secondary); margin-top: 2px; overflow-wrap: anywhere; }
 .eat-price { flex-shrink: 0; font-size: 0.82rem; font-weight: 800; color: #E67700; text-align: right; font-variant-numeric: tabular-nums; }
+.eat-price small { display: block; font-size: 0.68rem; font-weight: 700; color: var(--label-secondary); }
+
+/* 이름 아래 한 줄 하이라이트: 방송·순위·공식 지정 + 대표메뉴 */
+.eat-hl { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; margin: 6px 0 0; font-size: 0.82rem; line-height: 1.45; color: var(--label-primary); }
+.eat-hl b { display: inline-flex; align-items: center; gap: 4px; color: #C2410C; font-weight: 800; }
+.eat-hl b i { font-size: 1rem; }
+.eat-hl-dot { color: var(--label-tertiary, #B0B8C1); }
+
+/* 캐치테이블 글로벌 원격 줄서기·예약 */
+.eat-ct { display: flex; align-items: center; gap: 10px; margin-top: 10px; padding: 10px 12px; border-radius: 12px; background: #FFF4E6; border: 1px solid #FFD8A8; color: var(--label-primary); text-decoration: none; }
+.eat-ct > i:first-child { font-size: 1.4rem; color: #E8590C; flex-shrink: 0; }
+.eat-ct span { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.eat-ct b { font-size: 0.86rem; color: #D9480F; }
+.eat-ct small { font-size: 0.72rem; color: var(--label-secondary); line-height: 1.4; }
+.eat-ct > i:last-child { color: #E8590C; flex-shrink: 0; }
+
+/* 지금 영업 상태 (제주 시각 기준) */
+.eat-status { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 0.8rem; font-weight: 700; }
+.eat-status > i { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: currentColor; }
+.eat-status small { font-weight: 500; color: var(--label-secondary); }
+.eat-status-open { color: #12B886; }
+.eat-status-soon { color: #E67700; }
+.eat-status-closed { color: var(--label-secondary); }
 
 .eat-tags { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin-top: 8px; }
 .eat-cu { padding: 2px 8px; border-radius: 6px; background: var(--fill-secondary); color: var(--label-primary); font-size: 0.74rem; font-weight: 700; }

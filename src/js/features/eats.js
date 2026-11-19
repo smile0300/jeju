@@ -1,5 +1,6 @@
 import { escapeHtml } from './planner/strings.js';
 import { chipGroup, bindChips, copyText, flashLabel } from './planner/shared.js';
+import { openStatus, fmtMin } from './eats-hours.js';
 
 // 맛집 (BETA): '제주 후보지 선별' 아티팩트의 식당·카페(src/data/eats.js, tools/build_eats_data.js로 생성)를
 // 음식 종류 · 지역 · 1인 가격 · 키워드로 걸러 보여준다. 데이터(약 280KB)는 화면에 들어올 때만 불러온다.
@@ -29,7 +30,7 @@ const S = {
         'pr.1': '₩1万以下', 'pr.2': '₩1~2万', 'pr.3': '₩2~3万', 'pr.4': '₩3万以上',
         'kw.locals': '本地人常去', 'kw.hyangto': '官方乡土美食店', 'kw.goodprice': '平价良心店', 'kw.century': '百年老店',
         'kw.tv': '韩国美食节目', 'kw.hot': '韩国年轻人爱去', 'kw.solo': '可一人用餐', 'kw.cnmenu': '中文菜单', 'kw.enmenu': '英文菜单', 'kw.cnreview': '有中文评价',
-        'kw.photo': '出片', 'kw.ocean': '海景', 'kw.breakfast': '早餐（9点前营业）', 'kw.shortwait': '排队短', 'kw.walkin': '外国人可直接去',
+        'kw.opennow': '现在营业', 'kw.catchtable': '可在线排队', 'kw.photo': '出片', 'kw.ocean': '海景', 'kw.breakfast': '早餐（9点前营业）', 'kw.shortwait': '排队短', 'kw.walkin': '外国人可直接去',
         'kw.twoplus': '2人起点', 'kw.booking': '需预约', 'kw.nokids': '禁止儿童',
         'so.rec': '推荐', 'so.rating': '评分高', 'so.reviews': '评价多', 'so.cheap': '价格低',
         reviews: '{n}条评价',
@@ -40,6 +41,11 @@ const S = {
         copy_name: '复制韩文店名', copy_addr: '复制地址', copied: '已复制',
         show_staff: '给司机/店员看：',
         report: '信息有误？告诉我们',
+        pp: '人均', signature: '招牌',
+        ct_btn: '在线排队 · 预约', ct_note: 'CatchTable 英文版，无需韩国手机号，到店前远程取号',
+        'st.open': '营业中 · {t}打烊', 'st.closing': '即将打烊 · {t}', 'st.break': '休息中 · {t}恢复营业', 'st.later': '今天{t}开门',
+        'st.done': '今日已打烊', 'st.off': '今日休息', 'st.tmr': '明天{t}开门', 'st.day': '{d}{t}开门',
+        days: '周日,周一,周二,周三,周四,周五,周六', st_tz: '济州时间',
     },
     en: {
         title: 'Jeju Eats',
@@ -62,7 +68,7 @@ const S = {
         'pr.1': 'Under ₩10k', 'pr.2': '₩10–20k', 'pr.3': '₩20–30k', 'pr.4': '₩30k+',
         'kw.locals': 'Locals’ favorite', 'kw.hyangto': 'Official local-food', 'kw.goodprice': 'Fair-price shop', 'kw.century': '100-year shop',
         'kw.tv': 'On Korean TV', 'kw.hot': 'Trending with young Koreans', 'kw.solo': 'Solo-friendly', 'kw.cnmenu': 'Chinese menu', 'kw.enmenu': 'English menu', 'kw.cnreview': 'Chinese reviews',
-        'kw.photo': 'Photogenic', 'kw.ocean': 'Ocean view', 'kw.breakfast': 'Breakfast (before 9am)', 'kw.shortwait': 'Short wait', 'kw.walkin': 'Easy walk-in',
+        'kw.opennow': 'Open now', 'kw.catchtable': 'Online waitlist', 'kw.photo': 'Photogenic', 'kw.ocean': 'Ocean view', 'kw.breakfast': 'Breakfast (before 9am)', 'kw.shortwait': 'Short wait', 'kw.walkin': 'Easy walk-in',
         'kw.twoplus': '2+ people', 'kw.booking': 'Booking needed', 'kw.nokids': 'No kids',
         'so.rec': 'Recommended', 'so.rating': 'Top rated', 'so.reviews': 'Most reviewed', 'so.cheap': 'Cheapest',
         reviews: '{n} reviews',
@@ -73,6 +79,11 @@ const S = {
         copy_name: 'Copy Korean name', copy_addr: 'Copy address', copied: 'Copied',
         show_staff: 'Show to driver/staff:',
         report: 'Wrong info? Tell us',
+        pp: 'pp', signature: 'Signature:',
+        ct_btn: 'Join waitlist · Book', ct_note: 'CatchTable in English — no Korean phone number needed, queue remotely before you arrive',
+        'st.open': 'Open · until {t}', 'st.closing': 'Closing soon · {t}', 'st.break': 'On break · back {t}', 'st.later': 'Opens today {t}',
+        'st.done': 'Closed for today', 'st.off': 'Closed today', 'st.tmr': 'Opens tomorrow {t}', 'st.day': 'Opens {d} {t}',
+        days: 'Sun,Mon,Tue,Wed,Thu,Fri,Sat', st_tz: 'Jeju time',
     },
     ko: {
         title: '제주 맛집',
@@ -95,7 +106,7 @@ const S = {
         'pr.1': '1만원 이하', 'pr.2': '1~2만원', 'pr.3': '2~3만원', 'pr.4': '3만원 이상',
         'kw.locals': '도민 맛집', 'kw.hyangto': '향토음식점 지정', 'kw.goodprice': '착한가격업소', 'kw.century': '백년가게',
         'kw.tv': '방송 출연', 'kw.hot': '요즘 핫플', 'kw.solo': '1인 식사', 'kw.cnmenu': '중국어 메뉴', 'kw.enmenu': '영어 메뉴', 'kw.cnreview': '중국어 후기',
-        'kw.photo': '사진 명소', 'kw.ocean': '오션뷰', 'kw.breakfast': '아침 식사(9시 전)', 'kw.shortwait': '대기 짧음', 'kw.walkin': '외국인 바로 방문',
+        'kw.opennow': '지금 영업 중', 'kw.catchtable': '원격 줄서기', 'kw.photo': '사진 명소', 'kw.ocean': '오션뷰', 'kw.breakfast': '아침 식사(9시 전)', 'kw.shortwait': '대기 짧음', 'kw.walkin': '외국인 바로 방문',
         'kw.twoplus': '2인부터', 'kw.booking': '예약 필요', 'kw.nokids': '노키즈',
         'so.rec': '추천순', 'so.rating': '평점순', 'so.reviews': '리뷰순', 'so.cheap': '가격 낮은순',
         reviews: '리뷰 {n}',
@@ -107,6 +118,11 @@ const S = {
         show_staff: '',
         report: '정보가 틀렸나요? 알려주세요',
         why: '선정 이유', photo_pt: '사진 포인트', caution: '참고',
+        pp: '1인', signature: '대표',
+        ct_btn: '원격 줄서기 · 예약', ct_note: '캐치테이블 글로벌(영어) — 외국인도 한국 번호 없이 줄서기 가능',
+        'st.open': '영업 중 · {t}까지', 'st.closing': '곧 마감 · {t}까지', 'st.break': '브레이크타임 · {t} 재개', 'st.later': '오늘 {t} 오픈',
+        'st.done': '오늘 영업 끝', 'st.off': '오늘 휴무', 'st.tmr': '내일 {t} 오픈', 'st.day': '{d} {t} 오픈',
+        days: '일요일,월요일,화요일,수요일,목요일,금요일,토요일', st_tz: '제주 시간',
     },
 };
 
@@ -121,7 +137,7 @@ const CUISINES = ['pork', 'seafood', 'noodle', 'soup', 'meat', 'local', 'snack',
 const AREAS = ['jeju', 'aewol', 'hallim', 'daejeong', 'jungmun', 'seogwipo', 'pyoseon', 'seongsan', 'udo', 'gujwa', 'jocheon'];
 const PRICES = ['1', '2', '3', '4'];
 // 필터로 고를 수 있는 키워드 (뱃지로만 보이는 twoplus·booking·nokids는 제외)
-const KEYWORDS = ['hot', 'locals', 'hyangto', 'goodprice', 'solo', 'cnmenu', 'enmenu', 'cnreview', 'shortwait', 'walkin', 'breakfast', 'ocean', 'photo', 'tv', 'century'];
+const KEYWORDS = ['opennow', 'catchtable', 'hot', 'locals', 'hyangto', 'goodprice', 'solo', 'cnmenu', 'enmenu', 'cnreview', 'shortwait', 'walkin', 'breakfast', 'ocean', 'photo', 'tv', 'century'];
 const BADGE_ORDER = ['hyangto', 'goodprice', 'century', 'locals', 'tv', 'hot', 'cnmenu', 'enmenu', 'cnreview', 'solo', 'twoplus', 'booking', 'breakfast', 'ocean', 'nokids'];
 const SORTS = ['rec', 'rating', 'reviews', 'cheap'];
 
@@ -138,6 +154,8 @@ function priceTier(d) {
 
 function hasKw(d, k) {
     if (k === 'shortwait') return d.w != null && d.w <= 20;
+    if (k === 'catchtable') return !!d.ct;
+    if (k === 'opennow') { const st = openStatus(d); return !!st && (st.kind === 'open' || st.kind === 'closing'); }
     return (d.t || []).includes(k);
 }
 
@@ -207,6 +225,67 @@ function priceText(d) {
     return `${lo ? money(lo) : ''}~${money(hi)}`;
 }
 
+// 방송·맛집 순위 출처 (선정근거 끝 " / " 뒤) → 중국어·영어 이름. 모르는 이름은 한국어 그대로
+const SOURCES = [
+    ['수요미식회', '水曜美食会', 'Wednesday Food Talk'],
+    ['백종원의 3대천왕', '白钟元的三大天王', 'Baek Jong-won’s Top 3'],
+    ['백종원의 골목식당', '白钟元的胡同餐厅', 'Baek’s Alley Restaurant'],
+    ['성시경 먹을텐데', '成始璄《我要吃》', 'Sung Si-kyung’s Mukeultende'],
+    ['전지적참견시점', '《全知的干预视角》', 'Omniscient Interfering View'],
+    ['허영만의 백반기행', '许英万的白饭纪行', 'Heo Young-man’s Food Trip'],
+    ['맛있는녀석들', '《美味的家伙们》', 'Tasty Guys'],
+    ['생활의 달인', '《生活的达人》', 'Master in Life'],
+    ['맛집의옆집', '《美食店的邻居》', 'Next Door to the Famous'],
+    ['또간집', '《又去的店》', 'Ttoganjip'],
+];
+function sourceName(src) {
+    const rank = src.match(/^다이닝코드\s*(제주|서귀포|애월|카페)?\s*(\d+)위/);
+    if (rank) {
+        const where = { 제주: ['济州', 'Jeju'], 서귀포: ['西归浦', 'Seogwipo'], 애월: ['涯月', 'Aewol'], 카페: ['咖啡馆', 'cafés'] }[rank[1]] || ['济州', 'Jeju'];
+        return lang() === 'ko' ? src : lang() === 'en' ? `DiningCode #${rank[2]} ${where[1]}` : `DiningCode ${where[0]}第${rank[2]}名`;
+    }
+    const hit = SOURCES.find(([ko]) => src.startsWith(ko));
+    if (!hit || lang() === 'ko') return src.replace(/\s*\d{4}$/, '');
+    return lang() === 'en' ? hit[2] : hit[1];
+}
+
+/** 이름 바로 아래 한 줄: 가장 내세울 점(방송·순위·공식 지정) + 대표메뉴. 이 키워드는 아래 배지 줄에서 뺀다 */
+const HL_ORDER = ['tv', 'hot', 'hyangto', 'century', 'locals', 'goodprice'];
+const HL_ICON = { tv: 'ph-television-simple', hot: 'ph-fire', hyangto: 'ph-seal-check', century: 'ph-medal', locals: 'ph-house-line', goodprice: 'ph-coins' };
+function highlight(d) {
+    const key = HL_ORDER.find(k => (d.t || []).includes(k));
+    const parts = (d.why || '').split(' / ');
+    const src = parts.length > 1 ? parts[parts.length - 1].split(' · ')[0].trim() : '';
+    let text = key ? L(`kw.${key}`) : '';
+    if ((key === 'tv' || key === 'hot') && src && !/후기|댓글/.test(src)) text = sourceName(src);
+    const menu = d.mn ? d.mn.split(/[·,.]\s*/).filter(Boolean).slice(0, 2).join('·') : '';
+    if (!text && !menu) return { key: null, html: '' };
+    return {
+        key,
+        html: `<p class="eat-hl">${text ? `<b><i class="ph-duotone ${HL_ICON[key]}"></i> ${escapeHtml(text)}</b>` : ''}${
+            text && menu ? '<span class="eat-hl-dot">·</span>' : ''}${menu ? `<span>${L('signature')} ${escapeHtml(menu)}</span>` : ''}</p>`,
+    };
+}
+
+// 지금 영업 상태 한 줄(제주 시각 기준). 영업시간 원문이 없거나 못 읽으면 빈 문자열
+function statusHtml(d) {
+    const s = openStatus(d);
+    if (!s) return '';
+    const t = (m) => fmtMin(m);
+    let text;
+    if (s.kind === 'open' || s.kind === 'closing' || s.kind === 'break') text = L(`st.${s.kind}`, { t: t(s.until) });
+    else if (s.kind === 'later') text = L('st.later', { t: t(s.at) });
+    else {
+        text = L(`st.${s.kind}`);
+        if (s.next) text += ' · ' + (s.next.tomorrow ? L('st.tmr', { t: t(s.next.at) })
+            : L('st.day', { d: L('days').split(',')[s.next.day], t: t(s.next.at) }));
+    }
+    const tone = s.kind === 'open' ? 'open' : s.kind === 'closing' || s.kind === 'break' || s.kind === 'later' ? 'soon' : 'closed';
+    // 중국(UTC+8) 등 다른 시간대에서 보는 사람을 위해 시각이 제주 기준임을 밝힌다
+    const tz = lang() === 'ko' ? '' : ` <small>(${L('st_tz')})</small>`;
+    return `<div class="eat-status eat-status-${tone}"><i></i>${escapeHtml(text)}${tz}</div>`;
+}
+
 function mapLinks(d) {
     const q = encodeURIComponent(`${d.n} ${d.a.replace(/^제주특별자치도\s*/, '')}`);
     const naver = d.ln || `https://map.naver.com/p/search/${encodeURIComponent('제주 ' + d.n)}`;
@@ -219,12 +298,13 @@ function mapLinks(d) {
 function cardHtml(d) {
     const ko = lang() === 'ko';
     const tags = d.cu.filter(c => c !== 'other').map(c => `<span class="eat-cu">${L(`cu.${c}`)}</span>`).join('');
-    const badges = BADGE_ORDER.filter(k => (d.t || []).includes(k)).map(k => `<span class="eat-badge eat-badge-${k}">${L(`kw.${k}`)}</span>`).join('');
+    const hl = highlight(d);
+    const badges = BADGE_ORDER.filter(k => k !== hl.key && (d.t || []).includes(k)).map(k => `<span class="eat-badge eat-badge-${k}">${L(`kw.${k}`)}</span>`).join('');
     const rating = d.g ? `<span class="eat-rating">★ ${d.g.toFixed(1)}<small> · ${L('reviews', { n: d.gr.toLocaleString('en-US') })}</small></span>` : '';
     const wait = d.w == null ? '' : `<span>${d.w === 0 ? L('nowait') : L('wait', { m: d.w })}</span>`;
     const hours = [d.h ? `<span><b>${L('hours')}</b> ${escapeHtml(trHours(d.h))}</span>` : '', d.off ? `<span><b>${L('off')}</b> ${escapeHtml(trHours(d.off))}</span>` : ''].join('');
     const koDetail = ko ? [
-        d.mn ? `<p class="eat-ko"><b>대표메뉴</b> ${escapeHtml(d.mn)}</p>` : '',
+        d.mn && d.mn.split(/[·,.]\s*/).filter(Boolean).length > 2 ? `<p class="eat-ko"><b>대표메뉴</b> ${escapeHtml(d.mn)}</p>` : '',
         d.why ? `<p class="eat-ko"><b>${L('why')}</b> ${escapeHtml(d.why)}</p>` : '',
         d.ph ? `<p class="eat-ko"><b>${L('photo_pt')}</b> ${escapeHtml(d.ph)}</p>` : '',
         d.cn ? `<p class="eat-ko eat-ko-sub"><b>${L('caution')}</b> ${escapeHtml(d.cn)}</p>` : '',
@@ -235,13 +315,17 @@ function cardHtml(d) {
                 <h3 class="eat-name">${escapeHtml(d.n)}</h3>
                 <div class="eat-sub">${L(`ar.${d.ar}`)}${ko && d.s ? ' · ' + escapeHtml(d.s) : ''}</div>
             </div>
-            <div class="eat-price">${priceText(d)}</div>
+            <div class="eat-price">${d.p ? `<small>${L('pp')}</small>` : ''}${priceText(d)}</div>
         </div>
+        ${hl.html}
+        ${statusHtml(d)}
         <div class="eat-tags">${tags}${rating}</div>
         ${badges ? `<div class="eat-badges">${badges}</div>` : ''}
         ${hours || wait ? `<div class="eat-meta">${hours}${wait}</div>` : ''}
         ${koDetail ? `<details class="eat-more"><summary>${L('why')}</summary>${koDetail}</details>` : ''}
         <div class="eat-addr">${L('show_staff') ? `<span class="eat-addr-hint">${L('show_staff')}</span>` : ''}${escapeHtml(d.a.replace(/^제주특별자치도\s*/, ''))}</div>
+        ${d.ct ? `<a class="eat-ct" href="https://www.catchtable.net/shop/${encodeURIComponent(d.ct)}" target="_blank" rel="noopener">
+            <i class="ph-duotone ph-clock-countdown"></i><span><b>${L('ct_btn')}</b><small>${L('ct_note')}</small></span><i class="ph-bold ph-caret-right"></i></a>` : ''}
         <div class="eat-actions">
             ${mapLinks(d)}
             <button type="button" class="eat-btn" data-copy="${escapeHtml(`${d.n}\n${d.a}`)}">${L(ko ? 'copy_addr' : 'copy_name')}</button>
