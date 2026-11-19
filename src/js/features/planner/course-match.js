@@ -2,7 +2,7 @@
 // 여러 날은 점수 좋은 하루 코스를 지역·장소가 겹치지 않게 골라 일정을 만든다.
 // 점수는 낮을수록 잘 맞는다.
 
-import { BLOCKS, FEES, isInSeason } from '../../../data/courses.js';
+import { BLOCKS, FEES, COMPANION_FIT, isInSeason } from '../../../data/courses.js';
 import { dayTransport } from './course-view.js';
 
 export const CAFE_SPEND = 12000;          // 카페 한 곳 1인 음료+디저트 추정
@@ -30,8 +30,13 @@ export function dayCost(block, budget) {
 /** 지금 볼 수 있는 코스인가: 제철이 아닌 계절 코스는 뺀다 */
 const available = (b) => !b.season || isInSeason(b);
 
-export function scoreBlock(block, { pace = 3, budget = 3, concepts = [] } = {}) {
+export function scoreBlock(block, { pace = 3, budget = 3, concepts = [], companion = 'all' } = {}) {
     let s = Math.abs((block.pace || 3) - pace) * 1.2;
+    if (companion !== 'all') {
+        const key = Object.keys(BLOCKS).find(k => BLOCKS[k] === block);
+        s += (COMPANION_FIT[key] || []).includes(companion) ? -0.5 : 1.8; // 안 맞는 코스는 뒤로(빼지는 않음)
+        if (companion === 'parents' && (block.pace || 3) >= 4) s += 1; // 부모님과는 빡빡한 일정 피하기
+    }
     const c = costLevel(block);
     s += c > budget ? (c - budget) * 1.5 : (budget - c) * 0.6; // 예산 초과는 크게, 남는 건 조금만 감점
     if (concepts.length) {

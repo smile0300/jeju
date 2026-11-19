@@ -485,6 +485,38 @@ Object.assign(BLOCKS, {
 // 컨셉·여행 속도 (추천 화면에서 사용)
 // pace: 1 느긋 ~ 5 빡빡 (장소 수·체류·이동량을 보고 정함). concepts: CONCEPTS 중 1~3개
 export const CONCEPTS = ['classic', 'sea', 'cafe', 'nature', 'photo', 'art'];
+
+// 누구와 가기 좋은 코스인가 (추천 순서에만 쓰고, 안 맞는 코스도 목록에서 빼지 않는다)
+// couple 커플 · friends 친구 · solo 혼자 · parents 부모님(걷기 적고 쉬어 갈 곳 많은 코스)
+export const COMPANIONS = ['couple', 'friends', 'solo', 'parents'];
+export const COMPANION_FIT = {
+    east: ['couple', 'friends', 'solo'],
+    west: ['couple', 'friends', 'solo', 'parents'],
+    south: ['couple', 'friends', 'solo', 'parents'],
+    north: ['couple', 'friends', 'solo'],
+    mid: ['couple', 'friends', 'parents'],
+    rainy: ['couple', 'friends', 'parents'],
+    udo: ['couple', 'friends'],
+    sunset: ['couple', 'friends', 'solo'],
+    jongdal: ['couple', 'friends', 'solo'],
+    seogwipo: ['couple', 'friends', 'solo', 'parents'],
+    jocheon: ['solo', 'parents'],
+    aewol: ['couple', 'friends', 'parents'],
+    jungmun: ['couple', 'parents'],
+    namwon: ['couple', 'solo', 'parents'],
+    spring: ['couple', 'friends', 'parents'],
+    summer: ['couple', 'friends'],
+    autumn: ['couple', 'friends', 'solo'],
+    winter: ['couple', 'friends', 'parents'],
+    slowcafe: ['couple', 'solo'],
+    slowforest: ['solo', 'parents'],
+    eastrush: ['friends'],
+    westphoto: ['couple', 'friends'],
+    freecity: ['friends', 'solo'],
+    royalwest: ['couple', 'friends'],
+    royaleast: ['couple', 'friends', 'parents'],
+};
+
 const META = {
     east: { pace: 4, concepts: ['classic', 'sea'] },
     west: { pace: 3, concepts: ['sea', 'cafe', 'photo'] },

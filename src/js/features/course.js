@@ -1,6 +1,6 @@
 import { tr, pick, escapeHtml } from './planner/strings.js';
 import { chipGroup, bindChips, copyText, flashLabel } from './planner/shared.js';
-import { BLOCKS, REGIONS, CONCEPTS, COURSES_DRAFT, isInSeason } from '../../data/courses.js';
+import { BLOCKS, REGIONS, CONCEPTS, COMPANIONS, COURSES_DRAFT, isInSeason } from '../../data/courses.js';
 import { mapHtml, moveHtml, timelineHtml, fillMeals, blockLabel, nowBadge, driveTotal, coverHtml, money } from './planner/course-view.js';
 import { rankBlocks, buildPlans, dayCost, isGoodMatch, TAXI_FROM_BUDGET } from './planner/course-match.js';
 import { builderHtml, onBuilderChip, onBuilderClick, startFromBlock } from './planner/course-builder.js';
@@ -11,8 +11,8 @@ import { builderHtml, onBuilderChip, onBuilderClick, startFromBlock } from './pl
 
 const MAX_DAYS = 6;
 const PLAN_COUNT = 3;
-const state = { days: 1, region: 'all', pace: 3, budget: 3, concepts: [], detail: null, detailDay: 0 };
-const prefs = () => ({ pace: state.pace, budget: state.budget, concepts: state.concepts });
+const state = { days: 1, region: 'all', pace: 3, budget: 3, concepts: [], companion: 'all', detail: null, detailDay: 0 };
+const prefs = () => ({ pace: state.pace, budget: state.budget, concepts: state.concepts, companion: state.companion });
 
 const durationLabel = (d) => (d === 1 ? tr('common.daytrip') : tr('common.nights', { d, n: d - 1 }));
 
@@ -57,6 +57,10 @@ function rangeHtml(name, value) {
 
 function prefsHtml() {
     return `<section class="pl-card pl-prefs">
+        <div class="pl-pref">
+            <div class="pl-pref-head"><strong>${tr('course.pref.with')}</strong></div>
+            ${chipGroup('companion', ['all', ...COMPANIONS].map(c => ({ value: c, label: tr(`with.${c}`) })), { selected: [state.companion] })}
+        </div>
         ${rangeHtml('pace', state.pace)}
         ${rangeHtml('budget', state.budget)}
         <div class="pl-pref">
@@ -141,6 +145,7 @@ function render() {
         if (!values.length) return;
         if (name === 'days') { state.days = parseInt(values[0], 10); state.region = 'all'; }
         if (name === 'region') state.region = values[0];
+        if (name === 'companion') state.companion = values[0];
         if (name === 'detailDay') state.detailDay = parseInt(values[0], 10);
         render();
     });
