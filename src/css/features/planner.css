@@ -403,6 +403,37 @@
     cursor: pointer;
 }
 
+/* 코스 속 식사: 점심·저녁 근처 식당 (장소 칸 안, 다음 이동 안내 앞) */
+.pl-meal {
+    margin-top: var(--space-3);
+    padding: var(--space-3);
+    border-radius: 12px;
+    background: #FFF7ED;
+    border: 1px solid #FDE2C4;
+}
+.pl-meal[hidden] { display: none; }
+.pl-meal-head { display: flex; align-items: center; gap: 6px; font-size: 0.875rem; font-weight: 800; color: #C2410C; margin-bottom: var(--space-2); }
+.pl-meal-head i { font-size: 1.1rem; }
+.pl-meal-row {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 10px 28px 10px 12px;
+    margin-top: 6px;
+    border-radius: 10px;
+    background: #fff;
+    color: var(--label-primary);
+    text-decoration: none;
+}
+.pl-meal-name { font-size: 0.9rem; font-weight: 800; }
+.pl-meal-meta { font-size: 0.78rem; color: var(--label-secondary); }
+.pl-meal-hl { align-self: flex-start; margin-top: 2px; padding: 1px 8px; border-radius: 999px; background: #FFEDD5; color: #C2410C; font-size: 0.72rem; font-weight: 700; }
+.pl-meal-go { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--label-tertiary, #B0B8C1); }
+.pl-meal-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px var(--space-2); margin-top: var(--space-2); }
+.pl-meal-hint { font-size: 0.72rem; color: var(--label-secondary); }
+.pl-meal-more { padding: 0; font-size: 0.8rem; }
+
 .pl-leg {
     margin-top: var(--space-3);
     font-size: 0.8rem;

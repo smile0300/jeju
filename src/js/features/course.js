@@ -1,7 +1,7 @@
 import { tr, pick, escapeHtml } from './planner/strings.js';
 import { chipGroup, bindChips, copyText, flashLabel } from './planner/shared.js';
 import { BLOCKS, REGIONS, CONCEPTS, COURSES_DRAFT, isInSeason } from '../../data/courses.js';
-import { mapHtml, moveHtml, timelineHtml, blockLabel, nowBadge, driveTotal, coverHtml, money } from './planner/course-view.js';
+import { mapHtml, moveHtml, timelineHtml, fillMeals, blockLabel, nowBadge, driveTotal, coverHtml, money } from './planner/course-view.js';
 import { rankBlocks, buildPlans, dayCost, isGoodMatch, TAXI_FROM_BUDGET } from './planner/course-match.js';
 import { builderHtml, onBuilderChip, onBuilderClick, startFromBlock } from './planner/course-builder.js';
 
@@ -122,7 +122,7 @@ function detailHtml() {
         ${mapHtml(block.stops)}
         ${moveHtml(block)}
         <p class="pl-muted pl-hint"><i class="ph-duotone ph-info"></i> ${tr('course.copy_hint')}</p>
-        ${timelineHtml(block)}
+        ${timelineHtml(block, { meals: true })}
         <p class="pl-muted pl-hint"><i class="ph-duotone ph-info"></i> ${tr('course.info_hint')}</p>
         <button type="button" class="pl-link pl-center" data-build-from="${escapeHtml(keys[dayIdx])}"><i class="ph-duotone ph-pencil-simple-line"></i> ${tr('build.from_course')}</button>
         <button type="button" class="res-submit-btn pl-mt" data-charter="${escapeHtml(block.region)}"><i class="ph-duotone ph-users-three"></i> <span>${tr('course.charter_cta')}</span></button>`;
@@ -183,6 +183,7 @@ function render() {
     }
 
     root.innerHTML = state.detail === 'build' ? builderHtml(state.budget) : state.detail ? detailHtml() : listHtml();
+    fillMeals(root);
 }
 
 // 코스 상세·직접 만들기는 /course 안에서 기록을 한 칸 쌓는다 → 뒤로가기(휴대폰·상단 ←)가 홈이 아니라 목록으로 간다
