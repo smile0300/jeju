@@ -5,6 +5,9 @@ import { chipGroup, bindChips, readChips, partyStepper, bindPartySteppers, wecha
 import { BLOCKS, COMBOS, isInSeason } from '../../data/courses.js';
 import { mapHtml, moveHtml, timelineHtml, blockLabel } from './planner/course-view.js';
 import { CHARTER_PRICES } from '../../data/charter.js';
+import { renderPlanPanel } from './planner/itinerary-view.js';
+import { readWish } from './planner/wishlist.js';
+import { tp } from './planner/plan-strings.js';
 
 // 여행 일정 도우미 (올인원 여행 브리핑):
 // 홈 화면(#home-trip-planner)이나 /trip 페이지에서 여행 날짜(시작~종료)를 입력하면
@@ -798,6 +801,7 @@ async function renderResult(root, { from, to }) {
 
         <nav class="pl-trip-tabs" role="tablist" aria-label="Trip briefing tabs">
             <button type="button" role="tab" class="pl-trip-tab active" data-trip-tab="weather" aria-selected="true">${escapeHtml(tr('trip.nav.weather'))}</button>
+            <button type="button" role="tab" class="pl-trip-tab" data-trip-tab="plan" aria-selected="false">${escapeHtml(tp('plan.tab'))}${readWish().length ? `<span class="pl-trip-tab-count">${readWish().length}</span>` : ''}</button>
             <button type="button" role="tab" class="pl-trip-tab" data-trip-tab="course" aria-selected="false">${escapeHtml(tr('trip.nav.course'))}</button>
             <button type="button" role="tab" class="pl-trip-tab" data-trip-tab="festival" aria-selected="false">${escapeHtml(tr('trip.nav.festival'))}${festivals.length ? `<span class="pl-trip-tab-count">${festivals.length}</span>` : ''}</button>
             <button type="button" role="tab" class="pl-trip-tab" data-trip-tab="booking" aria-selected="false">${escapeHtml(tr('trip.nav.booking'))}</button>
@@ -807,6 +811,10 @@ async function renderResult(root, { from, to }) {
             <div id="trip-weather" class="naver-card pl-wx"><p class="pl-muted"><i class="ph-duotone ph-circle-notch spin"></i> ${tr('trip.loading')}</p></div>
             <div id="trip-outfit"></div>
             <div id="trip-history-compare"></div>
+        </section>
+
+        <section data-panel="plan" class="pl-trip-panel" hidden>
+            <div id="trip-plan" class="ip"></div>
         </section>
 
         <section data-panel="course" class="pl-trip-panel" hidden>
@@ -829,6 +837,13 @@ async function renderResult(root, { from, to }) {
 
     // 2) 추천 코스 초기 렌더링
     renderTripCourseBox(root, from, to);
+
+    // 2-1) 내 일정(담은 곳 → 날짜별 경로). 날씨가 오면 다시 짠다. 담기 버튼에서 왔거나 공유 링크면 이 탭부터
+    const planTrip = { from, to, fromIso: toIso(from), toIso: toIso(to) };
+    let wantPlan = new URLSearchParams(location.search).has('plan');
+    try { if (sessionStorage.getItem('jeju_trip_tab') === 'plan') { wantPlan = true; sessionStorage.removeItem('jeju_trip_tab'); } } catch (e) { /* 무시 */ }
+    if (wantPlan) switchTripTab(root, 'plan');
+    renderPlanPanel(root.querySelector('#trip-plan'), planTrip);
 
     // 3) 간편 예약 시간 선택기 초기화
     const qresTimeInput = root.querySelector('#trip-qres-time');
@@ -910,6 +925,7 @@ async function renderResult(root, { from, to }) {
 
     // 날씨에 맞춰 추천 코스의 비 예보 배지/우천 코스 팁 갱신
     renderTripCourseBox(root, from, to);
+    renderPlanPanel(root.querySelector('#trip-plan'), planTrip, { forecast, history: history_ });
 }
 
 async function submitReco(root, from, to) {

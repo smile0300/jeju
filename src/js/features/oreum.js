@@ -2,6 +2,7 @@ import { tr, pick, escapeHtml } from './planner/strings.js';
 import { chipGroup, bindChips } from './planner/shared.js';
 import { krwToCny } from '../../data/taxi.js';
 import { OREUMS } from '../../data/oreums.js';
+import { wishBtnHtml } from './planner/wishlist.js';
 
 // 한라산 화면의 "오름" 탭: 지역·계절로 거른 오름 카드 목록.
 // 탭 전환 시 한라산 CCTV를 멈추고(데이터 절약), 돌아오면 다시 튼다.
@@ -90,7 +91,10 @@ function cardHtml(o) {
         <p class="oreum-photo"><i class="ph-duotone ph-camera"></i> ${escapeHtml(pick(o.photo))}</p>
         <div class="oreum-meta">${meta}</div>
         <div class="oreum-transport">${busHtml(o)}${taxiHtml(o)}</div>
-        <a class="oreum-map-btn" href="${mapUrl}" target="_blank" rel="noopener"><i class="ph-duotone ph-map-pin"></i> ${tr('oreum.map')}</a>
+        <div class="oreum-btns">
+            <a class="oreum-map-btn" href="${mapUrl}" target="_blank" rel="noopener"><i class="ph-duotone ph-map-pin"></i> ${tr('oreum.map')}</a>
+            ${wishBtnHtml({ k: 'oreum', key: o.id, name: o.name }, { cls: 'oreum-wish' })}
+        </div>
     </article>`;
 }
 

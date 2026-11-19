@@ -1,4 +1,5 @@
 import { CONFIG } from '../core/config.js';
+import { wishBtnHtml } from './planner/wishlist.js';
 
 let currentTab = 'recent'; // 'recent', 'highlight', 'permanent'
 let currentRegion = 'all';
@@ -736,6 +737,8 @@ export function renderFestivalItems(container, items) {
                     <div class="festival-date" style="color:var(--text-muted); font-size:0.85rem; margin-top:5px;">
                         <i class="ph-duotone ph-calendar-blank"></i> ${displayDate}
                     </div>
+                    ${item.contentsid ? wishBtnHtml({ k: 'fest', key: item.contentsid,
+                        name: { ko: rawTitle, zh: FESTIVAL_TRANSLATIONS[rawTitle] || item.title_zh || rawTitle, en: FESTIVAL_TRANSLATIONS_EN[rawTitle] || rawTitle } }, { cls: 'wish-btn-sm festival-wish' }) : ''}
                 </div>
             </div>`;
     }).join('');

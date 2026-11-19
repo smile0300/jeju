@@ -5,6 +5,7 @@ import { tr, pick, escapeHtml } from './strings.js';
 import { BLOCKS, STOP_POS, STOP_TYPES, COVERS, isInSeason } from '../../../data/courses.js';
 import { JEJU_MAP, projectLatLng } from '../../../data/jeju-map.js';
 import { roadKm, taxiFare, krwToCny, driveMin, WALK_KM, WALK_KMH, HOTEL_BASE, BUS_FARE } from '../../../data/taxi.js';
+import { wishBtnHtml } from './wishlist.js';
 
 const TYPE_ICON = { spot: 'ph-map-pin', cafe: 'ph-coffee', photo: 'ph-camera' };
 
@@ -264,7 +265,7 @@ export function fillMeals(root) {
 const mealSlot = (kind, stop, at) => `<div class="pl-meal" data-meal="${kind}" data-meal-stop="${escapeHtml(stop.name.ko)}" data-meal-at="${at}" hidden></div>`;
 
 /** 장소 타임라인. 처음과 끝에 숙소(그랜드 하얏트 제주)를 붙여 왕복 이동까지 보여준다. meals = 점심·저녁 근처 식당 칸 */
-export function timelineHtml(block, { extraClass = '', meals = false } = {}) {
+export function timelineHtml(block, { extraClass = '', meals = false, wish = false } = {}) {
     const stops = block.stops;
     const hotel = hotelLegs(block);
     const isUdo = block.transport === 'udo';
@@ -281,6 +282,7 @@ export function timelineHtml(block, { extraClass = '', meals = false } = {}) {
             <div class="pl-stop-body">
                 <span class="pl-stop-ko">${escapeHtml(s.name.ko)}</span>
                 <button type="button" class="pl-copy" data-copy="${escapeHtml(s.name.ko)}"><i class="ph-duotone ph-copy"></i> ${tr('course.copy_ko')}</button>
+                ${wish ? wishBtnHtml({ k: 'stop', key: s.name.ko, name: s.name }, { cls: 'wish-btn-sm' }) : ''}
                 <span class="pl-stop-stay">${tr('course.stay', { m: s.stayMin })}</span>
                 ${s.info ? `<p class="pl-stop-info"><i class="ph-duotone ph-clock"></i> ${escapeHtml(pick(s.info))}</p>` : ''}
                 ${s.tip ? `<p class="pl-stop-tip">${escapeHtml(pick(s.tip))}</p>` : ''}

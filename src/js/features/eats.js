@@ -1,6 +1,7 @@
 import { escapeHtml } from './planner/strings.js';
 import { chipGroup, bindChips, copyText, flashLabel } from './planner/shared.js';
 import { openStatus, fmtMin } from './eats-hours.js';
+import { wishBtnHtml } from './planner/wishlist.js';
 
 // 맛집 (BETA): '제주 후보지 선별' 아티팩트의 식당·카페(src/data/eats.js, tools/build_eats_data.js로 생성)를
 // 음식 종류 · 지역 · 1인 가격 · 키워드로 걸러 보여준다. 데이터(약 280KB)는 화면에 들어올 때만 불러온다.
@@ -329,6 +330,7 @@ function cardHtml(d) {
         <div class="eat-actions">
             ${mapLinks(d)}
             <button type="button" class="eat-btn" data-copy="${escapeHtml(`${d.n}\n${d.a}`)}">${L(ko ? 'copy_addr' : 'copy_name')}</button>
+            ${d.ll ? wishBtnHtml({ k: 'eat', key: d.n, name: d.n }, { cls: 'eat-btn' }) : ''}
         </div>
     </article>`;
 }

@@ -70,7 +70,10 @@ async function fetchShortTerm(loc) {
             icon = Object.keys(counts).reduce((a, b) => (counts[a] >= counts[b] ? a : b));
         }
 
-        out[ymd] = { min: Math.round(Math.min(...temps)), max: Math.round(Math.max(...temps)), pop: pops.length ? Math.max(...pops) : 0, icon };
+        // 낮 시간 최대 풍속(m/s) — 일정 짜기에서 우도 배·한라산 판단에 쓴다
+        const winds = core.map(t => parseFloat(hours[t].WSD)).filter(v => !isNaN(v));
+        out[ymd] = { min: Math.round(Math.min(...temps)), max: Math.round(Math.max(...temps)), pop: pops.length ? Math.max(...pops) : 0, icon,
+            wind: winds.length ? Math.round(Math.max(...winds) * 10) / 10 : null };
     });
     return out;
 }

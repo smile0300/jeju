@@ -1,0 +1,237 @@
+/* ===== 일정에 담기 버튼 + 여행 브리핑 "내 일정" 탭 — planner/wishlist.js · planner/itinerary-view.js ===== */
+
+/* 담기 버튼 (맛집·오름·코스·축제 공용) */
+.wish-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-height: 38px;
+    padding: 0 12px;
+    border: 1px solid #FFC9C9;
+    border-radius: 999px;
+    background: #FFF5F5;
+    color: #E03131;
+    font: inherit;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.wish-btn i { font-size: 1rem; }
+.wish-btn.on { background: #E03131; border-color: #E03131; color: #fff; }
+.wish-btn-sm { min-height: 32px; padding: 0 10px; font-size: 0.74rem; }
+.eat-actions .wish-btn.eat-btn { grid-column: 1 / -1; border-radius: 10px; }
+.oreum-btns { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.oreum-btns .wish-btn { min-height: 40px; }
+.festival-wish { margin-top: 8px; }
+.pl-stop-body .wish-btn { vertical-align: middle; }
+
+.wish-all-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    min-height: 42px;
+    margin: 10px 0 4px;
+    border: 1px dashed #FFA8A8;
+    border-radius: 12px;
+    background: #FFF5F5;
+    color: #E03131;
+    font: inherit;
+    font-size: 0.86rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+/* 담기 알림 (하단 탭바 위) */
+.wish-toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: max-content; /* left:50%라 기본 폭이 화면 절반으로 잡히는 것 방지 */
+    max-width: calc(100vw - 32px);
+    padding: 10px 10px 10px 16px;
+    border-radius: 14px;
+    background: rgba(25, 31, 40, 0.94);
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    transform: translate(-50%, 16px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .2s, transform .2s, visibility .2s;
+}
+.wish-toast.show { opacity: 1; visibility: visible; transform: translate(-50%, 0); }
+.wish-toast span { min-width: 0; }
+.wish-toast button {
+    flex-shrink: 0;
+    min-height: 34px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 10px;
+    background: #FF6B6B;
+    color: #fff;
+    font: inherit;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+/* ── 내 일정 탭 ── */
+/* 여행 브리핑 탭이 5개(날씨·내 일정·코스·축제·예약)가 되어 한 줄 5칸으로 */
+.pl-trip-tabs { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 2px; }
+.pl-trip-tabs .pl-trip-tab { padding: 6px 0; font-size: 0.74rem; overflow: hidden; text-overflow: ellipsis; }
+.pl-trip-tabs .pl-trip-tab-count { min-width: 16px; margin-left: 2px; padding: 0 4px; line-height: 16px; }
+html[lang="en"] .pl-trip-tabs .pl-trip-tab { font-size: 0.7rem; letter-spacing: -0.2px; } /* "Weather" 같은 긴 영어 라벨 */
+
+.ip { display: flex; flex-direction: column; gap: 12px; }
+.ip-intro { margin: 0; }
+.ip-note { margin: 0; font-size: 0.78rem; }
+.ip-label { display: flex; align-items: center; gap: 4px; font-size: 0.78rem; font-weight: 800; color: var(--label-secondary); }
+
+.ip-banner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: var(--accent-subtle);
+    color: var(--accent-active);
+    font-size: 0.84rem;
+    font-weight: 700;
+}
+.ip-banner-wx { justify-content: flex-start; background: #FFF9DB; color: #8A6100; }
+
+.ip-wish, .ip-settings, .ip-total, .ip-unplaced { display: flex; flex-direction: column; gap: 8px; }
+.ip-wish-head { font-size: 0.95rem; }
+.ip-wchips { display: flex; flex-wrap: wrap; gap: 6px; }
+.ip-wchip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    max-width: 100%;
+    padding: 4px 4px 4px 10px;
+    border-radius: 999px;
+    background: var(--fill-secondary);
+    font-size: 0.8rem;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+.ip-wchip button, .ip-act {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-width: 30px;
+    min-height: 30px;
+    padding: 0 6px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--label-secondary);
+    font: inherit;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+}
+.ip-act { border: 1px solid var(--separator); background: var(--bg-card); }
+.ip-act-text { padding: 0 10px; }
+.ip-gos { display: flex; flex-wrap: wrap; gap: 6px; }
+.ip-go {
+    min-height: 34px;
+    padding: 0 12px;
+    border: 1px solid var(--separator);
+    border-radius: 999px;
+    background: var(--bg-card);
+    color: var(--label-primary);
+    font: inherit;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+.ip-hikes .pl-chip { min-height: 34px; font-size: 0.78rem; }
+
+.ip-set { display: flex; flex-direction: column; gap: 4px; }
+.ip-set .pl-chips { flex-wrap: wrap; }
+.ip-set .pl-chip { min-height: 34px; font-size: 0.8rem; }
+
+.ip-total-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-weight: 800; }
+.ip-total-head b { font-size: 1.3rem; color: #E67700; font-variant-numeric: tabular-nums; }
+.ip-trow { display: flex; justify-content: space-between; font-size: 0.84rem; color: var(--label-secondary); }
+.ip-trow b { color: var(--label-primary); font-variant-numeric: tabular-nums; }
+
+.ip-day { display: flex; flex-direction: column; gap: 8px; }
+.ip-day-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 1rem; }
+.ip-date { font-size: 0.85rem; color: var(--label-secondary); font-weight: 600; }
+.ip-wx { display: inline-flex; align-items: center; gap: 3px; flex-shrink: 0; font-size: 0.8rem; font-weight: 700; color: var(--label-secondary); }
+.ip-wx.wet { color: #1971C2; }
+.ip-wx img, .ip-wx svg { width: 22px; height: 22px; }
+.ip-day-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.ip-chip { padding: 2px 8px; border-radius: 999px; background: var(--accent-subtle); color: var(--accent-active); font-size: 0.74rem; font-weight: 700; }
+.ip-cost { margin-left: auto; font-size: 0.82rem; font-weight: 800; color: #E67700; }
+.ip-warns { display: flex; flex-direction: column; gap: 4px; margin: 0; padding: 8px 10px; border-radius: 10px; background: #FFF9DB; list-style: none; font-size: 0.78rem; color: #8A6100; line-height: 1.45; }
+.ip-warns li { display: flex; gap: 6px; }
+
+.ip-tl { margin: 0; padding: 0; list-style: none; }
+.ip-node { display: grid; grid-template-columns: 42px 28px 1fr; gap: 0 6px; align-items: start; }
+.ip-time { padding-top: 5px; font-size: 0.8rem; font-weight: 800; color: var(--label-primary); font-variant-numeric: tabular-nums; }
+.ip-dot { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: var(--fill-secondary); color: var(--label-secondary); font-size: 1rem; }
+.ip-k-eat .ip-dot { background: #FFF4E6; color: #E8590C; }
+.ip-k-cafe .ip-dot { background: #F8F0E3; color: #8D5524; }
+.ip-k-oreum .ip-dot, .ip-k-hike .ip-dot { background: #EBFBEE; color: #2B8A3E; }
+.ip-k-fest .ip-dot { background: #F3F0FF; color: #6741D9; }
+.ip-k-stop .ip-dot { background: var(--accent-subtle); color: var(--accent-active); }
+.ip-body { min-width: 0; padding-bottom: 4px; }
+.ip-name-row { display: flex; align-items: center; gap: 4px; }
+.ip-tag { font-size: 0.7rem; font-weight: 800; color: var(--label-secondary); }
+.ip-sug { padding: 0 6px; border-radius: 999px; background: var(--fill-secondary); font-size: 0.68rem; font-weight: 700; color: var(--label-secondary); }
+.ip-pin { color: #E03131; font-size: 0.8rem; }
+.ip-name { font-size: 0.95rem; font-weight: 800; color: var(--label-primary); overflow-wrap: anywhere; }
+.ip-edge .ip-name { padding-top: 4px; font-size: 0.85rem; font-weight: 700; color: var(--label-secondary); }
+.ip-sub { display: flex; flex-wrap: wrap; gap: 0 4px; margin-top: 2px; font-size: 0.76rem; color: var(--label-secondary); overflow-wrap: anywhere; }
+.ip-ko { color: var(--label-primary); font-weight: 600; }
+.ip-sep { color: var(--label-tertiary, #B0B8C1); }
+.ip-acts { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.ip-move {
+    min-height: 30px;
+    max-width: 130px;
+    padding: 0 8px;
+    border: 1px solid var(--separator);
+    border-radius: 999px;
+    background: var(--bg-card);
+    color: var(--label-primary);
+    font: inherit;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+.ip-node.is-sug .ip-name { font-weight: 700; }
+.ip-leg {
+    margin: 2px 0 2px 62px;
+    padding: 4px 0 4px 10px;
+    border-left: 2px dashed var(--separator);
+    font-size: 0.74rem;
+    color: var(--label-secondary);
+}
+
+.ip-unplaced ul { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.ip-unplaced li { display: grid; grid-template-columns: 1fr auto; gap: 0 8px; align-items: center; font-size: 0.85rem; font-weight: 700; }
+.ip-unplaced small { grid-column: 1; font-weight: 500; color: var(--label-secondary); }
+.ip-unplaced li .ip-act { grid-column: 2; grid-row: 1 / span 2; }
+.ip-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+
+/* 접는 카드 (담은 곳·설정) */
+.ip-fold > summary { list-style: none; }
+.ip-fold > summary::-webkit-details-marker { display: none; }
+.ip-sum { display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 28px; cursor: pointer; font-size: 0.88rem; }
+.ip-sum span { min-width: 0; color: var(--label-primary); font-weight: 700; overflow-wrap: anywhere; }
+.ip-sum > i { flex-shrink: 0; color: var(--label-secondary); transition: transform .2s; }
+.ip-fold[open] > .ip-sum > i { transform: rotate(180deg); }

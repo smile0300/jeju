@@ -4,6 +4,7 @@ import { BLOCKS, REGIONS, CONCEPTS, COMPANIONS, COURSES_DRAFT, isInSeason } from
 import { mapHtml, moveHtml, timelineHtml, fillMeals, blockLabel, nowBadge, driveTotal, coverHtml, money } from './planner/course-view.js';
 import { rankBlocks, buildPlans, dayCost, isGoodMatch, TAXI_FROM_BUDGET } from './planner/course-match.js';
 import { builderHtml, onBuilderChip, onBuilderClick, startFromBlock } from './planner/course-builder.js';
+import { wishAllBtnHtml } from './planner/wishlist.js';
 
 // 추천 코스: 여행 일수 · 여행 속도(느긋~빡빡 5단계) · 예산(0원~로얄 5단계) · 컨셉을 고르면
 // 당일은 하루 코스를 잘 맞는 순서로, 여러 날은 하루 코스를 묶은 일정 후보(course-match.js)를 보여준다.
@@ -126,7 +127,8 @@ function detailHtml() {
         ${mapHtml(block.stops)}
         ${moveHtml(block)}
         <p class="pl-muted pl-hint"><i class="ph-duotone ph-info"></i> ${tr('course.copy_hint')}</p>
-        ${timelineHtml(block, { meals: true })}
+        ${wishAllBtnHtml(block.stops.map(s => ({ k: 'stop', key: s.name.ko, name: s.name })))}
+        ${timelineHtml(block, { meals: true, wish: true })}
         <p class="pl-muted pl-hint"><i class="ph-duotone ph-info"></i> ${tr('course.info_hint')}</p>
         <button type="button" class="pl-link pl-center" data-build-from="${escapeHtml(keys[dayIdx])}"><i class="ph-duotone ph-pencil-simple-line"></i> ${tr('build.from_course')}</button>
         <button type="button" class="res-submit-btn pl-mt" data-charter="${escapeHtml(block.region)}"><i class="ph-duotone ph-users-three"></i> <span>${tr('course.charter_cta')}</span></button>`;
