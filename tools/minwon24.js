@@ -414,6 +414,9 @@ async function watchNotify(M, st, test, dry, save) {
       msg = W.found.replace(/\{n\}/g, fresh.length);
     } else if (!ws.ended && Date.now() > endMs) {
       const basic = c.plan === '기본 9.9元';
+      // 19.9 집중 고객에게는 10일 종료 안내를 보내지 않는다 — 결과는 '🎯 집중 결과' 안내로 따로 가고,
+      // '못 찾았다'를 한 번 더 듣게 하면 불만만 생김 (사용자 결정 2026-11-20). 9.9 고객에게만 종료 + 집중 업그레이드 안내
+      if (!basic) { ws.ended = true; save(); console.log(`${code} 감시 종료 — 집중 상품이라 안내 생략`); continue; }
       kind = 'end';
       msg = (ws.everFound || w.cands.length ? W.end_found : W.end_none) + (basic ? W.upsell : '');
     } else continue;

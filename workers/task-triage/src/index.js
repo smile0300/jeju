@@ -494,7 +494,7 @@ async function processLost(env, row, dry = false) {
   // dry: 검색·판정만 하고 큐에 쓰지 않음 (분류 확장 비교 시험용 GET /run?lost_row=N&dry=1)
   if (dry) return { row, cats, onVehicle, regionAlt: answers.region_alt?.choice, from: ymd(lostDate), to: ymd(to), catProbs: cat.probabilities, regions: regionNames, total: foundTotal, sent: candidates.length,
     byCat: cats.map(c => [c, candidates.filter(x => x._cat === c).length]),
-    top: top.map(([id, p]) => ({ id, p: +p.toFixed(2), cat: byId[id]?._cat, name: byId[id]?.fdPrdtNm, place: byId[id]?.depPlace, date: byId[id]?.fdYmd })),
+    top: top.map(([id, p]) => ({ id, p: +p.toFixed(2), cat: byId[id]?._cat, name: byId[id]?.fdPrdtNm, place: byId[id]?.depPlace, date: byId[id]?.fdYmd, img: byId[id]?.fdFilePathImg })),
     final: match?.choice || null, sub: (answers.subcategory?.probabilities ? Object.entries(answers.subcategory.probabilities).sort((a, b) => b[1] - a[1]).slice(0, 3) : null),
     form: (({ lclsf, mclsf, brand, itemName, title }) => ({ lclsf, mclsf, brand, itemName, title }))(buildPoliceForm(row, fields, ko, answers, lostDate, photoIds)) };
   const candJson = mergeCandidates('[]', top.filter(([id, p]) => p >= CANDIDATE_MIN_P && byId[id])

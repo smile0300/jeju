@@ -25,7 +25,9 @@ export async function onRequest(context) {
 
   try {
     const targetUrl = new URL(targetUrlString);
-    const isAllowed = ALLOWED_DOMAINS.some(domain => targetUrl.hostname === domain || targetUrl.hostname.endsWith('.' + domain));
+    // 습득물 사진은 2026-11 무렵부터 lost112 대신 경찰민원24 주소로 온다 → 그 사진 경로만 허용 (다른 민원24 페이지는 막음)
+    const isFoundPhoto = targetUrl.hostname === 'minwon24.police.go.kr' && targetUrl.pathname.startsWith('/lost112/find/getOpenapiAttachFileImage/');
+    const isAllowed = isFoundPhoto || ALLOWED_DOMAINS.some(domain => targetUrl.hostname === domain || targetUrl.hostname.endsWith('.' + domain));
     if (!isAllowed) return new Response(`Forbidden: Target domain (${targetUrl.hostname}) not in whitelist`, { status: 403, headers: { 'Access-Control-Allow-Origin': ALLOWED_ORIGIN } });
 
     for (const [key, value] of url.searchParams) if (key !== 'endpoint' && key !== 'url' && key !== '_') targetUrl.searchParams.set(key, value);
@@ -62,7 +64,7 @@ export async function onRequest(context) {
     const isDataApi = hostname.includes('apis.data.go.kr');
     const fetchOnce = () => fetch(targetUrl.toString(), {
       method: 'GET',
-      headers: hostname.includes('lost112.go.kr') ? { 'Accept': 'image/*,*/*;q=0.8', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36', 'Referer': 'https://www.lost112.go.kr/' } : { 'Accept': '*/*', 'User-Agent': 'Mozilla/5.0' },
+      headers: hostname.includes('lost112.go.kr') || isFoundPhoto ? { 'Accept': 'image/*,*/*;q=0.8', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36', 'Referer': isFoundPhoto ? 'https://minwon24.police.go.kr/' : 'https://www.lost112.go.kr/' } : { 'Accept': '*/*', 'User-Agent': 'Mozilla/5.0' },
       ...(isDataApi ? { signal: AbortSignal.timeout(8000) } : {})
     });
     let res;
