@@ -115,7 +115,11 @@ async function main() {
       }
       log('FILL', JSON.stringify(res));
       const officeProblem = (res.problems || []).find(p => /관서|구·군/.test(p));
-      if (officeProblem) { log('HOLD ' + m24('hold', String(queueRow), String(lostRow), officeProblem)); continue; }
+      if (officeProblem) {
+        log('HOLD ' + m24('hold', String(queueRow), String(lostRow), officeProblem));
+        if (onlyRow) break;   // 한 건만 지정한 실행은 다른 건으로 넘어가지 않는다 (11-20 656 지정 실행이 657까지 제출함)
+        continue;
+      }
       if (NO_SUBMIT) { log('제출하지 않음(--no-submit) — 채운 양식 탭을 열어 둡니다. 확인 후 그 탭만 닫으세요.'); page = null; return; }
       // 제출 때 서버 응답을 모아 둔다 — "민원을 신청할 수 없습니다" 원인 확인용
       const posts = [];
