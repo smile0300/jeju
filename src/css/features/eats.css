@@ -179,3 +179,26 @@ html[lang="ko"] .eat-beta { word-break: keep-all; } /* 중국어에 keep-all을 
     cursor: pointer;
 }
 .eat-report { border: 0; background: none; color: var(--label-secondary); font-size: 0.8rem; font-weight: 600; text-decoration: underline; }
+
+/* 상황별 바로가기 · 칩 개수 */
+.eat-quick .pl-chip { background: var(--accent-subtle); border-color: transparent; color: var(--accent-active); font-weight: 700; }
+.eat-quick .pl-chip.active { background: var(--accent); color: #fff; }
+.eat-n { margin-left: 4px; font-size: 0.72em; font-weight: 600; opacity: 0.65; font-variant-numeric: tabular-nums; }
+.pl-chip.is-zero { opacity: 0.45; }
+
+/* 추천순 순번 배지 */
+.eat-head { position: relative; }
+.eat-rank { flex-shrink: 0; align-self: flex-start; display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; margin-right: -2px; padding: 0 6px; border-radius: 8px; background: var(--fill-secondary); color: var(--label-secondary); font-size: 0.8rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.eat-rank-1 { background: #FFD43B; color: #5C3D00; }
+.eat-rank-2 { background: #DEE2E6; color: #343A40; }
+.eat-rank-3 { background: #F0C9A0; color: #6B3A10; }
+.eat-head:has(.eat-rank) .eat-name-wrap { flex: 1; }
+
+/* 한 줄 추천평 */
+.eat-rv { display: flex; gap: 6px; align-items: flex-start; margin: 8px 0 0; padding: 7px 10px; border-radius: 10px; background: #FFF8F0; color: #7A4A12; font-size: 0.8rem; line-height: 1.45; }
+.eat-rv i { flex-shrink: 0; margin-top: 2px; color: #E67700; }
+
+/* 매장 공식 사진 (16:9 자리 고정 → 늦게 떠도 밀림 없음) */
+.eat-photo { position: relative; margin: -14px -14px 12px; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 16px 16px 0 0; background: var(--fill-secondary); }
+.eat-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.eat-photo-by { position: absolute; right: 8px; bottom: 8px; padding: 2px 7px; border-radius: 6px; background: rgba(0, 0, 0, 0.55); color: #fff; font-size: 0.68rem; }

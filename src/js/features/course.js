@@ -12,7 +12,7 @@ import { wishAllBtnHtml } from './planner/wishlist.js';
 
 const MAX_DAYS = 6;
 const PLAN_COUNT = 3;
-const state = { days: 1, region: 'all', pace: 3, budget: 3, concepts: [], companion: 'all', detail: null, detailDay: 0 };
+const state = { days: 1, region: 'all', pace: 3, budget: 3, concepts: [], companion: 'all', detail: null, detailDay: 0, prefsOpen: false };
 const prefs = () => ({ pace: state.pace, budget: state.budget, concepts: state.concepts, companion: state.companion });
 
 const durationLabel = (d) => (d === 1 ? tr('common.daytrip') : tr('common.nights', { d, n: d - 1 }));
@@ -72,6 +72,18 @@ function prefsHtml() {
     </section>`;
 }
 
+// 조건 설정은 접어 두고 요약 한 줄만 보인다 → 처음 온 사람도 첫 화면에서 코스 목록을 본다
+function prefsToggleHtml() {
+    const sum = tr('course.prefs_sum', { w: tr(`with.${state.companion}`), p: tr(`course.pace.${state.pace}`), b: tr(`course.budget.${state.budget}`) })
+        + (state.concepts.length ? ' · ' + tr('course.prefs_concepts', { n: state.concepts.length }) : '');
+    return `<button type="button" class="pl-prefs-toggle" data-prefs-toggle aria-expanded="${state.prefsOpen}">
+            <i class="ph-duotone ph-sliders-horizontal"></i>
+            <span class="pl-prefs-toggle-text"><strong>${tr('course.prefs_open')}</strong><small>${escapeHtml(sum)}</small></span>
+            <i class="ph-bold ph-caret-down"></i>
+        </button>
+        <div class="pl-prefs-wrap"${state.prefsOpen ? '' : ' hidden'}>${prefsHtml()}</div>`;
+}
+
 // 하루 코스 목록: 고른 속도·예산·컨셉에 잘 맞는 순서. '계절' 필터는 제철 여부와 상관없이 계절 코스를 모두 보여준다
 function blockKeys() {
     if (state.region === 'season') return Object.keys(BLOCKS).filter(k => BLOCKS[k].season)
@@ -94,16 +106,16 @@ function listHtml() {
         </button>
         ${COURSES_DRAFT ? `<p class="pl-draft"><i class="ph-duotone ph-warning"></i> ${tr('course.draft')}</p>` : ''}
         <div class="pl-filter">${chipGroup('days', durations, { selected: [String(state.days)] })}</div>
-        ${prefsHtml()}
-        <button type="button" class="pl-card pl-plan pl-build-entry" data-build="1">
-            <span class="pl-plan-text"><strong><i class="ph-duotone ph-pencil-simple-line"></i> ${tr('build.entry')}</strong><span>${tr('build.entry_desc')}</span></span>
-            <span class="pl-plan-go">${tr('build.entry_btn')} →</span>
-        </button>
+        ${prefsToggleHtml()}
         <h4 class="pl-list-head">${tr('course.result')}</h4>
         ${state.days === 1 ? `<div class="pl-filter">${chipGroup('region',
             [{ value: 'all', label: tr('region.all') }, ...REGIONS.map(r => ({ value: r, label: tr(`region.${r}`) }))],
             { selected: [state.region] })}</div>` : ''}
         <div class="pl-course-list">${cards.length ? cards.join('') : `<p class="pl-muted">${tr('course.empty')}</p>`}</div>
+        <button type="button" class="pl-card pl-plan pl-build-entry" data-build="1">
+            <span class="pl-plan-text"><strong><i class="ph-duotone ph-pencil-simple-line"></i> ${tr('build.entry')}</strong><span>${tr('build.entry_desc')}</span></span>
+            <span class="pl-plan-go">${tr('build.entry_btn')} →</span>
+        </button>
         <button type="button" class="pl-link pl-center" onclick="showSection('trip')">${tr('course.custom')} →</button>`;
 }
 
@@ -156,6 +168,14 @@ function render() {
         root.dataset.courseBound = '1';
         root.addEventListener('click', async (e) => {
             if (state.detail === 'build' && onBuilderClick(e)) { render(); return; }
+            const pt = e.target.closest('[data-prefs-toggle]');
+            if (pt) {
+                state.prefsOpen = !state.prefsOpen;
+                pt.setAttribute('aria-expanded', String(state.prefsOpen));
+                const wrap = root.querySelector('.pl-prefs-wrap');
+                if (wrap) wrap.hidden = !state.prefsOpen;
+                return;
+            }
             const buildFrom = e.target.closest('[data-build-from]');
             if (buildFrom) startFromBlock(buildFrom.dataset.buildFrom);
             if (buildFrom || e.target.closest('[data-build]')) { openDetail('build'); return; }

@@ -214,6 +214,21 @@ function mealSlots(block) {
     return { lunch, lunchAt, dinner: lunch === last || block.transport === 'udo' ? -1 : last };
 }
 
+/** 장소별 예상 도착 시각(분). 숙소 10시 출발 · 장소 체류 · 이동 · 점심 1시간(점심 자리 다음부터) */
+const LUNCH_MIN = 60;
+function arrivals(block, slots) {
+    const stops = block.stops;
+    let t = DAY_START + (hotelLegs(block)?.out?.min || 0);
+    return stops.map((st, i) => {
+        const at = t;
+        t += st.stayMin || 0;
+        if (slots && i === slots.lunch) t += LUNCH_MIN;
+        const leg = i < stops.length - 1 ? legInfo(block, i) : null;
+        t += leg?.min || (leg?.kind === 'ferry' ? 15 : 0);
+        return at;
+    });
+}
+
 const hhmm = (min) => `${Math.floor(min / 60)}:${String(Math.round(min % 60 / 10) * 10 % 60).padStart(2, '0')}`;
 
 let MEALS = null; // 처음 상세를 열 때만 불러온다(약 20KB)
@@ -270,6 +285,7 @@ export function timelineHtml(block, { extraClass = '', meals = false, wish = fal
     const hotel = hotelLegs(block);
     const isUdo = block.transport === 'udo';
     const slots = meals ? mealSlots(block) : null;
+    const times = arrivals(block, slots || mealSlots(block)); // 식당 칸이 없어도 점심 1시간은 시각에 넣는다
     const mealAfter = (i) => (!slots ? '' : i === slots.lunch ? mealSlot('lunch', stops[i], slots.lunchAt)
         : i === slots.dinner ? mealSlot('dinner', stops[i], 0) : '');
     const items = stops.map((s, i) => `
@@ -283,7 +299,7 @@ export function timelineHtml(block, { extraClass = '', meals = false, wish = fal
                 <span class="pl-stop-ko">${escapeHtml(s.name.ko)}</span>
                 <button type="button" class="pl-copy" data-copy="${escapeHtml(s.name.ko)}"><i class="ph-duotone ph-copy"></i> ${tr('course.copy_ko')}</button>
                 ${wish ? wishBtnHtml({ k: 'stop', key: s.name.ko, name: s.name }, { cls: 'wish-btn-sm' }) : ''}
-                <span class="pl-stop-stay">${tr('course.stay', { m: s.stayMin })}</span>
+                <span class="pl-stop-stay"><b class="pl-stop-time"><i class="ph-bold ph-clock"></i> ${tr('course.arrive', { t: hhmm(times[i]) })}</b> · ${tr('course.stay', { m: s.stayMin })}</span>
                 ${s.info ? `<p class="pl-stop-info"><i class="ph-duotone ph-clock"></i> ${escapeHtml(pick(s.info))}</p>` : ''}
                 ${s.tip ? `<p class="pl-stop-tip">${escapeHtml(pick(s.tip))}</p>` : ''}
             </div>
@@ -292,7 +308,8 @@ export function timelineHtml(block, { extraClass = '', meals = false, wish = fal
                 : (hotel ? legHtml(hotel.back, { back: true, viaFerry: isUdo }) : '')}
         </li>`).join('');
 
-    return `<ol class="pl-timeline ${extraClass}">
+    return `<p class="pl-muted pl-time-note"><i class="ph-duotone ph-clock"></i> ${tr('course.time_note')}</p>
+    <ol class="pl-timeline ${extraClass}">
         ${hotel ? hotelItem(legHtml(hotel.out)) : ''}
         ${items}
         ${hotel ? hotelItem('') : ''}

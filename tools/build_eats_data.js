@@ -15,6 +15,9 @@ const { TREND, EXTRA_TAGS } = require('./eats_trend.js');
 const GEO = JSON.parse(fs.readFileSync(path.join(__dirname, 'eats_geo.json'), 'utf8')); // 주소 → [위도, 경도] (tools/geocode_eats.js)
 const CATCHTABLE = JSON.parse(fs.readFileSync(path.join(__dirname, 'eats_catchtable.json'), 'utf8'));
 DATA.push(...TREND);
+// 가게별 덧붙임(한 줄 추천평 rv{zh,en,ko}, 매장 공식 사진 img·imgBy) — 이름으로 찾는다
+const EXTRA_PATH = path.join(__dirname, 'eats_extra.json');
+const EXTRA = fs.existsSync(EXTRA_PATH) ? JSON.parse(fs.readFileSync(EXTRA_PATH, 'utf8')) : {};
 
 // 주소 → 세부 지역 키
 function area(addr) {
@@ -134,6 +137,8 @@ for (const d of DATA) {
         ll: GEO[d.주소_ko] || '', // 좌표 (일정 짜기 동선 계산용)
         ct: CATCHTABLE[d.이름_ko] || '', // 캐치테이블 글로벌 원격 줄서기·예약 (tools/eats_catchtable.json)
     };
+    const ex = EXTRA[d.이름_ko];
+    if (ex) { if (ex.rv) r.rv = ex.rv; if (ex.img) { r.img = ex.img; r.imgBy = ex.imgBy || ''; } }
     // 빈 값은 지워서 용량을 줄인다
     for (const k of Object.keys(r)) if (r[k] === '' || r[k] === null || (Array.isArray(r[k]) && !r[k].length)) delete r[k];
     rows.push(r);

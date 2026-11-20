@@ -30,7 +30,7 @@ const S = {
         'ar.daejeong': '大静·安德',
         'pr.1': '₩1万以下', 'pr.2': '₩1~2万', 'pr.3': '₩2~3万', 'pr.4': '₩3万以上',
         'kw.locals': '本地人常去', 'kw.hyangto': '官方乡土美食店', 'kw.goodprice': '平价良心店', 'kw.century': '百年老店',
-        'kw.tv': '韩国美食节目', 'kw.hot': '韩国年轻人爱去', 'kw.solo': '可一人用餐', 'kw.cnmenu': '中文菜单', 'kw.enmenu': '英文菜单', 'kw.cnreview': '有中文评价',
+        'kw.tv': '韩国美食节目', 'kw.hot': '韩国年轻人爱去', 'kw.bakery': '面包·甜点', photo_by: '图片：{by}', 'kw.solo': '可一人用餐', 'kw.cnmenu': '中文菜单', 'kw.enmenu': '英文菜单', 'kw.cnreview': '有中文评价',
         'kw.opennow': '现在营业', 'kw.catchtable': '可在线排队', 'kw.photo': '出片', 'kw.ocean': '海景', 'kw.breakfast': '早餐（9点前营业）', 'kw.shortwait': '排队短', 'kw.walkin': '外国人可直接去',
         'kw.twoplus': '2人起点', 'kw.booking': '需预约', 'kw.nokids': '禁止儿童',
         'so.rec': '推荐', 'so.rating': '评分高', 'so.reviews': '评价多', 'so.cheap': '价格低',
@@ -68,7 +68,7 @@ const S = {
         'ar.daejeong': 'Daejeong·Andeok',
         'pr.1': 'Under ₩10k', 'pr.2': '₩10–20k', 'pr.3': '₩20–30k', 'pr.4': '₩30k+',
         'kw.locals': 'Locals’ favorite', 'kw.hyangto': 'Official local-food', 'kw.goodprice': 'Fair-price shop', 'kw.century': '100-year shop',
-        'kw.tv': 'On Korean TV', 'kw.hot': 'Trending with young Koreans', 'kw.solo': 'Solo-friendly', 'kw.cnmenu': 'Chinese menu', 'kw.enmenu': 'English menu', 'kw.cnreview': 'Chinese reviews',
+        'kw.tv': 'On Korean TV', 'kw.hot': 'Trending with young Koreans', 'kw.bakery': 'Bakery & dessert', photo_by: 'Photo: {by}', 'kw.solo': 'Solo-friendly', 'kw.cnmenu': 'Chinese menu', 'kw.enmenu': 'English menu', 'kw.cnreview': 'Chinese reviews',
         'kw.opennow': 'Open now', 'kw.catchtable': 'Online waitlist', 'kw.photo': 'Photogenic', 'kw.ocean': 'Ocean view', 'kw.breakfast': 'Breakfast (before 9am)', 'kw.shortwait': 'Short wait', 'kw.walkin': 'Easy walk-in',
         'kw.twoplus': '2+ people', 'kw.booking': 'Booking needed', 'kw.nokids': 'No kids',
         'so.rec': 'Recommended', 'so.rating': 'Top rated', 'so.reviews': 'Most reviewed', 'so.cheap': 'Cheapest',
@@ -106,7 +106,7 @@ const S = {
         'ar.daejeong': '대정·안덕',
         'pr.1': '1만원 이하', 'pr.2': '1~2만원', 'pr.3': '2~3만원', 'pr.4': '3만원 이상',
         'kw.locals': '도민 맛집', 'kw.hyangto': '향토음식점 지정', 'kw.goodprice': '착한가격업소', 'kw.century': '백년가게',
-        'kw.tv': '방송 출연', 'kw.hot': '요즘 핫플', 'kw.solo': '1인 식사', 'kw.cnmenu': '중국어 메뉴', 'kw.enmenu': '영어 메뉴', 'kw.cnreview': '중국어 후기',
+        'kw.tv': '방송 출연', 'kw.hot': '요즘 핫플', 'kw.bakery': '빵·디저트', photo_by: '사진: {by}', 'kw.solo': '1인 식사', 'kw.cnmenu': '중국어 메뉴', 'kw.enmenu': '영어 메뉴', 'kw.cnreview': '중국어 후기',
         'kw.opennow': '지금 영업 중', 'kw.catchtable': '원격 줄서기', 'kw.photo': '사진 명소', 'kw.ocean': '오션뷰', 'kw.breakfast': '아침 식사(9시 전)', 'kw.shortwait': '대기 짧음', 'kw.walkin': '외국인 바로 방문',
         'kw.twoplus': '2인부터', 'kw.booking': '예약 필요', 'kw.nokids': '노키즈',
         'so.rec': '추천순', 'so.rating': '평점순', 'so.reviews': '리뷰순', 'so.cheap': '가격 낮은순',
@@ -138,9 +138,13 @@ const CUISINES = ['pork', 'seafood', 'noodle', 'soup', 'meat', 'local', 'snack',
 const AREAS = ['jeju', 'aewol', 'hallim', 'daejeong', 'jungmun', 'seogwipo', 'pyoseon', 'seongsan', 'udo', 'gujwa', 'jocheon'];
 const PRICES = ['1', '2', '3', '4'];
 // 필터로 고를 수 있는 키워드 (뱃지로만 보이는 twoplus·booking·nokids는 제외)
-const KEYWORDS = ['opennow', 'catchtable', 'hot', 'locals', 'hyangto', 'goodprice', 'solo', 'cnmenu', 'enmenu', 'cnreview', 'shortwait', 'walkin', 'breakfast', 'ocean', 'photo', 'tv', 'century'];
+const KEYWORDS = ['opennow', 'catchtable', 'hot', 'bakery', 'locals', 'hyangto', 'goodprice', 'solo', 'cnmenu', 'enmenu', 'cnreview', 'shortwait', 'walkin', 'breakfast', 'ocean', 'photo', 'tv', 'century'];
 const BADGE_ORDER = ['hyangto', 'goodprice', 'century', 'locals', 'tv', 'hot', 'cnmenu', 'enmenu', 'cnreview', 'solo', 'twoplus', 'booking', 'breakfast', 'ocean', 'nokids'];
 const SORTS = ['rec', 'rating', 'reviews', 'cheap'];
+// 검색창 바로 아래 상황별 바로가기 (캐치테이블·Wanderlog식). 누르면 아래 필터(키워드·가격)와 같은 값을 켠다
+const QUICK = [['kw', 'hot'], ['kw', 'ocean'], ['kw', 'bakery'], ['kw', 'solo'], ['pr', '1'], ['kw', 'breakfast'], ['kw', 'opennow']];
+const BAKERY_RE = /빵|베이커리|도넛|꽈배기|케이크|디저트|떡|카이막|빙수|제과|바게트|스콘|타르트|아이스크림|젤라또/;
+const RANKED = 10; // 추천순일 때 순번 배지를 붙이는 개수
 
 const state = { q: '', cu: [], ar: [], pr: [], kw: [], sort: 'rec', shown: PAGE, more: false };
 let EATS = null;
@@ -156,19 +160,34 @@ function priceTier(d) {
 function hasKw(d, k) {
     if (k === 'shortwait') return d.w != null && d.w <= 20;
     if (k === 'catchtable') return !!d.ct;
-    if (k === 'opennow') { const st = openStatus(d); return !!st && (st.kind === 'open' || st.kind === 'closing'); }
+    if (k === 'bakery') return BAKERY_RE.test(`${d.n} ${d.s || ''} ${d.mn || ''}`);
+    if (k === 'opennow') { if (openCache) return openCache.has(d); const st = openStatus(d); return !!st && (st.kind === 'open' || st.kind === 'closing'); }
     return (d.t || []).includes(k);
 }
 
-function matches(d) {
-    if (state.cu.length && !state.cu.some(c => d.cu.includes(c))) return false;
-    if (state.ar.length && !state.ar.includes(d.ar)) return false;
-    if (state.pr.length && !state.pr.includes(priceTier(d))) return false;
-    if (state.kw.length && !state.kw.every(k => hasKw(d, k))) return false;
-    if (state.q) {
-        const q = state.q.toLowerCase();
-        const hay = [d.n, d.s, d.mn, d.a, ...d.cu.map(c => L(`cu.${c}`)), L(`ar.${d.ar}`)].join(' ').toLowerCase();
-        if (!hay.includes(q)) return false;
+// 영업 중 판정은 무거워서(영업시간 원문 해석) 한 번 그릴 때 한 번만 계산해 둔다
+let openCache = null;
+function buildOpenCache() {
+    openCache = null;
+    const set = new Set();
+    EATS.forEach(d => { const st = openStatus(d); if (st && (st.kind === 'open' || st.kind === 'closing')) set.add(d); });
+    openCache = set;
+}
+
+// 검색 대상 글자(언어별로 한 번만 만든다)
+function hayOf(d) {
+    const l = lang();
+    if (!d._hay || d._hayL !== l) { d._hay = [d.n, d.s, d.mn, d.a, ...d.cu.map(c => L(`cu.${c}`)), L(`ar.${d.ar}`)].join(' ').toLowerCase(); d._hayL = l; }
+    return d._hay;
+}
+
+function matches(d, st = state) {
+    if (st.cu.length && !st.cu.some(c => d.cu.includes(c))) return false;
+    if (st.ar.length && !st.ar.includes(d.ar)) return false;
+    if (st.pr.length && !st.pr.includes(priceTier(d))) return false;
+    if (st.kw.length && !st.kw.every(k => hasKw(d, k))) return false;
+    if (st.q) {
+        if (!hayOf(d).includes(st.q.toLowerCase())) return false;
     }
     return true;
 }
@@ -296,7 +315,7 @@ function mapLinks(d) {
     return links.join('');
 }
 
-function cardHtml(d) {
+function cardHtml(d, rank = 0) {
     const ko = lang() === 'ko';
     const tags = d.cu.filter(c => c !== 'other').map(c => `<span class="eat-cu">${L(`cu.${c}`)}</span>`).join('');
     const hl = highlight(d);
@@ -310,8 +329,13 @@ function cardHtml(d) {
         d.ph ? `<p class="eat-ko"><b>${L('photo_pt')}</b> ${escapeHtml(d.ph)}</p>` : '',
         d.cn ? `<p class="eat-ko eat-ko-sub"><b>${L('caution')}</b> ${escapeHtml(d.cn)}</p>` : '',
     ].join('') : '';
-    return `<article class="eat-card">
+    const rv = d.rv && (d.rv[lang()] || d.rv.zh);
+    // 매장 공식 계정 사진만 쓴다(출처 표기). 16:9 고정 크기로 자리를 잡아 늦게 떠도 화면이 밀리지 않는다
+    const photo = d.img ? `<div class="eat-photo"><img src="/img/eats/${escapeHtml(d.img)}" alt="" loading="lazy" decoding="async" width="640" height="360">${d.imgBy ? `<span class="eat-photo-by">${escapeHtml(L('photo_by', { by: d.imgBy }))}</span>` : ''}</div>` : '';
+    return `<article class="eat-card${d.img ? ' has-photo' : ''}">
+        ${photo}
         <div class="eat-head">
+            ${rank ? `<span class="eat-rank eat-rank-${rank <= 3 ? rank : 'n'}" aria-label="#${rank}">${rank}</span>` : ''}
             <div class="eat-name-wrap">
                 <h3 class="eat-name">${escapeHtml(d.n)}</h3>
                 <div class="eat-sub">${L(`ar.${d.ar}`)}${ko && d.s ? ' · ' + escapeHtml(d.s) : ''}</div>
@@ -319,6 +343,7 @@ function cardHtml(d) {
             <div class="eat-price">${d.p ? `<small>${L('pp')}</small>` : ''}${priceText(d)}</div>
         </div>
         ${hl.html}
+        ${rv ? `<p class="eat-rv"><i class="ph-duotone ph-thumbs-up"></i><span>${escapeHtml(rv)}</span></p>` : ''}
         ${statusHtml(d)}
         <div class="eat-tags">${tags}${rating}</div>
         ${badges ? `<div class="eat-badges">${badges}</div>` : ''}
@@ -336,6 +361,44 @@ function cardHtml(d) {
 }
 
 const opts = (keys, prefix) => keys.map(k => ({ value: k, label: L(`${prefix}.${k}`) }));
+const quickOpts = () => QUICK.map(([g, v]) => ({ value: `${g}:${v}`, label: L(`${g}.${v}`) }));
+const quickSelected = () => QUICK.filter(([g, v]) => state[g].includes(v)).map(([g, v]) => `${g}:${v}`);
+
+/** 칩 켜짐 상태를 state에 맞춘다 (바로가기와 아래 필터가 같은 값을 공유) */
+function syncChips(root) {
+    const want = { cu: state.cu, ar: state.ar, pr: state.pr, kw: state.kw, quick: quickSelected() };
+    for (const [g, vals] of Object.entries(want)) {
+        root.querySelectorAll(`[data-chip-group="${g}"] .pl-chip`).forEach(c => {
+            const on = vals.includes(c.dataset.value);
+            c.classList.toggle('active', on);
+            c.setAttribute('aria-pressed', String(on));
+        });
+    }
+}
+
+/** 칩마다 '누르면 몇 곳' 개수 (Trip.com식). 같은 줄(음식·지역·가격)은 그 값만 고른 경우, 키워드는 지금 조건에 더한 경우 */
+function countFor(g, v) {
+    const st = { ...state };
+    if (g === 'kw') st.kw = state.kw.includes(v) ? state.kw : [...state.kw, v];
+    else st[g] = [v];
+    let n = 0;
+    for (const d of EATS) if (matches(d, st)) n++;
+    return n;
+}
+function updateCounts(root) {
+    root.querySelectorAll('[data-chip-group] .pl-chip').forEach(c => {
+        const group = c.closest('[data-chip-group]').dataset.chipGroup;
+        let g = group, v = c.dataset.value;
+        if (group === 'quick') [g, v] = v.split(':');
+        if (!['cu', 'ar', 'pr', 'kw'].includes(g)) return;
+        const n = countFor(g, v);
+        let tag = c.querySelector('.eat-n');
+        if (!tag) { tag = document.createElement('span'); tag.className = 'eat-n'; c.appendChild(tag); }
+        tag.textContent = n;
+        c.classList.toggle('is-zero', n === 0 && !c.classList.contains('active'));
+    });
+}
+
 const activeCount = () => state.pr.length + state.kw.length + (state.sort !== 'rec' ? 1 : 0);
 
 function filtersHtml() {
@@ -345,6 +408,7 @@ function filtersHtml() {
             <input type="search" class="eat-search" id="eat-q" value="${escapeHtml(state.q)}" placeholder="${escapeHtml(L('search_ph'))}" autocomplete="off">
             <button type="button" class="eat-more-btn${state.more ? ' active' : ''}" data-more-filters aria-expanded="${state.more}">${L('more_filters')}${n ? ` <span class="eat-count-dot">${n}</span>` : ''}</button>
         </div>
+        <div class="pl-filter eat-quick">${chipGroup('quick', quickOpts(), { multi: true, selected: quickSelected() })}</div>
         <div class="pl-filter">${chipGroup('cu', opts(CUISINES, 'cu'), { multi: true, selected: state.cu })}</div>
         <div class="pl-filter">${chipGroup('ar', opts(AREAS, 'ar'), { multi: true, selected: state.ar })}</div>
         <div class="eat-panel"${state.more ? '' : ' hidden'}>
@@ -359,19 +423,23 @@ function filtersHtml() {
 }
 
 function resultsHtml() {
-    const list = sorted(EATS.filter(matches));
+    const list = sorted(EATS.filter(d => matches(d)));
     const anyFilter = state.q || state.cu.length || state.ar.length || activeCount();
     const head = `<div class="eat-result-head"><span>${L('count', { n: list.length })}</span>${anyFilter ? `<button type="button" class="eat-reset" data-reset>${L('reset')}</button>` : ''}</div>`;
     if (!list.length) return head + `<div class="eat-empty">${L('empty')}</div>`;
     const rest = list.length - state.shown;
-    return head + list.slice(0, state.shown).map(cardHtml).join('')
+    const ranked = state.sort === 'rec';
+    return head + list.slice(0, state.shown).map((d, i) => cardHtml(d, ranked && i < RANKED ? i + 1 : 0)).join('')
         + (rest > 0 ? `<button type="button" class="eat-load-more" data-load-more>${L('more', { n: rest })}</button>` : '')
         + `<button type="button" class="eat-report" onclick="window.openCSModal && window.openCSModal()">${L('report')}</button>`;
 }
 
 function renderResults() {
+    buildOpenCache();
     const box = document.getElementById('eat-results');
     if (box) box.innerHTML = resultsHtml();
+    const root = document.getElementById('eats-root');
+    if (root) updateCounts(root);
 }
 
 function render() {
@@ -386,7 +454,8 @@ function render() {
     }
     bind(root);
     root.innerHTML = `<div class="eat-beta"><span class="eat-beta-tag">BETA</span>${escapeHtml(L('beta_note', { n: EATS.length }).replace(/^BETA · /, ''))}</div>`
-        + filtersHtml() + `<div id="eat-results">${resultsHtml()}</div>`;
+        + filtersHtml() + '<div id="eat-results"></div>';
+    renderResults();
 }
 
 function load() {
@@ -406,7 +475,15 @@ function bind(root) {
     root.dataset.eatsBound = '1';
     bindChips(root, (name, values) => {
         if (name === 'sort') state.sort = values[0] || 'rec';
-        else state[name] = values;
+        else if (name === 'quick') {
+            for (const [g, v] of QUICK) {
+                const on = values.includes(`${g}:${v}`);
+                const has = state[g].includes(v);
+                if (on && !has) state[g] = [...state[g], v];
+                if (!on && has) state[g] = state[g].filter(x => x !== v);
+            }
+        } else state[name] = values;
+        syncChips(root);
         state.shown = PAGE;
         // 필터 줄의 스크롤 위치를 지키려고 결과만 다시 그린다 (더보기 버튼의 개수 표시는 갱신)
         renderResults();
