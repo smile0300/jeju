@@ -18,6 +18,7 @@ import { initReservationSection, adjustParty, submitReservation, changeReservati
 import { showSection, goBack, openWechatQR, closeWechatQR, openFeatureModal, closeFeatureModal, submitFeatureRequest, openCSModal, closeCSModal, submitCSFeedback, copyWechatId, copyAndOpenWechat, copyText, wechatEnv, openWeatherSummaryModal, closeWeatherSummaryModal, openShareModal, closeShareModal, shareToPlatform } from '../ui/ui.js';
 import '../ui/home.js';
 import '../ui/home-info-banner.js';
+import '../ui/scroll-top.js';
 import '../features/trip.js';
 import '../features/course.js';
 import '../features/eats.js';
