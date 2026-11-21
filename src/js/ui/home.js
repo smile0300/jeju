@@ -152,11 +152,11 @@
         { origId: 'home-weather-btn',   subId: 'res-sub-beauty',     animClass: 'lost-sub-in-top',    outClass: 'lost-sub-out-top' },
         { origId: 'home-hallasan-btn',  subId: 'res-sub-restaurant', animClass: 'lost-sub-in-top',    outClass: 'lost-sub-out-top' },
         { origId: 'home-airport-btn',   subId: 'res-sub-activity',   animClass: 'lost-sub-in-top',    outClass: 'lost-sub-out-top' },
-        { origId: 'home-festival-btn',  subId: 'res-sub-skin',       animClass: 'lost-sub-in-left',   outClass: 'lost-sub-out-left' },
-        { origId: 'home-lost-btn',      subId: 'res-sub-cloth',      animClass: 'lost-sub-in-right',  outClass: 'lost-sub-out-right' },
+        { origId: 'home-festival-btn',  subId: 'res-sub-cake',      animClass: 'lost-sub-in-left',   outClass: 'lost-sub-out-left' },
+        { origId: 'home-lost-btn',      subId: 'res-sub-anniversary',     animClass: 'lost-sub-in-right',  outClass: 'lost-sub-out-right' },
         // 예약신청이 가운데 오른쪽 칸이라 아래 줄 세 칸에 스냅·렌트·기타를 순서대로 둔다
         { origId: 'home-course-btn',    subId: 'res-sub-snap',       animClass: 'lost-sub-in-bottom', outClass: 'lost-sub-out-bottom' },
-        { origId: 'home-food-btn',      subId: 'res-sub-rental',     animClass: 'lost-sub-in-bottom', outClass: 'lost-sub-out-bottom' },
+        { origId: 'home-food-btn',      subId: 'res-sub-camera',    animClass: 'lost-sub-in-bottom', outClass: 'lost-sub-out-bottom' },
         { origId: 'home-reward-btn',    subId: 'res-sub-other',      animClass: 'lost-sub-in-bottom', outClass: 'lost-sub-out-bottom' },
     ];
 

@@ -6,10 +6,10 @@ const RES_TYPE_MAP = {
     beauty:     { key: 'res.type.beauty',     icon: '✂️' },
     restaurant: { key: 'res.type.restaurant', icon: '🍽️' },
     activity:   { key: 'res.type.activity',   icon: '🏄' },
-    skin:       { key: 'res.type.skin',       icon: '💆' },
-    cloth:      { key: 'res.type.cloth',      icon: '👗' },
+    cake:        { key: 'res.type.cake',        icon: '🎂' },
+    anniversary: { key: 'res.type.anniversary', icon: '💝' },
     snap:       { key: 'res.type.snap',       icon: '📸' },
-    rental:     { key: 'res.type.rental',     icon: '📦' },
+    camera:      { key: 'res.type.camera',      icon: '📷' },
     other:      { key: 'res.type.other',      icon: '📋' },
 };
 

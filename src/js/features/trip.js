@@ -37,10 +37,10 @@ const QRES_TYPES = [
     { value: 'restaurant', icon: '🍽️', key: 'res.type.restaurant', fallback: { zh: '餐厅', ko: '식당', en: 'Restaurant' } },
     { value: 'beauty',     icon: '✂️', key: 'res.type.beauty',     fallback: { zh: '美发/美甲', ko: '미용실/네일', en: 'Hair/Nail' } },
     { value: 'snap',       icon: '📸', key: 'res.type.snap',       fallback: { zh: '旅拍', ko: '스냅사진', en: 'Photo Shoot' } },
-    { value: 'skin',       icon: '💆', key: 'res.type.skin',       fallback: { zh: '皮肤管理', ko: '피부과', en: 'Skin Clinic' } },
+    { value: 'cake',       icon: '🎂', key: 'res.type.cake',       fallback: { zh: '蛋糕定制', ko: '케이크', en: 'Cake' } },
     { value: 'activity',   icon: '🏄', key: 'res.type.activity',   fallback: { zh: '休闲活动', ko: '액티비티', en: 'Activity' } },
-    { value: 'cloth',      icon: '👗', key: 'res.type.cloth',      fallback: { zh: '服装租赁', ko: '의류대여', en: 'Outfit Rental' } },
-    { value: 'rental',     icon: '📦', key: 'res.type.rental',     fallback: { zh: '物品租借', ko: '물품대여', en: 'Gear Rental' } },
+    { value: 'anniversary', icon: '💝', key: 'res.type.anniversary', fallback: { zh: '纪念日布置', ko: '기념일 이벤트', en: 'Anniversary Event' } },
+    { value: 'camera',     icon: '📷', key: 'res.type.camera',     fallback: { zh: '相机租赁', ko: '카메라 대여', en: 'Camera Rental' } },
     { value: 'other',      icon: '📋', key: 'res.type.other',      fallback: { zh: '其他', ko: '기타', en: 'Other' } },
 ];
 
