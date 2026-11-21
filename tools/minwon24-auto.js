@@ -63,6 +63,7 @@ function bumpTries(lostRow) {
   return m[lostRow];
 }
 
+let skipped = false;   // 할 일이 없어 건너뛴 실행 — 위챗 최소화도 하지 않는다
 async function main() {
   // 작업 스케줄러가 정시 실행 약 6분 뒤(:05:55·:35:55)에 한 번 더 띄우는 일이 있음(원인 미상, 11-18 확인) → 옵션 없는 정기 실행은 10분 안에 또 돌지 않는다
   const LAST = path.join(__dirname, 'minwon24-auto.last.local.txt');
@@ -70,6 +71,16 @@ async function main() {
     const prev = +(fs.existsSync(LAST) ? fs.readFileSync(LAST, 'utf8') : 0) || 0;
     if (Date.now() - prev < 10 * 60000) return;
     fs.writeFileSync(LAST, String(Date.now()));
+    // 할 일이 있을 때만 전체 실행 — 시트에 흔적이 남는 변화(minwon24.js pending)가 있거나, 마지막 전체 실행 뒤 1시간이 지났을 때
+    // (친구 요청 수락·고객이 먼저 보낸 요청은 시트에 안 남아 1시간 실행이 본다 — 사용자 결정 2026-11-21). 건너뛸 때는 위챗을 건드리지 않음
+    const FULL = path.join(__dirname, 'minwon24-auto.full.local.txt');
+    const lastFull = +(fs.existsSync(FULL) ? fs.readFileSync(FULL, 'utf8') : 0) || 0;
+    let reasons;
+    try { reasons = JSON.parse(m24('pending').split('\n').pop()).reasons; } catch (e) { reasons = ['확인 결과를 못 읽음']; }
+    const mins = Math.round((Date.now() - lastFull) / 60000);
+    if (!reasons.length && mins < 55) { skipped = true; log(`변화 없음 — 건너뜀 (전체 실행 ${mins}분 전)`); return; }
+    fs.writeFileSync(FULL, String(Date.now()));
+    log(`전체 실행: ${reasons.length ? reasons.join(', ') : `1시간 정기 (${mins}분 만)`}`);
     // 절전에서 깨어나면 작업 스케줄러가 놓친 실행을 3~6초 만에 바로 띄운다 → 화면·위챗이 준비되도록 잠깐 기다림
     await new Promise(r => setTimeout(r, 20000));
   }
@@ -211,7 +222,7 @@ $ids=@(Get-CimInstance Win32_Process -Filter "Name='chrome.exe'" | ?{ $_.Command
 }
 // 다 끝나면 위챗 창을 최소화 — 창이 내려가 있으면 '이번 자동화가 끝났다'는 표시 (2026-11-21 사용자 요청)
 function minimizeWechat() {
-  if (LOGIN || NO_SUBMIT) return;
+  if (LOGIN || NO_SUBMIT || skipped) return;
   try {
     const out = execFileSync('powershell', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', path.join(__dirname, 'wechat-add.ps1'), '-Minimize'], { encoding: 'utf8', timeout: 30000 }).trim();
     if (out) log('WECHAT', out);

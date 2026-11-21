@@ -511,6 +511,55 @@ async function proxy(M, st, test, dry, save, today) {
   if (!seen) console.log('PROXY 보낼 안내 없음');
 }
 
+// ── 자동 실행 전 '할 일 있나' 확인 — 위챗 화면은 쓰지 않고 시트·Worker만 본다 ──
+// 시트에 흔적이 남는 변화(새 접수·결제 확인·대리수령 단계·집중결과·감시 종료·발송 재시도)가 있으면 이유를 돌려준다.
+// 고객이 친구 요청을 수락했거나 먼저 요청한 경우는 시트에 안 남으므로 여기서 못 잡는다 → minwon24-auto.js 가 1시간마다 한 번 전체 실행 (사용자 결정 2026-11-21)
+// 출력: {"reasons":[...]} — 읽기 실패도 이유로 친다 (모르면 도는 쪽이 안전)
+async function pending() {
+  const reasons = [];
+  const get = async (q) => (await fetch(`${API}${q}`, { headers })).json();
+  let st = {};
+  try { st = JSON.parse(fs.readFileSync(FRIEND_STATE, 'utf8')); } catch (e) { reasons.push('상태 파일 없음'); }
+  await Promise.all([
+    (async () => {   // 새 분실 접수
+      if (st.last >= 2 && (await contact(st.last + 1)).result === 'success') reasons.push(`새 접수 JL${st.last + 1}`);
+    })().catch(e => reasons.push(`접수 확인 실패 ${e.message}`)),
+    (async () => {   // 결제 확인된 경찰 등록대기
+      const r = await get('/form');
+      if (!r.error) reasons.push(`등록대기 #${r.form && r.form.lostRow}`);
+    })().catch(e => reasons.push(`등록대기 확인 실패 ${e.message}`)),
+    (async () => {   // 대리수령 새 케이스·단계 변경 (친구 대기 중인 건은 1시간 실행이 본다)
+      const r = await get(`/run?proxy_from=${PROXY_FROM}`);
+      if (r.result !== 'success') throw new Error(r.message || r.error || 'proxy');
+      for (const c of r.cases) {
+        const step = parseInt(c.step, 10) || 0;
+        const last = parseInt((String(c.notice).match(/^s(\d)/) || [])[1], 10) || 0;
+        if (step >= 1 && step <= PROXY_AUTO_MAX && last < step && !/요청 보냄|고객 추가 대기|안내 실패/.test(c.notice)) reasons.push(`대리수령 ${proxyCode(c)} 단계 ${step}`);
+      }
+    })().catch(e => reasons.push(`대리수령 확인 실패 ${e.message}`)),
+    (async () => {   // 19.9 집중 결과 입력
+      const r = await get('/run?focus=1');
+      if (r.result !== 'success') throw new Error(r.message || r.error || 'focus');
+      if (r.rows.length) reasons.push(`집중결과 ${r.rows.length}건`);
+    })().catch(e => reasons.push(`집중결과 확인 실패 ${e.message}`)),
+    (async () => {   // 감시: 처음 보는 건·새 후보·10일 종료
+      const r = await get('/run?watch_status=1');
+      if (r.result !== 'success') throw new Error(r.message || r.error || 'watch');
+      const W = st.watch || {};
+      for (const w of r.rows) {
+        const ws = W[w.queueRow];
+        const endMs = new Date(`${w.done}T10:00:00+09:00`).getTime() + r.watchDays * 864e5;
+        if (!ws || ws.lost !== w.lostRow) reasons.push(`감시 새 건 JL${w.lostRow}`);
+        else if (!ws.ended && Date.now() > endMs) reasons.push(`감시 종료 JL${w.lostRow}`);
+        else if (!ws.ended && w.cands.some(c => !ws.sent.includes(c.id))) reasons.push(`감시 새 후보 JL${w.lostRow}`);
+      }
+    })().catch(e => reasons.push(`감시 확인 실패 ${e.message}`)),
+  ]);
+  // 안내 발송 실패 → 재시도 대기 (备注는 달렸으니 다음 실행에서 다시 보냄)
+  for (const [n, w] of Object.entries(st.wait || {})) if (w.fails) reasons.push(`발송 재시도 JL${n}`);
+  console.log(JSON.stringify({ reasons }));
+}
+
 async function notify(title, body) {
   try {
     const r = await fetch('https://jeju-weather-alerts.smile0300.workers.dev/api/notify-admin', {
@@ -554,6 +603,8 @@ if (cmd === 'judge') {
   const i = args.indexOf('--to');
   const to = i !== -1 ? args.splice(i, 2)[1] : '';
   wechat(args[0], args[1], args[2], args[3] || '', to);
+} else if (cmd === 'pending') {
+  pending().catch(e => console.log(JSON.stringify({ reasons: [`확인 오류 ${e.message}`] })));
 } else if (cmd === 'friends') {
   const i = args.indexOf('--row');
   const row = i !== -1 ? parseInt(args.splice(i, 2)[1], 10) : 0;
