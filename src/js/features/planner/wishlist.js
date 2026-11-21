@@ -37,10 +37,10 @@ export function wishBtnHtml(item, { cls = '' } = {}) {
 }
 
 /** 코스 하루 장소 전부 담기 버튼. items = [{ k, key, name }] */
-export function wishAllBtnHtml(items) {
+export function wishAllBtnHtml(items, { label = '', cls = '' } = {}) {
     const data = items.map(i => ({ k: i.k, key: i.key, name: i.name }));
-    return `<button type="button" class="wish-all-btn" data-wish-all="${escapeHtml(JSON.stringify(data))}">
-        <i class="ph-bold ph-heart"></i> ${tp('wish.all')}</button>`;
+    return `<button type="button" class="wish-all-btn ${cls}" data-wish-all="${escapeHtml(JSON.stringify(data))}">
+        <i class="ph-bold ph-heart"></i> ${escapeHtml(label || tp('wish.all'))}</button>`;
 }
 
 function syncButtons() {
@@ -54,6 +54,39 @@ function syncButtons() {
         const s = btn.querySelector('span');
         if (s) s.textContent = tp(on ? 'wish.added' : 'wish.add');
     });
+    syncWishBar();
+}
+
+/** 전 페이지 하단 플로팅 여행 바구니 바 (/trip 화면에서는 숨김) */
+export function syncWishBar() {
+    if (typeof document === 'undefined') return;
+    const list = readWish();
+    const inTrip = document.getElementById('trip')?.classList.contains('active');
+    let bar = document.getElementById('jl-wish-bar');
+    if (!list.length || inTrip) {
+        if (bar) bar.classList.remove('show');
+        return;
+    }
+    if (!bar) {
+        bar = document.createElement('div');
+        bar.id = 'jl-wish-bar';
+        bar.className = 'wish-bar';
+        document.body.appendChild(bar);
+        bar.addEventListener('click', (e) => {
+            if (e.target.closest('[data-wbar-go]')) goPlan();
+        });
+    }
+    const barLabel = tp('wish.bar_label', { n: list.length });
+    const barGo = tp('wish.go');
+    bar.innerHTML = `
+        <div class="wish-bar-info">
+            <i class="ph-fill ph-heart"></i>
+            <span>${escapeHtml(barLabel)}</span>
+        </div>
+        <button type="button" class="wish-bar-btn" data-wbar-go>
+            ${escapeHtml(barGo)} <i class="ph-bold ph-arrow-right"></i>
+        </button>`;
+    bar.classList.add('show');
 }
 
 /** 저장된 여행 날짜가 있으면 그 브리핑의 "내 일정" 탭으로, 없으면 날짜 고르기 화면으로 */
@@ -120,5 +153,17 @@ document.addEventListener('click', (e) => {
 }, true);
 
 window.addEventListener('jeju:wishchange', syncButtons);
+window.addEventListener('jeju:langchange', syncWishBar);
+window.addEventListener('popstate', () => setTimeout(syncWishBar, 50));
+if (typeof document !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', () => {
+        syncWishBar();
+        // 섹션 전환(active 클래스 변경)을 감지해 /trip 진입 시 플로팅 바를 자동 숨김
+        const tripSec = document.getElementById('trip');
+        if (tripSec && typeof MutationObserver !== 'undefined') {
+            new MutationObserver(syncWishBar).observe(tripSec, { attributes: true, attributeFilter: ['class'] });
+        }
+    });
+}
 
 export const wishName = (item) => (typeof item.name === 'string' ? item.name : pick(item.name));

@@ -235,3 +235,51 @@ html[lang="en"] .pl-trip-tabs .pl-trip-tab { font-size: 0.7rem; letter-spacing: 
 .ip-sum span { min-width: 0; color: var(--label-primary); font-weight: 700; overflow-wrap: anywhere; }
 .ip-sum > i { flex-shrink: 0; color: var(--label-secondary); transition: transform .2s; }
 .ip-fold[open] > .ip-sum > i { transform: rotate(180deg); }
+
+/* ── 보강 스타일: 플로팅 여행 바구니 · 다일정 전체 담기 · 일자별 숙소 · 이미지 저장 ── */
+.wish-all-primary {
+    background: #E03131; border-style: solid; border-color: #E03131; color: #fff;
+}
+
+.wish-bar {
+    position: fixed;
+    left: 50%;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    z-index: 2900;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: calc(100vw - 24px);
+    max-width: 480px;
+    padding: 10px 10px 10px 16px;
+    border-radius: 16px;
+    background: rgba(25, 31, 40, 0.95);
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+    transform: translate(-50%, 100px);
+    opacity: 0;
+    visibility: hidden;
+    transition: transform 0.25s ease, opacity 0.25s ease, visibility 0.25s;
+}
+.wish-bar.show { transform: translate(-50%, 0); opacity: 1; visibility: visible; }
+.wish-bar-info { display: flex; align-items: center; gap: 8px; font-size: 0.88rem; font-weight: 800; }
+.wish-bar-info i { color: #FF6B6B; font-size: 1.15rem; }
+.wish-bar-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    min-height: 36px; padding: 0 14px; border: 0; border-radius: 12px;
+    background: #FF6B6B; color: #fff; font: inherit; font-size: 0.84rem; font-weight: 800; cursor: pointer; white-space: nowrap;
+}
+
+.ip-day-hotel {
+    min-height: 28px; padding: 0 8px; border: 1px solid var(--separator); border-radius: 999px;
+    background: var(--fill-tertiary, #F8F9FA); color: var(--label-primary);
+    font: inherit; font-size: 0.74rem; font-weight: 700; cursor: pointer;
+}
+
+.ip-export-area { display: flex; flex-direction: column; gap: 12px; }
+.ip-export-wm { display: none; text-align: center; font-size: 0.76rem; font-weight: 700; color: #868E96; padding: 6px 0 2px; }
+.ip-export-area.is-exporting { padding: 16px; background: #F2F4F6; border-radius: 16px; }
+.ip-export-area.is-exporting .ip-export-wm { display: block; }
+.ip-export-area.is-exporting .ip-acts,
+.ip-export-area.is-exporting .ip-day-hotel { display: none; }

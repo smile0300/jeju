@@ -4,9 +4,10 @@ import { tp } from './plan-strings.js';
 import { chipGroup, copyText, flashLabel } from './shared.js';
 import { toYmd } from './forecast.js';
 import { readWish, writeWish, removeWish, goPlan } from './wishlist.js';
-import { buildItinerary, clock, DEFAULT_SETTINGS } from './itinerary.js';
+import { buildItinerary, clock, DEFAULT_SETTINGS, HOTELS } from './itinerary.js';
 import { HIKES } from '../../../data/hikes.js';
 import { FESTIVAL_POS } from '../../../data/festival-geo.js';
+import { krwToCny } from '../../../data/taxi.js';
 
 const SETTINGS_KEY = 'jeju_plan_settings_v1';
 const MOVES_KEY = 'jeju_plan_moves_v1';
@@ -40,11 +41,13 @@ function readShared() {
     const o = raw && b64.dec(raw);
     if (!o || !Array.isArray(o.w)) return null;
     const wish = o.w.map(id => { const i = id.indexOf(':'); return i > 0 ? { id, k: id.slice(0, i), key: id.slice(i + 1), name: { ko: id.slice(i + 1) } } : null; }).filter(Boolean);
-    return { wish, settings: { ...DEFAULT_SETTINGS, ...(o.s || {}) }, moves: o.m || {} };
+    return { wish, settings: { ...DEFAULT_SETTINGS, ...(o.s || {}) }, moves: o.m || {}, dayHotels: o.h || {} };
 }
 
-function shareUrl(trip, wish, settings, moves) {
-    const p = b64.enc({ w: wish.map(x => x.id), s: settings, m: moves });
+function shareUrl(trip, wish, settings, moves, dayHotels) {
+    const payload = { w: wish.map(x => x.id), s: settings, m: moves };
+    if (dayHotels && Object.keys(dayHotels).length) payload.h = dayHotels;
+    const p = b64.enc(payload);
     return `${location.origin}/trip?from=${trip.fromIso}&to=${trip.toIso}&plan=${p}`;
 }
 
@@ -132,11 +135,18 @@ function warnHtml(w) {
     return `<li><i class="ph-duotone ${w.key === 'rain' ? 'ph-umbrella' : 'ph-warning'}"></i> ${escapeHtml(tp(`plan.warn.${w.key}`, { name }))}</li>`;
 }
 
-function dayHtml(day, days, locked, fmt) {
+function dayHtml(day, days, locked, fmt, dayHotels = {}, isShared = false) {
     const wd = new Intl.DateTimeFormat(LOCALES[lang()], { weekday: 'short' }).format(day.date);
     const startLabel = day.win.first ? tp('plan.airport_in') : tp('plan.hotel_out');
     const endLabel = day.win.last ? tp('plan.airport_out') : tp('plan.hotel_in');
     const empty = !day.entries.length;
+    const curHotel = dayHotels[day.i] || '';
+    const hotelSel = !isShared && days.length > 1 && !day.win.last ? `
+        <select class="ip-day-hotel" data-ip-hotel="${day.i}" aria-label="${escapeHtml(tp('plan.day_hotel'))}">
+            <option value=""${!curHotel ? ' selected' : ''}>🏨 ${escapeHtml(tp('plan.day_hotel_default'))}</option>
+            ${Object.keys(HOTELS).map(k => `<option value="${k}"${curHotel === k ? ' selected' : ''}>🏨 ${escapeHtml(tp(`plan.hotel.${k}`))}</option>`).join('')}
+        </select>` : '';
+    const cny = lang() === 'ko' ? '' : ` (≈¥${krwToCny(day.cost.total)})`;
     return `<section class="pl-card ip-day" data-ip-day="${day.i}">
         <header class="ip-day-head">
             <div><b>${escapeHtml(tp('plan.day', { n: day.i + 1 }))}</b> <span class="ip-date">${escapeHtml(fmt.format(day.date))} ${escapeHtml(wd)}</span></div>
@@ -145,7 +155,8 @@ function dayHtml(day, days, locked, fmt) {
         <div class="ip-day-meta">
             ${day.hikeDay ? `<span class="ip-chip"><i class="ph-duotone ph-person-simple-hike"></i> ${escapeHtml(tp('plan.hike_day'))}</span>` : ''}
             ${day.filledBlock ? `<span class="ip-chip">${escapeHtml(tp('plan.empty_day'))}</span>` : ''}
-            <span class="ip-cost">${escapeHtml(tp('plan.cost.day', { n: won(day.cost.total) }))}</span>
+            ${hotelSel}
+            <span class="ip-cost">${escapeHtml(tp('plan.cost.day', { n: won(day.cost.total) }))}${escapeHtml(cny)}</span>
         </div>
         ${day.warns.length ? `<ul class="ip-warns">${day.warns.map(warnHtml).join('')}</ul>` : ''}
         <ol class="ip-tl">
@@ -229,7 +240,11 @@ function readExcluded() {
     const m = store.get(MOVES_KEY, {});
     return m.trip === tripKey() ? (m.ex || []) : [];
 }
-function writeMoves(moves, ex) { store.set(MOVES_KEY, { trip: tripKey(), moves, ex }); }
+function readDayHotels() {
+    const m = store.get(MOVES_KEY, {});
+    return m.trip === tripKey() ? (m.dh || {}) : {};
+}
+function writeMoves(moves, ex, dh = readDayHotels()) { store.set(MOVES_KEY, { trip: tripKey(), moves, ex, dh }); }
 
 function draw(box) {
     const { from, to } = view.trip;
@@ -240,9 +255,10 @@ function draw(box) {
     const settings = shared ? shared.settings : { ...DEFAULT_SETTINGS, ...store.get(SETTINGS_KEY, {}) };
     const moves = shared ? shared.moves : readMoves();
     const excluded = shared ? [] : readExcluded();
+    const dayHotels = shared ? (shared.dayHotels || {}) : readDayHotels();
     const wx = weatherFor(dates, view.wx?.forecast, view.wx?.history);
 
-    const plan = buildItinerary({ dates, wx, wish, ctx: view.ctx, settings, moves, excluded });
+    const plan = buildItinerary({ dates, wx, wish, ctx: view.ctx, settings, moves, excluded, dayHotels });
     // 이름 없는 공유 항목은 계산된 이름으로
     const nameOf = new Map();
     plan.days.forEach(d => d.entries.forEach(e => nameOf.set(e.v.id, e.v.name)));
@@ -277,14 +293,18 @@ function draw(box) {
         ${shared ? '' : wishHtml(wishShown)}
         ${shared ? '' : settingsHtml(settings)}
         ${histNote}
-        ${totalHtml(plan.total)}
-        ${plan.days.map(d => dayHtml(d, plan.days, locked, fmt)).join('')}
+        <div id="ip-export-area" class="ip-export-area">
+            ${totalHtml(plan.total)}
+            ${plan.days.map(d => dayHtml(d, plan.days, locked, fmt, dayHotels, !!shared)).join('')}
+            <div class="ip-export-wm">jeju-live.com · ${escapeHtml(view.trip.fromIso)} ~ ${escapeHtml(view.trip.toIso)}</div>
+        </div>
         ${unplaced}
         <div class="ip-actions">
+            <button type="button" class="pl-btn-ghost" data-ip-save-img><i class="ph-duotone ph-image"></i> ${escapeHtml(tp('plan.save_img'))}</button>
             <button type="button" class="pl-btn-ghost" data-ip-share><i class="ph-duotone ph-link"></i> ${escapeHtml(tp('plan.share'))}</button>
-            ${!shared && (locked.size || excluded.length) ? `<button type="button" class="pl-btn-ghost" data-ip-reset>${escapeHtml(tp('plan.reset_moves'))}</button>` : ''}
+            ${!shared && (locked.size || excluded.length || Object.keys(dayHotels).length) ? `<button type="button" class="pl-btn-ghost" data-ip-reset>${escapeHtml(tp('plan.reset_moves'))}</button>` : ''}
         </div>`;
-    view.last = { wish, settings, moves, names: nameOf };
+    view.last = { wish, settings, moves, dayHotels, names: nameOf };
 }
 
 function bindPanel(box) {
@@ -333,14 +353,13 @@ function bindPanel(box) {
             if (go.dataset.ipGo === 'oreum') window.oreumApp?.switchTab('oreum');
             return;
         }
-        if (t.closest('[data-ip-reset]')) { writeMoves({}, []); redraw(); return; }
+        if (t.closest('[data-ip-reset]')) { writeMoves({}, [], {}); redraw(); return; }
         if (t.closest('[data-ip-save-shared]')) {
             const sh = view.shared;
             if (sh) {
-                // 공유 링크에는 id만 있으므로 계산된 3개 언어 이름으로 저장
                 writeWish(sh.wish.map(w => ({ ...w, name: view.last?.names?.get(w.id) || w.name })));
                 store.set(SETTINGS_KEY, sh.settings);
-                writeMoves(sh.moves, []);
+                writeMoves(sh.moves, [], sh.dayHotels || {});
                 const url = new URL(location.href); url.searchParams.delete('plan');
                 history.replaceState(history.state, '', url.pathname + url.search);
                 view.shared = null;
@@ -348,9 +367,33 @@ function bindPanel(box) {
             }
             return;
         }
+        const imgBtn = t.closest('[data-ip-save-img]');
+        if (imgBtn) {
+            const target = box.querySelector('#ip-export-area');
+            if (!target) return;
+            const prev = imgBtn.innerHTML;
+            imgBtn.disabled = true;
+            imgBtn.innerHTML = `<i class="ph-duotone ph-circle-notch spin"></i> ${escapeHtml(tp('plan.saving_img'))}`;
+            target.classList.add('is-exporting');
+            try {
+                const { toPng } = await import('html-to-image');
+                const dataUrl = await toPng(target, { backgroundColor: '#F2F4F6', pixelRatio: 2, cacheBust: true });
+                const a = document.createElement('a');
+                a.download = `jeju-plan-${view.trip.fromIso}.png`;
+                a.href = dataUrl;
+                a.click();
+            } catch (err) {
+                console.error('export plan image failed:', err);
+            } finally {
+                target.classList.remove('is-exporting');
+                imgBtn.disabled = false;
+                imgBtn.innerHTML = prev;
+            }
+            return;
+        }
         const share = t.closest('[data-ip-share]');
         if (share && view.last) {
-            const url = shareUrl(view.trip, view.last.wish, view.last.settings, view.last.moves);
+            const url = shareUrl(view.trip, view.last.wish, view.last.settings, view.last.moves, view.last.dayHotels);
             if (await copyText(url)) flashLabel(share, tp('plan.copied'));
         }
     });
@@ -359,6 +402,15 @@ function bindPanel(box) {
         if (f) view.open[f.dataset.ipFold] = f.open;
     }, true);
     box.addEventListener('change', (e) => {
+        const hSel = e.target.closest('[data-ip-hotel]');
+        if (hSel && !view.shared) {
+            const dh = readDayHotels();
+            if (hSel.value) dh[hSel.dataset.ipHotel] = hSel.value;
+            else delete dh[hSel.dataset.ipHotel];
+            writeMoves(readMoves(), readExcluded(), dh);
+            redraw();
+            return;
+        }
         const sel = e.target.closest('[data-ip-move]');
         if (!sel || view.shared) return;
         const moves = readMoves();

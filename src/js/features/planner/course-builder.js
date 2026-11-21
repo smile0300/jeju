@@ -8,6 +8,7 @@ import { BLOCKS, REGIONS, STOP_POS, STOP_TYPES, FEES } from '../../../data/cours
 import { roadKm, HOTEL_BASE } from '../../../data/taxi.js';
 import { mapHtml, moveHtml, timelineHtml, typeTag, dayTransport, money } from './course-view.js';
 import { dayCost } from './course-match.js';
+import { wishAllBtnHtml } from './wishlist.js';
 
 const STORE_KEY = 'jl_my_course';
 const MAX_STOPS = 8;
@@ -118,11 +119,12 @@ function summaryHtml(block, budget) {
 }
 
 /** 코스 만들기 화면. budget = 추천 코스에서 고른 예산 단계(비용 계산 기준) */
-export function builderHtml(budget) {
+export function builderHtml(budget, hotelKey = 'jeju') {
     const block = myBlock();
     const n = block.stops.length;
     const places = [...POOL.values()].filter(p =>
         (bState.region === 'all' || p.region === bState.region) && (bState.type === 'all' || p.type === bState.type));
+    const wishItems = block.stops.map(s => ({ k: 'stop', key: s.name.ko, name: s.name }));
 
     return `
         <button type="button" class="pl-link" data-back="1">← ${tr('course.back')}</button>
@@ -137,11 +139,12 @@ export function builderHtml(budget) {
                 <button type="button" class="pl-chip" data-b-auto="1"><i class="ph-duotone ph-path"></i> ${tr('build.auto')}</button>
                 <button type="button" class="pl-chip" data-copy="${escapeHtml(copyLines(block))}"><i class="ph-duotone ph-copy"></i> ${tr('build.copy')}</button>
             </div>` : ''}
+            ${n ? wishAllBtnHtml(wishItems, { label: tr('build.to_plan'), cls: 'wish-all-primary' }) : ''}
             ${n ? summaryHtml(block, budget) : ''}
         </section>
 
-        ${n ? `${mapHtml(block.stops)}${moveHtml(block)}
-            <details class="pl-build-detail"><summary>${tr('build.timeline')}</summary>${timelineHtml(block)}</details>` : ''}
+        ${n ? `${mapHtml(block.stops)}${moveHtml(block, { hotelKey })}
+            <details class="pl-build-detail"><summary>${tr('build.timeline')}</summary>${timelineHtml(block, { hotelKey })}</details>` : ''}
 
         <h4 class="pl-list-head">${tr('build.pick')}</h4>
         <div class="pl-filter">${chipGroup('bRegion',

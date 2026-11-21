@@ -321,20 +321,24 @@ const windy = (w) => (w?.wind || 0) >= WINDY;
  * }
  */
 export function buildItinerary(input) {
-    const { dates, wx = [], wish = [], ctx = {}, moves = {} } = input;
+    const { dates, wx = [], wish = [], ctx = {}, moves = {}, dayHotels = {} } = input;
     const S = { ...DEFAULT_SETTINGS, ...(input.settings || {}) };
     const pace = DAY_START[S.pace] ? S.pace : 3;
     const mode = S.move === 'taxi' ? 'taxi' : 'bus';
     const excluded = new Set(input.excluded || []);
     const D = dates.length;
     const base = HOTELS[S.hotel] || HOTEL_BASE;
+    const hotelOf = (i) => HOTELS[dayHotels[i]] || base;
     const pool = ctx.eats || [];
 
     const win = dates.map((_, i) => {
-        let start = DAY_START[pace], end = DAY_END[pace], from = base, to = base, first = false, last = false;
-        if (i === 0) { start = Math.max(start, ARRIVE[S.arrive] + 50); from = AIRPORT; first = true; }
-        if (i === D - 1) { end = Math.min(end, DEPART[S.depart] - 120); to = AIRPORT; last = true; }
-        return { start, end, from, to, first, last };
+        let start = DAY_START[pace], end = DAY_END[pace];
+        let from = i === 0 ? AIRPORT : hotelOf(i - 1);
+        let to = i === D - 1 ? AIRPORT : hotelOf(i);
+        let first = false, last = false;
+        if (i === 0) { start = Math.max(start, ARRIVE[S.arrive] + 50); first = true; }
+        if (i === D - 1) { end = Math.min(end, DEPART[S.depart] - 120); last = true; }
+        return { start, end, from, to, first, last, hotelKey: dayHotels[i] || S.hotel };
     });
     const cap = (i) => Math.max(0, win[i].end - win[i].start);
 
@@ -384,7 +388,7 @@ export function buildItinerary(input) {
         }
         if (hikeHere?.full && !v.meal) c += 45;
         const pts = day.items.filter(x => x.pos && x !== v);
-        if (v.pos) c += pts.length ? Math.min(...pts.map(x => roadKm(x.pos, v.pos))) : 14 + roadKm(base, v.pos) * 0.15;
+        if (v.pos) c += pts.length ? Math.min(...pts.map(x => roadKm(x.pos, v.pos))) : 14 + roadKm(hotelOf(i), v.pos) * 0.15;
         if (v.needClear && wet(w)) c += 40;
         else if (!v.indoor && wet(w)) c += 15;
         if (isUdo(v.pos) && windy(w)) c += 40;

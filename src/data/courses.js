@@ -18,7 +18,7 @@
 // 이동 시간·택시 요금은 좌표로 계산한다(taxi.js의 driveMin·taxiFare). 숙소 기준점은 그랜드 하얏트 제주.
 // 이름 zh/en은 비짓제주 공식 표기를 따른다. 좌표는 아래 STOP_POS.
 
-export const COURSES_DRAFT = true;
+export const COURSES_DRAFT = false;
 
 // 'season' = 계절 코스만 모아 보기(지역 필터 자리에 함께 둔다)
 export const REGIONS = ['east', 'west', 'south', 'north', 'mid', 'rainy', 'season'];
@@ -480,6 +480,38 @@ Object.assign(BLOCKS, {
             stop('광치기해변'),
         ],
     },
+    shopping: {
+        region: 'north',
+        title: { zh: '市区购物·免税店·东门夜市', ko: '제주시 쇼핑 · 면세점 · 동문야시장', en: 'City Shopping · Duty-Free · Night Market' },
+        summary: { zh: '免税店扫货、宝健路 Olive Young、七星路潮牌，晚上逛东门夜市吃小吃', ko: '면세점 쇼핑, 누웨마루거리·올리브영, 칠성로 구경 후 동문야시장으로 마무리', en: 'Duty-free shopping, Nuwemaru & Olive Young, Chilseong-ro and Dongmun Night Market' },
+        stops: [
+            { name: { ko: '신라면세점 제주점', zh: '新罗免税店 济州店', en: 'Shilla Duty Free Jeju' }, type: 'spot', stayMin: 90,
+              info: { ko: '09:30–18:00 · 연중무휴 · 여권·항공권 필수', zh: '09:30–18:00 · 全年无休 · 必带护照和机票信息（支持支付宝/微信支付）', en: '09:30–18:00 · Open daily · Passport & flight info required' },
+              tip: { zh: '距机场10分钟，部分海外大牌需在机场提货口领取，买前确认航班时间', ko: '공항 10분 거리, 일부 수입 브랜드는 출국 시 공항 인도장 수령', en: '10 min from airport; some imported brands are picked up at the airport gate' } },
+            { name: { ko: '누웨마루거리', zh: '宝健路（莲洞步行街 · Olive Young）', en: 'Nuwemaru Street (Yeon-dong)' }, type: 'spot', stayMin: 70,
+              info: { ko: '상시 개방 · 올리브영 등 대부분 10:00–22:00', zh: '全天开放 · Olive Young 等店铺多营业至22:00，支持现场退税', en: 'Always open · Olive Young & shops open until ~22:00, tax-free available' },
+              tip: { zh: '济州市最热闹的商业街，Olive Young、美妆店、烤肉店集中，步行可达新罗免税店', ko: '신제주 중심 상권, 올리브영·화장품·식당 밀집 (신라면세점 도보 이동)', en: 'Main shopping street with Olive Young, cosmetics and BBQ — walkable from Shilla' } },
+            { name: { ko: '칠성로 쇼핑거리', zh: '七星路商业街', en: 'Chilseong-ro Shopping Street' }, type: 'spot', stayMin: 60,
+              info: { ko: '10:30–21:00 (매장별 상이)', zh: '10:30–21:00（各店略有不同）· 运动品牌、潮牌、ABC-Mart集中', en: '10:30–21:00 (varies by shop)' },
+              tip: { zh: '紧邻东门市场和黑猪肉一条街，适合傍晚顺路逛街', ko: '동문시장·흑돼지거리 바로 옆, 저녁 전 들르기 좋음', en: 'Right next to Dongmun Market and Black Pork Street' } },
+            { name: { ko: '동문재래시장', zh: '东门传统市场（夜市）', en: 'Dongmun Traditional Market & Night Market' }, type: 'spot', stayMin: 70,
+              info: { ko: '시장 08:00–21:00 · 야시장 18:00–24:00 · 연중무휴', zh: '市场08:00–21:00 · 夜市18:00–24:00 · 全年无休 · 建议备少量现金或WOWPASS', en: 'Market 08:00–21:00 · Night market 18:00–24:00 · Open daily' },
+              tip: { zh: '必吃烤黑猪肉串、橘子麻糬、鲍鱼紫菜包饭，伴手礼橘子巧克力价格实惠', ko: '야시장 흑돼지 꼬치·감귤 모찌·기념품 쇼핑까지 한 번에', en: 'Black pork skewers, tangerine mochi and affordable Jeju souvenirs' } },
+        ],
+    },
+    arrival: {
+        region: 'north',
+        title: { zh: '抵达/返程半日：机场周边海边 · 东门市场', ko: '도착·출발 반나절: 공항 근처 해변 · 동문시장', en: 'Arrival/Departure Half-Day: Near Airport & Market' },
+        summary: { zh: '落地或起飞前半天轻松走完，机场可寄存/配送行李，全程打车10~15分钟内', ko: '도착일·출발일 반나절에 딱 맞는 공항 15분 이내 코스 (짐 보관·배송 팁 포함)', en: 'Easy half-day loop within 15 min of the airport — ideal for arrival or departure' },
+        stops: [
+            stop('도두동 무지개해안도로'),
+            stop('이호테우해변'),
+            stop('용두암'),
+            { name: { ko: '동문재래시장', zh: '东门传统市场（伴手礼·小吃）', en: 'Dongmun Traditional Market' }, type: 'spot', stayMin: 60,
+              info: { ko: '08:00–21:00 (야시장 18:00–24:00) · 공항 택시 약 15분', zh: '08:00–21:00（夜市18:00起）· 打车去机场约15分钟（约¥30）', en: '08:00–21:00 · ~15 min taxi to airport' },
+              tip: { zh: '机场1楼3号门附近有行李寄存和酒店行李配送服务，轻装逛更省心', ko: '제주공항 1층 짐 보관·숙소 배송 서비스 이용 시 가볍게 이동 가능', en: 'Use airport 1F luggage storage/delivery to explore hands-free' } },
+        ],
+    },
 });
 
 // 컨셉·여행 속도 (추천 화면에서 사용)
@@ -515,6 +547,8 @@ export const COMPANION_FIT = {
     freecity: ['friends', 'solo'],
     royalwest: ['couple', 'friends'],
     royaleast: ['couple', 'friends', 'parents'],
+    shopping: ['couple', 'friends', 'solo', 'parents'],
+    arrival: ['couple', 'friends', 'solo', 'parents'],
 };
 
 const META = {
@@ -543,6 +577,8 @@ const META = {
     freecity: { pace: 2, concepts: ['sea', 'photo'] },
     royalwest: { pace: 3, concepts: ['art', 'cafe'] },
     royaleast: { pace: 3, concepts: ['art', 'sea'] },
+    shopping: { pace: 2, concepts: ['classic'] },
+    arrival: { pace: 2, concepts: ['classic', 'sea', 'photo'] },
 };
 for (const [k, m] of Object.entries(META)) Object.assign(BLOCKS[k], m);
 
@@ -644,6 +680,11 @@ export const STOP_POS = {
     '9.81파크 제주': [33.3929, 126.3586],
     '빛의 벙커': [33.4398, 126.8990],
     '아쿠아플라넷 제주': [33.4325, 126.9272],
+    // 쇼핑·도착일 코스
+    '신라면세점 제주점': [33.4859, 126.4876],
+    '누웨마루거리': [33.4872, 126.4902],
+    '칠성로 쇼핑거리': [33.5145, 126.5256],
+    '동문재래시장': [33.5121, 126.5284],
 };
 
 // 코스 카드 표지 사진: public/img/courses/{img}. stop = 사진 속 장소(그 코스의 stop.name.ko, 출처 표시에 이름을 쓴다)
@@ -675,6 +716,8 @@ export const COVERS = {
     summer: { img: 'summer.webp', stop: '종달리수국길' },
     autumn: { img: 'autumn.webp', stop: '새별오름' },
     winter: { img: 'winter.webp', stop: '위미동백나무군락' },
+    shopping: { img: 'freecity.webp', stop: '동문재래시장' },
+    arrival: { img: 'north.webp', stop: '도두동 무지개해안도로' },
 };
 
 // 여러 날 코스: days = 날짜 순서대로 BLOCKS의 키. 같은 일수에서는 먼저 적힌 것이 여행 브리핑의 기본 코스가 된다
