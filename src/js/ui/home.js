@@ -263,6 +263,41 @@
         if (window.showSection) window.showSection('reservation');
     };
 
+    // ===== 예약신청 버튼 라벨 회전 (무엇을 예약할 수 있는지 미리 보여줌) =====
+    // 펼쳐진 동안·탭이 숨겨진 동안은 멈추고, 동작 줄이기 설정이면 돌리지 않는다
+    const RES_ROTATE = [
+        { key: 'nav.reservation',        icon: 'ph-calendar-check' },
+        { key: 'res.rotate.restaurant',  icon: 'ph-fork-knife' },
+        { key: 'res.rotate.beauty',      icon: 'ph-scissors' },
+        { key: 'res.rotate.cake',        icon: 'ph-cake' },
+        { key: 'res.rotate.anniversary', icon: 'ph-heart' },
+        { key: 'res.rotate.camera',      icon: 'ph-aperture' },
+        { key: 'res.rotate.snap',        icon: 'ph-camera' },
+    ];
+    (function startReservationRotate() {
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        var idx = 0;
+        setInterval(function() {
+            if (reservationExpanded || document.hidden) return;
+            var btn = document.getElementById('home-reservation-btn');
+            if (!btn || btn.offsetParent === null) return;
+            var icon  = btn.querySelector('.item-icon i');
+            var label = btn.querySelector('.item-label');
+            if (!icon || !label) return;
+
+            idx = (idx + 1) % RES_ROTATE.length;
+            var next = RES_ROTATE[idx];
+            btn.classList.add('res-rotate-out');
+            setTimeout(function() {
+                if (reservationExpanded) { btn.classList.remove('res-rotate-out'); return; }
+                icon.className = 'ph-duotone ' + next.icon + ' color-reservation';
+                label.setAttribute('data-i18n', next.key);
+                label.textContent = window.t ? window.t(next.key) : label.textContent;
+                btn.classList.remove('res-rotate-out');
+            }, 200);
+        }, 2500);
+    })();
+
     // ===== 차량 홈버튼 → 위 打车·公交 / 왼쪽 拼车 / 오른쪽 包车 토글 =====
 
     let charterExpanded = false;

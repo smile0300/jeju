@@ -642,6 +642,17 @@
     box-shadow: 0 4px 12px rgba(8, 145, 178, 0.2), inset 0 1px 0 rgba(255,255,255,0.9);
 }
 
+/* 예약신청 버튼 라벨 회전 — 버튼 크기는 그대로, 안쪽 아이콘·글자만 페이드 */
+#home-reservation-btn .item-icon,
+#home-reservation-btn .item-label {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+#home-reservation-btn.res-rotate-out .item-icon,
+#home-reservation-btn.res-rotate-out .item-label {
+    opacity: 0;
+    transform: translateY(-4px);
+}
+
 /* 예약 서브버튼 공통 */
 .home-item.item-res-sub {
     cursor: pointer;
