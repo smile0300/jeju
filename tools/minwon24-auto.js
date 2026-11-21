@@ -69,7 +69,7 @@ async function main() {
   const LAST = path.join(__dirname, 'minwon24-auto.last.local.txt');
   if (!args.length) {
     const prev = +(fs.existsSync(LAST) ? fs.readFileSync(LAST, 'utf8') : 0) || 0;
-    if (Date.now() - prev < 10 * 60000) return;
+    if (Date.now() - prev < 10 * 60000) { skipped = true; return; }
     fs.writeFileSync(LAST, String(Date.now()));
     // 할 일이 있을 때만 전체 실행 — 시트에 흔적이 남는 변화(minwon24.js pending)가 있거나, 마지막 전체 실행 뒤 1시간이 지났을 때
     // (친구 요청 수락·고객이 먼저 보낸 요청은 시트에 안 남아 1시간 실행이 본다 — 사용자 결정 2026-11-21). 건너뛸 때는 위챗을 건드리지 않음
