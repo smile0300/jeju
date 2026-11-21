@@ -142,7 +142,9 @@ function wx(args, hideId, raw) {
   return hideId ? out.split(new RegExp(hideId.replace(/[^a-zA-Z0-9]/g, '\\$&'), 'i')).join('<ID>') : out;
 }
 const sent = (out) => /^OK .*\bsent$/.test(out);
-const idOk = (id) => WECHAT_ID_RE.test(id) && !/^wxid_/i.test(id);
+// 위챗 ID, 또는 중국 휴대폰 번호(위챗 '번호 검색'으로 찾음 — 2026-11-21, 분실 접수의 절반 가까이가 번호를 적음)
+const CN_MOBILE_RE = /^(\+?86)?1\d{10}$/;
+const idOk = (id) => (WECHAT_ID_RE.test(id) && !/^wxid_/i.test(id)) || CN_MOBILE_RE.test(id);
 const contact = async (lostRow) => (await fetch(`${API}/run?lost_row=${lostRow}&contact=1`, { headers })).json();
 const postRun = (body) => fetch(`${API}/run`, { method: 'POST', headers: { ...headers, 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(r => r.json());
 const nowKst = () => new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Seoul' }).slice(0, 16);
@@ -204,7 +206,8 @@ async function friends(max, onlyRow, dry) {
   if (!onlyRow) {
     const lines = wx(['-Requests'], null, true);
     const tail = lines[lines.length - 1] || '';
-    if (!/^OK requests/.test(tail)) { console.log(`REQUESTS ${tail}`); if (SCREEN_FAIL.test(tail)) return; }
+    // 'New Friends 줄을 못 찾음'은 연락처 목록 위치 문제일 뿐 → 받은 요청만 건너뛰고 나머지(새 접수·대리수령·감시)는 계속
+    if (!/^OK requests/.test(tail)) { console.log(`REQUESTS ${tail}`); if (SCREEN_FAIL.test(tail) && !/New Friends/.test(tail)) return; }
     st.req = st.req || {};
     for (const k of Object.keys(st.req)) if ((Date.now() - new Date(st.req[k]).getTime()) / 864e5 > 14) delete st.req[k];
     const key = (t) => require('crypto').createHash('sha1').update(t).digest('hex').slice(0, 12);
@@ -481,12 +484,15 @@ async function proxy(M, st, test, dry, save, today) {
     let out = wx(['-Local', '-Remark', code, '-Message', msg, ...test]);
     if (SCREEN_FAIL.test(out)) { console.log(`${code} ${out}`); return; }
     // 2) 위챗 ID 검색 — 친구면 备注를 달고 보내고, 아니면 친구 요청 (같은 ID는 6시간에 한 번만 검색)
+    // idOk 는 중국 휴대폰 번호도 받는다 (2026-11-21 JEJU-0063 — 번호라 검색을 건너뛰고 '고객 추가 대기'로만 두었음)
     if (/^OK not-friend/.test(out) && idOk(id) && Date.now() - (st.pserver[code] || 0) > SERVER_CHECK_MS) {
       st.pserver[code] = Date.now();
       const limit = st.count >= FRIEND_DAILY_MAX;
       out = wx(['-WechatId', id, '-Remark', code, '-Hello', M.proxy.hello.replace(/\{code\}/g, code), ...(limit ? ['-CheckOnly'] : []), '-Message', msg, ...test], id);
       if (SCREEN_FAIL.test(out)) { console.log(`${code} ${out}`); return; }
       if (/^OK (requested|added)/.test(out)) st.count++;
+      // 备注를 방금 단 직후엔 대화방이 안 열리는 일이 잦다(JEJU-0063) → 새 备注로 한 번 더
+      if (/remarked send-fail/.test(out) && !dry) { await new Promise(r => setTimeout(r, 3000)); out = wx(['-Local', '-Remark', code, '-Message', msg, ...test]); }
     }
     if (sent(out)) { await mark(c, `s${step} 보냄`); delete st.pserver[code]; }
     else if (/send-fail/.test(out)) {

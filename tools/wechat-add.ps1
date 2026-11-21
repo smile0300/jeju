@@ -14,10 +14,10 @@
 #              처음 보는 화면이면 'UNK<탭>보이는 버튼들<탭>줄 끝' (누르지 않음)
 # -Accept    : -Remark JL<행> [-WechatId id] — 줄에 그 접수 코드가 있거나 프로필의 위챗 ID가 같은 요청을 수락하고 备注를 단다 → OK accepted | OK accepted-noremark
 # -Local     : 위챗 서버에 ID 검색을 하지 않고 내 연락처에서 备注($Remark, 접수 코드)로만 찾는다 — 친구 수락 여부 확인용(검색 횟수 제한 없음)
-param([string]$WechatId, [string]$Remark, [string]$Hello, [string]$Message, [switch]$CheckOnly, [switch]$Local, [switch]$DryRun, [switch]$Dump, [switch]$NoEnter, [switch]$Requests, [switch]$Accept)
+param([string]$WechatId, [string]$Remark, [string]$Hello, [string]$Message, [switch]$CheckOnly, [switch]$Local, [switch]$DryRun, [switch]$Dump, [switch]$NoEnter, [switch]$Requests, [switch]$Accept, [switch]$Minimize)
 if ($Local -and -not $Remark) { "FAIL -Local 은 -Remark 필요"; exit 1 }
 if ($Accept -and $Remark -notmatch '^(JL\d+|JEJU-\d+)$') { "FAIL -Accept 는 -Remark JL<행번호> 또는 JEJU-<번호> 필요"; exit 1 }
-if (-not $Local -and -not $WechatId -and -not $Requests -and -not $Accept) { "FAIL -WechatId 필요"; exit 1 }
+if (-not $Local -and -not $WechatId -and -not $Requests -and -not $Accept -and -not $Minimize) { "FAIL -WechatId 필요"; exit 1 }
 $ErrorActionPreference = 'Stop'
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 Add-Type -AssemblyName UIAutomationClient, UIAutomationTypes, System.Windows.Forms
@@ -165,6 +165,11 @@ foreach ($h in [WxA]::TitledWindows([int[]]$script:pids)) {
 }
 if ($mainH -eq [IntPtr]::Zero) { "FAIL 위챗 창이 없음"; exit 1 }
 $proc = New-Object psobject -Property @{ MainWindowHandle = $mainH }
+# -Minimize : 자동화가 끝났다는 표시로 위챗 메인 창을 최소화 (2026-11-21 사용자 요청). 다음 실행은 복원해서 쓴다
+if ($Minimize) {
+  if ([WxA]::IsWindowVisible($mainH) -and -not [WxA]::IsIconic($mainH)) { [WxA]::ShowWindow($mainH, 6) | Out-Null; "OK minimized" } else { "OK already-minimized" }
+  exit 0
+}
 # 트레이로 숨겨진 상태(창 닫기·ESC)면 위챗의 '열기' 단축키 Ctrl+Alt+W 로 꺼낸다
 # (ShowWindow 로 억지로 보이면 화면 요소가 비어 있고, Weixin.exe 를 다시 실행하면 로그인 창이 하나 더 뜬다 — 2026-11-14 확인)
 if (-not [WxA]::IsWindowVisible($mainH)) {
@@ -319,6 +324,9 @@ if ($Local) {
 Paste $WechatId
 
 # 검색 팝업의 'Search WeChat ID'(위챗 ID로 찾기) 줄 → Add Contacts 창이 그 ID의 프로필을 띄운다
+# 중국 휴대폰 번호(11자리)는 'Search mobile/QQ ID' 줄로 찾는다 — 그 번호에 연결된 계정의 프로필이 뜬다 (2026-11-21 대리수령 JEJU-0063)
+$isPhone = $WechatId -match '^(\+?86)?1\d{10}$'
+$itemRe = if ($isPhone) { '^(Search mobile|搜索手机|查找手机|网络查找手机)' } else { '^(Search WeChat ID|搜索微信号|查找微信号)$' }
 $item = $null; $cands = @()
 for ($i = 0; $i -lt 8 -and -not $item; $i++) {
   Start-Sleep -Milliseconds 500
@@ -326,12 +334,13 @@ for ($i = 0; $i -lt 8 -and -not $item; $i++) {
   if ($list) {
     $cands = @()
     foreach ($li in $list.FindAll($TS::Children, $True_)) {
-      if ($li.Current.Name -match '^(Search WeChat ID|搜索微信号|查找微信号)$') { $item = $li }
+      if ($li.Current.Name -match $itemRe) { $item = $li }
       elseif ($li.Current.ClassName -eq 'mmui::SearchContentCellView') { $cands += $li }
     }
-    if ($cands.Count -and $i -ge 2) { break }
+    if ($cands.Count -and $i -ge 2 -and -not $isPhone) { break }
   }
 }
+if ($isPhone) { $cands = @() }   # 번호는 내 연락처 줄로 확인할 방법이 없다 → 번호 검색 줄만 쓴다
 $viaContact = $false
 if (-not $item -and $cands.Count) {
   # 이미 내 연락처에 있는 사람(备注 없이 별명으로 저장됨)은 'Search WeChat ID' 줄 대신 연락처 줄로 뜬다 (2026-11-15 JEJU-0060)
@@ -385,14 +394,17 @@ if (-not $chatBtn -and -not $addBtn) {
 # 이 창이 정말 우리가 넣은 ID를 찾은 결과인지 — 창의 검색칸 값이 그 ID여야 한다
 $box = $add.FindFirst($TS::Descendants, (Cond $A::ClassNameProperty 'mmui::XValidatorTextEdit'))
 $boxText = ''; try { $boxText = $box.GetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern).Current.Value } catch {}
-if ($boxText.Trim().ToLower() -ne $WechatId.Trim().ToLower()) { Fail "Add Contacts 창의 검색어가 다름" }
+$digits = { param($s) ($s -replace '\D', '') -replace '^86(?=1\d{10}$)', '' }
+if ($isPhone) { if ((& $digits $boxText) -ne (& $digits $WechatId)) { Fail "Add Contacts 창의 검색어가 다름" } }
+elseif ($boxText.Trim().ToLower() -ne $WechatId.Trim().ToLower()) { Fail "Add Contacts 창의 검색어가 다름" }
 }
 
 if ($chatBtn) {
   # 친구 프로필에는 "WeChat ID:" 값이 보인다 → 검색한 ID와 같아야 한다
   # 备注가 달린 친구는 이름 아래에 닉네임 줄이 먼저 온다 → 머리 부분의 값들 중 하나가 ID와 같으면 된다. 값이 늦게 채워져 몇 번 다시 본다
-  $idOk = $false
-  for ($i = 0; $i -lt 8; $i++) {
+  # 번호 검색은 프로필에 번호가 안 보인다 — 위챗이 그 번호로 찾아 준 계정이므로(검색칸 값 확인 끝) 그대로 믿는다
+  $idOk = [bool]$isPhone
+  for ($i = 0; $i -lt 8 -and -not $idOk; $i++) {
     foreach ($e in $add.FindAll($TS::Descendants, (Cond $A::ClassNameProperty 'mmui::ProfileTextView'))) {
       if ($e.Current.AutomationId -match 'user_info_center_view' -and $e.Current.Name.Trim().ToLower() -eq $WechatId.Trim().ToLower()) { $idOk = $true }
     }

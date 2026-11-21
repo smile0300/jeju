@@ -209,4 +209,13 @@ $ids=@(Get-CimInstance Win32_Process -Filter "Name='chrome.exe'" | ?{ $_.Command
 [SW]::EnumWindows({param($h,$l) $p=[uint32]0; [void][SW]::GetWindowThreadProcessId($h,[ref]$p); if($ids -contains $p){ $s=New-Object Text.StringBuilder 64; [void][SW]::GetClassName($h,$s,64); if($s.ToString() -eq 'Chrome_WidgetWin_1' -and [SW]::GetWindowTextLength($h) -gt 0){ [void][SW]::ShowWindow($h,5) } }; $true},[IntPtr]::Zero) | Out-Null`;
   try { execFileSync('powershell', ['-NoProfile', '-Command', ps], { timeout: 20000, stdio: 'ignore' }); } catch (e) { /* 창 표시는 부가 기능 */ }
 }
-main().catch(e => { log('오류', e.message); notify('⚠ 경찰민원24 자동 등록 오류', e.message.slice(0, 150)); process.exitCode = 1; });
+// 다 끝나면 위챗 창을 최소화 — 창이 내려가 있으면 '이번 자동화가 끝났다'는 표시 (2026-11-21 사용자 요청)
+function minimizeWechat() {
+  if (LOGIN || NO_SUBMIT) return;
+  try {
+    const out = execFileSync('powershell', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', path.join(__dirname, 'wechat-add.ps1'), '-Minimize'], { encoding: 'utf8', timeout: 30000 }).trim();
+    if (out) log('WECHAT', out);
+  } catch (e) { /* 위챗이 꺼져 있거나 화면 잠김 — 표시만 못 할 뿐 */ }
+}
+main().catch(e => { log('오류', e.message); notify('⚠ 경찰민원24 자동 등록 오류', e.message.slice(0, 150)); process.exitCode = 1; })
+  .finally(minimizeWechat);
