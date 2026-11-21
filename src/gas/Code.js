@@ -443,6 +443,45 @@ function nextCaseId_(sheet) {
   return 'jeju-' + String(maxNum + 1).padStart(4, '0');
 }
 
+/**
+ * 받을 주소(비공개)에서 성·시까지만 뽑아 진행상황 카드의 도착지(Region, 공개)로 쓴다 — 상세 주소·이름·번호는 버림
+ *   '中国江苏省苏州市吴中区…' → '江苏省苏州市' / '上海市徐汇区…' → '上海市' / '所在地区: 湖北省武汉市…'(택배앱 복사) → '湖北省武汉市'
+ *   '苏州市吴江区…' → '江苏省苏州市' (주요 도시만 성을 채움) / '寄回中国深圳' → '广东省深圳市' / '台灣臺北市…' → '臺北市'
+ *   '경상남도 창원시…' → '경상남도 창원시' / 알 수 없으면 '' (카드는 '도착 장소 확인 중')
+ */
+var CN_CITY_PROV_ = {
+  '深圳': '广东', '广州': '广东', '东莞': '广东', '佛山': '广东', '珠海': '广东', '苏州': '江苏', '南京': '江苏', '无锡': '江苏',
+  '常州': '江苏', '南通': '江苏', '杭州': '浙江', '宁波': '浙江', '温州': '浙江', '绍兴': '浙江', '嘉兴': '浙江', '成都': '四川',
+  '武汉': '湖北', '长沙': '湖南', '郑州': '河南', '西安': '陕西', '济南': '山东', '青岛': '山东', '合肥': '安徽', '福州': '福建',
+  '厦门': '福建', '大连': '辽宁', '沈阳': '辽宁', '哈尔滨': '黑龙江', '长春': '吉林', '昆明': '云南', '南昌': '江西', '石家庄': '河北'
+};
+var CN_PROVS_ = ['河北', '山西', '辽宁', '吉林', '黑龙江', '江苏', '浙江', '安徽', '福建', '江西', '山东', '河南', '湖北', '湖南', '广东',
+  '海南', '四川', '贵州', '云南', '陕西', '甘肃', '青海', '台湾'];
+function regionFromAddress_(addr) {
+  var s = String(addr || '');
+  var area = s.match(/所在地区\s*[:：]\s*([^\n]+)/);   // 택배앱에서 복사한 주소는 이 줄이 성·시·구
+  if (area) s = area[1];
+  s = s.replace(/[\s,，、()（）\d]/g, '').replace(/中国|中國/g, '');
+  var m = s.match(/(北京|上海|天津|重庆)/);
+  if (m) return m[1] + '市';
+  if (/台[灣湾]|臺灣/.test(s)) { m = s.match(/(臺北|台北|新北|桃園|桃园|臺中|台中|臺南|台南|高雄|基隆|新竹|嘉義|嘉义|宜蘭|花蓮|屏東)[市縣县]?/); return m ? m[1] + (/[縣县]/.test(s.charAt(s.indexOf(m[1]) + m[1].length)) ? '縣' : '市') : '台灣'; }
+  m = s.match(/([一-鿿]{2,3}省|内蒙古自治区|广西壮族自治区|西藏自治区|宁夏回族自治区|新疆维吾尔自治区)([一-鿿]{2,4}?(?:市|自治州|地区|盟))?/);
+  if (m) return m[1] + (m[2] || '');
+  for (var i = 0; i < CN_PROVS_.length; i++) {   // '辽宁大连…'처럼 '省' 없이 쓴 경우
+    if (s.indexOf(CN_PROVS_[i]) === 0) {
+      var after = s.slice(CN_PROVS_[i].length), rest = after.match(/^([一-鿿]{2,4}?)市/);
+      if (!rest) for (var c in CN_CITY_PROV_) if (after.indexOf(c) === 0) rest = [c, c];
+      return CN_PROVS_[i] + '省' + (rest ? rest[1] + '市' : '');
+    }
+  }
+  for (var city in CN_CITY_PROV_) if (s.indexOf(city) !== -1) return CN_CITY_PROV_[city] + '省' + city + '市';
+  m = s.match(/([一-鿿]{2,4}?)市/);
+  if (m) return m[1] + '市';
+  m = String(addr || '').match(/([가-힣]+(?:특별자치도|특별자치시|특별시|광역시|도))\s*([가-힣]+?시)?(?=[\s가-힣]|$)/);
+  if (m) return m[1] + (m[2] ? ' ' + m[2] : '');
+  return '';
+}
+
 function handleProxyPickup_(data) {
   var ss = SpreadsheetApp.openById(SHEET_ID);
   var timestamp = new Date();
@@ -501,7 +540,7 @@ function handleProxyPickup_(data) {
   if (data.locDetail) extraNotes.push('상세: ' + data.locDetail);
 
   var itemText = data.itemName || '';
-  var regionText = data.region || '';
+  var regionText = data.region || regionFromAddress_(data.address);
   var placeText = (data.proxyLocationType || '') + (data.hotelName ? ' - ' + data.hotelName : '');
 
   var fieldMap = {
