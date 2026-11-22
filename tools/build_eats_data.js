@@ -18,6 +18,8 @@ DATA.push(...TREND);
 // 가게별 덧붙임(한 줄 추천평 rv{zh,en,ko}, 매장 공식 사진 img·imgBy) — 이름으로 찾는다
 const EXTRA_PATH = path.join(__dirname, 'eats_extra.json');
 const EXTRA = fs.existsSync(EXTRA_PATH) ? JSON.parse(fs.readFileSync(EXTRA_PATH, 'utf8')) : {};
+// 단골식당: 제주 현지 지인들의 카카오맵 단골 목록과 겹치는 가게 (tools/eats_regular.json)
+const REGULAR = new Set(JSON.parse(fs.readFileSync(path.join(__dirname, 'eats_regular.json'), 'utf8')).inEats);
 
 // 주소 → 세부 지역 키
 function area(addr) {
@@ -89,6 +91,7 @@ for (const d of DATA) {
     const tags = [];
     const titles = (d.보유타이틀 || '') + ' ' + (d.선정근거 || '');
     if (d.규모 === 'local') tags.push('locals');
+    if (REGULAR.has(d.이름_ko)) tags.push('regular');
     if (/향토음식점/.test(titles) || d.규모 === '향토지정') tags.push('hyangto');
     if (/착한가격/.test(titles) || d.규모 === '착한가격') tags.push('goodprice');
     if (/백년가게/.test(titles)) tags.push('century');
@@ -144,8 +147,46 @@ for (const d of DATA) {
     rows.push(r);
 }
 
+// 단골식당 신규 가게: 지인 카카오맵 목록 중 기존 데이터에 없는 곳 (tools/fetch_regular_places.js로 업종·주소 확인, 검색 안 되는 곳=폐업은 제외)
+{
+    const REG = JSON.parse(fs.readFileSync(path.join(__dirname, 'eats_regular.json'), 'utf8'));
+    const INFO = JSON.parse(fs.readFileSync(path.join(__dirname, 'eats_regular_info.json'), 'utf8'));
+    const norm = s => (s || '').replace(/\s/g, '');
+    const have = new Set(rows.map(r => norm(r.n)));
+    const skip = new Set(REG.skip || []);
+    const CAT_CU = [
+        ['seafood', /해물|생선|초밥|참치|회/], ['noodle', /국수|냉면|라면|우동/], ['soup', /해장국|국밥|순대|찌개|전골|감자탕|설렁탕|곰탕/],
+        ['meat', /육류|고기|치킨|정육/], ['snack', /분식|떡볶이|베이커리|제과|햄버거|샌드위치/], ['western', /양식|이탈리안|피자|멕시칸|퓨전/],
+    ];
+    let added = 0;
+    for (const line of REG.places) {
+        const [name0, , id] = line.split('|');
+        const x = INFO[id];
+        if (!x || !x.found || skip.has(name0) || have.has(norm(x.name)) || have.has(norm(name0))) continue;
+        have.add(norm(x.name));
+        const cats = (x.cat || '').split(' > ');
+        const cafe = x.group === 'CE7' || cats[1] === '카페';
+        let cu;
+        if (cafe) cu = ['cafe'];
+        else {
+            const text = `${x.name} ${cats.slice(1).join(' ')}`;
+            cu = CUISINE.filter(([, re]) => re.test(text)).map(([k]) => k);
+            if (!cu.length) cu = CAT_CU.filter(([, re]) => re.test(cats.slice(1).join(' '))).map(([k]) => k);
+            if (!cu.length) cu = ['other'];
+        }
+        const r = { id: rows.length, n: x.name, c: cafe ? 'cafe' : 'food', cu, s: cats.slice(1, 3).pop() || '', a: x.addr, ar: area(x.addr),
+            t: ['regular'], tel: x.tel || '', lk: (x.url || '').replace(/^http:/, 'https:'), ll: x.ll };
+        const ex = EXTRA[x.name];
+        if (ex) { if (ex.rv) r.rv = ex.rv; if (ex.img) { r.img = ex.img; r.imgBy = ex.imgBy || ''; } }
+        for (const k of Object.keys(r)) if (r[k] === '' || r[k] === null || (Array.isArray(r[k]) && !r[k].length)) delete r[k];
+        rows.push(r);
+        added++;
+    }
+    console.log('단골식당 신규', added);
+}
+
 const final = `// 자동 생성 파일 — 직접 고치지 말 것. tools/build_eats_data.js 로 다시 만든다.
-// 출처: '제주 후보지 선별' 아티팩트 (식당·카페, 폐업 제외) + tools/eats_trend.js (방송·20·30대 인기, 구글맵 검증) · ${new Date().toISOString().slice(0, 10)}
+// 출처: '제주 후보지 선별' 아티팩트 (식당·카페, 폐업 제외) + tools/eats_trend.js (방송·20·30대 인기, 구글맵 검증) + 단골식당(tools/eats_regular.json) · ${new Date().toISOString().slice(0, 10)}
 // 키: n 이름 · c food|cafe · cu 음식종류 · s 세부유형 · mn 대표메뉴 · a 주소 · ar 세부지역 · p [1인 최소,최대]원 · pt 가격 원문
 //     g 구글평점 · gr 구글리뷰 · nr 네이버리뷰 · w 최대대기(분) · h 영업시간 · off 정기휴무 · t 태그 · why 선정근거 · ph 사진포인트
 //     cn 주의사항 · tel 연락처 · pr 우선순위 · ln 네이버 플레이스 · lk 카카오맵 · ct 캐치테이블 id · ll [위도, 경도]

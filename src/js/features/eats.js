@@ -18,7 +18,7 @@ const NEAR_WISH_KM = 3.5;
 const S = {
     zh: {
         title: '济州美食',
-        beta_note: '共收录 {n} 家餐厅和咖啡馆（官方乡土美食店、平价良心店及实地调查）。支持中文搜菜名/别称，营业时间可能变动。',
+        beta_note: '共收录 {n} 家餐厅和咖啡馆（官方乡土美食店、平价良心店、本地熟客常去店及实地调查）。支持中文搜菜名/别称，营业时间可能变动。',
         search_ph: '搜店名或菜品（中/韩均可，如：带鱼、黑猪肉、熟成道）',
         more_filters: '更多筛选',
         reset: '重置',
@@ -35,7 +35,7 @@ const S = {
         'ar.udo': '牛岛', 'ar.seongsan': '城山', 'ar.pyoseon': '表善·南元', 'ar.seogwipo': '西归浦市区', 'ar.jungmun': '中文',
         'ar.daejeong': '大静·安德',
         'pr.1': '₩1万以下', 'pr.2': '₩1~2万', 'pr.3': '₩2~3万', 'pr.4': '₩3万以上',
-        'kw.locals': '本地人常去', 'kw.hyangto': '官方乡土美食店', 'kw.goodprice': '平价良心店', 'kw.century': '百年老店',
+        'kw.locals': '本地人常去', 'kw.regular': '本地熟客常去', 'kw.hyangto': '官方乡土美食店', 'kw.goodprice': '平价良心店', 'kw.century': '百年老店',
         'kw.tv': '韩国美食节目', 'kw.hot': '韩国年轻人爱去', 'kw.bakery': '面包·甜点', photo_by: '图片：{by}', 'kw.solo': '可一人用餐', 'kw.cnmenu': '中文菜单', 'kw.enmenu': '英文菜单', 'kw.cnreview': '有中文评价',
         'kw.opennow': '现在营业', 'kw.catchtable': '可在线排队', 'kw.photo': '出片', 'kw.ocean': '海景', 'kw.breakfast': '早餐（9点前营业）', 'kw.shortwait': '排队短', 'kw.walkin': '外国人可直接去',
         'kw.twoplus': '2人起点', 'kw.booking': '需预约', 'kw.nokids': '禁止儿童', 'kw.nearwish': '我的行程附近',
@@ -61,7 +61,7 @@ const S = {
     },
     en: {
         title: 'Jeju Eats',
-        beta_note: '{n} restaurants and cafés — officially designated local-food and fair-price places plus our own picks. Hours change, so check before you go.',
+        beta_note: '{n} restaurants and cafés — officially designated local-food and fair-price places, locals’ regular spots and our own picks. Hours change, so check before you go.',
         search_ph: 'Search name or dish (Korean / English / Chinese)',
         more_filters: 'More filters',
         reset: 'Reset',
@@ -78,7 +78,7 @@ const S = {
         'ar.udo': 'Udo', 'ar.seongsan': 'Seongsan', 'ar.pyoseon': 'Pyoseon·Namwon', 'ar.seogwipo': 'Seogwipo City', 'ar.jungmun': 'Jungmun',
         'ar.daejeong': 'Daejeong·Andeok',
         'pr.1': 'Under ₩10k', 'pr.2': '₩10–20k', 'pr.3': '₩20–30k', 'pr.4': '₩30k+',
-        'kw.locals': 'Locals’ favorite', 'kw.hyangto': 'Official local-food', 'kw.goodprice': 'Fair-price shop', 'kw.century': '100-year shop',
+        'kw.locals': 'Locals’ favorite', 'kw.regular': 'Regulars’ spot', 'kw.hyangto': 'Official local-food', 'kw.goodprice': 'Fair-price shop', 'kw.century': '100-year shop',
         'kw.tv': 'On Korean TV', 'kw.hot': 'Trending with young Koreans', 'kw.bakery': 'Bakery & dessert', photo_by: 'Photo: {by}', 'kw.solo': 'Solo-friendly', 'kw.cnmenu': 'Chinese menu', 'kw.enmenu': 'English menu', 'kw.cnreview': 'Chinese reviews',
         'kw.opennow': 'Open now', 'kw.catchtable': 'Online waitlist', 'kw.photo': 'Photogenic', 'kw.ocean': 'Ocean view', 'kw.breakfast': 'Breakfast (before 9am)', 'kw.shortwait': 'Short wait', 'kw.walkin': 'Easy walk-in',
         'kw.twoplus': '2+ people', 'kw.booking': 'Booking needed', 'kw.nokids': 'No kids', 'kw.nearwish': 'Near my plan',
@@ -104,7 +104,7 @@ const S = {
     },
     ko: {
         title: '제주 맛집',
-        beta_note: '식당·카페 {n}곳 (향토음식점·착한가격업소 공식 지정 + 자체 조사). 영업시간은 바뀔 수 있으니 가기 전에 확인하세요.',
+        beta_note: '식당·카페 {n}곳 (향토음식점·착한가격업소 공식 지정 + 현지인 단골 + 자체 조사). 영업시간은 바뀔 수 있으니 가기 전에 확인하세요.',
         search_ph: '가게 이름·메뉴 검색 (한국어·중국어 별칭 지원)',
         more_filters: '필터 더보기',
         reset: '초기화',
@@ -121,7 +121,7 @@ const S = {
         'ar.udo': '우도', 'ar.seongsan': '성산', 'ar.pyoseon': '표선·남원', 'ar.seogwipo': '서귀포시내', 'ar.jungmun': '중문',
         'ar.daejeong': '대정·안덕',
         'pr.1': '1만원 이하', 'pr.2': '1~2만원', 'pr.3': '2~3만원', 'pr.4': '3만원 이상',
-        'kw.locals': '도민 맛집', 'kw.hyangto': '향토음식점 지정', 'kw.goodprice': '착한가격업소', 'kw.century': '백년가게',
+        'kw.locals': '도민 맛집', 'kw.regular': '단골식당', 'kw.hyangto': '향토음식점 지정', 'kw.goodprice': '착한가격업소', 'kw.century': '백년가게',
         'kw.tv': '방송 출연', 'kw.hot': '요즘 핫플', 'kw.bakery': '빵·디저트', photo_by: '사진: {by}', 'kw.solo': '1인 식사', 'kw.cnmenu': '중국어 메뉴', 'kw.enmenu': '영어 메뉴', 'kw.cnreview': '중국어 후기',
         'kw.opennow': '지금 영업 중', 'kw.catchtable': '원격 줄서기', 'kw.photo': '사진 명소', 'kw.ocean': '오션뷰', 'kw.breakfast': '아침 식사(9시 전)', 'kw.shortwait': '대기 짧음', 'kw.walkin': '외국인 바로 방문',
         'kw.twoplus': '2인부터', 'kw.booking': '예약 필요', 'kw.nokids': '노키즈', 'kw.nearwish': '내 일정 근처',
@@ -157,8 +157,8 @@ function L(key, params = {}) {
 const CUISINES = ['pork', 'seafood', 'noodle', 'soup', 'meat', 'local', 'snack', 'western', 'cafe'];
 const AREAS = ['jeju', 'aewol', 'hallim', 'daejeong', 'jungmun', 'seogwipo', 'pyoseon', 'seongsan', 'udo', 'gujwa', 'jocheon'];
 const PRICES = ['1', '2', '3', '4'];
-const KEYWORDS = ['opennow', 'catchtable', 'hot', 'bakery', 'locals', 'hyangto', 'goodprice', 'solo', 'cnmenu', 'enmenu', 'cnreview', 'shortwait', 'walkin', 'breakfast', 'ocean', 'photo', 'tv', 'century'];
-const BADGE_ORDER = ['hyangto', 'goodprice', 'century', 'locals', 'tv', 'hot', 'cnmenu', 'enmenu', 'cnreview', 'solo', 'twoplus', 'booking', 'breakfast', 'ocean', 'nokids'];
+const KEYWORDS = ['opennow', 'catchtable', 'regular', 'hot', 'bakery', 'locals', 'hyangto', 'goodprice', 'solo', 'cnmenu', 'enmenu', 'cnreview', 'shortwait', 'walkin', 'breakfast', 'ocean', 'photo', 'tv', 'century'];
+const BADGE_ORDER = ['regular', 'hyangto', 'goodprice', 'century', 'locals', 'tv', 'hot', 'cnmenu', 'enmenu', 'cnreview', 'solo', 'twoplus', 'booking', 'breakfast', 'ocean', 'nokids'];
 const SORTS = ['rec', 'rating', 'reviews', 'cheap'];
 const QUICK = [['kw', 'hot'], ['kw', 'ocean'], ['kw', 'bakery'], ['kw', 'solo'], ['pr', '1'], ['kw', 'breakfast'], ['kw', 'opennow']];
 const BAKERY_RE = /빵|베이커리|도넛|꽈배기|케이크|디저트|떡|카이막|빙수|제과|바게트|스콘|타르트|아이스크림|젤라또/;
@@ -244,6 +244,7 @@ function recScore(d) {
     const t = d.t || [];
     if (t.includes('hyangto')) s += 0.15;
     if (t.includes('locals')) s += 0.15;
+    if (t.includes('regular')) s += 0.2;
     if (t.includes('cnreview')) s += 0.1;
     if (t.includes('cnmenu')) s += 0.1;
     if (t.includes('hot')) s += 0.1;
@@ -312,8 +313,8 @@ function sourceName(src) {
     return lang() === 'en' ? hit[2] : hit[1];
 }
 
-const HL_ORDER = ['tv', 'hot', 'hyangto', 'century', 'locals', 'goodprice'];
-const HL_ICON = { tv: 'ph-television-simple', hot: 'ph-fire', hyangto: 'ph-seal-check', century: 'ph-medal', locals: 'ph-house-line', goodprice: 'ph-coins' };
+const HL_ORDER = ['regular', 'tv', 'hot', 'hyangto', 'century', 'locals', 'goodprice'];
+const HL_ICON = { regular: 'ph-heart', tv: 'ph-television-simple', hot: 'ph-fire', hyangto: 'ph-seal-check', century: 'ph-medal', locals: 'ph-house-line', goodprice: 'ph-coins' };
 function highlight(d) {
     const key = HL_ORDER.find(k => (d.t || []).includes(k));
     const parts = (d.why || '').split(' / ');
