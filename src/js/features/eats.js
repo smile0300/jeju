@@ -2,7 +2,7 @@ import { escapeHtml } from './planner/strings.js';
 import { chipGroup, bindChips, copyText, flashLabel } from './planner/shared.js';
 import { openStatus, fmtMin } from './eats-hours.js';
 import { wishBtnHtml, readWish } from './planner/wishlist.js';
-import { JEJU_MAP, projectLatLng } from '../../data/jeju-map.js';
+import { JEJU_MAP } from '../../data/jeju-map.js';
 import { STOP_POS } from '../../data/courses.js';
 import { OREUMS } from '../../data/oreums.js';
 import { roadKm } from '../../data/taxi.js';
@@ -54,7 +54,8 @@ const S = {
         book_btn: '帮我代预约（10元）', book_note: '不会韩语/无韩国号码也能约，约不到全额退款',
         driver_btn: '给司机看', order_btn: '点餐卡',
         view_list: '列表', view_map: '地图',
-        map_hint: '点击地图上的圆点查看该店详情（显示前60家）',
+        'z.all': '济州全岛', 'z.hint_zone': '点击区域放大，查看该区域所有餐厅', 'z.hint_pin': '点击圆点查看该店详情',
+        'z.jc_new': '新济州', 'z.jc_old': '旧城区', 'z.jc_air': '机场·梨湖', 'z.jc_ara': '阿罗·吾罗', 'z.jc_east': '禾北·三阳',
         'st.open': '营业中 · {t}打烊', 'st.closing': '即将打烊 · {t}', 'st.break': '休息中 · {t}恢复营业', 'st.later': '今天{t}开门',
         'st.done': '今日已打烊', 'st.off': '今日休息', 'st.tmr': '明天{t}开门', 'st.day': '{d}{t}开门',
         days: '周日,周一,周二,周三,周四,周五,周六', st_tz: '济州时间',
@@ -97,7 +98,8 @@ const S = {
         book_btn: 'Request Booking Service', book_note: 'We call & book Korean restaurants for you via WeChat',
         driver_btn: 'Show Driver', order_btn: 'Order Card',
         view_list: 'List', view_map: 'Map',
-        map_hint: 'Tap a pin on the map to preview (top 60 shown)',
+        'z.all': 'All of Jeju', 'z.hint_zone': 'Tap an area to zoom in and see every place there', 'z.hint_pin': 'Tap a pin to preview the place',
+        'z.jc_new': 'New Jeju', 'z.jc_old': 'Old Town', 'z.jc_air': 'Airport·Iho', 'z.jc_ara': 'Ara·Ora', 'z.jc_east': 'Hwabuk·Samyang',
         'st.open': 'Open · until {t}', 'st.closing': 'Closing soon · {t}', 'st.break': 'On break · back {t}', 'st.later': 'Opens today {t}',
         'st.done': 'Closed for today', 'st.off': 'Closed today', 'st.tmr': 'Opens tomorrow {t}', 'st.day': 'Opens {d} {t}',
         days: 'Sun,Mon,Tue,Wed,Thu,Fri,Sat', st_tz: 'Jeju time',
@@ -140,7 +142,8 @@ const S = {
         book_btn: '대리 예약 신청하기', book_note: '전화 예약이 필요한 매장도 위챗으로 간편 예약 대행',
         driver_btn: '기사님 카드', order_btn: '주문 카드',
         view_list: '목록', view_map: '지도',
-        map_hint: '지도에서 핀을 누르면 아래에 식당 정보가 열립니다 (상위 60곳)',
+        'z.all': '제주 전체', 'z.hint_zone': '구역을 누르면 확대되고 그 구역 식당이 모두 표시돼요', 'z.hint_pin': '핀을 누르면 아래에 식당 정보가 열려요',
+        'z.jc_new': '신제주', 'z.jc_old': '구제주', 'z.jc_air': '공항·이호', 'z.jc_ara': '아라·오라', 'z.jc_east': '화북·삼양',
         'st.open': '영업 중 · {t}까지', 'st.closing': '곧 마감 · {t}까지', 'st.break': '브레이크타임 · {t} 재개', 'st.later': '오늘 {t} 오픈',
         'st.done': '오늘 영업 끝', 'st.off': '오늘 휴무', 'st.tmr': '내일 {t} 오픈', 'st.day': '{d} {t} 오픈',
         days: '일요일,월요일,화요일,수요일,목요일,금요일,토요일', st_tz: '제주 시간',
@@ -164,7 +167,7 @@ const QUICK = [['kw', 'hot'], ['kw', 'ocean'], ['kw', 'bakery'], ['kw', 'solo'],
 const BAKERY_RE = /빵|베이커리|도넛|꽈배기|케이크|디저트|떡|카이막|빙수|제과|바게트|스콘|타르트|아이스크림|젤라또/;
 const RANKED = 10;
 
-const state = { q: '', cu: [], ar: [], pr: [], kw: [], sort: 'rec', shown: PAGE, more: false, view: 'list', pickedId: null };
+const state = { q: '', cu: [], ar: [], pr: [], kw: [], sort: 'rec', shown: PAGE, more: false, view: 'list', pickedId: null, zone: null };
 let EATS = null;
 let loading = null;
 
@@ -425,46 +428,142 @@ function cardHtml(d, rank = 0) {
     </article>`;
 }
 
-/** 지도 보기 (JEJU_MAP SVG 위에 상위 60곳 핀 표시 + 클릭 시 하단 카드 프리뷰) */
-function mapViewHtml(list) {
-    const pts = list.filter(d => d.ll).slice(0, 60);
-    if (!pts.length) return `<div class="eat-empty">${L('empty')}</div>`;
-    if (state.pickedId == null || !pts.some(d => d.id === state.pickedId)) {
-        state.pickedId = pts[0].id;
-    }
-    const picked = pts.find(d => d.id === state.pickedId) || pts[0];
+/** 지도 보기: 구역(읍면동 묶음) 지도 → 구역을 누르면 그 구역으로 확대하며 가게 핀 전부 표시, 핀을 누르면 아래 카드
+ *  구역 경계(src/data/jeju-zones.js)는 지도 보기를 처음 열 때만 불러온다. 외부 지도·타일 없음 (중국 접속 고려) */
+const CITY = ['jc_new', 'jc_old', 'jc_air', 'jc_ara', 'jc_east'];
+const MAP_ASPECT = 4 / 3;
+let ZMOD = null;
+let zLoading = null;
+let lastVB = null;
 
-    const coords = pts.map(d => ({ d, xy: projectLatLng(d.ll[0], d.ll[1]) }));
+function loadZones() {
+    if (!zLoading) zLoading = import('../../data/jeju-zones.js').then(m => { ZMOD = m; renderResults(); }).catch(() => { zLoading = null; });
+    return zLoading;
+}
+
+const zoneName = (k) => (k === 'jcity' ? L('ar.jeju') : k.startsWith('jc_') ? L(`z.${k}`) : L(`ar.${k}`));
+// 지금 화면에서 고를 수 있는 구역 단위: 전체 보기에선 제주시내를 하나로 묶는다
+const zoneUnits = () => (state.zone === 'jcity' || CITY.includes(state.zone)
+    ? CITY : ['jcity', ...ZMOD.ZONES.map(z => z.k).filter(k => !CITY.includes(k))]);
+const inUnit = (d, u) => (u === 'jcity' ? CITY.includes(d.z) : d.z === u);
+
+// 범위 [x0,y0,x1,y1]를 지도 비율에 맞춘 viewBox로 (여백 포함, 너무 작게 확대되지 않게)
+function fitBox([x0, y0, x1, y1], minW) {
     const { width: W, height: H } = JEJU_MAP;
-    const xs = coords.map(c => c.xy[0]), ys = coords.map(c => c.xy[1]);
-    const PAD = 60, MIN_W = 560;
-    const w = Math.min(W, Math.max(MIN_W, Math.max(...xs) - Math.min(...xs) + PAD * 2, (Math.max(...ys) - Math.min(...ys) + PAD * 2) * W / H));
-    const h = w * H / W;
-    const clamp = (v, max) => Math.max(0, Math.min(max, v));
-    const vx = clamp((Math.min(...xs) + Math.max(...xs)) / 2 - w / 2, W - w);
-    const vy = clamp((Math.min(...ys) + Math.max(...ys)) / 2 - h / 2, H - h);
-    const k = w / W;
-    const r = 18 * k;
+    const pad = Math.max(x1 - x0, y1 - y0) * 0.12 + 4;
+    let w = Math.max(x1 - x0 + pad * 2, (y1 - y0 + pad * 2) * MAP_ASPECT, minW);
+    w = Math.min(w, W * 1.05);
+    const h = w / MAP_ASPECT;
+    const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+    return [cx - w / 2, Math.max(-h * 0.2, Math.min(H - h * 0.8, cy - h / 2)), w, h].map(v => Math.round(v * 10) / 10);
+}
+function coreBox(pts) {
+    const q = (arr, f) => { const v = [...arr].sort((p, r) => p - r); return v[Math.min(v.length - 1, Math.floor(v.length * f))]; };
+    const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+    return [q(xs, 0.05), q(ys, 0.05), q(xs, 0.95), q(ys, 0.95)];
+}
+const median = (arr) => { const v = [...arr].sort((p, q) => p - q); return v[Math.floor(v.length / 2)]; };
+function cityLabelPos(u, fallback) {
+    const pts = EATS.filter(d => d.ll && d.z === u).map(d => ZMOD.projectFine(d.ll[0], d.ll[1]));
+    return pts.length ? [median(pts.map(p => p[0])), median(pts.map(p => p[1]))] : fallback;
+}
+const bboxOf = (pts) => [Math.min(...pts.map(p => p[0])), Math.min(...pts.map(p => p[1])), Math.max(...pts.map(p => p[0])), Math.max(...pts.map(p => p[1]))];
 
-    const pins = coords.map(({ d, xy: [x, y] }) => {
-        const active = d.id === picked.id;
-        const cls = d.c === 'cafe' ? 'eat-pin-cafe' : 'eat-pin-food';
-        return `<g class="eat-mpin ${cls}${active ? ' active' : ''}" data-map-pick="${d.id}" role="button" tabindex="0">
-            <circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(active ? r * 1.45 : r).toFixed(1)}" />
-        </g>`;
+function mapViewHtml(list) {
+    if (!ZMOD) { loadZones(); return `<div class="eat-empty">${L('loading')}</div>`; }
+    const { ZONES, ZONE_BORDER, projectFine } = ZMOD;
+    const leaf = state.zone && state.zone !== 'jcity' ? state.zone : null;
+    const units = zoneUnits();
+    const count = (u) => list.filter(d => inUnit(d, u)).length;
+
+    // 보이는 범위: 전체 → 섬, 제주시내 → 시내 가게들, 구역 → 그 구역 가게들 (가게가 없으면 구역 경계)
+    let vb;
+    if (!state.zone) vb = fitBox([0, 40, JEJU_MAP.width, JEJU_MAP.height - 40], 0);
+    else {
+        const ks = state.zone === 'jcity' ? CITY : [state.zone];
+        const pts = list.filter(d => d.ll && ks.includes(d.z)).map(d => projectFine(d.ll[0], d.ll[1]));
+        const zb = ZONES.filter(z => ks.includes(z.k)).map(z => z.b);
+        // 멀리 떨어진 몇 곳 때문에 덜 확대되지 않게, 가게가 10곳 이상이면 가운데 90%에 맞춘다 (나머지 핀도 그려지며 지도 밖일 수 있음)
+        const box = pts.length >= 10 ? coreBox(pts) : pts.length >= 2 ? bboxOf(pts) : bboxOf(zb.flatMap(b => [[b[0], b[1]], [b[2], b[3]]]));
+        vb = fitBox(box, state.zone === 'jcity' ? 90 : 45);
+    }
+    const k = vb[2] / 1000;
+
+    const focus = new Set(state.zone === 'jcity' ? CITY : leaf ? [leaf] : ZONES.map(z => z.k));
+    const shapes = ZONES.map((z, i) => `<path class="ez-zone ez-c${i % 4}${focus.has(z.k) ? '' : ' ez-dim'}" data-zone="${z.k}" d="${z.d}"/>`).join('');
+
+    let labels = '';
+    if (!leaf) {
+        labels = units.map(u => {
+            const zs = ZONES.filter(z => (u === 'jcity' ? CITY.includes(z.k) : z.k === u));
+            // 구역들이 한라산 쪽으로 길게 뻗어 있어 무게중심 대신 가게들이 모인 곳(중앙값)에 라벨을 둔다
+            const [x, y] = u === 'jcity' ? ZONES.find(z => z.k === 'jc_old').c.map((v, i) => v + (i ? 18 : 0))
+                : cityLabelPos(u, zs[0].c);
+            const n = count(u);
+            return `<g class="ez-label${n ? '' : ' ez-empty'}" data-zone="${u}" role="button" tabindex="0" transform="translate(${x} ${y})">
+                <text y="-0.15em">${escapeHtml(zoneName(u))}</text><text class="ez-n" y="1.05em">${n}</text></g>`;
+        }).join('');
+    }
+
+    let pins = '', picked = null;
+    if (leaf) {
+        const pts = list.filter(d => d.ll && d.z === leaf);
+        if (pts.length) {
+            if (!pts.some(d => d.id === state.pickedId)) state.pickedId = pts[0].id;
+            picked = pts.find(d => d.id === state.pickedId);
+            // 선택한 핀이 다른 핀에 가리지 않게 맨 뒤(위)에 그린다
+            pins = [...pts.filter(d => d !== picked), picked].map(d => {
+                const [x, y] = projectFine(d.ll[0], d.ll[1]);
+                const cls = d.c === 'cafe' ? 'eat-pin-cafe' : 'eat-pin-food';
+                const on = d === picked;
+                return `<g class="eat-mpin ${cls}${on ? ' active' : ''}" data-map-pick="${d.id}" role="button" tabindex="0"><circle cx="${x}" cy="${y}" r="${((on ? 20 : 13) * k).toFixed(2)}"/></g>`;
+            }).join('');
+        }
+    }
+
+    const chips = units.map(u => {
+        const n = count(u);
+        return `<button type="button" class="ez-chip${state.zone === u ? ' active' : ''}" data-zone="${u}"${n ? '' : ' disabled'}>${escapeHtml(zoneName(u))} <span class="eat-n">${n}</span></button>`;
     }).join('');
+    const back = state.zone
+        ? `<button type="button" class="ez-back" data-zone="${CITY.includes(state.zone) ? 'jcity' : ''}"><i class="ph-bold ph-arrow-left"></i> ${escapeHtml(CITY.includes(state.zone) ? zoneName('jcity') : L('z.all'))}</button>`
+        : '';
+    const title = state.zone ? zoneName(state.zone) : L('z.all');
 
     return `
         <div class="eat-map-wrap">
-            <p class="eat-map-hint"><i class="ph-duotone ph-map-pin"></i> ${escapeHtml(L('map_hint'))}</p>
-            <figure class="pl-map eat-map-svg">
-                <svg viewBox="${[vx, vy, w, h].map(Math.round).join(' ')}" style="--k:${k.toFixed(3)}">
-                    <path class="pl-map-land" d="${JEJU_MAP.path}"/>
-                    ${pins}
+            <div class="ez-head">${back}<b>${escapeHtml(title)}</b></div>
+            <p class="eat-map-hint"><i class="ph-duotone ph-map-pin"></i> ${escapeHtml(L(leaf ? 'z.hint_pin' : 'z.hint_zone'))}</p>
+            <figure class="pl-map eat-map-svg ez-map">
+                <svg viewBox="${vb.join(' ')}" data-vb="${vb.join(' ')}" style="--k:${k.toFixed(4)}">
+                    ${shapes}<path class="ez-border" d="${ZONE_BORDER}"/>${labels}${pins}
                 </svg>
             </figure>
-            <div class="eat-map-picked">${cardHtml(picked, 0)}</div>
+            <div class="ez-chips">${chips}</div>
+            ${picked ? `<div class="eat-map-picked">${cardHtml(picked, 0)}</div>` : ''}
         </div>`;
+}
+
+// 구역을 바꿀 때 이전 화면 범위에서 새 범위로 부드럽게 확대·축소 (viewBox만 바꾸므로 가볍다)
+function animateMap() {
+    const svg = document.querySelector('#eat-results .ez-map svg');
+    if (!svg) { lastVB = null; return; }
+    const to = svg.dataset.vb.split(' ').map(Number);
+    const from = lastVB;
+    lastVB = to;
+    if (!from || from.every((v, i) => Math.abs(v - to[i]) < 0.5) || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+    const t0 = performance.now(), DUR = 420;
+    const step = (now) => {
+        const t = Math.min(1, (now - t0) / DUR), e = 1 - Math.pow(1 - t, 3);
+        const v = from.map((a, i) => a + (to[i] - a) * e);
+        svg.setAttribute('viewBox', v.join(' '));
+        svg.style.setProperty('--k', (v[2] / 1000).toFixed(4));
+        if (t < 1 && svg.isConnected) requestAnimationFrame(step);
+    };
+    svg.setAttribute('viewBox', from.join(' '));
+    requestAnimationFrame(step);
+    // 백그라운드 탭 등에서 rAF가 멈춰도 최종 범위로는 반드시 맞춘다
+    setTimeout(() => { svg.setAttribute('viewBox', to.join(' ')); svg.style.setProperty('--k', (to[2] / 1000).toFixed(4)); }, DUR + 80);
 }
 
 const opts = (keys, prefix) => keys.map(k => ({ value: k, label: L(`${prefix}.${k}`) }));
@@ -560,6 +659,7 @@ function renderResults() {
     buildOpenCache();
     const box = document.getElementById('eat-results');
     if (box) box.innerHTML = resultsHtml();
+    if (state.view === 'map') animateMap(); else lastVB = null;
     const root = document.getElementById('eats-root');
     if (root) updateCounts(root);
 }
@@ -633,6 +733,14 @@ function bind(root) {
             renderResults();
             return;
         }
+        const zBtn = e.target.closest('[data-zone]');
+        if (zBtn && !zBtn.disabled) {
+            const z = zBtn.dataset.zone || null;
+            // 전체 보기에서 제주시내 안 구역 도형을 누르면 먼저 제주시내로 확대
+            state.zone = !state.zone && z?.startsWith('jc_') ? 'jcity' : z;
+            renderResults();
+            return;
+        }
         const mPin = e.target.closest('[data-map-pick]');
         if (mPin) {
             state.pickedId = Number(mPin.dataset.mapPick);
@@ -655,7 +763,7 @@ function bind(root) {
         }
         if (e.target.closest('[data-load-more]')) { state.shown += PAGE; renderResults(); return; }
         if (e.target.closest('[data-reset]')) {
-            Object.assign(state, { q: '', cu: [], ar: [], pr: [], kw: [], sort: 'rec', shown: PAGE });
+            Object.assign(state, { q: '', cu: [], ar: [], pr: [], kw: [], sort: 'rec', shown: PAGE, zone: null });
             render();
             return;
         }

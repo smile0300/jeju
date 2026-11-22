@@ -242,3 +242,21 @@ html[lang="ko"] .eat-beta { word-break: keep-all; } /* 중국어에 keep-all을 
 .eat-pin-food circle { fill: #F76707; }
 .eat-pin-cafe circle { fill: #8D5524; }
 .eat-mpin.active circle { fill: #E03131; stroke-width: calc(5px * var(--k, 1)); }
+
+/* 구역 지도 (eats.js mapViewHtml) — 구역을 누르면 확대, 핀은 확대된 구역에서만 */
+.ez-head { display: flex; align-items: center; gap: 8px; min-height: 32px; }
+.ez-head b { font-size: 0.95rem; }
+.ez-back { display: inline-flex; align-items: center; gap: 4px; padding: 5px 10px; border: 0; border-radius: 999px; background: var(--fill-secondary); color: var(--label-primary); font-size: 0.8rem; font-weight: 700; cursor: pointer; }
+.ez-map svg { aspect-ratio: 4 / 3; touch-action: manipulation; }
+.ez-zone { stroke: none; cursor: pointer; transition: opacity 0.2s; }
+.ez-c0 { fill: #FFF4E6; } .ez-c1 { fill: #E7F5FF; } .ez-c2 { fill: #EBFBEE; } .ez-c3 { fill: #F3F0FF; }
+.ez-zone.ez-dim { opacity: 0.45; }
+.ez-border { fill: none; stroke: #ADB5BD; stroke-width: calc(2px * var(--k, 1)); stroke-linejoin: round; pointer-events: none; }
+.ez-label { cursor: pointer; }
+.ez-label text { font-size: calc(30px * var(--k, 1)); font-weight: 800; fill: #343A40; text-anchor: middle; paint-order: stroke; stroke: #fff; stroke-width: calc(6px * var(--k, 1)); stroke-linejoin: round; }
+.ez-label .ez-n { fill: #E8590C; font-size: calc(34px * var(--k, 1)); }
+.ez-label.ez-empty { opacity: 0.4; }
+.ez-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.ez-chip { padding: 5px 10px; border: 1px solid var(--separator, #E5E8EB); border-radius: 999px; background: var(--bg-card); color: var(--label-primary); font-size: 0.8rem; font-weight: 700; cursor: pointer; }
+.ez-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.ez-chip:disabled { opacity: 0.4; cursor: default; }

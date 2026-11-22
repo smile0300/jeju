@@ -185,11 +185,49 @@ for (const d of DATA) {
     console.log('단골식당 신규', added);
 }
 
+// 지도 구역 키(z): 좌표가 어느 구역 폴리곤에 들어가는지 (tools/jeju_zones_rings.json, execution/build_jeju_zones.js)
+// 해안선 단순화로 바다에 찍힌 가게는 가장 가까운 구역 경계로 붙인다
+{
+    const ZR = JSON.parse(fs.readFileSync(path.join(__dirname, 'jeju_zones_rings.json'), 'utf8'));
+    const proj = ([lat, lng]) => [(lng - ZR.BBOX.minLng) * ZR.COS * ZR.SCALE, (ZR.BBOX.maxLat - lat) * ZR.SCALE];
+    const inside = ([x, y], ring) => {
+        let c = false;
+        for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+            const [xi, yi] = ring[i], [xj, yj] = ring[j];
+            if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c;
+        }
+        return c;
+    };
+    const segDist = ([px, py], [ax, ay], [bx, by]) => {
+        const dx = bx - ax, dy = by - ay, len = dx * dx + dy * dy;
+        const t = len ? Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / len)) : 0;
+        return Math.hypot(ax + t * dx - px, ay + t * dy - py);
+    };
+    const entries = Object.entries(ZR.zones);
+    let near = 0;
+    for (const r of rows) {
+        if (!r.ll) continue;
+        const pt = proj(r.ll);
+        // 구멍(안쪽 고리)이 있는 구역도 있어 짝홀 규칙으로 센다
+        let z = entries.find(([, rings]) => rings.filter(ring => inside(pt, ring)).length % 2 === 1)?.[0];
+        if (!z) {
+            let best = Infinity;
+            for (const [k, rings] of entries) for (const ring of rings) for (let i = 1; i < ring.length; i++) {
+                const d = segDist(pt, ring[i - 1], ring[i]);
+                if (d < best) { best = d; z = k; }
+            }
+            near++;
+        }
+        r.z = z;
+    }
+    console.log('구역 바깥 → 가까운 구역', near);
+}
+
 const final = `// 자동 생성 파일 — 직접 고치지 말 것. tools/build_eats_data.js 로 다시 만든다.
 // 출처: '제주 후보지 선별' 아티팩트 (식당·카페, 폐업 제외) + tools/eats_trend.js (방송·20·30대 인기, 구글맵 검증) + 단골식당(tools/eats_regular.json) · ${new Date().toISOString().slice(0, 10)}
 // 키: n 이름 · c food|cafe · cu 음식종류 · s 세부유형 · mn 대표메뉴 · a 주소 · ar 세부지역 · p [1인 최소,최대]원 · pt 가격 원문
 //     g 구글평점 · gr 구글리뷰 · nr 네이버리뷰 · w 최대대기(분) · h 영업시간 · off 정기휴무 · t 태그 · why 선정근거 · ph 사진포인트
-//     cn 주의사항 · tel 연락처 · pr 우선순위 · ln 네이버 플레이스 · lk 카카오맵 · ct 캐치테이블 id · ll [위도, 경도]
+//     cn 주의사항 · tel 연락처 · pr 우선순위 · ln 네이버 플레이스 · lk 카카오맵 · ct 캐치테이블 id · ll [위도, 경도] · z 지도 구역(jeju-zones.js)
 export const EATS = ${JSON.stringify(rows)};
 `;
 fs.writeFileSync(path.join(__dirname, '..', 'src', 'data', 'eats.js'), final);
