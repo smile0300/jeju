@@ -1415,7 +1415,7 @@ const TRANSLATIONS = {
         'proxy.modal.address':         '최종 배송 상세 주소',
         'proxy.modal.address.ph':      '상세 주소(호텔명, 방 번호 등)를 적어주세요',
         'proxy.modal.submit':          '대리수령 신청하기',
-        'proxy.modal.privacy_notice':  '대리수령 기준 강화에 따라 여권사진은 필수 서류입니다. 여권사진이 없을 시 호텔, 경찰서 등에서 물품 수령이 불가합니다. 수령 완료 후 여권사진 외 개인정보는 즉시 삭제됩니다.',
+        'proxy.modal.privacy_notice':  '대리수령 기준 강화에 따라 여권사진은 필수 서류입니다. 여권사진이 없을 시 호텔, 경찰서 등에서 물품 수령이 불가합니다. 수령 완료 후 여권사진을 포함한 개인정보는 즉시 삭제됩니다.',
         'proxy.modal.step1.title':     '📍 어디서 찾아야 하나요?',
         'proxy.modal.step1.desc':      '물건이 보관되어 있는 장소를 선택해주세요.',
         'proxy.modal.step2.title':     '📄 수령에 필요한 정보를 적어주세요.',

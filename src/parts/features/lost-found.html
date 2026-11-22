@@ -19,7 +19,7 @@
                         <select id="lostRegionCd" class="filter-select" onchange="fetchFoundGoodsManual()" style="flex:1;">
                             <option value="LCP000" data-i18n="lost.region.jeju" selected>제주</option>
                             <option value="LCA000" data-i18n="lost.region.seoul">서울</option>
-                            <option value="LCD000" data-i18n="lost.region.incheon">인천공항</option>
+                            <option value="LCV000" data-i18n="lost.region.incheon">인천공항</option><!-- 인천(공항 포함)은 LCV000 — task-triage REGIONS 와 같은 값. 예전 LCD000 은 다른 지역 -->
                             <option value="LCT000" data-i18n="lost.region.busan">부산</option>
                         </select>
                         <select id="pkupCmdtyLclsfCd" class="filter-select" onchange="fetchFoundGoodsManual()" style="flex:2;">
@@ -56,6 +56,8 @@
                                 // 어제 날짜 구하기 (현재 시간에서 24시간 빼기)
                                 const yesterdayUTC = new Date(Date.now() - 24 * 60 * 60 * 1000);
                                 const yyyymmdd = formatter.format(yesterdayUTC);
+                                // 기본값은 어제(오늘 건은 아직 적음), 선택은 오늘까지 — 당일 분실·당일 등록된 습득물도 볼 수 있게
+                                const todayYmd = formatter.format(new Date());
 
                                 const dateInput = document.getElementById('lost-date');
                                 const regionSelect = document.getElementById('lostRegionCd');
@@ -70,7 +72,7 @@
                                     
                                     const fp = flatpickr(dateInput, {
                                         locale: fpLang,
-                                        maxDate: yyyymmdd,
+                                        maxDate: todayYmd,
                                         defaultDate: yyyymmdd,
                                         mode: regionSelect.value === 'LCP000' ? 'range' : 'single',
                                         onChange: function(selectedDates, dateStr, instance) {
@@ -105,7 +107,7 @@
                                     });
                                 } else {
                                     dateInput.type = 'date';
-                                    dateInput.setAttribute('max', yyyymmdd);
+                                    dateInput.setAttribute('max', todayYmd);
                                     dateInput.value = yyyymmdd;
                                 }
                             })();
@@ -427,7 +429,7 @@
                 </div>
             </div>
             <div style="margin-bottom: 12px; padding: 12px; background: rgba(229, 62, 62, 0.05); border: 1px solid rgba(229, 62, 62, 0.2); border-radius: 8px;">
-                <p data-i18n="proxy.modal.privacy_notice" style="color: var(--color-red, #e53e3e); font-size: 0.85rem; line-height: 1.4; margin: 0; word-break: break-all;">대리수령 기준 강화에 따라 여권사진은 필수 서류입니다. 여권사진이 없을시 호텔, 경찰서 등에서 물품 수령이 불가합니다. 수령 완료후 여권사진 외 개인정보는 즉시 삭제됩니다.</p>
+                <p data-i18n="proxy.modal.privacy_notice" style="color: var(--color-red, #e53e3e); font-size: 0.85rem; line-height: 1.4; margin: 0; word-break: break-all;">대리수령 기준 강화에 따라 여권사진은 필수 서류입니다. 여권사진이 없을시 호텔, 경찰서 등에서 물품 수령이 불가합니다. 수령 완료 후 여권사진을 포함한 개인정보는 즉시 삭제됩니다.</p>
             </div>
             <p data-i18n="proxy.modal.desc" style="margin-top: 6px;">담당자가 물건을 보관 중인 곳에서 수령하여 전달해드립니다.</p>
         </div>

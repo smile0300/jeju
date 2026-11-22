@@ -390,3 +390,9 @@
   - Worker `GET /run?res_from=N` / `POST /run {resRow, fields}` → GAS `res_list`/`res_update`
 - **배포 전 주의**: 배포 전 Worker는 `res_from`을 몰라 기본 판정(triage)을 돌림 → `wechat-messages.json`의 `reservation.enabled`를 false로 두었다. GAS v181(clasp push·version 완료, 배포 갱신 전) + task-triage Worker 배포 후 true로 바꿀 것
 - (배포 완료 2026-11-22) GAS v181 배포 47개 전부 갱신 · task-triage Worker 배포 · `reservation.enabled` true · 첫 실행으로 기준 행 47 설정(46행까지 기존 45건은 안내 안 함). 관리자 예약 탭은 사이트 push 후 반영
+
+## 2026-11-23 분실물 조회·안내 버그 3건 (외부 분석 팩트체크 후)
+- 인천공항 지역 코드 LCD000 → LCV000 (lost-found.html). 실제 API로 3일치 비교: LCD000 0건, LCV000 115건(역전지구대·검단지구대 등 인천). task-triage REGIONS 와 같은 값
+- 습득물 조회 날짜 선택을 오늘까지 허용 (flatpickr maxDate·input max). 기본값은 그대로 어제
+- 대리수령 개인정보 안내 한국어 오기 "여권사진 외 개인정보는 즉시 삭제" → "여권사진을 포함한 개인정보는 즉시 삭제" (html 기본 문구·i18n ko). zh/en은 원래 전체 삭제로 되어 있었음
+  - 주의: 실제 여권·예약 사진 자동 파기 코드는 아직 없음 (unsharePrivatePhotos 로 공유만 끔)
