@@ -3,6 +3,8 @@
  *   GET  /api/admin/sheet?sheet=LostReport|SuccessStories  → { headers, rows }
  *   POST /api/admin/sheet  { caseId, fields }               → SuccessStories 한 건 수정
  *   POST /api/admin/sheet  { sheet:'LostReport', row, fields } → 분실신고 결제·경찰 접수 칸 수정
+ *   GET  /api/admin/sheet?sheet=Reservation                  → 예약 접수 내역
+ *   POST /api/admin/sheet  { sheet:'Reservation', row, fields } → 예약 진행·안내메모·메모 칸 수정
  *   GET  /api/admin/sheet?sheet=Ledger                      → 정산표 { headers, summary, rows }
  *   POST /api/admin/sheet  { sheet:'Ledger', row?, orig?, values } → 정산표 행 추가(row 없음)·수정
  *
@@ -11,7 +13,7 @@
  */
 const JSON_HEADERS = { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' };
 const respond = (obj, status = 200) => new Response(JSON.stringify(obj), { status, headers: JSON_HEADERS });
-const SHEETS = ['LostReport', 'SuccessStories', 'Ledger'];
+const SHEETS = ['LostReport', 'SuccessStories', 'Ledger', 'Reservation'];
 
 // 길이가 달라도 시간 차이로 비밀번호가 새지 않도록 비교
 function safeEqual(a, b) {
@@ -88,15 +90,15 @@ export async function onRequestPost({ request, env }) {
   try {
     const body = await request.json();
     if (body.sheet === 'Ledger') return await saveLedger(env, body);
-    // 분실신고: 찾기 서비스 결제·경찰 접수 칸만 (GAS가 허용 칸을 다시 막음)
-    if (body.sheet === 'LostReport') {
+    // 분실신고: 찾기 서비스 결제·경찰 접수 칸만 / 예약: 진행·안내메모·메모 칸만 (GAS가 허용 칸을 다시 막음)
+    if (body.sheet === 'LostReport' || body.sheet === 'Reservation') {
       const row = parseInt(body.row, 10);
       const lostFields = body.fields && typeof body.fields === 'object' ? body.fields : null;
       if (!(row >= 2) || !lostFields || !Object.keys(lostFields).length) return respond({ error: '수정할 내용이 없습니다.' }, 400);
       const res = await readGas(await fetch(String(env.ADMIN_GAS_URL).trim(), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'admin_lost_update', key: env.ADMIN_LOOKUP_SECRET || '', row, fields: lostFields }),
+        body: JSON.stringify({ type: body.sheet === 'Reservation' ? 'admin_res_update' : 'admin_lost_update', key: env.ADMIN_LOOKUP_SECRET || '', row, fields: lostFields }),
       }));
       if (res.result !== 'success') throw new Error('저장 실패: ' + (res.message || JSON.stringify(res)));
       return respond(res);

@@ -378,3 +378,15 @@
 - 고객이 '_xx_1031'(밑줄로 시작)을 넣자 "영문으로 시작" 형식 오류로 제출이 막힘. 예전에 만든 위챗 ID는 _ 로 시작하기도 함
 - 규칙을 `^[a-zA-Z_][-_a-zA-Z0-9]{5,19}$` 로: 접수 양식(lost-found.v1.js wechatIdProblem)·발송 쪽(tools/minwon24.js WECHAT_ID_RE) 같이. 휴대폰 번호·wxid_ 안내는 그대로
 - 안내 문구 modal.lost.wechat.err.format ko/en/zh 모두 "영문이나 _로 시작"으로
+
+## 2026-11-22 예약(Reservation) 관리자 탭 + 위챗 자동 안내 (배포 대기)
+- 관리자 `📅 예약` 탭(public/admin.html): Reservation 시트 최신순, 진행·유형 필터. 칸 `진행`(1 접수/2 예약확정/3 예약불가/4 이용완료/5 취소, 비면 1)·`안내메모`·`AdminNote`·`위챗안내`(자동 기록) — 없으면 GAS가 오른쪽에 추가
+  - 확정·불가 버튼 = 고객 안내 메모(한국어) 입력 후 저장 → 자동화가 중국어(번체 고객은 번체)로 번역해 함께 보냄. 이용완료·취소는 안내 없음
+  - API: `/api/admin/sheet?sheet=Reservation`, POST `{sheet:'Reservation', row, fields}` → GAS `admin_res_update`(ADMIN_RES_COLS만)
+- 자동 안내: `node tools/minwon24.js res [--dry]`, friends 끝(대리수령 다음)에서도 실행. 备注 `RS<행>`, 인사말 `reservation.hello`
+  - 새 예약 → 위챗 ID·중국 휴대폰 번호 검색으로 친구 추가 후 접수 안내(s1). 5일 안에 친구가 안 되면 그만 찾음(운영자가 备注 RS<행>로 추가하면 확정 안내부터는 나감)
+  - 받은 친구 요청 인사말에 RS<행>이 있거나 위챗 ID가 예약과 같으면 자동 수락
+  - 첫 실행은 기준 행(`wechat-add.local.txt`의 res.from)만 잡고 아무것도 보내지 않음 → 그 전 예약은 안내 안 함
+  - Worker `GET /run?res_from=N` / `POST /run {resRow, fields}` → GAS `res_list`/`res_update`
+- **배포 전 주의**: 배포 전 Worker는 `res_from`을 몰라 기본 판정(triage)을 돌림 → `wechat-messages.json`의 `reservation.enabled`를 false로 두었다. GAS v181(clasp push·version 완료, 배포 갱신 전) + task-triage Worker 배포 후 true로 바꿀 것
+- (배포 완료 2026-11-22) GAS v181 배포 47개 전부 갱신 · task-triage Worker 배포 · `reservation.enabled` true · 첫 실행으로 기준 행 47 설정(46행까지 기존 45건은 안내 안 함). 관리자 예약 탭은 사이트 push 후 반영

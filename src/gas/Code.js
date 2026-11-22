@@ -131,9 +131,10 @@ function doPost(e) {
     if (data.type === 'admin_update') return adminUpdate(data);
     if (data.type === 'admin_lost_update') return adminLostUpdate(data);
     if (data.type === 'admin_ledger_save') return adminLedgerSave(data);
+    if (data.type === 'admin_res_update') return adminResUpdate(data);
 
     // 작업 큐 (workers/task-triage) — TASK_SECRET으로 따로 인증
-    if (/^(task_list|task_get|task_update|task_append|lost_get|lost_update|lost_pending|lost_contact|focus_list|proxy_list|proxy_update|health_get|health_set|heartbeat)$/.test(data.type)) {
+    if (/^(task_list|task_get|task_update|task_append|lost_get|lost_update|lost_pending|lost_contact|focus_list|proxy_list|proxy_update|res_list|res_update|health_get|health_set|heartbeat)$/.test(data.type)) {
       return handleTaskQueue_(data);
     }
 
@@ -171,6 +172,7 @@ function doPost(e) {
 var LOST_PRIVATE_HEADERS = ['WechatId', 'UserAgent', 'PhotoURL', 'HotelBooker', 'CarNumber', 'hotelRoom'];
 var LOST_WRITABLE_HEADERS = ['경찰접수번호', '경찰접수일', '경찰관서', '위챗친구', '집중안내'];
 var PROXY_WRITABLE_HEADERS = ['위챗안내'];
+var RES_WRITABLE_HEADERS = ['위챗안내'];
 function handleTaskQueue_(data) {
   var props = PropertiesService.getScriptProperties();
   var secret = String(props.getProperty('TASK_SECRET') || '').trim();
@@ -278,6 +280,52 @@ function handleTaskQueue_(data) {
       puNames.forEach(function (h) { puSheet.getRange(puRow, puHeaders.indexOf(h) + 1).setValue(data.fields[h]); });
     } finally {
       puLock.releaseLock();
+    }
+    return json_({ result: 'success' });
+  }
+
+  // 예약(Reservation) 위챗 자동 안내용 (tools/minwon24.js res)
+  // res_list  : { from: 행 } → 그 행 이후 예약의 진행 단계·위챗 ID·유형·매장·날짜·인원·위챗안내 기록 + last(마지막 행)
+  //             확정·불가(2·3) 안내를 아직 안 보낸 행만 안내메모(한국어)를 고객 언어로 번역해 준다
+  // res_update: { row, fields: { '위챗안내': … } } → RES_WRITABLE_HEADERS 칸만
+  if (data.type === 'res_list') {
+    var rSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName('Reservation');
+    if (!rSheet || rSheet.getLastRow() < 2) return json_({ result: 'success', last: 1, rows: [] });
+    var rHeaders = headerRow_(rSheet);
+    var rLast = rSheet.getLastRow();
+    var rFrom = Math.max(2, parseInt(data.from, 10) || 2);
+    var rRows = [];
+    if (rFrom <= rLast) {
+      var rVals = rSheet.getRange(rFrom, 1, rLast - rFrom + 1, rHeaders.length).getDisplayValues();
+      var rGet = function (r, h) { var i = rHeaders.indexOf(h); return i === -1 ? '' : String(r[i] || '').trim(); };
+      rVals.forEach(function (r, i) {
+        if (!rGet(r, 'Timestamp') && !rGet(r, 'WechatId')) return;
+        var step = parseInt(rGet(r, '진행'), 10) || 1;
+        var sentStep = parseInt((rGet(r, '위챗안내').match(/^s(\d)/) || [])[1], 10) || 0;
+        var tw = isTraditional_([rGet(r, 'PreferredStore'), rGet(r, 'RequestNote'), rGet(r, 'BookerName')].join(' '), rGet(r, 'UserAgent'));
+        var memo = rGet(r, '안내메모');
+        rRows.push({
+          row: rFrom + i, step: step, type: rGet(r, 'ReservationType'), wechatId: rGet(r, 'WechatId'),
+          store: rGet(r, 'PreferredStore'), date: rGet(r, 'VisitDate'), party: rGet(r, 'PartySize'),
+          tw: tw, notice: rGet(r, '위챗안내'),
+          memo: memo && (step === 2 || step === 3) && sentStep < step ? MY_DEEPL(memo, tw ? 'zh-tw' : 'zh') : ''
+        });
+      });
+    }
+    return json_({ result: 'success', last: rLast, rows: rRows });
+  }
+  if (data.type === 'res_update') {
+    var ruSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName('Reservation');
+    var ruRow = parseInt(data.row, 10);
+    var ruNames = Object.keys(data.fields || {}).filter(function (h) { return RES_WRITABLE_HEADERS.indexOf(h) !== -1; });
+    if (!ruSheet || !(ruRow >= 2) || ruRow > ruSheet.getLastRow() || !ruNames.length) return json_({ result: 'error', message: 'bad row or fields' });
+    var ruLock = LockService.getScriptLock();
+    ruLock.waitLock(10000);
+    try {
+      var ruHeaders = ensureHeaders_(ruSheet, ruNames);
+      ruNames.forEach(function (h) { ruSheet.getRange(ruRow, ruHeaders.indexOf(h) + 1).setValue(data.fields[h]); });
+    } finally {
+      ruLock.releaseLock();
     }
     return json_({ result: 'success' });
   }
@@ -899,7 +947,7 @@ function adminLookup(params) {
  * [관리자 전용] 관리자 페이지(public/admin.html) — functions/api/admin/sheet.js 에서만 호출
  * adminLookup 과 같은 ADMIN_LOOKUP_SECRET 사용
  */
-var ADMIN_SHEETS = ['LostReport', 'SuccessStories'];
+var ADMIN_SHEETS = ['LostReport', 'SuccessStories', 'Reservation'];
 var ADMIN_READONLY_COLS = ['CaseId', 'Timestamp'];
 
 function adminJson_(obj) {
@@ -975,6 +1023,36 @@ function adminLostUpdate(data) {
     // 결제 확인 → 작업 큐의 그 분실 건을 바로 '등록대기'로 (자동 등록 작업이 경찰민원24에 제출)
     var queued = String(data.fields['결제상태'] || '').trim() === '확인' ? markLostQueueReady_(row) : '';
     return adminJson_({ result: 'success', row: obj, written: names, queue: queued, ledger: ledgerNote });
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/**
+ * 관리자 페이지에서 Reservation 한 줄의 운영 칸만 수정 — 진행 단계·고객 안내 메모·관리자 메모
+ * 진행: 1 접수 / 2 예약확정 / 3 예약불가 / 4 이용완료 / 5 취소 (2·3은 tools/minwon24.js 가 위챗으로 안내)
+ * data: { key, row, fields } — 고객이 쓴 칸은 건드리지 않음, 없는 열은 맨 오른쪽에 추가
+ */
+var ADMIN_RES_COLS = ['진행', '안내메모', 'AdminNote', '위챗안내'];
+function adminResUpdate(data) {
+  if (!adminAuthorized_(data.key)) return adminJson_({ result: 'error', message: 'unauthorized' });
+  var row = parseInt(data.row, 10);
+  var names = Object.keys(data.fields || {}).filter(function (h) { return ADMIN_RES_COLS.indexOf(h) !== -1; });
+  if (!(row >= 2) || !names.length) return adminJson_({ result: 'error', message: '수정할 수 없는 칸' });
+  var lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+    var sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName('Reservation');
+    if (!sheet || row > sheet.getLastRow()) return adminJson_({ result: 'error', message: '행 없음' });
+    var headers = ensureHeaders_(sheet, names);
+    names.forEach(function (h) {
+      var v = String(data.fields[h]).trim();
+      sheet.getRange(row, headers.indexOf(h) + 1).setValue(h === '진행' && v !== '' && !isNaN(v) ? Number(v) : v);
+    });
+    var vals = sheet.getRange(row, 1, 1, headers.length).getValues()[0];
+    var obj = { _row: row };
+    headers.forEach(function (h, j) { if (h) obj[h] = adminCell_(vals[j]); });
+    return adminJson_({ result: 'success', row: obj, written: names });
   } finally {
     lock.releaseLock();
   }

@@ -33,6 +33,24 @@
     "s3_tw": "【{code} 進度】已為您領取到物品（{item}）✅\n接下來為您安排寄送，寄出後會把快遞單號發給您。",
     "s4_tw": "【{code} 進度】您的物品（{item}）已寄出 📦{note}\n收到後麻煩告訴我們一聲，謝謝！"
   },
+  "reservation": {
+    "enabled": true,
+    "_설명": "예약(Reservation 시트) 안내 (minwon24.js res, friends 끝에서도 실행). enabled=false 면 예약 안내·예약 친구 요청 수락을 전부 건너뜀 (GAS v181·task-triage Worker 배포 전에는 false 유지 — 배포 전 Worker는 res_from 을 모르고 기본 판정을 돌림). s1=접수(새 예약 → 친구 추가 후 자동) s2=예약확정 s3=예약불가 — 관리자 예약 탭 버튼으로 진행을 바꾸면 발송. 4 이용완료·5 취소는 안내 없음. {code}=RS<행> {detail}=유형·매장·날짜·인원 줄(빈 칸은 뺌) {memo}=memo_label(관리자 안내메모를 번역해 넣음, 없으면 빈칸). 비용·예약금은 약속하지 말고 관리자 메모로만. _tw=번체",
+    "types": { "restaurant": "餐厅", "food": "餐厅", "beauty": "美发/美甲", "activity": "体验活动", "cake": "蛋糕定制", "anniversary": "纪念日布置", "snap": "旅拍", "camera": "相机租赁", "skin": "皮肤管理", "cloth": "服装租赁", "rental": "物品租借", "course": "路线定制", "trip": "行程规划", "other": "其他" },
+    "detail": { "type": "类型", "store": "店铺／项目", "date": "日期", "party": "人数" },
+    "hello": "您好，我是 jeju-live 济州预约客服（预约编号 {code}）",
+    "s1": "您好！这里是 jeju-live 济州预约客服 🙂\n已收到您的预约申请，预约编号：{code}\n{detail}\n\n我们会尽快与商家确认，结果会在本聊天中通知您。",
+    "s2": "【{code} 预约成功】✅ 您的预约已确认：\n{detail}{memo}\n\n如需变更或取消，请直接在本聊天告诉我们。",
+    "s3": "【{code} 预约结果】很抱歉，您申请的预约暂时无法完成 🙏\n{detail}{memo}\n\n如需更改时间或换一家店，请直接在本聊天回复我们，我们再帮您安排。",
+    "memo_label": "\n\n客服备注：{memo}",
+    "types_tw": { "restaurant": "餐廳", "food": "餐廳", "beauty": "美髮/美甲", "activity": "體驗活動", "cake": "蛋糕訂製", "anniversary": "紀念日布置", "snap": "旅拍", "camera": "相機租借", "skin": "皮膚管理", "cloth": "服裝租借", "rental": "物品租借", "course": "路線訂製", "trip": "行程規劃", "other": "其他" },
+    "detail_tw": { "type": "類型", "store": "店家／項目", "date": "日期", "party": "人數" },
+    "hello_tw": "您好，我是 jeju-live 濟州預約客服（預約編號 {code}）",
+    "s1_tw": "您好！這裡是 jeju-live 濟州預約客服 🙂\n已收到您的預約申請，預約編號：{code}\n{detail}\n\n我們會盡快與店家確認，結果會在本聊天中通知您。",
+    "s2_tw": "【{code} 預約成功】✅ 您的預約已確認：\n{detail}{memo}\n\n如需變更或取消，請直接在本聊天告訴我們。",
+    "s3_tw": "【{code} 預約結果】很抱歉，您申請的預約暫時無法完成 🙏\n{detail}{memo}\n\n如需更改時間或換一家店，請直接在本聊天回覆我們，我們再幫您安排。",
+    "memo_label_tw": "\n\n客服備註：{memo}"
+  },
   "tw": {
     "_설명": "번체 고객(대만·홍콩·마카오 — UA·주소·번체 글자로 판단)용. 여기 있는 키가 위의 간체 멘트를 대신한다. 경찰 등록 안내 번체는 minwon24.js wechat() 안에 있음",
     "plans": {

@@ -93,6 +93,7 @@
   <div class="tabs">
     <button data-sheet="LostReport" class="on">🔍 분실신고</button>
     <button data-sheet="SuccessStories">📦 대리수령</button>
+    <button data-sheet="Reservation">📅 예약</button>
     <button data-sheet="Ledger">💰 정산</button>
   </div>
 
@@ -127,6 +128,14 @@
     if (str(r['찾기상품'])) return 'wait';
     return '';
   }
+
+  // 예약 (Reservation 시트) — '진행' 칸: 비어 있으면 1 접수. 2·3은 30분 안에 고객 위챗 안내(tools/minwon24.js res)
+  var RES_STEPS = { 1: '1 접수', 2: '2 예약확정', 3: '3 예약불가', 4: '4 이용완료', 5: '5 취소' };
+  var RES_TYPES = {
+    restaurant: '식당', food: '맛집', beauty: '미용실/네일', activity: '액티비티', cake: '케이크', anniversary: '기념일 이벤트',
+    snap: '스냅사진', camera: '카메라 대여', skin: '피부과', cloth: '의류대여', rental: '물품대여', course: '코스', trip: '여행 일정', other: '기타'
+  };
+  function resStep(r) { return Number(str(r['진행'])) || 1; }
 
   try { $('key').value = localStorage.getItem('adminReplyKey') || ''; } catch (e) {}
 
@@ -202,6 +211,15 @@
       var cats = {};
       rows.forEach(function (r) { var c = str(r.ItemCategory); if (c) cats[c] = (cats[c] || 0) + 1; });
       Object.keys(cats).sort().forEach(function (c) { opts.push([c, c + ' (' + cats[c] + ')']); });
+    } else if (state.sheet === 'Reservation') {
+      // 진행 단계 필터 (값 앞에 ':') + 유형 필터
+      Object.keys(RES_STEPS).forEach(function (s) {
+        var n = rows.filter(function (r) { return resStep(r) === Number(s); }).length;
+        if (n) opts.push([':' + s, RES_STEPS[s] + ' (' + n + ')']);
+      });
+      var types = {};
+      rows.forEach(function (r) { var t = str(r.ReservationType); if (t) types[t] = (types[t] || 0) + 1; });
+      Object.keys(types).sort().forEach(function (t) { opts.push([t, (RES_TYPES[t] || t) + ' (' + types[t] + ')']); });
     } else {
       Object.keys(STEPS).forEach(function (s) {
         var n = rows.filter(function (r) { return str(r.Step) === s; }).length;
@@ -225,6 +243,14 @@
         return x === y ? b._row - a._row : (x < y ? 1 : -1);
       });
     }
+    if (state.sheet === 'Reservation') {
+      return rows.filter(function (r) {
+        if (f && f.charAt(0) === ':') { if (resStep(r) !== Number(f.slice(1))) return false; }
+        else if (f && str(r.ReservationType) !== f) return false;
+        if (!q) return true;
+        return Object.keys(r).some(function (k) { return str(r[k]).toLowerCase().indexOf(q) !== -1; });
+      });
+    }
     return rows.filter(function (r) {
       if (f && f.charAt(0) === ':') { if (lostStage(r) !== f.slice(1)) return false; }
       else if (f && str(state.sheet === 'LostReport' ? r.ItemCategory : r.Step) !== f) return false;
@@ -241,7 +267,7 @@
     $('count').textContent = rows.length === total ? '총 ' + total + '건' : rows.length + '건 / 전체 ' + total + '건';
     if (state.sheet === 'Ledger') list.appendChild(ledgerTop(rows));
     rows.slice(0, state.shown).forEach(function (r) {
-      list.appendChild(state.sheet === 'LostReport' ? lostCard(r) : state.sheet === 'Ledger' ? ledgerCard(r) : successCard(r));
+      list.appendChild(state.sheet === 'LostReport' ? lostCard(r) : state.sheet === 'Ledger' ? ledgerCard(r) : state.sheet === 'Reservation' ? resCard(r) : successCard(r));
     });
     $('more').hidden = rows.length <= state.shown;
   }
@@ -459,6 +485,160 @@
       var lg = data.ledger ? ' · 정산표: ' + data.ledger : '';
       if (data.ledger && data.ledger.indexOf('입력') !== -1) delete state.data.Ledger;   // 정산 탭을 열 때 새로 받아 오게
       var ok = el('p', 'ok', '✅ 저장됨: ' + data.written.join(', ') + q + lg);
+      fresh.appendChild(ok);
+      setTimeout(function () { ok.remove(); }, 6000);
+    } catch (e) {
+      if (msg) { msg.textContent = e.message; msg.hidden = false; } else showError(e.message);
+      btn.disabled = false;
+      btn.textContent = label;
+    }
+  }
+
+  // ── 예약 카드: 접수 내역 + 진행 단계 버튼 (확정·불가는 고객에게 전할 메모와 함께 저장 → 30분 안에 위챗 안내)
+  function resCard(r) {
+    var c = el('div', 'card');
+    var step = resStep(r);
+    var code = 'RS' + r._row;
+    var head = el('div', 'item-head');
+    var badges = el('div');
+    var type = str(r.ReservationType);
+    badges.appendChild(el('span', 'badge strong', RES_TYPES[type] || type || '유형 없음'));
+    badges.appendChild(el('span', step === 1 ? 'badge warn' : step === 2 ? 'badge info' : 'badge', RES_STEPS[step] || ('진행 ' + step)));
+    var wx = str(r.WechatId).replace(/\s/g, '');
+    if (wx && !(/^[a-zA-Z_][-_a-zA-Z0-9]{5,19}$/.test(wx) && !/^wxid_/i.test(wx)) && !/^(\+?86)?1\d{10}$/.test(wx)) {
+      badges.appendChild(el('span', 'badge warn', '⚠ 위챗ID 아님 → 备注 ' + code + ' 필요'));
+    }
+    head.appendChild(badges);
+    head.appendChild(el('span', 'time', r.Timestamp));
+    c.appendChild(head);
+    c.appendChild(el('div', 'title', str(r.PreferredStore) || '(매장·상품 미지정)'));
+
+    var dl = el('dl');
+    addPairs(dl, [
+      ['예약자', r.BookerName],
+      ['날짜', r.VisitDate],
+      ['대체 시간', r.AltTime],
+      ['인원', r.PartySize],
+      ['위챗', r.WechatId],
+      ['접수 코드', code + ' (친구 备注)'],
+      ['요청사항', r.RequestNote],
+      ['고객 안내 메모', r['안내메모']],
+      ['위챗 안내', r['위챗안내']],
+      ['메모', r.AdminNote]
+    ]);
+    c.appendChild(dl);
+
+    var act = el('div', 'actions');
+    var msg = el('p', 'error');
+    msg.hidden = true;
+    // 다음 단계 버튼 — 확정·불가는 메모 폼을 열고, 이용완료·취소는 바로 저장 (위챗 안내 없음)
+    if (step <= 2) {
+      [[2, '✅ 예약확정'], [3, '❌ 예약불가'], [4, '🏁 이용완료'], [5, '취소']].forEach(function (p) {
+        if (p[0] <= step || (step === 2 && p[0] === 3)) return;
+        var b = el('button', p[0] === 2 ? '' : 'sub', p[1]);
+        b.type = 'button';
+        b.addEventListener('click', function () {
+          if (p[0] === 2 || p[0] === 3) return openResMemo(c, r, p[0], act);
+          if (!window.confirm(code + ' 을(를) \'' + RES_STEPS[p[0]] + '\'(으)로 바꿀까요? (위챗 안내 없음)')) return;
+          saveRes(c, r, { '진행': String(p[0]) }, b, msg);
+        });
+        act.appendChild(b);
+      });
+    }
+    var editBtn = el('button', 'sub', '✏️ 수정');
+    editBtn.type = 'button';
+    act.appendChild(editBtn);
+    if (str(r.WechatId)) act.appendChild(copyBtn('위챗ID 복사', str(r.WechatId)));
+    act.appendChild(copyBtn('코드 ' + code + ' 복사', code));
+    c.appendChild(act);
+    c.appendChild(msg);
+    editBtn.addEventListener('click', function () {
+      var f = c.querySelector('form.edit');
+      if (f) { f.remove(); editBtn.textContent = '✏️ 수정'; return; }
+      c.insertBefore(resEditForm(c, r), act.nextSibling);
+      editBtn.textContent = '닫기';
+    });
+    c.appendChild(rawDetails(r));
+    return c;
+  }
+
+  // 확정·불가 — 고객에게 전할 메모(한국어, 중국어로 번역돼 같이 감)를 받아 저장
+  function openResMemo(card, r, step, act) {
+    var old = card.querySelector('form.edit');
+    if (old) old.remove();
+    var form = el('form', 'edit');
+    form.appendChild(el('div', 'hint', 'RS' + r._row + ' 「' + RES_STEPS[step] + '」 — 저장하면 30분 안에 고객 위챗으로 안내가 나갑니다.'));
+    var f = field('안내메모', step === 3 ? '' : r['안내메모']);
+    f.querySelector('label').textContent = step === 2
+      ? '고객에게 전할 메모 (예: 11/25 18:30 4명 확정, 매장 주소·예약금 안내) — 중국어로 번역됨'
+      : '고객에게 전할 메모 (예: 그 시간은 만석, 19:30 가능 / 다른 매장 추천) — 중국어로 번역됨';
+    var ta = el('textarea');
+    var inp = f.querySelector('input');
+    ta.name = '안내메모';
+    ta.id = inp.id;
+    ta.value = inp.value;
+    inp.replaceWith(ta);
+    form.appendChild(f);
+    var save = el('button', 'save', '저장 · 고객 안내');
+    save.type = 'submit';
+    var msg = el('p', 'error');
+    msg.hidden = true;
+    form.appendChild(save);
+    form.appendChild(msg);
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      if (step === 2 && !ta.value.trim() && !window.confirm('메모 없이 확정 안내만 보낼까요? (시간·장소는 고객이 신청한 내용 그대로 안내됨)')) return;
+      saveRes(card, r, { '진행': String(step), '안내메모': ta.value.trim() }, save, msg);
+    });
+    card.insertBefore(form, act.nextSibling);
+    ta.focus();
+  }
+
+  function resEditForm(card, r) {
+    var form = el('form', 'edit');
+    var wrap = el('div');
+    wrap.appendChild(el('label', '', '진행'));
+    var s = el('select');
+    s.name = '진행';
+    Object.keys(RES_STEPS).forEach(function (k) { var o = el('option', '', RES_STEPS[k]); o.value = k; s.appendChild(o); });
+    s.value = String(resStep(r));
+    s.dataset.orig = str(r['진행']) || '1';
+    wrap.appendChild(s);
+    form.appendChild(wrap);
+    ['안내메모', 'AdminNote', '위챗안내'].forEach(function (h) { form.appendChild(field(h, r[h])); });
+    form.appendChild(el('div', 'notes', '위챗안내 칸은 자동 기록(s<단계> 보냄 …)입니다. 같은 단계 안내를 다시 보내려면 이 칸을 비우세요. 진행을 1로 되돌려도 접수 안내는 다시 나가지 않습니다(칸을 비우면 다시 나감).'));
+    var msg = el('p', 'error');
+    msg.hidden = true;
+    var save = el('button', 'save', '저장');
+    save.type = 'submit';
+    form.appendChild(save);
+    form.appendChild(msg);
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var fields = {};
+      form.querySelectorAll('[name]').forEach(function (inp) {
+        if (inp.value.trim() !== inp.dataset.orig) fields[inp.name] = inp.value.trim();
+      });
+      if (!Object.keys(fields).length) { msg.textContent = '바뀐 내용이 없습니다.'; msg.hidden = false; return; }
+      saveRes(card, r, fields, save, msg);
+    });
+    return form;
+  }
+
+  async function saveRes(card, r, fields, btn, msg) {
+    var label = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '저장 중…';
+    try {
+      var data = await api('POST', { sheet: 'Reservation', row: r._row, fields: fields });
+      var rows = state.data.Reservation.rows;
+      var i = rows.indexOf(r);
+      if (i !== -1) rows[i] = data.row;
+      buildFilter();
+      var fresh = resCard(data.row);
+      card.replaceWith(fresh);
+      var st = Number(fields['진행']);
+      var ok = el('p', 'ok', '✅ 저장됨: ' + data.written.join(', ') + (st === 2 || st === 3 ? ' · 위챗 안내 30분 안에 발송' : ''));
       fresh.appendChild(ok);
       setTimeout(function () { ok.remove(); }, 6000);
     } catch (e) {

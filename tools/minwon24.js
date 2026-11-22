@@ -25,6 +25,9 @@
  *     → 감시 결과 고객 알림만
  *   node tools/minwon24.js proxy [--dry]
  *     → 대리수령 안내만 (friends 끝부분과 같음)
+ *   node tools/minwon24.js res [--dry]
+ *     → 예약(Reservation) 안내만 — 새 예약 친구 추가·접수 안내, 관리자 예약 탭의 확정·불가 안내 (备注 RS<행>, friends 끝에서도 실행)
+ *       첫 실행은 기준 행만 잡고 보내지 않음 (그 전 예약은 안내 안 함)
  *   node tools/minwon24.js link <queueRow>
  *     → 고객용 유력 후보 페이지 주소 (결제 전 고객에게 보내면 후보 건수만 보임 — 결제 유도용)
  *   node tools/minwon24.js hold <queueRow> <lostRow> <이유>
@@ -213,6 +216,7 @@ async function friends(max, onlyRow, dry) {
     const key = (t) => require('crypto').createHash('sha1').update(t).digest('hex').slice(0, 12);
     let recent = null;   // 최근 접수의 위챗 ID → 행 (필요할 때만 읽는다)
     let pcases = null;   // 대리수령 케이스 (필요할 때만 읽는다)
+    let rcases = null;   // 예약 (필요할 때만 읽는다)
     for (const line of lines) {
       const [kind, a, text = ''] = line.split('\t');
       if (kind === 'UNK') {
@@ -242,6 +246,17 @@ async function friends(max, onlyRow, dry) {
         n = recent[id.toLowerCase()] || 0;
       }
       if (!n) {
+        // 예약 고객인지 — 인사말의 RS<행> 또는 위챗 ID (자동화 시작 이후 예약만)
+        if (!rcases) rcases = M.reservation && M.reservation.enabled === true && st.res && st.res.from >= 2 ?((await resList(st).catch(() => ({}))).rows || []) : [];
+        const rm = text.match(/\bRS\s*0*(\d{1,6})(?!\d)/i);
+        const rc = rcases.find(c => (rm && c.row === +rm[1]) || (id && String(c.wechatId).replace(/\s/g, '').toLowerCase() === id.toLowerCase()));
+        if (rc) {
+          const code = resCode(rc.row);
+          const out = wx(['-Accept', '-Remark', code, ...(id ? ['-WechatId', id] : []), ...(dry ? ['-DryRun'] : [])], id || null);
+          console.log(`${code} 친구 요청 ${out}`);   // 안내는 아래 예약 단계가 备注로 찾아 보낸다
+          if (/^FAIL/.test(out) && !dry && !st.req[key('fail' + code)]) { st.req[key('fail' + code)] = today; await notify(`⚠ 위챗 친구 요청 수락 실패 ${code}`, out.replace(/^FAIL /, '')); }
+          continue;
+        }
         // 대리수령 고객인지 — 인사말의 JEJU-00NN 또는 위챗 ID
         if (!pcases) pcases = (await (await fetch(`${API}/run?proxy_from=${PROXY_FROM}`, { headers })).json().catch(() => ({}))).cases || [];
         const pm = text.match(/jeju[-\s]*0*(\d{2,4})(?!\d)/i);
@@ -338,6 +353,8 @@ async function friends(max, onlyRow, dry) {
   }
   // C. 대리수령 안내
   await proxy(M, st, test, dry, save, today);
+  // C2. 예약 접수·확정·불가 안내
+  await reservation(M, st, test, dry, save, today);
   // D. 결제 건 습득물 감시 결과 안내
   await watchNotify(M, st, test, dry, save);
   // E. 19.9 집중 찾기 결과 안내
@@ -511,6 +528,93 @@ async function proxy(M, st, test, dry, save, today) {
   if (!seen) console.log('PROXY 보낼 안내 없음');
 }
 
+// ── 예약(Reservation 시트) 위챗 자동 안내 ──
+// 새 예약 → 친구 추가(备注 RS<행>, 인사말 reservation.hello) 후 접수 안내(s1)
+// 관리자 예약 탭에서 진행을 2 예약확정 / 3 예약불가로 바꾸면 그 안내(+ 관리자 안내메모 번역). 4 이용완료·5 취소는 안내 없음
+// 시트 '위챗안내' 칸: 's<보낸 단계> …'. 지금 단계와 다른 단계가 적혀 있으면 지금 단계 안내를 보낸다 (확정 → 불가 → 확정도 각각 안내)
+// 상태 파일(wechat-add.local.txt)의 res.from 이전 행은 자동화 시작 전 예약이라 건드리지 않는다 — 첫 실행은 기준만 잡고 아무것도 보내지 않음
+const RES_PER_RUN = 5;
+const RES_WAIT_DAYS = 5;   // 새 예약이 이 기간 안에 친구가 안 되면 더 찾지 않는다 (운영자가 备注 RS<행>로 추가하면 확정 안내부터는 다시 나감)
+const resCode = (row) => `RS${row}`;
+const resSentStep = (notice) => parseInt((String(notice || '').match(/^s(\d)/) || [])[1], 10) || 0;
+// 보낼 단계가 있는가 — 1 접수는 처음 한 번만, 2·3은 지금 단계 안내가 마지막으로 보낸 것이 아닐 때
+const resNeeds = (c) => c.step >= 1 && c.step <= 3 && (c.step === 1 ? resSentStep(c.notice) === 0 : resSentStep(c.notice) !== c.step);
+function resText(M, c) {
+  const R = M.reservation, tw = !!c.tw;
+  const pick = (k) => (tw && R[`${k}_tw`]) || R[k];
+  const t = pick(`s${c.step}`);
+  if (!t) return '';
+  const D = pick('detail'), T = pick('types');
+  const detail = [[D.type, T[c.type] || T.other], [D.store, c.store], [D.date, c.date], [D.party, c.party]]
+    .filter(([, v]) => String(v || '').trim()).map(([k, v]) => `${k}：${v}`).join('\n');
+  const memo = c.memo ? pick('memo_label').replace(/\{memo\}/g, c.memo) : '';
+  return t.replace(/\{code\}/g, resCode(c.row)).replace(/\{detail\}/g, detail).replace(/\{memo\}/g, memo);
+}
+async function resList(st) {
+  return (await fetch(`${API}/run?res_from=${st.res && st.res.from ? st.res.from : 999999}`, { headers })).json();
+}
+async function reservation(M, st, test, dry, save, today) {
+  if (!M.reservation) { console.log('RES wechat-messages.json 에 reservation 멘트 없음'); return; }
+  if (M.reservation.enabled !== true) { console.log('RES 꺼져 있음 (wechat-messages.json reservation.enabled)'); return; }
+  st.res = st.res || {};
+  const r = await resList(st).catch(e => ({ error: e.message }));
+  if (r.result !== 'success') { console.log(`RES 목록을 못 읽음 ${r.message || r.error || ''}`); return; }
+  if (!(st.res.from >= 2)) {
+    // 첫 실행: 지금까지 들어온 예약은 이미 본 것으로 치고 다음 행부터 안내
+    if (!dry) { st.res.from = r.last + 1; save(); }
+    console.log(`RES 기준 행 설정 — ${r.last + 1}행부터 자동 안내 (이전 예약은 안내하지 않음)${dry ? ' [dry: 저장 안 함]' : ''}`);
+    return;
+  }
+  st.res.seen = st.res.seen || {};
+  st.pserver = st.pserver || {};
+  const mark = async (c, text) => { if (!dry) await postRun({ resRow: c.row, fields: { '위챗안내': `${text} ${nowKst().slice(5)}` } }).catch(() => {}); };
+  let done = 0, seen = 0;
+  for (const c of r.rows) {
+    if (!st.res.seen[c.row]) st.res.seen[c.row] = today;
+    if (!resNeeds(c)) continue;
+    const last = resSentStep(c.notice);
+    // 새 예약인데 며칠째 친구가 안 됨 → 그만 찾는다
+    if (c.step === 1 && (Date.now() - new Date(st.res.seen[c.row]).getTime()) / 864e5 > RES_WAIT_DAYS) continue;
+    seen++;
+    if (done >= RES_PER_RUN) break;
+    done++;
+    const code = resCode(c.row), msg = resText(M, c);
+    if (!msg) { console.log(`${code} 단계 ${c.step} 안내 멘트가 wechat-messages.json 에 없음`); continue; }
+    const id = String(c.wechatId || '').replace(/\s/g, '');
+    // 1) 내 연락처에서 备注로 (서버 조회 없음)
+    let out = wx(['-Local', '-Remark', code, '-Message', msg, ...test]);
+    if (SCREEN_FAIL.test(out)) { console.log(`${code} ${out}`); return; }
+    // 2) 위챗 ID·휴대폰 번호 검색 — 친구면 备注를 달고 보내고, 아니면 친구 요청 (같은 건은 6시간에 한 번만)
+    if (/^OK not-friend/.test(out) && idOk(id) && Date.now() - (st.pserver[code] || 0) > SERVER_CHECK_MS) {
+      st.pserver[code] = Date.now();
+      const limit = st.count >= FRIEND_DAILY_MAX;
+      const hello = ((c.tw && M.reservation.hello_tw) || M.reservation.hello).replace(/\{code\}/g, code);
+      out = wx(['-WechatId', id, '-Remark', code, '-Hello', hello, ...(limit ? ['-CheckOnly'] : []), '-Message', msg, ...test], id);
+      if (SCREEN_FAIL.test(out)) { console.log(`${code} ${out}`); return; }
+      if (/^OK (requested|added)/.test(out)) st.count++;
+      // 备注를 방금 단 직후엔 대화방이 안 열리는 일이 잦다 → 새 备注로 한 번 더
+      if (/remarked send-fail/.test(out) && !dry) { await new Promise(res => setTimeout(res, 3000)); out = wx(['-Local', '-Remark', code, '-Message', msg, ...test]); }
+    }
+    if (sent(out)) { await mark(c, `s${c.step} 보냄`); delete st.pserver[code]; }
+    else if (/send-fail/.test(out)) {
+      await mark(c, `s${last} 안내 실패(단계 ${c.step})`);
+      // 실패 건은 1시간 정기 실행마다 다시 시도하지만 푸시는 처음 한 번만
+      if (!dry && !/안내 실패/.test(c.notice)) await notify(`⚠ 예약 위챗 안내 실패 ${code}`, `${out.replace(/^.*send-fail /, '')} — 직접 안내해 주세요`);
+    } else if (/^OK requested/.test(out)) await mark(c, `s${last} 요청 보냄`);
+    else if (/^OK dry-run|typed-only/.test(out)) { /* 시험 */ }
+    else if (!/요청 보냄|고객 추가 대기/.test(c.notice)) {
+      // 친구가 아니고 검색으로도 못 찾음 (닉네임을 적은 고객 등) → 운영자에게 한 번만 알린다
+      await mark(c, `s${last} 고객 추가 대기`);
+      if (!dry) await notify(`예약 ${code} — 위챗 친구가 아님`, `위챗 ID로 찾을 수 없습니다. 고객을 친구로 추가하고 备注를 ${code} 로 달면 안내가 자동으로 나갑니다`);
+    }
+    console.log(`${code} 단계 ${c.step} ${out}`);
+    save();
+  }
+  // 오래된 기록 정리
+  for (const k of Object.keys(st.res.seen)) if ((Date.now() - new Date(st.res.seen[k]).getTime()) / 864e5 > 60) delete st.res.seen[k];
+  if (!seen) console.log('RES 보낼 안내 없음');
+}
+
 // ── 자동 실행 전 '할 일 있나' 확인 — 위챗 화면은 쓰지 않고 시트·Worker만 본다 ──
 // 시트에 흔적이 남는 변화(새 접수·결제 확인·대리수령 단계·집중결과·감시 종료·발송 재시도)가 있으면 이유를 돌려준다.
 // 고객이 친구 요청을 수락했거나 먼저 요청한 경우는 시트에 안 남으므로 여기서 못 잡는다 → minwon24-auto.js 가 1시간마다 한 번 전체 실행 (사용자 결정 2026-11-21)
@@ -537,6 +641,14 @@ async function pending() {
         if (step >= 1 && step <= PROXY_AUTO_MAX && last < step && !/요청 보냄|고객 추가 대기|안내 실패/.test(c.notice)) reasons.push(`대리수령 ${proxyCode(c)} 단계 ${step}`);
       }
     })().catch(e => reasons.push(`대리수령 확인 실패 ${e.message}`)),
+    (async () => {   // 예약: 기준 행 미설정(첫 실행) · 새 예약 · 확정/불가 변경 (친구 대기·안내 실패 건은 1시간 실행이 본다)
+      const M = JSON.parse(fs.readFileSync(path.join(__dirname, 'wechat-messages.json'), 'utf8'));
+      if (!M.reservation || M.reservation.enabled !== true) return;
+      if (!(st.res && st.res.from >= 2)){ reasons.push('예약 기준 행 설정'); return; }
+      const r = await resList(st);
+      if (r.result !== 'success') throw new Error(r.message || r.error || 'res');
+      for (const c of r.rows) if (resNeeds(c) && !/요청 보냄|고객 추가 대기|안내 실패/.test(c.notice)) reasons.push(`예약 ${resCode(c.row)} 단계 ${c.step}`);
+    })().catch(e => reasons.push(`예약 확인 실패 ${e.message}`)),
     (async () => {   // 19.9 집중 결과 입력
       const r = await get('/run?focus=1');
       if (r.result !== 'success') throw new Error(r.message || r.error || 'focus');
@@ -623,6 +735,16 @@ if (cmd === 'judge') {
     try { st = JSON.parse(fs.readFileSync(FRIEND_STATE, 'utf8')); } catch (e) { /* 첫 실행 */ }
     if (st.day !== today) { st.day = today; st.count = 0; }
     await proxy(M, st, dry ? ['-DryRun', '-NoEnter'] : [], dry, () => { if (!dry) fs.writeFileSync(FRIEND_STATE, JSON.stringify(st)); }, today);
+  })();
+} else if (cmd === 'res') {
+  (async () => {
+    const dry = args.includes('--dry');
+    const M = JSON.parse(fs.readFileSync(path.join(__dirname, 'wechat-messages.json'), 'utf8'));
+    const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' });
+    let st = {};
+    try { st = JSON.parse(fs.readFileSync(FRIEND_STATE, 'utf8')); } catch (e) { /* 첫 실행 */ }
+    if (st.day !== today) { st.day = today; st.count = 0; }
+    await reservation(M, st, dry ? ['-DryRun', '-NoEnter'] : [], dry, () => { if (!dry) fs.writeFileSync(FRIEND_STATE, JSON.stringify(st)); }, today);
   })();
 } else if (cmd === 'focus') {
   const dry = args.includes('--dry');

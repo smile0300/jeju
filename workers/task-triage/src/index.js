@@ -712,6 +712,8 @@ async function route(request, env, url) {
         if (body.heartbeat) return Response.json(await callGas(env, { type: 'heartbeat', name: body.heartbeat, info: body.info || {} }));
         // { caseId, fields } → 대리수령 SuccessStories ('위챗안내' 칸만, GAS에서 막음)
         if (body.caseId) return Response.json(await callGas(env, { type: 'proxy_update', caseId: body.caseId, fields: body.fields }));
+        // { resRow, fields } → 예약 Reservation ('위챗안내' 칸만, GAS에서 막음)
+        if (body.resRow) return Response.json(await callGas(env, { type: 'res_update', row: body.resRow, fields: body.fields }));
         return Response.json(await callGas(env, { type: 'task_update', row: body.queueRow, fields: body.fields }));
       }
       const lostRow = parseInt(url.searchParams.get('lost_row'), 10);
@@ -728,6 +730,8 @@ async function route(request, env, url) {
       if (url.searchParams.get('focus')) return Response.json(await callGas(env, { type: 'focus_list' }));
       // proxy_from=60 → 대리수령 케이스 목록 (위챗 자동 안내용, 위챗 ID 포함 — 비밀값 필요)
       if (url.searchParams.get('proxy_from')) return Response.json(await callGas(env, { type: 'proxy_list', from: parseInt(url.searchParams.get('proxy_from'), 10) }));
+      // res_from=N → 예약 목록 N행부터 (위챗 자동 안내용, 위챗 ID 포함 — 비밀값 필요)
+      if (url.searchParams.get('res_from')) return Response.json(await callGas(env, { type: 'res_list', from: parseInt(url.searchParams.get('res_from'), 10) }));
       if (url.searchParams.get('lost_pending')) return Response.json(await triageLost(env));
       if (url.searchParams.get('watch')) return Response.json(await watchPaidLost(env));
       if (url.searchParams.get('paid')) return Response.json(await promotePaid(env));
