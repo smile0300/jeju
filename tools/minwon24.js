@@ -75,7 +75,7 @@ async function prep(lostRow, outDir) {
 // 1순위: 양식의 위챗 ID — 위챗 ID 형식일 때만 (휴대폰 번호·wxid_ 는 검색이 안 돼 시도하지 않음)
 // 2순위: 운영자가 친구 수락 때 단 备注 'JL<행번호>' (고객이 친구 요청 메시지에 적은 접수 코드)
 // --to <id 또는 JL코드> 를 주면 그것으로만 보낸다(시험용, 큐 기록 안 함).
-const WECHAT_ID_RE = /^[a-zA-Z][-_a-zA-Z0-9]{5,19}$/;
+const WECHAT_ID_RE = /^[a-zA-Z_][-_a-zA-Z0-9]{5,19}$/;   // 예전 ID는 _ 로 시작하기도 함 (접수 양식과 같은 규칙)
 async function wechat(queueRow, lostRow, sn, office, to) {
   // 후보 페이지가 실제로 열릴 때만 링크를 넣는다 (Worker 배포 전·장애 시 깨진 링크를 보내지 않도록)
   const link = matchLink(queueRow);

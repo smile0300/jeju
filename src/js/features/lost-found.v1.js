@@ -649,13 +649,14 @@ export function handleLostImageChange(event) {
     reader.readAsDataURL(file);
 }
 
-// 위챗 ID 규칙: 영문으로 시작, 6~20자, 영문·숫자·_·- (tools/minwon24.js 발송 쪽과 같은 규칙)
+// 위챗 ID 규칙: 영문 또는 _ 로 시작, 6~20자, 영문·숫자·_·- (tools/minwon24.js 발송 쪽과 같은 규칙)
+// 예전에 만든 ID는 _ 로 시작하기도 한다 — 2026-11-22 '_xx_1031' 고객이 형식 오류로 접수를 못 함
 function wechatIdProblem(v) {
     const s = String(v || '').replace(/\s/g, '');
     if (!s) return '';
     if (/^\+?\d[\d-]{6,}$/.test(s)) return 'phone';
     if (/^wxid_/i.test(s)) return 'wxid';
-    if (!/^[a-zA-Z][-_a-zA-Z0-9]{5,19}$/.test(s)) return 'format';
+    if (!/^[a-zA-Z_][-_a-zA-Z0-9]{5,19}$/.test(s)) return 'format';
     return '';
 }
 function showWechatIdProblem(problem) {
