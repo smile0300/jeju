@@ -134,7 +134,7 @@ function doPost(e) {
     if (data.type === 'admin_res_update') return adminResUpdate(data);
 
     // 작업 큐 (workers/task-triage) — TASK_SECRET으로 따로 인증
-    if (/^(task_list|task_get|task_update|task_append|lost_get|lost_update|lost_pending|lost_contact|focus_list|proxy_list|proxy_update|res_list|res_update|health_get|health_set|heartbeat)$/.test(data.type)) {
+    if (/^(task_list|task_get|task_update|task_append|lost_get|lost_update|lost_pending|lost_contact|focus_list|proxy_list|proxy_update|res_list|res_update|health_get|health_set|heartbeat|private_purge)$/.test(data.type)) {
       return handleTaskQueue_(data);
     }
 
@@ -182,6 +182,8 @@ function handleTaskQueue_(data) {
   if (given !== secret) {
     return json_({ result: 'error', message: 'task forbidden: 값 불일치 (받은 길이 ' + given.length + ', 설정 길이 ' + secret.length + ')' });
   }
+
+  if (data.type === 'private_purge') return json_(purgePrivatePhotos_(!!data.dry));
 
   if (data.type === 'lost_get') {
     var lostSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName('LostReport');
@@ -548,7 +550,7 @@ function handleProxyPickup_(data) {
 
   // 잠금은 접수번호 발급 + 자리 잡기(행 추가)까지만. 사진 저장·번역(수 초)은 잠금 밖에서 한다.
   // 예전엔 이 전부를 잠금 안에서 해서, 그동안 다른 접수·관리자 수정이 10초를 넘기면 실패했다.
-  var headers = headerRow_(successSheet);
+  var headers = ensureHeaders_(successSheet, ['LostRef']);   // 후보 페이지에서 온 신청이면 그 분실 접수(JL) 행 번호
   var newCaseId, rowNum;
   var lock = LockService.getScriptLock();
   try {
@@ -615,9 +617,14 @@ function handleProxyPickup_(data) {
     'ReservationPhoto': reservationUrl,
     'MgmtNumber'      : data.mgmtNumber     || '',
     'UserAgent'       : data.userAgent      || '',
-    'AdminNote'       : extraNotes.join(' / ')
+    'AdminNote'       : extraNotes.join(' / '),
+    'LostRef'         : /^\d{2,6}$/.test(String(data.lostRef || '')) ? String(data.lostRef) : ''
   };
   successSheet.getRange(rowNum, 1, 1, headers.length).setValues([rowByHeaders_(headers, fieldMap)]);
+  // 후보 페이지 '这是我的' → 대리수령: 고객이 그 습득물을 자기 것이라고 고른 것 → 분실 접수에 정답으로 남김 (실패해도 접수는 그대로)
+  if (fieldMap.LostRef && data.mgmtNumber) {
+    try { recordFoundItem_(fieldMap.LostRef, data.mgmtNumber, '후보페이지→대리수령 ' + newCaseId); } catch (err) { Logger.log('recordFoundItem_ ' + err); }
+  }
 
   notifyAdmin(
     '📦 대리수령 신청 접수',
@@ -998,7 +1005,26 @@ function adminList(params) {
  * 관리자 페이지에서 LostReport 한 줄의 운영 칸만 수정 (찾기 서비스 결제 확인, 경찰 접수 기록 등)
  * data: { key, row, fields } — 고객이 쓴 칸은 건드리지 않게 ADMIN_LOST_COLS 만 허용, 없는 열은 맨 오른쪽에 추가
  */
-var ADMIN_LOST_COLS = ['찾기상품', '결제상태', '경찰접수번호', '경찰접수일', '경찰관서', 'AdminNote', '집중결과', '집중메모'];
+var ADMIN_LOST_COLS = ['찾기상품', '결제상태', '경찰접수번호', '경찰접수일', '경찰관서', 'AdminNote', '집중결과', '집중메모', '찾은습득물', '찾은경로', '찾은일'];
+
+/**
+ * 추정리스트 적중률 측정용 정답 기록 — LostReport 에 실제로 찾은 습득물 관리번호(atcId)와 어떻게 찾았는지
+ * 이미 적힌 값은 덮지 않는다 (먼저 확정된 기록이 우선). route 예: '후보페이지→대리수령', '집중'
+ */
+function recordFoundItem_(lostRow, atcId, route) {
+  var row = parseInt(lostRow, 10);
+  var id = String(atcId || '').trim().replace(/-\d+$/, '');   // 'F2026072800004620-1' 처럼 순번이 붙어 오기도 함
+  if (!(row >= 2) || !/^[FV][0-9A-Z]{10,}$/.test(id)) return '';
+  var sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName('LostReport');
+  if (!sheet || row > sheet.getLastRow()) return '';
+  var headers = ensureHeaders_(sheet, ['찾은습득물', '찾은경로', '찾은일']);
+  var col = headers.indexOf('찾은습득물') + 1;
+  if (String(sheet.getRange(row, col).getValue() || '').trim()) return 'exists';
+  sheet.getRange(row, col).setValue(id);
+  sheet.getRange(row, headers.indexOf('찾은경로') + 1).setValue(route || '');
+  sheet.getRange(row, headers.indexOf('찾은일') + 1).setValue(Utilities.formatDate(new Date(), 'Asia/Seoul', 'yyyy-MM-dd'));
+  return 'ok';
+}
 function adminLostUpdate(data) {
   if (!adminAuthorized_(data.key)) return adminJson_({ result: 'error', message: 'unauthorized' });
   var row = parseInt(data.row, 10);
@@ -1432,6 +1458,82 @@ function backfillLostReport() {
 
   Logger.log('완료! 처리: ' + processedCount + '행 / 건너뜀: ' + skippedCount + '행');
   SpreadsheetApp.getUi().alert('소급 적용 완료!\n처리: ' + processedCount + '행\n건너뜀: ' + skippedCount + '행');
+}
+
+/**
+ * 대리수령 여권·호텔 예약 사진 자동 파기 — 안내 문구 "수령 완료 후 여권사진을 포함한 개인정보는 즉시 삭제"와 맞춘다 (2026-11-23)
+ * task-triage Worker 가 매일 KST 04시에 { type: 'private_purge' } 로 부른다. dry 면 바꾸지 않고 대상만 돌려준다.
+ *   - Step 4(발송완료)·5(직접수령): 완료를 처음 본 날(스크립트 속성 PURGE_SEEN)부터 PURGE_DONE_DAYS 뒤 파기
+ *     (재발송·분쟁에 잠깐 필요할 수 있음). 기록이 없어도 접수 PURGE_OLD_DONE_DAYS 넘은 완료 건은 바로 (밀린 예전 건)
+ *   - Step 1~3: 접수 PURGE_STALE_DAYS 넘게 멈춘 건 파기
+ *   - 파기 = Drive 휴지통으로 이동(영구 삭제 아님 — 30일 뒤 Drive가 비움) + 셀을 '파기 yyyy-MM-dd' 로 (관리자 화면은 https 가 아니면 링크를 안 그림)
+ */
+var PURGE_DONE_DAYS = 3;
+var PURGE_OLD_DONE_DAYS = 30;
+var PURGE_STALE_DAYS = 60;
+function purgePrivatePhotos_(dry) {
+  var sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName('SuccessStories');
+  if (!sheet) return { result: 'error', message: 'SuccessStories 없음' };
+  var data = sheet.getDataRange().getValues();
+  var headers = data[0].map(function (h) { return h ? h.toString().trim() : ''; });
+  var col = function (h) { return headers.indexOf(h); };
+  var cId = col('CaseId'), cStep = col('Step'), cDate = col('Date'), cTs = col('Timestamp');
+  var photoCols = ['PassportPhoto', 'ReservationPhoto'].map(col).filter(function (c) { return c !== -1; });
+  if (cId === -1 || cStep === -1 || !photoCols.length) return { result: 'error', message: '열 이름 확인 필요' };
+
+  var props = PropertiesService.getScriptProperties();
+  var seen = {};
+  try { seen = JSON.parse(props.getProperty('PURGE_SEEN') || '{}'); } catch (e) { seen = {}; }
+  var tz = 'Asia/Seoul', now = new Date(), today = Utilities.formatDate(now, tz, 'yyyy-MM-dd');
+  var daysSince = function (d) { return d ? (now.getTime() - d.getTime()) / 864e5 : -1; };
+  // 접수일 — Date 칸은 '2026. 7. 22' · '2026-08-07' · 날짜 값이 섞여 있음
+  var toDate = function (v) {
+    if (v instanceof Date && !isNaN(v)) return v;
+    var m = String(v || '').match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
+    return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null;
+  };
+  var idOf = function (v) { var m = String(v || '').match(/\/d\/([a-zA-Z0-9_-]{10,})|[?&]id=([a-zA-Z0-9_-]{10,})/); return m ? (m[1] || m[2]) : ''; };
+
+  var due = [], waiting = [], trashed = 0, missing = 0;
+  for (var i = 1; i < data.length; i++) {
+    var r = data[i];
+    var caseId = String(r[cId] || '').trim();
+    var links = photoCols.filter(function (c) { return idOf(r[c]); });
+    if (!caseId) continue;
+    var step = parseInt(r[cStep], 10) || 0;
+    var created = toDate(r[cDate]) || (cTs !== -1 ? toDate(r[cTs]) : null);
+    var age = daysSince(created);
+    var why = '';
+    if (step >= 4) {
+      if (!seen[caseId]) seen[caseId] = today;   // 완료를 처음 본 날
+      var doneFor = daysSince(new Date(seen[caseId] + 'T00:00:00+09:00'));
+      if (doneFor >= PURGE_DONE_DAYS) why = '완료 ' + Math.floor(doneFor) + '일';
+      else if (age > PURGE_OLD_DONE_DAYS) why = '완료·접수 ' + Math.floor(age) + '일';
+    } else if (age > PURGE_STALE_DAYS) {
+      why = '진행 멈춤·접수 ' + Math.floor(age) + '일';
+    }
+    if (!links.length) continue;   // 사진이 없거나 이미 파기됨
+    if (!why) { if (step >= 4) waiting.push(caseId); continue; }
+    due.push(caseId + '(' + why + ', 사진 ' + links.length + ')');
+    if (dry) continue;
+    links.forEach(function (c) {
+      var mark = '파기 ' + today;
+      try { DriveApp.getFileById(idOf(r[c])).setTrashed(true); trashed++; }
+      catch (e) { missing++; mark = '파기(파일 없음) ' + today; }
+      sheet.getRange(i + 1, c + 1).setValue(mark);
+    });
+  }
+  // 파기까지 끝났거나 시트에서 사라진 케이스는 기록에서 뺀다 (속성 크기 9KB 제한)
+  var live = {};
+  for (var j = 1; j < data.length; j++) {
+    var id = String(data[j][cId] || '').trim();
+    if (id && photoCols.some(function (c) { return idOf(data[j][c]); })) live[id] = true;
+  }
+  if (!dry) {
+    Object.keys(seen).forEach(function (k) { if (!live[k] || due.some(function (d) { return d.indexOf(k + '(') === 0; })) delete seen[k]; });
+    props.setProperty('PURGE_SEEN', JSON.stringify(seen));
+  }
+  return { result: 'success', dry: dry, due: due, count: due.length, waiting: waiting, trashed: trashed, missing: missing };
 }
 
 /**

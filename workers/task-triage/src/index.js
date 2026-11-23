@@ -207,10 +207,13 @@ function searchCategories(cat) {
 // order 'near' = 분실일에 가까운(습득일이 이른) 순 — 첫 검색. 대부분 분실 직후 며칠 안에 습득되는데,
 //   최근 순으로 자르면 서울처럼 습득물이 많은 곳에서는 그 물건이 60건 밖으로 밀려난다 (2026-11-16)
 // order 'recent' = 최근 습득 순 — 10일 감시(새로 올라온 것을 본다)
-async function searchFoundMulti(env, cats, regionCodes, from, to, exclude = [], order = 'near') {
-  const byDate = order === 'recent'
+async function searchFoundMulti(env, cats, regionCodes, from, to, exclude = [], order = 'near', prof = null) {
+  const byDateOnly = order === 'recent'
     ? (a, b) => String(b.fdYmd).localeCompare(String(a.fdYmd))
     : (a, b) => String(a.fdYmd).localeCompare(String(b.fdYmd));
+  // 고객이 적은 물건 정보(브랜드·색·종류·낱말)와 습득물 이름을 먼저 맞춰 본 점수로 앞에 세운다 — 60건 자르기에서 진짜 후보가 밀리지 않게 (2026-11-23)
+  const score = (c) => (c._pre = c._pre || (prof ? preScore(c, prof) : { s: 0, why: [] })).s;
+  const byDate = (a, b) => (score(b) - score(a)) || byDateOnly(a, b);
   // 습득일이 분실일보다 이른 것은 뺀다 — API 기간 조건(START_YMD)이 정확히 걸리지 않음 (2026-11-16 #638: 11-15 습득 반지가 11-16 분실 건 후보로)
   const fromYmd = ymd(from);
   const lists = await Promise.all(cats.map((c, i) => (i === 0 ? searchFound(env, c, regionCodes, from, to) : searchFound(env, c, regionCodes, from, to).catch(() => []))
@@ -222,6 +225,78 @@ async function searchFoundMulti(env, cats, regionCodes, from, to, exclude = [], 
   const out = [...primary];
   rest.forEach((l, i) => out.push(...take(l, Math.floor((MAX_MATCH_CANDIDATES - out.length) / (rest.length - i)))));
   return { candidates: out.sort(byDate), total: lists.reduce((n, l) => n + l.length, 0) };
+}
+
+// ── 고객이 적은 물건 정보 ↔ 습득물 이름·상세 비교 (2026-11-23) ──
+// 경찰 API는 소유자 이름을 공개하지 않는다(신분증도 '중국 신분증' 정도) → 사람 이름 대신 물건 정보로 비교한다.
+// 1단계: 목록의 물품명·색상(clrNm)·분류를 규칙으로 점수 매겨 정렬 + Jev가 60건을 훑음
+// 2단계: Jev 상위 몇 건만 상세 API(습득 시각·습득 장소 유형·보관 상태·특이사항)를 붙여 다시 판정, 이미 반환·처분된 건은 뺌
+const FOUND_DETAIL = {
+  F: 'https://apis.data.go.kr/1320000/LosfundInfoInqireService/getLosfundDetailInfo',
+  V: 'https://apis.data.go.kr/1320000/LosPtfundInfoInqireService/getPtLosfundDetailInfo'
+};
+const DETAIL_TOP = 6;               // 상세를 볼 후보 수 (건당 요청 1개 — Workers 무료 한도 실행당 50)
+const GONE_RE = /반환|폐기|국고|매각|인계완료/;
+const POLICE_COLOR = { CL1001: /흰|화이트/, CL1002: /검|블랙/, CL1003: /빨|레드|적/, CL1004: /주황|오렌지/, CL1005: /노랑|노란|옐로/,
+  CL1006: /초록|녹|그린/, CL1007: /파랑|파란|블루|하늘|네이비|민트|청/, CL1008: /갈|브라운|베이지|카키/, CL1009: /보라|퍼플/,
+  CL1011: /분홍|핑크/, CL1019: /회|그레이/, CL1023: /은|실버/ };
+const WORD_STOP = new Set(['분실', '분실물', '잃어버렸어요', '잃어버렸습니다', '제주', '제주도', '택시', '호텔', '버스', '식당', '근처', '정도', '그리고', '물건', '것같아요',
+  '있어요', '있습니다', '했어요', '했습니다', '같아요', '때문에', '에서', '하고', '저는', '제가', '우리', '오늘', '어제', '시간', '타고', '내릴', '내렸어요', 'the', 'and', 'with', 'lost']);
+/** 고객 쪽 물건 정보 — brand·color(신고서 코드)·noun(소분류 이름)·words(물품명에서 찾을 낱말) */
+function itemProfile({ brand, color, mclsf, text }) {
+  const words = [...new Set((String(text || '').match(/[가-힣]{2,}|[A-Za-z][A-Za-z0-9]{2,}/g) || [])
+    .map(w => w.toLowerCase().replace(/(을|를|이|가|은|는|에서|에|의|도|와|과|으로|로)$/, ''))
+    .filter(w => w.length >= 2 && !WORD_STOP.has(w)))].slice(0, 25);
+  return { brand: brand || '', color: color && color !== 'CL1010' ? color : '', noun: mclsf && SUBCATS[mclsf] ? SUBCATS[mclsf][1] : '', words };
+}
+/** 규칙 점수 — 브랜드가 같으면 크게, 다르면 감점. 색·종류·낱말은 보탬. why 는 Jev에게도 보여 준다 */
+function preScore(c, prof) {
+  const name = `${c.fdPrdtNm || ''} ${c.prdtClNm || ''}`.toLowerCase();
+  let s = 0;
+  const why = [];
+  const b = brandOf(c.fdPrdtNm || '');
+  if (prof.brand && b) { if (b === prof.brand) { s += 3; why.push('brand same'); } else { s -= 2; why.push('brand different'); } }
+  if (prof.color && c.clrNm && !/기타|혼합/.test(c.clrNm)) {
+    if (POLICE_COLOR[prof.color]?.test(c.clrNm)) { s += 1.5; why.push('color same'); } else { s -= 0.5; why.push('color different'); }
+  }
+  if (prof.noun && name.includes(prof.noun)) { s += 1; why.push('type same'); }
+  const hits = prof.words.filter(w => name.includes(w));
+  if (hits.length) { s += Math.min(2, hits.length * 0.7); why.push(`words: ${hits.slice(0, 4).join(',')}`); }
+  return { s, why };
+}
+/** 습득물 상세 — 습득 시각·습득 장소 유형·보관 상태·특이사항('없음'이면 빈칸) */
+async function foundDetail(env, c) {
+  let key = String(env.PUBLIC_DATA_KEY || '').trim();
+  if (!key.includes('%')) key = encodeURIComponent(key);
+  const ep = FOUND_DETAIL[String(c.atcId).charAt(0) === 'V' ? 'V' : 'F'];
+  const res = await fetch(`${ep}?serviceKey=${key}&ATC_ID=${encodeURIComponent(c.atcId)}&FD_SN=${encodeURIComponent(c.fdSn || 1)}`);
+  if (!res.ok) return null;
+  const text = await res.text();
+  const tag = (t) => ((text.match(new RegExp(`<${t}>([\\s\\S]*?)</${t}>`)) || [])[1] || '').replace(/&#xd;/g, '').trim();
+  const note = (tag('uniq').match(/특이사항\s*:\s*([\s\S]*)$/) || [])[1] || '';
+  return { hour: tag('fdHor'), place: tag('fdPlace'), status: tag('csteSteNm'), note: /^\s*없음\s*$/.test(note) ? '' : note.replace(/\s+/g, ' ').slice(0, 150) };
+}
+const DETAIL_INSTRUCTIONS = 'Compare the lost item with each found item in detail: item type and name, brand and model, color, contents (cards, cash, ID inside), distinctive features, the date and hour it was lost vs found, and the place type where it was lost (taxi, bus, restaurant, street...) vs where it was found. "rule check" notes are automatic name comparisons. Choose the found item that is the same physical object; choose none if every candidate contradicts a clear detail (different brand, color or item type).';
+/**
+ * 2단계 — 1단계 확률 상위 몇 건에 상세를 붙여 다시 판정. budget.n 은 이번 실행에서 남은 상세 요청 수 (여러 건이 나눠 씀)
+ * 돌려줌: { match(Jev 답), gone: [반환·처분돼 뺀 id] } 또는 null(상세를 못 봄 → 1단계 결과 그대로)
+ */
+async function rerankWithDetail(env, state, en, ranked, byId, budget) {
+  const ids = ranked.filter(([id]) => id !== 'none' && byId[id]).slice(0, Math.min(DETAIL_TOP, budget?.n ?? DETAIL_TOP));
+  if (!ids.length) return null;
+  if (budget) budget.n -= ids.length;
+  const details = await Promise.all(ids.map(([id]) => foundDetail(env, byId[id]).catch(() => null)));
+  const criteria = { none: 'None of these found items is the lost item' };
+  const gone = [];
+  ids.forEach(([id], i) => {
+    const c = byId[id], d = details[i];
+    if (d?.status && GONE_RE.test(d.status)) { gone.push(id); return; }
+    criteria[id] = [c.fdPrdtNm, c.clrNm && `color ${c.clrNm}`, `found ${c.fdYmd}${d?.hour ? ` ${d.hour}h` : ''}`, d?.place && `found at place type ${d.place}`,
+      `kept at ${c.depPlace}`, d?.note && `note: ${d.note}`, c._pre?.why?.length && `rule check: ${c._pre.why.join('; ')}`].filter(Boolean).join(' | ').slice(0, 400);
+  });
+  if (Object.keys(criteria).length < 2) return { match: { choice: 'none', probabilities: {}, confidence: 1 }, gone };
+  const match = (await askJev(env, state, { match: { type: 'choice', instructions: DETAIL_INSTRUCTIONS + enNameHint(en), criteria } })).match || null;
+  return { match, gone };
 }
 
 // 경찰청 물품 분류 코드 (src/parts/features/lost-found.html 과 같은 목록)
@@ -378,7 +453,7 @@ async function searchFound(env, categoryCd, regionCodes, from, to) {
     }
     return [...text.matchAll(/<item>([\s\S]*?)<\/item>/g)].map(([, body]) => {
       const tag = (t) => (body.match(new RegExp(`<${t}>([\\s\\S]*?)</${t}>`)) || [])[1] || '';
-      return { atcId: tag('atcId'), fdPrdtNm: tag('fdPrdtNm'), depPlace: tag('depPlace'), fdYmd: tag('fdYmd'), prdtClNm: tag('prdtClNm'), fdSbjt: tag('fdSbjt'), fdFilePathImg: tag('fdFilePathImg') };
+      return { atcId: tag('atcId'), fdSn: tag('fdSn'), fdPrdtNm: tag('fdPrdtNm'), clrNm: tag('clrNm'), depPlace: tag('depPlace'), fdYmd: tag('fdYmd'), prdtClNm: tag('prdtClNm'), fdSbjt: tag('fdSbjt'), fdFilePathImg: tag('fdFilePathImg') };
     });
   }));
   const seen = new Set();
@@ -452,7 +527,7 @@ async function notifyAdmin(env, title, body) {
   }
 }
 
-async function processLost(env, row, dry = false) {
+async function processLost(env, row, dry = false, budget = null) {
   const { fields, ko = {}, photoIds = [] } = await callGas(env, { type: 'lost_get', row });
   const state = Object.entries(fields).map(([h, v]) => `${h}: ${v}`).join('\n');
   const answers = await askJev(env, state, LOST_QUESTIONS);
@@ -470,21 +545,38 @@ async function processLost(env, row, dry = false) {
   const regionNames = [...new Set(regionKeys)];
   const regionCodes = [...new Set(regionNames.flatMap(k => REGIONS[k].codes))];
   const cats = searchCategories(cat);
-  const { candidates, total: foundTotal } = cats.length ? await searchFoundMulti(env, cats, regionCodes, lostDate, to) : { candidates: [], total: 0 };
+  // 고객 쪽 물건 정보 — 신고서와 같은 방식으로 브랜드·색·소분류를 정하고, 고객 글(원문+번역)에서 낱말을 뽑는다
+  const koDesc = String(fields['분실내용(자동번역)'] || fields.Desc_ko || '');
+  const prof = itemProfile({
+    brand: brandOf(`${fields.Specifics || ''} ${fields['분실내용(원본)'] || ''} ${koDesc}`),
+    color: COLOR_BY_NAME[fields.ItemColor] || answers.color?.choice,
+    mclsf: pickSubcat(cat.choice || 'PRZ000', answers.subcategory).mclsf,
+    text: `${fields.Specifics || ''} ${koDesc}`
+  });
+  const { candidates, total: foundTotal } = cats.length ? await searchFoundMulti(env, cats, regionCodes, lostDate, to, [], 'near', prof) : { candidates: [], total: 0 };
+  // 고객이 적은 시각·장소 유형 — 2단계에서 습득 시각·습득 장소 유형과 견준다
+  const lostHint = `\nLost on ${ymd(lostDate)}${fields.Time ? ` around ${fields.Time}` : ''}; place type: ${PLACE_KO[answers.place_type?.choice] || fields.RegionCategory || 'unknown'}`;
 
   // 습득물 후보 중 같은 물건이 있는지 Jev에 한 번에 묻는다 (보기 = 습득물 + '없음')
-  let match = null;
+  let match = null, stage1 = null, gone = [];
   if (candidates.length) {
     const criteria = { none: 'None of these found items is the lost item' };
-    candidates.forEach(c => { criteria[c.atcId] = `${c.fdPrdtNm} | found ${c.fdYmd} | ${c.depPlace} | ${c.fdSbjt || ''}`.slice(0, 300); });
+    candidates.forEach(c => { criteria[c.atcId] = `${c.fdPrdtNm}${c.clrNm ? ` | color ${c.clrNm}` : ''} | found ${c.fdYmd} | ${c.depPlace}${c._pre?.why?.length ? ` | rule check: ${c._pre.why.join('; ')}` : ''}`.slice(0, 300); });
     const matchAnswers = await askJev(env, state, {
       match: { type: 'choice', instructions: MATCH_INSTRUCTIONS + enNameHint(fields.EnglishName), criteria }
     });
-    match = matchAnswers.match || null;
+    match = stage1 = matchAnswers.match || null;
+  }
+  // 2단계: 상위 몇 건은 상세까지 보고 다시 판정 (상세 요청 한도가 남아 있을 때만)
+  const ranked1 = stage1?.probabilities ? Object.entries(stage1.probabilities).filter(([id]) => id !== 'none').sort((a, b) => b[1] - a[1]) : [];
+  const byIdAll = Object.fromEntries(candidates.map(c => [c.atcId, c]));
+  if (ranked1.length && (budget?.n ?? DETAIL_TOP) > 0) {
+    const r2 = await rerankWithDetail(env, state + lostHint, fields.EnglishName, ranked1, byIdAll, budget).catch(() => null);
+    if (r2?.match) { match = r2.match; gone = r2.gone; }
   }
 
   const top = match?.probabilities
-    ? Object.entries(match.probabilities).filter(([id]) => id !== 'none').sort((a, b) => b[1] - a[1]).slice(0, 3)
+    ? Object.entries(match.probabilities).filter(([id]) => id !== 'none' && !gone.includes(id)).sort((a, b) => b[1] - a[1]).slice(0, 3)
     : [];
   const byId = Object.fromEntries(candidates.map(c => [c.atcId, c]));
   const foundText = !candidates.length
@@ -494,7 +586,8 @@ async function processLost(env, row, dry = false) {
   // dry: 검색·판정만 하고 큐에 쓰지 않음 (분류 확장 비교 시험용 GET /run?lost_row=N&dry=1)
   if (dry) return { row, cats, onVehicle, regionAlt: answers.region_alt?.choice, from: ymd(lostDate), to: ymd(to), catProbs: cat.probabilities, regions: regionNames, total: foundTotal, sent: candidates.length,
     byCat: cats.map(c => [c, candidates.filter(x => x._cat === c).length]),
-    top: top.map(([id, p]) => ({ id, p: +p.toFixed(2), cat: byId[id]?._cat, name: byId[id]?.fdPrdtNm, place: byId[id]?.depPlace, date: byId[id]?.fdYmd, img: byId[id]?.fdFilePathImg })),
+    top: top.map(([id, p]) => ({ id, p: +p.toFixed(2), cat: byId[id]?._cat, name: byId[id]?.fdPrdtNm, color: byId[id]?.clrNm, place: byId[id]?.depPlace, date: byId[id]?.fdYmd, rule: byId[id]?._pre?.why, img: byId[id]?.fdFilePathImg })),
+    stage1: ranked1.slice(0, 3).map(([id, p]) => ({ id, p: +p.toFixed(2), name: byId[id]?.fdPrdtNm })), detailed: match !== stage1, gone, prof,
     final: match?.choice || null, sub: (answers.subcategory?.probabilities ? Object.entries(answers.subcategory.probabilities).sort((a, b) => b[1] - a[1]).slice(0, 3) : null),
     form: (({ lclsf, mclsf, brand, itemName, title }) => ({ lclsf, mclsf, brand, itemName, title }))(buildPoliceForm(row, fields, ko, answers, lostDate, photoIds)) };
   const candJson = mergeCandidates('[]', top.filter(([id, p]) => p >= CANDIDATE_MIN_P && byId[id])
@@ -609,6 +702,8 @@ export default {
       if (kst.getUTCHours() === 9 && kst.getUTCMinutes() < 15) {
         console.log('[watch]', JSON.stringify(await watchPaidLost(env)));
       } else {
+        // 하루 한 번(KST 04:00~04:14) 대리수령 여권·예약 사진 파기 (GAS purgePrivatePhotos_ — 완료 3일 뒤·멈춘 건 60일 뒤 휴지통)
+        if (kst.getUTCHours() === 4 && kst.getUTCMinutes() < 15) console.log('[purge]', JSON.stringify(await callGas(env, { type: 'private_purge' })));
         console.log('[paid]', JSON.stringify(await promotePaid(env)));
         console.log('[lost]', JSON.stringify(await triageLost(env)));
       }
@@ -619,6 +714,7 @@ export default {
   //   GET  /run?lost_row=612        → LostReport 그 한 줄 판정
   //   GET  /run?lost_pending=1      → 크론과 같은 새 분실 접수 판정 (최대 3건)
   //   GET  /run?paid=1 · ?watch=1   → 결제 확인 건 등록대기로 · 결제 건 10일 습득물 감시 (크론과 같음)
+  //   GET  /run?purge=1[&dry=1]     → 대리수령 여권·예약 사진 파기 (크론은 매일 04시)
   //   GET  /run?lost_row=612&peek=1 → 원본만
   //   POST /run {queueRow|lostRow, fields} → 작업 큐 / 운영 시트 기록
   //   GET  /form[?lost_row=612]     → 신고서 값 (없으면 '등록대기' 분실 건 중 첫 번째)
@@ -734,6 +830,8 @@ async function route(request, env, url) {
       if (url.searchParams.get('res_from')) return Response.json(await callGas(env, { type: 'res_list', from: parseInt(url.searchParams.get('res_from'), 10) }));
       if (url.searchParams.get('lost_pending')) return Response.json(await triageLost(env));
       if (url.searchParams.get('watch')) return Response.json(await watchPaidLost(env));
+      // purge=1[&dry=1] → 대리수령 여권·예약 사진 파기 (크론과 같음. dry 는 대상만 보여 줌)
+      if (url.searchParams.get('purge')) return Response.json(await callGas(env, { type: 'private_purge', dry: url.searchParams.get('dry') === '1' }));
       if (url.searchParams.get('paid')) return Response.json(await promotePaid(env));
       return Response.json(await triage(env));
     }
@@ -769,10 +867,12 @@ async function promotePaid(env) {
  * 새 후보가 Jev 일치 확률 0.5 이상이면 관리자 푸시 (위챗 안내는 운영자가). 이미 알린 습득물은 '감시알림' 칸에 쌓아 중복 방지.
  */
 const WATCH_DAYS = 10;
+const WATCH_DETAIL_MIN_P = 0.2;   // 감시: 1단계 1위가 이 이상일 때만 상세 비교 (요청 한도 — 감시는 이미 건당 검색 요청이 많음)
 async function watchPaidLost(env) {
   const { rows } = await callGas(env, { type: 'task_list', status: '완료' });
   const now = Date.now();
   const out = [];
+  const watchBudget = { n: DETAIL_TOP };
   for (const q of rows) {
     if (out.length >= 5) break;
     const ref = String(q['참고(링크·위챗ID 등)'] || '');
@@ -783,14 +883,23 @@ async function watchPaidLost(env) {
     const notified = String(q['감시알림'] || '').split(/\s+/).filter(Boolean);
     try {
       const wCats = Array.isArray(form.searchCats) && form.searchCats.length ? form.searchCats : [form.lclsf];
-      const found = (await searchFoundMulti(env, wCats, [form.rgnCd], new Date(`${form.lostYmd}T00:00:00+09:00`), new Date(), notified, 'recent')).candidates;
+      const prof = itemProfile({ brand: form.brand, color: form.color, mclsf: form.mclsf, text: `${form.itemName || ''} ${form.content || ''}` });
+      const found = (await searchFoundMulti(env, wCats, [form.rgnCd], new Date(`${form.lostYmd}T00:00:00+09:00`), new Date(), notified, 'recent', prof)).candidates;
       if (!found.length) { out.push({ ref, fresh: 0 }); continue; }
       const criteria = { none: 'None of these found items is the lost item' };
-      found.forEach(c => { criteria[c.atcId] = `${c.fdPrdtNm} | found ${c.fdYmd} | ${c.depPlace} | ${c.fdSbjt || ''}`.slice(0, 300); });
+      found.forEach(c => { criteria[c.atcId] = `${c.fdPrdtNm}${c.clrNm ? ` | color ${c.clrNm}` : ''} | found ${c.fdYmd} | ${c.depPlace}${c._pre?.why?.length ? ` | rule check: ${c._pre.why.join('; ')}` : ''}`.slice(0, 300); });
       const en = String(q['영문명'] || '').trim();
-      const m = (await askJev(env, `${form.itemName}\n${form.lostPlcNm}\n${form.content}${en ? `\nOwner name on passport/ID: ${en}` : ''}`, {
+      const wState = `${form.itemName}\n${form.lostPlcNm}\n${form.content}${en ? `\nOwner name on passport/ID: ${en}` : ''}`;
+      let m = (await askJev(env, wState, {
         match: { type: 'choice', instructions: MATCH_INSTRUCTIONS + enNameHint(en), criteria }
       })).match;
+      // 1단계에서 그럴듯한 후보가 있으면 상세까지 보고 다시 판정 (반환·처분된 건은 빠짐)
+      const ranked1 = m?.probabilities ? Object.entries(m.probabilities).filter(([id]) => id !== 'none').sort((a, b) => b[1] - a[1]) : [];
+      if (ranked1.length && ranked1[0][1] >= WATCH_DETAIL_MIN_P && watchBudget.n > 0) {
+        const r2 = await rerankWithDetail(env, `${wState}\nLost on ${form.lostYmd} around ${form.hour}:00; place type: ${PLACE_KO[form.lostPlcSeCd] || 'unknown'}`, en, ranked1,
+          Object.fromEntries(found.map(c => [c.atcId, c])), watchBudget).catch(() => null);
+        if (r2?.match) m = r2.match;
+      }
       const p = Number(m?.probabilities?.[m?.choice] ?? 0);
       if (m?.choice && m.choice !== 'none' && p >= 0.5) {
         const c = found.find(f => f.atcId === m.choice);
@@ -915,9 +1024,11 @@ async function runHealth(env, dry) {
 async function triageLost(env) {
   const { rows } = await callGas(env, { type: 'lost_pending', limit: 3 });
   const results = [];
+  // 상세 비교 요청은 이번 실행 전체에서 이만큼만 (첫 건이 다 쓰면 나머지는 1단계만 — 결제 뒤 감시에서 다시 봄)
+  const detailBudget = { n: DETAIL_TOP };
   for (const row of rows) {
     try {
-      const r = await processLost(env, row);
+      const r = await processLost(env, row, false, detailBudget);
       results.push({ row, queueRow: r.queueRow, status: r.status, category: r.category, regions: r.regions });
     } catch (e) {
       console.error('[lost] row', row, e.message);

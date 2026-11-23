@@ -397,3 +397,22 @@
 - 대리수령 개인정보 안내 한국어 오기 "여권사진 외 개인정보는 즉시 삭제" → "여권사진을 포함한 개인정보는 즉시 삭제" (html 기본 문구·i18n ko). zh/en은 원래 전체 삭제로 되어 있었음
   - 주의: 실제 여권·예약 사진 자동 파기 코드는 아직 없음 (unsharePrivatePhotos 로 공유만 끔)
 - (같은 날 되돌림) 조회 날짜는 다시 어제까지만. 습득물 API는 다음 날 공개라 오늘은 거의 0건 (11-23 22:32: 제주 0/0, 인천 0/0, 서울 0/1 vs 전날 16/22·50/202·259/749) — 빈 결과로 고객이 포기할 위험
+
+## 2026-11-23 — 습득물 추정리스트 고도화 (상세 비교 + 정답 기록)
+- **사실**: 경찰 습득물 API는 주인 이름을 주지 않음. 비교 가능한 건 물건 정보뿐 — 목록의 fdPrdtNm·clrNm(예 `블랙(검정)`)·prdtClNm, 상세(getLosfundDetailInfo F… / getPtLosfundDetailInfo V…, ATC_ID+FD_SN)의 fdHor(습득 시각)·fdPlace(노상/택시/버스/음식점 등 장소 유형)·csteSteNm(보관중…)·uniq(거의 항상 `특이사항 : 없음`, `&#xd;` 섞임).
+- **Worker(task-triage)**: 고객 신고에서 itemProfile(브랜드·색 코드·소분류명·낱말)을 만들어 preScore로 사전 정렬(브랜드 같음 +3/다름 −2, 색 같음 +1.5/다름 −0.5, 분류 +1, 낱말 0.7씩 최대 2) → 1단계 Jev 판정 → 상위 6건(DETAIL_TOP, 실행당 공유 예산 — 무료 플랜 서브요청 50 한도) 상세 조회 후 2단계 재판정. 반환·폐기·국고·매각·인계완료 상태는 제외. watchPaidLost는 1단계 0.2 이상일 때만 2단계.
+- **정답 기록**: LostReport에 `찾은습득물`·`찾은경로`·`찾은일` 열(ensureHeaders_로 자동 생성). ① 후보페이지(/m) → 대리수령 신청 시 `jl`(JL 번호)가 넘어가 GAS가 자동 기록(경로 `후보페이지→대리수령 케이스ID`, 이미 값 있으면 안 덮음), SuccessStories에 LostRef 열 ② 관리자 🎯 집중 결과 '찾음'에서 관리번호 입력(경로 `집중`) ③ 관리자 편집 폼에서 직접 입력. 형식 `^[FV][0-9A-Z]{10,}$`, `-1` 같은 순번 접미사는 제거.
+- **배포**: GAS 배포 갱신. Worker는 같은 파일에 여권사진 파기 크론(04시)이 미승인 상태로 들어 있어 **배포 보류** — 파기 승인 후 함께 배포할 것. 로컬 wrangler dev에는 TYPESAFE_API_KEY·PUBLIC_DATA_KEY가 없어 판정 dry 시험 불가(점수 함수는 node로, 상세 API는 사이트 프록시로 확인).
+- **다음**: 찾은습득물이 쌓이면 후보JSON 순위와 대조하는 적중률 도구.
+- **정정(같은 날)**: GAS 배포 실패 — Apps Script **버전 200개 한도** 도달(`Cannot create more versions`). 코드는 clasp push로 HEAD에만 반영, 모든 배포는 기존 v200 그대로. 프로젝트 기록 페이지(편집기 → 프로젝트 기록)에서 안 쓰는 옛 버전을 지운 뒤 `clasp version` → 모든 배포 `clasp deploy -i <id> -V <새 버전>` 해야 함. 스크립트에서 version 번호를 뽑을 땐 실패 메시지의 숫자(200)를 잡지 않게 `Created version N` 형식을 확인할 것.
+
+## 2026-11-23 대리수령 여권·예약 사진 자동 파기
+- GAS `purgePrivatePhotos_(dry)` (작업 큐 type `private_purge`, TASK_SECRET 인증): SuccessStories 의 PassportPhoto·ReservationPhoto
+  - Step 4·5(발송완료·직접수령): 완료를 처음 본 날(스크립트 속성 PURGE_SEEN) + 3일 뒤 파기. 기록이 없어도 접수 30일 넘은 완료 건은 바로
+  - Step 1~3: 접수 60일 넘게 멈춘 건 파기
+  - 파기 = Drive 휴지통 이동(30일 안엔 복구 가능) + 셀을 '파기 yyyy-MM-dd' 로 → admin.html 은 https 가 아니면 링크를 안 그림
+- task-triage Worker: 크론 KST 04:00~04:14 슬롯에 하루 한 번 호출, 수동 `GET /run?purge=1[&dry=1]`
+- 첫 실행(사용자 승인): jeju-0041~0058 18건, 사진 26장 휴지통. 0059~0062 는 완료 3일 대기, 0001~0040 은 사진 링크 없음
+- ⚠ GAS 버전 한도 200 도달: 예전 방식(`clasp deploy -i <id>` 를 47번)은 배포마다 버전 47개를 만들었음
+  - 이번엔 `clasp deploy -i <id> -V 200` 으로 기존 버전에 47개 모두 연결 (@200x47)
+  - 앞으로: `clasp push` → `clasp version "설명"` 1번 → 모든 배포에 `clasp deploy -i <id> -V <새 번호>`. 새 버전을 만들려면 편집기 '프로젝트 기록'에서 오래된 버전 삭제 필요
