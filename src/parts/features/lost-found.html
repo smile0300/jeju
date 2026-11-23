@@ -56,8 +56,7 @@
                                 // 어제 날짜 구하기 (현재 시간에서 24시간 빼기)
                                 const yesterdayUTC = new Date(Date.now() - 24 * 60 * 60 * 1000);
                                 const yyyymmdd = formatter.format(yesterdayUTC);
-                                // 기본값은 어제(오늘 건은 아직 적음), 선택은 오늘까지 — 당일 분실·당일 등록된 습득물도 볼 수 있게
-                                const todayYmd = formatter.format(new Date());
+                                // 습득물 API는 다음 날 공개 — 오늘을 고르면 거의 0건이라(11-23 22시 제주 0건) 어제까지만 고르게 둔다
 
                                 const dateInput = document.getElementById('lost-date');
                                 const regionSelect = document.getElementById('lostRegionCd');
@@ -72,7 +71,7 @@
                                     
                                     const fp = flatpickr(dateInput, {
                                         locale: fpLang,
-                                        maxDate: todayYmd,
+                                        maxDate: yyyymmdd,
                                         defaultDate: yyyymmdd,
                                         mode: regionSelect.value === 'LCP000' ? 'range' : 'single',
                                         onChange: function(selectedDates, dateStr, instance) {
@@ -107,7 +106,7 @@
                                     });
                                 } else {
                                     dateInput.type = 'date';
-                                    dateInput.setAttribute('max', todayYmd);
+                                    dateInput.setAttribute('max', yyyymmdd);
                                     dateInput.value = yyyymmdd;
                                 }
                             })();
