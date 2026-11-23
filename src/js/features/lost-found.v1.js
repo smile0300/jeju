@@ -1838,6 +1838,10 @@ window.checkProxyDeepLink = function() {
                 const set = (id, v) => { const el = document.getElementById(id); if (el && v) el.value = v; };
                 set('proxy-mgmt-num', params.get('mgmt') || '');
                 set('proxy-location-detail', params.get('detail') || '');
+                // 어느 분실 접수(JL)의 후보에서 왔는지 — 제출 때 같이 보내 LostReport 에 '찾은 습득물'로 남긴다 (추정리스트 적중률 측정용)
+                const jl = (String(params.get('jl') || params.get('detail') || '').match(/JL\s*(\d{2,6})/i) || [])[1];
+                const modal = document.getElementById('pickup');
+                if (modal) modal.dataset.lostRef = jl || '';
             }
         }, 300);
     }
@@ -1902,6 +1906,7 @@ window.openProxyPickupModal = function(caseId, itemName, originalWechat, region,
 
     // 숨겨진 필드에 데이터 저장 (제출 및 딥링크 복사 시 사용)
     modal.dataset.originalWechat = originalWechat || '';
+    modal.dataset.lostRef = '';   // 후보 페이지 딥링크면 checkProxyDeepLink 가 연 뒤에 채움
     modal.dataset.itemName = itemName || '';
     modal.dataset.region = region || '';
     modal.dataset.place = place || '';
@@ -2211,6 +2216,7 @@ window.submitProxyPickup = async function() {
             requesterName,
             contact,
             mgmtNumber: mgmtNum,
+            lostRef: modal?.dataset.lostRef || '',   // 후보 페이지에서 온 분실 접수 번호(JL 숫자) — 없으면 빈칸
             passportPhoto: passportBase64,
             itemPhoto: itemBase64,
             reservationPhoto: reservationBase64,

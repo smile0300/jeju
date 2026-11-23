@@ -335,6 +335,7 @@
       ['찾기 서비스', joinNonEmpty([r['찾기상품'], r['결제상태'] && '결제 ' + r['결제상태']], ' · ')],
       ['경찰 접수', joinNonEmpty([r['경찰접수번호'], r['경찰관서'], r['경찰접수일']], ' · ')],
       ['집중 결과', joinNonEmpty([r['집중결과'], r['집중메모'], r['집중안내'] && '위챗 ' + r['집중안내']], ' · ')],
+      ['찾은 습득물', joinNonEmpty([r['찾은습득물'], r['찾은경로'], r['찾은일']], ' · ')],
       ['메모', r.AdminNote]
     ]);
     c.appendChild(dl);
@@ -384,6 +385,15 @@
           inp.replaceWith(ta);
           ta.id = inp.id;
           form.appendChild(f);
+          // 찾았으면 그 습득물 관리번호 — 추정리스트가 맞혔는지 재는 정답 기록 (경찰 습득물 F…/유실물센터 V…)
+          var atc = null;
+          if (p[0] === '찾음') {
+            var af = field('찾은습득물', '');
+            af.querySelector('label').textContent = '찾은 습득물 관리번호 (선택 · 경찰 습득물이면 F… / V…, 호텔·식당 직접 보관이면 비움)';
+            atc = af.querySelector('input');
+            atc.placeholder = 'F2026112200001021';
+            form.appendChild(af);
+          }
           var save = el('button', 'save', '저장 · 고객 안내');
           save.type = 'submit';
           var msg = el('p', 'error');
@@ -394,6 +404,9 @@
             ev.preventDefault();
             var fields = { '집중결과': p[0] };
             if (ta.value.trim()) fields['집중메모'] = ta.value.trim();
+            var atcV = atc ? atc.value.trim().toUpperCase().replace(/-\d+$/, '') : '';
+            if (atcV && !/^[FV][0-9A-Z]{10,}$/.test(atcV)) { msg.textContent = '관리번호 형식이 아닙니다 (F… 또는 V…)'; msg.hidden = false; return; }
+            if (atcV) { fields['찾은습득물'] = atcV; fields['찾은경로'] = '집중'; fields['찾은일'] = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10); }
             saveLost(c, r, fields, save, msg);
           });
           c.insertBefore(form, act.nextSibling);
@@ -445,9 +458,11 @@
       form.appendChild(row2);
       form.appendChild(field('집중메모', r['집중메모']));
     }
-    ['경찰접수번호', '경찰관서', '경찰접수일', 'AdminNote'].forEach(function (h) {
+    ['경찰접수번호', '경찰관서', '경찰접수일', '찾은습득물', '찾은경로', 'AdminNote'].forEach(function (h) {
       var f = field(h, r[h]);
       if (h === '경찰접수일') f.querySelector('input').type = 'date';
+      if (h === '찾은습득물') f.querySelector('input').placeholder = '찾은 습득물 관리번호 F…/V… (추정리스트 적중률용)';
+      if (h === '찾은경로') f.querySelector('input').placeholder = '예: 집중 · 후보페이지 · 고객 직접 · 호텔 보관';
       form.appendChild(f);
     });
     form.appendChild(el('div', 'notes', '기본에서 집중으로 업그레이드(10元 추가)하면 찾기상품을 바꾸세요. 경찰 접수는 북마클릿 기록 버튼을 쓰면 자동으로 채워집니다.'));

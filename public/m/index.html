@@ -102,7 +102,7 @@ footer a{color:inherit}
         h+=cs.map(function(c){
           var tr=tier(Number(c.p)||0);
           var img=c.img?'<img src="/api/public-data?url='+encodeURIComponent(c.img)+'" alt="" loading="lazy" onerror="this.parentNode.textContent=\'暂无照片\'">':'暂无照片';
-          var q=new URLSearchParams({item:c.name||'',place:c.place||'',mgmt:c.id||'',detail:[d.code,c.place,c.date].filter(Boolean).join(' · '),utm_source:'match'});
+          var q=new URLSearchParams({item:c.name||'',place:c.place||'',mgmt:c.id||'',jl:d.code||'',detail:[d.code,c.place,c.date].filter(Boolean).join(' · '),utm_source:'match'});
           return '<div class="item"><div class="ph">'+img+'</div><div class="body">'
             +'<div class="tier '+tr[0]+'">'+tr[1]+(c.src==='watch'&&c.at&&(Date.parse(today)-Date.parse(c.at))<3*864e5?'<span class="new">NEW</span>':'')+'</div>'
             +'<div class="name">'+esc(c.name||'(未填写物品名)')+'</div>'

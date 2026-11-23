@@ -236,6 +236,7 @@ const FOUND_DETAIL = {
   V: 'https://apis.data.go.kr/1320000/LosPtfundInfoInqireService/getPtLosfundDetailInfo'
 };
 const DETAIL_TOP = 6;               // 상세를 볼 후보 수 (건당 요청 1개 — Workers 무료 한도 실행당 50)
+const DETAIL_MIN_P = 0.05;  // 1단계 1위가 이 미만이면(전부 아님) 상세 비교 생략 — 요청 아끼기
 const GONE_RE = /반환|폐기|국고|매각|인계완료/;
 const POLICE_COLOR = { CL1001: /흰|화이트/, CL1002: /검|블랙/, CL1003: /빨|레드|적/, CL1004: /주황|오렌지/, CL1005: /노랑|노란|옐로/,
   CL1006: /초록|녹|그린/, CL1007: /파랑|파란|블루|하늘|네이비|민트|청/, CL1008: /갈|브라운|베이지|카키/, CL1009: /보라|퍼플/,
@@ -467,6 +468,35 @@ const MATCH_INSTRUCTIONS = 'Which found item (if any) is most likely the same ob
 function enNameHint(en) {
   return en ? ` The lost item contains a passport or ID belonging to "${en}". A found item whose name or description contains this name (or its Korean transliteration, e.g. ZHANG SAN → 장산) is a very strong match; a passport/ID with a clearly different name is not a match.` : '';
 }
+/**
+ * 분실자명 검색 — 경찰민원24 습득물 검색의 '분실자명' 칸과 같은 조회 (공공데이터 API에는 이름이 없음)
+ * 신분증·카드·지갑에 이름이 있으면 경찰이 LSTAO_NM에 적는다 (여권 영문명 그대로, 공백 없이 대문자: SUNWEISHENG).
+ * 검색어는 우리 고객 본인 이름만. 응답의 이름 칸은 화면과 달리 가려지지 않으므로 비교에만 쓰고 저장·출력하지 않는다.
+ */
+const NAME_SEARCH = 'https://minwon24.police.go.kr/wisenut/search.do';
+const nameKey = (n) => String(n || '').toUpperCase().replace(/[^A-Z]/g, '');
+async function searchByName(name, from, to) {
+  const key = nameKey(name);
+  if (key.length < 6) return [];   // 짧은 이름은 부분 일치로 남의 물건이 섞임
+  const d8 = (d) => ymd(d).replace(/-/g, '');
+  const res = await fetch(NAME_SEARCH, {
+    method: 'POST', headers: { 'Content-Type': 'application/json;charset=utf-8' },
+    body: JSON.stringify({ query: '', searchFields: ['_ALL_'], resultFields: ['_ALL_'], collections: ['FOUND'], pageStart: 1, pageCount: 10, orderBys: ['DATE/DESC'],
+      subQueries: { MODE: 'DETAIL', SNIPPET_SIZE: '200', HL_TERM: '', FOUND_FILTER_QUERY: `<LSTAO_NM:substring:${key}>`, FOUND_COLLECTION_QUERY: '', START_DATE: d8(from), END_DATE: d8(to) } })
+  });
+  if (!res.ok) throw new Error(`name search ${res.status}`);
+  const docs = (await res.json())?.result?.outputs?.FOUND?.documents || [];
+  return docs.map(d => d.fields || {}).map(f => ({
+    atcId: String(f.PKUP_CMDTY_MNG_ID || '').replace(/<\/?H[SE]>/g, ''),
+    fdSn: f.SORT_SN || '1',
+    fdPrdtNm: String(f.ITEM_CN || '').replace(/<\/?H[SE]>/g, ''),
+    prdtClNm: [f.PKUP_CMDTY_LCLSF_NM, f.PKUP_CMDTY_MCLSF_NM].filter(Boolean).join(' > '),
+    depPlace: f.KPNG_PLC_NM || '', fdYmd: f.LOST_CMDTY_PKUP_YMD || '', fdFilePathImg: '',
+    _nameExact: nameKey(f.LSTAO_NM) === key   // 이름 자체는 버린다
+  })).filter(c => /^[FV][0-9A-Z]{10,}$/.test(c.atcId));
+}
+const nameP = (c) => c._nameExact ? 0.95 : 0.6;   // 완전 일치 = 거의 확실, 부분 일치 = 확인 필요
+
 const CANDIDATE_MIN_P = 0.1;      // 이보다 낮은 일치 확률은 페이지에 올리지 않는다
 const CANDIDATE_MAX = 8;
 function candidateOf(c, p, src) {
@@ -554,6 +584,9 @@ async function processLost(env, row, dry = false, budget = null) {
     text: `${fields.Specifics || ''} ${koDesc}`
   });
   const { candidates, total: foundTotal } = cats.length ? await searchFoundMulti(env, cats, regionCodes, lostDate, to, [], 'near', prof) : { candidates: [], total: 0 };
+  // 여권·신분증 영문명이 있으면 분실자명으로도 찾는다 (분류·지역과 무관 — 이름이 붙은 습득물은 그 자체로 강한 증거)
+  let nameErr = null;
+  const nameHits = await searchByName(fields.EnglishName, lostDate, to).catch(e => { nameErr = e.message; return []; });
   // 고객이 적은 시각·장소 유형 — 2단계에서 습득 시각·습득 장소 유형과 견준다
   const lostHint = `\nLost on ${ymd(lostDate)}${fields.Time ? ` around ${fields.Time}` : ''}; place type: ${PLACE_KO[answers.place_type?.choice] || fields.RegionCategory || 'unknown'}`;
 
@@ -570,7 +603,7 @@ async function processLost(env, row, dry = false, budget = null) {
   // 2단계: 상위 몇 건은 상세까지 보고 다시 판정 (상세 요청 한도가 남아 있을 때만)
   const ranked1 = stage1?.probabilities ? Object.entries(stage1.probabilities).filter(([id]) => id !== 'none').sort((a, b) => b[1] - a[1]) : [];
   const byIdAll = Object.fromEntries(candidates.map(c => [c.atcId, c]));
-  if (ranked1.length && (budget?.n ?? DETAIL_TOP) > 0) {
+  if (ranked1.length && ranked1[0][1] >= DETAIL_MIN_P && (budget?.n ?? DETAIL_TOP) > 0) {
     const r2 = await rerankWithDetail(env, state + lostHint, fields.EnglishName, ranked1, byIdAll, budget).catch(() => null);
     if (r2?.match) { match = r2.match; gone = r2.gone; }
   }
@@ -582,16 +615,18 @@ async function processLost(env, row, dry = false, budget = null) {
   const foundText = !candidates.length
     ? `습득물 후보 없음 (${ymd(lostDate)}~${ymd(to)} ${regionNames.join('+')}, ${cats.join('+') || '분류 실패'})`
     : `[${regionNames.join('+')} · ${cats.join('+')}] 습득물 ${foundTotal}건 중 유력 후보: ` + top.map(([id, p]) => `${id} ${byId[id]?.fdPrdtNm || ''} @${byId[id]?.depPlace || ''} (${p.toFixed(2)})`).join(' / ') +
-      ` | Jev 최종: ${match.choice} (${Number(match.confidence ?? 0).toFixed(2)})`;
+      ` | Jev 최종: ${match.choice} (${Number(match.confidence ?? 0).toFixed(2)})`
+    + (nameHits.length ? ` | 🪪 분실자명 일치: ${nameHits.map(c => `${c.atcId} ${c.fdPrdtNm} @${c.depPlace}${c._nameExact ? '' : ' (부분)'}`).join(' / ')}` : '');
   // dry: 검색·판정만 하고 큐에 쓰지 않음 (분류 확장 비교 시험용 GET /run?lost_row=N&dry=1)
   if (dry) return { row, cats, onVehicle, regionAlt: answers.region_alt?.choice, from: ymd(lostDate), to: ymd(to), catProbs: cat.probabilities, regions: regionNames, total: foundTotal, sent: candidates.length,
     byCat: cats.map(c => [c, candidates.filter(x => x._cat === c).length]),
     top: top.map(([id, p]) => ({ id, p: +p.toFixed(2), cat: byId[id]?._cat, name: byId[id]?.fdPrdtNm, color: byId[id]?.clrNm, place: byId[id]?.depPlace, date: byId[id]?.fdYmd, rule: byId[id]?._pre?.why, img: byId[id]?.fdFilePathImg })),
     stage1: ranked1.slice(0, 3).map(([id, p]) => ({ id, p: +p.toFixed(2), name: byId[id]?.fdPrdtNm })), detailed: match !== stage1, gone, prof,
+    nameHits: nameHits.map(c => ({ id: c.atcId, item: c.fdPrdtNm, date: c.fdYmd, place: c.depPlace, exact: c._nameExact })), nameErr, nameLen: nameKey(fields.EnglishName).length,
     final: match?.choice || null, sub: (answers.subcategory?.probabilities ? Object.entries(answers.subcategory.probabilities).sort((a, b) => b[1] - a[1]).slice(0, 3) : null),
     form: (({ lclsf, mclsf, brand, itemName, title }) => ({ lclsf, mclsf, brand, itemName, title }))(buildPoliceForm(row, fields, ko, answers, lostDate, photoIds)) };
-  const candJson = mergeCandidates('[]', top.filter(([id, p]) => p >= CANDIDATE_MIN_P && byId[id])
-    .map(([id, p]) => candidateOf(byId[id], p, 'initial')));
+  const candJson = mergeCandidates('[]', [...nameHits.map(c => candidateOf(c, nameP(c), 'initial')), ...top.filter(([id, p]) => p >= CANDIDATE_MIN_P && byId[id])
+    .map(([id, p]) => candidateOf(byId[id], p, 'initial'))]);
 
   // 찾기 서비스(9.9/19.9元) 결제가 확인된 건만 경찰 등록 대상 — 운영자가 LostReport '결제상태'를 '확인'으로 바꾸면 크론이 넘겨 줌
   const paid = String(fields['결제상태'] || '').trim() === '확인';
@@ -882,13 +917,22 @@ async function watchPaidLost(env) {
     const form = JSON.parse(q['신고서']);
     const notified = String(q['감시알림'] || '').split(/\s+/).filter(Boolean);
     try {
+      // 분실자명 일치는 Jev 판정 없이 바로 알림·후보 (이름이 붙은 습득물 = 거의 확실)
+      const enName = String(q['영문명'] || '').trim();
+      const hits = (await searchByName(enName, new Date(`${form.lostYmd}T00:00:00+09:00`), new Date()).catch(() => [])).filter(c => !notified.includes(c.atcId));
+      if (hits.length) {
+        await notifyAdmin(env, `🪪 분실자명 일치 (${ref})`, hits.map(c => `${c.fdPrdtNm} @${c.depPlace} ${c.fdYmd}${c._nameExact ? '' : ' (부분 일치)'} · ${c.atcId}`).join('\n'));
+        notified.push(...hits.map(c => c.atcId));
+        q['후보JSON'] = mergeCandidates(q['후보JSON'], hits.map(c => candidateOf(c, nameP(c), 'watch')));
+        await callGas(env, { type: 'task_update', row: q.row, fields: { '감시알림': notified.join(' '), '후보JSON': q['후보JSON'] } });
+      }
       const wCats = Array.isArray(form.searchCats) && form.searchCats.length ? form.searchCats : [form.lclsf];
       const prof = itemProfile({ brand: form.brand, color: form.color, mclsf: form.mclsf, text: `${form.itemName || ''} ${form.content || ''}` });
       const found = (await searchFoundMulti(env, wCats, [form.rgnCd], new Date(`${form.lostYmd}T00:00:00+09:00`), new Date(), notified, 'recent', prof)).candidates;
       if (!found.length) { out.push({ ref, fresh: 0 }); continue; }
       const criteria = { none: 'None of these found items is the lost item' };
       found.forEach(c => { criteria[c.atcId] = `${c.fdPrdtNm}${c.clrNm ? ` | color ${c.clrNm}` : ''} | found ${c.fdYmd} | ${c.depPlace}${c._pre?.why?.length ? ` | rule check: ${c._pre.why.join('; ')}` : ''}`.slice(0, 300); });
-      const en = String(q['영문명'] || '').trim();
+      const en = enName;
       const wState = `${form.itemName}\n${form.lostPlcNm}\n${form.content}${en ? `\nOwner name on passport/ID: ${en}` : ''}`;
       let m = (await askJev(env, wState, {
         match: { type: 'choice', instructions: MATCH_INSTRUCTIONS + enNameHint(en), criteria }

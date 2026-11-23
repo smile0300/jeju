@@ -416,3 +416,11 @@
 - ⚠ GAS 버전 한도 200 도달: 예전 방식(`clasp deploy -i <id>` 를 47번)은 배포마다 버전 47개를 만들었음
   - 이번엔 `clasp deploy -i <id> -V 200` 으로 기존 버전에 47개 모두 연결 (@200x47)
   - 앞으로: `clasp push` → `clasp version "설명"` 1번 → 모든 배포에 `clasp deploy -i <id> -V <새 번호>`. 새 버전을 만들려면 편집기 '프로젝트 기록'에서 오래된 버전 삭제 필요
+
+## 2026-11-24 — 분실자명 검색 (경찰민원24 습득물 검색)
+- **사실**: 공공데이터 습득물 API에는 이름이 없지만(물품명에 `여권(이*실)`처럼 들어간 건 증명서 86건 중 5건뿐), 경찰민원24 습득물 검색(`/cvlcpt/cvlcptAply.do?cvlcptId=MW-201`)은 목록마다 **분실자명**(`LSTAO_NM`)을 준다. 화면은 `S*********G`처럼 가리지만 내부 요청 `POST /wisenut/search.do`(JSON) 응답에는 **가리지 않은 전체 이름**이 온다 → 비교에만 쓰고 저장·출력 금지.
+- 형식: 여권 영문명을 공백 없이 대문자(`SUNWEISHENG`). 한국어 이름+괄호(`김***********)`)도 있음. 신분증뿐 아니라 지갑·카드에도 채워짐. 검색 필터 `FOUND_FILTER_QUERY: <LSTAO_NM:substring:이름>`, 기간 `START_DATE/END_DATE`(YYYYMMDD), 관리번호는 `FOUND_COLLECTION_QUERY: <PKUP_CMDTY_MNG_ID:contains:F…>`. 응답 필드: PKUP_CMDTY_MNG_ID(<HS>…<HE> 강조 태그 섞임)·ITEM_CN·KPNG_PLC_NM·LOST_CMDTY_PKUP_YMD·PKUP_CMDTY_LCLSF/MCLSF_CD/NM·SORT_SN.
+- **검증**: 이미 찾은 대리수령 건을 관리번호로 조회해 분실자명이 채워진 것 확인(2건). 최근 결제 고객 6명 이름 검색은 0건(검색 자체는 이름 없이 94,025건 반환 — 정상).
+- **원칙**: 검색어는 **우리 고객 본인 이름만**(사용자 승인 2026-11-24). 다른 이름·성씨로 조회 금지(자동 승인 분류기도 차단함). 6자 미만 이름은 부분 일치 오염 때문에 생략.
+- **Worker**: `searchByName` — processLost 첫 검색에서 EnglishName으로 조회해 후보 맨 위(완전 일치 p 0.95 / 부분 0.6), 관리자 문구에 `🪪 분실자명 일치`. watchPaidLost 10일 감시에서도 매일 조회 → Jev 없이 바로 관리자 푸시 + 후보페이지(watch, NEW). 1단계 1위가 0.05 미만이면 상세 비교 생략(DETAIL_MIN_P).
+- **참고**: 여권사진 파기 세션의 커밋 82a5b40에 추정리스트 상세 비교(Worker)·정답 기록(GAS) 코드가 함께 들어가 push·Worker 배포됨(상세 비교는 운영 중 확인). GAS 정답 기록은 버전 200 한도로 아직 미배포.
