@@ -430,3 +430,9 @@
 - 관리자 페이지 상단 브리핑 카드(오늘의 제주·분실물 주간/월간 카드 버튼) 제거 → `🧩 습득물 후보 모니터 (품목별)` 버튼 하나로 교체. 브리핑 카드 기능 코드(`?brief=1`, `?brief_lost=1`)는 그대로 남아 있고 버튼만 없앰.
 - 새 페이지 `public/admin-candidates.html`(읽기 전용, 관리자 비밀번호 localStorage `adminReplyKey` 공유): 작업 큐 후보JSON을 신고서 대분류(lclsf)별로 묶어 보여 줌. 결제/전체/미결제, 후보 있는 건·유력(0.6+)·찾은 건 필터, 검색, 요약(분실 건·후보·유력·새 후보 3일), 실제 찾은 습득물(LostReport 찾은습득물)은 초록 줄.
 - 데이터: `GET /api/admin/sheet?sheet=Candidates` → GAS `doGet action=admin_candidates` → `adminCandidates()` (TASK_SHEET_ID 큐 + LostReport 결합). 위챗 ID·이름·연락처는 응답에 넣지 않음.
+
+## 2026-11-24 — 분실 접수 '물품 특징' 자세히 쓰게 유도
+- 대충 쓰는 접수가 많아 폼에서 유도(제출은 막지 않음). `lost-found.html` 특징 칸 위에 ① 이유 한 줄(`modal.lost.spec.why` — 경찰청 신고서에 그대로 들어가고 습득물 대조에 쓰임) ② 분류별 항목 칩 `#lost-spec-chips`(누르면 `항목: ` 줄 삽입, 채우면 ✓) ③ 아래 상세도 막대 `#lost-spec-meter`(4칸 + 다음에 쓸 것 한 줄, 글이 있을 때만 visibility로 표시).
+- 분류별 칩: 스마트폰(브랜드/모델·케이스·잠금화면·스티커/흠집), 시계/이어폰, 카메라(스트랩), 지갑·가방(안에 든 것), 의류, 여권(국가·커버·안에 든 것), 기타. 상세도 = brand·extra(안에 든 것/케이스/크기)·mark(스티커·흠집·키링)·long(20자+) 4가지 충족 수. 칩으로 채운 줄은 해당 항목 인정, 나머지는 ko/en/zh 낱말 정규식(LOST_SPEC_RE).
+- 코드: `lost-found.v1.js` initLostSpecHelper/renderLostSpecChips/updateLostSpecMeter (분류 칩 클릭·폼 초기화 때 다시 그림), CSS `sections.css` .lost-spec-*, i18n 키 `modal.lost.spec.why|chip.*|lv1~4|tip.*` ko/en/zh.
+- 효과 측정: 찾은습득물이 쌓이면 상세도와 추정리스트 적중률 비교.

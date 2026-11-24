@@ -258,8 +258,15 @@
                 <input type="hidden" id="lost-report-item-color">
 
                 <div class="lost-form-group">
-                    <label class="lost-form-label"><span data-i18n="modal.lost.spec.label">물품 상세 설명</span></label>
+                    <label class="lost-form-label" for="lost-report-specifics"><span data-i18n="modal.lost.spec.label">물품 상세 설명</span></label>
+                    <!-- 자세히 쓰게 유도: 이유 · 분류별 항목 칩 · 상세도 (lost-found.v1.js initLostSpecHelper) -->
+                    <p class="lost-spec-why" data-i18n="modal.lost.spec.why">您写的内容会原样填入韩国警察厅的报失单，并用来与每件拾得物逐一比对。</p>
+                    <div class="lost-spec-chips" id="lost-spec-chips"></div>
                     <textarea id="lost-report-specifics" class="lost-form-textarea" data-i18n="modal.lost.spec.ph" placeholder="색상, 브랜드, 모델명, 특징 등을 상세히 적어주세요."></textarea>
+                    <div class="lost-spec-meter" id="lost-spec-meter" data-level="0" style="visibility:hidden;" aria-live="polite">
+                        <span class="lost-spec-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+                        <span><span class="lost-spec-level" id="lost-spec-level"></span> <span id="lost-spec-tip"></span></span>
+                    </div>
                 </div>
 
                 <div class="lost-form-group">

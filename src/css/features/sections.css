@@ -4684,6 +4684,51 @@ body:not(.page-home) .wechat-float-btn {
     border-color: #d93025;
 }
 
+/* 분실 접수 물품 특징: 이유 한 줄 · 분류별 항목 칩(누르면 '항목: ' 삽입) · 상세도 막대 (lost-found.v1.js initLostSpecHelper) */
+.lost-spec-why {
+    margin: 0 2px 8px;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: var(--label-secondary);
+}
+.lost-spec-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+.lost-spec-chip {
+    padding: 5px 10px;
+    border: 1px dashed var(--color-orange, #ff6b00);
+    border-radius: 14px;
+    font-size: 0.8rem;
+    color: var(--color-orange, #ff6b00);
+    background: transparent;
+    cursor: pointer;
+}
+.lost-spec-chip.done {
+    border-style: solid;
+    background: #fff0e6;
+}
+.lost-spec-chip.done::before { content: '✓ '; }
+.lost-spec-meter {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 6px 2px 0;
+    min-height: 1.4em;
+    font-size: 0.78rem;
+    line-height: 1.4;
+    color: var(--label-secondary);
+}
+.lost-spec-bars { display: inline-flex; gap: 3px; flex-shrink: 0; }
+.lost-spec-bars i { width: 14px; height: 6px; border-radius: 3px; background: var(--separator); }
+.lost-spec-meter[data-level="1"] .lost-spec-bars i:nth-child(-n+1),
+.lost-spec-meter[data-level="2"] .lost-spec-bars i:nth-child(-n+2) { background: #f0a020; }
+.lost-spec-meter[data-level="3"] .lost-spec-bars i:nth-child(-n+3),
+.lost-spec-meter[data-level="4"] .lost-spec-bars i { background: #1f9d55; }
+.lost-spec-meter[data-level="4"] .lost-spec-level { color: #1f9d55; font-weight: 600; }
+
 /* 분실 접수 화면 신뢰 띠 — 최근 경찰청 등록 사례 (렌더 전엔 visibility:hidden 으로 자리만 잡음) */
 .lost-trust {
     display: flex;

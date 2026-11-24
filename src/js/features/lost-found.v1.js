@@ -382,6 +382,7 @@ function resetLostReportForm() {
     ].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     document.querySelectorAll('#item-category-chips .lost-chip, #item-color-chips .lost-chip, #city-category-chips .lost-chip, #region-category-chips .lost-chip')
         .forEach(c => c.classList.remove('active'));
+    renderLostSpecChips();   // 특징 칩은 기본 묶음으로, 상세도 막대는 숨김
 
     // 서브 필드 숨기기
     document.querySelectorAll('#lost-step-2 .sub-fields').forEach(el => el.classList.remove('active'));
@@ -500,6 +501,92 @@ function syncLostEnName() {
     if (g) g.style.display = needsLostEnName() ? 'block' : 'none';
 }
 
+// ─── 물품 특징을 자세히 쓰게: 분류별 항목 칩 + 상세도 막대 ───
+// 칩을 누르면 '항목: ' 줄이 들어가고, 채운 줄은 그 항목(dim)으로 바로 인정. 나머지 글은 낱말로 추정.
+// dim: brand(브랜드·모델·국가) / extra(안에 든 것·케이스·크기 등) / mark(스티커·흠집 같은 구별점) / long(충분한 길이)
+const LOST_SPEC_DIMS = { model: 'brand', brand: 'brand', country: 'brand', case: 'extra', lockscreen: 'extra', strap: 'extra', cover: 'extra', inside: 'extra', size: 'extra', mark: 'mark' };
+const LOST_SPEC_CHIPS = {
+    '스마트폰': ['model', 'case', 'lockscreen', 'mark'],
+    '시계/이어폰': ['model', 'case', 'mark'],
+    '카메라': ['model', 'strap', 'mark'],
+    '지갑': ['brand', 'inside', 'mark'],
+    '가방/캐리어': ['brand', 'size', 'inside', 'mark'],
+    '의류': ['brand', 'size', 'mark'],
+    '여권': ['country', 'cover', 'inside'],
+    '': ['brand', 'size', 'inside', 'mark']
+};
+const LOST_SPEC_RE = {
+    brand: /[A-Za-z]{2,}|\d{2,}|애플|삼성|아이폰|갤럭시|에어팟|소니|캐논|후지|니콘|샤넬|구찌|루이비통|프라다|나이키|아디다스|苹果|华为|三星|小米|荣耀|索尼|佳能|富士|尼康|大疆|香奈儿|古驰|路易|普拉达|耐克|阿迪/i,
+    extra: /里面|里边|装着|内有|放着|壳|套|挂绳|背带|尺寸|大小|寸|안에|들어|케이스|커버|스트랩|크기|사이즈|inside|contain|case|cover|strap|size|inch/i,
+    mark: /贴纸|划痕|挂件|钥匙扣|刻字|裂|磨损|污渍|名字|吊坠|스티커|흠집|키링|각인|금이|깨진|얼룩|이름|고리|sticker|scratch|key ?(chain|ring)|engrav|crack|stain|charm|name ?tag/i
+};
+function lostSpecTr(key) { return window.t ? window.t(key) : key; }
+function lostSpecChipLine(text, label) {
+    const esc = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return text.match(new RegExp(`^\\s*${esc}\\s*[:：]\\s*(.*)$`, 'm'));
+}
+function updateLostSpecMeter() {
+    const ta = document.getElementById('lost-report-specifics');
+    const meter = document.getElementById('lost-spec-meter');
+    if (!ta || !meter) return;
+    let rest = ta.value;
+    const hit = { brand: false, extra: false, mark: false, long: false };
+    document.querySelectorAll('#lost-spec-chips .lost-spec-chip').forEach(chip => {
+        const m = lostSpecChipLine(rest, lostSpecTr(chip.dataset.i18n));
+        const filled = !!(m && m[1].trim());
+        chip.classList.toggle('done', filled);
+        if (m) {
+            if (filled) hit[LOST_SPEC_DIMS[chip.dataset.key]] = true;
+            rest = rest.replace(m[0], m[1]);   // 항목 이름 자체는 추정에서 뺀다
+        }
+    });
+    ['brand', 'extra', 'mark'].forEach(d => { if (LOST_SPEC_RE[d].test(rest)) hit[d] = true; });
+    hit.long = ta.value.replace(/\s/g, '').length >= 20;
+    const level = Object.values(hit).filter(Boolean).length;
+    meter.dataset.level = String(level);
+    meter.style.visibility = ta.value.trim() ? 'visible' : 'hidden';
+    const lvKey = `modal.lost.spec.lv${Math.max(1, level)}`;
+    const miss = ['brand', 'extra', 'mark', 'long'].find(d => !hit[d]);
+    const tipKey = miss ? `modal.lost.spec.tip.${miss}` : 'modal.lost.spec.tip.done';
+    const lv = document.getElementById('lost-spec-level');
+    const tip = document.getElementById('lost-spec-tip');
+    // data-i18n 을 달아 두면 언어를 바꿔도 applyTranslations 가 다시 채운다
+    if (lv) { lv.setAttribute('data-i18n', lvKey); lv.textContent = lostSpecTr(lvKey); }
+    if (tip) { tip.setAttribute('data-i18n', tipKey); tip.textContent = lostSpecTr(tipKey); }
+}
+function renderLostSpecChips() {
+    const box = document.getElementById('lost-spec-chips');
+    if (!box) return;
+    const cat = document.getElementById('lost-report-item-category')?.value || '';
+    box.innerHTML = '';
+    (LOST_SPEC_CHIPS[cat] || LOST_SPEC_CHIPS['']).forEach(key => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'lost-spec-chip';
+        b.dataset.key = key;
+        b.setAttribute('data-i18n', `modal.lost.spec.chip.${key}`);
+        b.textContent = lostSpecTr(`modal.lost.spec.chip.${key}`);
+        b.addEventListener('click', () => {
+            const ta = document.getElementById('lost-report-specifics');
+            if (!ta) return;
+            const label = lostSpecTr(b.dataset.i18n);
+            const m = lostSpecChipLine(ta.value, label);
+            if (!m) ta.value = (ta.value.trim() ? ta.value.replace(/\s+$/, '') + '\n' : '') + label + ': ';
+            ta.focus();
+            // 이미 있으면 그 줄 끝으로, 없으면 방금 넣은 줄 끝(=맨 끝)으로
+            const pos = m ? ta.value.indexOf(m[0]) + m[0].length : ta.value.length;
+            try { ta.setSelectionRange(pos, pos); } catch (err) { /* 무시 */ }
+            updateLostSpecMeter();
+        });
+        box.appendChild(b);
+    });
+    updateLostSpecMeter();
+}
+function initLostSpecHelper() {
+    renderLostSpecChips();
+    document.getElementById('lost-report-specifics')?.addEventListener('input', updateLostSpecMeter);
+}
+
 // Global Chip Event Listener Setup
 document.addEventListener('DOMContentLoaded', () => {
     // Item Category Chips
@@ -511,8 +598,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const hiddenInput = document.getElementById('lost-report-item-category');
             if (hiddenInput) hiddenInput.value = this.dataset.value;
             syncLostEnName();
+            renderLostSpecChips();
         });
     });
+    initLostSpecHelper();
     document.getElementById('lost-report-has-id')?.addEventListener('change', syncLostEnName);
     // 입력하는 대로 대문자로 (여권 표기와 같게)
     document.getElementById('lost-report-en-name')?.addEventListener('input', (e) => {
