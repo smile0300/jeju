@@ -73,6 +73,21 @@ html[lang="ko"] .eat-beta { word-break: keep-all; } /* 중국어에 keep-all을 
 .eat-kw .pl-chip { min-height: 34px; padding: 0 12px; font-size: 0.82rem; }
 .eat-filters .pl-filter .pl-chip { min-height: 36px; font-size: 0.85rem; }
 
+/* 필터 줄 이름표 — 줄마다 무엇을 고르는지 먼저 보이게 */
+.eat-sec { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.eat-sec-label { display: flex; align-items: center; gap: 4px; font-size: 0.74rem; font-weight: 800; color: var(--label-secondary); letter-spacing: 0.01em; }
+.eat-sec-label i { font-size: 0.85rem; color: var(--accent); }
+/* 옆으로 넘기는 줄은 오른쪽 끝을 흐리게 해서 더 있다는 걸 알린다 */
+.eat-filters .pl-filter { -webkit-mask-image: linear-gradient(to right, #000 88%, transparent); mask-image: linear-gradient(to right, #000 88%, transparent); padding-right: 24px; }
+.eat-panel { gap: 12px; margin-top: 2px; padding: 12px; border-radius: 14px; background: var(--fill-secondary, #F2F4F6); }
+.eat-panel .eat-kw .pl-chip, .eat-panel .pl-filter .pl-chip { background: var(--bg-card, #fff); }
+.eat-panel .pl-chip.active { background: var(--accent); }
+/* 적용 중인 필터 요약 */
+.eat-applied { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding-top: 2px; }
+.eat-applied-label { font-size: 0.74rem; font-weight: 800; color: var(--label-secondary); margin-right: 2px; }
+.eat-applied-chip { display: inline-flex; align-items: center; gap: 4px; min-height: 30px; padding: 0 8px 0 10px; border: 0; border-radius: 999px; background: var(--accent-subtle); color: var(--accent-active); font-size: 0.78rem; font-weight: 700; cursor: pointer; }
+.eat-applied-chip i { font-size: 0.75rem; opacity: 0.8; }
+
 .eat-result-head {
     display: flex;
     justify-content: space-between;

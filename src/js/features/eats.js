@@ -28,7 +28,7 @@ const S = {
         empty: '没有符合条件的店，试试减少筛选条件',
         loading: '加载中…',
         load_fail: '加载失败，请刷新重试',
-        g_cuisine: '吃什么', g_area: '区域', g_price: '人均', g_kw: '特色', g_sort: '排序',
+        g_cuisine: '吃什么', g_area: '区域', g_quick: '热门筛选', g_kw_trust: '口碑认证', g_kw_easy: '外国游客友好', g_kw_time: '营业·排队', g_kw_vibe: '氛围·甜点', applied: '已选', clear_one: '取消', g_price: '人均', g_kw: '特色', g_sort: '排序',
         all: '全部',
         'cu.pork': '黑猪肉', 'cu.seafood': '海鲜', 'cu.noodle': '面食', 'cu.soup': '汤饭·粥', 'cu.meat': '烤肉·鸡',
         'cu.local': '乡土料理', 'cu.snack': '小吃·面包', 'cu.western': '西餐·套餐', 'cu.cafe': '咖啡馆', 'cu.other': '其他',
@@ -72,7 +72,7 @@ const S = {
         empty: 'Nothing matches. Try fewer filters.',
         loading: 'Loading…',
         load_fail: 'Could not load. Please refresh.',
-        g_cuisine: 'Food', g_area: 'Area', g_price: 'Per person', g_kw: 'Features', g_sort: 'Sort',
+        g_cuisine: 'Food', g_area: 'Area', g_quick: 'Quick picks', g_kw_trust: 'Trusted picks', g_kw_easy: 'Visitor-friendly', g_kw_time: 'Hours & wait', g_kw_vibe: 'Vibe & dessert', applied: 'Selected', clear_one: 'Remove', g_price: 'Per person', g_kw: 'Features', g_sort: 'Sort',
         all: 'All',
         'cu.pork': 'Black pork', 'cu.seafood': 'Seafood', 'cu.noodle': 'Noodles', 'cu.soup': 'Soup & porridge', 'cu.meat': 'BBQ & chicken',
         'cu.local': 'Jeju home food', 'cu.snack': 'Snacks & bakery', 'cu.western': 'Western & course', 'cu.cafe': 'Cafés', 'cu.other': 'Other',
@@ -116,7 +116,7 @@ const S = {
         empty: '조건에 맞는 곳이 없어요. 필터를 줄여 보세요.',
         loading: '불러오는 중…',
         load_fail: '불러오지 못했습니다. 새로고침해 주세요.',
-        g_cuisine: '음식', g_area: '지역', g_price: '1인 가격', g_kw: '키워드', g_sort: '정렬',
+        g_cuisine: '음식', g_area: '지역', g_quick: '추천 필터', g_kw_trust: '믿을 만한 곳', g_kw_easy: '외국인 편의', g_kw_time: '영업·대기', g_kw_vibe: '분위기·디저트', applied: '적용 중', clear_one: '빼기', g_price: '1인 가격', g_kw: '키워드', g_sort: '정렬',
         all: '전체',
         'cu.pork': '흑돼지', 'cu.seafood': '해산물', 'cu.noodle': '국수·면', 'cu.soup': '국밥·죽', 'cu.meat': '고기·닭',
         'cu.local': '향토음식', 'cu.snack': '분식·빵', 'cu.western': '양식·코스', 'cu.cafe': '카페', 'cu.other': '기타',
@@ -164,6 +164,13 @@ const PRICES = ['1', '2', '3', '4'];
 const KEYWORDS = ['opennow', 'catchtable', 'regular', 'hot', 'bakery', 'locals', 'hyangto', 'goodprice', 'solo', 'cnmenu', 'enmenu', 'cnreview', 'shortwait', 'walkin', 'breakfast', 'ocean', 'photo', 'tv', 'century'];
 const BADGE_ORDER = ['regular', 'hyangto', 'goodprice', 'century', 'locals', 'tv', 'hot', 'cnmenu', 'enmenu', 'cnreview', 'solo', 'twoplus', 'booking', 'breakfast', 'ocean', 'nokids'];
 const SORTS = ['rec', 'rating', 'reviews', 'cheap'];
+// 필터 더보기 안의 키워드를 성격별로 묶는다. 칩 그룹 이름은 kw_<묶음>, 값은 모두 state.kw 하나로 모은다
+const KW_GROUPS = [
+    ['trust', ['regular', 'locals', 'hyangto', 'goodprice', 'century', 'tv', 'hot']],
+    ['easy', ['cnmenu', 'enmenu', 'cnreview', 'walkin', 'solo']],
+    ['time', ['opennow', 'breakfast', 'shortwait', 'catchtable']],
+    ['vibe', ['ocean', 'photo', 'bakery']],
+];
 const QUICK = [['kw', 'hot'], ['kw', 'ocean'], ['kw', 'bakery'], ['kw', 'solo'], ['pr', '1'], ['kw', 'breakfast'], ['kw', 'opennow']];
 const BAKERY_RE = /빵|베이커리|도넛|꽈배기|케이크|디저트|떡|카이막|빙수|제과|바게트|스콘|타르트|아이스크림|젤라또/;
 const RANKED = 10;
@@ -603,9 +610,9 @@ const quickOpts = () => quickItems().map(([g, v]) => ({ value: `${g}:${v}`, labe
 const quickSelected = () => quickItems().filter(([g, v]) => state[g].includes(v)).map(([g, v]) => `${g}:${v}`);
 
 function syncChips(root) {
-    const want = { cu: state.cu, ar: state.ar, pr: state.pr, kw: state.kw, quick: quickSelected() };
+    const want = { cu: state.cu, ar: state.ar, pr: state.pr, kw: state.kw, quick: quickSelected(), sort: [state.sort] };
     for (const [g, vals] of Object.entries(want)) {
-        root.querySelectorAll(`[data-chip-group="${g}"] .pl-chip`).forEach(c => {
+        root.querySelectorAll(`[data-chip-group="${g}"] .pl-chip, [data-chip-group^="${g}_"] .pl-chip`).forEach(c => {
             const on = vals.includes(c.dataset.value);
             c.classList.toggle('active', on);
             c.setAttribute('aria-pressed', String(on));
@@ -626,6 +633,7 @@ function updateCounts(root) {
         const group = c.closest('[data-chip-group]').dataset.chipGroup;
         let g = group, v = c.dataset.value;
         if (group === 'quick') [g, v] = v.split(':');
+        if (group.startsWith('kw_')) g = 'kw';
         if (!['cu', 'ar', 'pr', 'kw'].includes(g)) return;
         const n = countFor(g, v);
         let tag = c.querySelector('.eat-n');
@@ -640,6 +648,30 @@ const activeCount = () => state.pr.length + state.kw.length + (state.sort !== 'r
 /** 필터 더보기 버튼: 글자 대신 아래 화살표(열리면 뒤집힘) + 고른 필터 수 */
 const moreBtnInner = (n) => `<i class="ph-bold ph-caret-down eat-more-caret"></i>${n ? `<span class="eat-count-dot">${n}</span>` : ''}`;
 
+const KW_ICON = { trust: 'ph-seal-check', easy: 'ph-translate', time: 'ph-clock', vibe: 'ph-camera' };
+// 필터 한 줄: 위에 작은 이름표(아이콘 + 묶음 이름), 아래에 칩
+const filterRow = (labelKey, icon, body) => `<div class="eat-sec"><div class="eat-sec-label"><i class="ph-bold ${icon}" aria-hidden="true"></i>${escapeHtml(L(labelKey))}</div>${body}</div>`;
+
+// 적용 중인 필터 요약: 줄이 옆으로 밀려 안 보여도 무엇이 걸렸는지 한눈에 보고 ✕로 하나씩 뺀다
+function appliedHtml() {
+    const items = [
+        ...state.cu.map(v => ['cu', v, L(`cu.${v}`)]),
+        ...state.ar.map(v => ['ar', v, L(`ar.${v}`)]),
+        ...state.pr.map(v => ['pr', v, L(`pr.${v}`)]),
+        ...state.kw.map(v => ['kw', v, L(`kw.${v}`)]),
+        ...(state.sort !== 'rec' ? [['sort', state.sort, L(`so.${state.sort}`)]] : []),
+    ];
+    if (!items.length) return '';
+    return `<div class="eat-applied"><span class="eat-applied-label">${escapeHtml(L('applied'))}</span>${items.map(([g, v, label]) =>
+        `<button type="button" class="eat-applied-chip" data-unset="${g}:${escapeHtml(v)}" aria-label="${escapeHtml(L('clear_one'))} ${escapeHtml(label)}">${escapeHtml(label)}<i class="ph-bold ph-x" aria-hidden="true"></i></button>`).join('')}</div>`;
+}
+function refreshApplied(root) {
+    const box = root.querySelector('.eat-applied-box');
+    if (box) box.innerHTML = appliedHtml();
+    const btn = root.querySelector('[data-more-filters]');
+    if (btn) btn.innerHTML = moreBtnInner(activeCount());
+}
+
 function filtersHtml() {
     const n = activeCount();
     return `<div class="eat-filters">
@@ -647,17 +679,15 @@ function filtersHtml() {
             <input type="search" class="eat-search" id="eat-q" value="${escapeHtml(state.q)}" placeholder="${escapeHtml(L('search_ph'))}" autocomplete="off">
             <button type="button" class="eat-more-btn${state.more ? ' active' : ''}" data-more-filters aria-expanded="${state.more}" aria-label="${escapeHtml(L('more_filters'))}" title="${escapeHtml(L('more_filters'))}">${moreBtnInner(n)}</button>
         </div>
-        <div class="pl-filter eat-quick">${chipGroup('quick', quickOpts(), { multi: true, selected: quickSelected() })}</div>
-        <div class="pl-filter">${chipGroup('cu', opts(CUISINES, 'cu'), { multi: true, selected: state.cu })}</div>
-        <div class="pl-filter">${chipGroup('ar', opts(AREAS, 'ar'), { multi: true, selected: state.ar })}</div>
+        ${filterRow('g_quick', 'ph-lightning', `<div class="pl-filter eat-quick">${chipGroup('quick', quickOpts(), { multi: true, selected: quickSelected() })}</div>`)}
+        ${filterRow('g_cuisine', 'ph-bowl-food', `<div class="pl-filter">${chipGroup('cu', opts(CUISINES, 'cu'), { multi: true, selected: state.cu })}</div>`)}
+        ${filterRow('g_area', 'ph-map-pin', `<div class="pl-filter">${chipGroup('ar', opts(AREAS, 'ar'), { multi: true, selected: state.ar })}</div>`)}
         <div class="eat-panel"${state.more ? '' : ' hidden'}>
-            <div class="eat-group-label">${L('g_price')}</div>
-            <div class="pl-filter">${chipGroup('pr', opts(PRICES, 'pr'), { multi: true, selected: state.pr })}</div>
-            <div class="eat-group-label">${L('g_kw')}</div>
-            <div class="eat-kw">${chipGroup('kw', opts(KEYWORDS, 'kw'), { multi: true, selected: state.kw })}</div>
-            <div class="eat-group-label">${L('g_sort')}</div>
-            <div class="pl-filter">${chipGroup('sort', opts(SORTS, 'so'), { selected: [state.sort] })}</div>
+            ${filterRow('g_price', 'ph-coins', `<div class="pl-filter">${chipGroup('pr', opts(PRICES, 'pr'), { multi: true, selected: state.pr })}</div>`)}
+            ${KW_GROUPS.map(([g, keys]) => filterRow(`g_kw_${g}`, KW_ICON[g], `<div class="eat-kw">${chipGroup(`kw_${g}`, opts(keys, 'kw'), { multi: true, selected: state.kw })}</div>`)).join('')}
+            ${filterRow('g_sort', 'ph-sort-descending', `<div class="pl-filter">${chipGroup('sort', opts(SORTS, 'so'), { selected: [state.sort] })}</div>`)}
         </div>
+        <div class="eat-applied-box">${appliedHtml()}</div>
     </div>`;
 }
 
@@ -734,12 +764,14 @@ function bind(root) {
                 if (on && !has) state[g] = [...state[g], v];
                 if (!on && has) state[g] = state[g].filter(x => x !== v);
             }
+        } else if (name.startsWith('kw_')) {
+            const keys = KW_GROUPS.find(([g]) => `kw_${g}` === name)?.[1] || [];
+            state.kw = [...state.kw.filter(k => !keys.includes(k)), ...values];
         } else state[name] = values;
         syncChips(root);
         state.shown = PAGE;
         renderResults();
-        const btn = root.querySelector('[data-more-filters]');
-        if (btn) { const n = activeCount(); btn.innerHTML = moreBtnInner(n); }
+        refreshApplied(root);
     });
     let timer;
     root.addEventListener('input', (e) => {
@@ -755,6 +787,17 @@ function bind(root) {
             const btn = e.target.closest('[data-more-filters]');
             btn.classList.toggle('active', state.more);
             btn.setAttribute('aria-expanded', state.more);
+            return;
+        }
+        const unset = e.target.closest('[data-unset]');
+        if (unset) {
+            const [g, v] = unset.dataset.unset.split(':');
+            if (g === 'sort') state.sort = 'rec';
+            else state[g] = state[g].filter(x => x !== v);
+            syncChips(root);
+            state.shown = PAGE;
+            renderResults();
+            refreshApplied(root);
             return;
         }
         const vBtn = e.target.closest('[data-eat-view]');
