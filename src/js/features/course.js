@@ -2,7 +2,7 @@ import { tr, pick, escapeHtml } from './planner/strings.js';
 import { tp } from './planner/plan-strings.js';
 import { chipGroup, bindChips, copyText, flashLabel } from './planner/shared.js';
 import { BLOCKS, CONCEPTS, COMPANIONS, COURSES_DRAFT } from '../../data/courses.js';
-import { mapHtml, moveHtml, timelineHtml, fillMeals, blockLabel, nowBadge, busBadgeHtml, driveTotal, coverHtml, money, COURSE_HOTEL_KEYS } from './planner/course-view.js';
+import { mapHtml, moveHtml, timelineHtml, fillMeals, blockLabel, nowBadge, busBadgeHtml, driveTotal, coverHtml, planCoverHtml, money, COURSE_HOTEL_KEYS } from './planner/course-view.js';
 import { rankBlocks, buildPlans, dayCost, isGoodMatch } from './planner/course-match.js';
 import { builderHtml, onBuilderChip, onBuilderClick, startFromBlock } from './planner/course-builder.js';
 import { wishAllBtnHtml } from './planner/wishlist.js';
@@ -146,7 +146,7 @@ function blockCardHtml(key) {
 function planCardHtml(plan, idx) {
     const total = plan.reduce((sum, k) => sum + dayCost(BLOCKS[k], budget()), 0);
     return `<button type="button" class="pl-course-card" data-open="plan:${plan.join(',')}">
-        ${coverHtml(plan[0])}
+        ${planCoverHtml(plan)}
         <span class="pl-course-tags"><span class="pl-tag">${durationLabel(plan.length)}</span><span class="pl-tag pl-tag-match">${tr('course.plan_alt', { n: idx + 1 })}</span></span>
         <span class="pl-course-days">${plan.map((k, i) =>
             `<span class="pl-daychip">${tr('course.day', { n: i + 1 })} ${escapeHtml(shortTitle(BLOCKS[k]))}</span>`).join('')}</span>

@@ -5,6 +5,7 @@ import { tr, pick, escapeHtml } from './strings.js';
 import { tp } from './plan-strings.js';
 import { BLOCKS, STOP_POS, STOP_TYPES, COVERS, isInSeason } from '../../../data/courses.js';
 import { JEJU_MAP, projectLatLng } from '../../../data/jeju-map.js';
+import { STOP_PHOTOS } from '../../../data/stop-photos.js';
 import { roadKm, taxiFare, krwToCny, driveMin, WALK_KM, WALK_KMH, HOTEL_BASE, BUS_FARE } from '../../../data/taxi.js';
 import { wishBtnHtml } from './wishlist.js';
 import { openDriverCard, openEatDetailModal, buildMapUrls } from './travel-card.js';
@@ -37,15 +38,64 @@ export function busBadgeHtml(block, hotelKey = 'jeju') {
     return `<span class="pl-tag ${ok ? 'pl-tag-bus-ok' : 'pl-tag-bus-hard'}">${escapeHtml(tr(ok ? 'course.bus_ok' : 'course.bus_hard'))}</span>`;
 }
 
-export function coverHtml(key, { eager = false } = {}) {
-    const cover = COVERS[key], block = BLOCKS[key];
-    if (!cover || !block) return '';
-    const stop = block.stops.find(s => s.name.ko === cover.stop);
-    const place = stop ? pick(stop.name) : cover.stop;
-    return `<span class="pl-cover">
-        <img src="/img/courses/${cover.img}" alt="${escapeHtml(place)}" width="480" height="270" decoding="async"${eager ? '' : ' loading="lazy"'}>
-        <span class="pl-cover-credit">${escapeHtml(tr('course.photo_credit'))} · ${escapeHtml(place)}</span>
+// ── 코스 표지: 장소 사진 2~4장을 대각선으로 나눠 한 장에 (코스마다 구성이 보이게) ──
+const COVER_BY_STOP = Object.fromEntries(Object.values(COVERS).map(c => [c.stop, `/img/courses/${c.img}`]));
+const MAX_SLICES = 4;
+
+/** 장소 사진 주소 (코스 표지 사진 → 장소 사진 순). 없으면 null */
+const photoOf = (nameKo) => COVER_BY_STOP[nameKo] || (STOP_PHOTOS[nameKo] ? `/img/places/${STOP_PHOTOS[nameKo]}` : null);
+
+/** 순서를 지키며 고르게 n개 고르기 */
+function spread(list, n) {
+    if (list.length <= n) return list;
+    return Array.from({ length: n }, (_, i) => list[Math.round(i * (list.length - 1) / (n - 1))]);
+}
+
+/** 사진 [{src, alt}] → 대각선 분할 표지. 경계는 '/' 방향으로 기울고 사이에 흰 틈 */
+function splitCoverHtml(photos, { eager = false } = {}) {
+    if (!photos.length) return '';
+    const n = photos.length;
+    const S = n === 1 ? 0 : 0.07;   // 기울기 (가로 폭 대비, 위아래로 각각)
+    const G = 0.005;                 // 틈 절반
+    const top = (j) => (j === 0 ? 0 : j === n ? 1 : j / n + S);
+    const bot = (j) => (j === 0 ? 0 : j === n ? 1 : j / n - S);
+    const pct = (v) => `${(v * 100).toFixed(2)}%`;
+    const slices = photos.map((p, i) => {
+        const gl = i === 0 ? 0 : G, gr = i === n - 1 ? 0 : G;
+        const x = [top(i) + gl, top(i + 1) - gr, bot(i + 1) - gr, bot(i) + gl];
+        const left = Math.min(...x), right = Math.max(...x), w = right - left;
+        const rel = (v) => pct((v - left) / w);
+        const clip = n === 1 ? '' : ` style="left:${pct(left)};width:${pct(w)};clip-path:polygon(${rel(x[0])} 0,${rel(x[1])} 0,${rel(x[2])} 100%,${rel(x[3])} 100%)"`;
+        return `<span class="pl-cover-slice"${clip}><img src="${p.src}" alt="${escapeHtml(p.alt)}" width="480" height="360" decoding="async"${eager ? '' : ' loading="lazy"'}></span>`;
+    }).join('');
+    return `<span class="pl-cover pl-cover-n${n}">${slices}
+        <span class="pl-cover-credit">${escapeHtml(tr('course.photo_credit'))}</span>
     </span>`;
+}
+
+/** 하루 코스 표지: 그 코스 장소들 사진 (최대 4장, 동선 순서대로) */
+export function coverHtml(key, { eager = false } = {}) {
+    const block = BLOCKS[key];
+    if (!block) return '';
+    const withPhoto = block.stops.map(s => ({ src: photoOf(s.name.ko), alt: pick(s.name) })).filter(p => p.src);
+    return splitCoverHtml(spread(withPhoto, MAX_SLICES), { eager });
+}
+
+/** 여러 날 코스 표지: 1박2일은 날마다 2장, 그 이상은 날마다 그날의 대표 사진 1장 (최대 4칸)
+ *  (첫날이 같은 일정 후보끼리도 표지가 달라 보이게) */
+export function planCoverHtml(keys, { eager = false } = {}) {
+    const perDay = keys.length <= 2 ? 2 : 1;
+    const photos = keys.flatMap(k => {
+        const b = BLOCKS[k];
+        if (!b) return [];
+        if (perDay === 1) {
+            const c = COVERS[k];
+            const stop = b.stops.find(s => s.name.ko === c?.stop);
+            return c ? [{ src: `/img/courses/${c.img}`, alt: stop ? pick(stop.name) : c.stop }] : [];
+        }
+        return spread(b.stops.map(s => ({ src: photoOf(s.name.ko), alt: pick(s.name) })).filter(p => p.src), perDay);
+    });
+    return splitCoverHtml(spread(photos, MAX_SLICES), { eager });
 }
 
 export const money = (krw) => ({ krw: krw.toLocaleString('ko-KR'), cny: krwToCny(krw) });

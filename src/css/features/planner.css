@@ -466,6 +466,9 @@
 }
 .pl-course-card .pl-cover { margin-bottom: var(--space-2); }
 .pl-cover img { display: block; width: 100%; height: 100%; object-fit: cover; }
+/* 분할 표지: 칸마다 사진 한 장, 대각선 틈은 카드 배경색 */
+.pl-cover-slice { position: absolute; top: 0; bottom: 0; left: 0; width: 100%; }
+.pl-cover-n2, .pl-cover-n3, .pl-cover-n4 { background: var(--bg-card); }
 .pl-cover-credit {
     position: absolute;
     right: 6px;

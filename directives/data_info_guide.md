@@ -458,3 +458,9 @@
 - **GAS 배포 완료(2026-11-24)**: v204 "course wizard log (CourseLog)", 버전 배포 47개 모두 @204. (같은 시각 다른 세션의 v203 배포가 끝나길 기다린 뒤 진행 — 배포가 섞여 있으면 끝날 때까지 기다릴 것)
   - 확인: 로컬 함수(`pages-functions-compat`)로 1줄 전송 → `success`. 운영 CourseLog 탭에 Visitor `claudetest01` 테스트 줄 1개 있음(지워도 됨). 잘못된 값은 Function에서 400.
   - 사이트(프론트 + `/api/course-log`)는 아직 push 전 → push 후부터 실제 기록 시작.
+
+## 2026-11-24 코스 표지 대각선 분할 + 장소별 사진 55장
+- 코스 표지가 코스당 1장이라 다 같아 보임 → 코스 장소 사진 2~4장을 대각선('/')으로 나눠 한 장에 (`course-view.js` `coverHtml`/`planCoverHtml`). 여러 날: 1박2일은 날마다 2장, 그 이상은 날마다 대표 1장, 최대 4칸.
+- 장소 사진: `python -I execution/fetch_course_photos.py <stops.json> <작업폴더>` (짝 찾기) → `--download` (480x360 webp 품질 62 → `public/img/places`, `src/data/stop-photos.js` 생성). 비짓제주 관광지·쇼핑·음식점 목록에서 이름 + 1.5km 이내로 짝, 모두 0.06km 이내로 일치.
+  - 수동 지정(`MANUAL`): 칠성로 쇼핑거리 ← 제주칠성로상가, 풍림다방 송당 ← 풍림다방 커피로스터즈 송당, 천제연폭포는 비짓제주 대표사진이 4.3 위령비 계단이라 사진 없음.
+  - 결과: 코스 장소 82곳 중 81곳 사진 (코스 표지 26 + 장소 55, 합계 약 1.3MB, 목록에선 지연 로딩). 새 코스 장소를 추가하면 이 스크립트를 다시 돌릴 것.
