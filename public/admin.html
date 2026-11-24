@@ -111,7 +111,7 @@
   // 대리수령 수정 폼에 먼저 보일 열 (나머지 열은 아래 '기타 열'로)
   var SS_MAIN = ['Step', 'Date', 'Item', 'Region', 'Place', 'Note', 'AdminNote', 'MgmtNumber', 'WeChatId', 'RequesterName', 'Contact', 'Address'];
   var SS_HIDDEN = ['CaseId', 'Timestamp', 'UserAgent'];
-  var LONG = ['Note', 'AdminNote', 'Address'];
+  var LONG = ['Note', 'AdminNote', 'Address', 'Specifics', 'DetailLocation'];
 
   var state = { sheet: 'LostReport', data: {}, shown: PAGE };
 
@@ -411,7 +411,7 @@
         act.appendChild(fb);
       });
     }
-    var editBtn = el('button', 'sub', '✏️ 상태 수정');
+    var editBtn = el('button', 'sub', '✏️ 수정');
     editBtn.type = 'button';
     act.appendChild(editBtn);
     if (str(r.WechatId)) act.appendChild(copyBtn('위챗ID 복사', str(r.WechatId)));
@@ -420,7 +420,7 @@
     c.appendChild(act);
     editBtn.addEventListener('click', function () {
       var f = c.querySelector('form.edit');
-      if (f) { f.remove(); editBtn.textContent = '✏️ 상태 수정'; return; }
+      if (f) { f.remove(); editBtn.textContent = '✏️ 수정'; return; }
       c.insertBefore(lostEditForm(c, r), act.nextSibling);
       editBtn.textContent = '닫기';
     });
@@ -428,7 +428,13 @@
     return c;
   }
 
-  // 찾기 서비스·결제·경찰 접수 칸 수정 (고객이 쓴 칸은 GAS가 막음)
+  // 고객 접수 칸 (GAS ADMIN_LOST_CUSTOMER_COLS 와 같게)
+  var LOST_CUST_FIELDS = [['ItemCategory', '분실 물품'], ['ItemColor', '색상'], ['HasIdCard', '신분증·카드 포함 (Y)'], ['EnglishName', '영문명'],
+    ['Specifics', '특징'], ['Date', '분실일'], ['Time', '분실 시각'], ['City', '도시'], ['RegionCategory', '지역'], ['DetailLocation', '상세 장소'],
+    ['HotelName', '호텔'], ['hotelRoom', '객실'], ['HotelBooker', '예약자'], ['HotelDates', '숙박일'],
+    ['CarNumber', '차량번호'], ['BoardLoc', '탑승 장소'], ['BoardTime', '탑승 시각'], ['AlightLoc', '하차 장소'], ['AlightTime', '하차 시각']];
+
+  // 찾기 서비스·결제·경찰 접수 칸 + 고객 접수 칸 수정
   function lostEditForm(card, r) {
     var form = el('form', 'edit');
     function sel(name, options) {
@@ -462,6 +468,29 @@
       form.appendChild(f);
     });
     form.appendChild(el('div', 'notes', '기본에서 집중으로 업그레이드(10元 추가)하면 찾기상품을 바꾸세요. 경찰 접수는 북마클릿 기록 버튼을 쓰면 자동으로 채워집니다.'));
+    // 고객이 쓴 칸 — 위챗으로 받은 정정 반영. 저장하면 번역·추정리스트·신고서를 다시 만듦 (다음 크론, 최대 15분)
+    var cust = el('details');
+    cust.appendChild(el('summary', '', '📝 고객 접수 내용 수정'));
+    if (str(r['경찰접수번호'])) cust.appendChild(el('div', 'notes', '⚠ 이미 경찰에 등록된 건입니다 (' + str(r['경찰접수번호']) + '). 여기서 고쳐도 경찰 신고 내용은 바뀌지 않으니, 필요하면 경찰민원24에서 따로 수정하세요.'));
+    LOST_CUST_FIELDS.forEach(function (p) {
+      var h = p[0];
+      if (h !== 'ItemCategory' && h !== 'Specifics' && h !== 'Date' && h !== 'DetailLocation' && !str(r[h]) && !(h in r)) return;   // 시트에 없는 열은 숨김
+      var f;
+      if (h === 'HasIdCard') {
+        f = sel('HasIdCard', ['', 'Y']);
+      } else {
+        f = field(h, r[h]);
+        var hint = f.querySelector('.hint');
+        if (hint) hint.remove();
+        var inp = f.querySelector('input');
+        if (h === 'Date' && inp) inp.type = /^\d{4}-\d{2}-\d{2}$/.test(str(r[h])) || !str(r[h]) ? 'date' : 'text';
+        if (h === 'EnglishName' && inp) inp.placeholder = '여권 영문명 (대문자, 고객 본인 것만)';
+      }
+      f.querySelector('label').textContent = p[1];
+      cust.appendChild(f);
+    });
+    cust.appendChild(el('div', 'hint', '저장하면 한국어 번역을 다시 만들고, 다음 크론(최대 15분)에 분류·습득물 후보·신고서를 새로 계산합니다.'));
+    form.appendChild(cust);
     var msg = el('p', 'error');
     msg.hidden = true;
     var save = el('button', 'save', '저장');
@@ -494,6 +523,7 @@
       card.replaceWith(fresh);
       var q = data.queue === '등록대기' ? ' · 작업 큐 등록대기 (30분 안에 경찰 등록)' : data.queue ? ' · 작업 큐: ' + data.queue : '';
       var lg = data.ledger ? ' · 정산표: ' + data.ledger : '';
+      if (data.retriage) lg += data.retriage === '재판정 요청' ? ' · 후보 재계산 요청됨 (최대 15분)' : data.retriage === 'not-queued' ? ' · 아직 판정 전 (크론이 새로 판정)' : ' · 재판정: ' + data.retriage;
       if (data.ledger && data.ledger.indexOf('입력') !== -1) delete state.data.Ledger;   // 정산 탭을 열 때 새로 받아 오게
       var ok = el('p', 'ok', '✅ 저장됨: ' + data.written.join(', ') + q + lg);
       fresh.appendChild(ok);

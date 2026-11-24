@@ -141,7 +141,7 @@ function doPost(e) {
     if (!publicRequestAllowed_(data)) return json_({ result: 'error', message: 'forbidden' });
 
     // 동승 달력 · 코스/대절 시트 준비 (planner.js)
-    if (data.type === 'planner_setup' || String(data.type || '').indexOf('carpool_') === 0) {
+    if (data.type === 'planner_setup' || data.type === 'course_log' || String(data.type || '').indexOf('carpool_') === 0) {
       return handlePlanner(data);
     }
 
@@ -389,6 +389,17 @@ function handleTaskQueue_(data) {
         if (String(r[0]).trim() && !queued['LostReport!' + n]) pending.push(n);
       });
     }
+    // 관리자가 고객 칸을 고친 건('재판정' = 요청)을 먼저 — 다시 판정하면 task_append 가 그 줄의 요청을 지운다
+    var reCol = headers.indexOf('재판정');
+    if (reCol !== -1 && refCol !== -1 && sheet.getLastRow() >= 2) {
+      var reVals = sheet.getRange(2, 1, sheet.getLastRow() - 1, headers.length).getDisplayValues();
+      var again = [];
+      reVals.forEach(function (r) {
+        var m = String(r[refCol]).match(/^LostReport!(\d+)$/);
+        if (m && String(r[reCol]).trim() === '요청') again.push(Number(m[1]));
+      });
+      pending = again.concat(pending.filter(function (n) { return again.indexOf(n) === -1; }));
+    }
     return json_({ result: 'success', rows: pending.slice(0, parseInt(data.limit, 10) || 3), total: pending.length });
   }
 
@@ -399,7 +410,13 @@ function handleTaskQueue_(data) {
     if (ref && refIdx !== -1 && sheet.getLastRow() >= 2) {
       var refs = sheet.getRange(2, refIdx + 1, sheet.getLastRow() - 1, 1).getDisplayValues();
       for (var k = 0; k < refs.length; k++) {
-        if (refs[k][0] === ref) return json_({ result: 'success', row: k + 2, existed: true });
+        if (refs[k][0] !== ref) continue;
+        // 다시 판정된 건: 재판정 요청을 지우고, 관리자가 고친 영문명을 10일 감시에 반영
+        var reIdx = headers.indexOf('재판정');
+        if (reIdx !== -1) sheet.getRange(k + 2, reIdx + 1).setValue('');
+        var enIdx = headers.indexOf('영문명');
+        if (enIdx !== -1 && data.fields['영문명'] !== undefined) sheet.getRange(k + 2, enIdx + 1).setValue(data.fields['영문명']);
+        return json_({ result: 'success', row: k + 2, existed: true });
       }
     }
     headers = ensureHeaders_(sheet, Object.keys(data.fields));
@@ -1045,6 +1062,32 @@ function adminList(params) {
  * data: { key, row, fields } — 고객이 쓴 칸은 건드리지 않게 ADMIN_LOST_COLS 만 허용, 없는 열은 맨 오른쪽에 추가
  */
 var ADMIN_LOST_COLS = ['찾기상품', '결제상태', '경찰접수번호', '경찰접수일', '경찰관서', 'AdminNote', '집중결과', '집중메모', '찾은습득물', '찾은경로', '찾은일'];
+// 고객이 쓴 칸 — 관리자가 위챗으로 받은 정정 내용을 반영할 때. 고치면 한국어 번역을 다시 만들고 작업 큐에 '재판정' 요청
+// (Worker 크론이 lost_pending 으로 다시 받아 분류·추정리스트·신고서를 새로 만듦. 경찰에 이미 낸 신고 내용은 바뀌지 않음)
+var ADMIN_LOST_CUSTOMER_COLS = ['ItemCategory', 'ItemColor', 'HasIdCard', 'EnglishName', 'Specifics', 'City', 'RegionCategory',
+  'Date', 'Time', 'DetailLocation', 'HotelName', 'hotelRoom', 'HotelBooker', 'HotelDates',
+  'CarNumber', 'BoardLoc', 'BoardTime', 'AlightLoc', 'AlightTime'];
+function adminLostCustomerValue_(h, v) {
+  if (h === 'EnglishName') return v.toUpperCase().replace(/[^A-Z' .-]/g, '').slice(0, 60);
+  if ((h === 'Time' || h === 'BoardTime' || h === 'AlightTime') && v) return "'" + v;   // 접수 때처럼 시각을 글자로
+  return v;
+}
+// 작업 큐의 그 분실 건에 '재판정' = '요청' (큐에 아직 없으면 어차피 새로 판정되므로 그대로)
+function markLostRetriage_(lostRow) {
+  var id = PropertiesService.getScriptProperties().getProperty('TASK_SHEET_ID');
+  if (!id) return 'no-queue';
+  var sheet = SpreadsheetApp.openById(id).getSheets()[0];
+  var headers = ensureHeaders_(sheet, ['재판정']);
+  var refCol = headers.indexOf('참고(링크·위챗ID 등)');
+  if (refCol === -1 || sheet.getLastRow() < 2) return 'not-queued';
+  var refs = sheet.getRange(2, refCol + 1, sheet.getLastRow() - 1, 1).getDisplayValues();
+  for (var i = 0; i < refs.length; i++) {
+    if (refs[i][0] !== 'LostReport!' + lostRow) continue;
+    sheet.getRange(i + 2, headers.indexOf('재판정') + 1).setValue('요청');
+    return '재판정 요청';
+  }
+  return 'not-queued';
+}
 
 /**
  * 추정리스트 적중률 측정용 정답 기록 — LostReport 에 실제로 찾은 습득물 관리번호(atcId)와 어떻게 찾았는지
@@ -1067,8 +1110,9 @@ function recordFoundItem_(lostRow, atcId, route) {
 function adminLostUpdate(data) {
   if (!adminAuthorized_(data.key)) return adminJson_({ result: 'error', message: 'unauthorized' });
   var row = parseInt(data.row, 10);
-  var names = Object.keys(data.fields || {}).filter(function (h) { return ADMIN_LOST_COLS.indexOf(h) !== -1; });
+  var names = Object.keys(data.fields || {}).filter(function (h) { return ADMIN_LOST_COLS.indexOf(h) !== -1 || ADMIN_LOST_CUSTOMER_COLS.indexOf(h) !== -1; });
   if (!(row >= 2) || !names.length) return adminJson_({ result: 'error', message: '수정할 수 없는 칸' });
+  var custNames = names.filter(function (h) { return ADMIN_LOST_CUSTOMER_COLS.indexOf(h) !== -1; });
   var lock = LockService.getScriptLock();
   try {
     lock.waitLock(10000);
@@ -1076,7 +1120,16 @@ function adminLostUpdate(data) {
     if (!sheet || row > sheet.getLastRow()) return adminJson_({ result: 'error', message: '행 없음' });
     var headers = ensureHeaders_(sheet, names);
     var before = sheet.getRange(row, 1, 1, headers.length).getDisplayValues()[0];
-    names.forEach(function (h) { sheet.getRange(row, headers.indexOf(h) + 1).setValue(String(data.fields[h]).trim()); });
+    names.forEach(function (h) {
+      var v = String(data.fields[h]).trim();
+      if (custNames.indexOf(h) !== -1) v = adminLostCustomerValue_(h, v);
+      sheet.getRange(row, headers.indexOf(h) + 1).setValue(v);
+    });
+    var retriage = '';
+    if (custNames.length) {
+      if (custNames.some(function (h) { return LOST_SOURCE_HEADERS.indexOf(h) !== -1; })) translateLostRow_(sheet, headers, row);
+      try { retriage = markLostRetriage_(row); } catch (err) { retriage = '오류: ' + err; }
+    }
     var vals = sheet.getRange(row, 1, 1, headers.length).getValues()[0];
     // 결제 확인(또는 기본→집중 업그레이드) → 받은 금액을 정산표에 한 줄 (실패해도 결제 저장은 그대로)
     var ledgerNote = '';
@@ -1087,7 +1140,7 @@ function adminLostUpdate(data) {
     obj._ko = adminCell_(vals[koIdx] !== undefined ? vals[koIdx] : '');
     // 결제 확인 → 작업 큐의 그 분실 건을 바로 '등록대기'로 (자동 등록 작업이 경찰민원24에 제출)
     var queued = String(data.fields['결제상태'] || '').trim() === '확인' ? markLostQueueReady_(row) : '';
-    return adminJson_({ result: 'success', row: obj, written: names, queue: queued, ledger: ledgerNote });
+    return adminJson_({ result: 'success', row: obj, written: names, queue: queued, ledger: ledgerNote, retriage: retriage });
   } finally {
     lock.releaseLock();
   }

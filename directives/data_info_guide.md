@@ -436,3 +436,22 @@
 - 분류별 칩: 스마트폰(브랜드/모델·케이스·잠금화면·스티커/흠집), 시계/이어폰, 카메라(스트랩), 지갑·가방(안에 든 것), 의류, 여권(국가·커버·안에 든 것), 기타. 상세도 = brand·extra(안에 든 것/케이스/크기)·mark(스티커·흠집·키링)·long(20자+) 4가지 충족 수. 칩으로 채운 줄은 해당 항목 인정, 나머지는 ko/en/zh 낱말 정규식(LOST_SPEC_RE).
 - 코드: `lost-found.v1.js` initLostSpecHelper/renderLostSpecChips/updateLostSpecMeter (분류 칩 클릭·폼 초기화 때 다시 그림), CSS `sections.css` .lost-spec-*, i18n 키 `modal.lost.spec.why|chip.*|lv1~4|tip.*` ko/en/zh.
 - 효과 측정: 찾은습득물이 쌓이면 상세도와 추정리스트 적중률 비교.
+
+## 2026-11-24 관리자 페이지 — 분실신고 고객 접수 칸 수정 + 재판정
+- 대리수령(SuccessStories)은 원래 거의 모든 칸 수정 가능. 분실신고(LostReport)는 운영 칸만 → 이번에 고객 칸도 열음.
+- GAS `ADMIN_LOST_CUSTOMER_COLS`: ItemCategory·ItemColor·HasIdCard·EnglishName·Specifics·City·RegionCategory·Date·Time·DetailLocation·Hotel*·Car/Board/Alight*.
+  - 시각 칸은 접수 때처럼 `'` 붙여 글자로, EnglishName 은 접수 때와 같은 정규화(대문자·영문만·60자).
+  - 원문 칸(LOST_SOURCE_HEADERS)을 고치면 `translateLostRow_` 로 Desc_src/Desc_ko 다시 생성.
+  - 작업 큐 그 줄의 `재판정` 열 = '요청' (`markLostRetriage_`). `lost_pending` 이 재판정 요청 건을 맨 앞에 돌려줌 → Worker 크론(*/15)이 processLost 재실행 → task_append(existed) 가 `재판정` 비우고 `영문명` 갱신 → 분류·후보JSON·신고서 갱신. Worker 코드 변경 없음.
+  - 재판정 시 후보JSON 은 새 결과로 교체(이전 watch 후보 병합 안 함). 큐 상태·푸시는 그대로.
+- 관리자 폼: '✏️ 수정' → 접힌 '📝 고객 접수 내용 수정'. 경찰접수번호가 있으면 "경찰 신고 내용은 안 바뀜 — 민원24에서 따로 수정" 경고.
+
+## 2026-11-24 추천 코스 단계별 질문 + 선택 기록 (CourseLog)
+- 코스 목록 화면을 필터 묶음 → 질문 6개(며칠 → 누구와 → 숙소 → 취향(최대 2) → 이동 → 속도)로 교체. 답은 localStorage `jeju_course_wiz_v1`, 숙소는 기존 `jeju_course_hotel_v1`에도 저장.
+  - 이동 → 예산 단계: bus 3 / taxi 4 / charter 4. 속도: relaxed 1.5 / normal 3 / packed 4.5. 부모님 + 속도 건너뜀 → relaxed.
+  - `scoreBlock`에 `hotel` 추가: 숙소 왕복 40분 넘는 만큼 1시간당 1점 감점 (trip.js 등 hotel 없이 부르는 곳은 영향 없음).
+- 기록: `course-log.js`(프론트) → `/api/course-log`(허용값만 재구성 + Cloudflare 국가 코드) → GAS `course_log` → 운영 시트 `CourseLog` 탭(첫 기록 때 자동 생성).
+  - event `answers`(결과 봄, 건너뛴 질문 포함) / `open`(연 코스). 같은 세션 같은 내용은 1번만. 개인정보 없음, Visitor는 기기별 무작위 ID.
+  - GA4(gtag)에도 `course_answers`/`course_open` 이벤트를 같이 보냄 — 중국 본토는 GA가 막혀 시트 기록이 기준.
+- **배포 순서**: GAS(`clasp push` → `clasp version` → 모든 배포 `clasp deploy -i <id> -V <새 번호>`) → 사이트 push. GAS 배포 전에는 `Unknown type`만 돌아오고 기록 안 됨(화면 영향 없음).
+- 로컬 테스트 주의: wrangler가 떠 있으면 실제 시트에 기록됨 → 브라우저에서 fetch를 가로채고 테스트함.

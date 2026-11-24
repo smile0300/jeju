@@ -90,7 +90,7 @@ export async function onRequestPost({ request, env }) {
   try {
     const body = await request.json();
     if (body.sheet === 'Ledger') return await saveLedger(env, body);
-    // 분실신고: 찾기 서비스 결제·경찰 접수 칸만 / 예약: 진행·안내메모·메모 칸만 (GAS가 허용 칸을 다시 막음)
+    // 분실신고: 운영 칸 + 고객 접수 칸(ADMIN_LOST_CUSTOMER_COLS, 고치면 재판정) / 예약: 진행·안내메모·메모 칸만 (GAS가 허용 칸을 다시 막음)
     if (body.sheet === 'LostReport' || body.sheet === 'Reservation') {
       const row = parseInt(body.row, 10);
       const lostFields = body.fields && typeof body.fields === 'object' ? body.fields : null;
