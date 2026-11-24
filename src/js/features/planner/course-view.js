@@ -110,7 +110,7 @@ export function legInfo(block, i) {
     return leg;
 }
 
-function hotelLegs(block, hotelKey = 'jeju') {
+export function hotelLegs(block, hotelKey = 'jeju') {
     const stops = block.stops;
     const base = hotelPos(hotelKey);
     const first = posOf(stops[0]);

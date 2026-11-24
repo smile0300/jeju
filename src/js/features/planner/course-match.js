@@ -3,7 +3,13 @@
 // 점수는 낮을수록 잘 맞는다.
 
 import { BLOCKS, FEES, COMPANION_FIT, isInSeason } from '../../../data/courses.js';
-import { dayTransport } from './course-view.js';
+import { dayTransport, hotelLegs } from './course-view.js';
+
+/** 숙소 → 첫 장소, 마지막 장소 → 숙소 왕복 이동 시간(분) */
+function hotelRoundTrip(block, hotel) {
+    const h = hotelLegs(block, hotel);
+    return h ? (h.out.min || 0) + (h.back.min || 0) : 0;
+}
 
 export const CAFE_SPEND = 12000;          // 카페 한 곳 1인 음료+디저트 추정
 const TAXI_SHARE = 2;                     // 택시는 2명이 나눠 탄다고 본다
@@ -30,8 +36,10 @@ export function dayCost(block, budget) {
 /** 지금 볼 수 있는 코스인가: 제철이 아닌 계절 코스는 뺀다 */
 const available = (b) => !b.season || isInSeason(b);
 
-export function scoreBlock(block, { pace = 3, budget = 3, concepts = [], companion = 'all' } = {}) {
+export function scoreBlock(block, { pace = 3, budget = 3, concepts = [], companion = 'all', hotel = null } = {}) {
     let s = Math.abs((block.pace || 3) - pace) * 1.2;
+    // 숙소를 골랐으면 숙소에서 먼 코스는 뒤로 (왕복 40분까지는 감점 없음, 그 뒤 1시간마다 1점)
+    if (hotel) s += Math.max(0, hotelRoundTrip(block, hotel) - 40) / 60;
     if (companion !== 'all') {
         const key = Object.keys(BLOCKS).find(k => BLOCKS[k] === block);
         s += (COMPANION_FIT[key] || []).includes(companion) ? -0.5 : 1.8; // 안 맞는 코스는 뒤로(빼지는 않음)

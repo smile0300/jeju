@@ -103,8 +103,36 @@ var PLANNER_SHEETS = {
     ['업데이트일', 'YYYY-MM-DD'],
     ['예시여부', 'Y 이면 사이트에 "示例" 표시가 붙음. 실제 시세로 고친 뒤 N'],
     ['공개', 'Y 이면 사이트에 노출']
+  ],
+  // 추천 코스 단계별 질문 기록 (선호도 파악용, 개인 정보 없음) — functions/api/course-log.js
+  CourseLog: [
+    ['Time', '기록 시각 (Asia/Seoul)'],
+    ['Event', 'answers = 질문을 끝내고 결과를 봄 / open = 결과에서 코스를 열어 봄'],
+    ['Days', '여행 일수 (1 = 당일, 2 = 1박2일 …)'],
+    ['With', 'couple 커플 / friends 친구 / solo 혼자 / parents 부모님'],
+    ['Hotel', 'jeju 제주시 / hamdeok 함덕 / aewol 애월 / jungmun 중문 / seogwipo 서귀포 / east 동부 / none 아직 모름'],
+    ['Concepts', 'classic 대표명소 / sea 바다 / cafe 카페 / nature 자연 / photo 사진 / art 실내 / any 다 좋아요'],
+    ['Move', 'bus 버스 / taxi 택시 / charter 기사 포함 차량'],
+    ['Pace', 'relaxed 여유 / normal 적당히 / packed 알차게'],
+    ['Skipped', '건너뛴 질문'],
+    ['Course', 'open 일 때 연 코스 (block:하루코스키 / plan:여러날)'],
+    ['Lang', '화면 언어'],
+    ['Country', '접속 국가 코드 (Cloudflare)'],
+    ['Visitor', '기기별 무작위 익명 ID (같은 사람이 여러 번 했는지 보는 용도)']
   ]
 };
+
+/** 코스 질문 기록 한 줄 추가. 값은 Pages Function에서 허용값만 걸러서 온다. */
+function courseLogAppend_(ss, data) {
+  var sheet = plannerSheet_(ss, 'CourseLog');
+  var s = function (v) { return String(v == null ? '' : v).slice(0, 80); };
+  sheet.appendRow([
+    Utilities.formatDate(new Date(), CARPOOL_TZ, 'yyyy-MM-dd HH:mm:ss'),
+    s(data.event), s(data.days), s(data.with), s(data.hotel), s(data.concepts), s(data.move),
+    s(data.pace), s(data.skipped), s(data.course), s(data.lang), s(data.country), s(data.visitor)
+  ]);
+  return { result: 'success' };
+}
 
 var CARPOOL_HISTORY_DAYS = 90;   // 지난 모집글을 며칠 전 것까지 내려줄지 (이력 표시용)
 var CARPOOL_TZ = 'Asia/Seoul';
@@ -168,6 +196,7 @@ function handlePlanner(data) {
   if (data.type === 'carpool_list') return plannerJson_(carpoolList_(ss));
   if (data.type === 'carpool_post') return plannerJson_(carpoolPost_(ss, data));
   if (data.type === 'carpool_comment') return plannerJson_(carpoolComment_(ss, data));
+  if (data.type === 'course_log') return plannerJson_(courseLogAppend_(ss, data));
   return plannerJson_({ result: 'error', message: 'Unknown type' });
 }
 

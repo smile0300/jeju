@@ -1634,3 +1634,24 @@
 .jl-ed-warn ul { margin: 4px 0 0; padding-left: 16px; }
 .jl-ed-tools { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
 .jl-tmodal-swap { border: 0; background: none; color: var(--accent); font: inherit; font-size: 0.84rem; font-weight: 700; cursor: pointer; padding: 6px; }
+
+/* ── [코스] 단계별 질문 (course.js) ── */
+.wiz-sum { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.wiz-sum-chip { display: inline-flex; align-items: center; gap: 5px; min-height: 32px; padding: 0 11px; border: 1px solid var(--accent); border-radius: 999px; background: var(--accent-subtle); color: var(--accent-active); font: inherit; font-size: 0.82rem; font-weight: 700; cursor: pointer; }
+.wiz-sum-chip i { font-size: 0.75rem; opacity: 0.7; }
+.wiz-sum-chip.editing { background: var(--accent); color: #fff; }
+.wiz-reset { min-height: 32px; padding: 0 8px; border: 0; background: none; color: var(--label-secondary); font: inherit; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+.wiz-q { display: flex; flex-direction: column; gap: 10px; padding: 18px 16px; border-radius: 18px; background: var(--bg-card); border: 1px solid var(--separator); animation: wiz-in 0.25s ease-out; }
+@keyframes wiz-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .wiz-q { animation: none; } }
+.wiz-progress { height: 4px; border-radius: 4px; background: var(--separator); overflow: hidden; }
+.wiz-progress span { display: block; height: 100%; background: var(--accent); transition: width 0.25s; }
+.wiz-step { margin: 0; font-size: 0.78rem; font-weight: 700; color: var(--label-secondary); }
+.wiz-title { margin: 0; font-size: 1.25rem; font-weight: 800; line-height: 1.35; }
+.wiz-sub { margin: -4px 0 0; font-size: 0.82rem; color: var(--label-secondary); }
+.wiz-opts .pl-chips { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.wiz-opts .pl-chip { min-height: 48px; border-radius: 14px; padding: 0 10px; font-size: 0.95rem; overflow-wrap: anywhere; }
+.wiz-next { min-height: 48px; border: 0; border-radius: 14px; background: var(--accent); color: #fff; font: inherit; font-size: 1rem; font-weight: 800; cursor: pointer; }
+.wiz-next:disabled { opacity: 0.4; cursor: default; }
+.wiz-skip { align-self: center; min-height: 36px; padding: 0 8px; border: 0; background: none; color: var(--label-secondary); font: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
+.wiz-links { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-top: var(--space-2); }

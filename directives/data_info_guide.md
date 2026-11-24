@@ -455,3 +455,6 @@
   - GA4(gtag)에도 `course_answers`/`course_open` 이벤트를 같이 보냄 — 중국 본토는 GA가 막혀 시트 기록이 기준.
 - **배포 순서**: GAS(`clasp push` → `clasp version` → 모든 배포 `clasp deploy -i <id> -V <새 번호>`) → 사이트 push. GAS 배포 전에는 `Unknown type`만 돌아오고 기록 안 됨(화면 영향 없음).
 - 로컬 테스트 주의: wrangler가 떠 있으면 실제 시트에 기록됨 → 브라우저에서 fetch를 가로채고 테스트함.
+- **GAS 배포 완료(2026-11-24)**: v204 "course wizard log (CourseLog)", 버전 배포 47개 모두 @204. (같은 시각 다른 세션의 v203 배포가 끝나길 기다린 뒤 진행 — 배포가 섞여 있으면 끝날 때까지 기다릴 것)
+  - 확인: 로컬 함수(`pages-functions-compat`)로 1줄 전송 → `success`. 운영 CourseLog 탭에 Visitor `claudetest01` 테스트 줄 1개 있음(지워도 됨). 잘못된 값은 Function에서 400.
+  - 사이트(프론트 + `/api/course-log`)는 아직 push 전 → push 후부터 실제 기록 시작.
