@@ -1,4 +1,5 @@
-import { escapeHtml } from './planner/strings.js';
+import { escapeHtml, pick } from './planner/strings.js';
+import { LANDMARKS } from '../../data/jeju-landmarks.js';
 import { chipGroup, bindChips, copyText, flashLabel } from './planner/shared.js';
 import { openStatus, fmtMin } from './eats-hours.js';
 import { wishBtnHtml, readWish } from './planner/wishlist.js';
@@ -469,6 +470,28 @@ function cityLabelPos(u, fallback) {
 }
 const bboxOf = (pts) => [Math.min(...pts.map(p => p[0])), Math.min(...pts.map(p => p[1])), Math.max(...pts.map(p => p[0])), Math.max(...pts.map(p => p[1]))];
 
+/** 대표 관광지 길잡이: 섬 전체 보기에선 주요 곳만, 확대하면 화면 안에 들어오는 곳 모두. 눌러도 반응 없음(핀 선택 방해 안 함) */
+function landmarksHtml(vb, k, project) {
+    const [x0, y0, w, h] = vb;
+    const zoomed = !!state.zone;
+    return LANDMARKS.filter(m => zoomed || m.t === 1).map(m => {
+        const [x, y] = project(m.ll[0], m.ll[1]);
+        const r = 9 * k;
+        // 이름이 지도 밖으로 잘리면 아예 빼기 (글자 폭: 한중 글자 약 32px, 영문 약 18px × k)
+        const half = [...pick(m.name)].reduce((s, c) => s + (c.charCodeAt(0) > 0x2e80 ? 32 : 18), 0) * k / 2;
+        if (x - half < x0 || x + half > x0 + w || y - r * 2 < y0 || y + r * 1.6 + 40 * k > y0 + h) return '';
+        const mark = m.icon === 'mt'
+            ? `<path class="lm-mt" d="M${x},${y - r * 1.6}L${x + r * 1.5},${y + r}L${x - r * 1.5},${y + r}Z"/>`
+            : m.icon === 'air' ? `<circle class="lm-dot lm-air" cx="${x}" cy="${y}" r="${r * 1.5}"/><text class="lm-air-t" x="${x}" y="${y}">✈</text>`
+            : `<circle class="lm-dot" cx="${x}" cy="${y}" r="${r}"/>`;
+        // 구역 이름이 보이는 화면(전체·제주시내)에선 공항 이름이 '공항' 구역 이름과 겹쳐 아이콘만
+        const zoneLabelsShown = !state.zone || state.zone === 'jcity';
+        const name = zoneLabelsShown && m.fullNoName ? ''
+            : `<text class="lm-name" x="${x}" y="${y + r * 1.6}" dy="0.9em">${escapeHtml(pick(m.name))}</text>`;
+        return `<g class="lm">${mark}${name}</g>`;
+    }).join('');
+}
+
 function mapViewHtml(list) {
     if (!ZMOD) { loadZones(); return `<div class="eat-empty">${L('loading')}</div>`; }
     const { ZONES, ZONE_BORDER, projectFine } = ZMOD;
@@ -491,6 +514,10 @@ function mapViewHtml(list) {
 
     const focus = new Set(state.zone === 'jcity' ? CITY : leaf ? [leaf] : ZONES.map(z => z.k));
     const shapes = ZONES.map((z, i) => `<path class="ez-zone ez-c${i % 4}${focus.has(z.k) ? '' : ' ez-dim'}" data-zone="${z.k}" d="${z.d}"/>`).join('');
+
+    // 해안선: 구역 전체를 한 겹 더 그려 테두리를 바다색으로 (안쪽 경계선은 위에 칠한 구역 색에 가려지고 바깥 해안선만 남는다)
+    const coast = `<path class="ez-coast" d="${ZONES.map(z => z.d).join('')}"/>`;
+    const landmarks = landmarksHtml(vb, k, projectFine);
 
     let labels = '';
     if (!leaf) {
@@ -536,7 +563,7 @@ function mapViewHtml(list) {
             <p class="eat-map-hint"><i class="ph-duotone ph-map-pin"></i> ${escapeHtml(L(leaf ? 'z.hint_pin' : 'z.hint_zone'))}</p>
             <figure class="pl-map eat-map-svg ez-map">
                 <svg viewBox="${vb.join(' ')}" data-vb="${vb.join(' ')}" style="--k:${k.toFixed(4)}">
-                    ${shapes}<path class="ez-border" d="${ZONE_BORDER}"/>${labels}${pins}
+                    ${coast}${shapes}<path class="ez-border" d="${ZONE_BORDER}"/>${labels}${pins}${landmarks}
                 </svg>
             </figure>
             <div class="ez-chips">${chips}</div>
@@ -610,12 +637,15 @@ function updateCounts(root) {
 
 const activeCount = () => state.pr.length + state.kw.length + (state.sort !== 'rec' ? 1 : 0);
 
+/** 필터 더보기 버튼: 글자 대신 아래 화살표(열리면 뒤집힘) + 고른 필터 수 */
+const moreBtnInner = (n) => `<i class="ph-bold ph-caret-down eat-more-caret"></i>${n ? `<span class="eat-count-dot">${n}</span>` : ''}`;
+
 function filtersHtml() {
     const n = activeCount();
     return `<div class="eat-filters">
         <div class="eat-search-row">
             <input type="search" class="eat-search" id="eat-q" value="${escapeHtml(state.q)}" placeholder="${escapeHtml(L('search_ph'))}" autocomplete="off">
-            <button type="button" class="eat-more-btn${state.more ? ' active' : ''}" data-more-filters aria-expanded="${state.more}">${L('more_filters')}${n ? ` <span class="eat-count-dot">${n}</span>` : ''}</button>
+            <button type="button" class="eat-more-btn${state.more ? ' active' : ''}" data-more-filters aria-expanded="${state.more}" aria-label="${escapeHtml(L('more_filters'))}" title="${escapeHtml(L('more_filters'))}">${moreBtnInner(n)}</button>
         </div>
         <div class="pl-filter eat-quick">${chipGroup('quick', quickOpts(), { multi: true, selected: quickSelected() })}</div>
         <div class="pl-filter">${chipGroup('cu', opts(CUISINES, 'cu'), { multi: true, selected: state.cu })}</div>
@@ -709,7 +739,7 @@ function bind(root) {
         state.shown = PAGE;
         renderResults();
         const btn = root.querySelector('[data-more-filters]');
-        if (btn) { const n = activeCount(); btn.innerHTML = L('more_filters') + (n ? ` <span class="eat-count-dot">${n}</span>` : ''); }
+        if (btn) { const n = activeCount(); btn.innerHTML = moreBtnInner(n); }
     });
     let timer;
     root.addEventListener('input', (e) => {

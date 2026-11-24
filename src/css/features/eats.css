@@ -53,6 +53,9 @@ html[lang="ko"] .eat-beta { word-break: keep-all; } /* 중국어에 keep-all을 
     white-space: nowrap;
 }
 .eat-more-btn.active { border-color: var(--accent); color: var(--accent-active); background: var(--accent-subtle); }
+.eat-more-btn { display: inline-flex; align-items: center; justify-content: center; gap: 4px; min-width: 42px; }
+.eat-more-caret { font-size: 1.1rem; transition: transform 0.2s; }
+.eat-more-btn[aria-expanded="true"] .eat-more-caret { transform: rotate(180deg); }
 .eat-count-dot {
     display: inline-block;
     min-width: 18px;
@@ -251,6 +254,14 @@ html[lang="ko"] .eat-beta { word-break: keep-all; } /* 중국어에 keep-all을 
 .ez-zone { stroke: none; cursor: pointer; transition: opacity 0.2s; }
 .ez-c0 { fill: #FFF4E6; } .ez-c1 { fill: #E7F5FF; } .ez-c2 { fill: #EBFBEE; } .ez-c3 { fill: #F3F0FF; }
 .ez-zone.ez-dim { opacity: 0.45; }
+.ez-coast { fill: #fff; stroke: #5B9BD5; stroke-width: calc(5px * var(--k, 1)); stroke-linejoin: round; pointer-events: none; }
+/* 대표 관광지 길잡이 (맛집 핀 위에 그리되 누를 수 없음 → 핀 선택은 그대로) */
+.lm { pointer-events: none; }
+.lm-dot { fill: #495057; stroke: #fff; stroke-width: calc(2.5px * var(--k, 1)); }
+.lm-air { fill: #1C7ED6; }
+.lm-air-t { font-size: calc(15px * var(--k, 1)); fill: #fff; text-anchor: middle; dominant-baseline: central; }
+.lm-mt { fill: #2B8A3E; stroke: #fff; stroke-width: calc(2.5px * var(--k, 1)); stroke-linejoin: round; }
+.lm-name { font-size: calc(32px * var(--k, 1)); font-weight: 800; fill: #212529; text-anchor: middle; paint-order: stroke; stroke: #fff; stroke-width: calc(7px * var(--k, 1)); stroke-linejoin: round; }
 .ez-border { fill: none; stroke: #ADB5BD; stroke-width: calc(2px * var(--k, 1)); stroke-linejoin: round; pointer-events: none; }
 .ez-label { cursor: pointer; }
 .ez-label text { font-size: calc(30px * var(--k, 1)); font-weight: 800; fill: #343A40; text-anchor: middle; paint-order: stroke; stroke: #fff; stroke-width: calc(6px * var(--k, 1)); stroke-linejoin: round; }
