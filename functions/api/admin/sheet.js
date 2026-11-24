@@ -13,7 +13,7 @@
  */
 const JSON_HEADERS = { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' };
 const respond = (obj, status = 200) => new Response(JSON.stringify(obj), { status, headers: JSON_HEADERS });
-const SHEETS = ['LostReport', 'SuccessStories', 'Ledger', 'Reservation'];
+const SHEETS = ['LostReport', 'SuccessStories', 'Ledger', 'Reservation', 'Candidates'];
 
 // 길이가 달라도 시간 차이로 비밀번호가 새지 않도록 비교
 function safeEqual(a, b) {
@@ -70,7 +70,7 @@ export async function onRequestGet({ request, env }) {
 
   try {
     const url = new URL(String(env.ADMIN_GAS_URL).trim());
-    url.searchParams.set('action', sheet === 'Ledger' ? 'admin_ledger' : 'admin_list');
+    url.searchParams.set('action', sheet === 'Ledger' ? 'admin_ledger' : sheet === 'Candidates' ? 'admin_candidates' : 'admin_list');
     url.searchParams.set('key', env.ADMIN_LOOKUP_SECRET || '');
     url.searchParams.set('sheet', sheet);
     const data = await readGas(await fetch(url.toString(), { cf: { cacheTtl: 0 } }));

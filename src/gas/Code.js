@@ -849,6 +849,7 @@ function doGet(e) {
     if (action === 'admin_lookup') return adminLookup(e.parameter);
     if (action === 'admin_list') return adminList(e.parameter);
     if (action === 'admin_ledger') return adminLedger(e.parameter);
+    if (action === 'admin_candidates') return adminCandidates(e.parameter);
     if (action === 'image') return publicImage_(e.parameter.id);
     if (action === 'lost_cases') return publicLostCases_();
     var ss = SpreadsheetApp.openById(SHEET_ID);
@@ -972,6 +973,44 @@ function adminCell_(v) {
     return Utilities.formatDate(v, 'Asia/Seoul', 'yyyy-MM-dd HH:mm').replace(/ 00:00$/, '');
   }
   return v === null ? '' : v;
+}
+
+/**
+ * 후보 모니터 (admin-candidates.html) — 작업 큐의 분실 건별 습득물 후보(후보JSON)를 품목과 함께. 읽기 전용.
+ * 위챗 ID·이름·연락처는 넣지 않는다. 파라미터: key
+ */
+function adminCandidates(params) {
+  if (!adminAuthorized_(params.key)) return adminJson_({ error: 'unauthorized' });
+  var id = PropertiesService.getScriptProperties().getProperty('TASK_SHEET_ID');
+  if (!id) return adminJson_({ rows: [] });
+  var q = SpreadsheetApp.openById(id).getSheets()[0].getDataRange().getValues();
+  if (q.length <= 1) return adminJson_({ rows: [] });
+  var qh = q[0].map(function (h) { return String(h || '').trim(); });
+  var col = function (n) { return qh.indexOf(n); };
+  var cRef = col('참고(링크·위챗ID 등)'), cSt = col('상태'), cReg = col('등록일'), cDone = col('처리일시'), cForm = col('신고서'), cCand = col('후보JSON'), cWatch = col('감시알림');
+  var lost = SpreadsheetApp.openById(SHEET_ID).getSheetByName('LostReport').getDataRange().getValues();
+  var lh = lost[0].map(function (h) { return String(h || '').trim(); });
+  var lc = function (n) { return lh.indexOf(n); };
+  var L = { cat: lc('ItemCategory'), spec: lc('Specifics'), date: lc('Date'), plan: lc('찾기상품'), paid: lc('결제상태'), police: lc('경찰접수번호'), found: lc('찾은습득물'), route: lc('찾은경로'), focus: lc('집중결과') };
+  var cell = function (r, i) { return i === -1 || r[i] === undefined ? '' : adminCell_(r[i]); };
+  var rows = [];
+  for (var i = q.length - 1; i >= 1; i--) {
+    var m = String(cell(q[i], cRef)).match(/^LostReport!(\d+)$/);
+    if (!m) continue;
+    var lr = +m[1], l = lost[lr - 1] || [];
+    var form = {}, cands = [];
+    try { form = JSON.parse(cell(q[i], cForm) || '{}'); } catch (e) { form = {}; }
+    try { cands = JSON.parse(cell(q[i], cCand) || '[]'); } catch (e) { cands = []; }
+    rows.push({
+      lostRow: lr, status: cell(q[i], cSt), registered: cell(q[i], cReg), done: cell(q[i], cDone),
+      lclsf: form.lclsf || '', mclsf: form.mclsf || '', itemName: form.itemName || '', brand: form.brand || '', lostYmd: form.lostYmd || cell(l, L.date),
+      category: cell(l, L.cat), specifics: String(cell(l, L.spec)).slice(0, 120),
+      plan: cell(l, L.plan), paid: cell(l, L.paid), police: cell(l, L.police), found: cell(l, L.found), foundRoute: cell(l, L.route), focus: cell(l, L.focus),
+      watched: String(cell(q[i], cWatch)).split(/\s+/).filter(Boolean).length,
+      cands: Array.isArray(cands) ? cands : []
+    });
+  }
+  return adminJson_({ rows: rows });
 }
 
 /** 시트 전체를 최신순으로. 파라미터: key, sheet */
