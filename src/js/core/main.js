@@ -24,6 +24,7 @@ import '../features/course.js';
 import '../features/eats.js';
 import '../features/oreum.js';
 import '../features/charter.js';
+import '../features/party.js';
 import '../features/brief-card.js';
 import '../features/lost-brief-card.js';
 
@@ -344,6 +345,7 @@ const ROUTE_MAP = {
     '/course': 'course',
     '/trip': 'trip',
     '/reservation': 'reservation',
+    '/party': 'party',
 };
 
 function handleRouting() {

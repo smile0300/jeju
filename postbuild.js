@@ -59,6 +59,11 @@ const SEO_META = {
         title: 'Jeju Restaurants & Cafés Finder (BETA) - Jeju Live | 济州美食筛选',
         desc: 'Find Jeju restaurants and cafés by area, food, price per person and features — black pork, seafood, noodles, local favorites, solo-friendly, Chinese menu. 按区域、菜系、人均价格筛选济州餐厅和咖啡馆。',
         keywords: 'Jeju restaurants, Jeju black pork, Jeju seafood, Jeju cafe, Jeju local food, 济州美食, 济州黑猪肉, 济州海鲜, 济州咖啡馆, 济州本地人餐厅, 제주 맛집, 제주 흑돼지, 제주 향토음식'
+    },
+    'party': {
+        title: 'Jeju Anniversary Party Box to Your Hotel (BETA) - Jeju Live | 济州纪念日派对盒',
+        desc: 'Self-setup anniversary and birthday party box delivered to your Jeju hotel front desk or Airbnb — fresh flowers, LED lights, bubble balloon, no tape, nothing to return. 济州酒店纪念日·生日布置派对盒，入住前送到前台，不粘墙不用归还。',
+        keywords: 'Jeju anniversary surprise, Jeju hotel room decoration, Jeju birthday party box, 济州纪念日布置, 济州酒店布置, 济州生日惊喜, 济州求婚布置, 제주 기념일 이벤트, 제주 호텔 이벤트'
     }
 };
 
@@ -109,6 +114,11 @@ const ROUTE_INTRO = {
         en: 'Jeju restaurants and cafés you can filter by area (Jeju City, Aewol, Hallim, Jungmun, Seogwipo, Seongsan, Udo, Gujwa, Jocheon and more), food type (black pork, seafood, noodles, soups, local home food, cafés), price per person and features such as solo-friendly, Chinese or English menu, short wait and breakfast. Includes places officially designated by Jeju for local food and fair prices, with opening hours, Google ratings and Naver, Kakao and Google map links.',
         zh: '按区域（济州市区、涯月、翰林、中文、西归浦、城山、牛岛、旧左、朝天等）、菜系（黑猪肉、海鲜、面食、汤饭、乡土料理、咖啡馆）、人均价格和特色（可一人用餐、中文/英文菜单、排队短、早餐）筛选济州餐厅和咖啡馆。收录济州官方认定的乡土美食店和平价良心店，附营业时间、Google评分以及Naver、Kakao、Google地图链接。',
         ko: '지역(제주시내·애월·한림·중문·서귀포·성산·우도·구좌·조천 등), 음식 종류(흑돼지·해산물·국수·국밥·향토음식·카페), 1인 가격, 키워드(1인 식사·중국어/영어 메뉴·대기 짧음·아침 식사)로 제주 식당과 카페를 찾아보세요. 제주도 지정 향토음식점·착한가격업소를 포함해 영업시간, 구글 평점, 네이버·카카오·구글 지도 링크를 함께 보여줍니다.'
+    },
+    'party': {
+        en: 'A self-setup party box for anniversaries, birthdays and friends’ trips in Jeju. Pick the base box with fresh flowers, LED lights and a message card, then add a bubble balloon, couple mood pack, photo props, printed photos, a welcome board, a film camera or a cake. Everything stands on its own — no tape on the walls and nothing to return — and it can wait for you at the hotel front desk before check-in or at your Airbnb door. A paid set-up service is available for one booking per day.',
+        zh: '济州纪念日、生日、闺蜜旅行用的自助派对盒。先选含鲜花、LED灯串和留言卡的基础盒，再加波波球、情侣氛围包、拍照道具、照片冲印、欢迎牌、胶片相机或蛋糕。全部可直接摆放，不粘墙、不用归还，入住前可寄存在酒店前台或送到民宿门口。另有付费代布置服务，每天限1组。',
+        ko: '제주 기념일·생일·우정여행용 셀프 파티박스입니다. 생화·LED 전구·메시지 카드가 든 베이스 박스에 버블풍선, 커플 무드 팩, 포토 소품, 사진 인화, 웰컴보드, 필름카메라, 케이크를 더할 수 있습니다. 벽에 붙이지 않고 세우는 구성이라 반납이 없고, 체크인 전 호텔 프런트나 에어비앤비 문 앞으로 받을 수 있습니다. 유료 세팅 대행은 하루 1건만 받습니다.'
     }
 };
 
@@ -158,7 +168,8 @@ const routes = [
     'trip',
     'course',
     'charter',
-    'eats'
+    'eats',
+    'party'
 ];
 
 let indexHtmlContent = fs.readFileSync(indexFile, 'utf-8');

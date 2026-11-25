@@ -177,9 +177,10 @@
             </div>
             <!-- 기념일 이벤트: 분실물(홍바오 아래) 자리 대체 -->
             <div class="home-item item-res-sub" id="res-sub-anniversary"
-                 style="display:none" onclick="window.goToReservation('anniversary')">
+                 style="display:none" onclick="window.goToParty ? window.goToParty() : window.goToReservation('anniversary')">
                 <span class="item-icon"><i class="ph-duotone ph-heart color-reservation"></i></span>
                 <span class="item-label" data-i18n="res.type.anniversary">纪念日布置</span>
+                <span class="coming-soon-badge pb-home-beta">BETA</span>
             </div>
             <!-- 스냅사진: 홍바오 자리 대체 -->
             <div class="home-item item-res-sub" id="res-sub-snap"

@@ -59,6 +59,11 @@ const SEO_META = {
         title: 'Jeju Restaurants & Cafés Finder (BETA) - Jeju Live | 济州美食筛选',
         desc: 'Find Jeju restaurants and cafés by area, food, price per person and features — black pork, seafood, noodles, local favorites, solo-friendly, Chinese menu. 按区域、菜系、人均价格筛选济州餐厅和咖啡馆。',
         keywords: 'Jeju restaurants, Jeju black pork, Jeju seafood, Jeju cafe, 济州美食, 济州黑猪肉, 济州海鲜, 济州咖啡馆, 제주 맛집'
+    },
+    'party': {
+        title: 'Jeju Anniversary Party Box to Your Hotel (BETA) - Jeju Live | 济州纪念日派对盒',
+        desc: 'Self-setup anniversary and birthday party box delivered to your Jeju hotel front desk or Airbnb. 济州酒店纪念日·生日布置派对盒，入住前送到前台，不粘墙不用归还。',
+        keywords: 'Jeju anniversary surprise, Jeju hotel room decoration, 济州纪念日布置, 济州酒店布置, 济州生日惊喜, 제주 기념일 이벤트'
     }
 };
 
@@ -155,6 +160,7 @@ export function showSection(sectionId, pushHistory = true) {
     if (sectionId === 'course') window.courseApp?.enter();
     if (sectionId === 'eats') window.eatsApp?.enter();
     if (sectionId === 'charter') window.charterApp?.enter();
+    if (sectionId === 'party') window.partyApp?.enter();
 
     // 진행상황 화면엔 이 기기에서 접수한 내 건을 맨 위에 다시 그린다
     if (sectionId === 'lost-status') window.lostApp?.renderMyCases?.();

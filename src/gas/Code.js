@@ -149,6 +149,7 @@ function doPost(e) {
     if (data.type === 'lost_report') return handleLostReport_(data);
     if (data.type === 'lost_plan') return handleLostPlan_(data);
     if (data.type === 'reservation') return handleReservation_(data);
+    if (data.type === 'event_order') return handleEventOrder_(data);
     if (data.type === 'feature' || data.type === 'customer_service' || data.type === 'cctv_apply') {
       return handleSimpleForm_(data);
     }
@@ -769,6 +770,86 @@ function handleReservation_(data) {
   return json_({ result: 'success' });
 }
 
+/**
+ * 기념일 파티박스 주문 (BETA) — functions/api/event.js 가 값 검사·금액 계산 후 보냄 → 'EventOrder' 시트 (없으면 새로 만듦)
+ * 세팅 대행은 하루 setupPerDay(1)건만: 같은 이용일에 취소 아닌 세팅 대행 건이 있으면 setup_full
+ * '진행' 칸은 운영자가 채운다 (비어 있으면 접수). 관리자 페이지 🎁 이벤트 탭에서 조회
+ */
+var EVENT_HEADERS = [
+  '접수시각', '진행', '이용일', '체크인', '받는방법', '입실방식', '누구와', '숙소유형', '숙소명', '주소', '예약자', '위챗ID', '서프라이즈',
+  '옵션', '상품금액', '세팅비', '배송비', '합계', '셀프세팅분', '카드문구', '레터링', '요청사항', '언어', '메모', 'UserAgent'
+];
+var EVENT_WHO_KO = { couple: '커플', friends: '우정', other: '기타' };
+var EVENT_STAY_KO = { hotel: '호텔', airbnb: '에어비앤비·민박', other: '기타' };
+
+function eventDay_(v) {
+  return v instanceof Date ? Utilities.formatDate(v, 'Asia/Seoul', 'yyyy-MM-dd') : String(v || '').trim().slice(0, 10);
+}
+
+function handleEventOrder_(data) {
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    var ss = SpreadsheetApp.openById(SHEET_ID);
+    var sheet = ss.getSheetByName('EventOrder');
+    if (!sheet) {
+      sheet = ss.insertSheet('EventOrder');
+      sheet.appendRow(EVENT_HEADERS);
+      sheet.setFrozenRows(1);
+    }
+    var headers = ensureHeaders_(sheet, EVENT_HEADERS);
+
+    if (data.method === 'setup') {
+      var rows = sheet.getDataRange().getValues();
+      var cDay = headers.indexOf('이용일'), cWay = headers.indexOf('받는방법'), cSt = headers.indexOf('진행');
+      var taken = 0;
+      for (var i = 1; i < rows.length; i++) {
+        if (eventDay_(rows[i][cDay]) !== data.date) continue;
+        if (String(rows[i][cWay]).indexOf('세팅 대행') === -1) continue;
+        if (/취소/.test(String(rows[i][cSt] || ''))) continue;
+        taken++;
+      }
+      if (taken >= (Number(data.setupPerDay) || 1)) return json_({ result: 'error', message: 'setup_full' });
+    }
+
+    sheet.appendRow(rowByHeaders_(headers, {
+      '접수시각': new Date(),
+      '진행': '',
+      '이용일': "'" + data.date,             // 날짜로 자동 변환되지 않게 글자로
+      '체크인': data.checkin ? "'" + data.checkin : '',
+      '받는방법': data.methodKo || data.method || '',
+      '입실방식': data.setupWayKo || '',
+      '누구와': EVENT_WHO_KO[data.who] || '',
+      '숙소유형': EVENT_STAY_KO[data.stayType] || '',
+      '숙소명': data.stayName || '',
+      '주소': data.stayAddr || '',
+      '예약자': data.booker || '',
+      '위챗ID': data.wechatId || '',
+      '서프라이즈': data.surprise || '',
+      '옵션': data.optionsKo || '',
+      '상품금액': Number(data.itemsKrw) || 0,
+      '세팅비': Number(data.setupKrw) || 0,
+      '배송비': Number(data.deliveryKrw) || 0,
+      '합계': Number(data.totalKrw) || 0,
+      '셀프세팅분': Number(data.minutes) || '',
+      '카드문구': data.card || '',
+      '레터링': data.lettering || '',
+      '요청사항': data.note || '',
+      '언어': data.lang || '',
+      'UserAgent': data.userAgent || ''
+    }));
+  } finally {
+    lock.releaseLock();
+  }
+
+  notifyAdmin(
+    '🎁 파티박스 주문 (BETA)',
+    '[날짜] ' + data.date + '  [받기] ' + (data.methodKo || data.method) + (data.setupWayKo ? '(' + data.setupWayKo + ')' : '') +
+    '  [숙소] ' + (data.stayName || '') + '  [합계] ' + Number(data.totalKrw || 0).toLocaleString() + '원  [위챗] ' + (data.wechatId || '')
+  );
+  return json_({ result: 'success' });
+}
+
 /** 기능 제안 · 고객센터 문의 · CCTV 신청 */
 function handleSimpleForm_(data) {
   var spec = {
@@ -972,7 +1053,7 @@ function adminLookup(params) {
  * [관리자 전용] 관리자 페이지(public/admin.html) — functions/api/admin/sheet.js 에서만 호출
  * adminLookup 과 같은 ADMIN_LOOKUP_SECRET 사용
  */
-var ADMIN_SHEETS = ['LostReport', 'SuccessStories', 'Reservation'];
+var ADMIN_SHEETS = ['LostReport', 'SuccessStories', 'Reservation', 'EventOrder'];
 var ADMIN_READONLY_COLS = ['CaseId', 'Timestamp'];
 
 function adminJson_(obj) {

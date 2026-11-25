@@ -464,3 +464,10 @@
 - 장소 사진: `python -I execution/fetch_course_photos.py <stops.json> <작업폴더>` (짝 찾기) → `--download` (480x360 webp 품질 62 → `public/img/places`, `src/data/stop-photos.js` 생성). 비짓제주 관광지·쇼핑·음식점 목록에서 이름 + 1.5km 이내로 짝, 모두 0.06km 이내로 일치.
   - 수동 지정(`MANUAL`): 칠성로 쇼핑거리 ← 제주칠성로상가, 풍림다방 송당 ← 풍림다방 커피로스터즈 송당, 천제연폭포는 비짓제주 대표사진이 4.3 위령비 계단이라 사진 없음.
   - 결과: 코스 장소 82곳 중 81곳 사진 (코스 표지 26 + 장소 55, 합계 약 1.3MB, 목록에선 지연 로딩). 새 코스 장소를 추가하면 이 스크립트를 다시 돌릴 것.
+
+## 2026-11-24 기념일 파티박스 (BETA) — /party · EventOrder 시트
+- 화면 `src/js/features/party.js` (`/party`, 홈 '纪念日布置' 버튼에서 진입, BETA 배지). 상품·가격·3언어 문구는 `src/data/party-box.js` 하나에서 관리 — 화면과 접수 API가 같은 표를 씀.
+- 접수 `functions/api/event.js` → GAS `event_order` → 시트 **EventOrder**(첫 주문 때 자동 생성, 한국어 열). 금액은 API가 다시 계산(화면 값 무시), 모르는 옵션은 버림.
+- 세팅 대행(+30,000원 임시값)은 하루 1건: 같은 이용일에 '진행'이 취소가 아닌 세팅 대행 건이 있으면 `setup_full`. 이용일·체크인은 날짜 자동 변환을 막으려고 글자(')로 기록.
+- 관리자 🎁 이벤트 탭(BETA, 읽기 전용) — '진행'(접수/확정/완료/취소)은 시트에서 직접 입력.
+- **GAS 배포 완료(2026-11-24)**: v205 "party box event order (EventOrder)", 버전 배포 47개 모두 @205 (+@HEAD 1개). 사이트 push 전에는 화면이 없어 주문 안 들어옴.

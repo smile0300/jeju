@@ -28,6 +28,9 @@
   .tabs { display:flex; gap:6px; margin-bottom:12px; }
   .tabs button { flex:1; background:var(--card); color:var(--text); border:1px solid var(--line); padding:11px 4px; font-size:15px; white-space:nowrap; }
   .tabs button.on { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .tabs { flex-wrap:wrap; }
+  .tabs button { flex:1 1 calc(33.333% - 6px); }
+  .beta { display:inline-block; margin-left:3px; padding:0 5px; border-radius:99px; background:#e11d48; color:#fff; font-size:10px; font-weight:800; letter-spacing:.5px; vertical-align:2px; }
   .toolbar { display:flex; gap:8px; margin-bottom:8px; }
   .toolbar input { flex:2; }
   .toolbar select { flex:1; }
@@ -90,6 +93,7 @@
     <button data-sheet="LostReport" class="on">🔍 분실신고</button>
     <button data-sheet="SuccessStories">📦 대리수령</button>
     <button data-sheet="Reservation">📅 예약</button>
+    <button data-sheet="EventOrder">🎁 이벤트<span class="beta">BETA</span></button>
     <button data-sheet="Ledger">💰 정산</button>
   </div>
 
@@ -132,6 +136,36 @@
     snap: '스냅사진', camera: '카메라 대여', skin: '피부과', cloth: '의류대여', rental: '물품대여', course: '코스', trip: '여행 일정', other: '기타'
   };
   function resStep(r) { return Number(str(r['진행'])) || 1; }
+
+  // 이벤트 (EventOrder 시트, 파티박스 BETA) — 읽기 전용. 진행 칸은 시트에서 직접 (접수/확정/완료/취소)
+  function evStep(r) { return str(r['진행']) || '접수'; }
+  function evWon(n) { n = Number(String(n || '').replace(/[^\d.-]/g, '')) || 0; return n.toLocaleString('ko-KR') + '원'; }
+  function eventCard(r) {
+    var c = el('div', 'card');
+    var head = el('div', 'item-head');
+    var badges = el('div');
+    badges.appendChild(el('span', 'badge strong', evStep(r)));
+    badges.appendChild(el('span', 'badge', str(r['받는방법']) || '-'));
+    if (str(r['입실방식'])) badges.appendChild(el('span', 'badge warn', '🔑 ' + str(r['입실방식']) + ' · 호텔 확인 필요'));
+    if (str(r['서프라이즈'])) badges.appendChild(el('span', 'badge info', '🤫 서프라이즈'));
+    head.appendChild(badges);
+    head.appendChild(el('span', 'time', r['접수시각']));
+    c.appendChild(head);
+    c.appendChild(el('div', 'title', joinNonEmpty(['📅 ' + str(r['이용일']), r['체크인'] ? '체크인 ' + str(r['체크인']) : '', r['숙소명']], ' · ')));
+    var dl = el('dl');
+    addPairs(dl, [
+      ['합계', evWon(r['합계']) + ' (상품 ' + evWon(r['상품금액']) + (Number(r['세팅비']) ? ' + 세팅 ' + evWon(r['세팅비']) : '') + ' + 배송 ' + evWon(r['배송비']) + ')'],
+      ['옵션', '베이스' + (str(r['옵션']) ? ', ' + str(r['옵션']) : '')],
+      ['누구와', r['누구와']], ['셀프 세팅', r['셀프세팅분'] ? r['셀프세팅분'] + '분' : ''],
+      ['숙소', joinNonEmpty([r['숙소유형'], r['주소']], ' · ')], ['예약자', r['예약자']], ['위챗', r['위챗ID']],
+      ['카드 문구', r['카드문구']], ['레터링', r['레터링']], ['요청', r['요청사항']], ['언어', r['언어']], ['메모', r['메모']]
+    ]);
+    c.appendChild(dl);
+    var act = el('div', 'actions');
+    if (str(r['위챗ID'])) act.appendChild(copyBtn('위챗ID 복사', str(r['위챗ID'])));
+    c.appendChild(act);
+    return c;
+  }
 
   try { $('key').value = localStorage.getItem('adminReplyKey') || ''; } catch (e) {}
 
@@ -207,6 +241,12 @@
       var cats = {};
       rows.forEach(function (r) { var c = str(r.ItemCategory); if (c) cats[c] = (cats[c] || 0) + 1; });
       Object.keys(cats).sort().forEach(function (c) { opts.push([c, c + ' (' + cats[c] + ')']); });
+    } else if (state.sheet === 'EventOrder') {
+      // 진행 칸(비어 있으면 접수) + 받는 방법 필터 (값 앞에 ':' = 진행)
+      var evSt = {}, evM = {};
+      rows.forEach(function (r) { var s = evStep(r); evSt[s] = (evSt[s] || 0) + 1; var m = str(r['받는방법']); if (m) evM[m] = (evM[m] || 0) + 1; });
+      Object.keys(evSt).forEach(function (s) { opts.push([':' + s, s + ' (' + evSt[s] + ')']); });
+      Object.keys(evM).sort().forEach(function (m) { opts.push([m, m + ' (' + evM[m] + ')']); });
     } else if (state.sheet === 'Reservation') {
       // 진행 단계 필터 (값 앞에 ':') + 유형 필터
       Object.keys(RES_STEPS).forEach(function (s) {
@@ -239,6 +279,14 @@
         return x === y ? b._row - a._row : (x < y ? 1 : -1);
       });
     }
+    if (state.sheet === 'EventOrder') {
+      return rows.filter(function (r) {
+        if (f && f.charAt(0) === ':') { if (evStep(r) !== f.slice(1)) return false; }
+        else if (f && str(r['받는방법']) !== f) return false;
+        if (!q) return true;
+        return Object.keys(r).some(function (k) { return str(r[k]).toLowerCase().indexOf(q) !== -1; });
+      });
+    }
     if (state.sheet === 'Reservation') {
       return rows.filter(function (r) {
         if (f && f.charAt(0) === ':') { if (resStep(r) !== Number(f.slice(1))) return false; }
@@ -263,7 +311,7 @@
     $('count').textContent = rows.length === total ? '총 ' + total + '건' : rows.length + '건 / 전체 ' + total + '건';
     if (state.sheet === 'Ledger') list.appendChild(ledgerTop(rows));
     rows.slice(0, state.shown).forEach(function (r) {
-      list.appendChild(state.sheet === 'LostReport' ? lostCard(r) : state.sheet === 'Ledger' ? ledgerCard(r) : state.sheet === 'Reservation' ? resCard(r) : successCard(r));
+      list.appendChild(state.sheet === 'LostReport' ? lostCard(r) : state.sheet === 'Ledger' ? ledgerCard(r) : state.sheet === 'Reservation' ? resCard(r) : state.sheet === 'EventOrder' ? eventCard(r) : successCard(r));
     });
     $('more').hidden = rows.length <= state.shown;
   }

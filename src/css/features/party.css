@@ -1,0 +1,77 @@
+/* ===== 기념일 파티박스 (BETA) — src/js/features/party.js ===== */
+.pb-root { padding-bottom: 24px; }
+.pb-beta {
+    display: flex; gap: 8px; align-items: flex-start;
+    padding: 10px 12px; margin-bottom: 12px; border-radius: 12px;
+    background: #FFF0F3; color: #9D174D; font-size: 0.8rem; line-height: 1.5;
+}
+.pb-beta-tag {
+    flex-shrink: 0; padding: 1px 6px; border-radius: 999px;
+    background: #E11D48; color: #fff; font-size: 0.68rem; font-weight: 800; letter-spacing: 1px; line-height: 1.6;
+}
+html[lang="ko"] .pb-root { word-break: keep-all; }
+
+.pb-hero {
+    padding: 16px; border-radius: 16px; margin-bottom: 16px;
+    background: linear-gradient(135deg, #fff1f2 0%, #fce7f3 100%);
+    border: 1px solid rgba(225, 29, 72, 0.18);
+}
+.pb-hero-title { margin: 0 0 8px; font-weight: 800; font-size: 1.02rem; color: var(--label-primary); line-height: 1.45; }
+.pb-hero ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; font-size: 0.85rem; color: var(--label-secondary); }
+
+.pb-sub { margin: 18px 0 8px; font-weight: 800; font-size: 0.95rem; color: var(--label-primary); }
+
+.pb-who-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.pb-who {
+    flex: 1 1 0; min-width: 0; min-height: 42px; padding: 0 10px;
+    border: 1px solid var(--separator); border-radius: 12px;
+    background: var(--bg-card); color: var(--label-primary); font: inherit; font-weight: 700; font-size: 0.88rem; cursor: pointer;
+}
+.pb-who.on { border-color: #E11D48; background: #FFF0F3; color: #BE123C; }
+
+.pb-combos { display: grid; gap: 8px; margin-top: 10px; }
+.pb-combo {
+    display: grid; gap: 3px; text-align: left; padding: 12px 14px;
+    border: 1px dashed rgba(225, 29, 72, 0.45); border-radius: 14px;
+    background: var(--bg-card); color: var(--label-primary); font: inherit; cursor: pointer;
+}
+.pb-combo-name { font-weight: 800; font-size: 0.92rem; }
+.pb-combo-items { font-size: 0.78rem; color: var(--label-secondary); }
+.pb-combo-hint { font-size: 0.78rem; color: #BE123C; font-weight: 700; }
+
+.pb-base, .pb-opt, .pb-method, .pb-way {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 12px; border: 1px solid var(--separator); border-radius: 14px; background: var(--bg-card);
+}
+.pb-base { margin-top: 16px; border-color: rgba(225, 29, 72, 0.35); }
+.pb-opt, .pb-method, .pb-way { cursor: pointer; }
+.pb-opt.on, .pb-method.on, .pb-way.on { border-color: #E11D48; background: #FFF7F8; }
+.pb-opt input, .pb-method input, .pb-way input { margin-top: 3px; accent-color: #E11D48; flex-shrink: 0; }
+.pb-opts, .pb-methods { display: grid; gap: 8px; }
+.pb-opt-body { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.pb-opt-name { font-weight: 700; font-size: 0.9rem; color: var(--label-primary); }
+.pb-opt-desc { font-size: 0.78rem; color: var(--label-secondary); line-height: 1.45; }
+.pb-opt-price { flex-shrink: 0; font-weight: 800; font-size: 0.85rem; color: var(--label-primary); white-space: nowrap; }
+.pb-base-price { flex-shrink: 0; display: grid; justify-items: end; gap: 1px; }
+.pb-base-price s { font-size: 0.75rem; color: var(--label-tertiary); }
+.pb-base-price b { font-size: 1rem; color: #BE123C; }
+.pb-base-price span { font-size: 0.68rem; color: #BE123C; font-weight: 700; }
+.pb-tag {
+    display: inline-block; padding: 0 6px; margin-left: 4px; border-radius: 999px;
+    background: #FFE4E6; color: #BE123C; font-size: 0.7rem; font-weight: 800; vertical-align: 1px;
+}
+.pb-ways { display: grid; gap: 8px; padding: 0 0 0 14px; border-left: 3px solid #FECDD3; }
+.pb-ways .pb-sub { margin: 4px 0 0; font-size: 0.85rem; }
+.pb-note { margin: 8px 0 0; font-size: 0.78rem; color: var(--label-secondary); line-height: 1.5; }
+
+#pb-form { margin-top: 18px; }
+.pb-check { display: flex; gap: 8px; align-items: flex-start; margin: 4px 0 14px; font-size: 0.85rem; color: var(--label-primary); line-height: 1.5; cursor: pointer; }
+.pb-check input { margin-top: 3px; accent-color: #E11D48; flex-shrink: 0; }
+.pb-agree { font-size: 0.78rem; color: var(--label-secondary); }
+
+.pb-summary { padding: 14px; margin: 8px 0 14px; border-radius: 14px; background: var(--fill-quaternary, #f4f5f7); }
+.pb-sum-row { display: flex; justify-content: space-between; gap: 8px; padding: 3px 0; font-size: 0.88rem; color: var(--label-primary); }
+.pb-sum-total { margin-top: 6px; padding-top: 8px; border-top: 1px solid var(--separator); font-weight: 800; font-size: 1rem; }
+.pb-sum-total small { font-weight: 600; color: var(--label-secondary); font-size: 0.78rem; }
+.pb-minutes { margin: 0 0 8px; font-size: 0.82rem; font-weight: 700; color: #047857; line-height: 1.5; }
+.pb-minutes.over { color: #B45309; }

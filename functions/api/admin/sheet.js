@@ -13,7 +13,7 @@
  */
 const JSON_HEADERS = { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' };
 const respond = (obj, status = 200) => new Response(JSON.stringify(obj), { status, headers: JSON_HEADERS });
-const SHEETS = ['LostReport', 'SuccessStories', 'Ledger', 'Reservation', 'Candidates'];
+const SHEETS = ['LostReport', 'SuccessStories', 'Ledger', 'Reservation', 'Candidates', 'EventOrder'];
 
 // 길이가 달라도 시간 차이로 비밀번호가 새지 않도록 비교
 function safeEqual(a, b) {
