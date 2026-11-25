@@ -11,14 +11,6 @@
 }
 html[lang="ko"] .pb-root { word-break: keep-all; }
 
-.pb-hero {
-    padding: 16px; border-radius: 16px; margin-bottom: 16px;
-    background: linear-gradient(135deg, #fff1f2 0%, #fce7f3 100%);
-    border: 1px solid rgba(225, 29, 72, 0.18);
-}
-.pb-hero-title { margin: 0 0 8px; font-weight: 800; font-size: 1.02rem; color: var(--label-primary); line-height: 1.45; }
-.pb-hero ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; font-size: 0.85rem; color: var(--label-secondary); }
-
 .pb-sub { margin: 18px 0 8px; font-weight: 800; font-size: 0.95rem; color: var(--label-primary); }
 
 .pb-who-row { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -29,21 +21,10 @@ html[lang="ko"] .pb-root { word-break: keep-all; }
 }
 .pb-who.on { border-color: #E11D48; background: #FFF0F3; color: #BE123C; }
 
-.pb-combos { display: grid; gap: 8px; margin-top: 10px; }
-.pb-combo {
-    display: grid; gap: 3px; text-align: left; padding: 12px 14px;
-    border: 1px dashed rgba(225, 29, 72, 0.45); border-radius: 14px;
-    background: var(--bg-card); color: var(--label-primary); font: inherit; cursor: pointer;
-}
-.pb-combo-name { font-weight: 800; font-size: 0.92rem; }
-.pb-combo-items { font-size: 0.78rem; color: var(--label-secondary); }
-.pb-combo-hint { font-size: 0.78rem; color: #BE123C; font-weight: 700; }
-
-.pb-base, .pb-opt, .pb-method, .pb-way {
+.pb-opt, .pb-method, .pb-way {
     display: flex; gap: 10px; align-items: flex-start;
     padding: 12px; border: 1px solid var(--separator); border-radius: 14px; background: var(--bg-card);
 }
-.pb-base { margin-top: 16px; border-color: rgba(225, 29, 72, 0.35); }
 .pb-opt, .pb-method, .pb-way { cursor: pointer; }
 .pb-opt.on, .pb-method.on, .pb-way.on { border-color: #E11D48; background: #FFF7F8; }
 .pb-opt input, .pb-method input, .pb-way input { margin-top: 3px; accent-color: #E11D48; flex-shrink: 0; }
@@ -52,15 +33,12 @@ html[lang="ko"] .pb-root { word-break: keep-all; }
 .pb-opt-name { font-weight: 700; font-size: 0.9rem; color: var(--label-primary); }
 .pb-opt-desc { font-size: 0.78rem; color: var(--label-secondary); line-height: 1.45; }
 .pb-opt-price { flex-shrink: 0; font-weight: 800; font-size: 0.85rem; color: var(--label-primary); white-space: nowrap; }
-.pb-base-price { flex-shrink: 0; display: grid; justify-items: end; gap: 1px; }
-.pb-base-price s { font-size: 0.75rem; color: var(--label-tertiary); }
-.pb-base-price b { font-size: 1rem; color: #BE123C; }
-.pb-base-price span { font-size: 0.68rem; color: #BE123C; font-weight: 700; }
 .pb-tag {
     display: inline-block; padding: 0 6px; margin-left: 4px; border-radius: 999px;
     background: #FFE4E6; color: #BE123C; font-size: 0.7rem; font-weight: 800; vertical-align: 1px;
 }
 .pb-ways { display: grid; gap: 8px; padding: 0 0 0 14px; border-left: 3px solid #FECDD3; }
+.pb-ways[hidden] { display: none; }
 .pb-ways .pb-sub { margin: 4px 0 0; font-size: 0.85rem; }
 .pb-note { margin: 8px 0 0; font-size: 0.78rem; color: var(--label-secondary); line-height: 1.5; }
 
@@ -75,3 +53,113 @@ html[lang="ko"] .pb-root { word-break: keep-all; }
 .pb-sum-total small { font-weight: 600; color: var(--label-secondary); font-size: 0.78rem; }
 .pb-minutes { margin: 0 0 8px; font-size: 0.82rem; font-weight: 700; color: #047857; line-height: 1.5; }
 .pb-minutes.over { color: #B45309; }
+
+/* ── 누구와 탭 (맨 위) ── */
+.pb-tabs { display: flex; gap: 6px; padding: 4px; margin-bottom: 12px; border-radius: 14px; background: var(--fill-quaternary, #f1f2f4); }
+.pb-tab {
+    flex: 1 1 0; min-width: 0; min-height: 44px; border: 0; border-radius: 11px;
+    background: transparent; color: var(--label-secondary); font: inherit; font-weight: 800; font-size: 0.92rem; cursor: pointer;
+}
+.pb-tab.on { background: #fff; color: #BE123C; box-shadow: 0 1px 4px rgba(0,0,0,0.12); }
+
+/* ── 완성 사진 + 어떤 예약인지 ── */
+.pb-hero { border-radius: 18px; overflow: hidden; background: var(--bg-card); border: 1px solid rgba(225, 29, 72, 0.18); box-shadow: 0 6px 20px rgba(190, 18, 60, 0.10); margin-bottom: 12px; }
+.pb-hero-img { position: relative; aspect-ratio: 4 / 3; background: #2a1f24; }
+.pb-hero-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pb-sample { position: absolute; right: 8px; bottom: 8px; padding: 2px 8px; border-radius: 999px; background: rgba(0,0,0,0.45); color: #fff; font-size: 0.66rem; }
+.pb-kind {
+    position: absolute; left: 10px; top: 10px; max-width: calc(100% - 20px);
+    padding: 4px 10px; border-radius: 999px; background: rgba(225, 29, 72, 0.92); color: #fff;
+    font-size: 0.74rem; font-weight: 800; line-height: 1.4;
+}
+.pb-hero-body { padding: 12px 14px 14px; display: grid; gap: 4px; }
+.pb-hero-scene { margin: 0; font-size: 0.78rem; font-weight: 700; color: #BE123C; }
+.pb-hero-name { margin: 0; font-size: 1.15rem; font-weight: 900; color: var(--label-primary); line-height: 1.35; }
+.pb-hero-items { margin: 0; font-size: 0.8rem; color: var(--label-secondary); line-height: 1.45; }
+.pb-hero-hint { margin: 0; font-size: 0.8rem; font-weight: 700; color: #047857; }
+.pb-hero-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 6px; }
+.pb-hero-price { font-size: 1.35rem; font-weight: 900; color: #BE123C; }
+.pb-hero-price small, .pb-sum-total small { font-size: 0.72rem; font-weight: 600; color: var(--label-secondary); }
+.pb-combo-btn {
+    flex-shrink: 0; min-height: 42px; padding: 0 16px; border-radius: 12px; border: 0;
+    background: #E11D48; color: #fff; font: inherit; font-weight: 800; font-size: 0.88rem; cursor: pointer;
+}
+.pb-combo-btn.on { background: #FFE4E6; color: #BE123C; }
+
+.pb-points { margin: 0 0 4px; padding: 0; list-style: none; display: grid; gap: 3px; font-size: 0.8rem; color: var(--label-secondary); }
+
+/* ── 베이스 박스 ── */
+.pb-base { display: flex; gap: 12px; padding: 10px; border-radius: 14px; background: var(--bg-card); border: 1.5px solid #E11D48; }
+.pb-base img { width: 96px; height: 96px; border-radius: 10px; object-fit: cover; flex-shrink: 0; }
+.pb-base-body { flex: 1; min-width: 0; display: grid; gap: 3px; align-content: start; }
+.pb-base-price { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; margin-top: 2px; }
+.pb-base-price b { font-size: 1.05rem; color: #BE123C; }
+.pb-base-price s { font-size: 0.75rem; color: var(--label-tertiary); }
+.pb-base-price em { font-style: normal; font-size: 0.68rem; font-weight: 800; color: #fff; background: #E11D48; padding: 0 6px; border-radius: 999px; }
+
+/* ── 상품 카드 (사진·금액·간단 설명) ── */
+.pb-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.pb-card {
+    display: flex; flex-direction: column; padding: 0; text-align: left; overflow: hidden;
+    border: 1.5px solid var(--separator); border-radius: 14px; background: var(--bg-card); color: inherit; font: inherit; cursor: pointer;
+}
+.pb-card.on { border-color: #E11D48; box-shadow: 0 0 0 2px rgba(225, 29, 72, 0.15); }
+.pb-card-img { display: block; aspect-ratio: 1 / 1; background: #f3eef0; }
+.pb-card-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pb-card-body { display: flex; flex-direction: column; gap: 3px; padding: 8px 10px 10px; flex: 1; }
+.pb-card .pb-opt-name { font-size: 0.86rem; }
+.pb-card .pb-opt-desc { font-size: 0.72rem; flex: 1; }
+.pb-card-foot { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-top: 4px; }
+.pb-card-foot b { font-size: 0.92rem; color: var(--label-primary); }
+.pb-card-add { padding: 3px 10px; border-radius: 999px; background: #FFE4E6; color: #BE123C; font-size: 0.72rem; font-weight: 800; white-space: nowrap; }
+.pb-card.on .pb-card-add { background: #E11D48; color: #fff; }
+
+/* ── 3단계 흐름: 단계 표시 · 고른 상품 줄 · 포함 물품 · 이전/다음 ── */
+.pb-steps { display: flex; gap: 4px; margin: 0 0 14px; padding: 0; list-style: none; counter-reset: none; }
+.pb-step {
+    flex: 1 1 0; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 6px;
+    min-height: 40px; padding: 0 6px; border-radius: 12px;
+    background: var(--fill-quaternary, #f1f2f4); color: var(--label-tertiary, #9aa0a6); font-size: 0.8rem; font-weight: 700;
+}
+.pb-step b {
+    flex-shrink: 0; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center;
+    background: var(--separator, #d9dbe0); color: #fff; font-size: 0.7rem;
+}
+.pb-step span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pb-step.on { background: #FFF0F3; color: #BE123C; }
+.pb-step.on b { background: #E11D48; }
+.pb-step.done { color: #BE123C; cursor: pointer; }
+.pb-step.done b { background: #FDA4AF; }
+
+.pb-step-title { margin: 18px 0 4px; font-size: 1.05rem; font-weight: 900; color: var(--label-primary); }
+.pb-lead { margin: 0 0 10px; }
+
+.pb-picked {
+    display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 14px;
+    background: var(--bg-card); border: 1.5px solid #E11D48;
+}
+.pb-picked img { width: 72px; height: 54px; border-radius: 9px; object-fit: cover; flex-shrink: 0; }
+.pb-picked-body { flex: 1; min-width: 0; display: grid; gap: 1px; }
+.pb-picked-kind { font-size: 0.7rem; font-weight: 800; color: #BE123C; }
+.pb-picked-body b { font-size: 0.9rem; color: var(--label-primary); line-height: 1.3; }
+.pb-link {
+    flex-shrink: 0; min-height: 36px; padding: 0 12px; border-radius: 10px; border: 1px solid #FECDD3;
+    background: #FFF0F3; color: #BE123C; font: inherit; font-size: 0.8rem; font-weight: 800; cursor: pointer;
+}
+
+.pb-inc { display: flex; flex-wrap: wrap; gap: 6px; }
+.pb-inc-item {
+    flex: 0 0 auto; display: flex; align-items: center; gap: 6px; max-width: 180px;
+    padding: 4px 10px 4px 4px; border-radius: 999px; background: #ECFDF5; color: #047857; font-size: 0.76rem; font-weight: 700;
+}
+.pb-inc-item img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+.pb-inc-item span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.pb-hero .pb-combo-btn { min-width: 108px; }
+
+.pb-nav { display: flex; gap: 8px; margin-top: 14px; }
+.pb-nav-back, .pb-nav-next {
+    min-height: 48px; padding: 0 16px; border-radius: 14px; font: inherit; font-weight: 800; font-size: 0.95rem; cursor: pointer;
+}
+.pb-nav-back { flex: 0 0 auto; border: 1px solid var(--separator); background: var(--bg-card); color: var(--label-secondary); }
+.pb-nav-next { flex: 1 1 auto; border: 0; background: #E11D48; color: #fff; box-shadow: 0 4px 12px rgba(225, 29, 72, 0.25); }

@@ -27,11 +27,16 @@ export function removeWish(id) {
 }
 
 /** 담기 버튼. item = { k, key, name } (name은 {ko,zh,en} 또는 문자열) */
-export function wishBtnHtml(item, { cls = '' } = {}) {
+export function wishBtnHtml(item, { cls = '', iconOnly = false } = {}) {
     const name = typeof item.name === 'string' ? { ko: item.name, zh: item.name, en: item.name } : item.name;
     const data = { k: item.k, key: item.key, name };
     const id = `${item.k}:${item.key}`;
     const on = hasWish(id);
+    // iconOnly: 목록 안에서 ♡ 아이콘만 (뜻은 화면 위 안내 카드가 설명)
+    if (iconOnly) {
+        return `<button type="button" class="wish-icon${on ? ' on' : ''} ${cls}" data-wish="${escapeHtml(JSON.stringify(data))}" data-wish-id="${escapeHtml(id)}" aria-pressed="${on}" aria-label="${escapeHtml(tp('wish.add'))}" title="${escapeHtml(tp('wish.add'))}">
+        <i class="${on ? 'ph-fill' : 'ph-bold'} ph-heart"></i></button>`;
+    }
     return `<button type="button" class="wish-btn${on ? ' on' : ''} ${cls}" data-wish="${escapeHtml(JSON.stringify(data))}" data-wish-id="${escapeHtml(id)}" aria-pressed="${on}">
         <i class="${on ? 'ph-fill' : 'ph-bold'} ph-heart"></i><span>${tp(on ? 'wish.added' : 'wish.add')}</span></button>`;
 }

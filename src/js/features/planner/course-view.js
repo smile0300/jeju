@@ -8,7 +8,7 @@ import { JEJU_MAP, projectLatLng } from '../../../data/jeju-map.js';
 import { STOP_PHOTOS } from '../../../data/stop-photos.js';
 import { roadKm, taxiFare, krwToCny, driveMin, WALK_KM, WALK_KMH, HOTEL_BASE, BUS_FARE } from '../../../data/taxi.js';
 import { wishBtnHtml } from './wishlist.js';
-import { openDriverCard, openEatDetailModal, buildMapUrls } from './travel-card.js';
+import { openDriverCard, openEatDetailModal } from './travel-card.js';
 
 export const COURSE_HOTELS = {
     jeju: HOTEL_BASE,
@@ -318,7 +318,7 @@ function mealRow([idx, km]) {
         </button>`;
 }
 
-function mealInner(kind, stopKo, at, used, page = 0) {
+function mealInner(kind, stopKo, at, used, page = 0, open = false) {
     const all = (MEALS?.STOP_EATS[stopKo] || []).filter(([idx]) => !used.has(idx));
     if (!all.length) return '';
     const start = (page * 3) % all.length;
@@ -327,13 +327,19 @@ function mealInner(kind, stopKo, at, used, page = 0) {
     if (page === 0) picks.forEach(([idx]) => used.add(idx));
     const title = kind === 'lunch' ? tr('course.meal.lunch', { t: hhmm(at) }) : tr('course.meal.dinner');
     const canSwap = all.length > 3;
-    return `<div class="pl-meal-head">
-            <span><i class="ph-duotone ph-fork-knife"></i> ${escapeHtml(title)}</span>
-            ${canSwap ? `<button type="button" class="pl-meal-swap" data-meal-swap><i class="ph-duotone ph-arrows-clockwise"></i> ${escapeHtml(tr('course.meal.swap'))}</button>` : ''}
-        </div>
+    const first = MEALS.MEAL_EATS[picks[0][0]].n;
+    const etc = picks.length > 1 ? tr('course.meal.etc', { name: first, n: picks.length, m: picks.length - 1 }) : first;
+    // 동선을 끊지 않게 한 줄로 접어 두고, 누르면 식당 목록이 열린다
+    return `<details class="pl-meal-box"${open ? ' open' : ''}>
+        <summary class="pl-meal-head">
+            <span class="pl-meal-sum"><i class="ph-duotone ph-fork-knife"></i> <b>${escapeHtml(title)}</b><small>${escapeHtml(etc)}</small></span>
+            <i class="ph-bold ph-caret-down pl-meal-caret"></i>
+        </summary>
+        ${canSwap ? `<button type="button" class="pl-meal-swap" data-meal-swap><i class="ph-duotone ph-arrows-clockwise"></i> ${escapeHtml(tr('course.meal.swap'))}</button>` : ''}
         ${picks.map(mealRow).join('')}
         <div class="pl-meal-foot"><span class="pl-meal-hint">${tr('course.meal.hint')}</span>
-            <button type="button" class="pl-link pl-meal-more" onclick="showSection('eats')">${tr('course.meal.more')} →</button></div>`;
+            <button type="button" class="pl-link pl-meal-more" onclick="showSection('eats')">${tr('course.meal.more')} →</button></div>
+    </details>`;
 }
 
 export function fillMeals(root) {
@@ -356,7 +362,7 @@ export function fillMeals(root) {
                 if (!box || !MEALS) return;
                 const next = (Number(box.dataset.mealPage) || 0) + 1;
                 box.dataset.mealPage = String(next);
-                box.innerHTML = mealInner(box.dataset.meal, box.dataset.mealStop, Number(box.dataset.mealAt), new Set(), next);
+                box.innerHTML = mealInner(box.dataset.meal, box.dataset.mealStop, Number(box.dataset.mealAt), new Set(), next, true);
                 return;
             }
             const open = e.target.closest('[data-meal-open]');
@@ -370,7 +376,7 @@ export function fillMeals(root) {
                         onSwap: box ? () => {
                             const next = (Number(box.dataset.mealPage) || 0) + 1;
                             box.dataset.mealPage = String(next);
-                            box.innerHTML = mealInner(box.dataset.meal, box.dataset.mealStop, Number(box.dataset.mealAt), new Set(), next);
+                            box.innerHTML = mealInner(box.dataset.meal, box.dataset.mealStop, Number(box.dataset.mealAt), new Set(), next, true);
                         } : null,
                     });
                 }
@@ -381,7 +387,7 @@ export function fillMeals(root) {
 
 const mealSlot = (kind, stop, at) => `<div class="pl-meal" data-meal="${kind}" data-meal-stop="${escapeHtml(stop.name.ko)}" data-meal-at="${at}" hidden></div>`;
 
-export function timelineHtml(block, { extraClass = '', meals = false, wish = false, hotelKey = 'jeju' } = {}) {
+export function timelineHtml(block, { extraClass = '', meals = false, wish = false, hotelKey = 'jeju', note = true } = {}) {
     const stops = block.stops;
     const hotel = hotelLegs(block, hotelKey);
     const isUdo = block.transport === 'udo';
@@ -390,24 +396,25 @@ export function timelineHtml(block, { extraClass = '', meals = false, wish = fal
     const mealAfter = (i) => (!slots ? '' : i === slots.lunch ? mealSlot('lunch', stops[i], slots.lunchAt)
         : i === slots.dinner ? mealSlot('dinner', stops[i], 0) : '');
     const items = stops.map((s, i) => {
-        const pos = posOf(s);
-        const urls = buildMapUrls({ nameKo: s.name.ko, lat: pos?.[0], lng: pos?.[1] });
+        // 복사·지도는 기사님 카드 안에 있으므로 장소마다 버튼은 하나 (+ ♡ 아이콘)
+        const meta = [tr('course.stay', { m: s.stayMin }), s.info ? pick(s.info) : ''].filter(Boolean).join(' · ');
         return `
         <li class="pl-stop">
             <div class="pl-stop-head">
                 <span class="pl-stop-no">${i + 1}</span>
-                <span class="pl-stop-name">${escapeHtml(pick(s.name))}</span>
-                ${typeTag(s.type)}
+                <span class="pl-stop-title">
+                    <b class="pl-stop-time">${hhmm(times[i])}</b>
+                    <span class="pl-stop-name">${escapeHtml(pick(s.name))}</span>
+                    ${typeTag(s.type)}
+                </span>
+                ${wish ? wishBtnHtml({ k: 'stop', key: s.name.ko, name: s.name }, { iconOnly: true }) : ''}
             </div>
             <div class="pl-stop-body">
-                <span class="pl-stop-ko">${escapeHtml(s.name.ko)}</span>
-                <button type="button" class="pl-copy" data-copy="${escapeHtml(s.name.ko)}"><i class="ph-duotone ph-copy"></i> ${tr('course.copy_ko')}</button>
-                <button type="button" class="pl-copy" data-stop-driver="${escapeHtml(s.name.ko)}" data-stop-local="${escapeHtml(pick(s.name))}"><i class="ph-duotone ph-taxi"></i> ${tr('course.driver_btn')}</button>
-                <a class="pl-copy pl-copy-link" href="${escapeHtml(urls.naver)}" target="_blank" rel="noopener"><i class="ph-duotone ph-map-pin"></i> ${tr('course.map_btn')}</a>
-                ${wish ? wishBtnHtml({ k: 'stop', key: s.name.ko, name: s.name }, { cls: 'wish-btn-sm' }) : ''}
-                <span class="pl-stop-stay"><b class="pl-stop-time"><i class="ph-bold ph-clock"></i> ${tr('course.arrive', { t: hhmm(times[i]) })}</b> · ${tr('course.stay', { m: s.stayMin })}</span>
-                ${s.info ? `<p class="pl-stop-info"><i class="ph-duotone ph-clock"></i> ${escapeHtml(pick(s.info))}</p>` : ''}
+                <p class="pl-stop-info">${escapeHtml(meta)}</p>
                 ${s.tip ? `<p class="pl-stop-tip">${escapeHtml(pick(s.tip))}</p>` : ''}
+                <button type="button" class="pl-drive-btn" data-stop-driver="${escapeHtml(s.name.ko)}" data-stop-local="${escapeHtml(pick(s.name))}">
+                    <i class="ph-duotone ph-taxi"></i><span class="pl-drive-ko">${escapeHtml(s.name.ko)}</span><span class="pl-drive-go">${tr('course.drive_btn')} ›</span>
+                </button>
             </div>
             ${mealAfter(i)}
             ${i < stops.length - 1 ? legHtml(legInfo(block, i))
@@ -415,7 +422,7 @@ export function timelineHtml(block, { extraClass = '', meals = false, wish = fal
         </li>`;
     }).join('');
 
-    return `<p class="pl-muted pl-time-note"><i class="ph-duotone ph-clock"></i> ${tr('course.time_note')}</p>
+    return `${note ? `<p class="pl-muted pl-time-note"><i class="ph-duotone ph-clock"></i> ${tr('course.time_note')}</p>` : ''}
     <ol class="pl-timeline ${extraClass}">
         ${hotel ? hotelItem(legHtml(hotel.out), hotelKey) : ''}
         ${items}

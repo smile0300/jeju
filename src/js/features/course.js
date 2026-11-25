@@ -197,15 +197,18 @@ function detailHtml() {
             keys.map((k, i) => ({ value: String(i), label: `${tr('course.day', { n: i + 1 })} · ${shortTitle(BLOCKS[k])}` })),
             { selected: [String(dayIdx)] })}</div>
             <p class="pl-detail-sub">${escapeHtml(pick(block.title))}</p>` : `<p class="pl-detail-sub">${escapeHtml(pick(block.summary))}</p>`}
+        <p class="pl-muted pl-hint"><i class="ph-duotone ph-info"></i> ${tr('course.notes')}</p>
         ${coverHtml(keys[dayIdx], { eager: true })}
         <p class="pl-course-cost">${costText(dayCost(block, budget()))} · ${tr(`course.pace.${block.pace || 3}`)}</p>
         ${mapHtml(block.stops)}
+        <section class="pl-wish-intro">
+            <div class="pl-wish-intro-text"><i class="ph-fill ph-heart"></i>
+                <span><strong>${tp('wish.intro_title')}</strong><small>${tp('wish.intro_desc')}</small></span></div>
+            ${isPlan ? wishAllBtnHtml(allPlanStops, { label: tp('wish.all_plan', { d: keys.length }), cls: 'wish-all-primary' }) : ''}
+            ${wishAllBtnHtml(dayStops)}
+        </section>
         ${moveHtml(block, { hotelKey: hotelKey(), party: state.party })}
-        <p class="pl-muted pl-hint"><i class="ph-duotone ph-info"></i> ${tr('course.copy_hint')}</p>
-        ${isPlan ? wishAllBtnHtml(allPlanStops, { label: tp('wish.all_plan', { d: keys.length }), cls: 'wish-all-primary' }) : ''}
-        ${wishAllBtnHtml(dayStops)}
-        ${timelineHtml(block, { meals: true, wish: true, hotelKey: hotelKey() })}
-        <p class="pl-muted pl-hint"><i class="ph-duotone ph-info"></i> ${tr('course.info_hint')}</p>
+        ${timelineHtml(block, { meals: true, wish: true, hotelKey: hotelKey(), note: false })}
         <button type="button" class="pl-link pl-center" data-build-from="${escapeHtml(keys[dayIdx])}"><i class="ph-duotone ph-pencil-simple-line"></i> ${tr('build.from_course')}</button>
         <button type="button" class="res-submit-btn pl-mt" data-charter="${escapeHtml(block.region)}"><i class="ph-duotone ph-users-three"></i> <span>${tr('course.charter_cta')}</span></button>`;
 }

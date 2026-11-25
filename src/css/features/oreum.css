@@ -13,24 +13,60 @@
     color: var(--label-secondary);
 }
 
-.oreum-pane .pl-filter { margin-bottom: 8px; }
-/* 지역 6개가 375px 폭 한 줄에 들어가도록 칩을 조금 줄인다 (넘치면 좌우 스크롤) */
-.oreum-pane .pl-chips { gap: 6px; }
-.oreum-pane .pl-chip { min-height: 36px; padding: 0 12px; font-size: 0.85rem; }
-/* 넘치는 줄은 오른쪽 끝을 흐리게 해서 옆으로 넘길 수 있다는 걸 보여준다 */
-.oreum-pane .pl-filter.is-overflow {
-    -webkit-mask-image: linear-gradient(to right, #000 85%, transparent);
-    mask-image: linear-gradient(to right, #000 85%, transparent);
-}
-.oreum-pane .pl-filter.is-overflow.at-end { -webkit-mask-image: none; mask-image: none; }
-.oreum-season-filter { margin-bottom: 4px; }
-
+/* 필터: 맛집 화면과 같은 방식 — 버튼 하나, 패널 안에 줄마다 이름표 + 칩(줄바꿈), 아래 'N곳 보기', 적용 중 요약 */
+.oreum-filters { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.oreum-filter-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .oreum-count {
-    margin: 8px 2px;
+    margin: 0 2px;
     font-size: 0.8rem;
     font-weight: 700;
     color: var(--label-secondary);
 }
+.oreum-filter-btn {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 42px;
+    padding: 0 12px;
+    border: 1px solid var(--separator);
+    border-radius: 12px;
+    background: var(--bg-card);
+    color: var(--label-primary);
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+}
+.oreum-filter-btn.active { border-color: var(--accent); color: var(--accent-active); background: var(--accent-subtle); }
+.oreum-filter-btn .ph-sliders-horizontal { font-size: 1rem; }
+.oreum-filter-caret { font-size: 0.85rem; opacity: 0.6; transition: transform 0.2s; }
+.oreum-filter-btn[aria-expanded="true"] .oreum-filter-caret { transform: rotate(180deg); }
+.oreum-count-dot {
+    display: inline-block;
+    min-width: 18px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.72rem;
+    line-height: 18px;
+    text-align: center;
+}
+.oreum-panel { display: flex; flex-direction: column; gap: 12px; padding: 12px; border-radius: 14px; background: var(--fill-secondary, #F2F4F6); }
+.oreum-panel[hidden] { display: none; }
+.oreum-sec { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.oreum-sec-label { display: flex; align-items: center; gap: 4px; font-size: 0.74rem; font-weight: 800; color: var(--label-secondary); }
+.oreum-sec-label i { font-size: 0.85rem; color: var(--accent); }
+.oreum-panel .pl-chips { flex-wrap: wrap; overflow: visible; gap: 6px; }
+.oreum-panel .pl-chip { min-height: 34px; padding: 0 12px; font-size: 0.82rem; background: var(--bg-card, #fff); }
+.oreum-panel .pl-chip.active { background: var(--accent); }
+.oreum-panel-done { min-height: 46px; border: 0; border-radius: 12px; background: var(--accent); color: #fff; font: inherit; font-size: 0.95rem; font-weight: 800; cursor: pointer; }
+.oreum-applied { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.oreum-applied-label { font-size: 0.74rem; font-weight: 800; color: var(--label-secondary); margin-right: 2px; }
+.oreum-applied-chip { display: inline-flex; align-items: center; gap: 4px; min-height: 30px; padding: 0 8px 0 10px; border: 0; border-radius: 999px; background: var(--accent-subtle); color: var(--accent-active); font: inherit; font-size: 0.78rem; font-weight: 700; cursor: pointer; }
+.oreum-applied-chip i { font-size: 0.75rem; opacity: 0.8; }
 
 .oreum-list {
     display: grid;
@@ -50,6 +86,63 @@
     border: 1px solid var(--separator);
     border-radius: 16px;
     background: var(--bg-card);
+}
+
+/* 카드 맨 위 사진 — 여러 장이면 옆으로 넘김(스크롤 스냅). 4:3 고정이라 로딩 중에도 자리가 안 밀린다 */
+.oreum-shots {
+    display: flex;
+    gap: 6px;
+    margin: -16px -16px 2px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    border-radius: 16px 16px 0 0;
+}
+.oreum-shots::-webkit-scrollbar { display: none; }
+.oreum-shot {
+    position: relative;
+    flex: 0 0 100%;
+    margin: 0;
+    aspect-ratio: 4 / 3;
+    scroll-snap-align: start;
+    background: var(--fill-secondary);
+}
+/* 여러 장이면 다음 사진이 살짝 보이게 */
+.oreum-shots.multi .oreum-shot { flex-basis: 88%; }
+.oreum-shot img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.oreum-shot figcaption {
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    top: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    pointer-events: none;
+}
+.oreum-shot-kind, .oreum-shot-n {
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.55);
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 800;
+    line-height: 1.6;
+}
+.oreum-shot-kind.k-sunset { background: rgba(217, 72, 15, 0.85); }
+.oreum-shot-kind.k-sunrise { background: rgba(230, 119, 0, 0.85); }
+.oreum-shot-kind.k-spot { background: rgba(174, 62, 201, 0.85); }
+.oreum-shot-credit {
+    position: absolute;
+    right: 6px;
+    bottom: 4px;
+    max-width: 90%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.6rem;
+    text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
 }
 
 .oreum-head {

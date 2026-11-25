@@ -1,23 +1,26 @@
 import { CONFIG } from '../core/config.js';
 import {
     PARTY_BASE, PARTY_OPTIONS, PARTY_COMBOS, PARTY_METHODS, PARTY_SETUP,
-    PARTY_TEXT, COUPLE_MINUTES, partyQuote,
+    PARTY_TEXT, COUPLE_MINUTES, KRW_PER_CNY, partyQuote,
 } from '../../data/party-box.js';
 
 // 기념일 셀프 파티박스 (BETA)
-// 베이스 + 옵션을 고르면 합계·직접 세팅 시간이 바로 바뀐다. 받는 방법 3가지 + 세팅 대행(유료, 하루 1건).
+// 3단계: ① 상품(커플·우정·가족 완성 사진 카드) 고르기 → ② 추가 물품(사진 카드) 고르기 → ③ 예약 정보 입력·접수
+// 금액은 위안화(위챗 결제). 한국어 화면에만 원화 환산을 작게 덧붙인다.
 // 접수: /api/event → GAS 'EventOrder' 시트. 결제는 위챗에서 수동 (오픈특가 20팀 동안).
 
+const WHO = ['couple', 'friends', 'family'];
 const lang = () => (window.getLang ? window.getLang() : 'zh');
 const T = () => PARTY_TEXT[lang()] || PARTY_TEXT.zh;
 const pick = (o) => (o && (o[lang()] || o.zh)) || '';
-const won = (n) => '₩' + n.toLocaleString('en-US');
-const cny = (n) => '≈¥' + Math.round(n / 200);
+const yuan = (n) => '¥' + n.toLocaleString('en-US');
+const krwHint = (n) => (lang() === 'ko' ? ` <small>≈₩${(n * KRW_PER_CNY).toLocaleString('ko-KR')}</small>` : '');
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 const state = {
+    step: 1,                  // 1 상품 · 2 추가 물품 · 3 예약 정보
     who: 'couple',
-    options: new Set(PARTY_COMBOS.couple.options),
+    extras: new Set(),        // 상품에 없는 추가 물품만
     method: 'front',          // front | door | hand | setup
     setupWay: 'cardkey',
     stayType: 'hotel',
@@ -27,26 +30,93 @@ const state = {
     sending: false,
 };
 
-function optionRow(o) {
-    const on = state.options.has(o.key);
-    return `<label class="pb-opt${on ? ' on' : ''}">
-        <input type="checkbox" data-opt="${o.key}" ${on ? 'checked' : ''}>
-        <span class="pb-opt-body">
-            <span class="pb-opt-name">${esc(pick(o.name))}</span>
-            <span class="pb-opt-desc">${esc(pick(o.desc))}</span>
-        </span>
-        <span class="pb-opt-price">+${won(o.price)}</span>
-    </label>`;
+const optByKey = (k) => PARTY_OPTIONS.find(o => o.key === k);
+/** 상품에 든 것 + 추가로 고른 것 = 실제 주문 옵션 */
+const orderKeys = () => [...new Set([...PARTY_COMBOS[state.who].options, ...state.extras])];
+const hasOpt = (k) => orderKeys().includes(k);
+
+function stepperHtml() {
+    const t = T();
+    const labels = [t.step1, t.step2, t.step3];
+    return `<ol class="pb-steps">${labels.map((l, i) => {
+        const n = i + 1;
+        const cls = n === state.step ? ' on' : n < state.step ? ' done' : '';
+        // 지나온 단계만 눌러서 돌아갈 수 있다
+        const go = n < state.step ? ` data-go="${n}" role="button" tabindex="0"` : '';
+        return `<li class="pb-step${cls}"${go}><b>${n < state.step ? '✓' : n}</b><span>${esc(l)}</span></li>`;
+    }).join('')}</ol>`;
 }
 
-function comboCard(key) {
-    const c = PARTY_COMBOS[key];
+function pkgCard(k) {
+    const t = T();
+    const c = PARTY_COMBOS[k];
     const q = partyQuote(c.options);
-    const names = [pick(PARTY_BASE.name), ...c.options.map(k => pick(PARTY_OPTIONS.find(o => o.key === k).name))].join(' + ');
-    return `<button type="button" class="pb-combo" data-combo="${key}">
-        <span class="pb-combo-name">${esc(pick(c.name))} · ${won(q.items)}</span>
-        <span class="pb-combo-items">${esc(names)}</span>
-        <span class="pb-combo-hint">⏱ ${esc(pick(c.hint))}</span>
+    const items = [pick(PARTY_BASE.name), ...c.options.map(o => pick(optByKey(o).name))].join(' + ');
+    return `<div class="pb-hero">
+        <div class="pb-hero-img">
+            <img src="${c.img}" alt="${esc(pick(c.name))}" width="960" height="720" ${k === 'couple' ? 'fetchpriority="high"' : 'loading="lazy"'}>
+            <span class="pb-sample">${esc(t.sample)}</span>
+            <span class="pb-kind">${esc(pick(c.tab))}</span>
+        </div>
+        <div class="pb-hero-body">
+            <p class="pb-hero-scene">${esc(pick(c.scene))}</p>
+            <h3 class="pb-hero-name">${esc(pick(c.name))}</h3>
+            <p class="pb-hero-items">${esc(items)}</p>
+            <p class="pb-hero-hint">⏱ ${esc(pick(c.hint))}</p>
+            <div class="pb-hero-foot">
+                <span class="pb-hero-price">${yuan(q.items)}${krwHint(q.items)}</span>
+                <button type="button" class="pb-combo-btn" data-pkg="${k}">${esc(t.pkg_select)} →</button>
+            </div>
+        </div>
+    </div>`;
+}
+
+/** ②·③ 단계 위쪽에 붙는 '고른 상품' 줄 */
+function pickedBar(withExtras) {
+    const t = T();
+    const c = PARTY_COMBOS[state.who];
+    const extra = [...state.extras].map(k => pick(optByKey(k).name));
+    return `<div class="pb-picked">
+        <img src="${c.img}" alt="" width="96" height="72">
+        <div class="pb-picked-body">
+            <span class="pb-picked-kind">${esc(pick(c.tab))}</span>
+            <b>${esc(pick(c.name))}</b>
+            ${withExtras ? `<span class="pb-opt-desc">${esc(t.extra)}: ${esc(extra.length ? extra.join(', ') : t.no_extra)}</span>` : ''}
+        </div>
+        <button type="button" class="pb-link" data-go="${withExtras ? 2 : 1}">${esc(t.change)}</button>
+    </div>`;
+}
+
+function navHtml(back, next) {
+    const t = T();
+    return `<div class="pb-nav">
+        ${back ? `<button type="button" class="pb-nav-back" data-go="${back}">← ${esc(t.back)}</button>` : ''}
+        ${next ? `<button type="button" class="pb-nav-next" data-go="${next}">${esc(t.next)} →</button>` : ''}
+    </div>`;
+}
+
+function baseHtml() {
+    const t = T();
+    return `<div class="pb-base">
+        <img src="${PARTY_BASE.img}" alt="" width="480" height="480" loading="lazy">
+        <div class="pb-base-body">
+            <span class="pb-opt-name">${esc(pick(PARTY_BASE.name))}</span>
+            <span class="pb-opt-desc">${esc(pick(PARTY_BASE.desc))}</span>
+            <span class="pb-base-price"><b>${yuan(PARTY_BASE.price)}</b><s>${yuan(PARTY_BASE.listPrice)}</s><em>${esc(t.open_price)}</em></span>
+        </div>
+    </div>`;
+}
+
+function optionCard(o) {
+    const t = T();
+    const on = state.extras.has(o.key);
+    return `<button type="button" class="pb-card${on ? ' on' : ''}" data-opt="${o.key}" aria-pressed="${on}">
+        <span class="pb-card-img"><img src="${o.img}" alt="" width="480" height="480" loading="lazy"></span>
+        <span class="pb-card-body">
+            <span class="pb-opt-name">${esc(pick(o.name))}</span>
+            <span class="pb-opt-desc">${esc(pick(o.desc))}</span>
+            <span class="pb-card-foot"><b>+${yuan(o.price)}</b><span class="pb-card-add">${esc(on ? t.added : t.add)}</span></span>
+        </span>
     </button>`;
 }
 
@@ -74,7 +144,7 @@ function setupBlock() {
     return `<label class="pb-method pb-setup${on ? ' on' : ''}">
             <input type="radio" name="pb-method" value="setup" ${on ? 'checked' : ''}>
             <span class="pb-opt-body">
-                <span class="pb-opt-name">${esc(pick(PARTY_SETUP.name))} <span class="pb-tag">+${won(PARTY_SETUP.price)}</span></span>
+                <span class="pb-opt-name">${esc(pick(PARTY_SETUP.name))} <span class="pb-tag">+${yuan(PARTY_SETUP.price)}</span></span>
                 <span class="pb-opt-desc">${esc(pick(PARTY_SETUP.desc))}</span>
             </span>
         </label>
@@ -101,50 +171,70 @@ const todayIso = () => {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 };
 
-function summaryHtml() {
+function minutesHtml(q, setup) {
+    if (setup) return '';
     const t = T();
-    const q = partyQuote([...state.options], state.method === 'setup');
-    const over = state.who === 'couple' && state.method !== 'setup' && q.minutes > COUPLE_MINUTES;
-    const mins = state.method === 'setup' ? '' : `<p class="pb-minutes${over ? ' over' : ''}">${esc((over ? t.minutes_over : '⏱ ' + t.minutes).replace('{n}', q.minutes))}</p>`;
-    return `${mins}
-        <div class="pb-sum-row"><span>${esc(t.sum_items)}</span><span>${won(q.items)}</span></div>
-        ${q.setupFee ? `<div class="pb-sum-row"><span>${esc(t.sum_setup)}</span><span>${won(q.setupFee)}</span></div>` : ''}
-        <div class="pb-sum-row"><span>${esc(t.sum_delivery)}</span><span>${q.delivery ? won(q.delivery) : esc(t.sum_free)}</span></div>
-        <div class="pb-sum-row pb-sum-total"><span>${esc(t.sum_total)}</span><span>${won(q.total)} <small>${cny(q.total)}</small></span></div>`;
+    const over = state.who === 'couple' && q.minutes > COUPLE_MINUTES;
+    return `<p class="pb-minutes${over ? ' over' : ''}">${esc((over ? t.minutes_over : '⏱ ' + t.minutes).replace('{n}', q.minutes))}</p>`;
 }
 
-function render() {
-    const root = document.getElementById('party-root');
-    if (!root) return;
+function summaryHtml() {
     const t = T();
-    const title = document.getElementById('party-title');
-    if (title) title.textContent = t.title;
+    const setup = state.method === 'setup';
+    const q = partyQuote(orderKeys(), setup);
+    return `${minutesHtml(q, setup)}
+        <div class="pb-sum-row"><span>${esc(t.sum_items)}</span><span>${yuan(q.items)}</span></div>
+        ${q.setupFee ? `<div class="pb-sum-row"><span>${esc(t.sum_setup)}</span><span>${yuan(q.setupFee)}</span></div>` : ''}
+        <div class="pb-sum-row"><span>${esc(t.sum_delivery)}</span><span>${q.delivery ? yuan(q.delivery) : esc(t.sum_free)}</span></div>
+        <div class="pb-sum-row pb-sum-total"><span>${esc(t.sum_total)}</span><span>${yuan(q.total)}${krwHint(q.total)}</span></div>`;
+}
 
-    const whoBtn = (k) => `<button type="button" class="pb-who${state.who === k ? ' on' : ''}" data-who="${k}">${esc(t['who_' + k])}</button>`;
+/** ② 추가 물품 화면의 '상품에 포함' 줄 */
+function includedHtml() {
+    const t = T();
+    const inc = [PARTY_BASE, ...PARTY_COMBOS[state.who].options.map(optByKey)];
+    return `<div class="pb-sub">✓ ${esc(t.included)}</div>
+    <div class="pb-inc">${inc.map(o => `<span class="pb-inc-item"><img src="${o.img}" alt="" width="56" height="56" loading="lazy"><span>${esc(pick(o.name))}</span></span>`).join('')}</div>`;
+}
+
+/** ② 화면 아래 지금까지 상품 합계 */
+function runningHtml() {
+    const t = T();
+    const q = partyQuote(orderKeys());
+    return `<div class="pb-summary">${minutesHtml(q, false)}
+        <div class="pb-sum-row pb-sum-total"><span>${esc(t.sum_items)}</span><span>${yuan(q.items)}${krwHint(q.items)}</span></div>
+    </div>`;
+}
+
+function step1Html() {
+    const t = T();
+    return `<div class="pb-beta"><span class="pb-beta-tag">BETA</span><span>${esc(t.beta)}</span></div>
+        <h3 class="pb-step-title">${esc(t.pkg_title)}</h3>
+        <p class="pb-note pb-lead">${esc(t.kind)}</p>
+        ${WHO.map(pkgCard).join('')}
+        <ul class="pb-points"><li>${esc(t.point1)}</li><li>${esc(t.point2)}</li><li>${esc(t.point3)}</li></ul>
+        <div class="pb-sub">${esc(t.base_note)}</div>
+        ${baseHtml()}`;
+}
+
+function step2Html() {
+    const t = T();
+    const inPkg = PARTY_COMBOS[state.who].options;
+    const rest = PARTY_OPTIONS.filter(o => !inPkg.includes(o.key));
+    return `${pickedBar(false)}
+        ${includedHtml()}
+        <h3 class="pb-step-title">${esc(t.add_title)}</h3>
+        <p class="pb-note pb-lead">${esc(t.add_sub)}</p>
+        <div class="pb-grid">${rest.map(optionCard).join('')}</div>
+        ${runningHtml()}
+        ${navHtml(1, 3)}`;
+}
+
+function step3Html() {
+    const t = T();
     const stayBtn = (k) => `<button type="button" class="pb-who${state.stayType === k ? ' on' : ''}" data-stay="${k}">${esc(t['stay_' + k])}</button>`;
-    const showLetter = state.options.has('balloon');
-
-    root.innerHTML = `
-        <div class="pb-beta"><span class="pb-beta-tag">BETA</span><span>${esc(t.beta)}</span></div>
-        <div class="pb-hero">
-            <p class="pb-hero-title">${esc(t.hero)}</p>
-            <ul><li>${esc(t.point1)}</li><li>${esc(t.point2)}</li><li>${esc(t.point3)}</li></ul>
-        </div>
-
-        <div class="pb-sub">${esc(t.who)}</div>
-        <div class="pb-who-row">${whoBtn('couple')}${whoBtn('friends')}${whoBtn('other')}</div>
-        <div class="pb-combos">${state.who === 'friends' ? comboCard('friends') + comboCard('couple') : comboCard('couple') + comboCard('friends')}</div>
-
-        <div class="pb-base">
-            <div class="pb-opt-body">
-                <span class="pb-opt-name">${esc(pick(PARTY_BASE.name))} <span class="pb-tag">${esc(t.base)}</span></span>
-                <span class="pb-opt-desc">${esc(pick(PARTY_BASE.desc))}</span>
-            </div>
-            <div class="pb-base-price"><s>${won(PARTY_BASE.listPrice)}</s><b>${won(PARTY_BASE.price)}</b><span>${esc(t.open_price)}</span></div>
-        </div>
-
-        <div class="pb-sub">${esc(t.options)}</div>
-        <div class="pb-opts">${PARTY_OPTIONS.map(optionRow).join('')}</div>
+    return `${pickedBar(true)}
+        <h3 class="pb-step-title">${esc(t.info_title)}</h3>
 
         <div class="pb-sub">${esc(t.delivery)}</div>
         <div class="pb-methods">${PARTY_METHODS.map(methodRow).join('')}${setupBlock()}</div>
@@ -163,7 +253,7 @@ function render() {
             ${field('pb-wechat', t.wechat, { ph: t.wechat_ph, required: true })}
             <label class="pb-check"><input type="checkbox" id="pb-surprise" ${state.surprise ? 'checked' : ''}> <span>${esc(t.surprise)}</span></label>
             ${field('pb-card', t.card, { ph: t.card_ph, area: true })}
-            ${showLetter ? field('pb-letter', t.lettering, { ph: t.lettering_ph }) : ''}
+            ${hasOpt('balloon') ? field('pb-letter', t.lettering, { ph: t.lettering_ph }) : ''}
             ${field('pb-note', t.note, { ph: t.note_ph, area: true })}
 
             <div id="pb-summary" class="pb-summary">${summaryHtml()}</div>
@@ -174,12 +264,27 @@ function render() {
                 <i class="ph-duotone ph-paper-plane-tilt"></i> <span>${esc(t.submit)}</span>
             </button>
             <div id="pb-qr" class="res-wechat-qr" style="display:none;"></div>
-        </form>`;
+        </form>
+        ${navHtml(2, 0)}`;
 }
 
-function refreshSummary() {
-    const box = document.getElementById('pb-summary');
-    if (box) box.innerHTML = summaryHtml();
+function render() {
+    const root = document.getElementById('party-root');
+    if (!root) return;
+    const t = T();
+    const title = document.getElementById('party-title');
+    if (title) title.textContent = t.title;
+    const body = state.step === 1 ? step1Html() : state.step === 2 ? step2Html() : step3Html();
+    root.innerHTML = stepperHtml() + body;
+}
+
+/** 단계를 옮길 때는 단계 표시부터 보이게 맨 위로 */
+function goStep(n) {
+    state.step = n;
+    render();
+    const root = document.getElementById('party-root');
+    const top = root ? root.getBoundingClientRect().top + window.scrollY - 70 : 0;
+    window.scrollTo(0, Math.max(0, top));
 }
 
 function status(msg, type) {
@@ -211,14 +316,14 @@ async function submit() {
             body: JSON.stringify({
                 type: 'event_order',
                 who: state.who,
-                options: [...state.options],
+                options: orderKeys(),
                 method: state.method,
                 setupWay: state.method === 'setup' ? state.setupWay : '',
                 stayType: state.stayType,
                 stayName: v('pb-stay'), stayAddr: v('pb-addr'), booker: v('pb-booker'),
                 date: v('pb-date'), checkin: v('pb-checkin'),
                 wechatId: v('pb-wechat'), surprise: state.surprise,
-                card: v('pb-card'), lettering: state.options.has('balloon') ? v('pb-letter') : '', note: v('pb-note'),
+                card: v('pb-card'), lettering: hasOpt('balloon') ? v('pb-letter') : '', note: v('pb-note'),
                 lang: lang(),
                 userAgent: navigator.userAgent,
             }),
@@ -256,40 +361,47 @@ async function submit() {
     }
 }
 
+/** 화면 위치를 지키며 다시 그린다 (카드를 누를 때 맨 위로 튀지 않게) */
+function rerender() {
+    const y = window.scrollY;
+    render();
+    window.scrollTo(0, y);
+}
+
 function bind() {
     const root = document.getElementById('party-root');
     if (!root || root.dataset.bound) return;
     root.dataset.bound = '1';
 
     root.addEventListener('click', (e) => {
-        const who = e.target.closest('[data-who]');
-        if (who) {
-            state.who = who.dataset.who;
-            if (PARTY_COMBOS[state.who]) state.options = new Set(PARTY_COMBOS[state.who].options);
-            return render();
+        const pkg = e.target.closest('[data-pkg]');
+        if (pkg) {
+            // 상품을 바꾸면 그 상품에 이미 든 물품은 추가 목록에서 뺀다
+            state.who = pkg.dataset.pkg;
+            PARTY_COMBOS[state.who].options.forEach(k => state.extras.delete(k));
+            return goStep(2);
         }
-        const combo = e.target.closest('[data-combo]');
-        if (combo) {
-            state.options = new Set(PARTY_COMBOS[combo.dataset.combo].options);
-            render();
-            root.querySelector('.pb-opts')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            return;
+        const go = e.target.closest('[data-go]');
+        if (go) return goStep(Number(go.dataset.go));
+        const opt = e.target.closest('[data-opt]');
+        if (opt) {
+            const k = opt.dataset.opt;
+            if (state.extras.has(k)) state.extras.delete(k); else state.extras.add(k);
+            return rerender();
         }
         const stay = e.target.closest('[data-stay]');
-        if (stay) { state.stayType = stay.dataset.stay; return render(); }
+        if (stay) { state.stayType = stay.dataset.stay; return rerender(); }
+    });
+
+    root.addEventListener('keydown', (e) => {
+        const go = e.target.closest?.('li[data-go]');
+        if (go && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); goStep(Number(go.dataset.go)); }
     });
 
     root.addEventListener('change', (e) => {
         const el = e.target;
-        if (el.dataset.opt) {
-            if (el.checked) state.options.add(el.dataset.opt); else state.options.delete(el.dataset.opt);
-            // 풍선 레터링 칸이 생기거나 없어지므로 다시 그림
-            if (el.dataset.opt === 'balloon') return render();
-            el.closest('.pb-opt')?.classList.toggle('on', el.checked);
-            return refreshSummary();
-        }
-        if (el.name === 'pb-method') { state.method = el.value; return render(); }
-        if (el.name === 'pb-way') { state.setupWay = el.value; return render(); }
+        if (el.name === 'pb-method') { state.method = el.value; return rerender(); }
+        if (el.name === 'pb-way') { state.setupWay = el.value; return rerender(); }
         if (el.id === 'pb-surprise') state.surprise = el.checked;
         if (el.id === 'pb-agree') state.agree = el.checked;
     });

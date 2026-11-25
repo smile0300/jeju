@@ -1,64 +1,76 @@
-// 셀프 파티박스 (기념일 이벤트, BETA) — 상품·가격·문구의 단일 출처
+// 셀프 파티박스 (기념일 이벤트, BETA) — 상품·가격·문구·사진의 단일 출처
 // 화면(src/js/features/party.js)과 접수 API(functions/api/event.js)가 같은 표를 쓴다 → 가격을 고치면 둘 다 바뀜.
-// 문구는 ko/en/zh 3개 모두 채울 것.
+// 금액은 위안화(¥, 위챗 결제 기준). 문구는 ko/en/zh 3개 모두 채울 것.
+// 사진: public/img/party/*.webp (Gemini Neon으로 만든 효과 예시 이미지 — 화면에 '效果示意图' 표시)
 
-export const PARTY_UPDATED = '2026-11-24';
+export const PARTY_UPDATED = '2026-11-25';
+export const KRW_PER_CNY = 200; // 한국어 화면 참고용 원화 환산 (결제는 위안화)
+const IMG = '/img/party/';
 
-// 베이스 박스 (필수). 정가는 오픈특가 비교 표시용
+// 베이스 박스 (필수, 약 ₩50,000). 정가는 오픈특가 비교 표시용
 export const PARTY_BASE = {
-    key: 'base', price: 39000, listPrice: 49000, min: 2,
+    key: 'base', price: 258, listPrice: 328, min: 3, img: IMG + 'p-base.webp',
     name: { zh: '基础派对盒', ko: '베이스 박스', en: 'Base box' },
     desc: {
-        zh: '透明礼盒 + 鲜花花艺（已保水）+ LED灯串 + 定制留言卡',
-        ko: '투명 기프트 박스 + 생화 어레인지(물처리 완료) + LED 와이어 전구 + 맞춤 메시지 카드',
-        en: 'Clear gift box + fresh flower arrangement (water-ready) + LED fairy lights + custom message card',
+        zh: '透明礼盒 + 满满鲜花花艺（已保水）+ LED灯串 + 定制留言卡 + 迷你欢迎牌和木画架',
+        ko: '투명 기프트 박스 + 풍성한 생화 어레인지(물처리 완료) + LED 와이어 전구 + 맞춤 메시지 카드 + 미니 웰컴보드·이젤',
+        en: 'Clear gift box + a full fresh flower arrangement (water-ready) + LED fairy lights + custom message card + mini welcome board & easel',
     },
 };
 
-// 추가 옵션. min = 손님이 직접 꾸미는 데 걸리는 대략 시간(분)
+// 추가 옵션 (¥). min = 손님이 직접 꾸미는 데 걸리는 대략 시간(분)
 export const PARTY_OPTIONS = [
-    { key: 'balloon', price: 25000, min: 1, lettering: true,
+    { key: 'balloon', price: 128, min: 1, lettering: true, img: IMG + 'p-balloon.webp',
       name: { zh: '透明波波球', ko: '버블풍선', en: 'Bubble balloon' },
-      desc: { zh: '20寸透明波波球 + 支架 + 定制字贴（已充好气）', ko: '20인치 투명 버블풍선 + 지지대 + 맞춤 레터링 (바람 넣어서 배송)', en: '20" clear bubble balloon + stand + custom lettering (arrives inflated)' } },
-    { key: 'volume', price: 20000, min: 0,
-      name: { zh: '鲜花加量', ko: '생화 볼륨업', en: 'More flowers' },
-      desc: { zh: '花量升级为基础款的1.5~2倍', ko: '기본 대비 꽃 양 1.5~2배', en: '1.5–2× the flowers of the base box' } },
-    { key: 'couple', price: 20000, min: 5,
+      desc: { zh: '20寸波波球+支架+定制字贴，充好气送到', ko: '20인치 버블풍선+지지대+맞춤 레터링, 바람 넣어 배송', en: '20" balloon + stand + custom lettering, arrives inflated' } },
+    { key: 'couple', price: 98, min: 5, img: IMG + 'p-couple.webp',
       name: { zh: '情侣氛围包', ko: '커플 무드 팩', en: 'Couple mood pack' },
-      desc: { zh: '桌旗 + LED蜡烛2支 + 红酒杯2只 + 仿真花瓣', ko: '테이블 러너 + LED 캔들 2p + 와인잔 2p + 조화 꽃잎', en: 'Table runner + 2 LED candles + 2 wine glasses + faux petals' } },
-    { key: 'friends', price: 15000, min: 1,
+      desc: { zh: '桌旗+LED蜡烛2支+红酒杯2只+花瓣', ko: '테이블 러너+LED 캔들 2p+와인잔 2p+꽃잎', en: 'Table runner + 2 LED candles + 2 wine glasses + petals' } },
+    { key: 'friends', price: 78, min: 1, img: IMG + 'p-friends.webp',
       name: { zh: '闺蜜拍照包', ko: '우정 포토 팩', en: 'Friends photo pack' },
-      desc: { zh: '派对墨镜2副 + 迷你皇冠 + 珍珠发夹', ko: '파티 선글라스 2p + 미니 티아라 + 진주 리본핀', en: '2 party sunglasses + mini tiara + pearl hair clips' } },
-    { key: 'photos', price: 7000, min: 4,
+      desc: { zh: '爱心墨镜2副+迷你皇冠+珍珠发夹', ko: '하트 선글라스 2p+미니 티아라+진주 리본핀', en: '2 heart sunglasses + mini tiara + pearl clips' } },
+    { key: 'family', price: 78, min: 2, img: IMG + 'p-family.webp',
+      name: { zh: '家庭派对包', ko: '가족 파티 팩', en: 'Family party pack' },
+      desc: { zh: '派对帽4顶+彩旗拉花+生日蜡烛', ko: '고깔모자 4p+삼각 가랜드+생일 초', en: '4 party hats + bunting garland + birthday candles' } },
+    { key: 'volume', price: 98, min: 0, img: IMG + 'p-volume.webp',
+      name: { zh: '鲜花加量', ko: '생화 볼륨업', en: 'More flowers' },
+      desc: { zh: '花量升级为1.5~2倍，更显隆重', ko: '꽃 양 1.5~2배, 더 화려하게', en: '1.5–2× the flowers for a bigger wow' } },
+    { key: 'photos', price: 38, min: 4, img: IMG + 'p-photos.webp',
       name: { zh: '照片冲印', ko: '추억 사진 인화', en: 'Photo prints' },
-      desc: { zh: '提前冲印5张您的照片 + 迷你木夹·麻绳（微信发图）', ko: '고객 사진 5장 사전 인화 + 미니 집게·마끈 (위챗으로 사진 전달)', en: '5 of your photos printed + mini clips & twine (send via WeChat)' } },
-    { key: 'board', price: 10000, min: 1,
-      name: { zh: '迷你欢迎牌', ko: '미니 웰컴보드', en: 'Mini welcome board' },
-      desc: { zh: 'A5定制欢迎牌 + 迷你木画架', ko: 'A5 맞춤 웰컴보드 + 미니 원목 이젤', en: 'Custom A5 welcome board + mini wooden easel' } },
-    { key: 'sparkling', price: 22000, min: 0,
-      name: { zh: '济州无醇气泡饮', ko: '제주 논알콜 스파클링', en: 'Jeju non-alcoholic sparkling' },
-      desc: { zh: '济州本地无酒精气泡饮1瓶', ko: '제주 로컬 논알콜 스파클링 1병', en: '1 bottle of local Jeju non-alcoholic sparkling' } },
-    { key: 'camera', price: 28000, min: 0,
-      name: { zh: '一次性胶片相机', ko: '일회용 필름카메라', en: 'Disposable film camera' },
-      desc: { zh: '柯达/富士正品一次性相机1台', ko: '코닥/후지 정품 일회용 카메라 1대', en: '1 genuine Kodak/Fuji disposable camera' } },
-    { key: 'cake', price: 40000, min: 1,
+      desc: { zh: '微信发5张照片，冲印+木夹麻绳', ko: '위챗으로 사진 5장, 인화+집게·마끈', en: 'Send 5 photos on WeChat; prints + clips & twine' } },
+    { key: 'cake', price: 198, min: 1, img: IMG + 'p-cake.webp',
       name: { zh: '迷你字母蛋糕', ko: '미니 레터링 케이크', en: 'Mini lettering cake' },
-      desc: { zh: '济州市合作蛋糕店制作，配送时一起送到', ko: '제주시내 제휴 케이크숍 제작, 함께 배송', en: 'Made by a partner bakery in Jeju City, delivered with the box' } },
+      desc: { zh: '济州市合作蛋糕店制作，可写字，一起送到', ko: '제주시내 제휴 케이크숍, 문구 가능, 함께 배송', en: 'Partner bakery in Jeju City, custom message, delivered together' } },
+    { key: 'sparkling', price: 108, min: 0, img: IMG + 'p-sparkling.webp',
+      name: { zh: '济州无醇气泡饮', ko: '제주 논알콜 스파클링', en: 'Jeju non-alcoholic sparkling' },
+      desc: { zh: '济州本地无酒精气泡饮1瓶', ko: '제주 로컬 논알콜 스파클링 1병', en: '1 bottle of local non-alcoholic sparkling' } },
+    { key: 'camera', price: 138, min: 0, img: IMG + 'p-camera.webp',
+      name: { zh: '一次性胶片相机', ko: '일회용 필름카메라', en: 'Disposable film camera' },
+      desc: { zh: '柯达/富士正品，旅行回忆用', ko: '코닥/후지 정품, 여행 추억용', en: 'Genuine Kodak/Fuji, for trip memories' } },
 ];
 
-// 추천 조합. 커플은 상대가 씻는 동안(약 10분) 끝낼 수 있는 구성만 넣는다
+// 누구와 — 화면 맨 위 탭. 고르면 완성 사진·추천 조합이 바뀐다. 커플은 상대가 씻는 동안(약 10분) 끝낼 수 있는 구성만
 export const PARTY_COMBOS = {
-    couple: { options: ['balloon', 'couple'],
-              name: { zh: '情侣人气组合', ko: '커플 인기 조합', en: 'Couple favourite' },
+    couple: { options: ['balloon', 'couple'], img: IMG + 'hero-couple.webp',
+              tab: { zh: '💑 情侣', ko: '💑 커플', en: '💑 Couple' },
+              name: { zh: '情侣纪念日布置', ko: '커플 기념일 세팅', en: 'Couple anniversary set-up' },
+              scene: { zh: '1周年·纪念日·求婚·生日惊喜', ko: '1주년·기념일·프로포즈·생일 서프라이즈', en: 'Anniversaries, proposals, birthday surprises' },
               hint: { zh: 'TA洗澡的10分钟就能布置好', ko: '상대가 씻는 10분 안에 세팅 끝', en: 'Done in the 10 minutes they spend in the shower' } },
-    friends: { options: ['balloon', 'friends', 'photos'],
-               name: { zh: '闺蜜人气组合', ko: '우정 인기 조합', en: 'Friends favourite' },
+    friends: { options: ['balloon', 'friends', 'photos'], img: IMG + 'hero-friends.webp',
+               tab: { zh: '👯 闺蜜', ko: '👯 우정', en: '👯 Friends' },
+               name: { zh: '闺蜜旅行派对布置', ko: '우정여행 파티 세팅', en: 'Friends trip party set-up' },
+               scene: { zh: '生日·30岁·10周年友情旅行', ko: '생일·서른 기념·10주년 우정여행', en: 'Birthdays, milestone trips with friends' },
                hint: { zh: '拍照道具齐全，一起布置一起拍', ko: '포토 소품까지, 같이 꾸미고 같이 찍기', en: 'Props included — set up and shoot together' } },
+    family: { options: ['balloon', 'family', 'cake'], img: IMG + 'hero-family.webp',
+              tab: { zh: '👨‍👩‍👧 家庭', ko: '👨‍👩‍👧 가족', en: '👨‍👩‍👧 Family' },
+              name: { zh: '家庭生日布置', ko: '가족 생일 세팅', en: 'Family birthday set-up' },
+              scene: { zh: '爸妈生日·宝宝生日·家庭旅行纪念', ko: '부모님 생일·아이 생일·가족여행 기념', en: "Parents' or kids' birthdays on a family trip" },
+              hint: { zh: '蛋糕和派对帽一起送到房间', ko: '케이크·고깔모자까지 한 번에 배송', en: 'Cake and party hats arrive together' } },
 };
 export const COUPLE_MINUTES = 10; // 커플: 이 시간을 넘으면 화면에서 경고
 
-// 배송 (제주시내만). 80,000원 이상 무료
-export const PARTY_DELIVERY = { fee: 8000, freeFrom: 80000 };
+// 배송 (제주시내만). ¥398 이상 무료
+export const PARTY_DELIVERY = { fee: 40, freeFrom: 398 };
 
 // 받는 방법
 export const PARTY_METHODS = [
@@ -75,7 +87,7 @@ export const PARTY_METHODS = [
 
 // 세팅 대행 (유료, 하루 1건, 호텔 문의 필요)
 export const PARTY_SETUP = {
-    price: 30000, perDay: 1,
+    price: 148, perDay: 1, // ¥ (약 ₩30,000)
     name: { zh: '代布置服务', ko: '세팅 대행', en: 'We set it up for you' },
     desc: {
         zh: '我们进房间帮您布置好（约20–30分钟）。每天仅限1组，需要先向酒店确认，确认后才算预约成功。',
@@ -104,7 +116,13 @@ export const PARTY_TEXT = {
         point1: '🧷 不粘墙不留痕，不违反住宿规定',
         point2: '🛎️ 入住前也能送到前台',
         point3: '🎁 全部归您，无需回收',
-        who: '和谁一起？', who_couple: '💑 情侣', who_friends: '👯 闺蜜', who_other: '🎈 其他',
+        who: '和谁一起？',
+        kind: '酒店房间布置套装 · 送货上门', sample: '效果示意图', from: '起', pick_combo: '选这套', picked: '✓ 已选这套',
+        combo_title: '推荐组合', base_title: '必选：基础派对盒', opt_title: '自由加购（点击选择）', add: '加入', added: '✓ 已加',
+        step1: '选套餐', step2: '加购', step3: '填写预约', next: '下一步', back: '上一步', change: '更改',
+        pkg_title: '① 选择套餐', pkg_select: '选这个', pkg_selected: '✓ 已选', base_note: '每个套餐都包含：',
+        add_title: '② 加购物品（可选）', add_sub: '想更有氛围可以加，不加也可以直接下一步', included: '套餐已含', no_extra: '未加购',
+        info_title: '③ 填写预约信息', your_order: '您的选择', extra: '加购',
         base: '必选', open_price: '开业特价', options: '自由加购',
         minutes: '自己布置约{n}分钟', minutes_over: '⚠️ 约{n}分钟，超过洗澡的10分钟。想偷偷准备的话可以减少选项，或选择代布置。',
         combo_apply: '一键选择',
@@ -121,7 +139,7 @@ export const PARTY_TEXT = {
         card: '留言卡内容', card_ph: '想写在卡片上的话（中文可以）',
         lettering: '波波球字贴', lettering_ph: '例：HAPPY 1st ANNIVERSARY',
         note: '其他要求', note_ph: '颜色偏好、过敏、特殊情况等',
-        sum_items: '商品', sum_setup: '代布置', sum_delivery: '配送费', sum_free: '免费（满₩80,000）', sum_total: '合计',
+        sum_items: '商品', sum_setup: '代布置', sum_delivery: '配送费', sum_free: '免费（满¥398）', sum_total: '合计',
         agree: '我已了解：本商品为定制制作。D-7前全额退款 / D-4~6 退70% / D-2~3 退50% / D-1~当天不退。航班因天气取消（凭证明）可免费改期1次。',
         submit: '提交预约', submitting: '提交中...', fill: '请填写必填项', agree_err: '请先勾选同意退改规则',
         success: '✅ 已收到！我们会通过微信确认库存、酒店情况并发送付款方式。', fail: '❌ 提交失败，请稍后再试。',
@@ -134,7 +152,13 @@ export const PARTY_TEXT = {
         point1: '🧷 테이프 없이 세우는 구성, 숙소 규정 걱정 없음',
         point2: '🛎️ 체크인 전에도 프런트로 배송',
         point3: '🎁 모두 소장, 수거 없음',
-        who: '누구와 함께?', who_couple: '💑 커플', who_friends: '👯 우정', who_other: '🎈 기타',
+        who: '누구와 함께?',
+        kind: '호텔 객실 기념일 세팅 박스 · 숙소로 배송', sample: '연출 예시 이미지', from: '부터', pick_combo: '이 구성 담기', picked: '✓ 담은 구성',
+        combo_title: '추천 조합', base_title: '필수: 베이스 박스', opt_title: '추가 옵션 (눌러서 선택)', add: '담기', added: '✓ 담음',
+        step1: '상품 선택', step2: '추가 물품', step3: '예약 정보', next: '다음', back: '이전', change: '변경',
+        pkg_title: '① 상품 선택', pkg_select: '선택', pkg_selected: '✓ 선택됨', base_note: '모든 상품에 포함:',
+        add_title: '② 추가 물품 (선택)', add_sub: '더 풍성하게 하고 싶다면 추가하세요. 없이 바로 다음으로 가도 됩니다', included: '상품에 포함', no_extra: '추가 없음',
+        info_title: '③ 예약 정보 입력', your_order: '선택한 구성', extra: '추가',
         base: '필수', open_price: '오픈특가', options: '추가 옵션',
         minutes: '직접 세팅 약 {n}분', minutes_over: '⚠️ 약 {n}분 — 씻는 10분을 넘습니다. 몰래 준비하려면 옵션을 줄이거나 세팅 대행을 고르세요.',
         combo_apply: '한 번에 담기',
@@ -151,7 +175,7 @@ export const PARTY_TEXT = {
         card: '메시지 카드 문구', card_ph: '카드에 쓸 말',
         lettering: '풍선 레터링', lettering_ph: '예: HAPPY 1st ANNIVERSARY',
         note: '요청사항', note_ph: '색상 취향, 알레르기, 특별한 상황 등',
-        sum_items: '상품', sum_setup: '세팅 대행', sum_delivery: '배송비', sum_free: '무료 (8만 원 이상)', sum_total: '합계',
+        sum_items: '상품', sum_setup: '세팅 대행', sum_delivery: '배송비', sum_free: '무료 (¥398 이상)', sum_total: '합계',
         agree: '주문 제작 상품임을 확인했습니다. D-7 전액 환불 / D-4~6 70% / D-2~3 50% / D-1~당일 환불 불가. 기상 악화로 항공편 결항 시(증빙) 1회 무료 일정 변경.',
         submit: '예약 신청', submitting: '제출 중...', fill: '필수 항목을 입력해 주세요', agree_err: '환불 규정에 동의해 주세요',
         success: '✅ 접수됐습니다! 위챗으로 재고·호텔 확인 후 결제 방법을 보내드립니다.', fail: '❌ 제출에 실패했습니다. 잠시 후 다시 시도해 주세요.',
@@ -164,7 +188,13 @@ export const PARTY_TEXT = {
         point1: '🧷 Free-standing pieces — no tape, no house-rule trouble',
         point2: '🛎️ Delivered to the front desk even before check-in',
         point3: '🎁 Everything is yours to keep',
-        who: 'Who is it for?', who_couple: '💑 Couple', who_friends: '👯 Friends', who_other: '🎈 Other',
+        who: 'Who is it for?',
+        kind: 'Hotel room celebration set · delivered to your stay', sample: 'Illustrative image', from: 'from', pick_combo: 'Pick this set', picked: '✓ Selected',
+        combo_title: 'Recommended set', base_title: 'Required: base box', opt_title: 'Add-ons (tap to add)', add: 'Add', added: '✓ Added',
+        step1: 'Package', step2: 'Add-ons', step3: 'Booking', next: 'Next', back: 'Back', change: 'Change',
+        pkg_title: '① Choose a package', pkg_select: 'Choose', pkg_selected: '✓ Chosen', base_note: 'Every package includes:',
+        add_title: '② Add extras (optional)', add_sub: 'Add more if you like, or skip straight to the next step', included: 'Included', no_extra: 'No extras',
+        info_title: '③ Booking details', your_order: 'Your selection', extra: 'Extras',
         base: 'Required', open_price: 'Launch price', options: 'Add-ons',
         minutes: 'About {n} min to set up yourself', minutes_over: '⚠️ About {n} min — longer than a 10-minute shower. Drop a few add-ons, or let us set it up.',
         combo_apply: 'Pick this',
@@ -181,7 +211,7 @@ export const PARTY_TEXT = {
         card: 'Message card', card_ph: 'What should the card say?',
         lettering: 'Balloon lettering', lettering_ph: 'e.g. HAPPY 1st ANNIVERSARY',
         note: 'Other requests', note_ph: 'Colours, allergies, anything special',
-        sum_items: 'Items', sum_setup: 'Set-up', sum_delivery: 'Delivery', sum_free: 'Free (₩80,000+)', sum_total: 'Total',
+        sum_items: 'Items', sum_setup: 'Set-up', sum_delivery: 'Delivery', sum_free: 'Free (¥398+)', sum_total: 'Total',
         agree: 'I understand this is made to order. Full refund up to 7 days before / 70% at 4–6 days / 50% at 2–3 days / none from 1 day before. One free date change if your flight is cancelled by weather (with proof).',
         submit: 'Send booking', submitting: 'Sending...', fill: 'Please fill in the required fields', agree_err: 'Please accept the refund policy',
         success: '✅ Received! We will confirm stock and the hotel on WeChat and send you how to pay.', fail: '❌ Could not send. Please try again later.',

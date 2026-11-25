@@ -21,7 +21,7 @@ const S = {
         title: '济州美食',
         beta_note: '共收录 {n} 家餐厅和咖啡馆（官方乡土美食店、平价良心店、本地熟客常去店及实地调查）。支持中文搜菜名/别称，营业时间可能变动。',
         search_ph: '搜店名或菜品（中/韩均可，如：带鱼、黑猪肉、熟成道）',
-        more_filters: '更多筛选', filter_btn: '筛选', show_n: '查看 {n} 家',
+        more_info: '详情 · 营业时间·菜单·地址', more_filters: '更多筛选', filter_btn: '筛选', show_n: '查看 {n} 家',
         reset: '重置',
         count: '找到 {n} 家',
         more: '查看更多（剩 {n} 家）',
@@ -65,7 +65,7 @@ const S = {
         title: 'Jeju Eats',
         beta_note: '{n} restaurants and cafés — officially designated local-food and fair-price places, locals’ regular spots and our own picks. Hours change, so check before you go.',
         search_ph: 'Search name or dish (Korean / English / Chinese)',
-        more_filters: 'More filters', filter_btn: 'Filters', show_n: 'Show {n} places',
+        more_info: 'Details · hours, menu, address', more_filters: 'More filters', filter_btn: 'Filters', show_n: 'Show {n} places',
         reset: 'Reset',
         count: '{n} places',
         more: 'Show more ({n} left)',
@@ -109,7 +109,7 @@ const S = {
         title: '제주 맛집',
         beta_note: '식당·카페 {n}곳 (향토음식점·착한가격업소 공식 지정 + 현지인 단골 + 자체 조사). 영업시간은 바뀔 수 있으니 가기 전에 확인하세요.',
         search_ph: '가게 이름·메뉴 검색 (한국어·중국어 별칭 지원)',
-        more_filters: '필터 더보기', filter_btn: '필터', show_n: '{n}곳 보기',
+        more_info: '자세히 보기 · 영업시간·메뉴·주소', more_filters: '필터 더보기', filter_btn: '필터', show_n: '{n}곳 보기',
         reset: '초기화',
         count: '{n}곳',
         more: '더 보기 ({n}곳 남음)',
@@ -380,8 +380,6 @@ function cardHtml(d, rank = 0) {
     const ko = l === 'ko';
     const tags = d.cu.filter(c => c !== 'other').map(c => `<span class="eat-cu">${L(`cu.${c}`)}</span>`).join('');
     const hl = highlight(d);
-    const badges = BADGE_ORDER.filter(k => k !== hl.key && (d.t || []).includes(k)).map(k => `<span class="eat-badge eat-badge-${k}">${L(`kw.${k}`)}</span>`).join('');
-    const rating = d.g ? `<span class="eat-rating">★ ${d.g.toFixed(1)}<small> · ${L('reviews', { n: d.gr.toLocaleString('en-US') })}</small></span>` : '';
     const wait = d.w == null ? '' : `<span>${d.w === 0 ? L('nowait') : L('wait', { m: d.w })}</span>`;
     const hours = [d.h ? `<span><b>${L('hours')}</b> ${escapeHtml(trHours(d.h))}</span>` : '', d.off ? `<span><b>${L('off')}</b> ${escapeHtml(trHours(d.off))}</span>` : ''].join('');
 
@@ -402,37 +400,61 @@ function cardHtml(d, rank = 0) {
     const needsBooking = (d.t || []).includes('booking') || (d.w != null && d.w >= 40);
     const photo = d.img ? `<div class="eat-photo"><img src="/img/eats/${escapeHtml(d.img)}" alt="" loading="lazy" decoding="async" width="640" height="360">${d.imgBy ? `<span class="eat-photo-by">${escapeHtml(L('photo_by', { by: d.imgBy }))}</span>` : ''}</div>` : '';
 
+    // 카드는 '훑어보기' 정보만: 사진 → 이름·가격 → 한 줄 요약(평점·지역·종류) → 영업 상태 → 추천 한 줄 → 배지 3개 → 핵심 버튼 3개
+    // 영업시간·메뉴·선정이유·주의사항·주소·다른 지도·주문 카드는 '자세히 보기' 안으로 (리스트에선 한 카드가 한 화면을 넘지 않게)
+    const allBadges = BADGE_ORDER.filter(k => k !== hl.key && (d.t || []).includes(k));
+    const BADGE_MAX = 3;
+    const badgeHtml = (ks) => ks.map(k => `<span class="eat-badge eat-badge-${k}">${L(`kw.${k}`)}</span>`).join('');
+    const kind = subType || d.cu.filter(c => c !== 'other').map(c => L(`cu.${c}`)).join('·');
+    const line = [
+        d.g ? `<span class="eat-rating">★ ${d.g.toFixed(1)}<small> (${d.gr.toLocaleString('en-US')})</small></span>` : '',
+        `<span>${L(`ar.${d.ar}`)}</span>`,
+        kind ? `<span>${escapeHtml(kind)}</span>` : '',
+    ].filter(Boolean).join('<span class="eat-dot" aria-hidden="true">·</span>');
+    const status = statusHtml(d);
+    const waitTxt = d.w == null ? '' : (d.w === 0 ? L('nowait') : L('wait', { m: d.w }));
+    const detailMeta = hours; // 대기시간은 위 상태 줄에 이미 보인다
+
     return `<article class="eat-card${d.img ? ' has-photo' : ''}">
         ${photo}
         <div class="eat-head">
             ${rank ? `<span class="eat-rank eat-rank-${rank <= 3 ? rank : 'n'}" aria-label="#${rank}">${rank}</span>` : ''}
             <div class="eat-name-wrap">
                 <h3 class="eat-name">${escapeHtml(d.n)}${alias ? ` <span class="eat-alias">${escapeHtml(alias)}</span>` : ''}</h3>
-                <div class="eat-sub">${L(`ar.${d.ar}`)}${subType ? ' · ' + escapeHtml(subType) : ''}</div>
+                <div class="eat-line">${line}</div>
             </div>
             <div class="eat-price">${d.p ? `<small>${L('pp')}</small>` : ''}${priceText(d)}${cny ? `<small class="eat-cny">${escapeHtml(cny)}</small>` : ''}</div>
         </div>
+        ${status || waitTxt ? `<div class="eat-status-row">${status}${waitTxt ? `<span class="eat-wait"><i class="ph-bold ph-clock" aria-hidden="true"></i>${escapeHtml(waitTxt)}</span>` : ''}</div>` : ''}
         ${hl.html}
         ${rv ? `<p class="eat-rv"><i class="ph-duotone ph-thumbs-up"></i><span>${escapeHtml(rv)}</span></p>` : ''}
-        ${statusHtml(d)}
-        <div class="eat-tags">${tags}${rating}</div>
-        ${badges ? `<div class="eat-badges">${badges}</div>` : ''}
-        ${hours || wait ? `<div class="eat-meta">${hours}${wait}</div>` : ''}
-        ${detailParts ? `<details class="eat-more"><summary>${L('why')}${cautions.length ? ` (${cautions.length})` : ''}</summary>${detailParts}</details>` : ''}
-        <div class="eat-addr">${L('show_staff') ? `<span class="eat-addr-hint">${L('show_staff')}</span>` : ''}${escapeHtml(d.a.replace(/^제주특별자치도\s*/, ''))}</div>
+        ${allBadges.length ? `<div class="eat-badges">${badgeHtml(allBadges.slice(0, BADGE_MAX))}${allBadges.length > BADGE_MAX ? `<span class="eat-badge eat-badge-more">+${allBadges.length - BADGE_MAX}</span>` : ''}</div>` : ''}
+        ${d.ct || needsBooking ? '<div class="eat-cta-row">' : ''}
         ${d.ct ? `<a class="eat-ct" href="https://www.catchtable.net/shop/${encodeURIComponent(d.ct)}" target="_blank" rel="noopener">
             <i class="ph-duotone ph-clock-countdown"></i><span><b>${L('ct_btn')}</b><small>${L('ct_note')}</small></span><i class="ph-bold ph-caret-right"></i></a>` : ''}
         ${needsBooking ? `<button type="button" class="eat-book-cta" data-eat-book="${escapeHtml(d.n)}">
             <i class="ph-duotone ph-calendar-check"></i><span><b>${L('book_btn')}</b><small>${L('book_note')}</small></span><i class="ph-bold ph-caret-right"></i></button>` : ''}
-        <div class="eat-tools">
+        ${d.ct || needsBooking ? '</div>' : ''}
+        <div class="eat-primary">
             <button type="button" class="eat-btn eat-btn-tool" data-eat-driver="${d.id}"><i class="ph-duotone ph-taxi"></i> ${L('driver_btn')}</button>
-            <button type="button" class="eat-btn eat-btn-tool" data-eat-order="${d.id}"><i class="ph-duotone ph-fork-knife"></i> ${L('order_btn')}</button>
-            <button type="button" class="eat-btn" data-copy="${escapeHtml(`${d.n}\n${d.a}`)}">${L(ko ? 'copy_addr' : 'copy_name')}</button>
-        </div>
-        <div class="eat-actions">
-            ${mapLinks(d)}
+            ${mapLinks(d).split('</a>')[0]}</a>
             ${d.ll ? wishBtnHtml({ k: 'eat', key: d.n, name: d.n }, { cls: 'eat-btn' }) : ''}
         </div>
+        <details class="eat-more">
+            <summary><span>${L('more_info')}</span>${cautions.length ? `<span class="eat-more-warn"><i class="ph-fill ph-warning"></i>${cautions.length}</span>` : ''}<i class="ph-bold ph-caret-down eat-more-chev" aria-hidden="true"></i></summary>
+            <div class="eat-detail">
+                ${allBadges.length > BADGE_MAX ? `<div class="eat-badges">${badgeHtml(allBadges)}</div>` : ''}
+                ${tags ? `<div class="eat-tags">${tags}</div>` : ''}
+                ${detailMeta ? `<div class="eat-meta">${detailMeta}</div>` : ''}
+                ${detailParts}
+                <div class="eat-addr">${L('show_staff') ? `<span class="eat-addr-hint">${L('show_staff')}</span>` : ''}${escapeHtml(d.a.replace(/^제주특별자치도\s*/, ''))}</div>
+                <div class="eat-tools">
+                    <button type="button" class="eat-btn eat-btn-tool" data-eat-order="${d.id}"><i class="ph-duotone ph-fork-knife"></i> ${L('order_btn')}</button>
+                    <button type="button" class="eat-btn" data-copy="${escapeHtml(`${d.n}\n${d.a}`)}">${L(ko ? 'copy_addr' : 'copy_name')}</button>
+                </div>
+                <div class="eat-actions">${mapLinks(d).split('</a>').slice(1).filter(x => x.trim()).map(x => x + '</a>').join('')}</div>
+            </div>
+        </details>
     </article>`;
 }
 

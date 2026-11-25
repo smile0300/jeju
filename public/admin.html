@@ -139,7 +139,8 @@
 
   // 이벤트 (EventOrder 시트, 파티박스 BETA) — 읽기 전용. 진행 칸은 시트에서 직접 (접수/확정/완료/취소)
   function evStep(r) { return str(r['진행']) || '접수'; }
-  function evWon(n) { n = Number(String(n || '').replace(/[^\d.-]/g, '')) || 0; return n.toLocaleString('ko-KR') + '원'; }
+  // 금액은 위안화(¥, 위챗 결제)
+  function evYuan(n) { n = Number(String(n || '').replace(/[^\d.-]/g, '')) || 0; return '¥' + n.toLocaleString('ko-KR'); }
   function eventCard(r) {
     var c = el('div', 'card');
     var head = el('div', 'item-head');
@@ -154,7 +155,7 @@
     c.appendChild(el('div', 'title', joinNonEmpty(['📅 ' + str(r['이용일']), r['체크인'] ? '체크인 ' + str(r['체크인']) : '', r['숙소명']], ' · ')));
     var dl = el('dl');
     addPairs(dl, [
-      ['합계', evWon(r['합계']) + ' (상품 ' + evWon(r['상품금액']) + (Number(r['세팅비']) ? ' + 세팅 ' + evWon(r['세팅비']) : '') + ' + 배송 ' + evWon(r['배송비']) + ')'],
+      ['합계', evYuan(r['합계(¥)']) + ' (상품 ' + evYuan(r['상품(¥)']) + (Number(r['세팅비(¥)']) ? ' + 세팅 ' + evYuan(r['세팅비(¥)']) : '') + ' + 배송 ' + evYuan(r['배송비(¥)']) + ')'],
       ['옵션', '베이스' + (str(r['옵션']) ? ', ' + str(r['옵션']) : '')],
       ['누구와', r['누구와']], ['셀프 세팅', r['셀프세팅분'] ? r['셀프세팅분'] + '분' : ''],
       ['숙소', joinNonEmpty([r['숙소유형'], r['주소']], ' · ')], ['예약자', r['예약자']], ['위챗', r['위챗ID']],

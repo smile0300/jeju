@@ -19,7 +19,9 @@ public class WxW { [DllImport("user32.dll")] public static extern bool SetForegr
   [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr h, int c);
   [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
   [DllImport("user32.dll")] public static extern void keybd_event(byte k, byte s, uint f, UIntPtr e);
-  [DllImport("user32.dll")] public static extern bool SetProcessDPIAware(); }
+  [DllImport("user32.dll")] public static extern bool SetProcessDPIAware();
+  [DllImport("user32.dll")] public static extern bool SetCursorPos(int x, int y);
+  [DllImport("user32.dll")] public static extern void mouse_event(uint f, int x, int y, uint d, UIntPtr e); }
 '@
 [WxW]::SetProcessDPIAware() | Out-Null
 $A = [System.Windows.Automation.AutomationElement]
@@ -49,8 +51,15 @@ function Ocr($x, $y, $w, $h) {
 
 $proc = Get-Process -Name Weixin -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowTitle } | Select-Object -First 1
 if (-not $proc) { Fail '위챗 창이 없음' }
-$win = $A::RootElement.FindFirst($TS::Children, (Cond $A::ProcessIdProperty $proc.Id))
-$search = $win.FindFirst($TS::Descendants, (New-Object System.Windows.Automation.AndCondition((Cond $A::ClassNameProperty 'mmui::XValidatorTextEdit'), (Cond $A::NameProperty 'Search'))))
+# 최소화·트레이 상태면 UI 요소가 아직 없다 → 창을 먼저 띄우고 몇 번 다시 찾는다
+[WxW]::ShowWindow($proc.MainWindowHandle, 9) | Out-Null
+$search = $null
+for ($i = 0; $i -lt 5 -and -not $search; $i++) {
+  if ($i) { Start-Sleep -Milliseconds 600 }
+  # 따로 띄운 대화창(mmui::ChatSingleWindow)이 있으면 프로세스 ID로는 그 창이 먼저 잡힌다 → 메인 창 핸들로 찾는다
+  $win = $A::FromHandle($proc.MainWindowHandle)
+  if ($win) { $search = $win.FindFirst($TS::Descendants, (New-Object System.Windows.Automation.AndCondition((Cond $A::ClassNameProperty 'mmui::XValidatorTextEdit'), (Cond $A::NameProperty 'Search')))) }
+}
 if (-not $search) { Fail '검색창을 못 찾음' }
 
 $script:oldClip = [System.Windows.Forms.Clipboard]::GetText()
@@ -61,12 +70,18 @@ $script:oldClip = [System.Windows.Forms.Clipboard]::GetText()
 Start-Sleep -Milliseconds 500
 if ([WxW]::GetForegroundWindow() -ne $proc.MainWindowHandle) { Fail '위챗 창을 앞으로 가져오지 못함' }
 $search.SetFocus(); Start-Sleep -Milliseconds 200
+# SetFocus만으로는 입력이 안 들어가는 경우가 있음(검색창에 'Search' 안내문 그대로) → 검색창 가운데를 직접 클릭
+$sr = $search.Current.BoundingRectangle
+[WxW]::SetCursorPos([int]($sr.X + $sr.Width / 2), [int]($sr.Y + $sr.Height / 2)) | Out-Null
+[WxW]::mouse_event(2, 0, 0, 0, [UIntPtr]::Zero); [WxW]::mouse_event(4, 0, 0, 0, [UIntPtr]::Zero)
+Start-Sleep -Milliseconds 300
 Paste $(if ($Remark) { $Remark } else { $WechatId })
 
 # 검색 결과 팝업(검색창 바로 아래)을 읽어 "ID: <id>" 확인 — 닉네임만 비슷한 다른 사람에게 보내지 않도록
 # OCR은 1↔l, 0↔o 를 자주 헷갈린다 → 양쪽 다 같은 규칙으로 바꿔서 비교. 결과가 늦게 그려질 수 있어 최대 4번 읽음
 # 밑줄(_)은 OCR이 아예 못 읽는 경우가 많아(JIAMINGKEJI018_ → JlAMlNGKEJ1018) 양쪽에서 뺀다
-function Canon($s) { (($s -replace '[\s_]', '').ToLower() -replace '[il|!]', '1' -replace 'o', '0') }
+# OCR이 ii·iii 를 로마숫자 한 글자(ⅱ·ⅲ)로 읽기도 한다(2026-11-13 JL635) → NFKC 로 풀어서 비교
+function Canon($s) { (($s.Normalize([Text.NormalizationForm]::FormKC) -replace '[\s_]', '').ToLower() -replace '[il|!]', '1' -replace 'o', '0') }
 # 검색어를 되풀이하는 줄("Search mobile/QQ ID: …", "Internet search results …", 搜索/查找/网络…)은 연락처가 아니다.
 # 2026-11-04 이 줄의 "QQ ID: <검색어>" 때문에 친구가 아닌데도 통과 → 이미 열려 있던 다른 고객 대화방으로 오발송됨.
 $echo = '(?i)search|qq|internet|mobile|phone|搜索|搜一搜|查找|网络|手机'

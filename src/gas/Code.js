@@ -777,9 +777,9 @@ function handleReservation_(data) {
  */
 var EVENT_HEADERS = [
   '접수시각', '진행', '이용일', '체크인', '받는방법', '입실방식', '누구와', '숙소유형', '숙소명', '주소', '예약자', '위챗ID', '서프라이즈',
-  '옵션', '상품금액', '세팅비', '배송비', '합계', '셀프세팅분', '카드문구', '레터링', '요청사항', '언어', '메모', 'UserAgent'
+  '옵션', '상품(¥)', '세팅비(¥)', '배송비(¥)', '합계(¥)', '셀프세팅분', '카드문구', '레터링', '요청사항', '언어', '메모', 'UserAgent'
 ];
-var EVENT_WHO_KO = { couple: '커플', friends: '우정', other: '기타' };
+var EVENT_WHO_KO = { couple: '커플', friends: '우정', family: '가족', other: '기타' };
 var EVENT_STAY_KO = { hotel: '호텔', airbnb: '에어비앤비·민박', other: '기타' };
 
 function eventDay_(v) {
@@ -827,10 +827,10 @@ function handleEventOrder_(data) {
       '위챗ID': data.wechatId || '',
       '서프라이즈': data.surprise || '',
       '옵션': data.optionsKo || '',
-      '상품금액': Number(data.itemsKrw) || 0,
-      '세팅비': Number(data.setupKrw) || 0,
-      '배송비': Number(data.deliveryKrw) || 0,
-      '합계': Number(data.totalKrw) || 0,
+      '상품(¥)': Number(data.itemsCny) || 0,
+      '세팅비(¥)': Number(data.setupCny) || 0,
+      '배송비(¥)': Number(data.deliveryCny) || 0,
+      '합계(¥)': Number(data.totalCny) || 0,
       '셀프세팅분': Number(data.minutes) || '',
       '카드문구': data.card || '',
       '레터링': data.lettering || '',
@@ -845,7 +845,7 @@ function handleEventOrder_(data) {
   notifyAdmin(
     '🎁 파티박스 주문 (BETA)',
     '[날짜] ' + data.date + '  [받기] ' + (data.methodKo || data.method) + (data.setupWayKo ? '(' + data.setupWayKo + ')' : '') +
-    '  [숙소] ' + (data.stayName || '') + '  [합계] ' + Number(data.totalKrw || 0).toLocaleString() + '원  [위챗] ' + (data.wechatId || '')
+    '  [숙소] ' + (data.stayName || '') + '  [합계] ¥' + Number(data.totalCny || 0) + '  [위챗] ' + (data.wechatId || '')
   );
   return json_({ result: 'success' });
 }

@@ -3,14 +3,26 @@ import { chipGroup, bindChips } from './planner/shared.js';
 import { krwToCny } from '../../data/taxi.js';
 import { OREUMS } from '../../data/oreums.js';
 import { wishBtnHtml } from './planner/wishlist.js';
+import { OREUM_PHOTOS } from '../../data/oreum-photos.js';
 
-// 한라산 화면의 "오름" 탭: 지역·계절로 거른 오름 카드 목록.
+// 한라산 화면의 "오름" 탭: 필터 버튼 하나(패널 안에 지역·계절·일출일몰·난이도·교통) + 사진 달린 오름 카드 목록.
 // 탭 전환 시 한라산 CCTV를 멈추고(데이터 절약), 돌아오면 다시 튼다.
 
-const state = { tab: 'mountain', region: 'all', season: 'all' };
+const state = { tab: 'mountain', more: false, region: [], season: [], light: [], level: [], access: [] };
 
-const REGIONS = ['all', 'north', 'east', 'west', 'south', 'mid'];
-const SEASONS = ['all', 'spring', 'summer', 'autumn', 'winter'];
+const REGIONS = ['north', 'east', 'west', 'south', 'mid'];
+const SEASONS = ['spring', 'summer', 'autumn', 'winter'];
+const LIGHTS = ['sunrise', 'sunset'];
+const LEVELS = ['easy', 'moderate'];
+const ACCESS = ['bus'];
+// 패널 줄 순서: [state 키, 값 목록, 칩 이름 앞부분, 아이콘]
+const GROUPS = [
+    ['region', REGIONS, 'oreum.region', 'ph-map-pin'],
+    ['season', SEASONS, 'oreum.season', 'ph-flower'],
+    ['light', LIGHTS, 'oreum.light', 'ph-sun-horizon'],
+    ['level', LEVELS, 'oreum.level', 'ph-person-simple-hike'],
+    ['access', ACCESS, 'oreum.access', 'ph-bus'],
+];
 
 // 화면에 붙이는 주의 배지. 순서 = 표시 순서
 const FLAG_ORDER = ['summit_closed', 'ferry', 'taxi_only', 'taxi_recommended', 'fee', 'private', 'steep', 'stairs', 'no_camping'];
@@ -31,11 +43,31 @@ function currentSeason() {
 // '사계절'만 붙은 곳은 제외하고, 지금 계절이 대표 계절인 곳
 const inSeason = (o) => o.seasons.includes(currentSeason());
 
+// 같은 줄 안에서는 '또는', 줄끼리는 '그리고'
 function matches(o) {
-    if (state.region !== 'all' && o.region !== state.region) return false;
+    if (state.region.length && !state.region.includes(o.region)) return false;
     // 'all' 계절이 붙은 곳(사계절 추천)은 어느 계절을 골라도 보여준다
-    if (state.season !== 'all' && !o.seasons.includes(state.season) && !o.seasons.includes('all')) return false;
+    if (state.season.length && !o.seasons.includes('all') && !state.season.some(s => o.seasons.includes(s))) return false;
+    if (state.light.length && !(o.light === 'both' || state.light.includes(o.light))) return false;
+    if (state.level.length && !state.level.includes(o.level)) return false;
+    if (state.access.includes('bus') && (!o.bus || o.flags.includes('ferry') || o.flags.includes('taxi_only'))) return false;
     return true;
+}
+
+// 카드 맨 위 사진 줄 — 옆으로 넘기며 노을·포토존·전망을 본다. 사진은 직접 호스팅(public/img/oreums)
+function photosHtml(o) {
+    const list = OREUM_PHOTOS[o.id];
+    if (!list?.length) return '';
+    const name = pick(o.name);
+    const n = list.length;
+    return `<div class="oreum-shots${n > 1 ? ' multi' : ''}">${list.map((p, i) => {
+        const kind = tr(`oreum.photo.${p.k}`);
+        return `<figure class="oreum-shot">
+            <img src="/img/oreums/${p.f}" alt="${escapeHtml(tr('oreum.photo.alt', { name, kind }))}" width="480" height="360" loading="lazy" decoding="async">
+            <figcaption><span class="oreum-shot-kind k-${p.k}">${escapeHtml(kind)}</span>${n > 1 ? `<span class="oreum-shot-n">${i + 1}/${n}</span>` : ''}</figcaption>
+            ${p.c ? `<small class="oreum-shot-credit">${escapeHtml(p.c)}</small>` : ''}
+        </figure>`;
+    }).join('')}</div>`;
 }
 
 function busHtml(o) {
@@ -83,6 +115,7 @@ function cardHtml(o) {
     const mapUrl = `https://map.kakao.com/link/map/${encodeURIComponent(o.name.ko)},${o.lat},${o.lng}`;
 
     return `<article class="oreum-card" id="oreum-${o.id}">
+        ${photosHtml(o)}
         <div class="oreum-head">
             <div class="oreum-title">${escapeHtml(name)} ${nameKo}</div>
             <span class="pl-tag oreum-region">${tr(`oreum.region.${o.region}`)}</span>
@@ -98,34 +131,86 @@ function cardHtml(o) {
     </article>`;
 }
 
-// 필터 줄이 화면 폭을 넘으면 is-overflow, 끝까지 넘기면 at-end (CSS 마스크 제어)
-function markOverflow(el) {
-    const update = () => {
-        el.classList.toggle('is-overflow', el.scrollWidth > el.clientWidth + 1);
-        el.classList.toggle('at-end', el.scrollLeft + el.clientWidth >= el.scrollWidth - 2);
-    };
-    // 탭이 숨겨진 상태에서 그리면 폭이 0이라 다음 프레임에 잰다
-    requestAnimationFrame(update);
-    el.addEventListener('scroll', update, { passive: true });
+const activeCount = () => GROUPS.reduce((n, [g]) => n + state[g].length, 0);
+const resultCount = () => OREUMS.filter(matches).length;
+const filterBtnInner = (n) => `<i class="ph-bold ph-sliders-horizontal"></i><span>${escapeHtml(tr('oreum.filter_btn'))}</span>${n ? `<span class="oreum-count-dot">${n}</span>` : ''}<i class="ph-bold ph-caret-down oreum-filter-caret"></i>`;
+
+// 적용 중인 필터 요약 — ✕로 하나씩 뺀다
+function appliedHtml() {
+    const items = GROUPS.flatMap(([g, , prefix]) => state[g].map(v => [g, v, tr(`${prefix}.${v}`)]));
+    if (!items.length) return '';
+    return `<div class="oreum-applied"><span class="oreum-applied-label">${escapeHtml(tr('oreum.applied'))}</span>${items.map(([g, v, label]) =>
+        `<button type="button" class="oreum-applied-chip" data-unset="${g}:${v}" aria-label="${escapeHtml(tr('oreum.clear_one'))} ${escapeHtml(label)}">${escapeHtml(label)}<i class="ph-bold ph-x" aria-hidden="true"></i></button>`).join('')}</div>`;
+}
+
+function filtersHtml() {
+    const rows = GROUPS.map(([g, values, prefix, icon]) => `<div class="oreum-sec">
+        <div class="oreum-sec-label"><i class="ph-bold ${icon}" aria-hidden="true"></i>${escapeHtml(tr(`oreum.g.${g}`))}</div>
+        ${chipGroup(g, values.map(v => ({ value: v, label: tr(`${prefix}.${v}`) })), { multi: true, selected: state[g] })}
+    </div>`).join('');
+    const n = resultCount();
+    return `<div class="oreum-filter-row">
+            <div class="oreum-count">${tr('oreum.count', { n })}</div>
+            <button type="button" class="oreum-filter-btn${state.more ? ' active' : ''}" data-oreum-filters aria-expanded="${state.more}">${filterBtnInner(activeCount())}</button>
+        </div>
+        <div class="oreum-panel"${state.more ? '' : ' hidden'}>
+            ${rows}
+            <button type="button" class="oreum-panel-done" data-oreum-done>${escapeHtml(tr('oreum.show_n', { n }))}</button>
+        </div>
+        ${appliedHtml()}`;
+}
+
+function listHtml() {
+    // 지금 계절에 맞는 곳을 위로 (같은 그룹 안에서는 데이터 순서 = 지역 순서 유지)
+    const list = OREUMS.filter(matches).sort((a, b) => inSeason(b) - inSeason(a));
+    return list.length ? list.map(cardHtml).join('') : `<div class="oreum-empty">${tr('oreum.empty')}</div>`;
 }
 
 function render() {
     const root = document.getElementById('hallasan-pane-oreum');
     if (!root) return;
-    // 지금 계절에 맞는 곳을 위로 (같은 그룹 안에서는 데이터 순서 = 지역 순서 유지)
-    const list = OREUMS.filter(matches).sort((a, b) => inSeason(b) - inSeason(a));
-    const allLabel = tr('oreum.filter.all');
     root.innerHTML = `
         <p class="oreum-intro">${tr('oreum.intro')}</p>
-        <div class="pl-filter">${chipGroup('region', REGIONS.map(v => ({ value: v, label: v === 'all' ? allLabel : tr(`oreum.region.${v}`) })), { selected: [state.region] })}</div>
-        <div class="pl-filter oreum-season-filter">${chipGroup('season', SEASONS.map(v => ({ value: v, label: v === 'all' ? allLabel : tr(`oreum.season.${v}`) })), { selected: [state.season] })}</div>
-        <div class="oreum-count">${tr('oreum.count', { n: list.length })}</div>
-        <div class="oreum-list">${list.length ? list.map(cardHtml).join('') : `<div class="oreum-empty">${tr('oreum.empty')}</div>`}</div>
+        <div class="oreum-filters">${filtersHtml()}</div>
+        <div class="oreum-list" id="oreum-list">${listHtml()}</div>
         <p class="oreum-foot">${tr('oreum.foot')}</p>`;
-    root.querySelectorAll('.pl-filter').forEach(markOverflow);
+    bind(root);
+}
+
+// 칩을 누를 때는 필터 영역과 목록만 다시 그린다 (패널이 열린 채로 유지)
+function refresh(root) {
+    const box = root.querySelector('.oreum-filters');
+    if (box) box.innerHTML = filtersHtml();
+    const list = root.querySelector('#oreum-list');
+    if (list) list.innerHTML = listHtml();
+}
+
+function bind(root) {
+    if (root.dataset.oreumBound) return;
+    root.dataset.oreumBound = '1';
     bindChips(root, (name, values) => {
-        state[name] = values[0] || 'all';
-        render();
+        if (!GROUPS.some(([g]) => g === name)) return;
+        state[name] = values;
+        refresh(root);
+    });
+    root.addEventListener('click', (e) => {
+        if (e.target.closest('[data-oreum-filters]')) {
+            state.more = !state.more;
+            refresh(root);
+            return;
+        }
+        if (e.target.closest('[data-oreum-done]')) {
+            state.more = false;
+            refresh(root);
+            root.querySelector('#oreum-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            return;
+        }
+        const unset = e.target.closest('[data-unset]');
+        if (unset) {
+            const [g, v] = unset.dataset.unset.split(':');
+            state[g] = state[g].filter(x => x !== v);
+            refresh(root);
+        }
     });
 }
 

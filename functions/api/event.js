@@ -25,7 +25,7 @@ export async function onRequest({ request, env }) {
   const date = /^\d{4}-\d{2}-\d{2}$/.test(String(d.date || '')) ? String(d.date) : '';
   const row = {
     type: 'event_order',
-    who: one(d.who, ['couple', 'friends', 'other']),
+    who: one(d.who, ['couple', 'friends', 'family']),
     options: [...new Set(options)],
     method,
     setupWay: method === 'setup' ? (one(d.setupWay, WAYS) || 'cardkey') : '',
@@ -44,7 +44,7 @@ export async function onRequest({ request, env }) {
   row.optionsKo = row.options.map(k => ko(PARTY_OPTIONS, k)).join(', ');
   row.methodKo = method === 'setup' ? PARTY_SETUP.name.ko : ko(PARTY_METHODS, method);
   row.setupWayKo = row.setupWay ? ko(PARTY_SETUP.ways, row.setupWay) : '';
-  Object.assign(row, { itemsKrw: q.items, setupKrw: q.setupFee, deliveryKrw: q.delivery, totalKrw: q.total, minutes: q.minutes, setupPerDay: PARTY_SETUP.perDay });
+  Object.assign(row, { itemsCny: q.items, setupCny: q.setupFee, deliveryCny: q.delivery, totalCny: q.total, minutes: q.minutes, setupPerDay: PARTY_SETUP.perDay });
 
   const target = gasUrl(env);
   if (!target) return jsonResponse({ result: 'error', message: 'GAS_URL NOT CONFIGURED' }, 500);
