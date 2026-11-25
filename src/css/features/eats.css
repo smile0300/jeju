@@ -87,6 +87,13 @@ html[lang="ko"] .eat-beta { word-break: keep-all; } /* 중국어에 keep-all을 
 .eat-applied-label { font-size: 0.74rem; font-weight: 800; color: var(--label-secondary); margin-right: 2px; }
 .eat-applied-chip { display: inline-flex; align-items: center; gap: 4px; min-height: 30px; padding: 0 8px 0 10px; border: 0; border-radius: 999px; background: var(--accent-subtle); color: var(--accent-active); font-size: 0.78rem; font-weight: 700; cursor: pointer; }
 .eat-applied-chip i { font-size: 0.75rem; opacity: 0.8; }
+/* 모든 카테고리를 패널 안에 — 줄바꿈으로 칩을 전부 보이게, 맨 아래 'N곳 보기'로 닫기 */
+.eat-more-btn { gap: 5px; padding: 0 12px; }
+.eat-more-btn .ph-sliders-horizontal { font-size: 1rem; }
+.eat-more-caret { font-size: 0.85rem; opacity: 0.6; }
+.eat-kw-area { display: flex; flex-wrap: wrap; gap: 6px; }
+.eat-kw-area .pl-chips { display: contents; }
+.eat-panel-done { margin-top: 2px; min-height: 46px; border: 0; border-radius: 12px; background: var(--accent); color: #fff; font: inherit; font-size: 0.95rem; font-weight: 800; cursor: pointer; }
 
 .eat-result-head {
     display: flex;

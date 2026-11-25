@@ -21,7 +21,7 @@ const S = {
         title: '济州美食',
         beta_note: '共收录 {n} 家餐厅和咖啡馆（官方乡土美食店、平价良心店、本地熟客常去店及实地调查）。支持中文搜菜名/别称，营业时间可能变动。',
         search_ph: '搜店名或菜品（中/韩均可，如：带鱼、黑猪肉、熟成道）',
-        more_filters: '更多筛选',
+        more_filters: '更多筛选', filter_btn: '筛选', show_n: '查看 {n} 家',
         reset: '重置',
         count: '找到 {n} 家',
         more: '查看更多（剩 {n} 家）',
@@ -65,7 +65,7 @@ const S = {
         title: 'Jeju Eats',
         beta_note: '{n} restaurants and cafés — officially designated local-food and fair-price places, locals’ regular spots and our own picks. Hours change, so check before you go.',
         search_ph: 'Search name or dish (Korean / English / Chinese)',
-        more_filters: 'More filters',
+        more_filters: 'More filters', filter_btn: 'Filters', show_n: 'Show {n} places',
         reset: 'Reset',
         count: '{n} places',
         more: 'Show more ({n} left)',
@@ -109,7 +109,7 @@ const S = {
         title: '제주 맛집',
         beta_note: '식당·카페 {n}곳 (향토음식점·착한가격업소 공식 지정 + 현지인 단골 + 자체 조사). 영업시간은 바뀔 수 있으니 가기 전에 확인하세요.',
         search_ph: '가게 이름·메뉴 검색 (한국어·중국어 별칭 지원)',
-        more_filters: '필터 더보기',
+        more_filters: '필터 더보기', filter_btn: '필터', show_n: '{n}곳 보기',
         reset: '초기화',
         count: '{n}곳',
         more: '더 보기 ({n}곳 남음)',
@@ -643,10 +643,12 @@ function updateCounts(root) {
     });
 }
 
-const activeCount = () => state.pr.length + state.kw.length + (state.sort !== 'rec' ? 1 : 0);
+const activeCount = () => state.cu.length + state.ar.length + state.pr.length + state.kw.length + (state.sort !== 'rec' ? 1 : 0);
 
 /** 필터 더보기 버튼: 글자 대신 아래 화살표(열리면 뒤집힘) + 고른 필터 수 */
-const moreBtnInner = (n) => `<i class="ph-bold ph-caret-down eat-more-caret"></i>${n ? `<span class="eat-count-dot">${n}</span>` : ''}`;
+const moreBtnInner = (n) => `<i class="ph-bold ph-sliders-horizontal"></i><span>${escapeHtml(L('filter_btn'))}</span>${n ? `<span class="eat-count-dot">${n}</span>` : ''}<i class="ph-bold ph-caret-down eat-more-caret"></i>`;
+const resultCount = () => EATS.filter(d => matches(d)).length;
+const panelDoneLabel = () => escapeHtml(L('show_n', { n: resultCount() }));
 
 const KW_ICON = { trust: 'ph-seal-check', easy: 'ph-translate', time: 'ph-clock', vibe: 'ph-camera' };
 // 필터 한 줄: 위에 작은 이름표(아이콘 + 묶음 이름), 아래에 칩
@@ -670,6 +672,8 @@ function refreshApplied(root) {
     if (box) box.innerHTML = appliedHtml();
     const btn = root.querySelector('[data-more-filters]');
     if (btn) btn.innerHTML = moreBtnInner(activeCount());
+    const done = root.querySelector('[data-panel-done]');
+    if (done) done.innerHTML = panelDoneLabel();
 }
 
 function filtersHtml() {
@@ -677,15 +681,15 @@ function filtersHtml() {
     return `<div class="eat-filters">
         <div class="eat-search-row">
             <input type="search" class="eat-search" id="eat-q" value="${escapeHtml(state.q)}" placeholder="${escapeHtml(L('search_ph'))}" autocomplete="off">
-            <button type="button" class="eat-more-btn${state.more ? ' active' : ''}" data-more-filters aria-expanded="${state.more}" aria-label="${escapeHtml(L('more_filters'))}" title="${escapeHtml(L('more_filters'))}">${moreBtnInner(n)}</button>
+            <button type="button" class="eat-more-btn${state.more ? ' active' : ''}" data-more-filters aria-expanded="${state.more}" aria-label="${escapeHtml(L('filter_btn'))}">${moreBtnInner(n)}</button>
         </div>
-        ${filterRow('g_quick', 'ph-lightning', `<div class="pl-filter eat-quick">${chipGroup('quick', quickOpts(), { multi: true, selected: quickSelected() })}</div>`)}
-        ${filterRow('g_cuisine', 'ph-bowl-food', `<div class="pl-filter">${chipGroup('cu', opts(CUISINES, 'cu'), { multi: true, selected: state.cu })}</div>`)}
-        ${filterRow('g_area', 'ph-map-pin', `<div class="pl-filter">${chipGroup('ar', opts(AREAS, 'ar'), { multi: true, selected: state.ar })}</div>`)}
         <div class="eat-panel"${state.more ? '' : ' hidden'}>
-            ${filterRow('g_price', 'ph-coins', `<div class="pl-filter">${chipGroup('pr', opts(PRICES, 'pr'), { multi: true, selected: state.pr })}</div>`)}
+            ${filterRow('g_cuisine', 'ph-bowl-food', `<div class="eat-kw">${chipGroup('cu', opts(CUISINES, 'cu'), { multi: true, selected: state.cu })}</div>`)}
+            ${filterRow('g_area', 'ph-map-pin', `<div class="eat-kw eat-kw-area">${readWish().length ? chipGroup('kw_near', opts(['nearwish'], 'kw'), { multi: true, selected: state.kw }) : ''}${chipGroup('ar', opts(AREAS, 'ar'), { multi: true, selected: state.ar })}</div>`)}
+            ${filterRow('g_price', 'ph-coins', `<div class="eat-kw">${chipGroup('pr', opts(PRICES, 'pr'), { multi: true, selected: state.pr })}</div>`)}
             ${KW_GROUPS.map(([g, keys]) => filterRow(`g_kw_${g}`, KW_ICON[g], `<div class="eat-kw">${chipGroup(`kw_${g}`, opts(keys, 'kw'), { multi: true, selected: state.kw })}</div>`)).join('')}
-            ${filterRow('g_sort', 'ph-sort-descending', `<div class="pl-filter">${chipGroup('sort', opts(SORTS, 'so'), { selected: [state.sort] })}</div>`)}
+            ${filterRow('g_sort', 'ph-sort-descending', `<div class="eat-kw">${chipGroup('sort', opts(SORTS, 'so'), { selected: [state.sort] })}</div>`)}
+            <button type="button" class="eat-panel-done" data-panel-done>${panelDoneLabel()}</button>
         </div>
         <div class="eat-applied-box">${appliedHtml()}</div>
     </div>`;
@@ -722,6 +726,8 @@ function renderResults() {
     if (state.view === 'map') animateMap(); else lastVB = null;
     const root = document.getElementById('eats-root');
     if (root) updateCounts(root);
+    const done = root?.querySelector('[data-panel-done]');
+    if (done) done.innerHTML = panelDoneLabel();
 }
 
 function render() {
@@ -765,7 +771,7 @@ function bind(root) {
                 if (!on && has) state[g] = state[g].filter(x => x !== v);
             }
         } else if (name.startsWith('kw_')) {
-            const keys = KW_GROUPS.find(([g]) => `kw_${g}` === name)?.[1] || [];
+            const keys = name === 'kw_near' ? ['nearwish'] : KW_GROUPS.find(([g]) => `kw_${g}` === name)?.[1] || [];
             state.kw = [...state.kw.filter(k => !keys.includes(k)), ...values];
         } else state[name] = values;
         syncChips(root);
@@ -780,6 +786,15 @@ function bind(root) {
         timer = setTimeout(() => { state.q = e.target.value.trim(); state.shown = PAGE; renderResults(); }, 200);
     });
     root.addEventListener('click', async (e) => {
+        if (e.target.closest('[data-panel-done]')) {
+            state.more = false;
+            const panel = root.querySelector('.eat-panel');
+            if (panel) panel.hidden = true;
+            const btn = root.querySelector('[data-more-filters]');
+            if (btn) { btn.classList.remove('active'); btn.setAttribute('aria-expanded', 'false'); }
+            document.getElementById('eat-results')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            return;
+        }
         if (e.target.closest('[data-more-filters]')) {
             state.more = !state.more;
             const panel = root.querySelector('.eat-panel');
