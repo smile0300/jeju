@@ -278,16 +278,28 @@ html[lang="ko"] .eat-beta { word-break: keep-all; } /* 중국어에 keep-all을 
 .eat-btn-amap { background: #E7F5FF; border-color: #A5D8FF; color: #1971C2; }
 
 .eat-head-right { display: flex; align-items: center; gap: 8px; }
-.eat-view-seg { display: inline-flex; padding: 2px; border-radius: 10px; background: var(--fill-secondary); }
-.eat-view-btn {
-    display: inline-flex; align-items: center; gap: 4px; min-height: 30px; padding: 0 10px;
-    border: 0; border-radius: 8px; background: transparent; color: var(--label-secondary);
-    font: inherit; font-size: 0.78rem; font-weight: 700; cursor: pointer;
+.eat-map-wrap { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+/* 지도 접기 (오른쪽 위 구석) / 접힌 막대 */
+.ez-map { position: relative; }
+.ez-min {
+    position: absolute; top: 8px; right: 8px; z-index: 2; width: 34px; height: 34px;
+    display: inline-flex; align-items: center; justify-content: center; padding: 0;
+    border: 1px solid var(--separator, rgba(0,0,0,0.08)); border-radius: 10px;
+    background: rgba(255,255,255,0.92); color: var(--label-primary); font-size: 1rem; cursor: pointer;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
 }
-.eat-view-btn.active { background: var(--bg-card); color: var(--label-primary); box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
-
-.eat-map-wrap { display: flex; flex-direction: column; gap: 10px; }
+.ez-mini-bar {
+    display: flex; align-items: center; gap: 8px; width: 100%; min-height: 44px; margin-bottom: 12px; padding: 0 14px;
+    border: 1px solid var(--separator, rgba(0,0,0,0.08)); border-radius: 12px; background: #E7F5FF;
+    color: #1971C2; font: inherit; font-size: 0.88rem; font-weight: 700; cursor: pointer; text-align: left;
+}
+.ez-mini-bar i:first-child { font-size: 1.15rem; }
+.ez-mini-bar b { margin-left: auto; padding: 2px 10px; border-radius: 999px; background: #fff; color: var(--label-primary); font-size: 0.8rem; }
+.ez-mini-bar .ph-caret-down { margin-left: auto; }
+.ez-mini-bar b + .ph-caret-down { margin-left: 0; }
 .eat-map-hint { margin: 0; font-size: 0.78rem; color: var(--label-secondary); display: flex; align-items: center; gap: 4px; }
+.ez-list-head { margin: 6px 0 0; font-size: 0.85rem; font-weight: 700; color: var(--label-primary); }
+.ez-show-all { display: flex; align-items: center; justify-content: center; gap: 6px; }
 .eat-mpin { cursor: pointer; }
 .eat-mpin circle { stroke: #fff; stroke-width: calc(3px * var(--k, 1)); transition: r 0.15s; }
 .eat-pin-food circle { fill: #F76707; }
@@ -315,7 +327,3 @@ html[lang="ko"] .eat-beta { word-break: keep-all; } /* 중국어에 keep-all을 
 .ez-label text { font-size: calc(30px * var(--k, 1)); font-weight: 800; fill: #343A40; text-anchor: middle; paint-order: stroke; stroke: #fff; stroke-width: calc(6px * var(--k, 1)); stroke-linejoin: round; }
 .ez-label .ez-n { fill: #E8590C; font-size: calc(34px * var(--k, 1)); }
 .ez-label.ez-empty { opacity: 0.4; }
-.ez-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.ez-chip { padding: 5px 10px; border: 1px solid var(--separator, #E5E8EB); border-radius: 999px; background: var(--bg-card); color: var(--label-primary); font-size: 0.8rem; font-weight: 700; cursor: pointer; }
-.ez-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-.ez-chip:disabled { opacity: 0.4; cursor: default; }

@@ -54,8 +54,8 @@ const S = {
         ct_btn: '在线排队 · 预约', ct_note: 'CatchTable 英文版，无需韩国手机号，到店前远程取号',
         book_btn: '帮我代预约（10元）', book_note: '不会韩语/无韩国号码也能约，约不到全额退款',
         driver_btn: '给司机看', order_btn: '点餐卡',
-        view_list: '列表', view_map: '地图',
-        'z.all': '济州全岛', 'z.hint_zone': '点击区域放大，查看该区域所有餐厅', 'z.hint_pin': '点击圆点查看该店详情',
+        view_list: '列表', view_map: '地图', map_open: '展开地图', map_min: '收起地图',
+        'z.all': '济州全岛', 'z.hint_zone': '点击区域放大，查看该区域所有餐厅', 'z.hint_pin': '点击圆点查看该店，点地图空白处回到全部餐厅', 'z.list_all': '{name}全部 {n} 家', 'z.show_all': '查看{name}全部餐厅（{n}）',
         'z.jc_new': '新济州', 'z.jc_old': '旧城区', 'z.jc_air': '机场·梨湖', 'z.jc_ara': '阿罗·吾罗', 'z.jc_east': '禾北·三阳',
         'st.open': '营业中 · {t}打烊', 'st.closing': '即将打烊 · {t}', 'st.break': '休息中 · {t}恢复营业', 'st.later': '今天{t}开门',
         'st.done': '今日已打烊', 'st.off': '今日休息', 'st.tmr': '明天{t}开门', 'st.day': '{d}{t}开门',
@@ -98,8 +98,8 @@ const S = {
         ct_btn: 'Join waitlist · Book', ct_note: 'CatchTable in English — no Korean phone number needed',
         book_btn: 'Request Booking Service', book_note: 'We call & book Korean restaurants for you via WeChat',
         driver_btn: 'Show Driver', order_btn: 'Order Card',
-        view_list: 'List', view_map: 'Map',
-        'z.all': 'All of Jeju', 'z.hint_zone': 'Tap an area to zoom in and see every place there', 'z.hint_pin': 'Tap a pin to preview the place',
+        view_list: 'List', view_map: 'Map', map_open: 'Show map', map_min: 'Hide map',
+        'z.all': 'All of Jeju', 'z.hint_zone': 'Tap an area to zoom in and see every place there', 'z.hint_pin': 'Tap a pin to preview a place, tap empty map space to see them all', 'z.list_all': 'All {n} places in {name}', 'z.show_all': 'All places in {name} ({n})',
         'z.jc_new': 'New Jeju', 'z.jc_old': 'Old Town', 'z.jc_air': 'Airport·Iho', 'z.jc_ara': 'Ara·Ora', 'z.jc_east': 'Hwabuk·Samyang',
         'st.open': 'Open · until {t}', 'st.closing': 'Closing soon · {t}', 'st.break': 'On break · back {t}', 'st.later': 'Opens today {t}',
         'st.done': 'Closed for today', 'st.off': 'Closed today', 'st.tmr': 'Opens tomorrow {t}', 'st.day': 'Opens {d} {t}',
@@ -142,8 +142,8 @@ const S = {
         ct_btn: '원격 줄서기 · 예약', ct_note: '캐치테이블 글로벌(영어) — 외국인도 한국 번호 없이 줄서기 가능',
         book_btn: '대리 예약 신청하기', book_note: '전화 예약이 필요한 매장도 위챗으로 간편 예약 대행',
         driver_btn: '기사님 카드', order_btn: '주문 카드',
-        view_list: '목록', view_map: '지도',
-        'z.all': '제주 전체', 'z.hint_zone': '구역을 누르면 확대되고 그 구역 식당이 모두 표시돼요', 'z.hint_pin': '핀을 누르면 아래에 식당 정보가 열려요',
+        view_list: '목록', view_map: '지도', map_open: '지도 펼치기', map_min: '지도 접기',
+        'z.all': '제주 전체', 'z.hint_zone': '구역을 누르면 확대되고 그 구역 식당이 모두 표시돼요', 'z.hint_pin': '핀을 누르면 그 식당만, 지도 빈 곳을 누르면 다시 전체가 보여요', 'z.list_all': '{name} 전체 {n}곳', 'z.show_all': '{name} 식당 전체 보기 ({n})',
         'z.jc_new': '신제주', 'z.jc_old': '구제주', 'z.jc_air': '공항·이호', 'z.jc_ara': '아라·오라', 'z.jc_east': '화북·삼양',
         'st.open': '영업 중 · {t}까지', 'st.closing': '곧 마감 · {t}까지', 'st.break': '브레이크타임 · {t} 재개', 'st.later': '오늘 {t} 오픈',
         'st.done': '오늘 영업 끝', 'st.off': '오늘 휴무', 'st.tmr': '내일 {t} 오픈', 'st.day': '{d} {t} 오픈',
@@ -175,7 +175,10 @@ const QUICK = [['kw', 'hot'], ['kw', 'ocean'], ['kw', 'bakery'], ['kw', 'solo'],
 const BAKERY_RE = /빵|베이커리|도넛|꽈배기|케이크|디저트|떡|카이막|빙수|제과|바게트|스콘|타르트|아이스크림|젤라또/;
 const RANKED = 10;
 
-const state = { q: '', cu: [], ar: [], pr: [], kw: [], sort: 'rec', shown: PAGE, more: false, view: 'list', pickedId: null, zone: null };
+// 지도 접힘 여부는 이 기기에서만 기억 (저장 실패해도 펼친 상태로 동작)
+function readMapMin() { try { return localStorage.getItem('eats_map_min') === '1'; } catch { return false; } }
+function saveMapMin(v) { try { localStorage.setItem('eats_map_min', v ? '1' : '0'); } catch { /* 무시 */ } }
+const state = { q: '', cu: [], ar: [], pr: [], kw: [], sort: 'rec', shown: PAGE, more: false, pickedId: null, zone: null, mapMin: readMapMin() };
 let EATS = null;
 let loading = null;
 
@@ -233,16 +236,20 @@ function hayOf(d) {
             d.s, translateFoodText(d.s, 'zh'), translateFoodText(d.s, 'en'),
             d.mn, translateFoodText(d.mn, 'zh'), translateFoodText(d.mn, 'en'),
             d.rv?.zh, d.rv?.en, d.a,
-            ...d.cu.map(c => L(`cu.${c}`)), L(`ar.${d.ar}`),
+            ...d.cu.map(c => L(`cu.${c}`)), L(`ar.${arOf(d)}`),
         ].filter(Boolean).join(' ').toLowerCase();
         d._hayL = l;
     }
     return d._hay;
 }
 
+// 지역은 지도 구역 기준 (지도에서 구역을 고르면 지역 필터가 되므로 둘이 같은 가게를 가리키게)
+const arOf = (d) => (!d.z ? d.ar : CITY.includes(d.z) ? 'jeju' : d.z);
+const zoneToAr = (z) => (!z ? null : z === 'jcity' || CITY.includes(z) ? 'jeju' : z);
+
 function matches(d, st = state) {
     if (st.cu.length && !st.cu.some(c => d.cu.includes(c))) return false;
-    if (st.ar.length && !st.ar.includes(d.ar)) return false;
+    if (st.ar.length && !st.ar.includes(arOf(d))) return false;
     if (st.pr.length && !st.pr.includes(priceTier(d))) return false;
     if (st.kw.length && !st.kw.every(k => hasKw(d, k))) return false;
     if (st.q && !hayOf(d).includes(st.q.toLowerCase())) return false;
@@ -408,7 +415,7 @@ function cardHtml(d, rank = 0) {
     const kind = subType || d.cu.filter(c => c !== 'other').map(c => L(`cu.${c}`)).join('·');
     const line = [
         d.g ? `<span class="eat-rating">★ ${d.g.toFixed(1)}<small> (${d.gr.toLocaleString('en-US')})</small></span>` : '',
-        `<span>${L(`ar.${d.ar}`)}</span>`,
+        `<span>${L(`ar.${arOf(d)}`)}</span>`,
         kind ? `<span>${escapeHtml(kind)}</span>` : '',
     ].filter(Boolean).join('<span class="eat-dot" aria-hidden="true">·</span>');
     const status = statusHtml(d);
@@ -565,10 +572,10 @@ function mapViewHtml(list) {
     if (leaf) {
         const pts = list.filter(d => d.ll && d.z === leaf);
         if (pts.length) {
-            if (!pts.some(d => d.id === state.pickedId)) state.pickedId = pts[0].id;
-            picked = pts.find(d => d.id === state.pickedId);
+            // 처음엔 아무 핀도 고르지 않고 아래 목록에 구역 식당 전체 (핀을 누르면 그 식당만)
+            picked = pts.find(d => d.id === state.pickedId) || null;
             // 선택한 핀이 다른 핀에 가리지 않게 맨 뒤(위)에 그린다
-            pins = [...pts.filter(d => d !== picked), picked].map(d => {
+            pins = [...pts.filter(d => d !== picked), ...(picked ? [picked] : [])].map(d => {
                 const [x, y] = projectFine(d.ll[0], d.ll[1]);
                 const cls = d.c === 'cafe' ? 'eat-pin-cafe' : 'eat-pin-food';
                 const on = d === picked;
@@ -577,10 +584,6 @@ function mapViewHtml(list) {
         }
     }
 
-    const chips = units.map(u => {
-        const n = count(u);
-        return `<button type="button" class="ez-chip${state.zone === u ? ' active' : ''}" data-zone="${u}"${n ? '' : ' disabled'}>${escapeHtml(zoneName(u))} <span class="eat-n">${n}</span></button>`;
-    }).join('');
     const back = state.zone
         ? `<button type="button" class="ez-back" data-zone="${CITY.includes(state.zone) ? 'jcity' : ''}"><i class="ph-bold ph-arrow-left"></i> ${escapeHtml(CITY.includes(state.zone) ? zoneName('jcity') : L('z.all'))}</button>`
         : '';
@@ -591,14 +594,35 @@ function mapViewHtml(list) {
             <div class="ez-head">${back}<b>${escapeHtml(title)}</b></div>
             <p class="eat-map-hint"><i class="ph-duotone ph-map-pin"></i> ${escapeHtml(L(leaf ? 'z.hint_pin' : 'z.hint_zone'))}</p>
             <figure class="pl-map eat-map-svg ez-map">
+                <button type="button" class="ez-min" data-map-min aria-label="${escapeHtml(L('map_min'))}" title="${escapeHtml(L('map_min'))}"><i class="ph-bold ph-arrows-in-simple"></i></button>
                 <svg viewBox="${vb.join(' ')}" data-vb="${vb.join(' ')}" style="--k:${k.toFixed(4)}">
                     ${coast}${shapes}<path class="ez-border" d="${ZONE_BORDER}"/>${labels}${pins}${landmarks}
                 </svg>
             </figure>
-            <div class="ez-chips">${chips}</div>
-            ${picked ? `<div class="eat-map-picked">${cardHtml(picked, 0)}</div>` : ''}
         </div>`;
 }
+
+// 지도 아래 목록: 구역을 골랐으면 그 구역만, 핀을 골랐으면 그 식당 + '전체 보기', 아니면 전체(30곳씩)
+function listHtml(list) {
+    const leaf = state.zone && state.zone !== 'jcity' ? state.zone : null;
+    const items = state.zone ? list.filter(d => (state.zone === 'jcity' ? CITY.includes(d.z) : d.z === state.zone)) : list;
+    const name = state.zone ? zoneName(state.zone) : '';
+    const picked = leaf ? items.find(d => d.id === state.pickedId && d.ll) : null;
+    if (picked) {
+        return `<button type="button" class="eat-load-more ez-show-all" data-map-unpick><i class="ph-bold ph-list-bullets"></i> ${escapeHtml(L('z.show_all', { name, n: items.length }))}</button>
+            <div class="eat-map-picked">${cardHtml(picked, 0)}</div>`;
+    }
+    if (!items.length) return `<div class="eat-empty">${L('empty')}</div>`;
+    const rest = items.length - state.shown;
+    const ranked = state.sort === 'rec' && !state.zone;
+    return (state.zone ? `<p class="ez-list-head">${escapeHtml(L('z.list_all', { name, n: items.length }))}</p>` : '')
+        + items.slice(0, state.shown).map((d, i) => cardHtml(d, ranked && i < RANKED ? i + 1 : 0)).join('')
+        + (rest > 0 ? `<button type="button" class="eat-load-more" data-load-more>${L('more', { n: rest })}</button>` : '');
+}
+
+// 지도를 접었을 때: 한 줄 막대 (고른 구역이 있으면 이름도)
+const mapMiniHtml = () => `<button type="button" class="ez-mini-bar" data-map-open>
+    <i class="ph-duotone ph-map-trifold"></i><span>${escapeHtml(L('map_open'))}</span>${state.zone ? `<b>${escapeHtml(zoneName(state.zone))}</b>` : ''}<i class="ph-bold ph-caret-down"></i></button>`;
 
 // 구역을 바꿀 때 이전 화면 범위에서 새 범위로 부드럽게 확대·축소 (viewBox만 바꾸므로 가볍다)
 function animateMap() {
@@ -720,24 +744,14 @@ function filtersHtml() {
 function resultsHtml() {
     const list = sorted(EATS.filter(d => matches(d)));
     const anyFilter = state.q || state.cu.length || state.ar.length || activeCount();
-    const viewToggle = `<div class="eat-view-seg" role="tablist">
-        <button type="button" class="eat-view-btn${state.view === 'list' ? ' active' : ''}" data-eat-view="list"><i class="ph-bold ph-list"></i> ${L('view_list')}</button>
-        <button type="button" class="eat-view-btn${state.view === 'map' ? ' active' : ''}" data-eat-view="map"><i class="ph-bold ph-map-trifold"></i> ${L('view_map')}</button>
-    </div>`;
     const head = `<div class="eat-result-head">
         <span>${L('count', { n: list.length })}</span>
         <div class="eat-head-right">
             ${anyFilter ? `<button type="button" class="eat-reset" data-reset>${L('reset')}</button>` : ''}
-            ${viewToggle}
         </div>
     </div>`;
-    if (!list.length) return head + `<div class="eat-empty">${L('empty')}</div>`;
-    if (state.view === 'map') return head + mapViewHtml(list);
-
-    const rest = list.length - state.shown;
-    const ranked = state.sort === 'rec';
-    return head + list.slice(0, state.shown).map((d, i) => cardHtml(d, ranked && i < RANKED ? i + 1 : 0)).join('')
-        + (rest > 0 ? `<button type="button" class="eat-load-more" data-load-more>${L('more', { n: rest })}</button>` : '')
+    // 검색창 아래에 지도를 기본으로 두고(접기 가능), 그 아래 목록이 지도에서 고른 구역을 따라간다
+    return head + (state.mapMin ? mapMiniHtml() : mapViewHtml(list)) + listHtml(list)
         + `<button type="button" class="eat-report" onclick="window.openCSModal && window.openCSModal()">${L('report')}</button>`;
 }
 
@@ -745,7 +759,7 @@ function renderResults() {
     buildOpenCache();
     const box = document.getElementById('eat-results');
     if (box) box.innerHTML = resultsHtml();
-    if (state.view === 'map') animateMap(); else lastVB = null;
+    if (!state.mapMin) animateMap(); else lastVB = null;
     const root = document.getElementById('eats-root');
     if (root) updateCounts(root);
     const done = root?.querySelector('[data-panel-done]');
@@ -780,6 +794,13 @@ function load() {
     return loading;
 }
 
+// 지역 필터를 하나만 고르면 지도도 그 구역으로, 여러 개거나 없으면 전체 지도
+function syncZoneFromAr() {
+    const one = state.ar.length === 1 ? state.ar[0] : null;
+    state.zone = !one ? null : one === 'jeju' ? (CITY.includes(state.zone) ? state.zone : 'jcity') : one;
+    state.pickedId = null;
+}
+
 function bind(root) {
     if (root.dataset.eatsBound) return;
     root.dataset.eatsBound = '1';
@@ -796,6 +817,7 @@ function bind(root) {
             const keys = name === 'kw_near' ? ['nearwish'] : KW_GROUPS.find(([g]) => `kw_${g}` === name)?.[1] || [];
             state.kw = [...state.kw.filter(k => !keys.includes(k)), ...values];
         } else state[name] = values;
+        if (name === 'ar') syncZoneFromAr();
         syncChips(root);
         state.shown = PAGE;
         renderResults();
@@ -831,24 +853,41 @@ function bind(root) {
             const [g, v] = unset.dataset.unset.split(':');
             if (g === 'sort') state.sort = 'rec';
             else state[g] = state[g].filter(x => x !== v);
+            if (g === 'ar') syncZoneFromAr();
             syncChips(root);
             state.shown = PAGE;
             renderResults();
             refreshApplied(root);
             return;
         }
-        const vBtn = e.target.closest('[data-eat-view]');
-        if (vBtn) {
-            state.view = vBtn.dataset.eatView;
+        const mm = e.target.closest('[data-map-min], [data-map-open]');
+        if (mm) {
+            state.mapMin = mm.hasAttribute('data-map-min');
+            saveMapMin(state.mapMin);
             renderResults();
+            return;
+        }
+        // 구역 지도에서 핀이 아닌 곳(바다·현재 구역 바탕)을 누르면 선택을 풀고 구역 식당 전체로
+        const leafNow = state.zone && state.zone !== 'jcity' ? state.zone : null;
+        const onMap = e.target.closest('.ez-map svg');
+        if (e.target.closest('[data-map-unpick]')
+            || (leafNow && onMap && !e.target.closest('[data-map-pick]')
+                && (!e.target.closest('[data-zone]') || e.target.closest('[data-zone]').dataset.zone === leafNow))) {
+            if (state.pickedId != null) { state.pickedId = null; renderResults(); }
             return;
         }
         const zBtn = e.target.closest('[data-zone]');
         if (zBtn && !zBtn.disabled) {
             const z = zBtn.dataset.zone || null;
+            state.pickedId = null;
+            state.shown = PAGE;
             // 전체 보기에서 제주시내 안 구역 도형을 누르면 먼저 제주시내로 확대
             state.zone = !state.zone && z?.startsWith('jc_') ? 'jcity' : z;
+            // 지도에서 고른 구역 = 지역 필터 (전체로 돌아가면 지역 필터도 해제)
+            state.ar = state.zone ? [zoneToAr(state.zone)] : [];
+            syncChips(root);
             renderResults();
+            refreshApplied(root);
             return;
         }
         const mPin = e.target.closest('[data-map-pick]');
