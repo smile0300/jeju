@@ -163,3 +163,4 @@ html[lang="ko"] .pb-root { word-break: keep-all; }
 }
 .pb-nav-back { flex: 0 0 auto; border: 1px solid var(--separator); background: var(--bg-card); color: var(--label-secondary); }
 .pb-nav-next { flex: 1 1 auto; border: 0; background: #E11D48; color: #fff; box-shadow: 0 4px 12px rgba(225, 29, 72, 0.25); }
+.pb-sum-plus { margin: 4px 0 0; text-align: right; font-size: 0.75rem; }

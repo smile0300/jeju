@@ -37,6 +37,9 @@ export async function onRequest({ request, env }) {
     lang: one(d.lang, ['zh', 'ko', 'en']), userAgent: text(d.userAgent, 300),
   };
   if (!row.date || !row.stayName || !row.wechatId) return jsonResponse({ result: 'error', message: 'missing' }, 400);
+  // 주류는 시세라 금액 없이 받는다. 원하는 술은 시트 열을 늘리지 않고 요청사항 맨 앞에 붙인다
+  const liquor = row.options.includes('liquor') ? text(d.liquor, 200) : '';
+  if (liquor) row.note = `[주류 희망: ${liquor} · 시세 견적 필요]` + (row.note ? ' / ' + row.note : '');
 
   const q = partyQuote(row.options, method === 'setup');
   // 시트는 운영자가 읽으므로 한국어 이름도 같이 보낸다

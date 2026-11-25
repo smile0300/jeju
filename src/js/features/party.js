@@ -115,7 +115,7 @@ function optionCard(o) {
         <span class="pb-card-body">
             <span class="pb-opt-name">${esc(pick(o.name))}</span>
             <span class="pb-opt-desc">${esc(pick(o.desc))}</span>
-            <span class="pb-card-foot"><b>+${yuan(o.price)}</b><span class="pb-card-add">${esc(on ? t.added : t.add)}</span></span>
+            <span class="pb-card-foot"><b>${o.variable ? esc(t.variable) : '+' + yuan(o.price)}</b><span class="pb-card-add">${esc(on ? t.added : t.add)}</span></span>
         </span>
     </button>`;
 }
@@ -184,10 +184,15 @@ function summaryHtml() {
     const q = partyQuote(orderKeys(), setup);
     return `${minutesHtml(q, setup)}
         <div class="pb-sum-row"><span>${esc(t.sum_items)}</span><span>${yuan(q.items)}</span></div>
+        ${hasOpt('liquor') ? `<div class="pb-sum-row"><span>${esc(t.sum_liquor)}</span><span>${esc(t.sum_liquor_v)}</span></div>` : ''}
         ${q.setupFee ? `<div class="pb-sum-row"><span>${esc(t.sum_setup)}</span><span>${yuan(q.setupFee)}</span></div>` : ''}
         <div class="pb-sum-row"><span>${esc(t.sum_delivery)}</span><span>${q.delivery ? yuan(q.delivery) : esc(t.sum_free)}</span></div>
-        <div class="pb-sum-row pb-sum-total"><span>${esc(t.sum_total)}</span><span>${yuan(q.total)}${krwHint(q.total)}</span></div>`;
+        <div class="pb-sum-row pb-sum-total"><span>${esc(t.sum_total)}</span><span>${yuan(q.total)}${krwHint(q.total)}</span></div>
+        ${liquorNote()}`;
 }
+
+/** 주류를 담았으면 합계 아래에 '주류 금액 별도' */
+const liquorNote = () => (hasOpt('liquor') ? `<p class="pb-note pb-sum-plus">+ ${esc(T().sum_plus)}</p>` : '');
 
 /** ② 추가 물품 화면의 '상품에 포함' 줄 */
 function includedHtml() {
@@ -203,6 +208,7 @@ function runningHtml() {
     const q = partyQuote(orderKeys());
     return `<div class="pb-summary">${minutesHtml(q, false)}
         <div class="pb-sum-row pb-sum-total"><span>${esc(t.sum_items)}</span><span>${yuan(q.items)}${krwHint(q.items)}</span></div>
+        ${liquorNote()}
     </div>`;
 }
 
@@ -254,6 +260,7 @@ function step3Html() {
             <label class="pb-check"><input type="checkbox" id="pb-surprise" ${state.surprise ? 'checked' : ''}> <span>${esc(t.surprise)}</span></label>
             ${field('pb-card', t.card, { ph: t.card_ph, area: true })}
             ${hasOpt('balloon') ? field('pb-letter', t.lettering, { ph: t.lettering_ph }) : ''}
+            ${hasOpt('liquor') ? field('pb-liquor', t.liquor, { ph: t.liquor_ph, required: true }) : ''}
             ${field('pb-note', t.note, { ph: t.note_ph, area: true })}
 
             <div id="pb-summary" class="pb-summary">${summaryHtml()}</div>
@@ -302,6 +309,7 @@ async function submit() {
     const need = [v('pb-date'), v('pb-stay'), v('pb-wechat')];
     if (state.stayType === 'airbnb') need.push(v('pb-addr'));
     if (state.stayType === 'hotel') need.push(v('pb-booker'));
+    if (hasOpt('liquor')) need.push(v('pb-liquor'));
     if (need.some(x => !x)) return status(t.fill, 'error');
     if (!state.agree) return status(t.agree_err, 'error');
 
@@ -324,6 +332,7 @@ async function submit() {
                 date: v('pb-date'), checkin: v('pb-checkin'),
                 wechatId: v('pb-wechat'), surprise: state.surprise,
                 card: v('pb-card'), lettering: hasOpt('balloon') ? v('pb-letter') : '', note: v('pb-note'),
+                liquor: hasOpt('liquor') ? v('pb-liquor') : '',
                 lang: lang(),
                 userAgent: navigator.userAgent,
             }),
@@ -342,7 +351,7 @@ async function submit() {
             }
             state.fields = {};
             state.agree = false;
-            ['pb-date', 'pb-checkin', 'pb-stay', 'pb-addr', 'pb-booker', 'pb-wechat', 'pb-card', 'pb-letter', 'pb-note'].forEach(id => {
+            ['pb-date', 'pb-checkin', 'pb-stay', 'pb-addr', 'pb-booker', 'pb-wechat', 'pb-card', 'pb-letter', 'pb-liquor', 'pb-note'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.value = '';
             });
