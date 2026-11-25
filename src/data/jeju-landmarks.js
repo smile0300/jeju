@@ -18,6 +18,8 @@ export const LANDMARKS = [
     { ll: [33.4237, 126.9296], t: 2, name: { ko: '섭지코지', zh: '涉地可支', en: 'Seopjikoji' } },
     { ll: [33.5150, 126.5117], t: 2, name: { ko: '용두암', zh: '龙头岩', en: 'Yongduam Rock' } },
     { ll: [33.5121, 126.5284], t: 2, name: { ko: '동문시장', zh: '东门市场', en: 'Dongmun Market' } },
+    // 신제주(노형) 랜드마크 — 그랜드 하얏트가 있어 중국 관광객은 '君悦'로 더 잘 안다. 좌표: 카카오 로컬 '제주 드림타워 복합 리조트'
+    { ll: [33.4853, 126.4815], t: 2, name: { ko: '드림타워', zh: '梦想塔(君悦)', en: 'Dream Tower' } },
     { ll: [33.3060, 126.2901], t: 2, name: { ko: '오설록', zh: '雪绿茶博物馆', en: "O'sulloc" } },
     { ll: [33.3672, 126.3571], t: 2, name: { ko: '새별오름', zh: '晓星岳', en: 'Saebyeol Oreum' } },
     { ll: [33.4181, 126.6535], t: 2, name: { ko: '사려니숲길', zh: '思连伊林荫道', en: 'Saryeoni Forest' } },
