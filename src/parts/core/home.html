@@ -64,11 +64,11 @@
         <div id="home-trip-planner" class="home-trip-planner"></div>
 
         <div class="home-grid">
-            <a href="/weather" class="home-item item-weather" id="home-weather-btn" onclick="event.preventDefault(); showSection('weather')">
+            <a href="/weather" class="home-item item-weather" id="home-weather-btn" onclick="event.preventDefault(); window.toggleWeatherExpand ? window.toggleWeatherExpand() : showSection('weather')">
                 <span class="item-icon"><i class="ph-duotone ph-cloud-sun color-weather"></i></span>
                 <span class="item-label" data-i18n="nav.weather">天气预报</span>
             </a>
-            <a href="/hallasan" class="home-item item-hallasan" id="home-hallasan-btn" onclick="event.preventDefault(); showSection('hallasan')">
+            <a href="/hallasan" class="home-item item-hallasan" id="home-hallasan-btn" onclick="event.preventDefault(); window.toggleHallasanExpand ? window.toggleHallasanExpand() : showSection('hallasan')">
                 <span class="item-icon"><i class="ph-duotone ph-mountains color-hallasan"></i></span>
                 <span class="item-label" data-i18n="nav.hallasan">汉拿山/火山丘</span>
             </a>
@@ -149,6 +149,32 @@
                  style="display:none" onclick="window.goToCharter('guide')">
                 <span class="item-icon"><i class="ph-duotone ph-van color-food"></i></span>
                 <span class="item-label" data-i18n="charter.home.baoche">包车</span>
+            </div>
+            <!-- ===== 날씨 서브 버튼 (평소 숨김, 날씨 클릭 시 첫 줄 오른쪽 두 칸에 삽입. 같은 날씨 화면, 탭만 다름) ===== -->
+            <!-- 실시간: 한라산 자리 대체 -->
+            <div class="home-item item-weather-sub" id="weather-sub-current"
+                 style="display:none" onclick="window.goToWeather('current')">
+                <span class="item-icon"><i class="ph-duotone ph-broadcast color-weather"></i></span>
+                <span class="item-label" data-i18n="weather.view.current">实时天气</span>
+            </div>
+            <!-- 과거: 공항 자리 대체 -->
+            <div class="home-item item-weather-sub" id="weather-sub-past"
+                 style="display:none" onclick="window.goToWeather('past')">
+                <span class="item-icon"><i class="ph-duotone ph-clock-counter-clockwise color-weather"></i></span>
+                <span class="item-label" data-i18n="weather.view.past">历史天气</span>
+            </div>
+            <!-- ===== 한라산 서브 버튼 (평소 숨김, 한라산 클릭 시 좌·우에 삽입) ===== -->
+            <!-- 한라산: 날씨예보 자리(왼쪽) 대체 -->
+            <div class="home-item item-hallasan-sub" id="hallasan-sub-mountain"
+                 style="display:none" onclick="window.goToHallasan('mountain')">
+                <span class="item-icon"><i class="ph-duotone ph-mountains color-hallasan"></i></span>
+                <span class="item-label" data-i18n="hallasan.tab.mountain">汉拿山</span>
+            </div>
+            <!-- 오름: 공항 자리(오른쪽) 대체 -->
+            <div class="home-item item-hallasan-sub" id="hallasan-sub-oreum"
+                 style="display:none" onclick="window.goToHallasan('oreum')">
+                <span class="item-icon"><i class="ph-duotone ph-tree-evergreen color-hallasan"></i></span>
+                <span class="item-label" data-i18n="hallasan.tab.oreum">火山丘 Oreum</span>
             </div>
             <!-- ===== 예약신청 서브 버튼 (평소 숨김, 예약신청 클릭 시 해당 자리에 삽입) ===== -->
             <!-- 미용실/네일: 날씨예보 자리 대체 -->

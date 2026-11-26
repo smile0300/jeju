@@ -674,6 +674,37 @@
     border: 1px solid rgba(230, 119, 0, 0.35);
 }
 
+/* ===== 한라산 홈 확장 (왼쪽 한라산 / 오른쪽 오름) ===== */
+.home-item.item-hallasan.hallasan-active {
+    background: rgba(10, 158, 114, 0.10);
+    border-color: rgba(10, 158, 114, 0.50);
+    box-shadow:
+        0 0 0 2px rgba(10, 158, 114, 0.18),
+        var(--shadow-sm);
+    transform: scale(1); /* hover scale 방지 */
+}
+.home-grid.sub-expanded-grid .home-item .coming-soon-badge { visibility: hidden !important; }
+.home-item.item-hallasan-sub {
+    cursor: pointer;
+    background: linear-gradient(135deg, #f0fdf8 0%, #d1fae5 100%);
+    border: 1px solid rgba(10, 158, 114, 0.35);
+}
+
+/* ===== 날씨 홈 확장 (첫 줄 [뒤로][실시간][과거]) ===== */
+.home-item.item-weather.weather-active {
+    background: rgba(49, 130, 246, 0.10);
+    border-color: rgba(49, 130, 246, 0.50);
+    box-shadow:
+        0 0 0 2px rgba(49, 130, 246, 0.18),
+        var(--shadow-sm);
+    transform: scale(1); /* hover scale 방지 */
+}
+.home-item.item-weather-sub {
+    cursor: pointer;
+    background: linear-gradient(135deg, #f5f9ff 0%, #dbeafe 100%);
+    border: 1px solid rgba(49, 130, 246, 0.35);
+}
+
 /* ===== 준비중 페이지 공통 스타일 ===== */
 .coming-soon-page {
     display: flex;

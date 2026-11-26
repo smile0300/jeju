@@ -31,6 +31,8 @@
 
     window.expandLostGrid = function() {
         if (lostExpanded) return;
+        if (window.collapseHallasanGrid) window.collapseHallasanGrid();
+        if (window.collapseWeatherGrid) window.collapseWeatherGrid();
         if (window.collapseReservationGrid) window.collapseReservationGrid();
         if (window.collapseCharterGrid) window.collapseCharterGrid();
         
@@ -175,15 +177,21 @@
         if (kind === 'lost') { if (!lostExpanded) window.expandLostGrid(); }
         else if (kind === 'res') { if (!reservationExpanded) window.expandReservationGrid(); }
         else if (kind === 'charter') { if (!charterExpanded) window.expandCharterGrid(); }
+        else if (kind === 'hallasan') { if (window.expandHallasanGrid) window.expandHallasanGrid(); }
+        else if (kind === 'weather') { if (window.expandWeatherGrid) window.expandWeatherGrid(); }
         else if (!window.keepLostMenuOpen) {
             window.collapseLostGrid();
             window.collapseReservationGrid();
             window.collapseCharterGrid();
+            if (window.collapseHallasanGrid) window.collapseHallasanGrid();
+            if (window.collapseWeatherGrid) window.collapseWeatherGrid();
         }
     };
 
     window.expandReservationGrid = function() {
         if (reservationExpanded) return;
+        if (window.collapseHallasanGrid) window.collapseHallasanGrid();
+        if (window.collapseWeatherGrid) window.collapseWeatherGrid();
         // 분실물·차량이 열려있으면 먼저 닫기
         if (window.collapseLostGrid) window.collapseLostGrid();
         if (window.collapseCharterGrid) window.collapseCharterGrid();
@@ -324,6 +332,8 @@
 
     window.expandCharterGrid = function() {
         if (charterExpanded) return;
+        if (window.collapseHallasanGrid) window.collapseHallasanGrid();
+        if (window.collapseWeatherGrid) window.collapseWeatherGrid();
         if (window.collapseLostGrid) window.collapseLostGrid();
         if (window.collapseReservationGrid) window.collapseReservationGrid();
 
@@ -400,6 +410,142 @@
                 if (el) el.style.visibility = '';
             });
         }, 250);
+    };
+
+    // ===== 버튼 하나 → 주변 칸에 서브 버튼 2개 펼치기 (한라산·날씨 공용, 차량 펼침과 같은 방식) =====
+    // cfg: kind(기록 이름), btnId, cls(펼침 강조 클래스), icon/label(원래 아이콘·문구 키), color(아이콘 색 클래스),
+    //      replace([{origId, subId, animClass, outClass}]), hide(숨길 칸 id)
+    function makeHomeExpand(cfg) {
+        let expanded = false;
+
+        function setBtn(on) {
+            var btn = document.getElementById(cfg.btnId);
+            if (!btn) return;
+            btn.classList.toggle(cfg.cls, on);
+            var icon  = btn.querySelector('.item-icon i');
+            var label = btn.querySelector('.item-label');
+            if (icon)  icon.className = on ? 'ph-bold ph-arrow-left ' + cfg.color : 'ph-duotone ' + cfg.icon + ' ' + cfg.color;
+            if (label) label.setAttribute('data-i18n', on ? 'lost.home.back' : cfg.label);
+        }
+
+        function expand() {
+            if (expanded) return;
+            if (window.collapseAllHomeExpand) window.collapseAllHomeExpand(cfg.kind);
+            expanded = true;
+            var grid = document.querySelector('.home-grid');
+            if (grid) grid.classList.add('sub-expanded-grid'); // 숨긴 칸의 BETA 배지(맛집은 항상 보이게 강제됨)도 감춘다
+
+            cfg.replace.forEach(function(item, i) {
+                var orig = document.getElementById(item.origId);
+                var sub  = document.getElementById(item.subId);
+                if (!orig || !sub) return;
+                orig.parentNode.insertBefore(sub, orig);
+                orig.style.display = 'none';
+                sub.style.display = '';
+                sub.style.visibility = 'hidden';
+                setTimeout(function() {
+                    sub.style.visibility = '';
+                    sub.classList.add(item.animClass);
+                }, i * 30);
+            });
+            cfg.hide.forEach(function(id) {
+                var el = document.getElementById(id);
+                if (el) el.style.visibility = 'hidden';
+            });
+            setBtn(true);
+            if (window.applyTranslations) window.applyTranslations();
+        }
+
+        function collapse() {
+            if (!expanded) return;
+            expanded = false;
+            cfg.replace.forEach(function(item) {
+                var orig = document.getElementById(item.origId);
+                var sub  = document.getElementById(item.subId);
+                if (!orig || !sub) return;
+                sub.classList.remove(item.animClass);
+                sub.classList.add(item.outClass);
+                setTimeout(function() {
+                    sub.style.display = 'none';
+                    sub.style.visibility = '';
+                    sub.classList.remove(item.outClass);
+                    orig.style.display = '';
+                }, 250);
+            });
+            setBtn(false);
+            if (window.applyTranslations) window.applyTranslations();
+            setTimeout(function() {
+                cfg.hide.forEach(function(id) {
+                    var el = document.getElementById(id);
+                    if (el) el.style.visibility = '';
+                });
+                var grid = document.querySelector('.home-grid');
+                if (grid) grid.classList.remove('sub-expanded-grid');
+            }, 250);
+        }
+
+        function toggle() {
+            if (expanded) {
+                if (history.state && history.state.homeExpand === cfg.kind) history.back(); // popstate가 접는다
+                else collapse();
+            } else {
+                expand();
+                pushHomeExpand(cfg.kind);
+            }
+        }
+
+        return { expand: expand, collapse: collapse, toggle: toggle };
+    }
+
+    // 한라산(가운데 위) → 왼쪽 한라산 / 오른쪽 오름
+    const hallasanExpand = makeHomeExpand({
+        kind: 'hallasan', btnId: 'home-hallasan-btn', cls: 'hallasan-active',
+        icon: 'ph-mountains', color: 'color-hallasan', label: 'nav.hallasan',
+        replace: [
+            { origId: 'home-weather-btn', subId: 'hallasan-sub-mountain', animClass: 'lost-sub-in-left',  outClass: 'lost-sub-out-left' },
+            { origId: 'home-airport-btn', subId: 'hallasan-sub-oreum',    animClass: 'lost-sub-in-right', outClass: 'lost-sub-out-right' },
+        ],
+        hide: ['home-festival-btn', 'home-lost-btn', 'home-reservation-btn', 'home-course-btn', 'home-food-btn', 'home-reward-btn'],
+    });
+    window.toggleHallasanExpand = hallasanExpand.toggle;
+    window.expandHallasanGrid = hallasanExpand.expand;
+    window.collapseHallasanGrid = hallasanExpand.collapse;
+
+    // 한라산 서브 버튼 동작: 'mountain' = 한라산 탐방로·CCTV, 'oreum' = 오름 목록
+    window.goToHallasan = function(tab) {
+        window.collapseHallasanGrid();
+        if (window.showSection) window.showSection('hallasan');
+        if (window.oreumApp) window.oreumApp.switchTab(tab);
+    };
+
+    // 날씨(왼쪽 위 모서리) → 첫 줄을 [뒤로][실시간][과거]로. 들어가면 같은 날씨 화면, 탭만 다르게
+    const weatherExpand = makeHomeExpand({
+        kind: 'weather', btnId: 'home-weather-btn', cls: 'weather-active',
+        icon: 'ph-cloud-sun', color: 'color-weather', label: 'nav.weather',
+        replace: [
+            { origId: 'home-hallasan-btn', subId: 'weather-sub-current', animClass: 'lost-sub-in-right', outClass: 'lost-sub-out-right' },
+            { origId: 'home-airport-btn',  subId: 'weather-sub-past',    animClass: 'lost-sub-in-right', outClass: 'lost-sub-out-right' },
+        ],
+        hide: ['home-festival-btn', 'home-lost-btn', 'home-reservation-btn', 'home-course-btn', 'home-food-btn', 'home-reward-btn'],
+    });
+    window.toggleWeatherExpand = weatherExpand.toggle;
+    window.expandWeatherGrid = weatherExpand.expand;
+    window.collapseWeatherGrid = weatherExpand.collapse;
+
+    // 날씨 서브 버튼 동작: 'current' = 실시간, 'past' = 과거 날씨 탭
+    window.goToWeather = function(view) {
+        window.collapseWeatherGrid();
+        if (window.showSection) window.showSection('weather');
+        if (window.switchWeatherView) window.switchWeatherView(view);
+    };
+
+    // 펼침은 한 번에 하나만: except 외에 열린 것을 모두 접는다
+    window.collapseAllHomeExpand = function(except) {
+        if (except !== 'lost' && window.collapseLostGrid) window.collapseLostGrid();
+        if (except !== 'res' && window.collapseReservationGrid) window.collapseReservationGrid();
+        if (except !== 'charter' && window.collapseCharterGrid) window.collapseCharterGrid();
+        if (except !== 'hallasan') hallasanExpand.collapse();
+        if (except !== 'weather') weatherExpand.collapse();
     };
 
     // 차량 서브 버튼 동작: 'carpool' = 拼车 달력 (기본 화면), 'fare' = 택시·버스 요금표, 'guide' = 包车 안내
