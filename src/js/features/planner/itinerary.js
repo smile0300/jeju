@@ -13,6 +13,7 @@ import { HIKES } from '../../../data/hikes.js';
 import { roadKm, driveMin, taxiFare, WALK_KM, WALK_KMH, BUS_FARE, HOTEL_BASE, AIRPORT } from '../../../data/taxi.js';
 import { openStatus } from '../eats-hours.js';
 import { CAFE_SPEND, rankBlocks } from './course-match.js';
+import { FLIGHT_ARRIVE, FLIGHT_DEPART } from './course-view.js';
 
 export const HOTELS = {
     jeju: HOTEL_BASE,
@@ -24,8 +25,8 @@ export const HOTELS = {
 };
 export const DEFAULT_SETTINGS = { hotel: 'jeju', arrive: 'am', depart: 'eve', pace: 3, move: 'bus' };
 
-const ARRIVE = { am: 10 * 60 + 30, pm: 14 * 60, eve: 18 * 60 + 30 };    // 비행기 도착 시각
-const DEPART = { am: 11 * 60, pm: 16 * 60, eve: 20 * 60 };              // 비행기 출발 시각
+const ARRIVE = FLIGHT_ARRIVE;    // 비행기 도착 시각 (추천 코스와 같은 기준)
+const DEPART = FLIGHT_DEPART;    // 비행기 출발 시각
 const DAY_START = { 1: 10 * 60, 3: 9 * 60 + 30, 5: 8 * 60 + 30 };
 const DAY_END = { 1: 19 * 60 + 30, 3: 20 * 60 + 30, 5: 21 * 60 + 30 };
 const MAX_VISITS = { 1: 3, 3: 5, 5: 7 };                                 // 식사를 뺀 하루 방문 수

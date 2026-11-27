@@ -2,7 +2,8 @@ import { tr, pick, escapeHtml } from './planner/strings.js';
 import { tp } from './planner/plan-strings.js';
 import { chipGroup, bindChips, copyText, flashLabel } from './planner/shared.js';
 import { BLOCKS, CONCEPTS, COMPANIONS, COURSES_DRAFT } from '../../data/courses.js';
-import { mapHtml, moveHtml, timelineHtml, fillMeals, blockLabel, nowBadge, busBadgeHtml, driveTotal, coverHtml, planCoverHtml, money, COURSE_HOTEL_KEYS } from './planner/course-view.js';
+import { mapHtml, moveHtml, timelineHtml, fillMeals, blockLabel, nowBadge, busBadgeHtml, driveTotal, coverHtml, planCoverHtml, money, COURSE_HOTEL_KEYS,
+    fitDay, transferDayHtml, hhmm, hotelLegs, FLIGHT_ARRIVE, FLIGHT_DEPART, ARRIVE_READY, DEPART_BEFORE } from './planner/course-view.js';
 import { rankBlocks, buildPlans, dayCost, isGoodMatch } from './planner/course-match.js';
 import { builderHtml, onBuilderChip, onBuilderClick, startFromBlock } from './planner/course-builder.js';
 import { wishAllBtnHtml } from './planner/wishlist.js';
@@ -20,8 +21,14 @@ const MOVE_BUDGET = { bus: 3, taxi: 4, charter: 4 };      // 이동수단 → �
 const PACE_VALUE = { relaxed: 1.5, normal: 3, packed: 4.5 };
 const WITH_PARTY = { solo: 1, couple: 2, friends: 3, parents: 3 };
 
+// 비행기 시각대: 2일 이상일 때만 묻는다 (첫날·마지막 날을 반나절로 잡기 위해)
+const FLIGHT_OPTS = ['am', 'pm', 'eve', 'unknown'];
+const flightLabel = (kind) => (v) => (v === 'unknown' ? tr('wiz.flight.unknown') : tr(`wiz.${kind}.${v}`));
+
 const STEPS = [
     { id: 'days', options: () => Array.from({ length: MAX_DAYS }, (_, i) => String(i + 1)), label: v => durationLabel(Number(v)) },
+    { id: 'arrive', when: () => state.answers.days !== '1', options: () => FLIGHT_OPTS, label: flightLabel('arrive') },
+    { id: 'depart', when: () => state.answers.days !== '1', options: () => FLIGHT_OPTS, label: flightLabel('depart') },
     { id: 'with', options: () => COMPANIONS, label: v => tr(`with.${v}`) },
     { id: 'hotel', options: () => [...COURSE_HOTEL_KEYS, 'none'], label: v => (v === 'none' ? tr('wiz.hotel.none') : tp(`plan.hotel.${v}`)) },
     { id: 'concepts', multi: true, options: () => [...CONCEPTS, 'any'], label: v => (v === 'any' ? tr('wiz.concept.any') : tr(`concept.${v}`)) },
@@ -51,9 +58,14 @@ const state = {
 };
 state.step = firstUnanswered(0);
 
+// 지금 물을 수 있는 질문인가 (당일치기면 비행기 시각은 묻지 않는다)
+function isActive(s) { return !s.when || s.when(); }
+function activeSteps() { return STEPS.filter(isActive); }
+
 function firstUnanswered(from) {
-    for (let i = from; i < STEPS.length; i++) if (state.answers[STEPS[i].id] === undefined) return i;
-    for (let i = 0; i < from; i++) if (state.answers[STEPS[i].id] === undefined) return i;
+    const open = (i) => isActive(STEPS[i]) && state.answers[STEPS[i].id] === undefined;
+    for (let i = from; i < STEPS.length; i++) if (open(i)) return i;
+    for (let i = 0; i < from; i++) if (open(i)) return i;
     return -1;
 }
 
@@ -75,6 +87,53 @@ const durationLabel = (d) => (d === 1 ? tr('common.daytrip') : tr('common.nights
 const shortTitle = (b) => pick(b.title).split(/[:：]/)[0].trim();
 const costText = (krw) => tr('course.cost', money(krw));
 
+/**
+ * 날짜별 하루 틀: 첫날은 공항에서 착륙 뒤 출발, 마지막 날은 이륙 2시간 전까지 공항 도착.
+ * 저녁 도착·오전 출발이면 그날은 코스 없이 이동만(skip). 비행기 시각을 모르면 오전 도착·저녁 출발로 본다.
+ * 가운데 날과 당일치기는 null (오전 10시 숙소 출발 → 숙소 복귀)
+ */
+function dayFrames() {
+    const D = days();
+    if (D < 2) return [null];
+    const a = FLIGHT_ARRIVE[state.answers.arrive] ? state.answers.arrive : 'am';
+    const d = FLIGHT_DEPART[state.answers.depart] ? state.answers.depart : 'eve';
+    return Array.from({ length: D }, (_, i) => {
+        if (i === 0) return { kind: 'arrive', from: 'airport', to: 'hotel', landAt: FLIGHT_ARRIVE[a], start: FLIGHT_ARRIVE[a] + ARRIVE_READY, skip: a === 'eve', assumed: a !== state.answers.arrive };
+        if (i === D - 1) return { kind: 'depart', from: 'hotel', to: 'airport', deadline: FLIGHT_DEPART[d] - DEPART_BEFORE, skip: d === 'am', assumed: d !== state.answers.depart };
+        return null;
+    });
+}
+const courseDays = () => dayFrames().filter(f => !f?.skip).length;
+
+/**
+ * 코스 일수만큼 고른 하루 코스를 여행 날짜에 놓는다 ('-' = 이동만 하는 날).
+ * 도착하는 날·떠나는 날에는 공항·숙소를 오가는 시간이 가장 짧은 코스를 놓고(우도는 배 시간 때문에 제외),
+ * 나머지는 원래 순서(섬 한 바퀴)대로 가운데 날에 채운다.
+ */
+function planDays(blocks) {
+    const frames = dayFrames();
+    const pool = [...blocks];
+    const keys = frames.map(f => (f?.skip ? '-' : null));
+    const endsMin = (k, f) => {
+        const h = hotelLegs(fitDay(BLOCKS[k], hotelKey(), f), hotelKey(), f);
+        return h ? (h.out.min || 0) + (h.back.min || 0) : Infinity;
+    };
+    frames.forEach((f, i) => {
+        if (!f || f.skip) return;
+        const cands = pool.filter(k => BLOCKS[k].transport !== 'udo');
+        if (!cands.length) return;
+        const best = cands.reduce((a, k) => (endsMin(k, f) < endsMin(a, f) ? k : a));
+        keys[i] = best;
+        pool.splice(pool.indexOf(best), 1);
+    });
+    return keys.map(k => k || pool.shift());
+}
+
+// 그 날 이름: 코스 짧은 제목, 이동만 하는 날은 '도착·체크인' / '체크아웃·공항'
+const dayName = (k, i, n) => (BLOCKS[k] ? shortTitle(BLOCKS[k]) : tr(i === 0 ? 'course.day_arrive_only' : 'course.day_depart_only'));
+// 저장된 일정 키와 지금 답이 어긋나면(날 수가 다르면) 틀 없이 보여준다
+const framesFor = (keys) => { const f = dayFrames(); return f.length === keys.length ? f : keys.map(() => null); };
+
 function answerText(step) {
     const v = state.answers[step.id];
     if (v === undefined) return '';
@@ -84,7 +143,7 @@ function answerText(step) {
 
 // ── 질문 화면 ──
 function summaryHtml() {
-    const chips = STEPS.map((s, i) => (state.answers[s.id] === undefined ? '' :
+    const chips = STEPS.map((s, i) => (!isActive(s) || state.answers[s.id] === undefined ? '' :
         `<button type="button" class="wiz-sum-chip${!state.done && i === state.step ? ' editing' : ''}" data-wiz-edit="${i}">${escapeHtml(answerText(s))}<i class="ph-bold ph-pencil-simple"></i></button>`)).join('');
     if (!chips) return '';
     return `<div class="wiz-sum">${chips}${state.done ? `<button type="button" class="wiz-reset" data-wiz-reset><i class="ph-bold ph-arrow-counter-clockwise"></i> ${tr('wiz.restart')}</button>` : ''}</div>`;
@@ -97,10 +156,11 @@ function questionHtml() {
     const cur = state.answers[s.id];
     const selected = s.multi ? (state.pendingConcepts || (cur && !cur.length ? ['any'] : cur) || [])
         : (cur === undefined ? [] : [cur]);
-    const answeredCount = STEPS.filter(x => state.answers[x.id] !== undefined).length;
+    const act = activeSteps();
+    const answeredCount = act.filter(x => state.answers[x.id] !== undefined).length;
     return `<section class="wiz-q" aria-live="polite">
-        <div class="wiz-progress" aria-hidden="true"><span style="width:${Math.round(answeredCount / STEPS.length * 100)}%"></span></div>
-        <p class="wiz-step">${i + 1} / ${STEPS.length}</p>
+        <div class="wiz-progress" aria-hidden="true"><span style="width:${Math.round(answeredCount / act.length * 100)}%"></span></div>
+        <p class="wiz-step">${act.indexOf(s) + 1} / ${act.length}</p>
         <h3 class="wiz-title">${escapeHtml(tr(`wiz.q.${s.id}`))}</h3>
         ${s.multi ? `<p class="wiz-sub">${escapeHtml(tr('wiz.q.concepts_sub', { n: MAX_CONCEPTS }))}</p>` : ''}
         <div class="wiz-opts">${chipGroup(`wiz_${s.id}`, options, { multi: !!s.multi, selected })}</div>
@@ -126,7 +186,7 @@ function finish() {
     state.done = true;
     state.step = -1;
     saveWiz();
-    logCourse('answers', state.answers, { skipped: STEPS.filter(s => state.answers[s.id] === undefined).map(s => s.id) });
+    logCourse('answers', state.answers, { skipped: activeSteps().filter(s => state.answers[s.id] === undefined).map(s => s.id) });
 }
 
 // ── 결과 ──
@@ -144,23 +204,28 @@ function blockCardHtml(key) {
 }
 
 function planCardHtml(plan, idx) {
-    const total = plan.reduce((sum, k) => sum + dayCost(BLOCKS[k], budget()), 0);
+    const frames = framesFor(plan);
+    const total = plan.reduce((sum, k, i) => (BLOCKS[k] ? sum + dayCost(fitDay(BLOCKS[k], hotelKey(), frames[i]), budget()) : sum), 0);
     return `<button type="button" class="pl-course-card" data-open="plan:${plan.join(',')}">
-        ${planCoverHtml(plan)}
+        ${planCoverHtml(plan.filter(k => BLOCKS[k]))}
         <span class="pl-course-tags"><span class="pl-tag">${durationLabel(plan.length)}</span><span class="pl-tag pl-tag-match">${tr('course.plan_alt', { n: idx + 1 })}</span></span>
         <span class="pl-course-days">${plan.map((k, i) =>
-            `<span class="pl-daychip">${tr('course.day', { n: i + 1 })} ${escapeHtml(shortTitle(BLOCKS[k]))}</span>`).join('')}</span>
+            `<span class="pl-daychip${BLOCKS[k] ? '' : ' pl-daychip-move'}">${frames[i] ? '<i class="ph-bold ph-airplane-tilt"></i>' : ''}${tr('course.day', { n: i + 1 })} ${escapeHtml(dayName(k, i, plan.length))}</span>`).join('')}</span>
         <span class="pl-course-cost">${tr('course.cost_total', money(total))}</span>
     </button>`;
 }
 
 function resultsHtml() {
-    const cards = days() === 1
+    // 여러 날: 첫날·마지막 날이 이동만 하는 날이면 그만큼 코스 수를 줄여 고른다
+    const n = days() === 1 ? 1 : courseDays();
+    const noTime = days() > 1 && n === 0;
+    const cards = days() === 1 || noTime
         ? rankBlocks(prefs()).slice(0, 6).map(blockCardHtml)
-        : buildPlans(days(), prefs(), PLAN_COUNT).map(planCardHtml);
+        : buildPlans(n, prefs(), PLAN_COUNT).map(planDays).map(planCardHtml);
     const charter = state.answers.move === 'charter'
         ? `<button type="button" class="res-submit-btn wiz-charter" data-charter=""><i class="ph-duotone ph-van"></i> <span>${tr('course.charter_cta')}</span></button>` : '';
     return `<h4 class="pl-list-head">${tr('course.result')}</h4>
+        ${noTime ? `<p class="pl-frame-note"><i class="ph-duotone ph-airplane-tilt"></i> ${tr('course.no_time')}</p>` : ''}
         <div class="pl-course-list">${cards.length ? cards.join('') : `<p class="pl-muted">${tr('course.empty')}</p>`}</div>
         ${charter}`;
 }
@@ -177,40 +242,66 @@ function listHtml() {
         </div>` : ''}`;
 }
 
+function frameNoteHtml(frame, shown, total) {
+    if (!frame) return '';
+    const base = frame.kind === 'arrive'
+        ? tr('course.frame.arrive', { t: hhmm(frame.landAt), s: hhmm(frame.start) })
+        : tr('course.frame.depart', { t: hhmm(frame.deadline) });
+    const trim = shown < total ? ` ${tr('course.frame.trim', { n: shown, m: total })}` : '';
+    const assumed = frame.assumed ? `<small>${tr('course.frame.assumed')}</small>` : '';
+    return `<p class="pl-frame-note"><i class="ph-duotone ph-airplane-tilt"></i> <span>${base}${trim}${assumed}</span></p>`;
+}
+
 function detailHtml() {
     const [type, id] = state.detail.split(':');
-    const keys = type === 'plan' ? id.split(',').filter(k => BLOCKS[k]) : [id];
+    const keys = type === 'plan' ? id.split(',').filter(k => BLOCKS[k] || k === '-') : [id];
     const isPlan = type === 'plan' && keys.length > 1;
+    const frames = isPlan ? framesFor(keys) : [null];
     const dayIdx = Math.min(state.detailDay, keys.length - 1);
-    const block = BLOCKS[keys[dayIdx]];
-    if (!block) return listHtml();
+    const key = keys[dayIdx];
+    const frame = frames[dayIdx];
+    if (!BLOCKS[key] && !isPlan) return listHtml();
 
-    const dayStops = block.stops.map(s => ({ k: 'stop', key: s.name.ko, name: s.name }));
-    const allPlanStops = isPlan
-        ? keys.flatMap(k => BLOCKS[k].stops.map(s => ({ k: 'stop', key: s.name.ko, name: s.name })))
-        : null;
-
-    return `
+    const head = `
         <button type="button" class="pl-link" data-back="1">← ${tr('course.back')}</button>
-        <h3 class="pl-detail-title">${escapeHtml(isPlan ? keys.map(k => shortTitle(BLOCKS[k])).join(' → ') : pick(block.title))}</h3>
+        <h3 class="pl-detail-title">${escapeHtml(isPlan ? keys.map((k, i) => dayName(k, i, keys.length)).join(' → ') : pick(BLOCKS[key].title))}</h3>
         ${isPlan ? `<div class="pl-filter">${chipGroup('detailDay',
-            keys.map((k, i) => ({ value: String(i), label: `${tr('course.day', { n: i + 1 })} · ${shortTitle(BLOCKS[k])}` })),
-            { selected: [String(dayIdx)] })}</div>
-            <p class="pl-detail-sub">${escapeHtml(pick(block.title))}</p>` : `<p class="pl-detail-sub">${escapeHtml(pick(block.summary))}</p>`}
-        <p class="pl-muted pl-hint"><i class="ph-duotone ph-info"></i> ${tr('course.notes')}</p>
-        ${coverHtml(keys[dayIdx], { eager: true })}
-        <p class="pl-course-cost">${costText(dayCost(block, budget()))} · ${tr(`course.pace.${block.pace || 3}`)}</p>
+            keys.map((k, i) => ({ value: String(i), label: `${tr('course.day', { n: i + 1 })} · ${dayName(k, i, keys.length)}` })),
+            { selected: [String(dayIdx)] })}</div>` : ''}`;
+
+    // 이동만 하는 날 (저녁 도착 / 오전 출발)
+    if (!BLOCKS[key]) {
+        const kind = frame?.kind || (dayIdx === 0 ? 'arrive' : 'depart');
+        const t = kind === 'arrive' ? (frame?.landAt ?? FLIGHT_ARRIVE.eve) : (frame?.deadline ?? FLIGHT_DEPART.am - DEPART_BEFORE);
+        return head + transferDayHtml(kind, hotelKey(), t);
+    }
+
+    const full = BLOCKS[key];
+    const block = fitDay(full, hotelKey(), frame);   // 도착하는 날·떠나는 날은 시간 안에 갈 수 있는 곳만
+    const stopItems = (b) => b.stops.map(s => ({ k: 'stop', key: s.name.ko, name: s.name }));
+    const dayStops = stopItems(block);
+    const allPlanStops = isPlan
+        ? keys.flatMap((k, i) => (BLOCKS[k] ? stopItems(fitDay(BLOCKS[k], hotelKey(), frames[i])) : []))
+        : null;
+    const realDays = keys.filter(k => BLOCKS[k]).length;
+
+    return `${head}
+        ${isPlan ? `<p class="pl-detail-sub">${escapeHtml(pick(full.title))}</p>` : `<p class="pl-detail-sub">${escapeHtml(pick(full.summary))}</p>`}
+        ${frameNoteHtml(frame, block.stops.length, full.stops.length)}
+        ${frame ? '' : `<p class="pl-muted pl-hint"><i class="ph-duotone ph-info"></i> ${tr('course.notes')}</p>`}
+        ${coverHtml(key, { eager: true })}
+        <p class="pl-course-cost">${costText(dayCost(block, budget()))} · ${tr(`course.pace.${full.pace || 3}`)}</p>
         ${mapHtml(block.stops)}
         <section class="pl-wish-intro">
             <div class="pl-wish-intro-text"><i class="ph-fill ph-heart"></i>
                 <span><strong>${tp('wish.intro_title')}</strong><small>${tp('wish.intro_desc')}</small></span></div>
-            ${isPlan ? wishAllBtnHtml(allPlanStops, { label: tp('wish.all_plan', { d: keys.length }), cls: 'wish-all-primary' }) : ''}
+            ${isPlan && realDays > 1 ? wishAllBtnHtml(allPlanStops, { label: tp('wish.all_plan', { d: keys.length }), cls: 'wish-all-primary' }) : ''}
             ${wishAllBtnHtml(dayStops)}
         </section>
-        ${moveHtml(block, { hotelKey: hotelKey(), party: state.party })}
-        ${timelineHtml(block, { meals: true, wish: true, hotelKey: hotelKey(), note: false })}
-        <button type="button" class="pl-link pl-center" data-build-from="${escapeHtml(keys[dayIdx])}"><i class="ph-duotone ph-pencil-simple-line"></i> ${tr('build.from_course')}</button>
-        <button type="button" class="res-submit-btn pl-mt" data-charter="${escapeHtml(block.region)}"><i class="ph-duotone ph-users-three"></i> <span>${tr('course.charter_cta')}</span></button>`;
+        ${moveHtml(block, { hotelKey: hotelKey(), party: state.party, day: frame })}
+        ${timelineHtml(block, { meals: true, wish: true, hotelKey: hotelKey(), note: false, day: frame })}
+        <button type="button" class="pl-link pl-center" data-build-from="${escapeHtml(key)}"><i class="ph-duotone ph-pencil-simple-line"></i> ${tr('build.from_course')}</button>
+        <button type="button" class="res-submit-btn pl-mt" data-charter="${escapeHtml(full.region)}"><i class="ph-duotone ph-users-three"></i> <span>${tr('course.charter_cta')}</span></button>`;
 }
 
 function onWizChip(name, values) {

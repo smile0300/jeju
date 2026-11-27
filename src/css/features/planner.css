@@ -1694,3 +1694,15 @@
 .pl-wish-intro-text small { font-size: 0.8rem; line-height: 1.45; color: #4E5968; }
 .pl-wish-intro .wish-all-btn { margin: 10px 0 0; background: #fff; }
 .pl-wish-intro .wish-all-btn + .wish-all-btn { margin-top: 6px; }
+
+/* 도착하는 날·떠나는 날 (course.js frameNoteHtml / transferDayHtml) */
+.pl-frame-note {
+    display: flex; gap: 8px; align-items: flex-start; margin: 10px 0 0; padding: 10px 12px;
+    border-radius: 12px; background: #E7F5FF; color: #1864AB; font-size: 0.85rem; line-height: 1.5;
+}
+.pl-frame-note > i { font-size: 1.15rem; flex-shrink: 0; margin-top: 1px; }
+.pl-frame-note small { display: block; margin-top: 2px; color: #4E5968; font-size: 0.78rem; }
+.pl-stop-airport .pl-stop-no { background: #E7F5FF; color: #1971C2; }
+.pl-stop-airport .pl-stop-time { margin-left: auto; font-size: 0.8rem; color: #1971C2; }
+.pl-daychip i { margin-right: 3px; color: #1971C2; }
+.pl-daychip-move { opacity: 0.75; }

@@ -6,7 +6,7 @@ import { tp } from './plan-strings.js';
 import { BLOCKS, STOP_POS, STOP_TYPES, COVERS, isInSeason } from '../../../data/courses.js';
 import { JEJU_MAP, projectLatLng } from '../../../data/jeju-map.js';
 import { STOP_PHOTOS } from '../../../data/stop-photos.js';
-import { roadKm, taxiFare, krwToCny, driveMin, WALK_KM, WALK_KMH, HOTEL_BASE, BUS_FARE } from '../../../data/taxi.js';
+import { roadKm, taxiFare, krwToCny, driveMin, WALK_KM, WALK_KMH, HOTEL_BASE, BUS_FARE, AIRPORT } from '../../../data/taxi.js';
 import { wishBtnHtml } from './wishlist.js';
 import { openDriverCard, openEatDetailModal } from './travel-card.js';
 
@@ -19,6 +19,12 @@ export const COURSE_HOTELS = {
     east: [33.4600, 126.9300],
 };
 export const COURSE_HOTEL_KEYS = Object.keys(COURSE_HOTELS);
+
+// 비행기 시각대 → 대표 시각(분). 추천 코스와 여행 일정(itinerary.js)이 같은 기준을 쓴다
+export const FLIGHT_ARRIVE = { am: 10 * 60 + 30, pm: 14 * 60, eve: 18 * 60 + 30 };   // 착륙
+export const FLIGHT_DEPART = { am: 11 * 60, pm: 16 * 60, eve: 20 * 60 };            // 이륙
+export const ARRIVE_READY = 50;      // 착륙 → 공항을 나서기까지 (입국 심사·짐 찾기)
+export const DEPART_BEFORE = 120;    // 국제선은 이륙 2시간 전까지 공항 도착
 
 const TYPE_ICON = { spot: 'ph-map-pin', cafe: 'ph-coffee', photo: 'ph-camera' };
 
@@ -160,14 +166,21 @@ export function legInfo(block, i) {
     return leg;
 }
 
-export function hotelLegs(block, hotelKey = 'jeju') {
+/** 숙소(또는 공항) → 첫 장소, 마지막 장소 → 숙소(또는 공항).
+ *  day = { from: 'airport'|'hotel', to: 'airport'|'hotel' } 이면 도착하는 날·떠나는 날의 공항 구간 */
+export function hotelLegs(block, hotelKey = 'jeju', day = null) {
     const stops = block.stops;
     const base = hotelPos(hotelKey);
     const first = posOf(stops[0]);
     const backFrom = block.transport === 'udo' ? first : posOf(stops[stops.length - 1]);
     if (!first || !backFrom) return null;
-    return { out: taxiLeg(base, first), back: taxiLeg(backFrom, base) };
+    const from = day?.from === 'airport' ? AIRPORT : base;
+    const to = day?.to === 'airport' ? AIRPORT : base;
+    return { out: taxiLeg(from, first), back: taxiLeg(backFrom, to) };
 }
+
+/** 공항 ↔ 숙소 한 구간 (저녁 도착·오전 출발처럼 코스 없이 이동만 하는 날) */
+export const airportLeg = (hotelKey = 'jeju') => taxiLeg(AIRPORT, hotelPos(hotelKey));
 
 const LEG_ICON = { walk: 'ph-person-simple-walk', taxi: 'ph-taxi', ferry: 'ph-boat', island: 'ph-bus' };
 
@@ -183,9 +196,9 @@ export function legHtml(leg, { back = false, viaFerry = false } = {}) {
     return `<div class="pl-leg${back ? ' pl-leg-back' : ''}"><i class="ph-duotone ${icon}"></i> ${prefix}${text}</div>`;
 }
 
-export function dayTransport(block, hotelKey = 'jeju') {
+export function dayTransport(block, hotelKey = 'jeju', day = null) {
     const legs = block.stops.slice(0, -1).map((_, i) => legInfo(block, i));
-    const hotel = hotelLegs(block, hotelKey);
+    const hotel = hotelLegs(block, hotelKey, day);
     if (!hotel || legs.some(l => !l)) return null;
     const all = [hotel.out, hotel.back, ...legs];
     const rides = all.filter(l => l.kind === 'taxi').length;
@@ -194,8 +207,8 @@ export function dayTransport(block, hotelKey = 'jeju') {
     return { taxi: all.reduce((sum, l) => sum + (l.fare || 0), 0), rides, bus: rides * BUS_FARE, minutes, busMin };
 }
 
-export function moveHtml(block, { compact = false, hotelKey = 'jeju', party = 2 } = {}) {
-    const t = dayTransport(block, hotelKey);
+export function moveHtml(block, { compact = false, hotelKey = 'jeju', party = 2, day = null } = {}) {
+    const t = dayTransport(block, hotelKey, day);
     if (!t) return '';
     const { taxi: total, rides, bus: busTotal, busMin } = t;
     const isUdo = block.transport === 'udo';
@@ -260,14 +273,29 @@ const hotelItem = (legBelow, hotelKey = 'jeju') => `
             ${legBelow}
         </li>`;
 
+// 공항 칸: 도착하는 날 맨 위(착륙 시각) · 떠나는 날 맨 아래(공항 도착 기한)
+export const airportItem = (legBelow, note = '') => `
+        <li class="pl-stop pl-stop-hotel pl-stop-airport">
+            <div class="pl-stop-head">
+                <span class="pl-stop-no"><i class="ph-duotone ph-airplane-tilt"></i></span>
+                <span class="pl-stop-name">${escapeHtml(tr('course.airport'))}</span>
+                ${note ? `<b class="pl-stop-time">${escapeHtml(note)}</b>` : ''}
+            </div>
+            ${legBelow}
+        </li>`;
+const endItem = (kind, legBelow, hotelKey, note) => (kind === 'airport' ? airportItem(legBelow, note) : hotelItem(legBelow, hotelKey));
+
 // ── 코스 속 식사: 점심·저녁 자리에 가까운 식당 + 앱 내 상세 모달 & 다른 식당 보기 ──
 const DAY_START = 10 * 60;
 const LUNCH_AT = 12 * 60;
 
-function mealSlots(block, hotelKey = 'jeju') {
+// day.start: 그날 출발 시각(분). 오후에 시작하면 점심을, 공항으로 끝나는 날은 저녁을 넣지 않는다
+const LUNCH_LATEST = 13 * 60 + 30;
+function mealSlots(block, hotelKey = 'jeju', day = null) {
     const stops = block.stops;
-    const hotel = hotelLegs(block, hotelKey);
-    let t = DAY_START + (hotel?.out?.min || 0);
+    const hotel = hotelLegs(block, hotelKey, day);
+    const start = day?.start ?? DAY_START;
+    let t = start + (hotel?.out?.min || 0);
     let lunch = -1, lunchAt = 0;
     for (let i = 0; i < stops.length; i++) {
         t += stops[i].stayMin || 0;
@@ -276,14 +304,21 @@ function mealSlots(block, hotelKey = 'jeju') {
         t += leg?.min || (leg?.kind === 'ferry' ? 15 : 0);
     }
     const last = stops.length - 1;
-    if (lunch < 0) { lunch = last; lunchAt = Math.max(t, LUNCH_AT); }
-    return { lunch, lunchAt, dinner: lunch === last || block.transport === 'udo' ? -1 : last };
+    const toAirport = day?.to === 'airport';
+    if (start > LUNCH_LATEST) lunch = -1;
+    else if (lunch < 0) {
+        lunchAt = Math.max(t, LUNCH_AT);
+        // 공항으로 가는 날: 공항 기한 전에 한 시간 먹고 갈 여유가 있을 때만 점심
+        const back = hotel?.back?.min || 0;
+        lunch = !toAirport || (day.deadline && lunchAt + LUNCH_MIN + back <= day.deadline) ? last : -1;
+    }
+    return { lunch, lunchAt, dinner: lunch === last || block.transport === 'udo' || toAirport ? -1 : last };
 }
 
 const LUNCH_MIN = 60;
-function arrivals(block, slots, hotelKey = 'jeju') {
+function arrivals(block, slots, hotelKey = 'jeju', day = null) {
     const stops = block.stops;
-    let t = DAY_START + (hotelLegs(block, hotelKey)?.out?.min || 0);
+    let t = (day?.start ?? DAY_START) + (hotelLegs(block, hotelKey, day)?.out?.min || 0);
     return stops.map((st, i) => {
         const at = t;
         t += st.stayMin || 0;
@@ -294,7 +329,28 @@ function arrivals(block, slots, hotelKey = 'jeju') {
     });
 }
 
-const hhmm = (min) => `${Math.floor(min / 60)}:${String(Math.round(min % 60 / 10) * 10 % 60).padStart(2, '0')}`;
+/**
+ * 도착하는 날·떠나는 날: 시간 안에 갈 수 있는 앞쪽 장소만 남긴다.
+ * day = { from, to, start, deadline } — deadline은 공항 도착 기한(분). 없으면 마지막 장소에 18시 전 도착이면 된다.
+ * 우도 코스는 배 시간 때문에 자르지 않는다.
+ */
+const LAST_ARRIVE = 17 * 60;   // 관광지 대부분이 17:30쯤 입장을 마감한다
+export function fitDay(block, hotelKey = 'jeju', day = null) {
+    if (!day || block.transport === 'udo') return block;
+    for (let n = block.stops.length; n > 1; n--) {
+        const b = { ...block, stops: block.stops.slice(0, n) };
+        const slots = mealSlots(b, hotelKey, day);
+        const at = arrivals(b, slots, hotelKey, day);
+        const last = n - 1;
+        const leave = at[last] + (b.stops[last].stayMin || 0) + (slots.lunch === last ? LUNCH_MIN : 0);
+        const back = hotelLegs(b, hotelKey, day)?.back?.min || 0;
+        if (at[last] <= LAST_ARRIVE && (!day.deadline || leave + back <= day.deadline)) return b;
+    }
+    return { ...block, stops: block.stops.slice(0, 1) };
+}
+
+// 10분 단위로 반올림 (10:55 → 11:00, 시가 넘어가는 것까지)
+export const hhmm = (min) => { const m = Math.round(min / 10) * 10; return `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`; };
 
 let MEALS = null;
 let FULL_EATS = null;
@@ -387,12 +443,12 @@ export function fillMeals(root) {
 
 const mealSlot = (kind, stop, at) => `<div class="pl-meal" data-meal="${kind}" data-meal-stop="${escapeHtml(stop.name.ko)}" data-meal-at="${at}" hidden></div>`;
 
-export function timelineHtml(block, { extraClass = '', meals = false, wish = false, hotelKey = 'jeju', note = true } = {}) {
+export function timelineHtml(block, { extraClass = '', meals = false, wish = false, hotelKey = 'jeju', note = true, day = null } = {}) {
     const stops = block.stops;
-    const hotel = hotelLegs(block, hotelKey);
+    const hotel = hotelLegs(block, hotelKey, day);
     const isUdo = block.transport === 'udo';
-    const slots = meals ? mealSlots(block, hotelKey) : null;
-    const times = arrivals(block, slots || mealSlots(block, hotelKey), hotelKey);
+    const slots = meals ? mealSlots(block, hotelKey, day) : null;
+    const times = arrivals(block, slots || mealSlots(block, hotelKey, day), hotelKey, day);
     const mealAfter = (i) => (!slots ? '' : i === slots.lunch ? mealSlot('lunch', stops[i], slots.lunchAt)
         : i === slots.dinner ? mealSlot('dinner', stops[i], 0) : '');
     const items = stops.map((s, i) => {
@@ -424,9 +480,9 @@ export function timelineHtml(block, { extraClass = '', meals = false, wish = fal
 
     return `${note ? `<p class="pl-muted pl-time-note"><i class="ph-duotone ph-clock"></i> ${tr('course.time_note')}</p>` : ''}
     <ol class="pl-timeline ${extraClass}">
-        ${hotel ? hotelItem(legHtml(hotel.out), hotelKey) : ''}
+        ${hotel ? endItem(day?.from, legHtml(hotel.out), hotelKey, day?.landAt ? tr('course.land_at', { t: hhmm(day.landAt) }) : '') : ''}
         ${items}
-        ${hotel ? hotelItem('', hotelKey) : ''}
+        ${hotel ? endItem(day?.to, '', hotelKey, day?.deadline ? tr('course.airport_by', { t: hhmm(day.deadline) }) : '') : ''}
     </ol>`;
 }
 
@@ -446,4 +502,13 @@ if (typeof document !== 'undefined') {
         const pos = STOP_POS[nameKo];
         openDriverCard({ nameKo, nameLocal: btn.dataset.stopLocal || '', lat: pos?.[0], lng: pos?.[1] });
     });
+}
+
+/** 코스 없이 이동만 하는 날: 저녁에 도착해 숙소로 / 오전 비행기라 숙소에서 공항으로. t = 착륙 시각 또는 공항 도착 기한(분) */
+export function transferDayHtml(kind, hotelKey = 'jeju', t = 0) {
+    const leg = legHtml(airportLeg(hotelKey));
+    const air = (legBelow) => airportItem(legBelow, tr(kind === 'arrive' ? 'course.land_at' : 'course.airport_by', { t: hhmm(t) }));
+    const list = kind === 'arrive' ? air(leg) + hotelItem('', hotelKey) : hotelItem(leg, hotelKey) + air('');
+    return `<p class="pl-frame-note"><i class="ph-duotone ph-airplane-tilt"></i> ${tr(`course.transfer.${kind}`)}</p>
+    <ol class="pl-timeline">${list}</ol>`;
 }
