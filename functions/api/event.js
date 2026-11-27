@@ -12,6 +12,21 @@ const text = (v, max) => String(v ?? '').replace(/[\u0000-\u0008\u000B\u000C\u00
 
 export async function onRequest({ request, env }) {
   if (request.method === 'OPTIONS') return corsPreflight();
+  // GET /api/event?busy=1 → 세팅 대행이 다 찬 날짜 (날짜만, 개인정보 없음). 1분 캐시
+  if (request.method === 'GET' && new URL(request.url).searchParams.has('busy')) {
+    const target = gasUrl(env);
+    if (!target) return jsonResponse({ result: 'error', full: [] }, 500);
+    const body = { type: 'event_busy', setupPerDay: PARTY_SETUP.perDay };
+    if (env.GAS_SHARED_SECRET) body._secret = env.GAS_SHARED_SECRET;
+    try {
+      const res = await fetch(target, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      const j = await res.json().catch(() => ({}));
+      const full = (Array.isArray(j.full) ? j.full : []).filter(d => /^\d{4}-\d{2}-\d{2}$/.test(String(d)));
+      return jsonResponse({ result: 'success', full }, 200, { 'Cache-Control': 'public, max-age=60' });
+    } catch (e) {
+      return jsonResponse({ result: 'error', full: [] }, 502);
+    }
+  }
   if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
 
   const raw = await request.text();
@@ -40,6 +55,9 @@ export async function onRequest({ request, env }) {
   // 주류는 시세라 금액 없이 받는다. 원하는 술은 시트 열을 늘리지 않고 요청사항 맨 앞에 붙인다
   const liquor = row.options.includes('liquor') ? text(d.liquor, 200) : '';
   if (liquor) row.note = `[주류 희망: ${liquor} · 시세 견적 필요]` + (row.note ? ' / ' + row.note : '');
+  // 화면이 만든 예약번호(위챗 문의 때 찾는 용도)를 요청사항 맨 앞에
+  const bookingNo = /^P\d{4}-\d{4}$/.test(String(d.bookingNo || '')) ? String(d.bookingNo) : '';
+  if (bookingNo) row.note = `[${bookingNo}]` + (row.note ? ' ' + row.note : '');
 
   const q = partyQuote(row.options, method === 'setup');
   // 시트는 운영자가 읽으므로 한국어 이름도 같이 보낸다

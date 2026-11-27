@@ -3,6 +3,8 @@ import {
     PARTY_BASE, PARTY_OPTIONS, PARTY_COMBOS, PARTY_METHODS, PARTY_SETUP,
     PARTY_TEXT, COUPLE_MINUTES, KRW_PER_CNY, partyQuote,
 } from '../../data/party-box.js';
+import { newBookingNo, saveBooking, bookingCardHtml, myBookingsHtml, bindBookingButtons } from '../core/my-bookings.js';
+import { tripChipsHtml } from '../core/trip-days.js';
 
 // 기념일 셀프 파티박스 (BETA)
 // 3단계: ① 상품(커플·우정·가족 완성 사진 카드) 고르기 → ② 추가 물품(사진 카드) 고르기 → ③ 예약 정보 입력·접수
@@ -28,7 +30,22 @@ const state = {
     surprise: true,
     agree: false,
     sending: false,
+    busy: [],                 // 세팅 대행이 다 찬 날짜 (GET /api/event?busy)
+    busyAt: 0,
 };
+
+/** 세팅 대행 마감일 받아오기 (1분 안에는 다시 묻지 않음). 실패하면 빈 목록 → 서버 접수 때 한 번 더 막힌다 */
+async function fetchBusy(force = false) {
+    if (!force && Date.now() - state.busyAt < 60000) return;
+    state.busyAt = Date.now();
+    try {
+        const res = await fetch(`${CONFIG.PROXY_URL || ''}/api/event?busy=1`, { signal: AbortSignal.timeout(8000) });
+        const j = await res.json();
+        state.busy = Array.isArray(j.full) ? j.full : [];
+        if (state.step === 3) rerender();
+    } catch (e) { /* 무시 */ }
+}
+const dateBusy = () => state.method === 'setup' && state.busy.includes(String(state.fields['pb-date'] || ''));
 
 const optByKey = (k) => PARTY_OPTIONS.find(o => o.key === k);
 /** 상품에 든 것 + 추가로 고른 것 = 실제 주문 옵션 */
@@ -214,13 +231,16 @@ function runningHtml() {
 
 function step1Html() {
     const t = T();
-    return `<div class="pb-beta"><span class="pb-beta-tag">BETA</span><span>${esc(t.beta)}</span></div>
+    return `${myBookingsHtml(b => b.kind === 'party')}
+        <div class="pb-beta"><span class="pb-beta-tag">BETA</span><span>${esc(t.beta)}</span></div>
         <h3 class="pb-step-title">${esc(t.pkg_title)}</h3>
         <p class="pb-note pb-lead">${esc(t.kind)}</p>
         ${WHO.map(pkgCard).join('')}
         <ul class="pb-points"><li>${esc(t.point1)}</li><li>${esc(t.point2)}</li><li>${esc(t.point3)}</li></ul>
         <div class="pb-sub">${esc(t.base_note)}</div>
-        ${baseHtml()}`;
+        ${baseHtml()}
+        <div class="pb-sub">${esc(t.how_title)}</div>
+        <ol class="pb-how">${[t.how1, t.how2, t.how3, t.how4].map(x => `<li>${esc(x)}</li>`).join('')}</ol>`;
 }
 
 function step2Html() {
@@ -248,6 +268,8 @@ function step3Html() {
 
         <form id="pb-form" class="reservation-form" novalidate>
             ${field('pb-date', t.date, { type: 'date', required: true })}
+            ${tripChipsHtml('pb-date', { selected: state.fields['pb-date'] || '', busy: state.method === 'setup' ? state.busy : [] })}
+            ${dateBusy() ? `<p class="pb-warn">${esc(t.busy_warn)}</p>` : ''}
             ${field('pb-checkin', t.checkin, { type: 'time' })}
             <div class="form-group">
                 <label class="form-label required">${esc(t.stay_type)}</label>
@@ -265,6 +287,7 @@ function step3Html() {
 
             <div id="pb-summary" class="pb-summary">${summaryHtml()}</div>
 
+            <p class="pb-note pb-clean">${esc(t.clean)}</p>
             <label class="pb-check pb-agree"><input type="checkbox" id="pb-agree" ${state.agree ? 'checked' : ''}> <span>${esc(t.agree)}</span></label>
             <div id="pb-status" class="form-status" style="display:none;"></div>
             <button type="submit" id="pb-submit" class="res-submit-btn"${state.sending ? ' disabled' : ''}>
@@ -311,7 +334,9 @@ async function submit() {
     if (state.stayType === 'hotel') need.push(v('pb-booker'));
     if (hasOpt('liquor')) need.push(v('pb-liquor'));
     if (need.some(x => !x)) return status(t.fill, 'error');
+    if (dateBusy()) return status(t.busy_warn, 'error');
     if (!state.agree) return status(t.agree_err, 'error');
+    const bookingNo = newBookingNo('P');
 
     state.sending = true;
     const btn = document.getElementById('pb-submit');
@@ -323,6 +348,7 @@ async function submit() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 type: 'event_order',
+                bookingNo,
                 who: state.who,
                 options: orderKeys(),
                 method: state.method,
@@ -341,9 +367,19 @@ async function submit() {
         const json = await res.json().catch(() => ({}));
         if (json.result === 'success') {
             status(t.success, 'success');
+            const c = PARTY_COMBOS[state.who];
+            const names = (lg) => [c.name[lg] || c.name.zh, ...[...state.extras].map(k => optByKey(k).name[lg] || optByKey(k).name.zh)].join(' + ');
+            const method = state.method === 'setup' ? PARTY_SETUP.name : PARTY_METHODS.find(m => m.key === state.method)?.name;
+            const booking = {
+                no: bookingNo, kind: 'party', type: t.title,
+                date: v('pb-date'), time: v('pb-checkin'), stay: v('pb-stay'), booker: v('pb-booker'), wechat: v('pb-wechat'),
+                item: names(lang()) + (method ? ` · ${pick(method)}` : ''),
+                ko: { type: '기념일 파티박스', item: names('ko') + (method ? ` · ${method.ko}` : '') },
+            };
+            saveBooking(booking);
             const qr = document.getElementById('pb-qr');
             if (qr) {
-                qr.innerHTML = `<p class="res-wechat-qr-title">${esc(t.qr)}</p>
+                qr.innerHTML = `${bookingCardHtml(booking)}<p class="res-wechat-qr-title">${esc(t.qr)}</p>
                     <img src="/assets/wechat_qr.png" alt="WeChat QR" class="res-wechat-qr-img" loading="lazy">
                     <p class="res-wechat-qr-hint">${esc(t.qr_hint)}</p>`;
                 qr.style.display = 'block';
@@ -359,6 +395,7 @@ async function submit() {
             if (ag) ag.checked = false;
         } else if (json.message === 'setup_full') {
             status(t.setup_full, 'error');
+            fetchBusy(true);
         } else {
             throw new Error(json.message || 'error');
         }
@@ -392,6 +429,8 @@ function bind() {
         }
         const go = e.target.closest('[data-go]');
         if (go) return goStep(Number(go.dataset.go));
+        const day = e.target.closest('[data-trip-day]');
+        if (day) { state.fields['pb-date'] = day.dataset.tripDay; return rerender(); }
         const opt = e.target.closest('[data-opt]');
         if (opt) {
             const k = opt.dataset.opt;
@@ -409,7 +448,12 @@ function bind() {
 
     root.addEventListener('change', (e) => {
         const el = e.target;
-        if (el.name === 'pb-method') { state.method = el.value; return rerender(); }
+        if (el.name === 'pb-method') {
+            state.method = el.value;
+            if (el.value === 'setup') fetchBusy();
+            return rerender();
+        }
+        if (el.id === 'pb-date') { state.fields['pb-date'] = el.value; return rerender(); }
         if (el.name === 'pb-way') { state.setupWay = el.value; return rerender(); }
         if (el.id === 'pb-surprise') state.surprise = el.checked;
         if (el.id === 'pb-agree') state.agree = el.checked;
@@ -429,7 +473,14 @@ function bind() {
 function enter() {
     render();
     bind();
+    bindBookingButtons();
+    fetchBusy();
 }
+
+// 내 예약을 지우면 1단계 목록 다시 그리기
+window.addEventListener('jeju:bookings', () => {
+    if (state.step === 1 && document.getElementById('party')?.classList.contains('active')) rerender();
+});
 
 window.partyApp = { enter };
 // 홈 '기념일 이벤트' 버튼 → 예약 그리드를 접고 파티박스 화면으로

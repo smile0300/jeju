@@ -1,0 +1,53 @@
+/* ===== 예약 확인 카드 · 내 예약 · 여행 날짜 칩 — src/js/core/my-bookings.js, trip-days.js ===== */
+
+/* 확인 카드 */
+.bk-card {
+    display: grid; gap: 4px; padding: 14px; margin: 0 0 14px; text-align: left;
+    border-radius: 16px; background: var(--bg-card, #fff); border: 1.5px solid #10B981;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.12);
+}
+.bk-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 2px; }
+.bk-type { font-weight: 800; font-size: 0.92rem; color: var(--label-primary); }
+.bk-status { padding: 2px 8px; border-radius: 999px; background: #ECFDF5; color: #047857; font-size: 0.7rem; font-weight: 800; white-space: nowrap; }
+.bk-no { display: flex; align-items: center; gap: 8px; padding: 8px 10px; margin: 2px 0 4px; border-radius: 10px; background: var(--fill-quaternary, #f4f5f7); }
+.bk-no span { font-size: 0.75rem; color: var(--label-secondary); }
+.bk-no b { flex: 1; font-size: 1.05rem; letter-spacing: 0.5px; color: var(--label-primary); font-variant-numeric: tabular-nums; }
+.bk-copy, .bk-remove {
+    min-height: 32px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--separator);
+    background: var(--bg-card, #fff); color: var(--label-secondary); font: inherit; font-size: 0.75rem; font-weight: 700; cursor: pointer;
+}
+.bk-row { display: flex; justify-content: space-between; gap: 12px; font-size: 0.82rem; line-height: 1.5; }
+.bk-row span { flex-shrink: 0; color: var(--label-secondary); }
+.bk-row b { min-width: 0; text-align: right; font-weight: 700; color: var(--label-primary); word-break: break-word; }
+.bk-ko { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--separator); display: grid; gap: 2px; }
+.bk-ko-title { margin: 0 0 2px; font-size: 0.72rem; font-weight: 800; color: #047857; }
+.bk-tip { margin: 6px 0 0; font-size: 0.72rem; color: var(--label-tertiary, #9aa0a6); line-height: 1.45; }
+.bk-remove { justify-self: end; margin-top: 4px; }
+
+/* 내 예약 (접이식) */
+.bk-mine { margin: 0 0 14px; border-radius: 14px; background: var(--fill-quaternary, #f4f5f7); padding: 0 10px; }
+.bk-mine summary {
+    display: flex; align-items: center; gap: 6px; min-height: 46px; cursor: pointer; list-style: none;
+    font-weight: 800; font-size: 0.9rem; color: var(--label-primary);
+}
+.bk-mine summary::-webkit-details-marker { display: none; }
+.bk-count { padding: 0 7px; border-radius: 999px; background: #10B981; color: #fff; font-size: 0.72rem; line-height: 1.6; }
+.bk-mine[open] { padding-bottom: 2px; }
+.bk-mine .bk-card { box-shadow: none; border-width: 1px; }
+
+/* 여행 날짜 칩 */
+.trip-days { margin: -6px 0 14px; }
+.trip-days-title { display: block; margin-bottom: 6px; font-size: 0.74rem; font-weight: 700; color: var(--label-secondary); }
+.trip-days-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.trip-day {
+    display: inline-flex; align-items: center; gap: 4px; min-height: 36px; padding: 0 11px; border-radius: 999px;
+    border: 1px solid var(--separator); background: var(--bg-card, #fff); color: var(--label-primary);
+    font: inherit; font-size: 0.8rem; font-weight: 700; cursor: pointer;
+}
+.trip-day.on { border-color: #2563EB; background: #EFF6FF; color: #1D4ED8; }
+.trip-day.full { opacity: 0.55; cursor: not-allowed; text-decoration: line-through; }
+.trip-day small { font-size: 0.66rem; color: #B91C1C; text-decoration: none; }
+
+/* 식당 예약 → 맛집 가는 길 */
+.res-eats-hint { display: inline-block; margin-top: 6px; font-size: 0.8rem; font-weight: 700; color: #2563EB; text-decoration: none; }
+.res-eats-hint[hidden] { display: none; }

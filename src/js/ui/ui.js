@@ -154,6 +154,7 @@ export function showSection(sectionId, pushHistory = true) {
     // 예약 유형 드롭다운은 진입할 때마다 현재 유형(currentReservationType)으로 갱신해야 한다.
     // 최초 1회 가드 안에 두면 두 번째 진입부터 이전 유형이 그대로 남는다.
     if (sectionId === 'reservation' && window.initReservationSection) window.initReservationSection();
+    if (sectionId === 'food' && window.initBookingExtras) window.initBookingExtras();
 
     // 여행 일정 · 추천 코스 · 차량 대절 화면은 들어올 때마다 현재 언어·주소 기준으로 다시 그린다
     if (sectionId === 'trip') window.tripApp?.enter();

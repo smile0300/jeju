@@ -150,6 +150,7 @@ function doPost(e) {
     if (data.type === 'lost_plan') return handleLostPlan_(data);
     if (data.type === 'reservation') return handleReservation_(data);
     if (data.type === 'event_order') return handleEventOrder_(data);
+    if (data.type === 'event_busy') return handleEventBusy_(data);
     if (data.type === 'feature' || data.type === 'customer_service' || data.type === 'cctv_apply') {
       return handleSimpleForm_(data);
     }
@@ -784,6 +785,30 @@ var EVENT_STAY_KO = { hotel: '호텔', airbnb: '에어비앤비·민박', other:
 
 function eventDay_(v) {
   return v instanceof Date ? Utilities.formatDate(v, 'Asia/Seoul', 'yyyy-MM-dd') : String(v || '').trim().slice(0, 10);
+}
+
+/**
+ * 세팅 대행이 다 찬 날짜 목록 (오늘 이후) — 파티박스 화면 날짜 칩에 '마감' 표시용.
+ * 개인정보 없이 날짜만 돌려준다. 세는 기준은 handleEventOrder_ 와 같다 (취소 건 제외).
+ */
+function handleEventBusy_(data) {
+  var sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName('EventOrder');
+  if (!sheet) return json_({ result: 'success', full: [] });
+  var rows = sheet.getDataRange().getValues();
+  var headers = rows[0] || [];
+  var cDay = headers.indexOf('이용일'), cWay = headers.indexOf('받는방법'), cSt = headers.indexOf('진행');
+  var perDay = Number(data.setupPerDay) || 1;
+  var today = Utilities.formatDate(new Date(), 'Asia/Seoul', 'yyyy-MM-dd');
+  var count = {};
+  for (var i = 1; i < rows.length; i++) {
+    var day = eventDay_(rows[i][cDay]);
+    if (day < today) continue;
+    if (String(rows[i][cWay]).indexOf('세팅 대행') === -1) continue;
+    if (/취소/.test(String(rows[i][cSt] || ''))) continue;
+    count[day] = (count[day] || 0) + 1;
+  }
+  var full = Object.keys(count).filter(function (d) { return count[d] >= perDay; }).sort();
+  return json_({ result: 'success', full: full });
 }
 
 function handleEventOrder_(data) {
