@@ -119,7 +119,7 @@ html[lang="ko"] .eat-beta { word-break: keep-all; } /* 중국어에 keep-all을 
 .eat-more[open] .eat-more-chev { transform: rotate(180deg); }
 .eat-detail { display: flex; flex-direction: column; gap: 8px; padding-top: 6px; }
 .eat-detail > * { margin-top: 0; }
-.eat-detail .eat-tools { grid-template-columns: repeat(2, 1fr); }
+.eat-detail .eat-tools { grid-template-columns: repeat(3, 1fr); }
 
 .eat-result-head {
     display: flex;
@@ -327,3 +327,18 @@ html[lang="ko"] .eat-beta { word-break: keep-all; } /* 중국어에 keep-all을 
 .ez-label text { font-size: calc(30px * var(--k, 1)); font-weight: 800; fill: #343A40; text-anchor: middle; paint-order: stroke; stroke: #fff; stroke-width: calc(6px * var(--k, 1)); stroke-linejoin: round; }
 .ez-label .ez-n { fill: #E8590C; font-size: calc(34px * var(--k, 1)); }
 .ez-label.ez-empty { opacity: 0.4; }
+
+/* 여행 중·후 편의: 내 주변 버튼·거리, 정보 부족 안내, 가봤어요, 결과 안내 줄 */
+.eat-near-btn { flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px; min-height: 42px; padding: 0 10px; border: 1px solid var(--separator); border-radius: 12px; background: var(--bg-card); color: var(--label-primary); font: inherit; font-size: 0.82rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
+.eat-near-btn.active { border-color: var(--accent); background: var(--accent); color: #fff; }
+.eat-dist { display: inline-flex; align-items: center; gap: 2px; color: var(--accent-active); font-weight: 800; }
+.eat-dist i { font-size: 0.75rem; }
+.eat-visited { display: inline-block; padding: 1px 6px; border-radius: 6px; background: #EBFBEE; color: #2B8A3E; font-size: 0.68rem; font-weight: 800; vertical-align: 2px; }
+.eat-sparse { display: flex; gap: 5px; align-items: flex-start; margin: 8px 0 0; font-size: 0.76rem; line-height: 1.45; color: var(--label-secondary); }
+.eat-sparse i { flex-shrink: 0; margin-top: 1px; }
+.eat-note { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 10px; padding: 8px 10px; border-radius: 10px; background: var(--fill-secondary, #F2F4F6); font-size: 0.78rem; color: var(--label-secondary); }
+.eat-note-btn { padding: 3px 10px; border: 0; border-radius: 999px; background: var(--bg-card, #fff); color: var(--accent-active); font: inherit; font-size: 0.76rem; font-weight: 800; cursor: pointer; }
+.eat-primary { grid-template-columns: repeat(4, 1fr); }
+.eat-primary .eat-btn { padding-left: 4px; padding-right: 4px; font-size: 0.78rem; gap: 3px; white-space: nowrap; letter-spacing: -0.02em; }
+.eat-primary .eat-btn i { font-size: 0.95em; }
+.eat-btn-tool.on { background: #EBFBEE; border-color: #8CE99A; color: #2B8A3E; }

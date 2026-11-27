@@ -223,6 +223,29 @@ for (const d of DATA) {
     console.log('구역 바깥 → 가까운 구역', near);
 }
 
+// ── 외국어 표기: nz 중국어(tools/eats_names_zh.json, 수작업 번역) · ne 로마자(국어의 로마자 표기법 기본 규칙) ──
+{
+    const zhFile = path.join(__dirname, 'eats_names_zh.json');
+    const ZH = fs.existsSync(zhFile) ? JSON.parse(fs.readFileSync(zhFile, 'utf8')) : {};
+    const I = ['g', 'kk', 'n', 'd', 'tt', 'r', 'm', 'b', 'pp', 's', 'ss', '', 'j', 'jj', 'ch', 'k', 't', 'p', 'h'];
+    const V = ['a', 'ae', 'ya', 'yae', 'eo', 'e', 'yeo', 'ye', 'o', 'wa', 'wae', 'oe', 'yo', 'u', 'wo', 'we', 'wi', 'yu', 'eu', 'ui', 'i'];
+    const F = ['', 'k', 'k', 'k', 'n', 'n', 'n', 't', 'l', 'k', 'm', 'l', 'l', 'l', 'p', 'l', 'm', 'p', 'p', 't', 't', 'ng', 't', 't', 'k', 't', 'p', 't'];
+    const roman = (s) => s.replace(/[가-힣]+/g, (w) => {
+        let out = '';
+        for (const ch of w) {
+            const c = ch.charCodeAt(0) - 0xac00;
+            out += I[Math.floor(c / 588)] + V[Math.floor((c % 588) / 28)] + F[c % 28];
+        }
+        return out;
+    }).replace(/(^|[\s(])([a-z])/g, (m, p, c) => p + c.toUpperCase());
+    let zhN = 0;
+    for (const r of rows) {
+        if (ZH[r.n] && ZH[r.n] !== r.n) { r.nz = ZH[r.n]; zhN++; }
+        if (/[가-힣]/.test(r.n)) r.ne = roman(r.n);
+    }
+    console.log('중국어 이름', zhN, '/', rows.length);
+}
+
 const final = `// 자동 생성 파일 — 직접 고치지 말 것. tools/build_eats_data.js 로 다시 만든다.
 // 출처: '제주 후보지 선별' 아티팩트 (식당·카페, 폐업 제외) + tools/eats_trend.js (방송·20·30대 인기, 구글맵 검증) + 단골식당(tools/eats_regular.json) · ${new Date().toISOString().slice(0, 10)}
 // 키: n 이름 · c food|cafe · cu 음식종류 · s 세부유형 · mn 대표메뉴 · a 주소 · ar 세부지역 · p [1인 최소,최대]원 · pt 가격 원문

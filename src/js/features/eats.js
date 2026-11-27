@@ -40,7 +40,10 @@ const S = {
         'kw.tv': '韩国美食节目', 'kw.hot': '韩国年轻人爱去', 'kw.bakery': '面包·甜点', photo_by: '图片：{by}', 'kw.solo': '可一人用餐', 'kw.cnmenu': '中文菜单', 'kw.enmenu': '英文菜单', 'kw.cnreview': '有中文评价',
         'kw.opennow': '现在营业', 'kw.catchtable': '可在线排队', 'kw.photo': '出片', 'kw.ocean': '海景', 'kw.breakfast': '早餐（9点前营业）', 'kw.shortwait': '排队短', 'kw.walkin': '外国人可直接去',
         'kw.twoplus': '2人起点', 'kw.booking': '需预约', 'kw.nokids': '禁止儿童', 'kw.nearwish': '我的行程附近',
-        'so.rec': '推荐', 'so.rating': '评分高', 'so.reviews': '评价多', 'so.cheap': '价格低',
+        'so.rec': '推荐', 'so.rating': '评分高', 'so.reviews': '评价多', 'so.cheap': '价格低', 'so.near': '离我最近',
+        near_btn: '附近', loc_wait: '正在获取位置…', loc_fail: '无法获取位置，请在浏览器设置里允许定位后重试', loc_far: '您目前不在济州，距离仅供参考',
+        sparse: '本地熟客推荐 · 菜单、价格、营业时间请在地图App里查看', open_unknown: '另有 {n} 家没有营业时间信息，未显示', open_unknown_show: '一起显示', open_unknown_hide: '只看确认营业的',
+        share_btn: '分享', share_done: '链接已复制', visited_btn: '去过了', visited_on: '✓ 去过了', share_text: '济州美食推荐',
         reviews: '{n}条评价',
         price_unknown: '价格待确认',
         wait: '排队约{m}分钟', nowait: '基本不用排队',
@@ -84,7 +87,10 @@ const S = {
         'kw.tv': 'On Korean TV', 'kw.hot': 'Trending with young Koreans', 'kw.bakery': 'Bakery & dessert', photo_by: 'Photo: {by}', 'kw.solo': 'Solo-friendly', 'kw.cnmenu': 'Chinese menu', 'kw.enmenu': 'English menu', 'kw.cnreview': 'Chinese reviews',
         'kw.opennow': 'Open now', 'kw.catchtable': 'Online waitlist', 'kw.photo': 'Photogenic', 'kw.ocean': 'Ocean view', 'kw.breakfast': 'Breakfast (before 9am)', 'kw.shortwait': 'Short wait', 'kw.walkin': 'Easy walk-in',
         'kw.twoplus': '2+ people', 'kw.booking': 'Booking needed', 'kw.nokids': 'No kids', 'kw.nearwish': 'Near my plan',
-        'so.rec': 'Recommended', 'so.rating': 'Top rated', 'so.reviews': 'Most reviewed', 'so.cheap': 'Cheapest',
+        'so.rec': 'Recommended', 'so.rating': 'Top rated', 'so.reviews': 'Most reviewed', 'so.cheap': 'Cheapest', 'so.near': 'Nearest',
+        near_btn: 'Near me', loc_wait: 'Finding your location…', loc_fail: 'Couldn’t get your location — allow location access in your browser and try again', loc_far: 'You’re not in Jeju right now, so distances are rough',
+        sparse: 'Recommended by local regulars · check menu, price and hours in a map app', open_unknown: '{n} more places have no hours info and are hidden', open_unknown_show: 'Show them too', open_unknown_hide: 'Confirmed open only',
+        share_btn: 'Share', share_done: 'Link copied', visited_btn: 'Been here', visited_on: '✓ Been here', share_text: 'Jeju food pick',
         reviews: '{n} reviews',
         price_unknown: 'Price TBC',
         wait: 'Wait ~{m} min', nowait: 'Little or no wait',
@@ -97,7 +103,7 @@ const S = {
         pp: 'pp', signature: 'Signature:',
         ct_btn: 'Join waitlist · Book', ct_note: 'CatchTable in English — no Korean phone number needed',
         book_btn: 'Request Booking Service', book_note: 'We call & book Korean restaurants for you via WeChat',
-        driver_btn: 'Show Driver', order_btn: 'Order Card',
+        driver_btn: 'Driver', order_btn: 'Order',
         view_list: 'List', view_map: 'Map', map_open: 'Show map', map_min: 'Hide map',
         'z.all': 'All of Jeju', 'z.hint_zone': 'Tap an area to zoom in and see every place there', 'z.hint_pin': 'Tap a pin to preview a place, tap empty map space to see them all', 'z.list_all': 'All {n} places in {name}', 'z.show_all': 'All places in {name} ({n})',
         'z.jc_new': 'New Jeju', 'z.jc_old': 'Old Town', 'z.jc_air': 'Airport·Iho', 'z.jc_ara': 'Ara·Ora', 'z.jc_east': 'Hwabuk·Samyang',
@@ -128,7 +134,10 @@ const S = {
         'kw.tv': '방송 출연', 'kw.hot': '요즘 핫플', 'kw.bakery': '빵·디저트', photo_by: '사진: {by}', 'kw.solo': '1인 식사', 'kw.cnmenu': '중국어 메뉴', 'kw.enmenu': '영어 메뉴', 'kw.cnreview': '중국어 후기',
         'kw.opennow': '지금 영업 중', 'kw.catchtable': '원격 줄서기', 'kw.photo': '사진 명소', 'kw.ocean': '오션뷰', 'kw.breakfast': '아침 식사(9시 전)', 'kw.shortwait': '대기 짧음', 'kw.walkin': '외국인 바로 방문',
         'kw.twoplus': '2인부터', 'kw.booking': '예약 필요', 'kw.nokids': '노키즈', 'kw.nearwish': '내 일정 근처',
-        'so.rec': '추천순', 'so.rating': '평점순', 'so.reviews': '리뷰순', 'so.cheap': '가격 낮은순',
+        'so.rec': '추천순', 'so.rating': '평점순', 'so.reviews': '리뷰순', 'so.cheap': '가격 낮은순', 'so.near': '가까운 순',
+        near_btn: '내 주변', loc_wait: '위치를 확인하는 중…', loc_fail: '위치를 가져오지 못했어요. 브라우저에서 위치 권한을 허용한 뒤 다시 눌러 주세요', loc_far: '지금 제주 밖이라 거리는 참고용이에요',
+        sparse: '현지인 단골 추천 · 메뉴·가격·영업시간은 지도 앱에서 확인해 주세요', open_unknown: '영업시간 정보가 없는 {n}곳은 빠져 있어요', open_unknown_show: '함께 보기', open_unknown_hide: '확인된 곳만',
+        share_btn: '공유', share_done: '링크를 복사했어요', visited_btn: '가봤어요', visited_on: '✓ 가봤어요', share_text: '제주 맛집 추천',
         reviews: '리뷰 {n}',
         price_unknown: '가격 확인 필요',
         wait: '대기 최대 {m}분', nowait: '대기 거의 없음',
@@ -163,7 +172,7 @@ const AREAS = ['jeju', 'aewol', 'hallim', 'daejeong', 'jungmun', 'seogwipo', 'py
 const PRICES = ['1', '2', '3', '4'];
 const KEYWORDS = ['opennow', 'catchtable', 'regular', 'hot', 'bakery', 'locals', 'hyangto', 'goodprice', 'solo', 'cnmenu', 'enmenu', 'cnreview', 'shortwait', 'walkin', 'breakfast', 'ocean', 'photo', 'tv', 'century'];
 const BADGE_ORDER = ['regular', 'hyangto', 'goodprice', 'century', 'locals', 'tv', 'hot', 'cnmenu', 'enmenu', 'cnreview', 'solo', 'twoplus', 'booking', 'breakfast', 'ocean', 'nokids'];
-const SORTS = ['rec', 'rating', 'reviews', 'cheap'];
+const SORTS = ['rec', 'near', 'rating', 'reviews', 'cheap'];
 // 필터 더보기 안의 키워드를 성격별로 묶는다. 칩 그룹 이름은 kw_<묶음>, 값은 모두 state.kw 하나로 모은다
 const KW_GROUPS = [
     ['trust', ['regular', 'locals', 'hyangto', 'goodprice', 'century', 'tv', 'hot']],
@@ -178,7 +187,18 @@ const RANKED = 10;
 // 지도 접힘 여부는 이 기기에서만 기억 (저장 실패해도 펼친 상태로 동작)
 function readMapMin() { try { return localStorage.getItem('eats_map_min') === '1'; } catch { return false; } }
 function saveMapMin(v) { try { localStorage.setItem('eats_map_min', v ? '1' : '0'); } catch { /* 무시 */ } }
-const state = { q: '', cu: [], ar: [], pr: [], kw: [], sort: 'rec', shown: PAGE, more: false, pickedId: null, zone: null, mapMin: readMapMin() };
+const state = { q: '', cu: [], ar: [], pr: [], kw: [], sort: 'rec', shown: PAGE, more: false, pickedId: null, zone: null, mapMin: readMapMin(), openUnknown: false };
+// 내 위치 (가까운 순). 기기 GPS라 중국 이용자도 쓸 수 있다. 저장하지 않고 이 화면에서만 쓴다
+let myPos = null;
+let locMsg = '';
+// 정보(평점·가격·영업시간)가 하나도 없는 가게 — 추천순에서 뒤로 보내고 카드에 안내
+const isSparse = (d) => !d.g && !d.p && !d.h;
+const distKm = (d) => (myPos && d.ll ? roadKm(myPos, d.ll) : Infinity);
+function fmtDist(km) { return km < 1 ? `${Math.max(50, Math.round(km * 1000 / 50) * 50)}m` : `${km.toFixed(km < 10 ? 1 : 0)}km`; }
+// 가봤어요: 이 기기에만 저장 (여행 후 다녀온 곳 기록)
+const VISITED_KEY = 'eats_visited_v1';
+function readVisited() { try { return new Set(JSON.parse(localStorage.getItem(VISITED_KEY) || '[]')); } catch { return new Set(); } }
+function toggleVisited(name) { const v = readVisited(); v.has(name) ? v.delete(name) : v.add(name); try { localStorage.setItem(VISITED_KEY, JSON.stringify([...v])); } catch { /* 무시 */ } return v.has(name); }
 let EATS = null;
 let loading = null;
 
@@ -209,7 +229,11 @@ function hasKw(d, k) {
     if (k === 'shortwait') return d.w != null && d.w <= 20;
     if (k === 'catchtable') return !!d.ct;
     if (k === 'bakery') return BAKERY_RE.test(`${d.n} ${d.s || ''} ${d.mn || ''}`);
-    if (k === 'opennow') { if (openCache) return openCache.has(d); const st = openStatus(d); return !!st && (st.kind === 'open' || st.kind === 'closing'); }
+    if (k === 'opennow') {
+        if (state.openUnknown && !openStatus(d)) return true; // 영업시간 정보 없음 → 함께 보기를 골랐을 때만
+        if (openCache) return openCache.has(d);
+        const st = openStatus(d); return !!st && (st.kind === 'open' || st.kind === 'closing');
+    }
     if (k === 'nearwish') {
         if (!d.ll) return false;
         const pts = wishPtsCache || wishCoords();
@@ -232,7 +256,7 @@ function hayOf(d) {
     const l = lang();
     if (!d._hay || d._hayL !== l) {
         d._hay = [
-            d.n, zhStoreAlias(d.n),
+            d.n, zhStoreAlias(d.n), d.nz, d.ne,
             d.s, translateFoodText(d.s, 'zh'), translateFoodText(d.s, 'en'),
             d.mn, translateFoodText(d.mn, 'zh'), translateFoodText(d.mn, 'en'),
             d.rv?.zh, d.rv?.en, d.a,
@@ -267,6 +291,7 @@ function recScore(d) {
     if (t.includes('cnmenu')) s += 0.1;
     if (t.includes('hot')) s += 0.1;
     s += (d.pr || 0) * 0.02;
+    if (isSparse(d)) s -= 0.8;
     return s;
 }
 
@@ -276,7 +301,8 @@ function sorted(list) {
         rating: (a, b) => (b.g || 0) - (a.g || 0) || (b.gr || 0) - (a.gr || 0),
         reviews: (a, b) => ((b.gr || 0) + (b.nr || 0)) - ((a.gr || 0) + (a.nr || 0)),
         cheap: (a, b) => (a.p ? a.p[0] : 1e9) - (b.p ? b.p[0] : 1e9),
-    }[state.sort];
+        near: (a, b) => distKm(a) - distKm(b) || recScore(b) - recScore(a),
+    }[state.sort === 'near' && !myPos ? 'rec' : state.sort];
     return list.slice().sort(by);
 }
 
@@ -394,7 +420,10 @@ function cardHtml(d, rank = 0) {
     const whyText = translateWhy(d, l);
     const cautions = translateCaution(d.cn, l);
     const subType = d.s ? translateFoodText(d.s, l) : '';
-    const alias = l === 'zh' ? zhStoreAlias(d.n).split(' ')[0] : '';
+    // 이름 옆 보조 표기: 중국어 화면은 중국어 이름, 영어 화면은 로마자 (기사님·직원에게는 한국어 원문을 보여 준다)
+    const alias = l === 'zh' ? (d.nz || zhStoreAlias(d.n).split(' ')[0]) : l === 'en' ? (d.ne || '') : '';
+    const visited = readVisited().has(d.n);
+    const dist = distKm(d);
     const detailParts = [
         d.mn ? `<p class="eat-ko"><b>${L('signature')}</b> ${escapeHtml(translateFoodText(d.mn, l))}${!ko ? ` <small>(${escapeHtml(d.mn)})</small>` : ''}</p>` : '',
         whyText ? `<p class="eat-ko"><b>${L('why')}</b> ${escapeHtml(whyText)}</p>` : '',
@@ -414,6 +443,7 @@ function cardHtml(d, rank = 0) {
     const badgeHtml = (ks) => ks.map(k => `<span class="eat-badge eat-badge-${k}">${L(`kw.${k}`)}</span>`).join('');
     const kind = subType || d.cu.filter(c => c !== 'other').map(c => L(`cu.${c}`)).join('·');
     const line = [
+        dist < Infinity ? `<span class="eat-dist"><i class="ph-bold ph-navigation-arrow" aria-hidden="true"></i>${fmtDist(dist)}</span>` : '',
         d.g ? `<span class="eat-rating">★ ${d.g.toFixed(1)}<small> (${d.gr.toLocaleString('en-US')})</small></span>` : '',
         `<span>${L(`ar.${arOf(d)}`)}</span>`,
         kind ? `<span>${escapeHtml(kind)}</span>` : '',
@@ -427,13 +457,14 @@ function cardHtml(d, rank = 0) {
         <div class="eat-head">
             ${rank ? `<span class="eat-rank eat-rank-${rank <= 3 ? rank : 'n'}" aria-label="#${rank}">${rank}</span>` : ''}
             <div class="eat-name-wrap">
-                <h3 class="eat-name">${escapeHtml(d.n)}${alias ? ` <span class="eat-alias">${escapeHtml(alias)}</span>` : ''}</h3>
+                <h3 class="eat-name">${escapeHtml(d.n)}${alias ? ` <span class="eat-alias">${escapeHtml(alias)}</span>` : ''}${visited ? ` <span class="eat-visited">${L('visited_on')}</span>` : ''}</h3>
                 <div class="eat-line">${line}</div>
             </div>
             <div class="eat-price">${d.p ? `<small>${L('pp')}</small>` : ''}${priceText(d)}${cny ? `<small class="eat-cny">${escapeHtml(cny)}</small>` : ''}</div>
         </div>
         ${status || waitTxt ? `<div class="eat-status-row">${status}${waitTxt ? `<span class="eat-wait"><i class="ph-bold ph-clock" aria-hidden="true"></i>${escapeHtml(waitTxt)}</span>` : ''}</div>` : ''}
         ${hl.html}
+        ${isSparse(d) ? `<p class="eat-sparse"><i class="ph-duotone ph-info" aria-hidden="true"></i>${escapeHtml(L('sparse'))}</p>` : ''}
         ${rv ? `<p class="eat-rv"><i class="ph-duotone ph-thumbs-up"></i><span>${escapeHtml(rv)}</span></p>` : ''}
         ${allBadges.length ? `<div class="eat-badges">${badgeHtml(allBadges.slice(0, BADGE_MAX))}${allBadges.length > BADGE_MAX ? `<span class="eat-badge eat-badge-more">+${allBadges.length - BADGE_MAX}</span>` : ''}</div>` : ''}
         ${d.ct || needsBooking ? '<div class="eat-cta-row">' : ''}
@@ -444,6 +475,7 @@ function cardHtml(d, rank = 0) {
         ${d.ct || needsBooking ? '</div>' : ''}
         <div class="eat-primary">
             <button type="button" class="eat-btn eat-btn-tool" data-eat-driver="${d.id}"><i class="ph-duotone ph-taxi"></i> ${L('driver_btn')}</button>
+            <button type="button" class="eat-btn eat-btn-tool" data-eat-order="${d.id}"><i class="ph-duotone ph-fork-knife"></i> ${L('order_btn')}</button>
             ${mapLinks(d).split('</a>')[0]}</a>
             ${d.ll ? wishBtnHtml({ k: 'eat', key: d.n, name: d.n }, { cls: 'eat-btn' }) : ''}
         </div>
@@ -456,7 +488,8 @@ function cardHtml(d, rank = 0) {
                 ${detailParts}
                 <div class="eat-addr">${L('show_staff') ? `<span class="eat-addr-hint">${L('show_staff')}</span>` : ''}${escapeHtml(d.a.replace(/^제주특별자치도\s*/, ''))}</div>
                 <div class="eat-tools">
-                    <button type="button" class="eat-btn eat-btn-tool" data-eat-order="${d.id}"><i class="ph-duotone ph-fork-knife"></i> ${L('order_btn')}</button>
+                    <button type="button" class="eat-btn eat-btn-tool" data-eat-share="${d.id}"><i class="ph-duotone ph-share-network"></i> ${L('share_btn')}</button>
+                    <button type="button" class="eat-btn eat-btn-tool${visited ? ' on' : ''}" data-eat-visited="${escapeHtml(d.n)}" aria-pressed="${visited}"><i class="ph-duotone ph-check-circle"></i> ${L('visited_btn')}</button>
                     <button type="button" class="eat-btn" data-copy="${escapeHtml(`${d.n}\n${d.a}`)}">${L(ko ? 'copy_addr' : 'copy_name')}</button>
                 </div>
                 <div class="eat-actions">${mapLinks(d).split('</a>').slice(1).filter(x => x.trim()).map(x => x + '</a>').join('')}</div>
@@ -727,6 +760,7 @@ function filtersHtml() {
     return `<div class="eat-filters">
         <div class="eat-search-row">
             <input type="search" class="eat-search" id="eat-q" value="${escapeHtml(state.q)}" placeholder="${escapeHtml(L('search_ph'))}" autocomplete="off">
+            <button type="button" class="eat-near-btn${state.sort === 'near' && myPos ? ' active' : ''}" data-near aria-pressed="${state.sort === 'near' && !!myPos}"><i class="ph-bold ph-navigation-arrow"></i><span>${escapeHtml(L('near_btn'))}</span></button>
             <button type="button" class="eat-more-btn${state.more ? ' active' : ''}" data-more-filters aria-expanded="${state.more}" aria-label="${escapeHtml(L('filter_btn'))}">${moreBtnInner(n)}</button>
         </div>
         <div class="eat-panel"${state.more ? '' : ' hidden'}>
@@ -750,8 +784,14 @@ function resultsHtml() {
             ${anyFilter ? `<button type="button" class="eat-reset" data-reset>${L('reset')}</button>` : ''}
         </div>
     </div>`;
+    let notes = locMsg ? `<p class="eat-note">${escapeHtml(locMsg)}</p>` : '';
+    if (state.kw.includes('opennow')) {
+        const st = { ...state, kw: state.kw.filter(k => k !== 'opennow') };
+        const unknown = EATS.filter(d => !openStatus(d) && matches(d, st)).length;
+        if (unknown) notes += `<p class="eat-note">${escapeHtml(state.openUnknown ? '' : L('open_unknown', { n: unknown }))}<button type="button" class="eat-note-btn" data-open-unknown>${escapeHtml(L(state.openUnknown ? 'open_unknown_hide' : 'open_unknown_show'))}</button></p>`;
+    }
     // 검색창 아래에 지도를 기본으로 두고(접기 가능), 그 아래 목록이 지도에서 고른 구역을 따라간다
-    return head + (state.mapMin ? mapMiniHtml() : mapViewHtml(list)) + listHtml(list)
+    return head + notes + (state.mapMin ? mapMiniHtml() : mapViewHtml(list)) + listHtml(list)
         + `<button type="button" class="eat-report" onclick="window.openCSModal && window.openCSModal()">${L('report')}</button>`;
 }
 
@@ -785,7 +825,11 @@ function render() {
 function load() {
     if (loading) return loading;
     loading = import('../../data/eats.js')
-        .then(m => { EATS = m.EATS; render(); })
+        .then(m => {
+            EATS = m.EATS;
+            try { const q = new URLSearchParams(location.search).get('q'); if (q) state.q = q.slice(0, 40); } catch { /* 무시 */ }
+            render();
+        })
         .catch(() => {
             loading = null;
             const root = document.getElementById('eats-root');
@@ -805,7 +849,7 @@ function bind(root) {
     if (root.dataset.eatsBound) return;
     root.dataset.eatsBound = '1';
     bindChips(root, (name, values) => {
-        if (name === 'sort') state.sort = values[0] || 'rec';
+        if (name === 'sort') { state.sort = values[0] || 'rec'; if (state.sort === 'near' && !myPos) { requestNear(root); return; } }
         else if (name === 'quick') {
             for (const [g, v] of quickItems()) {
                 const on = values.includes(`${g}:${v}`);
@@ -904,6 +948,30 @@ function bind(root) {
             if (item) openDriverCard({ nameKo: item.n, addr: item.a, lat: item.ll?.[0], lng: item.ll?.[1], naverUrl: item.ln });
             return;
         }
+        if (e.target.closest('[data-near]')) {
+            if (state.sort === 'near' && myPos) { state.sort = 'rec'; locMsg = ''; afterSortChange(root); }
+            else requestNear(root);
+            return;
+        }
+        if (e.target.closest('[data-open-unknown]')) { state.openUnknown = !state.openUnknown; renderResults(); return; }
+        const shBtn = e.target.closest('[data-eat-share]');
+        if (shBtn) {
+            const item = EATS?.find(x => x.id === Number(shBtn.dataset.eatShare));
+            if (item) shareStore(item, shBtn);
+            return;
+        }
+        const vsBtn = e.target.closest('[data-eat-visited]');
+        if (vsBtn) {
+            const on = toggleVisited(vsBtn.dataset.eatVisited);
+            vsBtn.classList.toggle('on', on);
+            vsBtn.setAttribute('aria-pressed', String(on));
+            const card = vsBtn.closest('.eat-card');
+            const name = card?.querySelector('.eat-name');
+            const mark = name?.querySelector('.eat-visited');
+            if (on && name && !mark) name.insertAdjacentHTML('beforeend', ` <span class="eat-visited">${L('visited_on')}</span>`);
+            if (!on && mark) mark.remove();
+            return;
+        }
         const oBtn = e.target.closest('[data-eat-order]');
         if (oBtn) {
             const item = EATS?.find(x => x.id === Number(oBtn.dataset.eatOrder));
@@ -919,6 +987,42 @@ function bind(root) {
         const copy = e.target.closest('[data-copy]');
         if (copy) { if (await copyText(copy.dataset.copy)) flashLabel(copy, L('copied')); }
     });
+}
+
+// 가까운 순: 위치를 받아 정렬. 실패하면 안내만 하고 추천순 유지
+function requestNear(root) {
+    if (!navigator.geolocation) { locMsg = L('loc_fail'); state.sort = 'rec'; afterSortChange(root); return; }
+    locMsg = L('loc_wait');
+    renderResults();
+    navigator.geolocation.getCurrentPosition((pos) => {
+        myPos = [pos.coords.latitude, pos.coords.longitude];
+        const inJeju = myPos[0] > 33.1 && myPos[0] < 33.6 && myPos[1] > 126.1 && myPos[1] < 127.0;
+        locMsg = inJeju ? '' : L('loc_far');
+        state.sort = 'near';
+        afterSortChange(root);
+    }, () => {
+        locMsg = L('loc_fail');
+        state.sort = 'rec';
+        afterSortChange(root);
+    }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 });
+}
+function afterSortChange(root) {
+    syncChips(root);
+    state.shown = PAGE;
+    renderResults();
+    refreshApplied(root);
+    const nb = root.querySelector('[data-near]');
+    if (nb) { const on = state.sort === 'near' && !!myPos; nb.classList.toggle('active', on); nb.setAttribute('aria-pressed', String(on)); }
+}
+
+// 공유: 휴대폰 공유창(위챗·샤오홍슈 등) → 안 되면 링크 복사
+async function shareStore(d, btn) {
+    const url = `${location.origin}/eats?q=${encodeURIComponent(d.n)}`;
+    const title = d.nz && lang() === 'zh' ? `${d.nz} ${d.n}` : d.n;
+    try {
+        if (navigator.share) { await navigator.share({ title, text: `${L('share_text')} · ${title}`, url }); return; }
+    } catch (err) { if (err?.name === 'AbortError') return; }
+    if (await copyText(url)) flashLabel(btn, L('share_done'));
 }
 
 window.eatsApp = { enter: render };
